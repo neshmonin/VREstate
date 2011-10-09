@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vrebo" namespace="Vre.Server.BusinessLogic">
+  <joined-subclass name="Buyer" extends="User" table="Buyers" dynamic-update="true" lazy="false">
+    
+    <key column="BuyerID"/>
+    
+    <bag name="Accounts" inverse="true" lazy="false" cascade="all-delete-orphan" >
+      <key column="BuyerID"/>
+      <one-to-many class="Account" />
+    </bag>
+    <bag name="VRTours" inverse="true" lazy="false" cascade="all-delete-orphan" >
+      <key column="BuyerID"/>
+      <one-to-many class="VRTour" />
+    </bag>
+    <many-to-one name="ContactInfo" column="ContactInfoID" cascade="save-update" 
+                 class="ContactInfo" />
+
+  </joined-subclass>
+</hibernate-mapping>

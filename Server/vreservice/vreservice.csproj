@@ -1,0 +1,272 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A84320F8-DC92-48D7-8AA6-2010786AA7C1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Vre.Server</RootNamespace>
+    <AssemblyName>vreservice</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\vreservice.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Release\vreservice.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\vreservice.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Release\vreservice.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LinFu.DynamicProxy">
+      <HintPath>..\Externals\NHibernate-2.1.2\Required_For_LazyLoading\LinFu\LinFu.DynamicProxy.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate">
+      <HintPath>..\Externals\NHibernate-2.1.2\Required_Bins\NHibernate.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate.ByteCode.LinFu">
+      <HintPath>..\Externals\NHibernate-2.1.2\Required_For_LazyLoading\LinFu\NHibernate.ByteCode.LinFu.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Externals\NLog\.NET Framework 4.0\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog.Extended, Version=2.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Externals\NLog\.NET Framework 4.0\NLog.Extended.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\Externals\NUnit-2.5.8.10295\bin\net-2.0\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.IdentityModel.Selectors" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Authentication\Authentication.cs" />
+    <Compile Include="Authentication\IAuthentication.cs" />
+    <Compile Include="ChangeLog\ChangeLog.cs" />
+    <Compile Include="Configuration.cs" />
+    <Compile Include="Dao\AccountDao.cs" />
+    <Compile Include="Dao\BuildingDao.cs" />
+    <Compile Include="Dao\OptionDao.cs" />
+    <Compile Include="Dao\OptionTypeDao.cs" />
+    <Compile Include="Dao\RoomCategoryDao.cs" />
+    <Compile Include="Dao\RoomDao.cs" />
+    <Compile Include="Dao\SiteDao.cs" />
+    <Compile Include="Dao\SuiteDao.cs" />
+    <Compile Include="Dao\DatabaseSettingsDao.cs" />
+    <Compile Include="Dao\EstateDeveloperDao.cs" />
+    <Compile Include="Dao\SimpleDao.cs" />
+    <Compile Include="Dao\SuiteLevelDao.cs" />
+    <Compile Include="Dao\SuiteTypeDao.cs" />
+    <Compile Include="Dao\UpdateableBaseDao.cs" />
+    <Compile Include="Dao\UserDao.cs" />
+    <Compile Include="Database\GenericDao.cs" />
+    <Compile Include="Database\DatabaseSettings.cs" />
+    <Compile Include="Database\NHibernateHelper.cs" />
+    <Compile Include="FileCacheManager.cs" />
+    <Compile Include="FloodPreventor.cs" />
+    <Compile Include="ModelCache\ModelCache.cs" />
+    <Compile Include="ModelCache\ModelCacheManager.cs" />
+    <Compile Include="RemoteService\ClientSession.cs" />
+    <Compile Include="RemoteService\GenerationService.cs" />
+    <Compile Include="RemoteService\DataService.cs" />
+    <Compile Include="RemoteService\ProgramService.cs" />
+    <Compile Include="HttpService\HttpService.cs" />
+    <Compile Include="HttpService\HttpServiceRequest.cs" />
+    <Compile Include="Managers\BuildingManager.cs" />
+    <Compile Include="Managers\GenericManager.cs" />
+    <Compile Include="Managers\PermissionException.cs" />
+    <Compile Include="Managers\UserManager.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RemoteService\RemoteServiceProvider.cs" />
+    <Compile Include="RemoteService\ServiceRequest.cs" />
+    <Compile Include="ServiceInstances.cs" />
+    <Compile Include="StartupShutdown.cs" />
+    <Compile Include="UnitTest\BuildingSuite.cs" />
+    <Compile Include="UnitTest\JSON.cs" />
+    <Compile Include="UnitTest\UserManagement.cs" />
+    <Compile Include="Utilities.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Mappings\DatabaseSettings.hbm.xml" />
+    <EmbeddedResource Include="Mappings\Credentials.hbm.xml" />
+    <EmbeddedResource Include="Mappings\Account.hbm.xml" />
+    <EmbeddedResource Include="Mappings\Building.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\ContactInfo.hbm.xml" />
+    <EmbeddedResource Include="Mappings\Option.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\Price.hbm.xml" />
+    <EmbeddedResource Include="Mappings\Suite.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\Transaction.hbm.xml" />
+    <EmbeddedResource Include="Mappings\User.hbm.xml" />
+    <EmbeddedResource Include="Mappings\VRTour.hbm.xml" />
+    <EmbeddedResource Include="ChangeLog\ChangeLog.hbm.xml" />
+    <EmbeddedResource Include="Mappings\EstateDeveloper.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\Site.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\SuiteType.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\SuiteLevel.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\Room.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\RoomCategory.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\MappingFilters.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\OptionType.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Content Include="SQL\Constraint\Account.sql" />
+    <Content Include="SQL\Constraint\DeveloperAdmin.sql" />
+    <Content Include="SQL\Constraint\Price.sql" />
+    <Content Include="SQL\Constraint\Product.sql" />
+    <Content Include="SQL\Constraint\Salesperson.sql" />
+    <Content Include="SQL\Constraint\Subcontractor.sql" />
+    <Content Include="SQL\Constraint\SuperAdmin.sql" />
+    <Content Include="SQL\Constraint\Transaction.sql" />
+    <Content Include="SQL\Constraint\VrEstateDeveloper.sql" />
+    <Content Include="SQL\Constraint\VrEstateSuperServer.sql" />
+    <Content Include="SQL\create.sql" />
+    <Content Include="SQL\CreateTable\Account.sql" />
+    <Content Include="SQL\CreateTable\DeveloperAdmin.sql" />
+    <Content Include="SQL\CreateTable\Price.sql" />
+    <Content Include="SQL\CreateTable\Product.sql" />
+    <Content Include="SQL\CreateTable\Salesperson.sql" />
+    <Content Include="SQL\CreateTable\Subcontractor.sql" />
+    <Content Include="SQL\CreateTable\SuperAdmin.sql" />
+    <Content Include="SQL\CreateTable\Transaction.sql" />
+    <Content Include="SQL\CreateTable\VrEstateDeveloper.sql" />
+    <Content Include="SQL\CreateTable\VrEstateSuperServer.sql" />
+    <Content Include="SQL\footer.sql" />
+    <Content Include="SQL\gen1.sql" />
+    <Content Include="SQL\header.sql" />
+    <Content Include="nhibernate.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\vreserver\App.config">
+      <Link>App.config</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="InterfaceImpl\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ModelParsing\ModelParsing.csproj">
+      <Project>{C0DEDA10-3530-447A-8123-6FCED0A1B7BE}</Project>
+      <Name>ModelParsing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\vrebo\vrebo.csproj">
+      <Project>{60458EA7-5B11-4E8B-8644-4538CD08FAFD}</Project>
+      <Name>vrebo</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vrebo" namespace="Vre.Server.BusinessLogic">
+  <class name="Suite" table="Suites" dynamic-update="true" lazy="true">
+
+    <id name="AutoID" column="AutoID" unsaved-value="0">
+      <generator class="identity" />
+    </id>
+    <version name="Version" generated="always" unsaved-value="null" type="BinaryBlob">
+      <column name="Version" not-null="false" sql-type="timestamp"/>
+    </version>
+    <property name="Created" column="Created" />
+    <property name="Updated" column="Updated" />
+    <property name="Deleted" column="Deleted" />
+
+    <many-to-one name="Building"
+      column="BuildingID" class="Building"
+      cascade="none" fetch="join" insert="true" update="false"
+    />
+
+    <many-to-one name="SuiteType"
+      column="SuiteTypeID" class="SuiteType"
+      cascade="none" fetch="join" insert="true" update="false"
+    />
+
+    <property name="PhysicalLevelNumber" column="PhysicalLevelNumber" />
+    <property name="FloorName" column="FloorName" />
+    <property name="SuiteName" column="SuiteName" />
+    <property name="Status" column="Status" />
+    <property name="ShowPanoramicView" column="ShowPanoramicView" />
+
+    <!-- Geometry-related elements are read directly from model cached
+    <property name="ceilingHeight" column="CeilingHeight" />
+    <component name="Location">
+      <property name="Longitude" column="PosLongitude" />
+      <property name="Latitude" column="PosLatitude" />
+      <property name="Altitude" column="PosAltitude" />
+      <property name="HorizontalHeading" column="PosHeading" />
+    </component>
+    -->
+
+    <bag name="OptionsPossible" table="OptionSuiteMM" cascade="all">
+      <key column="SuiteID"/>
+      <many-to-many column="OptionID" class="Option"/>
+    </bag>
+
+    <!--property name="AccountID" column="AccountID" /-->
+
+    <!--
+    <bag name="VRTours" inverse="true" lazy="false" cascade="all-delete-orphan" >
+      <key column="SuiteID"/>
+      <one-to-many class="VRTour" />
+    </bag>
+    -->
+    
+  </class>
+</hibernate-mapping>

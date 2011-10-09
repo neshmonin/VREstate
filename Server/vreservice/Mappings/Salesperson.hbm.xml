@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2">
+<joined-subclass name="Vre.Server.BusinessLogic.Salesperson, vrebo" extends="Vre.Server.BusinessLogic.User, vreservice " table="aSalespersons" lazy="false">
+<key column="SalespersonID"/>
+<bag name="VRTours" inverse="true" lazy="false" cascade="all-delete-orphan" >
+<key column="SalespersonID"/>
+<one-to-many class="Vre.Server.BusinessLogic.VRTour, vrebo" />
+</bag>
+<many-to-one name="ContactInfo" column="ContactInfoID" cascade="save-update" class="Vre.Server.BusinessLogic.ContactInfo, vrebo" />
+</joined-subclass>
+</hibernate-mapping>

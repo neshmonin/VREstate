@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vrebo" namespace="Vre.Server.BusinessLogic">
+  <class name="SuiteLevel" table="SuiteLevels" dynamic-update="true" lazy="true">
+
+    <id name="AutoID" column="AutoID" unsaved-value="0">
+      <generator class="identity" />
+    </id>
+    <version name="Version" generated="always" unsaved-value="null" type="BinaryBlob">
+      <column name="Version" not-null="false" sql-type="timestamp"/>
+    </version>
+    <property name="Created" column="Created" />
+    <property name="Updated" column="Updated" />
+    <property name="Deleted" column="Deleted" />
+
+    <property name="Name" column="Name" />
+    <property name="Model" column="Model" />
+    <property name="Order" column="LevelOrder" />
+
+    <bag name="Rooms">
+      <key column="SuiteLevelID" />
+      <one-to-many class="Room" />
+    </bag>
+
+    <many-to-one name="SuiteType"
+      column="SuiteTypeID" class="SuiteType"
+      cascade="none" fetch="join" insert="true" update="false"
+    />
+
+  </class>
+</hibernate-mapping>
