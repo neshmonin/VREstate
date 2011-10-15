@@ -1,8 +1,0 @@
-
-PRINT '-------- Configuring database... --------'
-
-INSERT INTO [dbo].[DbSettings] ([Id], [IntValue]) VALUES (1, 1)
-INSERT INTO [dbo].[DbSettings] ([Id], [TimeValue]) VALUES (2, GETDATE())
-
-
-PRINT '-------- VR-Setup.sql - Complete. --------'
