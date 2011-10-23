@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2">
+
+    <class name="Vre.Server.BusinessLogic.Option, vreservice"
+    table="aOptions"
+    lazy="false">
+
+
+		<id name="AutoID" column="AutoID" unsaved-value="00000000000000000000000000000000">
+			<generator class="identity" />
+		</id>
+		  		  <property name="Description" column="Description"  />
+		            <bag name="Prices" inverse="true" lazy="false"
+      	  	  		 cascade="none"
+            >
+              <key column="OptionID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.Price, vreservice"
+             />
+		</bag>
+  		<many-to-one name="Provider"
+  			column="ProviderID"
+    						cascade="none"
+  			                    class="Vre.Server.BusinessLogic.Subcontractor, vreservice"
+             />
+		  		  <property name="CutoffDay" column="CutoffDay"  type="Timestamp"  />
+		    
+  </class>
+</hibernate-mapping>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2">
+
+    <class name="Vre.Server.BusinessLogic.VrEstateDeveloper, vreservice"
+    table="aVrEstateDevelopers"
+    lazy="false">
+
+
+		<id name="AutoID" column="AutoID" unsaved-value="00000000000000000000000000000000">
+			<generator class="identity" />
+		</id>
+        <bag name="Buildings" inverse="true" lazy="false"
+      	  	  		 cascade="none"
+            >
+              <key column="VrEstateDeveloperID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.Building, vreservice"
+             />
+		</bag>
+          <bag name="Subcontractors" inverse="true" lazy="false"
+      	  	  		 cascade="none"
+            >
+              <key column="VrEstateDeveloperID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.Subcontractor, vreservice"
+             />
+		</bag>
+          <bag name="Buyers" inverse="true" lazy="false"
+      	  	  		 cascade="none"
+            >
+              <key column="VrEstateDeveloperID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.Buyer, vreservice"
+             />
+		</bag>
+          <bag name="Salespersons" inverse="true" lazy="false"
+      	  	  		 cascade="none"
+            >
+              <key column="VrEstateDeveloperID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.Salesperson, vreservice"
+             />
+		</bag>
+  		  		  <property name="VRConfiguration" column="VRConfiguration"  />
+		    
+  </class>
+</hibernate-mapping>

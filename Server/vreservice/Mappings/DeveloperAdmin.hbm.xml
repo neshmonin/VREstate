@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vrebo" namespace="Vre.Server.BusinessLogic">
+  <joined-subclass name="DeveloperAdmin" extends="User" table="aDeveloperAdmins" dynamic-update="true" lazy="false">
+
+    <key column="DeveloperadminID"/>
+
+  </joined-subclass>
+</hibernate-mapping>

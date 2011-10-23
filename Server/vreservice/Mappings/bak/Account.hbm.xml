@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2">
+
+    <class name="Vre.Server.BusinessLogic.Account, vreservice"
+    table="aAccounts"
+    lazy="false">
+
+
+		<id name="AutoID" column="AutoID" unsaved-value="00000000000000000000000000000000">
+			<generator class="identity" />
+		</id>
+		  		  <property name="SuiteID" column="SuiteID"  />
+		            <bag name="Transactions" inverse="true" lazy="false"
+      	  	  		 cascade="none"
+            >
+              <key column="AccountID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.Transaction, vreservice"
+             />
+		</bag>
+  		  		  <property name="CurrentBalance" column="CurrentBalance"  />
+		    		  		  <property name="CustomerID" column="CustomerID"  />
+		    		  		  <property name="CurrencyCents" column="CurrencyCents"  />
+		    
+  </class>
+</hibernate-mapping>

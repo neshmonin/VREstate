@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vrebo" namespace="Vre.Server.BusinessLogic">
+  <class name="Room" table="Rooms" dynamic-update="true" lazy="true">
+
+    <id name="AutoID" column="AutoID" unsaved-value="0">
+      <generator class="identity" />
+    </id>
+    <version name="Version" generated="always" unsaved-value="null" type="BinaryBlob">
+      <column name="Version" not-null="false" sql-type="timestamp"/>
+    </version>
+    <property name="Created" column="Created" />
+    <property name="Updated" column="Updated" />
+    <property name="Deleted" column="Deleted" />
+
+    <property name="floorArea" column="FloorArea" />
+    <property name="wallsArea" column="WallsArea" />
+    <property name="plinthLength" column="PlinthLength" />
+
+    <component name="Location">
+      <property name="Longitude" column="PosLongitude" />
+      <property name="Latitude" column="PosLatitude" />
+      <property name="HorizontalHeading" column="PosHeading" />
+    </component>
+
+    <many-to-one name="Level"
+      column="SuiteLevelID" class="SuiteLevel"
+      cascade="none" fetch="join" insert="true" update="false"
+    />
+
+    <many-to-one name="Category"
+      column="CategoryID" class="RoomCategory"
+      cascade="none" fetch="join" insert="true" update="false"
+    />
+
+  </class>
+</hibernate-mapping>

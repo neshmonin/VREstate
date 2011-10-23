@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2">
+
+    <class name="Vre.Server.BusinessLogic.Building, vreservice"
+    table="aBuildings"
+    lazy="false">
+
+
+		<id name="AutoID" column="AutoID" unsaved-value="00000000000000000000000000000000">
+			<generator class="identity" />
+		</id>
+		<many-to-one name="Location"
+  			column="LocationID"
+    						cascade="none"
+  			                    class="Vre.Server.BusinessLogic.PostalAddress, vreservice"
+             />
+		  		  <property name="OpenningDate" column="OpenningDate"  type="Timestamp"  />
+		    		  		  <property name="Status" column="Status"  />
+		            <bag name="Suites" inverse="true" lazy="false"
+      	  	  		 cascade="none"
+            >
+              <key column="BuildingID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.Suite, vreservice"
+             />
+		</bag>
+  		  		  <property name="Model" column="Model"  />
+		    
+  </class>
+</hibernate-mapping>

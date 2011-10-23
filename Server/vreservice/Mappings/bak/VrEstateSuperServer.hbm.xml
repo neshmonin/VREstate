@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2">
+
+    <class name="Vre.Server.BusinessLogic.VrEstateSuperServer, vreservice"
+    table="aVrEstateSuperServers"
+    lazy="false">
+
+
+		<id name="AutoID" column="AutoID" unsaved-value="00000000000000000000000000000000">
+			<generator class="identity" />
+		</id>
+        <bag name="Developers" inverse="true" lazy="false"
+      	  	  		 cascade="none"
+            >
+              <key column="VrEstateSuperServerID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.VrEstateDeveloper, vreservice"
+             />
+		</bag>
+          <bag name="Users" inverse="true" lazy="false"
+      	  	  		 cascade="none"
+            >
+              <key column="VrEstateSuperServerID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.User, vreservice"
+             />
+		</bag>
+  		<many-to-one name="SuperAdmin"
+  			column="SuperAdminID"
+    						cascade="none"
+  			                    class="Vre.Server.BusinessLogic.SuperAdmin, vreservice"
+             />
+        <bag name="Subcontractors" inverse="true" lazy="false"
+      	  	  		 cascade="none"
+            >
+              <key column="VrEstateSuperServerID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.Subcontractor, vreservice"
+             />
+		</bag>
+          <bag name="Buyers" inverse="true" lazy="false"
+      	  	  		 cascade="none"
+            >
+              <key column="VrEstateSuperServerID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.Buyer, vreservice"
+             />
+		</bag>
+          <bag name="Salespersons" inverse="true" lazy="false"
+      	  	  		 cascade="none"
+            >
+              <key column="VrEstateSuperServerID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.Salesperson, vreservice"
+             />
+		</bag>
+  
+  </class>
+</hibernate-mapping>

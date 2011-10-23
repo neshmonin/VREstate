@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2">
+
+    <class name="Vre.Server.BusinessLogic.Transaction, vreservice"
+    table="aTransactions"
+    lazy="false">
+
+
+		<id name="AutoID" column="AutoID" unsaved-value="00000000000000000000000000000000">
+			<generator class="identity" />
+		</id>
+    <property name="Amount" column="Amount"  />
+  		<many-to-one name="OptionPaid"
+  			column="OptionPaidID"
+    			cascade="save-update"
+  			                    class="Vre.Server.BusinessLogic.Option, vreservice"
+             />
+    <property name="DealDateTime" column="DealDateTime"  type="Timestamp"  />
+      <property name="PaidDateTime" column="PaidDateTime"  type="Timestamp"  />
+      <property name="Status" column="Status"  />
+  
+  </class>
+</hibernate-mapping>

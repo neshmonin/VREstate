@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2">
+
+    <class name="Vre.Server.BusinessLogic.Suite, vreservice"
+    table="aSuites"
+    lazy="false">
+
+
+		<id name="AutoID" column="AutoID" unsaved-value="00000000000000000000000000000000">
+			<generator class="identity" />
+		</id>
+    <property name="PhysicalLevelNumber" column="PhysicalLevelNumber"  />
+      <property name="FloorNumber" column="FloorNumber"  />
+      <property name="SuiteNumber" column="SuiteNumber"  />
+      <property name="Status" column="Status"  />
+          <bag name="Options" inverse="true" lazy="false"
+      	  	  cascade="all-delete-orphan"
+            >
+              <key column="SuiteID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.Option, vreservice"
+             />
+		</bag>
+      <property name="Model" column="Model"  />
+          <bag name="VRTours" inverse="true" lazy="false"
+      	  	  cascade="all-delete-orphan"
+            >
+              <key column="SuiteID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.VRTour, vreservice"
+             />
+		</bag>
+      <property name="AccountID" column="AccountID"  />
+  
+  </class>
+</hibernate-mapping>

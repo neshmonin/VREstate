@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2">
+
+    <class name="Vre.Server.BusinessLogic.PersonalInfo, vreservice"
+    table="aPersonalInfos"
+    lazy="false">
+
+
+		<id name="AutoID" column="AutoID" unsaved-value="00000000000000000000000000000000">
+			<generator class="identity" />
+		</id>
+    <property name="FirstName" column="FirstName"  />
+      <property name="LastName" column="LastName"  />
+      <property name="MidName" column="MidName"  />
+      <property name="PersonalTitle" column="PersonalTitle"  />
+  
+  </class>
+</hibernate-mapping>

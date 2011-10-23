@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2">
+
+    <class name="Vre.Server.BusinessLogic.ContactInfo, vreservice"
+    table="aContactInfos"
+    lazy="false">
+
+
+		<id name="AutoID" column="AutoID" unsaved-value="00000000000000000000000000000000">
+			<generator class="identity" />
+		</id>
+		  		  <property name="Emails" column="Emails"  />
+		            <bag name="PhoneNumbers" inverse="true" lazy="false"
+      	  	  		 cascade="none"
+            >
+              <key column="ContactInfoID"/>
+    		    <one-to-many                     class="Vre.Server.BusinessLogic.PhoneNumber, vreservice"
+             />
+		</bag>
+  		<many-to-one name="Address"
+  			column="AddressID"
+    						cascade="none"
+  			                    class="Vre.Server.BusinessLogic.PostalAddress, vreservice"
+             />
+		<many-to-one name="PersonalInfo"
+  			column="PersonalInfoID"
+    						cascade="none"
+  			                    class="Vre.Server.BusinessLogic.PersonalInfo, vreservice"
+             />
+
+  </class>
+</hibernate-mapping>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2">
+
+    <class name="Vre.Server.BusinessLogic.PostalAddress, vreservice"
+    table="aPostalAddresss"
+    lazy="false">
+
+
+		<id name="AutoID" column="AutoID" unsaved-value="00000000000000000000000000000000">
+			<generator class="identity" />
+		</id>
+    <property name="Line1" column="Line1"  />
+      <property name="Line2" column="Line2"  />
+      <property name="City" column="City"  />
+      <property name="State_province" column="State_province"  />
+      <property name="Zipcode" column="Zipcode"  />
+      <property name="Country" column="Country"  />
+  
+  </class>
+</hibernate-mapping>

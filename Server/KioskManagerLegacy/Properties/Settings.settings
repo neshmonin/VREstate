@@ -1,0 +1,45 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="KioskManager.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="HttpServerUrl" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">localhost</Value>
+    </Setting>
+    <Setting Name="HttpServerPort" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">80</Value>
+    </Setting>
+    <Setting Name="SiteName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Eden_Park_Towers_Phase_II</Value>
+    </Setting>
+    <Setting Name="WebRootLocalPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\MyProjects\VirtualEstate\Trunk\VREstate\VrEstate\WebRoot</Value>
+    </Setting>
+    <Setting Name="DeveloperName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Times Group Corporation</Value>
+    </Setting>
+    <Setting Name="ShowSoldSuiteNumbers" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="PricePerSqUnit" Type="System.Double" Scope="Application">
+      <Value Profile="(Default)">500</Value>
+    </Setting>
+    <Setting Name="FloorIncrementPrice" Type="System.Double" Scope="Application">
+      <Value Profile="(Default)">1000</Value>
+    </Setting>
+    <Setting Name="VrEstateExecutable" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\MyProjects\VirtualEstate\Trunk\VREstate\VrEstate\bin\Release\VrEstate.exe</Value>
+    </Setting>
+    <Setting Name="StartOnSecondaryMonitor" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="ImportFromPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\MyProjects\VirtualEstate\Trunk\VREstate\VrEstate\WebRoot</Value>
+    </Setting>
+    <Setting Name="ExportToPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\MyProjects\VirtualEstate\Trunk\VREstate\VrEstate\WebRoot</Value>
+    </Setting>
+    <Setting Name="UseOnScreenKeyboard" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
