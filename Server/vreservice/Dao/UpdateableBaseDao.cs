@@ -39,6 +39,7 @@ namespace Vre.Server.Dao
         {
             entity.MarkUpdated();
             base.Create(entity);
+            _session.Refresh(entity);
         }
 
         [Obsolete("Use SafeUpdate method instead.", true)]
@@ -51,6 +52,7 @@ namespace Vre.Server.Dao
             try
             {
                 base.Update(entity);
+                _session.Refresh(entity);
                 return true;
             }
             catch (StaleObjectStateException)
@@ -70,6 +72,7 @@ namespace Vre.Server.Dao
             try
             {
                 base.CreateOrUpdate(entity);
+                _session.Refresh(entity);
                 return true;
             }
             catch (StaleObjectStateException)
@@ -88,6 +91,7 @@ namespace Vre.Server.Dao
             try
             {
                 base.Update(entity);
+                _session.Refresh(entity);
                 return true;
             }
             catch (StaleObjectStateException)
