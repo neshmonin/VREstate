@@ -5,6 +5,7 @@ using Vre.Server.BusinessLogic;
 using Vre.Server.Dao;
 using Vre.Server.HttpService;
 using Vre.Server.RemoteService;
+using System.Threading;
 
 namespace Vre.Server
 {
@@ -38,9 +39,10 @@ namespace Vre.Server
 
             ServiceInstances.ModelCache = new ModelCache.ModelCacheManager(
                 ServiceInstances.Configuration.GetValue("ModelFileStore", string.Empty));
-            // TODO: make this call working on a separate thread
-            // May take long enough for Service Control Manager to render this as hung on start!
-            ServiceInstances.ModelCache.Initialize();
+            // This may take long enough for Service Control Manager to render this as hung on start!
+            new Thread(() => ServiceInstances.ModelCache.Initialize()) 
+            { IsBackground = true, Priority = ThreadPriority.BelowNormal, Name = "InitialModelReader" }
+            .Start();
 
             if (startServiceListeners) startCommunications();
 
