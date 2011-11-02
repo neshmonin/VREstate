@@ -7,7 +7,7 @@ using Vre.Server.BusinessLogic;
 
 namespace Vre.Server.RemoteService
 {
-    internal class ClientSessionStore : IDisposable
+    public class ClientSessionStore : IDisposable
     {
         private Dictionary<string, ClientSession> _sessionList;
         private ManualResetEvent _staleSessionDropThreadExit;
@@ -168,7 +168,7 @@ namespace Vre.Server.RemoteService
         /// <summary>
         /// Generates a session with virtual non-persistent full-powered user.
         /// </summary>
-        internal static ClientSession MakeSystemSession()
+        public static ClientSession MakeSystemSession()
         {
             return new ClientSession(LoginType.Plain, "<system>", new User(null, User.Role.SuperAdmin));
         }

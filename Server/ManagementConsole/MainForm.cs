@@ -5,6 +5,8 @@ using System.Windows.Forms;
 using Vre.Server.BusinessLogic;
 using System.Diagnostics;
 using Vre.Server.Dao;
+using Vre.Server.RemoteService;
+using System.Net;
 
 namespace Vre.Server.ManagementConsole
 {
@@ -17,7 +19,9 @@ namespace Vre.Server.ManagementConsole
         private const int NODE_TYPE_OPTIONS = 5;
 
         private bool _servicesStarted;
-        private NHibernate.ISession _session;
+        private ClientSession _session;
+        //private string _sessionId;
+        private ClientSessionStore _clientSessionStore = new ClientSessionStore();
         private User _administrativeSystemUser;
         private bool _inhibitNodeChangedTest = false;
 
@@ -51,7 +55,8 @@ namespace Vre.Server.ManagementConsole
 
                 try
                 {
-                    closeDbSession();
+                    _session.Disconnect();
+                    _clientSessionStore.Dispose();
 
                     Vre.Server.StartupShutdown.PerformShutdown();
                     _servicesStarted = false;
@@ -75,7 +80,6 @@ namespace Vre.Server.ManagementConsole
 
                 AppendLog("Conecting to " + NHibernateHelper.DisplayableConnectionString);
 
-                openDbSession();
                 loadTreeView();
 
                 AppendLog("Conected to database");
@@ -105,8 +109,8 @@ namespace Vre.Server.ManagementConsole
 
             try
             {
-                closeDbSession();
-                openDbSession();
+                _session.Disconnect();
+                _session.Resume();
                 loadTreeView();
             }
             finally
@@ -116,30 +120,24 @@ namespace Vre.Server.ManagementConsole
             }
         }
 
-        private void openDbSession()
-        {
-            _session = Vre.Server.NHibernateHelper.GetSession();
-        }
-
-        private void closeDbSession()
-        {
-            if (_session != null) { _session.Dispose(); _session = null; }
-        }
-
         private void loadTreeView()
         {
             // TODO: Make this a login popup
-            using (UserManager manager = new UserManager(_session))
-            {
-                _administrativeSystemUser = manager.Login(LoginType.Plain, "admin", "admin");
-            }
+            string sessionId = _clientSessionStore.LoginUser(new IPEndPoint(IPAddress.Loopback, 0), LoginType.Plain, "admin", "admin");
+            //using (UserManager manager = new UserManager(ClientSession.MakeSystemSession()))
+            //{
+            //    _administrativeSystemUser = manager.Login(LoginType.Plain, "admin", "admin");
+            //}
+
+            _session = _clientSessionStore[sessionId];
 
             TreeNode root = new TreeNode("Estate Developers");
             root.Tag = NODE_TYPE_ESTATE_DEVELOPERS;
             root.ContextMenuStrip = mnuEstateDevelopers;
             EstateDeveloperProps props = new EstateDeveloperProps();
 
-            using (Vre.Server.Dao.EstateDeveloperDao eddao = new Vre.Server.Dao.EstateDeveloperDao(_session))
+            _session.Resume();
+            using (Vre.Server.Dao.EstateDeveloperDao eddao = new Vre.Server.Dao.EstateDeveloperDao(_session.DbSession))
             {
                 foreach (var ed in eddao.GetAll())
                 {
@@ -308,7 +306,7 @@ namespace Vre.Server.ManagementConsole
                                 case System.Windows.Forms.DialogResult.Yes:
                                     try
                                     {
-                                        pp.Save(tvStructure.SelectedNode.Parent.Tag, _session);
+                                        pp.Save(tvStructure.SelectedNode.Parent.Tag, _session.DbSession);
                                         pp.SetupNode(tvStructure.SelectedNode);
                                     }
                                     catch (NHibernate.StaleObjectStateException)
@@ -319,7 +317,7 @@ namespace Vre.Server.ManagementConsole
                                             "Please review updated values and try changing again.",
                                             "Save changes - " + Text,
                                             MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                                        _session.Refresh(tvStructure.SelectedNode.Tag);
+                                        _session.DbSession.Refresh(tvStructure.SelectedNode.Tag);
                                         pp.SetObject(tvStructure.SelectedNode.Tag);
                                         pp.SetupNode(tvStructure.SelectedNode);
                                         e.Cancel = true;
@@ -518,7 +516,7 @@ namespace Vre.Server.ManagementConsole
                 siteData = new VrEstate.Site(kmz.GetColladaDoc());
             }
 
-            using (Vre.Server.INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session))
+            using (Vre.Server.INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
             {
                 site = dealWithImportedSite(dev, site, siteData);
                 if (null == site) return;
@@ -563,7 +561,7 @@ namespace Vre.Server.ManagementConsole
                         if (building != null) doImportBuilding(siteData, site, b, building);
                     }
                 }
-                _session.Refresh(site);
+                _session.DbSession.Refresh(site);
 
                 tran.Commit();
             }
@@ -656,8 +654,8 @@ namespace Vre.Server.ManagementConsole
                     result.Location.Longitude = importedSite.Lon_d;
                     result.Location.Latitude = importedSite.Lat_d;
                     result.Location.Altitude = importedSite.Alt_m;
-                    using (SiteDao dao = new SiteDao(_session)) dao.Create(result);
-                    _session.Refresh(dev);
+                    using (SiteDao dao = new SiteDao(_session.DbSession)) dao.Create(result);
+                    _session.DbSession.Refresh(dev);
                 }
                 catch (Exception ex)
                 {
@@ -725,8 +723,8 @@ namespace Vre.Server.ManagementConsole
                 try
                 {
                     result = new Building(site, importedBuildingName);
-                    using (BuildingDao dao = new BuildingDao(_session)) dao.Create(result);
-                    _session.Refresh(site);
+                    using (BuildingDao dao = new BuildingDao(_session.DbSession)) dao.Create(result);
+                    _session.DbSession.Refresh(site);
                 }
                 catch (Exception ex)
                 {
@@ -749,7 +747,7 @@ namespace Vre.Server.ManagementConsole
 
             int updatedCnt = 0, createdCnt = 0, deletedCnt = 0;
 
-            using (SuiteDao dao = new SuiteDao(_session))
+            using (SuiteDao dao = new SuiteDao(_session.DbSession))
             {
                 // delete possible existing suites
                 //dao.DeleteSuites(destination);
@@ -822,7 +820,7 @@ namespace Vre.Server.ManagementConsole
                         if (st.Name.Equals(s.ClassId, StringComparison.InvariantCultureIgnoreCase))
                         {
                             suite.SuiteType = st;
-                            dao.Update(suite);
+                            dao.SafeUpdate(suite);
                             suiteTypeResolved = true;
                             break;
                         }
@@ -831,18 +829,18 @@ namespace Vre.Server.ManagementConsole
                     {
                         SuiteType suiteType = new SuiteType(siteReference, s.ClassId);
                         // TODO: suiteType.Model
-                        using (SuiteTypeDao stdao = new SuiteTypeDao(_session))
+                        using (SuiteTypeDao stdao = new SuiteTypeDao(_session.DbSession))
                         {
                             stdao.Create(suiteType);
                         }
                         suite.SuiteType = suiteType;
-                        if (!dao.SafeUpdate(suite)) 
+                        if (!dao.SafeUpdate(suite))
                             throw new Exception("One of objects was updated by other user (1); please try again.");
                     }
 
-                    using (BuildingManager manager = new BuildingManager(_session))
+                    using (SiteManager manager = new SiteManager(_session))
                     {
-                        if (!manager.SetSuitePrice(_administrativeSystemUser, suite, (float)s.Price))
+                        if (!manager.SetSuitePrice(suite, (float)s.Price))
                         {
                             throw new Exception("Cannot set suite price: value was updated by other user.");
                         }
@@ -858,7 +856,7 @@ namespace Vre.Server.ManagementConsole
                 }
 
                 // refresh building state from database
-                _session.Refresh(destination);
+                _session.DbSession.Refresh(destination);
 
                 // fixup floor levels
                 //
@@ -875,7 +873,7 @@ namespace Vre.Server.ManagementConsole
                 foreach (Suite s in destination.Suites)
                 {
                     s.PhysicalLevelNumber = floor2level[s.PhysicalLevelNumber];
-                    dao.Update(s);
+                    dao.SafeUpdate(s);
                 }
             }
 
