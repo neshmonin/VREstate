@@ -104,6 +104,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\_version\version.cs">
+      <Link>Properties\version.cs</Link>
+    </Compile>
+    <Compile Include="..\_version\versiongen.cs">
+      <Link>Properties\versiongen.cs</Link>
+    </Compile>
     <Compile Include="BusinessObjects\Account.cs" />
     <Compile Include="BusinessObjects\Building.cs" />
     <Compile Include="BusinessObjects\ContactInfo.cs" />

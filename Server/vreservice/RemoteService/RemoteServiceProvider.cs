@@ -158,10 +158,11 @@ namespace Vre.Server.RemoteService
         {
             StringBuilder result = new StringBuilder();
 
-            result.Append("VR Estate server; copyright (C) 2010-2011 3D Condo Explorer Corp.");
+            result.AppendFormat("{0}, {1}", VersionGen.ProductName, VersionGen.CopyrightString);
 
             result.AppendFormat("\r\nService assembly version: {0}", Assembly.GetExecutingAssembly().GetName().Version);
             result.AppendFormat("\r\nBO assembly version: {0}", typeof(Vre.Server.BusinessLogic.Suite).Assembly.GetName().Version);
+            result.AppendFormat("\r\nBuild version stamp: {0}", VersionGen.VersionStamp);
 
             return result.ToString();
         }

@@ -79,6 +79,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\_version\version.cs">
+      <Link>Properties\version.cs</Link>
+    </Compile>
+    <Compile Include="..\_version\versiongen.cs">
+      <Link>Properties\versiongen.cs</Link>
+    </Compile>
     <Compile Include="PropertyPages\BuildingProps.cs">
       <SubType>UserControl</SubType>
     </Compile>
