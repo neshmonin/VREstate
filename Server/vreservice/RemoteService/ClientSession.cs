@@ -73,7 +73,7 @@ namespace Vre.Server.RemoteService
                 string sessionId = Guid.NewGuid().ToString();
 
                 lock (_sessionList)
-                    _sessionList.Add(sessionId, new ClientSession(loginType, login, user));
+                    _sessionList.Add(sessionId, new ClientSession(loginType, login, user, isTrustedConnection(ep, user)));
                                 
                 return sessionId;
             }
@@ -84,6 +84,22 @@ namespace Vre.Server.RemoteService
 
                 return null;
             }
+        }
+
+        private bool isTrustedConnection(IPEndPoint userEndpoint, User user)
+        {
+            bool result = false;
+
+            if (User.Role.SuperAdmin == user.UserRole)
+            {
+                // allow only local connections
+                // TODO: add more configurable logic?
+                if (userEndpoint.Address.Equals(IPAddress.Loopback)
+                    || userEndpoint.Address.Equals(IPAddress.IPv6Loopback))
+                    result = true;
+            }
+
+            return result;
         }
 
         public ClientSession this[string sessionId]
@@ -155,12 +171,17 @@ namespace Vre.Server.RemoteService
         public User User { get; private set; }
         public ISession DbSession { get; private set; }
         public DateTime LastUsed { get; private set; }
+        /// <summary>
+        /// This session is fully trusted and extended functionality is allowed
+        /// </summary>
+        public bool TrustedConnection { get; private set; }
 
-        public ClientSession(LoginType loginType, string login, User user)
+        public ClientSession(LoginType loginType, string login, User user, bool trustedConnection)
         {
             AuthLoginType = loginType;
             AuthLogin = login;
             User = user;
+            TrustedConnection = trustedConnection;
             DbSession = null;
             LastUsed = DateTime.UtcNow;
         }
@@ -170,7 +191,7 @@ namespace Vre.Server.RemoteService
         /// </summary>
         public static ClientSession MakeSystemSession()
         {
-            return new ClientSession(LoginType.Plain, "<system>", new User(null, User.Role.SuperAdmin));
+            return new ClientSession(LoginType.Plain, "<system>", new User(null, User.Role.SuperAdmin), true);
         }
 
         /// <summary>

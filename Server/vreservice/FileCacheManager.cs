@@ -41,16 +41,17 @@ namespace Vre.Server
             // collect current file list
             //
             _files = new List<FileInfo>();
-            collectFiles(new DirectoryInfo(_cacheRoot), ref _files);
+            lock (_files)
+            {
+                collectFiles(new DirectoryInfo(_cacheRoot), ref _files);
 
-            // sort files by access time
-            //
-            _files.Sort((FileInfo x, FileInfo y) => { return x.LastAccessTimeUtc.CompareTo(y.LastAccessTimeUtc); });
+                // sort files by access time
+                _files.Sort((FileInfo x, FileInfo y) => { return x.LastAccessTimeUtc.CompareTo(y.LastAccessTimeUtc); });
 
-            // find if we exceeded defined space limit
-            //
-            _currentSize = 0;
-            for (int idx = _files.Count - 1; idx >= 0; idx--) _currentSize += _files[idx].Length;
+                // find if we exceeded defined space limit
+                _currentSize = 0;
+                for (int idx = _files.Count - 1; idx >= 0; idx--) _currentSize += _files[idx].Length;
+            }
 
             // check we've run out of space limit already
             adjustCacheSize();
