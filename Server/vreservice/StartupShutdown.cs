@@ -18,7 +18,7 @@ namespace Vre.Server
         public static string Status = "Stopped.";
         public static string[] Listeners { get { lock (_listeners) return _listeners.ToArray(); } }
 
-        public static void PerformStartup(bool startServiceListeners)
+        public static void PerformStartup(bool startAsService)
         {
             ServiceInstances.Logger.Info("Starting server.");
             Status = "Starting...";
@@ -32,19 +32,27 @@ namespace Vre.Server
                 um.ConfirmPresetUsers();
             }
 
-            System.Threading.ThreadPool.SetMinThreads(100, 100);
-
             ServiceInstances.FileCache = new FileCacheManager();
-            ServiceInstances.FileCache.Initialize();
 
             ServiceInstances.ModelCache = new ModelCache.ModelCacheManager(
                 ServiceInstances.Configuration.GetValue("ModelFileStore", string.Empty));
-            // This may take long enough for Service Control Manager to render this as hung on start!
-            new Thread(() => ServiceInstances.ModelCache.Initialize()) 
-            { IsBackground = true, Priority = ThreadPriority.BelowNormal, Name = "InitialModelReader" }
-            .Start();
 
-            if (startServiceListeners) startCommunications();
+            if (startAsService)
+            {
+                System.Threading.ThreadPool.SetMinThreads(100, 100);
+
+                // This may take long enough for Service Control Manager to render this as hung on start!
+                new Thread(() => ServiceInstances.FileCache.Initialize()) 
+                { IsBackground = true, Priority = ThreadPriority.BelowNormal, Name = "InitializeFileCache" }
+                .Start();
+
+                // This may take long enough for Service Control Manager to render this as hung on start!
+                new Thread(() => ServiceInstances.ModelCache.Initialize()) 
+                { IsBackground = true, Priority = ThreadPriority.BelowNormal, Name = "InitialModelReader" }
+                .Start();
+                
+                startCommunications();
+            }
 
             Status = "Running.";
         }
