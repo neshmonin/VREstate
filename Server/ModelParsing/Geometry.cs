@@ -104,7 +104,7 @@ namespace VrEstate
                     case "vertices":
                         break;
                     case "lines":
-                        count = int.Parse(geomChild.GetAttribute("count"));
+                        count = int.Parse(geomChild.GetAttribute("count")) * 2;
                         foreach (var linesChildNode in geomChild.ChildNodes)
                         {
                             XmlElement p = linesChildNode as XmlElement;
