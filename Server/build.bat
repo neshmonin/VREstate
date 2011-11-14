@@ -25,8 +25,15 @@ IF ERRORLEVEL 1 GOTO devenvFailed
 
 
 ECHO Packaging...
-
+CALL setup\prepare.bat
+IF ERRORLEVEL 1 GOTO packagingFailed
 EXIT 0
+
+
+
+:packagingFailed
+ECHO ERROR: Packaging failed.
+EXIT 1
 
 
 
