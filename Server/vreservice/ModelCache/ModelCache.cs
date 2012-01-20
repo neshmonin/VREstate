@@ -129,7 +129,7 @@ namespace Vre.Server.ModelCache
                 //Name = modelInfo.Name;
                 string name = Path.GetFileName(path);
                 int pos = name.IndexOf('.');
-                if (pos > 0) name = name.Substring(0, pos - 1);
+                if (pos > 0) name = name.Substring(0, pos);
                 pos = name.IndexOf('-');
                 if (pos > 0) name = name.Substring(0, pos - 1);
                 Name = name.Trim();
