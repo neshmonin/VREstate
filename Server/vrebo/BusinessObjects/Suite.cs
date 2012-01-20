@@ -80,7 +80,10 @@ namespace Vre.Server.BusinessLogic
             result.Add("levelNumber", PhysicalLevelNumber);
             result.Add("floorName", FloorName);
             result.Add("name", SuiteName);
-            result.Add("ceilingHeightFt", CeilingHeight.ValueAs(ValueWithUM.Unit.Feet));
+            if (CeilingHeight != null)
+            {
+                result.Add("ceilingHeightFt", CeilingHeight.ValueAs(ValueWithUM.Unit.Feet));
+            }
             result.Add("showPanoramicView", ShowPanoramicView);
             result.Add("status", Status);
 
