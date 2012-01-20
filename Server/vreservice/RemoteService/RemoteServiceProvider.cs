@@ -160,8 +160,7 @@ namespace Vre.Server.RemoteService
 
             result.AppendFormat("{0}, {1}", VersionGen.ProductName, VersionGen.CopyrightString);
 
-            result.AppendFormat("\r\nService assembly version: {0}", Assembly.GetExecutingAssembly().GetName().Version);
-            result.AppendFormat("\r\nBO assembly version: {0}", typeof(Vre.Server.BusinessLogic.Suite).Assembly.GetName().Version);
+            result.AppendFormat("\r\nVersion: {0}", Assembly.GetExecutingAssembly().GetName().Version);
             result.AppendFormat("\r\nBuild version stamp: {0}", VersionGen.VersionStamp);
 
             return result.ToString();
