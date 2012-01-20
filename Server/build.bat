@@ -27,24 +27,28 @@ IF ERRORLEVEL 1 GOTO devenvFailed
 ECHO Packaging...
 CALL setup\prepare.bat
 IF ERRORLEVEL 1 GOTO packagingFailed
+PAUSE
 EXIT 0
 
 
 
 :packagingFailed
 ECHO ERROR: Packaging failed.
+PAUSE
 EXIT 1
 
 
 
 :devenvFailed
 ECHO ERROR: Building binaries failed; see errors in _build\build.log
+PAUSE
 EXIT 1
 
 
 
 :versionFailed
 ECHO ERROR: Version stamp tool failed.
+PAUSE
 EXIT 1
 
 
@@ -52,4 +56,5 @@ EXIT 1
 :dirty
 ECHO ERROR: Repository is not clean.
 ECHO Do a clean checkout or commit changed files before release.
+PAUSE
 EXIT 1
