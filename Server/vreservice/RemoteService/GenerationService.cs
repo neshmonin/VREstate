@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using System.Globalization;
 
 namespace Vre.Server.RemoteService
 {
@@ -59,12 +60,42 @@ namespace Vre.Server.RemoteService
         {
             string text = query.GetParam("text", "Test");
             int height = query.GetParam("height", 12);
-            Color textColor = Color.FromArgb((int)((uint)query.GetParam("txtClr", 0) | 0xFF000000L));
-            Color shadowColor = Color.FromArgb((int)((uint)query.GetParam("shdClr", 0x00202020) | 0xFF000000L));
+            Color textColor = readColorParam(query, "txtClr", Color.Black);
+            Color shadowColor = readColorParam(query, "shdClr", Color.DarkGray);
             bool frame = (query.GetParam("frame", 0) != 0);
 
             resp.DataStreamContentType = generateTextImage(text, height, textColor, shadowColor, frame, resp.DataStream, true);
             resp.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private static Color readColorParam(ServiceQuery query, string paramName, Color defaultValue)
+        {
+            Color result = defaultValue;
+
+            string text = query.GetParam(paramName, null);
+            if (text != null)
+            {
+                int value;
+                if (text.StartsWith("x"))
+                {
+                    if (int.TryParse(text.Substring(1), 
+                        NumberStyles.AllowHexSpecifier, NumberFormatInfo.InvariantInfo, out value))
+                        result = Color.FromArgb((int)((uint)value | 0xFF000000L));
+                }
+                else if (text.StartsWith("0x"))
+                {
+                    if (int.TryParse(text.Substring(2), 
+                        NumberStyles.AllowHexSpecifier, NumberFormatInfo.InvariantInfo, out value))
+                        result = Color.FromArgb((int)((uint)value | 0xFF000000L));
+                }
+                else
+                {
+                    if (int.TryParse(text, out value))
+                        result = Color.FromArgb((int)((uint)value | 0xFF000000L));
+                }
+            }
+
+            return result;
         }
 
         private static string generateTextImage(string text,
