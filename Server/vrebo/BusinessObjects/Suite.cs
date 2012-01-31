@@ -91,7 +91,7 @@ namespace Vre.Server.BusinessLogic
 
             if (ClassName != null)
             {
-                result.Add("class", ClassName);
+                result.Add("className", ClassName);
             }
             if (Location != null)
             {
