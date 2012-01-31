@@ -24,7 +24,7 @@ namespace Vre.Server.BusinessLogic
         public virtual Building Building { get; protected set; }
         public virtual SuiteType SuiteType { get; set; }
         public virtual ViewPoint Location { get; set; }
-        public virtual Wireframe[] Model { get; set; }
+        public virtual string ClassName { get; set; }
         public virtual ValueWithUM CeilingHeight { get; set; }
         public virtual bool ShowPanoramicView { get; set; }
 
@@ -43,6 +43,7 @@ namespace Vre.Server.BusinessLogic
             Building = copy.Building;
             SuiteType = copy.SuiteType;
             Location = copy.Location;
+            ClassName = copy.ClassName;
             CeilingHeight = copy.CeilingHeight;
             ShowPanoramicView = copy.ShowPanoramicView;
         }
@@ -57,6 +58,7 @@ namespace Vre.Server.BusinessLogic
             SuiteName = suiteName;
             Status = SalesStatus.Available;
             Location = ViewPoint.Empty;
+            ClassName = null;
             CeilingHeight = ValueWithUM.EmptyLinear;
             ShowPanoramicView = true;
             if (Building != null) Building.Suites.Add(this);
@@ -85,14 +87,11 @@ namespace Vre.Server.BusinessLogic
                 result.Add("ceilingHeightFt", CeilingHeight.ValueAs(ValueWithUM.Unit.Feet));
             }
             result.Add("showPanoramicView", ShowPanoramicView);
-            result.Add("status", Status);
+            result.Add("status", ClientData.ConvertProperty<SalesStatus>(Status));
 
-            if (Model != null)
+            if (ClassName != null)
             {
-                int idx = 0;
-                ClientData[] model = new ClientData[Model.Length];
-                foreach (Wireframe wf in Model) model[idx++] = wf.GetClientData();
-                result.Add("geometries", model);  // keep model's terminology
+                result.Add("class", ClassName);
             }
             if (Location != null)
             {

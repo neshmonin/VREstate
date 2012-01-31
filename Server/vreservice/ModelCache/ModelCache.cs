@@ -72,6 +72,15 @@ namespace Vre.Server.ModelCache
             }
         }
 
+        public SuiteClass[] GetSuiteClassList(Building target)
+        {
+            if (_info != null)
+            {
+                return _info.GetSuiteClassList(target);
+            }
+            return null;
+        }
+
         public void UpdateBo(Suite target, bool withSubObjects)
         {
             if (_info != null)
@@ -187,6 +196,16 @@ namespace Vre.Server.ModelCache
                 return false;
             }
 
+            public SuiteClass[] GetSuiteClassList(Building target)
+            {
+                BuildingInfo bi;
+                if (_buildingInfo.TryGetValue(target.Name, out bi))
+                {
+                    return bi.SuiteClassList;
+                }
+                return null;
+            }
+
             public bool UpdateBo(Suite target, bool withSubObjects)
             {
                 BuildingInfo bi;
@@ -205,6 +224,7 @@ namespace Vre.Server.ModelCache
             private GeoPoint _location;
 
             private Dictionary<string, SuiteInfo> _suiteInfo;
+            private List<SuiteClass> _classInfo;
 
             public BuildingInfo(VrEstate.Building modelInfo)
             {
@@ -229,7 +249,36 @@ namespace Vre.Server.ModelCache
 
                     _suiteInfo.Add(si.Name, si);
                 }
+
+                _classInfo = new List<SuiteClass>(modelInfo.Geometries.Values.Count);
+                foreach (string className in modelInfo.Geometries.Keys)
+                {
+                    _classInfo.Add(new SuiteClass(className, processGeometries(modelInfo.Geometries[className])));
+                }
             }
+
+            private static Wireframe[] processGeometries(VrEstate.Geometry[] geometries)
+            {
+                int idx = 0;
+                Wireframe[] result = new Wireframe[geometries.Length];
+
+                foreach (VrEstate.Geometry geom in geometries)
+                {
+                    List<Wireframe.Point3D> points = new List<Wireframe.Point3D>(geom.Points.Length);
+                    foreach (VrEstate.Geometry.Point3 pt in geom.Points)
+                        points.Add(new Wireframe.Point3D(pt.X, pt.Y, pt.Z));
+
+                    List<Wireframe.Segment> segments = new List<Wireframe.Segment>(geom.Lines.Count);
+                    foreach (VrEstate.Geometry.Line ln in geom.Lines)
+                        segments.Add(new Wireframe.Segment(ln.Start, ln.End));
+
+                    result[idx++] = new Wireframe(points, segments);
+                }
+
+                return result;
+            }
+
+            public SuiteClass[] SuiteClassList { get { return _classInfo.ToArray(); } }
 
             public void UpdateBo(Building target, bool withSubObjects)
             {
@@ -270,7 +319,6 @@ namespace Vre.Server.ModelCache
             public string Name;
 
             private ViewPoint _location;
-            private Wireframe[] _wireframe;
             private string _classId;
             private double _ceilingHeightFt;
             private string _floor;
@@ -282,31 +330,9 @@ namespace Vre.Server.ModelCache
                 _classId = modelInfo.ClassId;
                 _ceilingHeightFt = modelInfo.CellingHeight;
                 _location = new ViewPoint(modelInfo.Lon_d, modelInfo.Lat_d, modelInfo.Alt_m, modelInfo.Heading_d);
-                _wireframe = processGeometries(modelInfo.Geometries);
                 _floor = modelInfo.FloorNumber;
 
                 //modelInfo.Id;  // "ID<five-digit-int>"
-            }
-
-            private static Wireframe[] processGeometries(VrEstate.Geometry[] geometries)
-            {
-                int idx = 0;
-                Wireframe[] result = new Wireframe[geometries.Length];
-
-                foreach (VrEstate.Geometry geom in geometries)
-                {
-                    List<Wireframe.Point3D> points = new List<Wireframe.Point3D>(geom.Points.Length);
-                    foreach (VrEstate.Geometry.Point3 pt in geom.Points)
-                        points.Add(new Wireframe.Point3D(pt.X, pt.Y, pt.Z));
-
-                    List<Wireframe.Segment> segments = new List<Wireframe.Segment>(geom.Lines.Count);
-                    foreach (VrEstate.Geometry.Line ln in geom.Lines)
-                        segments.Add(new Wireframe.Segment(ln.Start, ln.End));
-
-                    result[idx++] = new Wireframe(points, segments);
-                }
-
-                return result;
             }
 
             public void UpdateBo(Suite target, bool withSubObjects)
@@ -315,7 +341,7 @@ namespace Vre.Server.ModelCache
                 ////target.SuiteType
                 target.FloorName = _floor;
                 target.Location = _location;
-                target.Model = _wireframe;
+                target.ClassName = _classId;
             }
         }
     }

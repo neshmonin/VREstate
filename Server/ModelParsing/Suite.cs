@@ -57,8 +57,8 @@ namespace VrEstate
         private string m_id;
         private double[][]  m_matrix;
         private double[] m_LonLatAlt;
-        private List<Geometry> m_geometries;
-        public Geometry[] Geometries { get { return m_geometries.ToArray(); } }
+        private List<string> m_geometryIdList;
+        public string[] GeometryIdList { get { return m_geometryIdList.ToArray(); } }
         public double LonModel_d { get { return m_LonLatAlt[0]; } }
         public double LatModel_d { get { return m_LonLatAlt[1]; } }
         public double AltModel_d { get { return m_LonLatAlt[2]; } }
@@ -66,9 +66,9 @@ namespace VrEstate
         private SaleStatus m_saleStatus = SaleStatus.Available;
         private double m_heading = 0.0f;
 
-        public Suite(XmlElement node, XmlElement library_nodes_Node, XmlElement library_geometries_Node, double[][] buildingMatrix)
+        public Suite(XmlElement node, XmlElement library_nodes_Node, double[][] buildingMatrix)
         {
-            m_geometries = new List<Geometry>();
+            m_geometryIdList = new List<string>();
 
             m_id = node.GetAttribute("id");
 
@@ -132,19 +132,7 @@ namespace VrEstate
                         {
                             string geometryUrl = subelt.GetAttribute("url");
                             if (geometryUrl.StartsWith("#")) geometryUrl = geometryUrl.Substring(1);
-                            foreach (var geom in library_geometries_Node.ChildNodes)
-                            {
-                                XmlElement geomelt = geom as XmlElement;
-                                if (geomelt != null && geomelt.Name == "geometry")
-                                {
-                                    string geomId = geomelt.GetAttribute("id");
-                                    if (geomId == geometryUrl)
-                                    {
-                                        m_geometries.Add(new Geometry(geomelt));
-                                        break;
-                                    }
-                                }
-                            }
+                            m_geometryIdList.Add(geometryUrl);
                         }
                     }
                 }

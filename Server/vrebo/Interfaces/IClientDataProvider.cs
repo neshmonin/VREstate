@@ -303,6 +303,10 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
+        public static string ConvertProperty<T>(T propertyValue) where T : struct, IConvertible
+        {
+            return Enum.GetName(typeof(T), propertyValue);
+        }
 
         /// <summary>
         /// Update string property in business object.

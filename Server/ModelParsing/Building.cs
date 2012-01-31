@@ -14,6 +14,7 @@ namespace VrEstate
 
         private int m_id = 108514319;
         private Dictionary<string, Suite> m_suites = new Dictionary<string, Suite>();
+        private Dictionary<string, Geometry[]> m_geometries = new Dictionary<string,Geometry[]>();
 
         private double m_Lon_d = 0;
         private double m_Lat_d = 0;
@@ -97,7 +98,7 @@ namespace VrEstate
                 if (name.StartsWith("instance_"))
                     continue;
 
-                Suite suite = new Suite(elt, library_nodes_Node, library_geometries_Node, matrix);
+                Suite suite = new Suite(elt, library_nodes_Node, matrix);
                 m_Lon_d += suite.Lon_d;
                 m_Lat_d += suite.Lat_d;
                 m_Alt_m += suite.Alt_m;
@@ -109,6 +110,44 @@ namespace VrEstate
                 //    m_suites.Equals(name);
                 //else
                     m_suites.Add(name, suite);
+            }
+
+            // build a list of used geometries
+            List<string> usedGeometryIds = new List<string>();
+            foreach (var suite in m_suites.Values)
+            {
+                foreach (string id in suite.GeometryIdList)
+                    if (!usedGeometryIds.Contains(id)) usedGeometryIds.Add(id);
+            }
+
+            // build a dictionary with all related geometries
+            Dictionary<string, Geometry> geometries = new Dictionary<string, Geometry>(usedGeometryIds.Count);
+            foreach (var geom in library_geometries_Node.ChildNodes)
+            {
+                XmlElement geomelt = geom as XmlElement;
+                if (geomelt != null && geomelt.Name == "geometry")
+                {
+                    string geomId = geomelt.GetAttribute("id");
+
+                    if (usedGeometryIds.Contains(geomId))
+                        geometries.Add(geomId, new Geometry(geomelt));
+                }
+            }
+
+            // build class-geometry dictionary
+            foreach (var suite in m_suites.Values)
+            {
+                if (m_geometries.ContainsKey(suite.ClassId)) continue;
+
+                string[] gidl = suite.GeometryIdList;
+                List<Geometry> gl = new List<Geometry>(gidl.Length);
+                foreach (string id in gidl)
+                {
+                    Geometry g;
+                    if (geometries.TryGetValue(id, out g)) gl.Add(g);
+                }
+
+                m_geometries.Add(suite.ClassId, gl.ToArray());
             }
 
             // average up the Lon-s/Lat-s/Alt-s - to obtain the coordinates of the building center
@@ -138,6 +177,11 @@ namespace VrEstate
         public Dictionary<string, Suite> Suites
         {
             get { return m_suites; }
+        }
+
+        public Dictionary<string, Geometry[]> Geometries
+        {
+            get { return m_geometries; }
         }
 
         public double Lon_d

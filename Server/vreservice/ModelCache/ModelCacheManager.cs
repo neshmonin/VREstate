@@ -99,6 +99,21 @@ namespace Vre.Server.ModelCache
             }
         }
 
+        public SuiteClass[] GetSuiteClassList(Building building)
+        {
+            lock (this)
+            {
+                if (null == _watcher) return null;  // not initialized yet
+
+                ModelCache mc;
+                if (_cacheByName.TryGetValue(building.ConstructionSite.Name, out mc))
+                {
+                    return mc.GetSuiteClassList(building);
+                }
+                return null;
+            }
+        }
+
         private bool tryAddNewModel(string path)
         {
             ModelCache mc = new ModelCache(path);

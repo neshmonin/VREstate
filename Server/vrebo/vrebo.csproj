@@ -113,6 +113,7 @@
     <Compile Include="BusinessObjects\Account.cs" />
     <Compile Include="BusinessObjects\Building.cs" />
     <Compile Include="BusinessObjects\ContactInfo.cs" />
+    <Compile Include="BusinessObjects\SuiteClass.cs" />
     <Compile Include="BusinessObjects\Wireframe.cs" />
     <Compile Include="BusinessObjects\OptionType.cs" />
     <Compile Include="BusinessObjects\ValueWithUM.cs" />
