@@ -46,9 +46,10 @@ namespace VrEstate
                         break;
                     case "unit":
                         //Assert.IsTrue(elt.HasAttributes);
-                        m_unitInMeters = double.Parse(elt.GetAttribute("meter"));
+                        m_unitInMeters = Math.Round(double.Parse(elt.GetAttribute("meter")),2);
+                        
                         // TODO: make sure the model in Merets has this value 1.0
-                        if (m_unitInMeters == 0.0254)
+                        if (m_unitInMeters == Math.Round(0.0254d, 2))
                             m_scale = MeasureScale.Inches;
                         else
                             m_scale = MeasureScale.Meters;
