@@ -10,10 +10,12 @@ namespace Vre.Server.ModelCache
 {
     internal class ModelCache
     {
+        public enum ModelLevel { Site, Building }
+
         private SHA512 _lastCrc;
         private SiteInfo _info;
 
-        public ModelCache(string filePath)
+        public ModelCache(string filePath, ModelLevel level, int objectId)
         {
             _info = parseFile(filePath);
             if (_info != null)
@@ -21,12 +23,16 @@ namespace Vre.Server.ModelCache
                 _lastCrc = calcCrc(filePath);
                 FilePath = filePath;
                 UpdatedTime = File.GetLastWriteTimeUtc(filePath);
+                Level = level;
+                ObjectId = objectId;
             }
         }
 
         public bool IsValid { get { return _info != null; } }
         public string FilePath { get; private set; }
         public DateTime UpdatedTime { get; private set; }
+        public ModelLevel Level { get; private set; }
+        public int ObjectId { get; private set; }
 
         public bool TryReRead(string filePath)
         {
@@ -54,7 +60,7 @@ namespace Vre.Server.ModelCache
             return result;
         }
 
-        public string SiteName { get { if (_info != null) return _info.Name; else return null; } }
+        //public string SiteName { get { if (_info != null) return _info.Name; else return null; } }
 
         public void UpdateBo(Site target, bool withSubObjects)
         {
@@ -138,7 +144,7 @@ namespace Vre.Server.ModelCache
                 //Name = modelInfo.Name;
                 string name = Path.GetFileName(path);
                 int pos = name.IndexOf('.');
-                if (pos > 0) name = name.Substring(0, pos);
+                if (pos > 0) name = name.Substring(0, pos - 1);
                 pos = name.IndexOf('-');
                 if (pos > 0) name = name.Substring(0, pos - 1);
                 Name = name.Trim();

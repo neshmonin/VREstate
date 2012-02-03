@@ -9,14 +9,16 @@ namespace Vre.Server.ModelCache
         private string _modelStoreFilter;
         private FileSystemWatcher _watcher;
         private Dictionary<string, ModelCache> _cache;
-        private Dictionary<string, ModelCache> _cacheByName;
+        //private Dictionary<string, ModelCache> _cacheByName;
+        private Dictionary<int, ModelCache> _cacheBySite;
+        private Dictionary<int, ModelCache> _cacheByBuilding;
 
         public ModelCacheManager(string modelStorePath)
         {
             _watcher = null;
 
-            _modelStorePath = Path.GetDirectoryName(modelStorePath);
-            _modelStoreFilter = Path.GetFileName(modelStorePath);
+            _modelStorePath = modelStorePath;// Path.GetDirectoryName(modelStorePath);
+            _modelStoreFilter = "model.kmz";// Path.GetFileName(modelStorePath);
         }
 
         public void Initialize()
@@ -27,6 +29,7 @@ namespace Vre.Server.ModelCache
 
                 _watcher = new FileSystemWatcher(_modelStorePath);
                 _watcher.Filter = Path.GetFileName(_modelStoreFilter);
+                _watcher.IncludeSubdirectories = true;
                 _watcher.EnableRaisingEvents = false;
 
                 _watcher.Changed += new FileSystemEventHandler(_watcher_Changed);
@@ -38,12 +41,17 @@ namespace Vre.Server.ModelCache
                 ServiceInstances.Logger.Info("MC: Started reading model files.");
 
                 _cache = new Dictionary<string, ModelCache>();
-                _cacheByName = new Dictionary<string, ModelCache>();
+                //_cacheByName = new Dictionary<string, ModelCache>();
 
-                foreach (string path in Directory.EnumerateFiles(_modelStorePath, _modelStoreFilter, SearchOption.TopDirectoryOnly))
-                {
-                    tryAddNewModel(path);
-                }
+                _cacheBySite = new Dictionary<int, ModelCache>();
+                _cacheByBuilding = new Dictionary<int, ModelCache>();
+
+                // produce a list of all model files reverse-sorted by write time
+                List<string> files = new List<string>();
+                files.AddRange(Directory.EnumerateFiles(_modelStorePath, _modelStoreFilter, SearchOption.AllDirectories));
+                files.Sort(delegate(string x, string y) { return File.GetLastWriteTimeUtc(x).CompareTo(File.GetLastWriteTimeUtc(y)); });
+
+                foreach (string path in files) tryAddNewModel(path);
 
                 ServiceInstances.Logger.Info("MC: Reading model files done.");
 
@@ -53,101 +61,161 @@ namespace Vre.Server.ModelCache
 
         public bool FillWithModelInfo(Site site, bool withSubObjects)
         {
+            bool result = false;
+            ModelCache mc = null;
+
             lock (this)
             {
-                if (null == _watcher) return false;  // not initialized yet
-
-                ModelCache mc;
-                if (_cacheByName.TryGetValue(site.Name, out mc))
+                if (null != _watcher)  // initialized
                 {
-                    mc.UpdateBo(site, withSubObjects);
-                    return true;
+                    result = _cacheBySite.TryGetValue(site.AutoID, out mc);
                 }
-                return false;
             }
+
+            if (result) mc.UpdateBo(site, withSubObjects);
+
+            return result;
         }
 
         public bool FillWithModelInfo(Building building, bool withSubObjects)
         {
+            bool result = false;
+            ModelCache mc = null;
+
             lock (this)
             {
-                if (null == _watcher) return false;  // not initialized yet
-
-                ModelCache mc;
-                if (_cacheByName.TryGetValue(building.ConstructionSite.Name, out mc))
+                if (null != _watcher)  // initialized
                 {
-                    mc.UpdateBo(building, withSubObjects);
-                    return true;
+                    if (_cacheByBuilding.TryGetValue(building.AutoID, out mc))
+                    {
+                        result = true;
+                    }
+                    else if (_cacheBySite.TryGetValue(building.ConstructionSite.AutoID, out mc))
+                    {
+                        result = true;
+                    }
                 }
-                return false;
             }
+
+            if (result) mc.UpdateBo(building, withSubObjects);
+
+            return result;
         }
 
         public bool FillWithModelInfo(Suite suite, bool withSubObjects)
         {
+            bool result = false;
+            ModelCache mc = null;
+
             lock (this)
             {
-                if (null == _watcher) return false;  // not initialized yet
-
-                ModelCache mc;
-                if (_cacheByName.TryGetValue(suite.Building.ConstructionSite.Name, out mc))
+                if (null != _watcher)  // initialized
                 {
-                    mc.UpdateBo(suite, withSubObjects);
-                    return true;
+                    if (_cacheByBuilding.TryGetValue(suite.Building.AutoID, out mc))
+                    {                        
+                        result = true;
+                    }
+                    else if (_cacheBySite.TryGetValue(suite.Building.ConstructionSite.AutoID, out mc))
+                    {
+                        result = true;
+                    }
                 }
-                return false;
             }
+
+            if (result) mc.UpdateBo(suite, withSubObjects);
+
+            return result;
         }
 
         public SuiteClass[] GetSuiteClassList(Building building)
         {
+            bool result = false;
+            ModelCache mc = null;
+
             lock (this)
             {
-                if (null == _watcher) return null;  // not initialized yet
-
-                ModelCache mc;
-                if (_cacheByName.TryGetValue(building.ConstructionSite.Name, out mc))
+                if (null != _watcher)  // not initialized yet
                 {
-                    return mc.GetSuiteClassList(building);
+                    if (_cacheByBuilding.TryGetValue(building.AutoID, out mc))
+                    {
+                        result = true;
+                    }
+                    else if (_cacheBySite.TryGetValue(building.ConstructionSite.AutoID, out mc))
+                    {
+                        result = true;
+                    }
                 }
-                return null;
             }
+
+            if (result) return mc.GetSuiteClassList(building);
+            else return null;
         }
-
-        private bool tryAddNewModel(string path)
+        
+        private void tryAddNewModel(string path)
         {
-            ModelCache mc = new ModelCache(path);
-            if (mc.IsValid)
+            ModelCache.ModelLevel level;
+            int objectId;
+
+            if (objectFromPath(path, out level, out objectId))
             {
-                if (_cacheByName.ContainsKey(mc.SiteName))
+                ModelCache mc;
+                bool insert = false;
+                Dictionary<int, ModelCache> cl = null;
+
+                if (ModelCache.ModelLevel.Site == level) cl = _cacheBySite;
+                else if (ModelCache.ModelLevel.Building == level) cl = _cacheByBuilding;
+
+                if (cl != null)
                 {
-                    ModelCache emc = _cacheByName[mc.SiteName];
-                    if (emc.UpdatedTime > mc.UpdatedTime)
-                    {
-                        ServiceInstances.Logger.Warn("MC: Duplicate site name ({2}) found in \"{0}\" and \"{1}\"; former used judging by file update timestamp.",
-                            emc.FilePath, path, mc.SiteName);
-                    }
+                    if (cl.TryGetValue(objectId, out mc))  // if cache object exists...
+                        insert = (mc.UpdatedTime < File.GetLastWriteTimeUtc(path));  // ... check if new newer
                     else
+                        insert = true;
+
+                    if (insert)
                     {
-                        ServiceInstances.Logger.Warn("MC: Duplicate site name ({2}) found in \"{0}\" and \"{1}\"; latter used judging by file update timestamp.",
-                            emc.FilePath, path, mc.SiteName);
-
-                        _cache.Remove(emc.FilePath);
-                        _cacheByName.Remove(mc.SiteName);
-
-                        _cache.Add(path, mc);
-                        _cacheByName.Add(mc.SiteName, mc);
+                        mc = new ModelCache(path, level, objectId);
+                        if (mc.IsValid)
+                        {
+                            cl[objectId] = mc;
+                            _cache[path] = mc;
+                        }
                     }
-                }
-                else
-                {
-                    _cache.Add(path, mc);
-                    _cacheByName.Add(mc.SiteName, mc);
-
-                    ServiceInstances.Logger.Info("MC: Added new model file: \"{0}\"; site '{1}'", path, mc.SiteName);
                 }
             }
-            return mc.IsValid;
+
+            //ModelCache mc = new ModelCache(path);
+            //if (mc.IsValid)
+            //{
+            //    if (_cacheByName.ContainsKey(mc.SiteName))
+            //    {
+            //        ModelCache emc = _cacheByName[mc.SiteName];
+            //        if (emc.UpdatedTime > mc.UpdatedTime)
+            //        {
+            //            ServiceInstances.Logger.Warn("MC: Duplicate site name ({2}) found in \"{0}\" and \"{1}\"; former used judging by file update timestamp.",
+            //                emc.FilePath, path, mc.SiteName);
+            //        }
+            //        else
+            //        {
+            //            ServiceInstances.Logger.Warn("MC: Duplicate site name ({2}) found in \"{0}\" and \"{1}\"; latter used judging by file update timestamp.",
+            //                emc.FilePath, path, mc.SiteName);
+
+            //            _cache.Remove(emc.FilePath);
+            //            _cacheByName.Remove(mc.SiteName);
+
+            //            _cache.Add(path, mc);
+            //            _cacheByName.Add(mc.SiteName, mc);
+            //        }
+            //    }
+            //    else
+            //    {
+            //        _cache.Add(path, mc);
+            //        _cacheByName.Add(mc.SiteName, mc);
+
+            //        ServiceInstances.Logger.Info("MC: Added new model file: \"{0}\"; site '{1}'", path, mc.SiteName);
+            //    }
+            //}
+            //return mc.IsValid;
         }
 
         private void _watcher_Error(object sender, ErrorEventArgs e)
@@ -165,9 +233,9 @@ namespace Vre.Server.ModelCache
         {
             lock (this)
             {
-                if (_cache.ContainsKey(e.OldFullPath))
+                ModelCache mc;
+                if (_cache.TryGetValue(e.OldFullPath, out mc))
                 {
-                    ModelCache mc = _cache[e.OldFullPath];
                     _cache.Remove(e.OldFullPath);
                     _cache.Add(e.FullPath, mc);
                     ServiceInstances.Logger.Info("MC: Detected renaming of model file: \"{0}\" -> \"{1}\"", e.OldFullPath, e.FullPath);
@@ -179,12 +247,15 @@ namespace Vre.Server.ModelCache
         {
             lock (this)
             {
-                if (_cache.ContainsKey(e.FullPath))
+                ModelCache mc;
+                if (_cache.TryGetValue(e.FullPath, out mc))
                 {
                     // TODO: is this proper behavior?
-                    string name = _cache[e.FullPath].SiteName;
+                    //string name = _cache[e.FullPath].SiteName;
                     _cache.Remove(e.FullPath);
-                    _cacheByName.Remove(name);
+                    if (ModelCache.ModelLevel.Site == mc.Level) _cacheBySite.Remove(mc.ObjectId);
+                    else if (ModelCache.ModelLevel.Building == mc.Level) _cacheByBuilding.Remove(mc.ObjectId);
+                    //_cacheByName.Remove(name);
                     ServiceInstances.Logger.Info("MC: Detected removal of model file: \"{0}\"", e.FullPath);
                 }
             }
@@ -202,36 +273,95 @@ namespace Vre.Server.ModelCache
         {
             lock (this)
             {
-                if (_cache.ContainsKey(e.FullPath))
+                ModelCache mc;
+                if (_cache.TryGetValue(e.FullPath, out mc))
                 {
-                    ModelCache mc = _cache[e.FullPath];
-                    string name = mc.SiteName;
+                    //string name = mc.SiteName;
                     if (mc.TryReRead(e.FullPath))
                     {
                         ServiceInstances.Logger.Info("MC: Re-read model file: \"{0}\"", e.FullPath);
 
-                        if (!name.Equals(mc.SiteName))
-                        {
-                            ModelCache emc;
-                            if (_cacheByName.TryGetValue(mc.SiteName, out emc))
-                            {
-                                ServiceInstances.Logger.Warn("MC: Model file re-read (\"{0}\") resulted in site name change: '{1}'->'{2}' which resulted in model \"{3}\" being removed from cache.",
-                                    e.FullPath, name, mc.SiteName, emc.FilePath);
+                        //if (!name.Equals(mc.SiteName))
+                        //{
+                        //    ModelCache emc;
+                        //    if (_cacheByName.TryGetValue(mc.SiteName, out emc))
+                        //    {
+                        //        ServiceInstances.Logger.Warn("MC: Model file re-read (\"{0}\") resulted in site name change: '{1}'->'{2}' which resulted in model \"{3}\" being removed from cache.",
+                        //            e.FullPath, name, mc.SiteName, emc.FilePath);
                          
-                                _cacheByName.Remove(mc.SiteName);
-                            }
-                            else
-                            {
-                                ServiceInstances.Logger.Warn("MC: Model file re-read (\"{0}\") resulted in site name change: '{1}'->'{2}'", 
-                                    e.FullPath, name, mc.SiteName);
-                            }
+                        //        _cacheByName.Remove(mc.SiteName);
+                        //    }
+                        //    else
+                        //    {
+                        //        ServiceInstances.Logger.Warn("MC: Model file re-read (\"{0}\") resulted in site name change: '{1}'->'{2}'", 
+                        //            e.FullPath, name, mc.SiteName);
+                        //    }
 
-                            _cacheByName.Remove(name);
-                            _cacheByName.Add(mc.SiteName, mc);
-                        }
+                        //    _cacheByName.Remove(name);
+                        //    _cacheByName.Add(mc.SiteName, mc);
+                        //}
                     }
                 }
             }
         }
+
+        #region path-object conversion
+        //private const string SiteDirPrefix = "site";
+        //private const string BuildingDirPrefix = "building";
+
+        //private string pathFromObject(Site site)
+        //{
+        //    return Path.Combine(_modelStorePath, string.Format("{0}{1}", SiteDirPrefix, site.AutoID));
+        //}
+
+        //private string pathFromObject(Building building)
+        //{
+        //    return Path.Combine(_modelStorePath, string.Format("{0}{1}", BuildingDirPrefix, building.AutoID));
+        //}
+
+        //private string pathFromObject(Suite suite)
+        //{
+        //    return Path.Combine(_modelStorePath, string.Format("building{0}", suite.Building.AutoID));
+        //}
+
+        private bool objectFromPath(string path, out ModelCache.ModelLevel level, out int id)
+        {
+            bool result = false;
+
+            level = ModelCache.ModelLevel.Building; id = 0;  // defaults
+
+            if (path.StartsWith(_modelStorePath, System.StringComparison.InvariantCultureIgnoreCase))
+            {
+                path = path.Substring(_modelStorePath.Length);
+                
+                string[] parts = path.Split(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar });
+                int startIdx = 0;
+
+                // remove trailing path separator element if any
+                if (0 == parts[0].Length) startIdx = 1;  // parts array cannot have zero elements (by design)
+
+                // path in form <developer id>\<site id>\model.kmz
+                if (3 == (parts.Length - startIdx))  // currently support a single nesting level; last item is file name
+                {
+                    if (int.TryParse(parts[startIdx + 1], out id))
+                    {
+                        level = ModelCache.ModelLevel.Site;
+                        result = true;
+                    }
+                }
+                // path in form <developer id>\<site id>\<building id>\model.kmz
+                else if (4 == (parts.Length - startIdx))
+                {
+                    if (int.TryParse(parts[startIdx + 2], out id))
+                    {
+                        level = ModelCache.ModelLevel.Building;
+                        result = true;
+                    }
+                }
+            }
+
+            return result;
+        }
+        #endregion
     }
 }
