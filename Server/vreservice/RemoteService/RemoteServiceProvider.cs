@@ -116,7 +116,7 @@ namespace Vre.Server.RemoteService
                 DataService.ProcessGetRequest(request);
                 return;
             }
-            else if (0 == request.Request.Query.Count)  // FS file reading
+            else //if (0 == request.Request.Query.Count)  // FS file reading
             {
                 request.Response.DataStreamContentType =
                     processFileRequest(request.Request.Path, request.Response.DataStream);
