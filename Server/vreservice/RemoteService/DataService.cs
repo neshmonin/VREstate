@@ -34,8 +34,7 @@ namespace Vre.Server.RemoteService
                     }
                     else
                     {
-                        // TODO: get a single building data
-                        throw new NotImplementedException();
+                        getBuilding(request.UserInfo.Session, objectId, request.Response);
                     }
                     return;
 
@@ -179,13 +178,48 @@ namespace Vre.Server.RemoteService
             resp.Data.Add("buildings", buildings);
             resp.ResponseCode = HttpStatusCode.OK;
         }
+        
+        private static void getBuilding(ClientSession session, int buildingId, IResponseData resp)
+        {
+            Building building;
+            SuiteClass[] classList;
+            ClientData[] classes;
+
+            using (SiteManager manager = new SiteManager(session))
+            {
+                building = manager.GetBuildingById(buildingId);
+                ServiceInstances.ModelCache.FillWithModelInfo(building, false);
+
+                classList = ServiceInstances.ModelCache.GetSuiteClassList(building);
+                if (classList != null)
+                {
+                    // produce output
+                    //
+                    int cnt = classList.Length;
+                    classes = new ClientData[cnt];
+                    for (int idx = 0; idx < cnt; idx++)
+                    {
+                        classes[idx] = classList[idx].GetClientData();
+                    }
+                }
+                else
+                {
+                    classes = new ClientData[0];
+                }
+            }            
+
+            // produce output
+            //
+            resp.Data = building.GetClientData();
+            resp.Data.Add("classes", classes);
+            resp.ResponseCode = HttpStatusCode.OK;
+        }
 
         private static void getSuiteList(ClientSession session, int buildingId, IResponseData resp)
         {
             Building building;
             Suite[] suiteList;
-            SuiteClass[] classList;
-            ClientData[] suites, classes;
+            ClientData[] suites;
 
             using (SiteManager manager = new SiteManager(session))
             {
@@ -207,28 +241,10 @@ namespace Vre.Server.RemoteService
                     //suites[idx] = new SuiteEx(s, manager.GetCurrentSuitePrice(s)).GetClientData();
                     suites[idx] = SuiteEx.GetClientData(s, manager.GetCurrentSuitePrice(s));
                 }
-
-                classList = ServiceInstances.ModelCache.GetSuiteClassList(building);
-                if (classList != null)
-                {
-                    // produce output
-                    //
-                    cnt = classList.Length;
-                    classes = new ClientData[cnt];
-                    for (int idx = 0; idx < cnt; idx++)
-                    {
-                        classes[idx] = classList[idx].GetClientData();
-                    }
-                }
-                else
-                {
-                    classes = new ClientData[0];
-                }
             }
 
             resp.Data = new ClientData();
             resp.Data.Add("suites", suites);
-            resp.Data.Add("classes", classes);
             resp.ResponseCode = HttpStatusCode.OK;
         }
 

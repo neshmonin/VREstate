@@ -28,6 +28,7 @@ namespace Vre.Server.BusinessLogic
         public virtual BuildingStatus Status { get; set; }
         public virtual string Model { get; set; }
         public virtual GeoPoint Location { get; set; }
+        public virtual double AltitudeAdjustment { get; set; }
 
         public virtual IList<Suite> Suites { get; protected set; }
 
@@ -59,6 +60,7 @@ namespace Vre.Server.BusinessLogic
             result.Add("name", Name);
             result.Add("status", Status);
             result.Add("openingDate", OpeningDate);
+            result.Add("altitudeAdjustment", AltitudeAdjustment);
 
             if (Location != null) result.Add("position", Location.GetClientData());
 

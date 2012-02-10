@@ -39,6 +39,8 @@
     </component>
     -->
 
+    <property name="AltitudeAdjustment" column="AltitudeAdjustment" />
+
     <bag name="Suites">
       <key column="BuildingID" />
       <one-to-many class="Suite" />
