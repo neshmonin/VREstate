@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml;
 
 namespace VrEstate
@@ -16,6 +13,7 @@ namespace VrEstate
 
         private int m_id = 108514320;
         private Dictionary<string, Building> m_buildings = new Dictionary<string, Building>();
+        private Dictionary<string, Geometry[]> m_geometries = new Dictionary<string, Geometry[]>();
         private double m_unitInMeters;
         public enum MeasureScale { Meters, Inches };
         public static MeasureScale m_scale = MeasureScale.Inches;
@@ -93,10 +91,58 @@ namespace VrEstate
                     m_buildings.Add(building.Name, building);
                 }
             }
-            // average up the Lon-s/Lat-s/Alt-s - to obtain the coordinates of the building center
+            // average up the Lon-s/Lat-s/Alt-s - to obtain the coordinates of the site center
             m_Lon_d = m_Lon_d / m_buildings.Count;
             m_Lat_d = m_Lat_d / m_buildings.Count;
             m_Alt_m = m_Alt_m / m_buildings.Count;
+
+            //
+            // Build a dictionary of <suite class name>-<geometry>
+            //
+
+            // build a list of used geometries
+            List<string> usedGeometryIds = new List<string>();
+            foreach (var bldg in m_buildings.Values)
+            {
+                foreach (var suite in bldg.Suites.Values)
+                {
+                    foreach (string id in suite.GeometryIdList)
+                        if (!usedGeometryIds.Contains(id)) usedGeometryIds.Add(id);
+                }
+            }
+
+            // build a dictionary with all related geometries
+            Dictionary<string, Geometry> geometries = new Dictionary<string, Geometry>(usedGeometryIds.Count);
+            foreach (var geom in library_geometries_Node.ChildNodes)
+            {
+                XmlElement geomelt = geom as XmlElement;
+                if (geomelt != null && geomelt.Name == "geometry")
+                {
+                    string geomId = geomelt.GetAttribute("id");
+
+                    if (usedGeometryIds.Contains(geomId))
+                        geometries.Add(geomId, new Geometry(geomelt));
+                }
+            }
+
+            // build class-geometry dictionary
+            foreach (var bldg in m_buildings.Values)
+            {
+                foreach (var suite in bldg.Suites.Values)
+                {
+                    if (m_geometries.ContainsKey(suite.ClassId)) continue;
+
+                    string[] gidl = suite.GeometryIdList;
+                    List<Geometry> gl = new List<Geometry>(gidl.Length);
+                    foreach (string id in gidl)
+                    {
+                        Geometry g;
+                        if (geometries.TryGetValue(id, out g)) gl.Add(g);
+                    }
+
+                    m_geometries.Add(suite.ClassId, gl.ToArray());
+                }
+            }
         }
 
         // TODO: UNUSED
@@ -152,6 +198,14 @@ namespace VrEstate
         public Dictionary<string, Building> Buildings
         {
             get { return m_buildings; }
+        }
+
+        /// <summary>
+        /// (suite class name)-(geometry)
+        /// </summary>
+        public Dictionary<string, Geometry[]> Geometries
+        {
+            get { return m_geometries; }
         }
 
         public double Lon_d

@@ -12,10 +12,31 @@ namespace Vre.Server.BusinessLogic
         private string _className;
         private Wireframe[] _model;
 
+        private ValueWithUM _area;
+        private int _bedroomCount, _denCount, _bathroomCount, _balconyCount, _terraceCount;
+
         public SuiteClass(string className, Wireframe[] model)
         {
             _className = className;
             _model = model;
+            _area = ValueWithUM.EmptyArea;
+            _bedroomCount = -1;
+            _denCount = -1;
+            _balconyCount = -1;
+            _bathroomCount = -1;
+            _terraceCount = -1;
+        }
+
+        public bool NeedUpdateFromType { get { return (_bedroomCount >= 0); } }
+
+        public void UpdateFromType(SuiteType suiteType)
+        {
+            _area = suiteType.FloorArea;
+            _bathroomCount = suiteType.BathroomCount;
+            _denCount = suiteType.DenCount;
+            _bedroomCount = suiteType.BedroomCount;
+            _balconyCount = suiteType.BalconyCount;
+            _terraceCount = suiteType.TerraceCount;
         }
 
         public ClientData GetClientData()

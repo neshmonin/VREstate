@@ -38,5 +38,12 @@
     </bag>
     -->
 
+    <property name="BedroomCount" column="BedroomCnt" /> <!-- TODO: TEMPORARY -->
+    <property name="DenCount" column="DenCnt" /> <!-- TODO: TEMPORARY -->
+    <property name="BathroomCount" column="BathroomCnt" /> <!-- TODO: TEMPORARY -->
+    <property name="BalconyCount" column="BalconyCnt" /> <!-- TODO: TEMPORARY -->
+    <property name="TerraceCount" column="TerraceCnt" /> <!-- TODO: TEMPORARY -->
+    <property name="floorArea" column="FloorArea" /> <!-- TODO: TEMPORARY -->
+
   </class>
 </hibernate-mapping>

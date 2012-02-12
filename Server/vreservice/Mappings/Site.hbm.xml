@@ -20,6 +20,7 @@
     <bag name="SuiteTypes">
       <key column="SiteID" />
       <one-to-many class="SuiteType" />
+      <loader query-ref="suiteTypesInSite"/>
     </bag>
 
     <many-to-one name="Developer"

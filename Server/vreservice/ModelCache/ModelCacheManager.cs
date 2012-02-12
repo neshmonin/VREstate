@@ -1,6 +1,7 @@
-﻿using System.IO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
 using Vre.Server.BusinessLogic;
+
 namespace Vre.Server.ModelCache
 {
     internal class ModelCacheManager
@@ -77,6 +78,24 @@ namespace Vre.Server.ModelCache
             return result;
         }
 
+        public bool FillWithModelInfo(SuiteType suiteType, bool withSubObjects)
+        {
+            bool result = false;
+            ModelCache mc = null;
+
+            lock (this)
+            {
+                if (null != _watcher)  // initialized
+                {
+                    result = _cacheBySite.TryGetValue(suiteType.ConstructionSite.AutoID, out mc);
+                }
+            }
+
+            if (result) mc.UpdateBo(suiteType, withSubObjects);
+
+            return result;
+        }
+
         public bool FillWithModelInfo(Building building, bool withSubObjects)
         {
             bool result = false;
@@ -127,30 +146,6 @@ namespace Vre.Server.ModelCache
             return result;
         }
 
-        public SuiteClass[] GetSuiteClassList(Building building)
-        {
-            bool result = false;
-            ModelCache mc = null;
-
-            lock (this)
-            {
-                if (null != _watcher)  // not initialized yet
-                {
-                    if (_cacheByBuilding.TryGetValue(building.AutoID, out mc))
-                    {
-                        result = true;
-                    }
-                    else if (_cacheBySite.TryGetValue(building.ConstructionSite.AutoID, out mc))
-                    {
-                        result = true;
-                    }
-                }
-            }
-
-            if (result) return mc.GetSuiteClassList(building);
-            else return null;
-        }
-        
         private void tryAddNewModel(string path)
         {
             ModelCache.ModelLevel level;
@@ -183,39 +178,6 @@ namespace Vre.Server.ModelCache
                     }
                 }
             }
-
-            //ModelCache mc = new ModelCache(path);
-            //if (mc.IsValid)
-            //{
-            //    if (_cacheByName.ContainsKey(mc.SiteName))
-            //    {
-            //        ModelCache emc = _cacheByName[mc.SiteName];
-            //        if (emc.UpdatedTime > mc.UpdatedTime)
-            //        {
-            //            ServiceInstances.Logger.Warn("MC: Duplicate site name ({2}) found in \"{0}\" and \"{1}\"; former used judging by file update timestamp.",
-            //                emc.FilePath, path, mc.SiteName);
-            //        }
-            //        else
-            //        {
-            //            ServiceInstances.Logger.Warn("MC: Duplicate site name ({2}) found in \"{0}\" and \"{1}\"; latter used judging by file update timestamp.",
-            //                emc.FilePath, path, mc.SiteName);
-
-            //            _cache.Remove(emc.FilePath);
-            //            _cacheByName.Remove(mc.SiteName);
-
-            //            _cache.Add(path, mc);
-            //            _cacheByName.Add(mc.SiteName, mc);
-            //        }
-            //    }
-            //    else
-            //    {
-            //        _cache.Add(path, mc);
-            //        _cacheByName.Add(mc.SiteName, mc);
-
-            //        ServiceInstances.Logger.Info("MC: Added new model file: \"{0}\"; site '{1}'", path, mc.SiteName);
-            //    }
-            //}
-            //return mc.IsValid;
         }
 
         private void _watcher_Error(object sender, ErrorEventArgs e)
@@ -354,8 +316,11 @@ namespace Vre.Server.ModelCache
                 {
                     if (int.TryParse(parts[startIdx + 2], out id))
                     {
-                        level = ModelCache.ModelLevel.Building;
-                        result = true;
+                        ServiceInstances.Logger.Error("Building-level models are not supported yet!");
+                        // TODO: To support this ModelCache class must handle level properly and create BuildingInfo directly instead of SiteInfo
+                        // See ModelCache.parseFile() for details
+                        //level = ModelCache.ModelLevel.Building;
+                        //result = true;
                     }
                 }
             }

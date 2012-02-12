@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using Vre.Server.BusinessLogic;
+using Vre.Server.Dao;
 
 namespace Vre.Server.ModelCache
 {
@@ -17,7 +18,7 @@ namespace Vre.Server.ModelCache
 
         public ModelCache(string filePath, ModelLevel level, int objectId)
         {
-            _info = parseFile(filePath);
+            _info = parseFile(filePath, objectId);
             if (_info != null)
             {
                 _lastCrc = calcCrc(filePath);
@@ -41,7 +42,7 @@ namespace Vre.Server.ModelCache
 
             if (!newCrc.Equals(_lastCrc))
             {
-                SiteInfo si = parseFile(filePath);
+                SiteInfo si = parseFile(filePath, ObjectId);
                 if (si != null)
                 {
                     _info = si;
@@ -60,9 +61,15 @@ namespace Vre.Server.ModelCache
             return result;
         }
 
-        //public string SiteName { get { if (_info != null) return _info.Name; else return null; } }
-
         public void UpdateBo(Site target, bool withSubObjects)
+        {
+            if (_info != null)
+            {
+                _info.UpdateBo(target, withSubObjects);
+            }
+        }
+
+        public void UpdateBo(SuiteType target, bool withSubObjects)
         {
             if (_info != null)
             {
@@ -76,15 +83,6 @@ namespace Vre.Server.ModelCache
             {
                 _info.UpdateBo(target, withSubObjects);
             }
-        }
-
-        public SuiteClass[] GetSuiteClassList(Building target)
-        {
-            if (_info != null)
-            {
-                return _info.GetSuiteClassList(target);
-            }
-            return null;
         }
 
         public void UpdateBo(Suite target, bool withSubObjects)
@@ -107,7 +105,7 @@ namespace Vre.Server.ModelCache
             return result;
         }
 
-        private static SiteInfo parseFile(string filePath)
+        private static SiteInfo parseFile(string filePath, int objectId)
         {
             SiteInfo result = null;
 
@@ -121,7 +119,8 @@ namespace Vre.Server.ModelCache
                     siteData = new VrEstate.Site(kmz.GetColladaDoc());
                 }
 
-                result = new SiteInfo(siteData, filePath);
+                result = new SiteInfo(siteData, filePath, objectId);
+                // see ModelCacheManager.objectFromPath for extending here
             }
             catch (Exception ex)
             {
@@ -133,133 +132,70 @@ namespace Vre.Server.ModelCache
 
         internal class SiteInfo
         {
-            public string Name;
-
             private GeoPoint _location;
+            private Dictionary<int, BuildingInfo> _buildingInfo;
+            private Dictionary<string, SuiteClassInfo> _classInfo;
 
-            private Dictionary<string, BuildingInfo> _buildingInfo;
-
-            public SiteInfo(VrEstate.Site modelInfo, string path)
+            public SiteInfo(VrEstate.Site modelInfo, string path, int objectId)
             {
                 //Name = modelInfo.Name;
-                string name = Path.GetFileName(path);
-                int pos = name.IndexOf('.');
-                if (pos > 0) name = name.Substring(0, pos - 1);
-                pos = name.IndexOf('-');
-                if (pos > 0) name = name.Substring(0, pos - 1);
-                Name = name.Trim();
+                //string name = Path.GetFileName(path);
+                //int pos = name.IndexOf('.');
+                //if (pos > 0) name = name.Substring(0, pos - 1);
+                //pos = name.IndexOf('-');
+                //if (pos > 0) name = name.Substring(0, pos - 1);
+                //Name = name.Trim();
 
                 _location = new GeoPoint(modelInfo.Lon_d, modelInfo.Lat_d, modelInfo.Alt_m);
-
                 //modelInfo.DirName  // null
                 //modelInfo.ID  // nine-digit-int
 
-                _buildingInfo = new Dictionary<string, BuildingInfo>(modelInfo.Buildings.Values.Count);
-                foreach (VrEstate.Building buildingModelInfo in modelInfo.Buildings.Values)
-                {
-                    BuildingInfo bi = new BuildingInfo(buildingModelInfo);
+                _buildingInfo = new Dictionary<int, BuildingInfo>(modelInfo.Buildings.Values.Count);
+                _classInfo = new Dictionary<string, SuiteClassInfo>();
 
-                    if (_buildingInfo.ContainsKey(bi.Name))
-                    {
-                        ServiceInstances.Logger.Error("Model contains duplicate building names: '{0}'", bi.Name);
-                        continue;
-                    }
-
-                    _buildingInfo.Add(bi.Name, bi);
-                }
-            }
-
-            public void UpdateBo(Site target, bool withSubObjects)
-            {
-                target.Location = _location;
-
-                if (withSubObjects)
-                {
-                    int toUpdate = target.Buildings.Count;
-                    foreach (string buildingName in _buildingInfo.Keys)
-                    {
-                        var buildings = from bd in target.Buildings where bd.Name == buildingName select bd;
-                        if (1 == buildings.Count())
-                        {
-                            Building buildingBo = buildings.First();
-                            _buildingInfo[buildingName].UpdateBo(buildingBo, true);
-                            toUpdate--;
-                        }
-                    }
-
-                    Debug.Assert(toUpdate == 0, "Not all buildings were updated from model information.");
-                }
-            }
-
-            public bool UpdateBo(Building target, bool withSubObjects)
-            {
-                BuildingInfo bi;
-                if (_buildingInfo.TryGetValue(target.Name, out bi))
-                {
-                    bi.UpdateBo(target, withSubObjects);
-                    return true;
-                }
-                return false;
-            }
-
-            public SuiteClass[] GetSuiteClassList(Building target)
-            {
-                BuildingInfo bi;
-                if (_buildingInfo.TryGetValue(target.Name, out bi))
-                {
-                    return bi.SuiteClassList;
-                }
-                return null;
-            }
-
-            public bool UpdateBo(Suite target, bool withSubObjects)
-            {
-                BuildingInfo bi;
-                if (_buildingInfo.TryGetValue(target.Building.Name, out bi))
-                {
-                    return bi.UpdateBo(target, withSubObjects);
-                }
-                return false;
-            }
-        }
-
-        internal class BuildingInfo
-        {
-            public string Name;
-
-            private GeoPoint _location;
-
-            private Dictionary<string, SuiteInfo> _suiteInfo;
-            private List<SuiteClass> _classInfo;
-
-            public BuildingInfo(VrEstate.Building modelInfo)
-            {
-                Name = modelInfo.Name;
-
-                _location = new GeoPoint(modelInfo.Lon_d, modelInfo.Lat_d, modelInfo.Alt_m);
-
-                //modelInfo.BuildingId  // "ID<five-digit-int>"
-                //modelInfo.ID          // nine-digit-int
-                //modelInfo.MaxAlt_m
-
-                _suiteInfo = new Dictionary<string, SuiteInfo>(modelInfo.Suites.Values.Count);
-                foreach (VrEstate.Suite suiteModelInfo in modelInfo.Suites.Values)
-                {
-                    SuiteInfo si = new SuiteInfo(suiteModelInfo);
-
-                    if (_suiteInfo.ContainsKey(si.Name))
-                    {
-                        ServiceInstances.Logger.Error("Model contains duplicate suite names within building: '{0}'", si.Name);
-                        continue;
-                    }
-
-                    _suiteInfo.Add(si.Name, si);
-                }
-
-                _classInfo = new List<SuiteClass>(modelInfo.Geometries.Values.Count);
                 foreach (string className in modelInfo.Geometries.Keys)
                 {
-                    _classInfo.Add(new SuiteClass(className, processGeometries(modelInfo.Geometries[className])));
+                    SuiteClassInfo sc = new SuiteClassInfo(processGeometries(modelInfo.Geometries[className]));
+                    _classInfo.Add(className, sc);
+                }
+
+                using (NHibernate.ISession dbSession = NHibernateHelper.GetSession())
+                {
+                    // find related DB site object by passed ID (from model's file path)
+                    //
+                    Site site;
+                    using (SiteDao dao = new SiteDao(dbSession)) site = dao.GetById(objectId);
+                    if (null == site)
+                    {
+                        ServiceInstances.Logger.Error("Unknown site ID used in model path: {0}", objectId);
+                        throw new ArgumentException("Unknown site ID");
+                    }
+
+                    foreach (VrEstate.Building buildingModelInfo in modelInfo.Buildings.Values)
+                    {
+                        // find related DB building object by name from model
+                        //
+                        Building building = null;
+                        // TODO: MODEL-DB TEXT COMPARISON
+                        // Here we match model's building name against its name in DB
+                        foreach (Building b in site.Buildings) if (b.Name.Equals(buildingModelInfo.Name)) { building = b; break; }
+                        if (null == building)
+                        {
+                            ServiceInstances.Logger.Error("Unknown building name used in model for {0} ({1}): {2}; building from model is skipped.",
+                                site.Name, site.AutoID, buildingModelInfo.Name);
+                            continue;
+                        }
+
+                        if (_buildingInfo.ContainsKey(building.AutoID))
+                        {
+                            ServiceInstances.Logger.Error("Model ({0} ({1})) contains duplicate building names: '{2}'; second occurrence is skipped.",
+                                site.Name, site.AutoID, buildingModelInfo.Name);
+                            continue;
+                        }
+
+                        BuildingInfo bi = new BuildingInfo(buildingModelInfo);
+                        _buildingInfo.Add(building.AutoID, bi);
+                    }
                 }
             }
 
@@ -284,7 +220,85 @@ namespace Vre.Server.ModelCache
                 return result;
             }
 
-            public SuiteClass[] SuiteClassList { get { return _classInfo.ToArray(); } }
+            public void UpdateBo(Site target, bool withSubObjects)
+            {
+                target.Location = _location;
+
+                if (withSubObjects)
+                {
+                    int toUpdate = target.Buildings.Count;
+                    foreach (Building building in target.Buildings)
+                    {
+                        BuildingInfo bi;
+                        if (_buildingInfo.TryGetValue(building.AutoID, out bi))
+                        {
+                            bi.UpdateBo(building, true);
+                            toUpdate--;
+                        }
+                    }
+
+                    Debug.Assert(toUpdate == 0, "Not all buildings were updated from model information.");
+                }
+            }
+
+            public void UpdateBo(SuiteType target, bool withSubObjects)
+            {
+                SuiteClassInfo sc;
+                if (_classInfo.TryGetValue(target.Name, out sc))
+                {
+                    sc.UpdateBo(target);
+                }
+            }
+
+            public bool UpdateBo(Building target, bool withSubObjects)
+            {
+                BuildingInfo bi;
+                if (_buildingInfo.TryGetValue(target.AutoID, out bi))
+                {
+                    bi.UpdateBo(target, withSubObjects);
+                    return true;
+                }
+                return false;
+            }
+
+            public bool UpdateBo(Suite target, bool withSubObjects)
+            {
+                BuildingInfo bi;
+                if (_buildingInfo.TryGetValue(target.Building.AutoID, out bi))
+                {
+                    return bi.UpdateBo(target, withSubObjects);
+                }
+                return false;
+            }
+        }
+
+        internal class BuildingInfo
+        {
+            private GeoPoint _location;
+            private Dictionary<string, SuiteInfo> _suiteInfo;
+
+            public BuildingInfo(VrEstate.Building modelInfo)
+            {
+                //Name = modelInfo.Name;
+                _location = new GeoPoint(modelInfo.Lon_d, modelInfo.Lat_d, modelInfo.Alt_m);
+                //modelInfo.BuildingId  // "ID<five-digit-int>"
+                //modelInfo.ID          // nine-digit-int
+                //modelInfo.MaxAlt_m
+
+                _suiteInfo = new Dictionary<string, SuiteInfo>(modelInfo.Suites.Values.Count);
+                foreach (VrEstate.Suite suiteModelInfo in modelInfo.Suites.Values)
+                {
+                    SuiteInfo si = new SuiteInfo(suiteModelInfo);
+
+                    if (_suiteInfo.ContainsKey(si.Name))
+                    {
+                        ServiceInstances.Logger.Error("Model contains duplicate suite names within building: '{0}'", si.Name);
+                        continue;
+                    }
+
+                    _suiteInfo.Add(si.Name, si);
+                }
+            }
 
             public void UpdateBo(Building target, bool withSubObjects)
             {
@@ -348,6 +362,21 @@ namespace Vre.Server.ModelCache
                 target.FloorName = _floor;
                 target.Location = _location;
                 target.ClassName = _classId;
+            }
+        }
+
+        internal class SuiteClassInfo
+        {
+            private Wireframe[] _model;
+
+            public SuiteClassInfo(Wireframe[] model)
+            {
+                _model = model;
+            }
+
+            public void UpdateBo(SuiteType target)
+            {
+                target.WireframeModel = _model;
             }
         }
     }

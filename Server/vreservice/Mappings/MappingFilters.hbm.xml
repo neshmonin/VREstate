@@ -8,6 +8,13 @@
       WHERE s.BuildingId = :id AND s.Deleted=0
   </sql-query>
 
+  <sql-query name="suiteTypesInSite">
+    <load-collection alias="s" role="Site.SuiteTypes"/>
+    SELECT {s.*}
+    FROM SuiteTypes s
+    WHERE s.SiteId = :id AND s.Deleted=0
+  </sql-query>
+
   <sql-query name="pricesInOption">
     <load-collection alias="p" role="Option.Prices"/>
     SELECT {p.*}
