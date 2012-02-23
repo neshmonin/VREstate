@@ -98,7 +98,7 @@ namespace Vre.Client
 
             bool result = false;
 
-            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(ServerEndpoint + "test");
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(ServerEndpoint + "version");
             request.Timeout = _requestTimeoutSec * 1000;
 
             //request.UserAgent = "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/13.0.780.0 Safari/535.1";
@@ -124,7 +124,7 @@ namespace Vre.Client
                         responseText = readStream.ReadToEnd();
                     }
 
-                    if (responseText.StartsWith("vre works", StringComparison.InvariantCultureIgnoreCase))
+                    if (responseText.IndexOf("vr estate server", StringComparison.InvariantCultureIgnoreCase) >= 0)
                         result = true;
 
                     //Stream rs = response.GetResponseStream();
