@@ -51,10 +51,13 @@ namespace Vre.Server.BusinessLogic
                 result.Add("levels", levels);
             }
 
-            idx = 0;
-            ClientData[] model = new ClientData[WireframeModel.Length];
-            foreach (Wireframe wf in WireframeModel) model[idx++] = wf.GetClientData();
-            result.Add("geometries", model);  // keep model's terminology
+            if (WireframeModel != null)
+            {
+                idx = 0;
+                ClientData[] model = new ClientData[WireframeModel.Length];
+                foreach (Wireframe wf in WireframeModel) model[idx++] = wf.GetClientData();
+                result.Add("geometries", model);  // keep model's terminology
+            }
 
             if (FloorArea != null)
             {
