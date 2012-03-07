@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace ModelReaderTest
 {
@@ -41,6 +42,23 @@ namespace ModelReaderTest
                     siteData.HowManyItems,
                     siteData.Lon_d, siteData.Lat_d, siteData.Alt_m);
 
+
+                foreach (var bldg in siteData.Buildings.Values)
+                {
+                    using (FileStream file = File.Create(bldg.Name + ".sql"))
+                    {
+                        using (StreamWriter sw = new StreamWriter(file))
+                        {
+                            sw.WriteLine("declare @buildingid int");
+                            sw.WriteLine("set @buildingid = -1");
+                            foreach (var s in bldg.Suites.Values)
+                            {
+                                sw.WriteLine("insert into [cmpt_SuiteClassName] ([buildingid],[suitename],[suiteclass]) values(@buildingid,'{0}','{1}')",
+                                    s.Name, s.ClassId);
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
