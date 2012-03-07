@@ -19,76 +19,44 @@ namespace Vre.Server.RemoteService
         {
             ModelObject mo;
             int objectId;
-            bool generation;
+            long generation;
 
             // TODO: SECURITY: configurable required SSL check
             //if (!request.Request.IsSecureConnection) throw new PermissionException("Service available only over secure connection.");
 
-            getPathElements(request.Request.Path, out mo, out objectId, out generation);
+            getPathElements(request.Request.Path, out mo, out objectId);
+
+            if (!long.TryParse(request.Request.Query.GetParam("genval", "0"), out generation)) generation = 0;
 
             switch (mo)
             {
-                case ModelObject.Site:
-                    if (-1 == objectId)
-                    {
-                    }
-                    else
-                    {
-                        if (generation)
-                        {
-                            getGenerationUpdate(request.Request.Query.GetParam("genval", "0"), 
-                                Spikes.PullUpdateService.EntityLevel.Site, objectId, request.Response);
-                            return;
-                        }
-                    }
-                    break;
-
                 case ModelObject.Building:
                     if (-1 == objectId)
                     {
-                        if (generation) throw new ArgumentException("Invalid request (4.1).");
                         int siteId = request.Request.Query.GetParam("site", -1);
                         if (-1 == siteId) throw new ArgumentException("Site ID is missing.");
-                        getBuildingList(request.UserInfo.Session, siteId, request.Response);
+                        getBuildingList(request.UserInfo.Session, siteId, request.Response, generation);
                     }
                     else
                     {
-                        if (generation)
-                        {
-                            getGenerationUpdate(request.Request.Query.GetParam("genval", "0"),
-                                Spikes.PullUpdateService.EntityLevel.Building, objectId, request.Response);
-                        }
-                        else
-                        {
-                            getBuilding(request.UserInfo.Session, objectId, request.Response);
-                        }
+                        getBuilding(request.UserInfo.Session, objectId, request.Response, generation);
                     }
                     return;
 
                 case ModelObject.Suite:
                     if (-1 == objectId)
                     {
-                        if (generation) throw new ArgumentException("Invalid request (4.1).");
                         int buildingId = request.Request.Query.GetParam("building", -1);
                         if (-1 == buildingId) throw new ArgumentException("Building ID is missing.");
-                        getSuiteList(request.UserInfo.Session, buildingId, request.Response);
+                        getSuiteList(request.UserInfo.Session, buildingId, request.Response, generation);
                     }
                     else
                     {
-                        if (generation)
-                        {
-                            getGenerationUpdate(request.Request.Query.GetParam("genval", "0"),
-                                Spikes.PullUpdateService.EntityLevel.Suite, objectId, request.Response);
-                        }
-                        else
-                        {
-                            getSuite(request.UserInfo.Session, objectId, request.Response);
-                        }
+                        getSuite(request.UserInfo.Session, objectId, request.Response, generation);
                     }
                     return;
 
                 case ModelObject.SuiteType:
-                    if (generation) throw new ArgumentException("Invalid request (4.1).");
                     if (-1 == objectId)
                     {                        
                         int siteId = request.Request.Query.GetParam("site", -1);
@@ -170,19 +138,10 @@ namespace Vre.Server.RemoteService
 
         private static void getPathElements(string path, out ModelObject mo, out int id)
         {
-            bool generation;
-            getPathElements(path, out mo, out id, out generation);
-            if (generation) throw new ArgumentException("Invalid request (4).");
-        }
-
-        private static void getPathElements(string path, out ModelObject mo, out int id, out bool generation)
-        {
             string[] elements = path.Split('/');
-            if ((elements.Length < 2) || (elements.Length > 4)) throw new ArgumentException("Object path is invalid (0).");
+            if ((elements.Length < 2) || (elements.Length > 3)) throw new ArgumentException("Object path is invalid (0).");
 
             if (!elements[0].Equals(ServicePathElement0)) throw new ArgumentException("Object path is invalid (1).");
-
-            generation = false;
 
             if (elements[1].Equals("ed")) mo = ModelObject.EstateDeveloper;
             else if (elements[1].Equals("site")) mo = ModelObject.Site;
@@ -199,131 +158,167 @@ namespace Vre.Server.RemoteService
             else
             {
                 if (!int.TryParse(elements[2], out id)) throw new ArgumentException("Object path is invalid (3).");
-
-                if (4 == elements.Length)
-                {
-                    if (elements[3].Equals("gen")) generation = true;
-                    else throw new ArgumentException("Object path is invalid (4).");
-                }
             }
         }
 
         #region retrieval
-        private static void getGenerationUpdate(string generationValue, 
-            Spikes.PullUpdateService.EntityLevel level, int objectId, IResponseData resp)
+        private static void getBuildingList(ClientSession session, int siteId, IResponseData resp, long generation)
         {
-            long generation;
-            if (long.TryParse(generationValue, out generation))
-            {
-                if (generation < 1) throw new ArgumentException("Generation request invalid (0).");
+            ClientData[] result = null;
 
-                ClientData result = new ClientData();
-                ServiceInstances.UpdateService.GetUpdate(ref result, level, objectId, generation);
-                resp.Data = result;
-                resp.ResponseCode = HttpStatusCode.OK;
-            }
-            else throw new ArgumentException("Generation request invalid (1).");
-        }
-
-        private static void getBuildingList(ClientSession session, int siteId, IResponseData resp)
-        {
-            ClientData result = new ClientData();
-            Building[] buildingList;
+            Spikes.PullUpdateService.UpdateInfo updateInfo =
+                ServiceInstances.UpdateService.GetUpdate(Spikes.PullUpdateService.EntityLevel.Site, siteId, generation);
 
             using (SiteManager manager = new SiteManager(session))
             {
-                ServiceInstances.UpdateService.GetUpdate(ref result, Spikes.PullUpdateService.EntityLevel.Site, siteId, 0);
-                buildingList = manager.ListBuildings(siteId);
-            }
+                Building[] buildingList = manager.ListBuildings(siteId);
 
-            foreach (Building b in buildingList) ServiceInstances.ModelCache.FillWithModelInfo(b, false);
+                if (0 == generation)  // full request
+                {
+                    int cnt = buildingList.Length;
+                    result = new ClientData[cnt];
+                    for (int idx = 0; idx < cnt; idx++)
+                    {
+                        Building b = buildingList[idx];
+                        ServiceInstances.ModelCache.FillWithModelInfo(b, false);
+                        result[idx] = b.GetClientData();
+                    }
+                }
+                else if (updateInfo.Buildings != null)  // changed item list
+                {
+                    int cnt = updateInfo.Buildings.Count;
+                    List<ClientData> buildingDataList = new List<ClientData>(cnt);
+                    foreach (Building b in buildingList)
+                    {
+                        if (updateInfo.Buildings.Contains(b.AutoID))
+                        {
+                            ServiceInstances.ModelCache.FillWithModelInfo(b, false);
+                            buildingDataList.Add(b.GetClientData());
+                        }
+                    }
+                    result = buildingDataList.ToArray();
+                }
+            }
 
             // produce output
             //
-            int cnt = buildingList.Length;
-            ClientData[] buildings = new ClientData[cnt];
-            for (int idx = 0; idx < cnt; idx++) buildings[idx] = buildingList[idx].GetClientData();
-
-            result.Add("buildings", buildings);
-
-            resp.Data = result;
+            resp.Data = new ClientData();
+            if (result != null) resp.Data.Add("buildings", result);
+            resp.Data.Add("generation", updateInfo.Generation);
             resp.ResponseCode = HttpStatusCode.OK;
         }
-        
-        private static void getBuilding(ClientSession session, int buildingId, IResponseData resp)
+
+        private static void getBuilding(ClientSession session, int buildingId, IResponseData resp, long generation)
         {
-            ClientData result = new ClientData();
-            Building building;
+            ClientData result = null;
+
+            Spikes.PullUpdateService.UpdateInfo updateInfo =
+                ServiceInstances.UpdateService.GetUpdate(Spikes.PullUpdateService.EntityLevel.Building, buildingId, generation);
 
             using (SiteManager manager = new SiteManager(session))
             {
-                ServiceInstances.UpdateService.GetUpdate(ref result, Spikes.PullUpdateService.EntityLevel.Building, buildingId, 0);
-                building = manager.GetBuildingById(buildingId);
-                ServiceInstances.ModelCache.FillWithModelInfo(building, false);
+                Building building = manager.GetBuildingById(buildingId);
+
+                if (0 == generation)  // full request
+                {
+                    ServiceInstances.ModelCache.FillWithModelInfo(building, false);
+                    result = building.GetClientData();
+                }
+                else if (updateInfo.Buildings != null)  // changed item list
+                {
+                    if (updateInfo.Buildings.Contains(building.AutoID))
+                    {
+                        ServiceInstances.ModelCache.FillWithModelInfo(building, false);
+                        result = building.GetClientData();
+                    }
+                }
             }            
 
             // produce output
             //
-            result.Merge(building.GetClientData());
-
-            resp.Data = result;
+            resp.Data = new ClientData();
+            if (result != null) resp.Data.Merge(result);
+            resp.Data.Add("generation", updateInfo.Generation);
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getSuiteList(ClientSession session, int buildingId, IResponseData resp)
+        private static void getSuiteList(ClientSession session, int buildingId, IResponseData resp, long generation)
         {
-            ClientData result = new ClientData();
-            Building building;
-            Suite[] suiteList;
-            ClientData[] suites;
+            ClientData[] result = null;
+
+            Spikes.PullUpdateService.UpdateInfo updateInfo =
+                ServiceInstances.UpdateService.GetUpdate(Spikes.PullUpdateService.EntityLevel.Building, buildingId, generation);
 
             using (SiteManager manager = new SiteManager(session))
             {
-                ServiceInstances.UpdateService.GetUpdate(ref result, Spikes.PullUpdateService.EntityLevel.Building, buildingId, 0);
-                building = manager.GetBuildingById(buildingId);
-                suiteList = manager.ListSuitesByBuiding(buildingId);
+                Suite[] suiteList = manager.ListSuitesByBuiding(buildingId);
 
-                foreach (Suite s in suiteList) ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-
-                // produce output
-                //
-                int cnt = suiteList.Length;
-                suites = new ClientData[cnt];
-                for (int idx = 0; idx < cnt; idx++)
+                if (0 == generation)  // full request
                 {
-                    Suite s = suiteList[idx];
-                    //ClientData cd = s.GetClientData();
-                    //cd.Add("currentPrice", manager.GetCurrentSuitePrice(s));
-                    //suites[idx] = cd;
-                    //suites[idx] = new SuiteEx(s, manager.GetCurrentSuitePrice(s)).GetClientData();
-                    suites[idx] = SuiteEx.GetClientData(s, manager.GetCurrentSuitePrice(s));
+                    int cnt = suiteList.Length;
+                    result = new ClientData[cnt];
+                    for (int idx = 0; idx < cnt; idx++)
+                    {
+                        Suite s = suiteList[idx];
+                        ServiceInstances.ModelCache.FillWithModelInfo(s, false);
+                        result[idx] = SuiteEx.GetClientData(s, manager.GetCurrentSuitePrice(s));
+                    }
+                }
+                else if (updateInfo.Suites != null)  // changed item list
+                {
+                    int cnt = updateInfo.Suites.Count;
+                    List<ClientData> suiteDataList = new List<ClientData>(cnt);
+                    foreach (Suite s in suiteList)
+                    {
+                        if (updateInfo.Suites.Contains(s.AutoID))
+                        {
+                            ServiceInstances.ModelCache.FillWithModelInfo(s, false);
+                            suiteDataList.Add(SuiteEx.GetClientData(s, manager.GetCurrentSuitePrice(s)));
+                        }
+                    }
+                    result = suiteDataList.ToArray();
                 }
             }
 
-            result.Add("suites", suites);
-
-            resp.Data = result;
+            // produce output
+            //
+            resp.Data = new ClientData();
+            if (result != null) resp.Data.Add("suites", result);
+            resp.Data.Add("generation", updateInfo.Generation);
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getSuite(ClientSession session, int suiteId, IResponseData resp)
+        private static void getSuite(ClientSession session, int suiteId, IResponseData resp, long generation)
         {
-            ClientData result = new ClientData();
-            Suite suite;
+            ClientData result = null;
+
+            Spikes.PullUpdateService.UpdateInfo updateInfo =
+                ServiceInstances.UpdateService.GetUpdate(Spikes.PullUpdateService.EntityLevel.Suite, suiteId, generation);
 
             using (SiteManager manager = new SiteManager(session))
             {
-                ServiceInstances.UpdateService.GetUpdate(ref result, Spikes.PullUpdateService.EntityLevel.Suite, suiteId, 0);
-                suite = manager.GetSuiteById(suiteId);
-            }
+                Suite suite = manager.GetSuiteById(suiteId);
 
-            ServiceInstances.ModelCache.FillWithModelInfo(suite, false);
+                if (0 == generation)  // full request
+                {
+                    ServiceInstances.ModelCache.FillWithModelInfo(suite, false);
+                    result = SuiteEx.GetClientData(suite, manager.GetCurrentSuitePrice(suite));
+                }
+                else if (updateInfo.Suites != null)  // changed item list
+                {
+                    if (updateInfo.Suites.Contains(suite.AutoID))
+                    {
+                        ServiceInstances.ModelCache.FillWithModelInfo(suite, false);
+                        result = SuiteEx.GetClientData(suite, manager.GetCurrentSuitePrice(suite));
+                    }
+                }
+            }
 
             // produce output
             //
-            result.Merge(suite.GetClientData());
-
-            resp.Data = result;
+            resp.Data = new ClientData();
+            if (result != null) resp.Data.Merge(result);
+            resp.Data.Add("generation", updateInfo.Generation);
             resp.ResponseCode = HttpStatusCode.OK;
         }
 

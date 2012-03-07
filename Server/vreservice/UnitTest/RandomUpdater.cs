@@ -1,10 +1,10 @@
-﻿
-using System.Threading;
-using Vre.Server.RemoteService;
-using Vre.Server.Dao;
-using Vre.Server.BusinessLogic;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using System.Threading;
+using Vre.Server.BusinessLogic;
+using Vre.Server.Dao;
+using Vre.Server.RemoteService;
+
 namespace Vre.Server.Testing
 {
     public class RandomUpdater
@@ -42,25 +42,21 @@ namespace Vre.Server.Testing
                     switch (rnd.Next(4))
                     {
                         case 0:
-                            developer.MarkUpdated();
                             using (EstateDeveloperDao seddao = new EstateDeveloperDao(session.DbSession))
                                 seddao.SafeUpdate(developer);
                             break;
 
                         case 1:
-                            site.MarkUpdated();
                             using (SiteDao ssdao = new SiteDao(session.DbSession))
                                 ssdao.SafeUpdate(site);
                             break;
 
                         case 2:
-                            building.MarkUpdated();
                             using (BuildingDao sbdao = new BuildingDao(session.DbSession))
                                 sbdao.SafeUpdate(building);
                             break;
 
                         case 3:
-                            suite.MarkUpdated();
                             using (SuiteDao ssudao = new SuiteDao(session.DbSession))
                                 ssudao.SafeUpdate(suite);
                             break;

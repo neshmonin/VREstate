@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Vre.Server.BusinessLogic;
 
 namespace Vre.Server.Spikes
@@ -24,6 +25,12 @@ namespace Vre.Server.Spikes
             public LinkedListNode<GenerationEntity> ListNode;
         }
 
+        public class UpdateInfo
+        {
+            public List<int> Developers = null, Sites = null, Buildings = null, Suites = null;
+            public long Generation;
+        }
+
         private Dictionary<int, GenerationEntity> _developerXRef = new Dictionary<int,GenerationEntity>();
         private Dictionary<int, GenerationEntity> _siteXRef = new Dictionary<int,GenerationEntity>();
         private Dictionary<int, GenerationEntity> _buildingXRef = new Dictionary<int,GenerationEntity>();
@@ -33,13 +40,15 @@ namespace Vre.Server.Spikes
         /// <summary>
         /// Update result set with generation information.
         /// </summary>
-        /// <param name="result">result set to add information to</param>
         /// <param name="level">root entity level</param>
         /// <param name="entityId">root entity id</param>
         /// <param name="generationQueryValue">current generation value known by client;
         /// if this is zero, result set is updated with current generation value only.</param>
-        public void GetUpdate(ref ClientData result, EntityLevel level, int entityId, long generationQueryValue)
+        public UpdateInfo GetUpdate(EntityLevel level, int entityId, long generationQueryValue)
         {
+            UpdateInfo result = new UpdateInfo();
+            result.Generation = 0;
+
             GenerationEntity topEntity = null;
             switch (level)
             {
@@ -62,8 +71,6 @@ namespace Vre.Server.Spikes
     
             if (topEntity != null)
             {
-                long updatedGenerationValue = 0;
-                List<int> developers = null, sites = null, buildings = null, suites = null;
                 lock (_updateList)
                 {
                     LinkedListNode<GenerationEntity> node = _updateList.Last;
@@ -82,46 +89,47 @@ namespace Vre.Server.Spikes
 
                             if (re.Id == topEntity.Id) // e is a subnode of requested element
                             {
-                                if (0 == updatedGenerationValue)
+                                if (0 == result.Generation)
                                 {
-                                    updatedGenerationValue = e.LastUpdateTime;
+                                    result.Generation = e.LastUpdateTime;
                                     if (0 == generationQueryValue) break;
                                 }
 
                                 switch (e.Level)
                                 {
                                     case EntityLevel.Developer:
-                                        if (null == developers) developers = new List<int>();
-                                        developers.Add(e.Id);
+                                        if (null == result.Developers) result.Developers = new List<int>();
+                                        result.Developers.Add(e.Id);
                                         break;
 
                                     case EntityLevel.Site:
-                                        if (null == sites) sites = new List<int>();
-                                        sites.Add(e.Id);
+                                        if (null == result.Sites) result.Sites = new List<int>();
+                                        result.Sites.Add(e.Id);
                                         break;
 
                                     case EntityLevel.Building:
-                                        if (null == buildings) buildings = new List<int>();
-                                        buildings.Add(e.Id);
+                                        if (null == result.Buildings) result.Buildings = new List<int>();
+                                        result.Buildings.Add(e.Id);
                                         break;
 
                                     case EntityLevel.Suite:
-                                        if (null == suites) suites = new List<int>();
-                                        suites.Add(e.Id);
+                                        if (null == result.Suites) result.Suites = new List<int>();
+                                        result.Suites.Add(e.Id);
                                         break;
                                 }
                             }
                         }
                         node = node.Previous;
-                    }
+                    }  // node list loop
+                }  // node list lock
+            }  // entity found
 
-                }
-                if (developers != null) result.Add("developers", developers.ToArray());
-                if (sites != null) result.Add("sites", sites.ToArray());
-                if (buildings != null) result.Add("buildings", buildings.ToArray());
-                if (suites != null) result.Add("suites", suites.ToArray());
-                result.Add("generation", updatedGenerationValue);
-            }
+            if (0 == result.Generation) result.Generation = generationQueryValue;  // no changes found; return same value
+
+            if (0 == result.Generation) result.Generation = DateTime.UtcNow.AddMinutes(-5.0).Ticks;  // default value
+            // in case no changes ever registered for this object tree
+
+            return result;
         }
 
         private GenerationEntity getEntity(EstateDeveloper bo)
