@@ -152,6 +152,7 @@
     <Compile Include="Database\GenericDao.cs" />
     <Compile Include="Database\DatabaseSettings.cs" />
     <Compile Include="Database\NHibernateHelper.cs" />
+    <Compile Include="Experimental\HttpServerPush.cs" />
     <Compile Include="FileCacheManager.cs" />
     <Compile Include="FloodPreventor.cs" />
     <Compile Include="ModelCache\ModelCache.cs" />

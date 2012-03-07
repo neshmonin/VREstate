@@ -51,6 +51,7 @@ namespace Vre.Server.RemoteService
         /// <para>Required to generate a resource for client containing references to server's other resources.</para>
         /// </summary>
         string ConstructClientRootUri();
+        bool IsSecureConnection { get; }
     }
 
     internal interface IResponseData
@@ -60,6 +61,7 @@ namespace Vre.Server.RemoteService
         ClientData Data { get; set; }
         string DataStreamContentType { get; set; }
         Stream DataStream { get; }
+        bool HoldResponseForServerPush { get; set; }
     }
 
     internal interface IServiceRequest

@@ -92,6 +92,7 @@ namespace Vre.Server.HttpService
                 try
                 {
                     // TODO: configurable required SSL check
+                    // Currently done in Vre.Server.RemoveService.DataService as all other services may be non-secure
                     // ctx.Request.IsSecureConnection
 
                     HttpServiceRequest rq = new HttpServiceRequest(ctx, _path);
@@ -114,7 +115,10 @@ namespace Vre.Server.HttpService
                         }
                     }
 
-                    ctx.Response.Close();
+                    if (rq.Response.HoldResponseForServerPush)
+                        Experimental.HttpServerPush.StartServerPushThread(ctx);
+                    else 
+                        ctx.Response.Close();
                 }
                 catch (Exception ex)
                 {

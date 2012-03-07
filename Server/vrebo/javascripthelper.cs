@@ -44,6 +44,7 @@ namespace Vre.Server
         {
             StringBuilder text = new StringBuilder();
 
+            // TODO: SECURITY: add a limiter for inbound stream length
             do
             {
                 byte[] buffer = new byte[1024];

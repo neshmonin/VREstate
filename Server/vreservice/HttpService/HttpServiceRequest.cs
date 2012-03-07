@@ -41,7 +41,7 @@ namespace Vre.Server.HttpService
         {
             private static string _serverRootPath = null;
             private Uri _rawRequest;
-            public RequestData(Uri rawRequest, string type, string path, ServiceQuery query, Stream data)
+            public RequestData(Uri rawRequest, string type, string path, ServiceQuery query, Stream data, bool isSecureConnection)
             {
                 // http://en.wikipedia.org/wiki/Representational_State_Transfer#RESTful_web_services
                 if (type.Equals("GET")) Type = RequestType.Get;
@@ -53,6 +53,7 @@ namespace Vre.Server.HttpService
                 _rawRequest = rawRequest;
                 Path = path;
                 Query = query;
+                IsSecureConnection = isSecureConnection;
 
                 if (data != null) Data = JavaScriptHelper.JsonToClientData(data);
                 else Data = null;
@@ -61,6 +62,7 @@ namespace Vre.Server.HttpService
             public string Path { get; private set; }
             public ServiceQuery Query { get; private set; }
             public ClientData Data { get; private set; }
+            public bool IsSecureConnection { get; private set; }
             public string ConstructClientRootUri()
             {
                 if (null == _serverRootPath)
@@ -90,6 +92,7 @@ namespace Vre.Server.HttpService
             public ClientData Data { get; set; }
             public string DataStreamContentType { get; set; }
             public Stream DataStream { get; private set; }
+            public bool HoldResponseForServerPush { get; set; }
         }
 
         private static void initialize()
@@ -137,7 +140,8 @@ namespace Vre.Server.HttpService
 
             UserInfo = new RemoteUserInfo(ctx.Request.RemoteEndPoint, ctx.Request.Headers, query);
             Request = new RequestData(ctx.Request.Url, ctx.Request.HttpMethod, file, query,
-                (ctx.Request.ContentLength64 > 0) ? ctx.Request.InputStream : null);
+                (ctx.Request.ContentLength64 > 0) ? ctx.Request.InputStream : null,
+                ctx.Request.IsSecureConnection);
             Response = new ResponseData(ctx.Response.OutputStream);
 
             if (UserInfo.StaleSession)
@@ -162,10 +166,14 @@ namespace Vre.Server.HttpService
             }
             else if (Response.Data != null)
             {
-                using (StreamWriter sw = new StreamWriter(response.OutputStream))
-                    sw.Write(JavaScriptHelper.ClientDataToJson(Response.Data));
+                //using (StreamWriter sw = new StreamWriter(response.OutputStream))
+                //    sw.Write(JavaScriptHelper.ClientDataToJson(Response.Data));
+
                 response.ContentEncoding = Encoding.UTF8;
                 response.ContentType = _contentTypeByExtension["json"];
+
+                byte[] resp = Encoding.UTF8.GetBytes(JavaScriptHelper.ClientDataToJson(Response.Data));
+                response.OutputStream.Write(resp, 0, resp.Length);
             }
 
             response.StatusCode = (int)Response.ResponseCode;

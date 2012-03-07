@@ -92,10 +92,18 @@ namespace Vre.Server.RemoteService
             }
             else if (request.Request.Path.Equals("test"))  // test ping/pong; LEGACY
             {
-                using (System.IO.StreamWriter w = new System.IO.StreamWriter(request.Response.DataStream))
-                    w.WriteLine("VRE Works!");
-                request.Response.DataStreamContentType = "txt";
+                //using (System.IO.StreamWriter w = new System.IO.StreamWriter(request.Response.DataStream))
+                //    w.WriteLine("VRE Works!");
+                //request.Response.DataStreamContentType = "txt";
+                //request.Response.ResponseCode = HttpStatusCode.OK;
+
+                // EXPERIMENTAL: starts an HTTP server push response which responds with progressing 
+                // status pushes until client shuts connection down
                 request.Response.ResponseCode = HttpStatusCode.OK;
+                request.Response.HoldResponseForServerPush = true;
+                request.Response.Data = new BusinessLogic.ClientData();
+                request.Response.Data.Add("status", 0);
+
                 return;
             }
             else if (request.Request.Path.Equals("version"))
@@ -106,7 +114,7 @@ namespace Vre.Server.RemoteService
                 request.Response.ResponseCode = HttpStatusCode.OK;
                 return;
             }
-            else if (request.Request.Path.StartsWith(GenerationService.ServicePathPrefix))  // on-the-fly generated contend (requires session)
+            else if (request.Request.Path.StartsWith(GenerationService.ServicePathPrefix))  // on-the-fly generated content (requires session)
             {
                 GenerationService.ProcessClientRequest(request);
                 return;
