@@ -19,40 +19,78 @@ namespace Vre.Server.RemoteService
         {
             ModelObject mo;
             int objectId;
+            bool generation;
 
-            getPathElements(request.Request.Path, out mo, out objectId);
+            // TODO: SECURITY: configurable required SSL check
+            //if (!request.Request.IsSecureConnection) throw new PermissionException("Service available only over secure connection.");
+
+            getPathElements(request.Request.Path, out mo, out objectId, out generation);
 
             switch (mo)
             {
+                case ModelObject.Site:
+                    if (-1 == objectId)
+                    {
+                    }
+                    else
+                    {
+                        if (generation)
+                        {
+                            getGenerationUpdate(request.Request.Query.GetParam("genval", "0"), 
+                                Spikes.PullUpdateService.EntityLevel.Site, objectId, request.Response);
+                            return;
+                        }
+                    }
+                    break;
+
                 case ModelObject.Building:
                     if (-1 == objectId)
                     {
+                        if (generation) throw new ArgumentException("Invalid request (4.1).");
                         int siteId = request.Request.Query.GetParam("site", -1);
                         if (-1 == siteId) throw new ArgumentException("Site ID is missing.");
                         getBuildingList(request.UserInfo.Session, siteId, request.Response);
                     }
                     else
                     {
-                        getBuilding(request.UserInfo.Session, objectId, request.Response);
+                        if (generation)
+                        {
+                            getGenerationUpdate(request.Request.Query.GetParam("genval", "0"),
+                                Spikes.PullUpdateService.EntityLevel.Building, objectId, request.Response);
+                        }
+                        else
+                        {
+                            getBuilding(request.UserInfo.Session, objectId, request.Response);
+                        }
                     }
                     return;
 
                 case ModelObject.Suite:
                     if (-1 == objectId)
                     {
+                        if (generation) throw new ArgumentException("Invalid request (4.1).");
                         int buildingId = request.Request.Query.GetParam("building", -1);
                         if (-1 == buildingId) throw new ArgumentException("Building ID is missing.");
                         getSuiteList(request.UserInfo.Session, buildingId, request.Response);
                     }
                     else
                     {
-                        getSuite(request.UserInfo.Session, objectId, request.Response);
+                        if (generation)
+                        {
+                            getGenerationUpdate(request.Request.Query.GetParam("genval", "0"),
+                                Spikes.PullUpdateService.EntityLevel.Suite, objectId, request.Response);
+                        }
+                        else
+                        {
+                            getSuite(request.UserInfo.Session, objectId, request.Response);
+                        }
                     }
                     return;
 
                 case ModelObject.SuiteType:
+                    if (generation) throw new ArgumentException("Invalid request (4.1).");
                     if (-1 == objectId)
-                    {
+                    {                        
                         int siteId = request.Request.Query.GetParam("site", -1);
                         if (-1 == siteId) throw new ArgumentException("Site ID is missing.");
                         getSuiteTypeList(request.UserInfo.Session, siteId, request.Response);
@@ -132,10 +170,19 @@ namespace Vre.Server.RemoteService
 
         private static void getPathElements(string path, out ModelObject mo, out int id)
         {
+            bool generation;
+            getPathElements(path, out mo, out id, out generation);
+            if (generation) throw new ArgumentException("Invalid request (4).");
+        }
+
+        private static void getPathElements(string path, out ModelObject mo, out int id, out bool generation)
+        {
             string[] elements = path.Split('/');
-            if ((elements.Length < 2) || (elements.Length > 3)) throw new ArgumentException("Object path is invalid (0).");
+            if ((elements.Length < 2) || (elements.Length > 4)) throw new ArgumentException("Object path is invalid (0).");
 
             if (!elements[0].Equals(ServicePathElement0)) throw new ArgumentException("Object path is invalid (1).");
+
+            generation = false;
 
             if (elements[1].Equals("ed")) mo = ModelObject.EstateDeveloper;
             else if (elements[1].Equals("site")) mo = ModelObject.Site;
@@ -152,16 +199,40 @@ namespace Vre.Server.RemoteService
             else
             {
                 if (!int.TryParse(elements[2], out id)) throw new ArgumentException("Object path is invalid (3).");
+
+                if (4 == elements.Length)
+                {
+                    if (elements[3].Equals("gen")) generation = true;
+                    else throw new ArgumentException("Object path is invalid (4).");
+                }
             }
         }
 
         #region retrieval
+        private static void getGenerationUpdate(string generationValue, 
+            Spikes.PullUpdateService.EntityLevel level, int objectId, IResponseData resp)
+        {
+            long generation;
+            if (long.TryParse(generationValue, out generation))
+            {
+                if (generation < 1) throw new ArgumentException("Generation request invalid (0).");
+
+                ClientData result = new ClientData();
+                ServiceInstances.UpdateService.GetUpdate(ref result, level, objectId, generation);
+                resp.Data = result;
+                resp.ResponseCode = HttpStatusCode.OK;
+            }
+            else throw new ArgumentException("Generation request invalid (1).");
+        }
+
         private static void getBuildingList(ClientSession session, int siteId, IResponseData resp)
         {
+            ClientData result = new ClientData();
             Building[] buildingList;
 
             using (SiteManager manager = new SiteManager(session))
             {
+                ServiceInstances.UpdateService.GetUpdate(ref result, Spikes.PullUpdateService.EntityLevel.Site, siteId, 0);
                 buildingList = manager.ListBuildings(siteId);
             }
 
@@ -173,35 +244,42 @@ namespace Vre.Server.RemoteService
             ClientData[] buildings = new ClientData[cnt];
             for (int idx = 0; idx < cnt; idx++) buildings[idx] = buildingList[idx].GetClientData();
 
-            resp.Data = new ClientData();
-            resp.Data.Add("buildings", buildings);
+            result.Add("buildings", buildings);
+
+            resp.Data = result;
             resp.ResponseCode = HttpStatusCode.OK;
         }
         
         private static void getBuilding(ClientSession session, int buildingId, IResponseData resp)
         {
+            ClientData result = new ClientData();
             Building building;
 
             using (SiteManager manager = new SiteManager(session))
             {
+                ServiceInstances.UpdateService.GetUpdate(ref result, Spikes.PullUpdateService.EntityLevel.Building, buildingId, 0);
                 building = manager.GetBuildingById(buildingId);
                 ServiceInstances.ModelCache.FillWithModelInfo(building, false);
             }            
 
             // produce output
             //
-            resp.Data = building.GetClientData();
+            result.Merge(building.GetClientData());
+
+            resp.Data = result;
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
         private static void getSuiteList(ClientSession session, int buildingId, IResponseData resp)
         {
+            ClientData result = new ClientData();
             Building building;
             Suite[] suiteList;
             ClientData[] suites;
 
             using (SiteManager manager = new SiteManager(session))
             {
+                ServiceInstances.UpdateService.GetUpdate(ref result, Spikes.PullUpdateService.EntityLevel.Building, buildingId, 0);
                 building = manager.GetBuildingById(buildingId);
                 suiteList = manager.ListSuitesByBuiding(buildingId);
 
@@ -222,17 +300,20 @@ namespace Vre.Server.RemoteService
                 }
             }
 
-            resp.Data = new ClientData();
-            resp.Data.Add("suites", suites);
+            result.Add("suites", suites);
+
+            resp.Data = result;
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
         private static void getSuite(ClientSession session, int suiteId, IResponseData resp)
         {
+            ClientData result = new ClientData();
             Suite suite;
 
             using (SiteManager manager = new SiteManager(session))
             {
+                ServiceInstances.UpdateService.GetUpdate(ref result, Spikes.PullUpdateService.EntityLevel.Suite, suiteId, 0);
                 suite = manager.GetSuiteById(suiteId);
             }
 
@@ -240,7 +321,9 @@ namespace Vre.Server.RemoteService
 
             // produce output
             //
-            resp.Data = suite.GetClientData();
+            result.Merge(suite.GetClientData());
+
+            resp.Data = result;
             resp.ResponseCode = HttpStatusCode.OK;
         }
 

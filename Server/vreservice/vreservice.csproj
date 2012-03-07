@@ -171,9 +171,11 @@
     <Compile Include="RemoteService\RemoteServiceProvider.cs" />
     <Compile Include="RemoteService\ServiceRequest.cs" />
     <Compile Include="ServiceInstances.cs" />
+    <Compile Include="Spikes\PullUpdateService.cs" />
     <Compile Include="StartupShutdown.cs" />
     <Compile Include="UnitTest\BuildingSuite.cs" />
     <Compile Include="UnitTest\JSON.cs" />
+    <Compile Include="UnitTest\RandomUpdater.cs" />
     <Compile Include="UnitTest\UserManagement.cs" />
     <Compile Include="Utilities.cs" />
   </ItemGroup>

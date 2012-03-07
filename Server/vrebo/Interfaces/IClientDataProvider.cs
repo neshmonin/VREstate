@@ -48,6 +48,21 @@ namespace Vre.Server.BusinessLogic
             foreach (KeyValuePair<string, ClientData[]> kvp in arraysToReplace) this[kvp.Key] = kvp.Value;
         }
 
+        public void Merge(ClientData mergingData) { Merge(mergingData, false); }
+
+        public void Merge(ClientData mergingData, bool overwriteExistingKeys)
+        {
+            foreach (string k in mergingData.Keys)
+            {
+                if (ContainsKey(k))
+                {
+                    if (overwriteExistingKeys) this[k] = mergingData[k];
+                    continue;
+                }
+                Add(k, mergingData[k]);
+            }
+        }
+
         /// <summary>
         /// Get inner ClientData object by name; returns empty container if no data exists.
         /// </summary>

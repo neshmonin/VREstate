@@ -55,6 +55,10 @@ namespace Vre.Server
             }
 
             Status = "Running.";
+
+#if DEBUG
+            Testing.RandomUpdater.Start();
+#endif
         }
 
         public static void PerformShutdown()
