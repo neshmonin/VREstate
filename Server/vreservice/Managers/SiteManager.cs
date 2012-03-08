@@ -228,6 +228,7 @@ namespace Vre.Server.BusinessLogic
                     if (dao.IsSuiteOption(opt.OpType))
                     {
                         emitNewPrice(opt, price);
+                        ServiceInstances.UpdateService.Update(suite);
 
                         result = true;
                         break;
