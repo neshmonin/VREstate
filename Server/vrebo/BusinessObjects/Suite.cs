@@ -89,10 +89,6 @@ namespace Vre.Server.BusinessLogic
             result.Add("showPanoramicView", ShowPanoramicView);
             result.Add("status", ClientData.ConvertProperty<SalesStatus>(Status));
 
-            if (ClassName != null)
-            {
-                result.Add("className", ClassName);
-            }
             if (Location != null)
             {
                 result.Add("position", Location.GetClientData());
@@ -109,15 +105,9 @@ namespace Vre.Server.BusinessLogic
             bool changed = false;
 
             PhysicalLevelNumber = data.UpdateProperty("levelNumber", PhysicalLevelNumber, ref changed);
-            FloorName = data.UpdateProperty("floorName", FloorName, ref changed);
             SuiteName = data.UpdateProperty("name", SuiteName, ref changed);
-            CeilingHeight.SetValue(
-                data.UpdateProperty("ceilingHeightFt", CeilingHeight.ValueAs(ValueWithUM.Unit.Feet), ref changed), 
-                ValueWithUM.Unit.Feet);
             ShowPanoramicView = data.UpdateProperty("showPanoramicView", ShowPanoramicView, ref changed);
             Status = data.UpdateProperty<SalesStatus>("status", Status, ref changed);
-
-            if (Location.UpdateFromClient(data.GetNextLevelDataItem("position"))) changed = true;
 
             return changed;
         }
