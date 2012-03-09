@@ -1,6 +1,7 @@
 ﻿using System.Collections.Specialized;
 using System.IO;
 using System.Net;
+using System.Text;
 using Vre.Server.BusinessLogic;
 
 namespace Vre.Server.RemoteService
@@ -28,6 +29,21 @@ namespace Vre.Server.RemoteService
             string result = this[name];
             if (null == result) result = defaultValue;
             return result;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder result = new StringBuilder();
+            bool separator = false;
+            foreach (string k in Keys)
+            {
+                if (separator) result.Append("&");
+                result.Append(k);
+                result.Append("=");
+                result.Append(this[k]);
+                separator = true;
+            }
+            return result.ToString();
         }
     }
 

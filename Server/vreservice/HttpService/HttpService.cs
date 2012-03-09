@@ -120,6 +120,10 @@ namespace Vre.Server.HttpService
                     else 
                         ctx.Response.Close();
                 }
+                catch (HttpListenerException ex)  // these seem to be useless; just flooding logs
+                {
+                    ServiceInstances.Logger.Error("HTTP request processing failed: {0}", ex.Message);
+                }
                 catch (Exception ex)
                 {
                     //ctx.Response.Abort();

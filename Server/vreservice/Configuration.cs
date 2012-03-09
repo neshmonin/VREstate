@@ -35,5 +35,20 @@ namespace Vre.Server
             if (int.TryParse(val, out ival)) return ival;
             return defaultValue;
         }
+
+        public bool GetValue(string key, bool defaultValue)
+        {
+            string val = GetValue(key, defaultValue.ToString())
+                .ToLower(System.Globalization.CultureInfo.InvariantCulture).Trim();
+            bool result = defaultValue;
+
+            if (val.Equals("true") || val.Equals("t") || val.Equals("yes") || val.Equals("y") || val.Equals("1"))
+                result = true;
+
+            if (val.Equals("false") || val.Equals("f") || val.Equals("no") || val.Equals("n") || val.Equals("0"))
+                result = false;
+
+            return result;
+        }
     }
 }

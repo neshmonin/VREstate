@@ -14,6 +14,7 @@ namespace Vre.Server.RemoteService
         private static List<string> _allowedFileExtensions = new List<string>();
         private static string _filesRootFolder = null;
         private static int _fileBufferSize = 16384;
+        private static bool _allowExtendedLogging = false;
 
         private static void initialize()
         {
@@ -21,6 +22,8 @@ namespace Vre.Server.RemoteService
                 Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
             _fileBufferSize = ServiceInstances.Configuration.GetValue("FileStreamingBufferSize", 16384);
+
+            _allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
 
             _allowedFileExtensions = Utilities.FromCsv(ServiceInstances.Configuration.GetValue("AllowedServedFileExtensions", string.Empty));
         }
@@ -121,6 +124,11 @@ namespace Vre.Server.RemoteService
             }
             else if (request.Request.Path.StartsWith(DataService.ServicePathPrefix))  // object reading (requires session)
             {
+                // Write request always:
+                // - has a sid query parameter (or passed in HTTP header)
+                // - refers to a valid active session
+                if (null == request.UserInfo.Session) throw new ArgumentException("Need a valid session to perform this operation.");
+
                 DataService.ProcessGetRequest(request);
                 return;
             }
@@ -131,7 +139,14 @@ namespace Vre.Server.RemoteService
                 request.Response.ResponseCode = HttpStatusCode.OK;
             }
 
-            throw new ArgumentException("GET request not recognized.");
+            if (_allowExtendedLogging)
+                throw new ArgumentException(string.Format(
+                    "GET request not recognized:\r\n  Caller: {0}\r\n  Request: {1}?{2}",
+                    request.UserInfo.EndPoint,
+                    request.Request.Path,
+                    request.Request.Query));
+            else
+                throw new ArgumentException("GET request not recognized.");
         }
 
         private string processFileRequest(string file, System.IO.Stream resp)

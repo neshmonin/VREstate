@@ -12,6 +12,7 @@ namespace Vre.Server.HttpService
     internal class HttpServiceRequest : IServiceRequest
     {
         private static Dictionary<string, string> _contentTypeByExtension = new Dictionary<string, string>();
+        private static bool _allowExtendedLogging = false;
 
         class RemoteUserInfo : IRemoteUserInfo
         {
@@ -114,6 +115,8 @@ namespace Vre.Server.HttpService
             _contentTypeByExtension.Add("json", "application/json");
             _contentTypeByExtension.Add("kml", "application/vnd.google-earth.kml+xml");
             _contentTypeByExtension.Add("kmz", "application/vnd.google-earth.kmz");
+
+            _allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
         }
 
         public IRemoteUserInfo UserInfo { get; private set; }
@@ -148,7 +151,12 @@ namespace Vre.Server.HttpService
             {
                 ctx.Response.StatusCode = (int)HttpStatusCode.RequestTimeout;
                 ctx.Response.StatusDescription = "Session ID is invalid or dropped by timeout.";
-                ServiceInstances.Logger.Error("HTTP request referred to unknows session ID.");
+                if (_allowExtendedLogging)
+                    ServiceInstances.Logger.Error(string.Format(
+                        "HTTP request referred to unknows session ID from {0}.",
+                        ctx.Request.RemoteEndPoint));
+                else
+                    ServiceInstances.Logger.Error("HTTP request referred to unknows session ID.");
             }
         }
 
