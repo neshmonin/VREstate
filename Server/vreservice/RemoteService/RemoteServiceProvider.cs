@@ -137,6 +137,7 @@ namespace Vre.Server.RemoteService
                 request.Response.DataStreamContentType =
                     processFileRequest(request.Request.Path, request.Response.DataStream);
                 request.Response.ResponseCode = HttpStatusCode.OK;
+                return;
             }
 
             if (_allowExtendedLogging)

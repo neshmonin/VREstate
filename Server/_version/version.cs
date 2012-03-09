@@ -11,7 +11,7 @@ namespace Vre.Server
         public const string Major = "1";
         public const string Minor = "0";
         public const string Build = "6";
-        public const string Revision = "3";
+        public const string Revision = "4";
 
         public static string AssemblyVersionString = Major + "." + Minor + "." + Build + "." + Revision;
     }
