@@ -56,9 +56,8 @@ namespace Vre.Server
 
             Status = "Running.";
 
-#if DEBUG
-            Testing.RandomUpdater.Start();
-#endif
+            // TODO: DEBUG
+            Testing.RandomUpdater.Start(ServiceInstances.Configuration.GetValue("DebugRandomObjectUpdateTimeSec", 0));
         }
 
         public static void PerformShutdown()

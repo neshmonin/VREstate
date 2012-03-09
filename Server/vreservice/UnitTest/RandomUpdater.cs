@@ -9,8 +9,12 @@ namespace Vre.Server.Testing
 {
     public class RandomUpdater
     {
-        public static void Start()
+        private static int _refreshTimeSec;
+
+        public static void Start(int refreshTimeSec)
         {
+            if (refreshTimeSec < 1) return;
+            _refreshTimeSec = refreshTimeSec;
             new Thread(thread) { IsBackground = true, Name = "Testing.RandomUpdater" }.Start();
         }
 
@@ -20,7 +24,7 @@ namespace Vre.Server.Testing
 
             while (true)
             {
-                Thread.Sleep(10000);
+                Thread.Sleep(1000 * _refreshTimeSec);
 
                 using (ClientSession session = ClientSession.MakeSystemSession())
                 {
