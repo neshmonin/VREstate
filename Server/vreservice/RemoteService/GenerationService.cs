@@ -64,7 +64,12 @@ namespace Vre.Server.RemoteService
             Color shadowColor = readColorParam(query, "shdClr", Color.DarkGray);
             bool frame = (query.GetParam("frame", 0) != 0);
 
-            resp.DataStreamContentType = generateTextImage(text, height, textColor, shadowColor, frame, resp.DataStream, true);
+            string type;
+            string location = null;
+            generateTextImage(text, height, textColor, shadowColor, frame, 
+                out type, resp.DataStream, ref location, true);
+            resp.DataPhysicalLocation = location;
+            resp.DataStreamContentType = type;
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
@@ -98,10 +103,11 @@ namespace Vre.Server.RemoteService
             return result;
         }
 
-        private static string generateTextImage(string text,
+        private static void generateTextImage(string text,
                                               int height,
-                                              Color textColor, Color shadowColor, bool frame,
-                                              System.IO.Stream resp, bool searchCache)
+                                              Color textColor, Color shadowColor, bool frame, 
+                                              out string type, System.IO.Stream resp, ref string resourceLocation,
+                                              bool searchCache)
         {
             // initialize cache path if necessary
             //
@@ -137,37 +143,23 @@ namespace Vre.Server.RemoteService
                     using (FileStream fs = File.Create(filePath))
                     {
                         generateTextImage(text, ref height, ref textColor, ref shadowColor, frame, fs);
-                        fs.Seek(0, SeekOrigin.Begin);
-                        fs.CopyTo(resp);
                         ServiceInstances.FileCache.AddManagedFile(filePath);
                     }
+                    resourceLocation = filePath;
                 }
                 else
                 {
-                    // stream file
-                    //
-                    FileInfo fi = new FileInfo(filePath);
-                    byte[] buffer = new byte[fi.Length];
-                    using (Stream fs = fi.OpenRead())
-                    {
-                        fs.Read(buffer, 0, buffer.Length);
-                        resp.Write(buffer, 0, buffer.Length);
-                    }
+                    resourceLocation = filePath;
                 }
             }
             else
             {
-                // generate image to memory and stream it out
+                // generate image and stream it out
                 //
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    generateTextImage(text, ref height, ref textColor, ref shadowColor, frame, ms);
-                    ms.Seek(0, SeekOrigin.Begin);
-                    ms.CopyTo(resp);
-                }
+                generateTextImage(text, ref height, ref textColor, ref shadowColor, frame, resp);
             }
 
-            return "png";
+            type = "png";
         }
 
         private static int calcAvgImagePx(int fontHeight, int letterCount)

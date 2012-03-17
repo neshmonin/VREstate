@@ -13,6 +13,7 @@ namespace Vre.Server.HttpService
     {
         private static Dictionary<string, string> _contentTypeByExtension = new Dictionary<string, string>();
         private static bool _allowExtendedLogging = false;
+        private static int _fileBufferSize = 16384;
 
         class RemoteUserInfo : IRemoteUserInfo
         {
@@ -87,12 +88,14 @@ namespace Vre.Server.HttpService
                 Data = null;
                 DataStream = httpResponseStream;
                 DataStreamContentType = null;
+                DataPhysicalLocation = null;
             }
             public HttpStatusCode ResponseCode { get; set; }
             public string ResponseCodeDescription { get; set; }
             public ClientData Data { get; set; }
             public string DataStreamContentType { get; set; }
             public Stream DataStream { get; private set; }
+            public string DataPhysicalLocation { get; set; }
             public bool HoldResponseForServerPush { get; set; }
         }
 
@@ -117,6 +120,8 @@ namespace Vre.Server.HttpService
             _contentTypeByExtension.Add("kmz", "application/vnd.google-earth.kmz");
 
             _allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
+
+            _fileBufferSize = ServiceInstances.Configuration.GetValue("FileStreamingBufferSize", 16384);
         }
 
         public IRemoteUserInfo UserInfo { get; private set; }
@@ -145,7 +150,7 @@ namespace Vre.Server.HttpService
             Request = new RequestData(ctx.Request.Url, ctx.Request.HttpMethod, file, query,
                 (ctx.Request.ContentLength64 > 0) ? ctx.Request.InputStream : null,
                 ctx.Request.IsSecureConnection);
-            Response = new ResponseData(ctx.Response.OutputStream);
+            Response = new ResponseData(new MemoryStream());
 
             if (UserInfo.StaleSession)
             {
@@ -172,7 +177,11 @@ namespace Vre.Server.HttpService
                 }
                 response.ContentType = type;
             }
-            else if (Response.Data != null)
+
+            response.StatusCode = (int)Response.ResponseCode;
+            response.StatusDescription = Response.ResponseCodeDescription;
+
+            if (Response.Data != null)
             {
                 //using (StreamWriter sw = new StreamWriter(response.OutputStream))
                 //    sw.Write(JavaScriptHelper.ClientDataToJson(Response.Data));
@@ -183,9 +192,25 @@ namespace Vre.Server.HttpService
                 byte[] resp = Encoding.UTF8.GetBytes(JavaScriptHelper.ClientDataToJson(Response.Data));
                 response.OutputStream.Write(resp, 0, resp.Length);
             }
-
-            response.StatusCode = (int)Response.ResponseCode;
-            response.StatusDescription = Response.ResponseCodeDescription;
+            else if (Response.DataStream.Length > 0)
+            {
+                if (Response.DataStream.CanSeek) Response.DataStream.Seek(0, SeekOrigin.Begin);  // safeguard
+                Response.DataStream.CopyTo(response.OutputStream);
+            }
+            else if (Response.DataPhysicalLocation != null)
+            {
+                // stream file to response
+                byte[] buffer = new byte[_fileBufferSize];
+                using (Stream fs = File.Open(Response.DataPhysicalLocation, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    int read;
+                    do
+                    {
+                        read = fs.Read(buffer, 0, _fileBufferSize);
+                        response.OutputStream.Write(buffer, 0, read);
+                    } while (read > 0);
+                }
+            }
         }
 
         public void UpdateResponse(HttpListenerResponse response, Exception e)

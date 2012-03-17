@@ -13,17 +13,11 @@ namespace Vre.Server.RemoteService
         private static char[] _invalidFileNameChars = Path.GetInvalidFileNameChars();
         private static List<string> _allowedFileExtensions = new List<string>();
         private static string _filesRootFolder = null;
-        private static int _fileBufferSize = 16384;
-        private static bool _allowExtendedLogging = false;
 
         private static void initialize()
         {
             _filesRootFolder = ServiceInstances.Configuration.GetValue("FilesRoot",
                 Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
-
-            _fileBufferSize = ServiceInstances.Configuration.GetValue("FileStreamingBufferSize", 16384);
-
-            _allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
 
             _allowedFileExtensions = Utilities.FromCsv(ServiceInstances.Configuration.GetValue("AllowedServedFileExtensions", string.Empty));
         }
@@ -111,8 +105,8 @@ namespace Vre.Server.RemoteService
             }
             else if (request.Request.Path.Equals("version"))
             {
-                using (System.IO.StreamWriter w = new System.IO.StreamWriter(request.Response.DataStream))
-                    w.Write(buildVersionInformation());
+                byte[] buffer = Encoding.UTF8.GetBytes(buildVersionInformation());
+                request.Response.DataStream.Write(buffer, 0, buffer.Length);
                 request.Response.DataStreamContentType = "txt";
                 request.Response.ResponseCode = HttpStatusCode.OK;
                 return;
@@ -134,48 +128,27 @@ namespace Vre.Server.RemoteService
             }
             else //if (0 == request.Request.Query.Count)  // FS file reading
             {
-                request.Response.DataStreamContentType =
-                    processFileRequest(request.Request.Path, request.Response.DataStream);
+                string type, location;
+                processFileRequest(request.Request.Path, out type, out location);
+                request.Response.DataStreamContentType = type;
+                request.Response.DataPhysicalLocation = location;
                 request.Response.ResponseCode = HttpStatusCode.OK;
                 return;
             }
-
-            if (_allowExtendedLogging)
-                throw new ArgumentException(string.Format(
-                    "GET request not recognized:\r\n  Caller: {0}\r\n  Request: {1}?{2}",
-                    request.UserInfo.EndPoint,
-                    request.Request.Path,
-                    request.Request.Query));
-            else
-                throw new ArgumentException("GET request not recognized.");
         }
 
-        private string processFileRequest(string file, System.IO.Stream resp)
+        private void processFileRequest(string file, out string resourceType, out string resourcePath)
         {
             // validate path
             if (!isPathValid(file)) throw new FileNotFoundException("Path is invalid.");
 
             // validate file type: only certain file types are accessible (!)
-            string result = Path.GetExtension(file).ToLower().Substring(1);
-            if (!_allowedFileExtensions.Contains(result)) throw new FileNotFoundException("File type not known.");
+            resourceType = Path.GetExtension(file).ToLower().Substring(1);
+            if (!_allowedFileExtensions.Contains(resourceType)) throw new FileNotFoundException("File type not known.");
 
             // verify file presence
-            file = Path.Combine(_filesRootFolder, file);
-            if (!File.Exists(file)) throw new FileNotFoundException("File not found.");
-
-            // stream file to response
-            byte[] buffer = new byte[_fileBufferSize];
-            using (Stream fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                int read;
-                do
-                {
-                    read = fs.Read(buffer, 0, _fileBufferSize);
-                    resp.Write(buffer, 0, read);
-                } while (read > 0);
-            }
-
-            return result;
+            resourcePath = Path.Combine(_filesRootFolder, file);
+            if (!File.Exists(resourcePath)) throw new FileNotFoundException("File not found.");
         }
 
         private static string buildVersionInformation()

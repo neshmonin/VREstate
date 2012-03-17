@@ -76,6 +76,7 @@ namespace Vre.Server.RemoteService
         string ResponseCodeDescription { get; set; }
         ClientData Data { get; set; }
         string DataStreamContentType { get; set; }
+        string DataPhysicalLocation { get; set; }
         Stream DataStream { get; }
         bool HoldResponseForServerPush { get; set; }
     }
