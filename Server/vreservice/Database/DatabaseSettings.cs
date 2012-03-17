@@ -8,7 +8,7 @@ namespace Vre.Server
     internal class DatabaseSettings
     {
         /// <summary>
-        /// Current version of database; to be verified against real DB on startup.
+        /// Current schema version of database; to be verified against real DB on startup.
         /// </summary>
         public const int CurrentDbVersion = 4;
 
@@ -17,8 +17,9 @@ namespace Vre.Server
         /// </summary>
         public enum Setting : int
         {
-            DbVersion = 1,
+            DbSchemaVersionMin = 1,
             CreateTime = 2,
+            DbSchemaVersionMax = 3,
         }
 
         /// <summary>

@@ -8,13 +8,17 @@ namespace Vre.Server.Dao
 
         public static void VerifyDatabase()
         {
-            DatabaseSettings setting = null;
+            DatabaseSettings schemaVerMin = null;
+            DatabaseSettings schemaVerMax = null;
+            DateTime created;
 
             try
             {
                 using (Dao dao = new Dao())
                 {
-                    setting = dao.GetById((int)DatabaseSettings.Setting.DbVersion);
+                    created = Get(DatabaseSettings.Setting.CreateTime, DateTime.MinValue);
+                    schemaVerMin = dao.GetById((int)DatabaseSettings.Setting.DbSchemaVersionMin);
+                    schemaVerMax = dao.GetById((int)DatabaseSettings.Setting.DbSchemaVersionMax);
                 }
             }
             catch (Exception ex)
@@ -22,19 +26,34 @@ namespace Vre.Server.Dao
                 throw new ApplicationException("Database is not accessible or is invalid.", ex);
             }
 
-            if (null == setting) throw new ApplicationException("Database is not initialized.");
-            if (!setting.IntValue.HasValue) throw new ApplicationException("Database is invalid.");
+            long svMin = ((schemaVerMin != null) && schemaVerMin.IntValue.HasValue) ? schemaVerMin.IntValue.Value : -1;
+            long svMax = ((schemaVerMax != null) && schemaVerMax.IntValue.HasValue) ? schemaVerMax.IntValue.Value : -1;
 
-            if (setting.IntValue == DatabaseSettings.CurrentDbVersion)
+            if (svMin < 0) throw new ApplicationException("Database is not initialized.");
+
+            if (svMax < 0)  // legacy mode
             {
-                DateTime created = Get(DatabaseSettings.Setting.CreateTime, DateTime.MinValue);
-                ServiceInstances.Logger.Info("Database version OK; created {0}.", created);
-                return;
+                if (svMin == DatabaseSettings.CurrentDbVersion)
+                {
+                    ServiceInstances.Logger.Info("Database version OK; created {0}.", created);
+                    return;
+                }
+                throw new ApplicationException("Database version is not supported: required = " +
+                    DatabaseSettings.CurrentDbVersion.ToString() + ", database value = " +
+                    svMin.ToString() + ".");
             }
-
-            throw new ApplicationException("Database version is not supported: required = " +
-                DatabaseSettings.CurrentDbVersion.ToString() + ", database value = " +
-                setting.IntValue.ToString() + ".");
+            else
+            {
+                if ((DatabaseSettings.CurrentDbVersion >= svMin)
+                    && (DatabaseSettings.CurrentDbVersion <= svMax))
+                {
+                    ServiceInstances.Logger.Info("Database version OK; created {0}.", created);
+                    return;
+                }
+                throw new ApplicationException("Database version is not supported: required = " +
+                    DatabaseSettings.CurrentDbVersion.ToString() + ", database value fork = " +
+                    svMin.ToString() + "..." + svMax.ToString() + ".");
+            }
         }
 
         private static DatabaseSettings Get(Dao dao, DatabaseSettings.Setting id)
