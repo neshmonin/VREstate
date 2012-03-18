@@ -47,6 +47,7 @@ namespace Vre.Client
             _sid = null;
             SessionLooseDescription = string.Empty;
             _referenceControl = referenceControl;
+            LoginId = string.Empty;
         }
 
         public void Dispose()
@@ -55,6 +56,7 @@ namespace Vre.Client
         }
 
         public bool Online { get { lock (_threadQuit) return (_sid != null); } }
+        public string LoginId { get; private set; }
         public string SessionLooseDescription { get; private set; }
         public string ServerEndpoint { get; private set; }
 
@@ -68,7 +70,7 @@ namespace Vre.Client
 
                 try
                 {
-                    response = makeProgramCall("q=sessionrenew");
+                    response = MakeProgramCall("q=sessionrenew");
                 }
                 catch (Exception ex)
                 {
@@ -160,7 +162,7 @@ namespace Vre.Client
         {
             bool result = false;
 
-            ServerResponse response = makeProgramCall(string.Format("q=login&uid={0}&pwd={1}",
+            ServerResponse response = MakeProgramCall(string.Format("q=login&uid={0}&pwd={1}",
                 System.Web.HttpUtility.UrlEncode(login),
                 System.Web.HttpUtility.UrlEncode(password)));
 
@@ -174,6 +176,7 @@ namespace Vre.Client
                     lock (_threadQuit)
                     {
                         _sid = sid;
+                        LoginId = login;
                         SessionLooseDescription = string.Empty;
                         result = true;
                     }
@@ -189,7 +192,7 @@ namespace Vre.Client
             return makeRequest(type.Method, "data/" + path, query, data);
         }
 
-        private ServerResponse makeProgramCall(string query)
+        public ServerResponse MakeProgramCall(string query)
         {
             return makeRequest("GET", "program", query, null);
         }

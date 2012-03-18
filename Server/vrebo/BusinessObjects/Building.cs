@@ -56,6 +56,7 @@ namespace Vre.Server.BusinessLogic
             ClientData result = new ClientData();
 
             result.Add("id", AutoID);
+            result.Add("deleted", Deleted);
 
             result.Add("name", Name);
             result.Add("status", Status);

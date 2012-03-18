@@ -7,7 +7,7 @@ using Vre.Server.RemoteService;
 
 namespace Vre.Server.BusinessLogic
 {
-    public class SiteManager : GenericManager
+    internal class SiteManager : GenericManager
     {
         public SiteManager(ClientSession clientSession) : base(clientSession) { }
 
@@ -33,22 +33,39 @@ namespace Vre.Server.BusinessLogic
         //    }
         //}
 
+        public Site[] List(int developerId, bool includeDeleted)
+        {
+            RolePermissionCheck.CheckListSites(_session);
+
+            using (SiteDao dao = new SiteDao(_session.DbSession))
+            {
+                return dao.GetByDeveloperId(developerId, includeDeleted);
+            }
+        }
+
         public void CreateSuites(Building building, string buildingSchema)
         {
             throw new NotImplementedException();
         }
 
-        public Building[] ListBuildings(int siteId)
+        public Building[] ListBuildings(int siteId, bool includeDeleted)
         {
-            // ROLE PERMISSION LOGIC
-            // none here: everyone can get a list of these
+            RolePermissionCheck.CheckListBuildings(_session);
 
-            using (SiteDao dao = new SiteDao(_session.DbSession))
+            using (BuildingDao dao = new BuildingDao(_session.DbSession))
             {
-                Site site = dao.GetById(siteId);
-                if (site != null) return NHibernateHelper.IListToArray<Building>(site.Buildings);
-                else throw new FileNotFoundException("Site does not exist.");
+                return NHibernateHelper.IListToArray<Building>(dao.GetAll(siteId, includeDeleted));
             }
+
+            //// ROLE PERMISSION LOGIC
+            //// none here: everyone can get a list of these
+
+            //using (SiteDao dao = new SiteDao(_session.DbSession))
+            //{
+            //    Site site = dao.GetById(siteId);
+            //    if (site != null) return NHibernateHelper.IListToArray<Building>(site.Buildings);
+            //    else throw new FileNotFoundException("Site does not exist.");
+            //}
         }
 
         public Suite[] ListSuitesByBuiding(int buildingId)

@@ -30,5 +30,18 @@ namespace Vre.Server.BusinessLogic
         {
             return Name;
         }
+
+        public override ClientData GetClientData()
+        {
+            ClientData result = new ClientData();
+
+            result.Add("id", AutoID);  // informational only
+            result.Add("deleted", Deleted);  // informational only
+
+            result.Add("name", Name);  // informational only
+            result.Add("configuration", VREConfiguration);  // informational only
+
+            return result;
+        }
     }
 }

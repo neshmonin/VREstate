@@ -155,6 +155,8 @@
     <Compile Include="Experimental\HttpServerPush.cs" />
     <Compile Include="FileCacheManager.cs" />
     <Compile Include="FloodPreventor.cs" />
+    <Compile Include="Managers\DeveloperManager.cs" />
+    <Compile Include="Managers\RolePermissionCheck.cs" />
     <Compile Include="ModelCache\ModelCache.cs" />
     <Compile Include="ModelCache\ModelCacheManager.cs" />
     <Compile Include="RemoteService\ClientSession.cs" />

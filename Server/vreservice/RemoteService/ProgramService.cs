@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using Vre.Server.BusinessLogic;
+using NHibernate;
 
 namespace Vre.Server.RemoteService
 {
@@ -22,6 +23,11 @@ namespace Vre.Server.RemoteService
                 else if (command.Equals("sessionrenew"))
                 {
                     sessionRenew(request);
+                    return;
+                }
+                else if (command.Equals("chpwd"))
+                {
+                    changePassword(request);
                     return;
                 }
             }
@@ -58,6 +64,36 @@ namespace Vre.Server.RemoteService
             {
                 request.Response.ResponseCode = HttpStatusCode.Forbidden;
                 request.Response.ResponseCodeDescription = "Invalid logn type, login name or password.";
+            }
+        }
+
+        private static void changePassword(IServiceRequest request)
+        {
+            // parse required arguments
+            //
+            LoginType loginType = parseLoginType(request.Request.Query);
+            string login = request.Request.Query["uid"];
+            string password = request.Request.Query["pwd"];
+            string newPassword = request.Request.Query["npwd"];
+
+            // authenticate
+            //
+            using (ISession session = NHibernateHelper.GetSession())
+            {
+                using (IAuthentication auth = new Authentication(session))
+                {
+                    string errorReason;
+                    if (auth.ChangePassword(loginType, login, password, newPassword, out errorReason))
+                    {
+                        request.Response.ResponseCode = HttpStatusCode.OK;
+                        request.Response.Data = new ClientData();
+                        request.Response.Data.Add("updated", 1);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(errorReason);
+                    }
+                }
             }
         }
 

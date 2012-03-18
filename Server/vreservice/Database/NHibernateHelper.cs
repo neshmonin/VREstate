@@ -14,7 +14,7 @@ namespace Vre.Server
         void Rollback();
     }
 
-    public class NHibernateHelper
+    internal class NHibernateHelper
     {
         private const string NHibernateConfigurationFileName = "nhibernate.config";
 

@@ -178,6 +178,30 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
+        public bool LoginByUserId(int userId, out LoginType loginType, out string login)
+        {
+            bool result;
+
+            using (CredentialsDao dao = new CredentialsDao(_session))
+            {
+                Credentials item = dao.GetByUserId(userId);
+                if (item != null)
+                {
+                    loginType = item.Type;
+                    login = item.Login;
+                    result = true;
+                }
+                else
+                {
+                    loginType = LoginType.Plain;
+                    login = null;
+                    result = false;
+                }
+            }
+
+            return result;
+        }
+
         public bool DropLogin(LoginType type, string login)
         {
             bool result = false;

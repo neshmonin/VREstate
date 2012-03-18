@@ -7,7 +7,7 @@ using Vre.Server.BusinessLogic;
 
 namespace Vre.Server.RemoteService
 {
-    public class ClientSessionStore : IDisposable
+    internal class ClientSessionStore : IDisposable
     {
         private Dictionary<string, ClientSession> _sessionList;
         private ManualResetEvent _staleSessionDropThreadExit;
@@ -73,7 +73,7 @@ namespace Vre.Server.RemoteService
                 string sessionId = Guid.NewGuid().ToString();
 
                 lock (_sessionList)
-                    _sessionList.Add(sessionId, new ClientSession(loginType, login, user, isTrustedConnection(ep, user)));
+                    _sessionList.Add(sessionId, new ClientSession(loginType, login, user));
                                 
                 return sessionId;
             }
@@ -84,22 +84,6 @@ namespace Vre.Server.RemoteService
 
                 return null;
             }
-        }
-
-        private bool isTrustedConnection(IPEndPoint userEndpoint, User user)
-        {
-            bool result = false;
-
-            if (User.Role.SuperAdmin == user.UserRole)
-            {
-                // allow only local connections
-                // TODO: add more configurable logic?
-                if (userEndpoint.Address.Equals(IPAddress.Loopback)
-                    || userEndpoint.Address.Equals(IPAddress.IPv6Loopback))
-                    result = true;
-            }
-
-            return result;
         }
 
         public ClientSession this[string sessionId]
@@ -164,7 +148,7 @@ namespace Vre.Server.RemoteService
         }
     }
 
-    public class ClientSession : IDisposable
+    internal class ClientSession : IDisposable
     {
         public LoginType AuthLoginType { get; private set; }
         public string AuthLogin { get; private set; }
@@ -174,9 +158,19 @@ namespace Vre.Server.RemoteService
         /// <summary>
         /// This session is fully trusted and extended functionality is allowed
         /// </summary>
-        public bool TrustedConnection { get; private set; }
+        public bool TrustedConnection { get; set; }
 
-        public ClientSession(LoginType loginType, string login, User user, bool trustedConnection)
+        public ClientSession(LoginType loginType, string login, User user)
+        {
+            AuthLoginType = loginType;
+            AuthLogin = login;
+            User = user;
+            TrustedConnection = false;
+            DbSession = null;
+            LastUsed = DateTime.UtcNow;
+        }
+
+        private ClientSession(LoginType loginType, string login, User user, bool trustedConnection)
         {
             AuthLoginType = loginType;
             AuthLogin = login;

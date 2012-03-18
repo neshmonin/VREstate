@@ -31,6 +31,9 @@ namespace Vre.Server.BusinessLogic
         {
             ClientData result = new ClientData();
 
+            result.Add("id", AutoID);  // informational only
+            result.Add("deleted", Deleted);  // informational only
+
             result.Add("name", Name);
 
             //ClientData position = new ClientData();

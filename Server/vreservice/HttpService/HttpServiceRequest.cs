@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Text;
+using NHibernate;
 using Vre.Server.BusinessLogic;
 using Vre.Server.RemoteService;
 
@@ -43,8 +44,10 @@ namespace Vre.Server.HttpService
         {
             private static string _serverRootPath = null;
             private Uri _rawRequest;
-            public RequestData(Uri rawRequest, string type, string path, ServiceQuery query, Stream data, bool isSecureConnection)
+            public RequestData(HttpListenerRequest request, string path, ServiceQuery query)
             {
+                string type = request.HttpMethod;
+
                 // http://en.wikipedia.org/wiki/Representational_State_Transfer#RESTful_web_services
                 if (type.Equals("GET")) Type = RequestType.Get;
                 else if (type.Equals("PUT")) Type = RequestType.Update;
@@ -52,12 +55,14 @@ namespace Vre.Server.HttpService
                 else if (type.Equals("DELETE")) Type = RequestType.Delete;
                 else throw new ArgumentException("Unknown HTTP method.");
 
-                _rawRequest = rawRequest;
+                _rawRequest = request.Url;
                 Path = path;
                 Query = query;
-                IsSecureConnection = isSecureConnection;
 
-                if (data != null) Data = JavaScriptHelper.JsonToClientData(data);
+                // either HTTPS (SSL) or local connection is required to qualify as secure
+                IsSecureConnection = request.IsSecureConnection | IsCallerSecure(request.RemoteEndPoint.Address);
+
+                if (request.ContentLength64 > 0) Data = JavaScriptHelper.JsonToClientData(request.InputStream);
                 else Data = null;
             }
             public RequestType Type { get; private set; }
@@ -76,6 +81,20 @@ namespace Vre.Server.HttpService
 
                 return string.Format("{0}://{1}{2}",
                     _rawRequest.Scheme, _rawRequest.Authority, _serverRootPath);
+            }
+
+            public static bool IsCallerSecure(IPAddress address)
+            {
+                bool result = false;
+                if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                {
+                    result = address.Equals(IPAddress.Loopback);
+                }
+                else if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+                {
+                    result = address.Equals(IPAddress.IPv6Loopback);
+                }
+                return result;
             }
         }
 
@@ -147,10 +166,12 @@ namespace Vre.Server.HttpService
             if (file.StartsWith(servicePath)) file = file.Remove(0, servicePath.Length);
 
             UserInfo = new RemoteUserInfo(ctx.Request.RemoteEndPoint, ctx.Request.Headers, query);
-            Request = new RequestData(ctx.Request.Url, ctx.Request.HttpMethod, file, query,
-                (ctx.Request.ContentLength64 > 0) ? ctx.Request.InputStream : null,
-                ctx.Request.IsSecureConnection);
+            Request = new RequestData(ctx.Request, file, query);
             Response = new ResponseData(new MemoryStream());
+
+            // update trusted value for this request: managers do not get request object!
+            if (UserInfo.Session != null)
+                UserInfo.Session.TrustedConnection = Request.IsSecureConnection;
 
             if (UserInfo.StaleSession)
             {
@@ -224,12 +245,24 @@ namespace Vre.Server.HttpService
             else if (e is PermissionException)
             {
                 response.StatusCode = (int)HttpStatusCode.Forbidden;
-                response.StatusDescription = "Current user has no permission to view this object.";
+                response.StatusDescription = e.Message;// "Current user has no permission to view this object.";
                 ServiceInstances.Logger.Error("Attempt to retrieve object not granted: {0}", e.Message);
+            }
+            else if (e is InvalidOperationException)
+            {
+                response.StatusCode = (int)HttpStatusCode.PreconditionFailed;
+                response.StatusDescription = e.Message;
+                ServiceInstances.Logger.Error("Cannot perform operation: {0}", e.Message);
+            }
+            else if (e is StaleObjectStateException)
+            {
+                response.StatusCode = (int)HttpStatusCode.Conflict;
+                response.StatusDescription = e.Message;
+                ServiceInstances.Logger.Error("Stale object: {0}", e.Message);
             }
             else if (e is ArgumentException)
             {
-                response.StatusCode = (int)HttpStatusCode.NotImplemented;
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
                 response.StatusDescription = "Argument error.";
                 ServiceInstances.Logger.Error("{0}", e.Message);
             }
@@ -241,9 +274,14 @@ namespace Vre.Server.HttpService
             }
             else if (e is InvalidDataException)
             {
-                response.StatusCode = (int)HttpStatusCode.Conflict;
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
                 response.StatusDescription = "The data passed to server is not valid.";
                 ServiceInstances.Logger.Error("Request processing fauled: {0}", e.Message);
+            }
+            else if (e is HttpListenerException)
+            {
+                ServiceInstances.Logger.Error("HTTP request processing failed: {0}", e.Message);
+                // no need to set status here as connection is no longer workable
             }
             else
             {

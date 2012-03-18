@@ -13,5 +13,6 @@ namespace Vre.Server.BusinessLogic
         bool DropLogin(LoginType type, string login);
         bool DropLogin(int userId);
         int UserIdByLogin(LoginType type, string login);
+        bool LoginByUserId(int userId, out LoginType loginType, out string login);
     }
 }

@@ -6,7 +6,7 @@ using Vre.Server.RemoteService;
 
 namespace Vre.Server.BusinessLogic
 {
-    public class GenericManager : IDisposable
+    internal class GenericManager : IDisposable
     {
         protected ClientSession _session;
         private bool _initiatedSession;

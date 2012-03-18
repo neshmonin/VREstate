@@ -18,11 +18,11 @@ namespace Vre.Server.Dao
         {
             if (includeDeleted)
                 return _session.CreateCriteria<Building>()
-                    .Add(Restrictions.Eq("SiteID", siteId))
+                    .Add(Restrictions.Eq("ConstructionSite.AutoID", siteId))
                     .List<Building>();
             else
                 return _session.CreateCriteria<Building>()
-                    .Add(Restrictions.Eq("SiteID", siteId) && Restrictions.Eq("Deleted", false))
+                    .Add(Restrictions.Eq("ConstructionSite.AutoID", siteId) && Restrictions.Eq("Deleted", false))
                     .List<Building>();
         }
 

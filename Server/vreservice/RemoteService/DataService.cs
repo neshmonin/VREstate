@@ -20,22 +20,51 @@ namespace Vre.Server.RemoteService
             ModelObject mo;
             int objectId;
             long generation;
+            bool includeDeleted;
 
             // TODO: SECURITY: configurable required SSL check
-            //if (!request.Request.IsSecureConnection) throw new PermissionException("Service available only over secure connection.");
+            //if (!request.UserInfo.Session.TrustedConnection) throw new PermissionException("Service available only over secure connection.");
 
             getPathElements(request.Request.Path, out mo, out objectId);
 
             if (!long.TryParse(request.Request.Query.GetParam("genval", "0"), out generation)) generation = 0;
+            includeDeleted = request.Request.Query.GetParam("withdeleted", "false").Equals("true");
+
+            if (includeDeleted) RolePermissionCheck.CheckReadDeletedObjects(request.UserInfo.Session);
 
             switch (mo)
             {
+                case ModelObject.EstateDeveloper:
+                    if (-1 == objectId)
+                    {
+                        getDeveloperList(request.UserInfo.Session, request.Response, includeDeleted);
+                    }
+                    else
+                    {
+                        // TODO: get a single estate developer data
+                        throw new NotImplementedException();
+                    }
+                    return;
+
+                case ModelObject.Site:
+                    if (-1 == objectId)
+                    {
+                        int estateDeveloperId = request.Request.Query.GetParam("ed", -1);
+                        if (-1 == estateDeveloperId) throw new ArgumentException("Developer ID is missing.");
+                        getSiteList(request.UserInfo.Session, estateDeveloperId, request.Response, generation, includeDeleted);
+                    }
+                    else
+                    {
+                        getBuilding(request.UserInfo.Session, objectId, request.Response, generation);
+                    }
+                    return;
+
                 case ModelObject.Building:
                     if (-1 == objectId)
                     {
                         int siteId = request.Request.Query.GetParam("site", -1);
                         if (-1 == siteId) throw new ArgumentException("Site ID is missing.");
-                        getBuildingList(request.UserInfo.Session, siteId, request.Response, generation);
+                        getBuildingList(request.UserInfo.Session, siteId, request.Response, generation, includeDeleted);
                     }
                     else
                     {
@@ -70,6 +99,20 @@ namespace Vre.Server.RemoteService
                     }
                     return;
 
+                case ModelObject.User:
+                    if (-1 == objectId)
+                    {
+                        getUserList(request.UserInfo.Session, request.Request.Query, request.Response, includeDeleted);
+                    }
+                    else if (0 == objectId)
+                    {
+                        getUser(request.UserInfo.Session, request.UserInfo.Session.User.AutoID, request.Response);
+                    }
+                    else
+                    {
+                        getUser(request.UserInfo.Session, objectId, request.Response);
+                    }
+                    return;
             }
 
             throw new NotImplementedException();
@@ -92,7 +135,7 @@ namespace Vre.Server.RemoteService
                     return;
 
                 case ModelObject.User:
-                    updateUser(request.UserInfo.Session, request.Request.Data, request.Response);
+                    updateUser(request.UserInfo.Session, objectId, request.Request.Data, request.Response);
                     return;
             }
 
@@ -162,7 +205,80 @@ namespace Vre.Server.RemoteService
         }
 
         #region retrieval
-        private static void getBuildingList(ClientSession session, int siteId, IResponseData resp, long generation)
+        private static void getDeveloperList(ClientSession session, IResponseData resp, bool includeDeleted)
+        {
+            ClientData[] result = null;
+
+            //using (UserManager manager = new UserManager(session))
+            using (DeveloperManager manager = new DeveloperManager(session))
+            {
+                EstateDeveloper[] developerList = manager.List(includeDeleted);
+
+                int cnt = developerList.Length;
+                result = new ClientData[cnt];
+                for (int idx = 0; idx < cnt; idx++)
+                {
+                    EstateDeveloper ed = developerList[idx];
+                    result[idx] = ed.GetClientData();
+                }
+            }
+
+            // produce output
+            //
+            resp.Data = new ClientData();
+            if (result != null) resp.Data.Add("developers", result);
+            resp.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private static void getSiteList(ClientSession session, int developerId, IResponseData resp, 
+            long generation, bool includeDeleted)
+        {
+            ClientData[] result = null;
+
+            Spikes.PullUpdateService.UpdateInfo updateInfo =
+                ServiceInstances.UpdateService.GetUpdate(Spikes.PullUpdateService.EntityLevel.Developer, developerId, generation);
+
+            using (SiteManager manager = new SiteManager(session))
+            {
+                Site[] siteList = manager.List(developerId, includeDeleted);
+
+                if (0 == generation)  // full request
+                {
+                    int cnt = siteList.Length;
+                    result = new ClientData[cnt];
+                    for (int idx = 0; idx < cnt; idx++)
+                    {
+                        Site s = siteList[idx];
+                        ServiceInstances.ModelCache.FillWithModelInfo(s, false);
+                        result[idx] = s.GetClientData();
+                    }
+                }
+                else if (updateInfo.Sites != null)  // changed item list
+                {
+                    int cnt = updateInfo.Sites.Count;
+                    List<ClientData> siteDataList = new List<ClientData>(cnt);
+                    foreach (Site s in siteList)
+                    {
+                        if (updateInfo.Sites.Contains(s.AutoID))
+                        {
+                            ServiceInstances.ModelCache.FillWithModelInfo(s, false);
+                            siteDataList.Add(s.GetClientData());
+                        }
+                    }
+                    result = siteDataList.ToArray();
+                }
+            }
+
+            // produce output
+            //
+            resp.Data = new ClientData();
+            if (result != null) resp.Data.Add("sites", result);
+            resp.Data.Add("generation", updateInfo.Generation);
+            resp.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private static void getBuildingList(ClientSession session, int siteId, IResponseData resp, 
+            long generation, bool includeDeleted)
         {
             ClientData[] result = null;
 
@@ -171,7 +287,7 @@ namespace Vre.Server.RemoteService
 
             using (SiteManager manager = new SiteManager(session))
             {
-                Building[] buildingList = manager.ListBuildings(siteId);
+                Building[] buildingList = manager.ListBuildings(siteId, includeDeleted);
 
                 if (0 == generation)  // full request
                 {
@@ -368,10 +484,48 @@ namespace Vre.Server.RemoteService
 
             using (UserManager manager = new UserManager(session))
             {
-                user = manager.GetUser(userId);
+                user = manager.Get(userId);
             }
             
             resp.Data = user.GetClientData();
+            resp.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private static void getUserList(ClientSession session, ServiceQuery query, IResponseData resp, bool includeDeleted)
+        {
+            User.Role role;
+            if (!Enum.TryParse<User.Role>(query.GetParam("role", "buyer"), true, out role)) role = User.Role.Buyer;
+            int estateDeveloperId = query.GetParam("ed", -1);// data.GetProperty("ed", -1);
+            string nameLookup = query.GetParam("nameFilter", string.Empty);// data.GetProperty("nameFilter", string.Empty);
+            User[] list;
+
+            using (UserManager manager = new UserManager(session))
+            {
+                list = manager.List(role, estateDeveloperId, nameLookup, includeDeleted);
+            }
+
+            // produce output
+            //
+            int cnt = list.Length;
+            ClientData[] result = new ClientData[cnt];
+            using (IAuthentication auth = new Authentication(session.DbSession))
+            {
+                for (int idx = 0; idx < cnt; idx++)
+                {
+                    result[idx] = list[idx].GetClientData();
+
+                    LoginType lt;
+                    string login;
+                    if (auth.LoginByUserId(list[idx].AutoID, out lt, out login))
+                    {
+                        result[idx].Add("loginType", lt);
+                        result[idx].Add("login", login);
+                    }
+                }
+            }
+
+            resp.Data = new ClientData();
+            resp.Data.Add("users", result);
             resp.ResponseCode = HttpStatusCode.OK;
         }
         #endregion
@@ -497,30 +651,18 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void updateUser(ClientSession session, ClientData data, IResponseData resp)
+        private static void updateUser(ClientSession session, int userId, ClientData data, IResponseData resp)
         {
-            int userId = data.GetProperty("id", -1);
-
             using (UserManager manager = new UserManager(session))
             {
-                string errorReason;
-                User user = manager.GetUser(userId);
+                User user = manager.Get(userId);
 
                 if (user.UpdateFromClient(data))
                 {
-                    if (manager.UpdateUser(user, out errorReason))
-                    {
-                        resp.ResponseCode = HttpStatusCode.OK;
-                        resp.Data = new ClientData();
-                        resp.Data.Add("updated", 1);
-                    }
-                    else
-                    {
-                        resp.ResponseCode = HttpStatusCode.Conflict;
-                        resp.ResponseCodeDescription = errorReason;
-                        resp.Data = new ClientData();
-                        resp.Data.Add("updatedObject", user.GetClientData());
-                    }
+                    manager.Update(user);
+                    resp.ResponseCode = HttpStatusCode.OK;
+                    resp.Data = new ClientData();
+                    resp.Data.Add("updated", 1);
                 }
                 else
                 {
@@ -537,33 +679,25 @@ namespace Vre.Server.RemoteService
         {
             User.Role role = data.GetProperty<User.Role>("role", User.Role.Buyer);
             LoginType type = data.GetProperty<LoginType>("type", LoginType.Plain);
-            int estateDeveloperId = data.GetProperty("estateDeveloperId", -1);
-            string login = data.GetProperty("login", string.Empty);
-            string password = data.GetProperty("password", string.Empty);
+            int estateDeveloperId = data.GetProperty("ed", -1);
+            string login = data.GetProperty("uid", string.Empty);
+            string password = data.GetProperty("pwd", string.Empty);
 
             using (UserManager manager = new UserManager(session))
             {
-                string errorReason;
-                if (manager.CreateUser(role, estateDeveloperId, type, login, password, out errorReason))
+                manager.Create(role, estateDeveloperId, type, login, password);
+                try
                 {
-                    try
-                    {
-                        // create contact info block with any added fields from inbound JSON
-                        User u = manager.GetUser(type, login);
-                        u.UpdateFromClient(data);
-                        resp.ResponseCode = HttpStatusCode.OK;
-                    }
-                    catch (Exception ex)
-                    {
-                        resp.ResponseCode = HttpStatusCode.Created;
-                        resp.ResponseCodeDescription = "Contact information was not stored.";
-                        ServiceInstances.Logger.Error("Contact information for created user {0}[{1}] was not saved: {2}", type, login, ex);
-                    }
+                    // create contact info block with any added fields from inbound JSON
+                    User u = manager.Get(type, login);
+                    u.UpdateFromClient(data);
+                    resp.ResponseCode = HttpStatusCode.OK;
                 }
-                else
+                catch (Exception ex)
                 {
-                    resp.ResponseCode = HttpStatusCode.Forbidden;
-                    resp.ResponseCodeDescription = errorReason;
+                    resp.ResponseCode = HttpStatusCode.Created;
+                    resp.ResponseCodeDescription = "Contact information was not stored.";
+                    ServiceInstances.Logger.Error("Contact information for created user {0}[{1}] was not saved: {2}", type, login, ex);
                 }
             }
         }
@@ -573,23 +707,15 @@ namespace Vre.Server.RemoteService
         private static void deleteUser(ClientSession session, int userId, IResponseData resp)
         {
             User user = null;
-            string errorReason;
 
             using (UserManager manager = new UserManager(session))
             {
-                user = manager.GetUser(userId);
+                user = manager.Get(userId);
 
-                if (manager.DeleteUser(user, out errorReason))
-                {
-                    resp.ResponseCode = HttpStatusCode.OK;
-                }
-                else
-                {
-                    resp.ResponseCode = HttpStatusCode.Forbidden;
-                    resp.ResponseCodeDescription = errorReason;
-                    resp.Data = new ClientData();
-                    resp.Data.Add("updatedObject", user.GetClientData());
-                }
+                manager.Delete(user);
+                resp.ResponseCode = HttpStatusCode.OK;
+                resp.Data = new ClientData();
+                resp.Data.Add("deleted", 1);
             }
         }
         #endregion
