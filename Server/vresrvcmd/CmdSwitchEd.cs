@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using Vre.Server.BusinessLogic;
 
 namespace Vre.Client.CommandLine
@@ -10,12 +9,12 @@ namespace Vre.Client.CommandLine
         public CmdSwitchEd()
         {
             Name = "switch-ed";
-            Description = "-admin only";
+            Description = "-superadmin only";
         }
 
         public override void ShowHelp()
         {
-            Console.WriteLine("Sets or changes current estate developer for admin.");
+            Console.WriteLine("Sets or changes current estate developer for superadmin.");
             Console.WriteLine("Usage: switch-ed <estate developer id>");
         }
 
@@ -28,9 +27,9 @@ namespace Vre.Client.CommandLine
             else
             {
                 if (Program.UserRole != User.Role.SuperAdmin)
-                    throw new InvalidOperationException("This command is available to admins only.");
+                    throw new InvalidOperationException("This command is available to superadmins only.");
 
-                Program.EstateDeveloperId = elements[0];
+                Program.EstateDeveloperId = int.Parse(elements[0]);
             }
         }
     }

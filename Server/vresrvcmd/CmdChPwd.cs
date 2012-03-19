@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using Vre.Server.BusinessLogic;
 
 namespace Vre.Client.CommandLine
 {

@@ -1,11 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using System.Reflection;
-using System.Text;
 using Vre.Server;
 using Vre.Server.BusinessLogic;
-using System.Collections.Generic;
 
 namespace Vre.Client.CommandLine
 {
@@ -19,11 +17,12 @@ namespace Vre.Client.CommandLine
             addCommand(ref result, new CmdList());
             addCommand(ref result, new CmdSwitchEd());
             addCommand(ref result, new CmdChPwd());
+            addCommand(ref result, new CmdCreate());
 
             return result;
         }
 
-        internal static string EstateDeveloperId = string.Empty;
+        internal static int EstateDeveloperId = -1;
         internal static User.Role UserRole = User.Role.Buyer;
 
         static void Main(string[] args)
@@ -58,7 +57,12 @@ namespace Vre.Client.CommandLine
 
                     while (proxy.Online || string.IsNullOrEmpty(proxy.LoginId))
                     {
-                        Console.Write("{0}@{1}>", proxy.LoginId, EstateDeveloperId);
+                        // command prompt
+                        Console.Write("{0}@{1}>", 
+                            proxy.LoginId, 
+                            (EstateDeveloperId >= 0) ? EstateDeveloperId.ToString() : string.Empty);
+
+                        // read command from console
                         List<string> cmdElements = preParseCommand(Console.ReadLine());
 
                         if (cmdElements.Count > 0)
@@ -156,21 +160,7 @@ namespace Vre.Client.CommandLine
                 Console.WriteLine("  {0} {1}", cmd.Name, cmd.Description);
             Console.WriteLine("Commands and parameters ARE case-sensitive.");
 
-            //Console.WriteLine("create");
             //Console.WriteLine("update");
         }
-
-        #region create
-        private static void showCreateHelp()
-        {
-            Console.WriteLine("Usage: create <entity> [<parameters>]");
-            Console.WriteLine("Where entity can be:");
-            Console.WriteLine("  user -parameters are:");
-            Console.WriteLine("    login -unique new user login; required.");
-            Console.WriteLine("    ed=<estate developer id> -required for any non-admin users.");
-            Console.WriteLine("    role={admin|developer|subcont|sales|buyer} -required.");
-        }
-
-        #endregion
     }
 }

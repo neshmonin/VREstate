@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using Vre.Server.BusinessLogic;
 using System.Text;
+using Vre.Server.BusinessLogic;
 
 namespace Vre.Client.CommandLine
 {
     internal class CmdList : CommandParserBase
     {
-        private enum ListableObject { Unknown, Developer, Site, Building, User }
-
         public CmdList()
         {
             Name = "list";
@@ -20,16 +18,16 @@ namespace Vre.Client.CommandLine
         {
             Console.WriteLine("Usage: list [all] <entity> [<parameters>]");
             Console.WriteLine("Where entity can be:");
-            Console.WriteLine("  developer -no parameters expected; admin only.");
+            Console.WriteLine("  developer -no parameters expected; superadmin only.");
             Console.WriteLine("  site -limited to estate developer scope; parameters are:");
-            Console.WriteLine("    ed=<estate developer id> -optional; admin only;");
+            Console.WriteLine("    ed=<estate developer id> -optional; superadmin only;");
             Console.WriteLine("        set or override current value.");
             Console.WriteLine("  building -parameters are:");
             Console.WriteLine("    site=<construction site id> -required.");
             Console.WriteLine("  user -limited to estate developer scope; parameters are:");
             Console.WriteLine("    role={superadmin|developeradmin|subcontractor|salesperson|buyer}");
             Console.WriteLine("        -optional, defaults to buyer.");
-            Console.WriteLine("    ed=<estate developer id> -optional; admin only;");
+            Console.WriteLine("    ed=<estate developer id> -optional; superadmin only;");
             Console.WriteLine("        set or override current value.");
             Console.WriteLine("    name=<full or partial name> -optional; filter by name.");
             Console.WriteLine("Specifying 'all' parameter shall include deleted objects.");
@@ -38,10 +36,7 @@ namespace Vre.Client.CommandLine
         public override void Parse(ServerProxy proxy, List<string> elements)
         {
             bool listAll = false;
-            ListableObject objToList = ListableObject.Unknown;
             Dictionary<string, string> options;
-            string estateDeveloperId = Program.EstateDeveloperId;
-            string constructionSiteId = string.Empty;
 
             if (0 == elements.Count)
             {
@@ -52,46 +47,28 @@ namespace Vre.Client.CommandLine
             // object name
             //
             string obj = elements[0];
-            if (obj.Equals("developer")) objToList = ListableObject.Developer;
-            else if (obj.Equals("site")) objToList = ListableObject.Site;
-            else if (obj.Equals("building")) objToList = ListableObject.Building;
-            else if (obj.Equals("user")) objToList = ListableObject.User;
-
             elements.RemoveAt(0);
 
             options = parseOptions(elements);
 
             if (options.ContainsKey("all")) listAll = true;
 
-            // extra required/optional parameters' check
-            //
-            switch (objToList)
-            {
-                case ListableObject.Developer:
-                    listDevelopers(proxy, listAll, options);
-                    break;
-
-                case ListableObject.Site:
-                    listSites(proxy, listAll, options);
-                    break;
-
-                case ListableObject.Building:
-                    listBuildings(proxy, listAll, options);
-                    break;
-
-                case ListableObject.User:
-                    listUsers(proxy, listAll, options);
-                    break;
-
-                default:
-                    throw new ArgumentException("Unknown object type to list.");
-            }
+            if (obj.Equals("developer"))
+                listDevelopers(proxy, listAll, options);
+            else if (obj.Equals("site"))
+                listSites(proxy, listAll, options);
+            else if (obj.Equals("building"))
+                listBuildings(proxy, listAll, options);
+            else if (obj.Equals("user"))
+                listUsers(proxy, listAll, options);
+            else
+                throw new ArgumentException("Unknown object type to list.");
         }
 
         private static void listDevelopers(ServerProxy proxy, bool all, Dictionary<string, string> options)
         {
             if (Program.UserRole != User.Role.SuperAdmin)
-                throw new InvalidOperationException("This command is available to admins only.");
+                throw new InvalidOperationException("This command is available to superadmins only.");
 
             ServerResponse resp = proxy.MakeRestRequest(ServerProxy.RequestType.Get, "ed", 
                 "withdeleted=" + (all ? "true" : "false"), null);
@@ -119,16 +96,16 @@ namespace Vre.Client.CommandLine
             StringBuilder query = new StringBuilder();
             string paramValue;
 
-            query.AppendFormat("withdeleted={0}", all);
+            query.AppendFormat("withdeleted={0}", (all ? "true" : "false"));
 
             if (options.TryGetValue("ed", out paramValue))
             {
                 if (Program.UserRole != User.Role.SuperAdmin)
-                    throw new InvalidOperationException("This command is available to admins only.");
+                    throw new InvalidOperationException("Specifying estate developer ID is available to superadmins only.");
             }
             else
             {
-                paramValue = Program.EstateDeveloperId;
+                paramValue = Program.EstateDeveloperId.ToString();
             }
             if (string.IsNullOrEmpty(paramValue))
                 throw new ArgumentException("Estate developer ID must be specified.");
@@ -158,7 +135,7 @@ namespace Vre.Client.CommandLine
             StringBuilder query = new StringBuilder();
             string paramValue;
 
-            query.AppendFormat("withdeleted={0}", all);
+            query.AppendFormat("withdeleted={0}", (all ? "true" : "false"));
 
             if (!options.TryGetValue("site", out paramValue))
             {
@@ -194,7 +171,7 @@ namespace Vre.Client.CommandLine
             string paramValue;
             bool saList = false;
 
-            query.AppendFormat("withdeleted={0}", all);
+            query.AppendFormat("withdeleted={0}", (all ? "true" : "false"));
 
             if (options.TryGetValue("role", out paramValue))
             {
@@ -208,13 +185,13 @@ namespace Vre.Client.CommandLine
             if (options.TryGetValue("ed", out paramValue))
             {
                 if (Program.UserRole != User.Role.SuperAdmin)
-                    throw new InvalidOperationException("This command is available to admins only.");
+                    throw new InvalidOperationException("This command is available to superadmins only.");
                 if (saList)
-                    throw new ArgumentException("Admins list cannot have estate developer id.");
+                    throw new ArgumentException("Superadmins list cannot have estate developer id.");
             }
             else
             {
-                paramValue = Program.EstateDeveloperId;
+                paramValue = Program.EstateDeveloperId.ToString();
             }
             if (saList)
             {

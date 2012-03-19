@@ -40,7 +40,7 @@ namespace Vre.Client.CommandLine
                     if (HttpStatusCode.OK == resp.ResponseCode)
                     {
                         ClientData userInfo = resp.Data;
-                        Program.EstateDeveloperId = userInfo.GetProperty("estateDeveloperId", string.Empty);
+                        Program.EstateDeveloperId = userInfo.GetProperty("estateDeveloperId", -1);
                         Program.UserRole = userInfo.GetProperty("role", User.Role.Buyer);
                     }
                 }

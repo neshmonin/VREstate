@@ -86,6 +86,7 @@
     <Compile Include="CommandParserBase.cs" />
     <Compile Include="CmdSwitchEd.cs" />
     <Compile Include="CmdChPwd.cs" />
+    <Compile Include="CmdCreate.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -35,7 +35,7 @@ namespace Vre.Server.BusinessLogic
                     using (EstateDeveloperDao devDao = new EstateDeveloperDao(_session.DbSession))
                     {
                         if (devDao.GetById(developerId) != null) newUser = new User(developerId, role);
-                        throw new FileNotFoundException("The developer ID supplied does not exist.");
+                        else throw new FileNotFoundException("The developer ID supplied does not exist.");
                     }
                 }
                 else
