@@ -32,6 +32,11 @@ IF ERRORLEVEL 1 GOTO quit
 ..\setup\ready\bin\7z.exe a ..\setup\ready\arc\defconfigs.zip -tzip -mx9 *.config -x!App.config -x!*.vshost.exe.config
 IF ERRORLEVEL 1 GOTO quit
 
+..\setup\ready\bin\7z.exe a console.zip -tzip -mx9 vresrvcmd.exe vrebo.dll
+IF ERRORLEVEL 1 GOTO quit
+COPY /B ..\setup\console.png+console.zip ..\setup\ready\arc\console.png
+IF ERRORLEVEL 1 GOTO quit
+
 CD ..\setup\sql-parts
 
 COPY header.txt+generated.sql+footer.txt ..\ready\sql\vr-setup.sql
