@@ -221,5 +221,30 @@ namespace Vre.Server.RemoteService
         {
             LastUsed = DateTime.UtcNow;
         }
+
+        public override string ToString()
+        {
+            switch (User.UserRole)
+            {
+                case BusinessLogic.User.Role.Buyer:
+                    // TODO: embed authentication types
+                    return string.Format("ed{0}-buyer-plain-{1}", User.EstateDeveloperID, AuthLogin);
+
+                case BusinessLogic.User.Role.DeveloperAdmin:
+                    return string.Format("ed{0}-admin-{1}", User.EstateDeveloperID, AuthLogin);
+
+                case BusinessLogic.User.Role.SalesPerson:
+                    return string.Format("ed{0}-sales-{1}", User.EstateDeveloperID, AuthLogin);
+
+                case BusinessLogic.User.Role.Subcontractor:
+                    return string.Format("ed{0}-subcont-{1}", User.EstateDeveloperID, AuthLogin);
+
+                case BusinessLogic.User.Role.SuperAdmin:
+                    return string.Format("superadmin-{0}", AuthLogin);
+
+                default:
+                    return "?";
+            }
+        }
     }
 }

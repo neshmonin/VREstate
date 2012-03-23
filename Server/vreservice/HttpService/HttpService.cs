@@ -19,6 +19,8 @@ namespace Vre.Server.HttpService
         private static RemoteServiceProvider _rsp;
         private static string _path;
 
+        private static bool _allowExtendedLogging;
+
         public static void PerformStartup()
         {
             ServiceInstances.Logger.Info("Starting HTTP service.");
@@ -27,6 +29,8 @@ namespace Vre.Server.HttpService
 
             //string path = System.Reflection.Assembly.GetExecutingAssembly().Location;
             //path = System.IO.Path.GetDirectoryName(path) + System.IO.Path.DirectorySeparatorChar;
+
+            _allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
 
             string uriText = ServiceInstances.Configuration.GetValue("HttpListenerUri", string.Empty);
             if (string.IsNullOrEmpty(uriText))
@@ -62,6 +66,9 @@ namespace Vre.Server.HttpService
             _httpListener.BeginGetContext(httpCallback, null);
 
             ServiceInstances.Logger.Info("HTTP Service started.");
+
+            if (_allowExtendedLogging)
+                ServiceInstances.RequestLogger.Info("HTTP Service started");
         }
 
         public static void PerformShutdown()
@@ -96,6 +103,15 @@ namespace Vre.Server.HttpService
                     // ctx.Request.IsSecureConnection
 
                     HttpServiceRequest rq = new HttpServiceRequest(ctx, _path);
+
+                    if (_allowExtendedLogging)
+                    {
+                        ClientSession cs = rq.UserInfo.Session;
+                        if (cs != null)
+                            ServiceInstances.RequestLogger.Info("Session={0}; URL={1}", cs, ctx.Request.Url);
+                        else
+                            ServiceInstances.RequestLogger.Info("Anonymous; URL={0}", ctx.Request.Url);
+                    }
 
                     if (!rq.UserInfo.StaleSession)
                     {

@@ -39,6 +39,19 @@ namespace Vre.Server
             }
         }
 
+        private static Logger _requestLogger = null;
+        public static Logger RequestLogger
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    if (null == _requestLogger) _requestLogger = LogManager.GetLogger("Vre.Server.Request");
+                }
+                return _requestLogger;
+            }
+        }
+
         private static FloodPreventor _floodPreventor = null;
         public static FloodPreventor FloodStopper
         {
