@@ -43,9 +43,12 @@ namespace Vre.Server.BusinessLogic
             if (string.IsNullOrWhiteSpace(login)) { errorReason = "Login cannot be whitespace"; return false; }
             
             if (login.Length < 4) { errorReason = "Login is too short"; return false; }
-            // This constraint must relate to DB create script value!
-            if (login.Length > 64) { errorReason = "Login is too long"; return false; }
-
+            // TODO: This constraint must relate to DB create script value!
+            // 12 symbols are: 2 internal login construction service characters and 10 for estate developer ID (32-bit)
+            if (login.Length > (64 - 12)) { errorReason = "Login is too long"; return false; }
+            // See intLoginFromVisible() and loginElementsFromIntLogin() for more details
+            if (login.StartsWith("@")) { errorReason = "Login must start with a letter"; return false; }
+            
             errorReason = null;
             return true;
         }
@@ -56,14 +59,15 @@ namespace Vre.Server.BusinessLogic
             if (string.IsNullOrWhiteSpace(password)) { errorReason = "Password cannot be whitespace"; return false; }
 
             if (password.Length < 4) { errorReason = "Password is too short"; return false; }
-            // This constraint must relate to DB create script value!
+            // TODO: Should ever limit password length?!
             if (password.Length > 64) { errorReason = "Password is too long"; return false; }
 
             errorReason = null;
             return true;
         }
 
-        public bool CreateLogin(LoginType type, string login, string password, int userId, out string errorReason)
+        public bool CreateLogin(LoginType type, User.Role role, int estateDeveloperId, string login, string password, 
+            int userId, out string errorReason)
         {
             bool result = false;
 
@@ -83,13 +87,14 @@ namespace Vre.Server.BusinessLogic
             {
                 using (CredentialsDao dao = new CredentialsDao(_session))
                 {
-                    Credentials item = dao.GetByLogin(type, login);
+                    string intLogin = intLoginFromVisible(role, estateDeveloperId, login);
+                    Credentials item = dao.GetByLogin(type, intLogin);
                     if (null == item)
                     {
                         if (type == LoginType.Plain)
-                            item = new Credentials(login, password, userId, _hashType, _saltSizeBytes);
+                            item = new Credentials(intLogin, password, userId, _hashType, _saltSizeBytes);
                         else
-                            item = new Credentials(type, login, userId);
+                            item = new Credentials(type, intLogin, userId);
 
                         dao.Create(item);
                         result = true;
@@ -105,15 +110,9 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
-        public bool ChangePassword(LoginType type, string login, string currentPassword, string newPassword, out string errorReason)
+        public bool ChangePassword(int userId, string currentPassword, string newPassword, out string errorReason)
         {
             bool result = false;
-
-            if (type != LoginType.Plain)
-            {
-                errorReason = "Cannot change password for external login; use main authentication provider to change password.";
-                return false;
-            }
 
             if (!validatePassword(newPassword, out errorReason)) return false;
 
@@ -121,7 +120,7 @@ namespace Vre.Server.BusinessLogic
             {
                 using (CredentialsDao dao = new CredentialsDao(_session))
                 {
-                    Credentials item = dao.GetByLogin(type, login);
+                    Credentials item = dao.GetByUserId(userId);
                     if (null != item)
                     {
                         if (item.VerifyPassword(currentPassword))
@@ -146,14 +145,15 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
-        public bool AuthenticateUser(LoginType type, string login, string password, out int userId)
+        public bool AuthenticateUser(LoginType type, User.Role role, int estateDeveloperId, string login, string password, 
+            out int userId)
         {
             bool result = false;
             userId = -1;
 
             using (CredentialsDao dao = new CredentialsDao(_session))
             {
-                Credentials item = dao.GetByLogin(type, login);
+                Credentials item = dao.GetByLogin(type, intLoginFromVisible(role, estateDeveloperId, login));
                 if (null != item)
                 {
                     // TODO: Validate login/password pair against external services for external logins
@@ -165,22 +165,28 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
-        public int UserIdByLogin(LoginType type, string login)
+        public int UserIdByLogin(LoginType type, User.Role role, int estateDeveloperId, string login)
         {
             int result = -1;
 
             using (CredentialsDao dao = new CredentialsDao(_session))
             {
-                Credentials item = dao.GetByLogin(type, login);
+                Credentials item = dao.GetByLogin(type, intLoginFromVisible(role, estateDeveloperId, login));
                 if (null != item) result = item.UserId;
             }
 
             return result;
         }
 
-        public bool LoginByUserId(int userId, out LoginType loginType, out string login)
+        public bool LoginByUserId(int userId, 
+            out LoginType loginType, out User.Role role, out int estateDeveloperId, out string login)
         {
-            bool result;
+            bool result = false;
+
+            loginType = LoginType.Plain;
+            role = User.Role.Buyer;
+            estateDeveloperId = -1;
+            login = null;
 
             using (CredentialsDao dao = new CredentialsDao(_session))
             {
@@ -188,21 +194,14 @@ namespace Vre.Server.BusinessLogic
                 if (item != null)
                 {
                     loginType = item.Type;
-                    login = item.Login;
-                    result = true;
-                }
-                else
-                {
-                    loginType = LoginType.Plain;
-                    login = null;
-                    result = false;
+                    result = loginElementsFromIntLogin(item.Login, out role, out estateDeveloperId, out login);
                 }
             }
 
             return result;
         }
 
-        public bool DropLogin(LoginType type, string login)
+        public bool DropLogin(LoginType type, User.Role role, int estateDeveloperId, string login)
         {
             bool result = false;
 
@@ -210,7 +209,7 @@ namespace Vre.Server.BusinessLogic
             {
                 using (CredentialsDao dao = new CredentialsDao(_session))
                 {
-                    Credentials item = dao.GetByLogin(type, login);
+                    Credentials item = dao.GetByLogin(type, intLoginFromVisible(role, estateDeveloperId, login));
                     if (null != item)
                     {
                         dao.Delete(item);
@@ -239,6 +238,64 @@ namespace Vre.Server.BusinessLogic
                     }
                 }
                 if (result) tran.Commit();
+            }
+
+            return result;
+        }
+
+        private static string intLoginFromVisible(User.Role role, int estateDeveloperId, string login)
+        {
+            switch (role)
+            {
+                case User.Role.SuperAdmin:
+                    return login;
+
+                case User.Role.DeveloperAdmin:
+                    return string.Format("@{0}a{1}", estateDeveloperId, login);
+
+                case User.Role.SalesPerson:
+                    return string.Format("@{0}s{1}", estateDeveloperId, login);
+
+                case User.Role.Subcontractor:
+                    return string.Format("@{0}c{1}", estateDeveloperId, login);
+
+                case User.Role.Buyer:
+                    return string.Format("@{0}b{1}", estateDeveloperId, login);
+
+                default:
+                    throw new ArgumentException("Unknown user role");
+            }
+        }
+
+        private static bool loginElementsFromIntLogin(string intLogin,
+            out User.Role role, out int estateDeveloperId, out string login)
+        {
+            bool result = false;
+
+            if (intLogin.StartsWith("@"))
+            {
+                int idx = 1;
+                while ((idx < intLogin.Length) && (intLogin[idx] >= '0') && (intLogin[idx] <= '9')) idx++;
+
+                role = User.Role.Buyer;
+                estateDeveloperId = -1;
+                login = null;
+
+                if ((idx < intLogin.Length) && int.TryParse(intLogin.Substring(1, idx - 1), out estateDeveloperId))
+                {
+                    login = intLogin.Substring(idx + 1);
+                    if ('a' == intLogin[idx]) { role = User.Role.DeveloperAdmin; result = true; }
+                    else if ('s' == intLogin[idx]) { role = User.Role.SalesPerson; result = true; }
+                    else if ('c' == intLogin[idx]) { role = User.Role.Subcontractor; result = true; }
+                    else if ('b' == intLogin[idx]) { role = User.Role.Buyer; result = true; }
+                }
+            }
+            else
+            {
+                role = User.Role.SuperAdmin;
+                estateDeveloperId = -1;
+                login = intLogin;
+                result = true;
             }
 
             return result;

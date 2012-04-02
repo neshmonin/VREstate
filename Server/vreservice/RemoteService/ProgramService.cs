@@ -40,15 +40,21 @@ namespace Vre.Server.RemoteService
             // parse required arguments
             //
             LoginType loginType = parseLoginType(request.Request.Query);
+            User.Role role;
+            int estateDeveloperId;
             string login = request.Request.Query["uid"];
             string password = request.Request.Query["pwd"];
             string sessionId = null;
+            if (!Enum.TryParse<User.Role>(request.Request.Query["role"], true, out role)) role = User.Role.SuperAdmin;
+            // TODO: Add login by Estate Developer Alias
+            if (!int.TryParse(request.Request.Query["ed"], out estateDeveloperId)) estateDeveloperId = -1;
 
             // authenticate
             //
             if ((!string.IsNullOrWhiteSpace(login)) && (!string.IsNullOrWhiteSpace(password)))
             {
-                sessionId = ServiceInstances.SessionStore.LoginUser(request.UserInfo.EndPoint, loginType, login, password);
+                sessionId = ServiceInstances.SessionStore.LoginUser(request.UserInfo.EndPoint, 
+                    loginType, role, estateDeveloperId, login, password);
             }
 
             // produce output
@@ -73,25 +79,27 @@ namespace Vre.Server.RemoteService
             //
             LoginType loginType = parseLoginType(request.Request.Query);
             string login = request.Request.Query["uid"];
+            User.Role role;
+            int estateDeveloperId;
             string password = request.Request.Query["pwd"];
             string newPassword = request.Request.Query["npwd"];
+            if (!Enum.TryParse<User.Role>(request.Request.Query["role"], true, out role)) role = User.Role.Buyer;
+            // TODO: Add login by Estate Developer Alias
+            if (!int.TryParse(request.Request.Query["ed"], out estateDeveloperId)) estateDeveloperId = -1;
 
             // authenticate
             //
             using (ISession session = NHibernateHelper.GetSession())
             {
-                using (IAuthentication auth = new Authentication(session))
+                using (UserManager manager = new UserManager(request.UserInfo.Session))
                 {
-                    string errorReason;
-                    if (auth.ChangePassword(loginType, login, password, newPassword, out errorReason))
+                    if (string.IsNullOrEmpty(login))  // self-service :)
                     {
-                        request.Response.ResponseCode = HttpStatusCode.OK;
-                        request.Response.Data = new ClientData();
-                        request.Response.Data.Add("updated", 1);
+                        manager.ChangePassword(request.UserInfo.Session.User, password, newPassword);
                     }
                     else
                     {
-                        throw new InvalidOperationException(errorReason);
+                        manager.ChangePassword(loginType, role, estateDeveloperId, login, password, newPassword);
                     }
                 }
             }

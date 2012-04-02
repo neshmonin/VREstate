@@ -51,7 +51,7 @@ namespace Vre.Server.BusinessLogic
 
                         using (IAuthentication auth = new Authentication(_session.DbSession))
                         {
-                            if (auth.CreateLogin(type, login, password, newUser.AutoID, out errorReason))
+                            if (auth.CreateLogin(type, role, developerId, login, password, newUser.AutoID, out errorReason))
                                 tran.Commit();
                             else
                                 throw new InvalidOperationException(errorReason);
@@ -61,7 +61,7 @@ namespace Vre.Server.BusinessLogic
             }
         }
 
-        public static User Login(LoginType type, string login, string password)
+        public static User Login(LoginType type, User.Role role, int estateDeveloperId, string login, string password)
         {
             User result = null;
 
@@ -70,7 +70,7 @@ namespace Vre.Server.BusinessLogic
                 using (IAuthentication auth = new Authentication(session))
                 {
                     int userId;
-                    if (auth.AuthenticateUser(type, login, password, out userId))
+                    if (auth.AuthenticateUser(type, role, estateDeveloperId, login, password, out userId))
                     {
                         using (UserDao dao = new UserDao(session)) result = dao.GetById(userId);
                     }
@@ -94,13 +94,13 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
-        public User Get(LoginType type, string login)
+        public User Get(LoginType type, User.Role role, int estateDeveloperId, string login)
         {
             User result = null;
 
             using (IAuthentication auth = new Authentication(_session.DbSession))
             {
-                int userId = auth.UserIdByLogin(type, login);
+                int userId = auth.UserIdByLogin(type, role, estateDeveloperId, login);
                 if (userId >= 0)
                 {
                     using (UserDao dao = new UserDao(_session.DbSession)) result = dao.GetById(userId);
@@ -164,11 +164,43 @@ namespace Vre.Server.BusinessLogic
         //    }
         //}
 
-        public bool ChangePassword(LoginType type, string login, string currentPassword, string newPassword, out string errorReason)
+        public void ChangePassword(LoginType type, User.Role role, int estateDeveloperId, string login, 
+            string currentPassword, string newPassword)
         {
             using (IAuthentication auth = new Authentication(_session.DbSession))
             {
-                return auth.ChangePassword(type, login, currentPassword, newPassword, out errorReason);
+                int userId;
+                if (auth.AuthenticateUser(type, role, estateDeveloperId, login, currentPassword, out userId))
+                {
+                    User u;
+                    using (UserDao dao = new UserDao(_session.DbSession)) u = dao.GetById(userId);
+
+                    RolePermissionCheck.CheckDeleteUser(_session, u);
+
+                    string errorReason;
+                    if (!auth.ChangePassword(userId, currentPassword, newPassword, out errorReason))
+                    {
+                        throw new PermissionException(errorReason);
+                    }
+                }
+                else
+                {
+                    throw new PermissionException("Unknown login or bad current password");
+                }
+            }
+        }
+
+        public void ChangePassword(User user, string currentPassword, string newPassword)
+        {
+            RolePermissionCheck.CheckDeleteUser(_session, user);
+
+            using (IAuthentication auth = new Authentication(_session.DbSession))
+            {
+                string errorReason;
+                if (!auth.ChangePassword(user.AutoID, currentPassword, newPassword, out errorReason))
+                {
+                    throw new PermissionException(errorReason);
+                }
             }
         }
 

@@ -41,7 +41,8 @@ namespace Vre.Server.RemoteService
 
         public int ClientKeepalivePeriodSec { get { return _cleanupTimeoutSec / 2; } }
 
-        public string LoginUser(IPEndPoint ep, LoginType loginType, string login, string password)
+        public string LoginUser(IPEndPoint ep, LoginType loginType, 
+            User.Role role, int estatedeveloperId, string login, string password)
         {
             // Flood prevention.
             // This is not a DoS prevention, rather a password brute-force stopper.
@@ -50,7 +51,7 @@ namespace Vre.Server.RemoteService
             ServiceInstances.Logger.Info("User login attempt from {0}: type='{1}', login='{2}'.",
                 ep, loginType, login);
 
-            User user = UserManager.Login(loginType, login, password);
+            User user = UserManager.Login(loginType, role, estatedeveloperId, login, password);
 
             if (user != null)
             {

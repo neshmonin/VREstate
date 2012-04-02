@@ -515,8 +515,10 @@ namespace Vre.Server.RemoteService
                     result[idx] = list[idx].GetClientData();
 
                     LoginType lt;
+                    User.Role ur;
+                    int ed;
                     string login;
-                    if (auth.LoginByUserId(list[idx].AutoID, out lt, out login))
+                    if (auth.LoginByUserId(list[idx].AutoID, out lt, out ur, out ed, out login))
                     {
                         result[idx].Add("loginType", lt);
                         result[idx].Add("login", login);
@@ -689,7 +691,7 @@ namespace Vre.Server.RemoteService
                 try
                 {
                     // create contact info block with any added fields from inbound JSON
-                    User u = manager.Get(type, login);
+                    User u = manager.Get(type, role, estateDeveloperId, login);
                     u.UpdateFromClient(data);
                     resp.ResponseCode = HttpStatusCode.OK;
                 }
