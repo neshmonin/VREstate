@@ -12,7 +12,7 @@ namespace Vre.Server.HttpService
 {
     internal class HttpServiceRequest : IServiceRequest
     {
-        private static Dictionary<string, string> _contentTypeByExtension = new Dictionary<string, string>();
+        public static Dictionary<string, string> ContentTypeByExtension = new Dictionary<string, string>();
         private static bool _allowExtendedLogging = false;
         private static int _fileBufferSize = 16384;
 
@@ -122,21 +122,21 @@ namespace Vre.Server.HttpService
         {
             // http://www.iana.org/assignments/media-types/
 
-            _contentTypeByExtension.Add("html", "text/html");
-            _contentTypeByExtension.Add("htm", "text/html");
-            _contentTypeByExtension.Add("txt", "text/plain");
-            _contentTypeByExtension.Add("xml", "text/xml");
-            _contentTypeByExtension.Add("css", "text/css");
+            ContentTypeByExtension.Add("html", "text/html");
+            ContentTypeByExtension.Add("htm", "text/html");
+            ContentTypeByExtension.Add("txt", "text/plain");
+            ContentTypeByExtension.Add("xml", "text/xml");
+            ContentTypeByExtension.Add("css", "text/css");
 
-            _contentTypeByExtension.Add("gif", "image/gif");
-            _contentTypeByExtension.Add("jpeg", "image/jpeg");
-            _contentTypeByExtension.Add("jpg", "image/jpeg");
-            _contentTypeByExtension.Add("png", "image/png");
+            ContentTypeByExtension.Add("gif", "image/gif");
+            ContentTypeByExtension.Add("jpeg", "image/jpeg");
+            ContentTypeByExtension.Add("jpg", "image/jpeg");
+            ContentTypeByExtension.Add("png", "image/png");
 
-            _contentTypeByExtension.Add("js", "application/javascript");
-            _contentTypeByExtension.Add("json", "application/json");
-            _contentTypeByExtension.Add("kml", "application/vnd.google-earth.kml+xml");
-            _contentTypeByExtension.Add("kmz", "application/vnd.google-earth.kmz");
+            ContentTypeByExtension.Add("js", "application/javascript");
+            ContentTypeByExtension.Add("json", "application/json");
+            ContentTypeByExtension.Add("kml", "application/vnd.google-earth.kml+xml");
+            ContentTypeByExtension.Add("kmz", "application/vnd.google-earth.kmz");
 
             _allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
 
@@ -147,13 +147,16 @@ namespace Vre.Server.HttpService
         public IRequestData Request { get; private set; }
         public IResponseData Response { get; private set; }
 
+        static HttpServiceRequest()
+        {
+            lock (ContentTypeByExtension)
+            {
+                initialize();
+            }
+        }
+
         public HttpServiceRequest(HttpListenerContext ctx, string servicePath)
         {
-            lock (_contentTypeByExtension)
-            {
-                if (_contentTypeByExtension.Count < 1) initialize();
-            }
-
             // TODO: verify this is valid:
             // ctx.Request.ContentEncoding
 
@@ -193,7 +196,7 @@ namespace Vre.Server.HttpService
                 string type = Response.DataStreamContentType;
                 if (!type.Contains("/"))  // result if a file extension rather a MIME type: convert it
                 {
-                    if (!_contentTypeByExtension.TryGetValue(type, out type))
+                    if (!ContentTypeByExtension.TryGetValue(type, out type))
                         throw new InvalidDataException("Response type in not known.");
                 }
                 response.ContentType = type;
@@ -208,7 +211,7 @@ namespace Vre.Server.HttpService
                 //    sw.Write(JavaScriptHelper.ClientDataToJson(Response.Data));
 
                 response.ContentEncoding = Encoding.UTF8;
-                response.ContentType = _contentTypeByExtension["json"];
+                response.ContentType = ContentTypeByExtension["json"];
 
                 byte[] resp = Encoding.UTF8.GetBytes(JavaScriptHelper.ClientDataToJson(Response.Data));
                 response.OutputStream.Write(resp, 0, resp.Length);
