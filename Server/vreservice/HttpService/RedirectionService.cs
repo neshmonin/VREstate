@@ -188,12 +188,10 @@ namespace Vre.Server.HttpService
                 if (k.Equals("project"))
                 {
                     finalUri = ctx.Request.QueryString[k];
-                    break;
                 }
-                if (k.Equals("test"))
+                else if (k.Equals("test"))
                 {
                     testMode = ctx.Request.QueryString[k].Equals("true");
-                    break;
                 }
             }
 
@@ -225,7 +223,7 @@ namespace Vre.Server.HttpService
                     aliasName = ctx.Request.QueryString[k];
                     if (null == _map.UriByAlias(aliasName)) aliasName = null;
                 }
-                if (k.Equals("image"))
+                else if (k.Equals("image"))
                 {
                     imageName = ctx.Request.QueryString[k];
                 }
