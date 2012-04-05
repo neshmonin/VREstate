@@ -25,7 +25,7 @@ namespace Vre.Server.HttpService
         private static string _path;
         private static string _buttonStorePath;
         private static string _defaultRedirectUri;
-        private static AliasMap _map;
+        private static AliasMap _map, _testMap;
         private static ButtonStoreFsNameCache _imagePathCache;
         private static bool _allowExtendedLogging;
 
@@ -53,7 +53,8 @@ namespace Vre.Server.HttpService
                 _imagePathCache = new ButtonStoreFsNameCache(_buttonStorePath);
             }
 
-            _map = new AliasMap();
+            _map = new AliasMap(ServiceInstances.Configuration.GetValue("RedirectionAliasMapFile", "aliases.config"));
+            _testMap = new AliasMap(ServiceInstances.Configuration.GetValue("RedirectionTestAliasMapFile", "aliases.test.config"));
 
             string uriText = ServiceInstances.Configuration.GetValue("HttpListenerUri", string.Empty);
             if (string.IsNullOrEmpty(uriText))
@@ -179,17 +180,25 @@ namespace Vre.Server.HttpService
 
         private static void redirect(HttpListenerContext ctx, string browserKey)
         {
-            string finalUri = _defaultRedirectUri;
+            string finalUri = null;
+            bool testMode = false;
 
             foreach (string k in ctx.Request.QueryString.AllKeys)
             {
                 if (k.Equals("project"))
                 {
-                    finalUri = _map.UriByAlias(ctx.Request.QueryString[k]);
-                    if (null == finalUri) finalUri = _defaultRedirectUri;
+                    finalUri = ctx.Request.QueryString[k];
+                    break;
+                }
+                if (k.Equals("test"))
+                {
+                    testMode = ctx.Request.QueryString[k].Equals("true");
                     break;
                 }
             }
+
+            if (finalUri != null) finalUri = testMode ? _testMap.UriByAlias(finalUri) : _map.UriByAlias(finalUri);
+            if (null == finalUri) finalUri = _defaultRedirectUri;
 
             string queryString = ctx.Request.Url.Query;
             if (queryString.Length > 0)
@@ -460,10 +469,10 @@ namespace Vre.Server.HttpService
         private string _filePath;
         private Dictionary<string, string> _map;
 
-        public AliasMap()
+        public AliasMap(string fileName)
         {
-            _filePath = ServiceInstances.Configuration.GetValue("RedirectionAliasMapFile", string.Empty);
-            if (string.IsNullOrEmpty(_filePath)) _filePath = "aliases.config";
+            _filePath = fileName;
+
             if (!Path.IsPathRooted(_filePath)) 
                 _filePath = Path.Combine(Path.GetDirectoryName(ServiceInstances.Configuration.FilePath), _filePath);
 
