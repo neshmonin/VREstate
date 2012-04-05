@@ -22,12 +22,15 @@ namespace Vre.Server.RemoteService
             _allowedFileExtensions = Utilities.FromCsv(ServiceInstances.Configuration.GetValue("AllowedServedFileExtensions", string.Empty));
         }
 
-        private static bool isPathValid(string path)
+        public static bool IsPathValid(string path, bool allowSubfolder)
         {
             if (string.IsNullOrWhiteSpace(path)) return false;
 
             if (path.IndexOfAny(_invalidPathChars) >= 0) return false;
-            //if (path.IndexOfAny(_invalidFileNameChars) >= 0) return false; - cannot request a file from subfolder if this is uncommented
+            if (!allowSubfolder)
+            {
+                if (path.IndexOfAny(_invalidFileNameChars) >= 0) return false;
+            }
 
             if (path.Contains("..") || path.StartsWith("\\") || path.StartsWith("/")) return false;
 
@@ -140,7 +143,7 @@ namespace Vre.Server.RemoteService
         private void processFileRequest(string file, out string resourceType, out string resourcePath)
         {
             // validate path
-            if (!isPathValid(file)) throw new FileNotFoundException("Path is invalid.");
+            if (!IsPathValid(file, true)) throw new FileNotFoundException("Path is invalid.");
 
             // validate file type: only certain file types are accessible (!)
             resourceType = Path.GetExtension(file).ToLower().Substring(1);

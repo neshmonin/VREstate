@@ -156,6 +156,7 @@
     <Compile Include="FileCacheManager.cs" />
     <Compile Include="FloodPreventor.cs" />
     <Compile Include="HttpService\RedirectionService.cs" />
+    <Compile Include="HttpService\Statistics.cs" />
     <Compile Include="Managers\DeveloperManager.cs" />
     <Compile Include="Managers\RolePermissionCheck.cs" />
     <Compile Include="ModelCache\ModelCache.cs" />

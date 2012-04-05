@@ -135,8 +135,8 @@ namespace Vre.Server
                         break;
 
                     case ServerRole.Redirector:
-                        Redirection.HttpService.HttpService.PerformStartup();
-                        _listeners.AddRange(Redirection.HttpService.HttpService.Listeners);
+                        RedirectionService.PerformStartup();
+                        _listeners.AddRange(RedirectionService.Listeners);
                         break;
                 }
             }
@@ -153,7 +153,7 @@ namespace Vre.Server
                         break;
 
                     case ServerRole.Redirector:
-                        Redirection.HttpService.HttpService.PerformShutdown();
+                        RedirectionService.PerformShutdown();
                         break;
                 }
 

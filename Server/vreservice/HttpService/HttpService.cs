@@ -102,15 +102,17 @@ namespace Vre.Server.HttpService
                     // Currently done in Vre.Server.RemoveService.DataService as all other services may be non-secure
                     // ctx.Request.IsSecureConnection
 
+                    string browserKey = Statistics.GetBrowserId(ctx);
+
                     HttpServiceRequest rq = new HttpServiceRequest(ctx, _path);
 
                     if (_allowExtendedLogging)
                     {
                         ClientSession cs = rq.UserInfo.Session;
                         if (cs != null)
-                            ServiceInstances.RequestLogger.Info("Session={0}; URL={1}", cs, ctx.Request.Url);
+                            ServiceInstances.RequestLogger.Info("Session={0}; BK={1}; URL={2}", cs, browserKey, ctx.Request.Url);
                         else
-                            ServiceInstances.RequestLogger.Info("Anonymous; URL={0}", ctx.Request.Url);
+                            ServiceInstances.RequestLogger.Info("Anonymous; BK={0}; URL={1}", browserKey, ctx.Request.Url);
                     }
 
                     if (!rq.UserInfo.StaleSession)

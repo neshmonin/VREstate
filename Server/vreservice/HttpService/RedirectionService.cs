@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
-using Vre.Server.RemoteService;
-using System.Threading;
 using System.IO;
+using System.Net;
 using System.Xml;
-using Vre.Server.HttpService;
+using Vre.Server.RemoteService;
 
-namespace Vre.Server.Redirection.HttpService
+namespace Vre.Server.HttpService
 {
-    internal class HttpService
+    internal class RedirectionService
     {
         enum ServiceType { Unknown, Redirection, Button }
         private const string _defaultImage = "default.png";
@@ -28,9 +26,8 @@ namespace Vre.Server.Redirection.HttpService
         private static string _buttonStorePath;
         private static string _defaultRedirectUri;
         private static AliasMap _map;
+        private static ButtonStoreFsNameCache _imagePathCache;
         private static bool _allowExtendedLogging;
-
-        private static Dictionary<string, string> _imagePathCache = new Dictionary<string, string>();
 
         public static void PerformStartup()
         {
@@ -48,7 +45,12 @@ namespace Vre.Server.Redirection.HttpService
             if (string.IsNullOrWhiteSpace(_buttonStorePath))
             {
                 _buttonStorePath = null;
+                _imagePathCache = null;
                 ServiceInstances.Logger.Error("RedirectorButtonsStore parameter is not set; buttons shall not be provided.");
+            }
+            else
+            {
+                _imagePathCache = new ButtonStoreFsNameCache(_buttonStorePath);
             }
 
             _map = new AliasMap();
@@ -117,73 +119,33 @@ namespace Vre.Server.Redirection.HttpService
                 {
                     if (ctx.Request.HttpMethod.Equals("GET", StringComparison.InvariantCultureIgnoreCase))
                     {
+                        string browserKey = Statistics.GetBrowserId(ctx);
+
                         if (_allowExtendedLogging)
-                            ServiceInstances.RequestLogger.Info(ctx.Request.Url);
-
-                        Cookie browserId = ctx.Request.Cookies["a"];
-                        string browserKey;
-
-                        if (null == browserId)
-                        {
-                            browserId = new Cookie("a", Guid.NewGuid().ToString());
-                            browserId.Expires = DateTime.Now.AddYears(10);
-                            ctx.Response.Cookies.Add(browserId);
-                        }
-                        browserKey = browserId.Value;
+                            ServiceInstances.RequestLogger.Info("{0}: {1}", browserKey, ctx.Request.Url);
 
                         string path = ctx.Request.Url.LocalPath;
                         if (path.StartsWith(_path))
                         {
                             path = path.Remove(0, _path.Length);
 
-                            string finalUri = _defaultRedirectUri;
-                            string[] pathElements = path.Split('/');
-                            if (pathElements.Length >= 2)
+                            switch (serviceTypeByName(path))
                             {
-                                ServiceType st = serviceTypeByName(pathElements[0]);
-                                string uriBase = _map.UriByAlias(pathElements[1]);
-                                if (uriBase != null)
-                                {
-                                    switch (st)
-                                    {
-                                        case ServiceType.Redirection:
-                                            if (2 == pathElements.Length)
-                                            {
-                                                string q = ctx.Request.Url.Query;
-                                                if (string.IsNullOrWhiteSpace(q)) finalUri = uriBase;
-                                                else
-                                                {
-                                                    if (q.StartsWith("?")) q = q.Substring(1);
-                                                    finalUri = uriBase + "&" + q;
-                                                }
-                                            }
-                                            break;
+                                case ServiceType.Redirection:
+                                    redirect(ctx, browserKey);
+                                    break;
 
-                                        case ServiceType.Button:
-                                            if (3 == pathElements.Length)
-                                            {
-                                                processButtonRequest(pathElements[1], pathElements[2], ctx.Response);
-                                                finalUri = null;
-                                            }
-                                            else
-                                            {
-                                                streamImage(Path.Combine(_buttonStorePath, _defaultImage), 
-                                                    _defaultImageExtension, ctx.Response);
-                                            }
-                                            break;
-                                    }
-                                }
+                                case ServiceType.Button:
+                                    processButtonRequest(ctx, browserKey);
+                                    break;
+
+                                default:
+                                    ctx.Response.Redirect(_defaultRedirectUri);
+                                    break;
                             }
-                            //ctx.Request.UrlReferrer;
-                            // TODO: save statistics
-                            
-                            if (finalUri != null) ctx.Response.Redirect(finalUri);
                         }
                         else
                         {
-                            //ctx.Request.UrlReferrer;
-                            // TODO: save statistics
-
                             ctx.Response.Redirect(_defaultRedirectUri);
                         }
                     }
@@ -215,34 +177,72 @@ namespace Vre.Server.Redirection.HttpService
             return ServiceType.Unknown;
         }
 
-        private static void processButtonRequest(string aliasName, string imageName, HttpListenerResponse response)
+        private static void redirect(HttpListenerContext ctx, string browserKey)
         {
-            string pathElement = aliasName + Path.DirectorySeparatorChar + imageName;
-            string extension;
-            lock (_imagePathCache) if (!_imagePathCache.TryGetValue(pathElement, out extension)) extension = null;
-            if (null == extension)
-            {
-                extension = deriveExtension(aliasName, imageName);
-                if (extension != null)
-                    lock (_imagePathCache)
-                        if (!_imagePathCache.ContainsKey(pathElement))
-                            _imagePathCache.Add(pathElement, extension);
-            }
+            string finalUri = _defaultRedirectUri;
 
-            if (extension != null)
+            foreach (string k in ctx.Request.QueryString.AllKeys)
             {
-                try
+                if (k.Equals("project"))
                 {
-                    streamImage(Path.Combine(_buttonStorePath, pathElement) + extension, extension, response);
-                }
-                catch (FileNotFoundException)
-                {
-                    extension = null;
+                    finalUri = _map.UriByAlias(ctx.Request.QueryString[k]);
+                    if (null == finalUri) finalUri = _defaultRedirectUri;
+                    break;
                 }
             }
 
-            if (null == extension)
-                streamImage(Path.Combine(_buttonStorePath, _defaultImage), _defaultImageExtension, response);
+            string queryString = ctx.Request.Url.Query;
+            if (queryString.Length > 0)
+            {
+                if (finalUri.Contains("?")) finalUri += "&" + queryString.Substring(1);
+                else finalUri += queryString;
+            }
+
+            //ctx.Request.UrlReferrer;
+            // TODO: save statistics
+
+            ctx.Response.Redirect(finalUri);
+        }
+
+        private static void processButtonRequest(HttpListenerContext ctx, string browserKey)
+        {
+            string aliasName = null;
+            string imageName = "default";
+
+            foreach (string k in ctx.Request.QueryString.AllKeys)
+            {
+                if (k.Equals("project"))
+                {
+                    aliasName = ctx.Request.QueryString[k];
+                    if (null == _map.UriByAlias(aliasName)) aliasName = null;
+                }
+                if (k.Equals("image"))
+                {
+                    imageName = ctx.Request.QueryString[k];
+                }
+            }
+            
+            bool served = false;
+
+            if (aliasName != null)
+            {
+                if (!RemoteServiceProvider.IsPathValid(imageName, false)) imageName = "default";
+                
+                string fullPath = (_imagePathCache != null) ? _imagePathCache.PathByHint(aliasName, imageName) : null;
+
+                if (fullPath != null)
+                {
+                    streamImage(fullPath, Path.GetExtension(fullPath), ctx.Response);
+                    served = true;
+                }
+            }
+
+            if (!served)
+                streamImage(Path.Combine(_buttonStorePath, _defaultImage), _defaultImageExtension, ctx.Response);
+
+            //ctx.Request.UrlReferrer;
+            // TODO: save statistics
+
         }
 
         private static string deriveExtension(string aliasName, string imageName)
@@ -286,8 +286,177 @@ namespace Vre.Server.Redirection.HttpService
         }
     }
 
+    internal class ButtonStoreFsNameCache
+    {
+        private static Dictionary<string, string> _cache = new Dictionary<string, string>();
+        private FileSystemWatcher _watcher;
+        private string _path;
+
+        public ButtonStoreFsNameCache(string path)
+        {
+            _path = path;
+            if (_path.EndsWith(new string(Path.DirectorySeparatorChar, 1))) _path = _path.Substring(0, _path.Length - 1);
+
+            _watcher = null;
+            initializeWatcher();
+        }
+
+        public string PathByHint(string aliasName, string imageName)
+        {
+            string result;
+            string hint = Path.Combine(aliasName, imageName);
+            lock (_cache)
+            {
+                if (!_cache.TryGetValue(hint, out result))
+                {
+                    result = deriveExtension(aliasName, imageName);
+                    _cache.Add(hint, result);
+                }
+            }
+            return result;
+        }
+
+        private string deriveExtension(string aliasName, string imageName)
+        {
+            string result = null;
+
+            try
+            {
+                foreach (string file in Directory.EnumerateFiles(
+                    Path.Combine(_path, aliasName), imageName + ".*", SearchOption.TopDirectoryOnly))
+                {
+                    result = file;
+                    break;
+                }
+            }
+            catch (DirectoryNotFoundException) { }
+
+            return result;
+        }
+
+        private void initializeWatcher()
+        {
+            lock (this)
+            {
+                if (_watcher != null) return;
+
+                _watcher = new FileSystemWatcher(_path);
+                _watcher.Filter = "*.*";
+                _watcher.IncludeSubdirectories = true;
+                _watcher.EnableRaisingEvents = false;
+
+                //_watcher.Changed += new FileSystemEventHandler(_watcher_CCD);
+                _watcher.Created += new FileSystemEventHandler(_watcher_Created);
+                _watcher.Deleted += new FileSystemEventHandler(_watcher_Deleted);
+                _watcher.Renamed += new RenamedEventHandler(_watcher_Renamed);
+                _watcher.Error += new ErrorEventHandler(_watcher_Error);
+
+                _watcher.EnableRaisingEvents = true;
+            }
+        }
+
+        private void _watcher_Error(object sender, ErrorEventArgs e)
+        {
+            lock (sender)
+            {
+                ServiceInstances.Logger.Error("BFS: File system watcher failed.  Recreating.\r\n{0}", e.GetException());
+                try { _watcher.Dispose(); }
+                catch { }
+                _watcher = null;
+                initializeWatcher();
+            }
+        }
+
+        private void _watcher_Created(object sender, FileSystemEventArgs e)
+        {
+            lock (sender)
+            {
+                ServiceInstances.Logger.Info("BSC: Detected added file: \"{0}\"", e.FullPath);
+                processAdd(e.FullPath);
+            }
+        }
+
+        private void _watcher_Deleted(object sender, FileSystemEventArgs e)
+        {
+            lock (sender)
+            {
+                ServiceInstances.Logger.Info("BSC: Detected file removal: \"{0}\"", e.FullPath);
+                processDelete(e.FullPath);
+            }
+        }
+
+        private void _watcher_Renamed(object sender, RenamedEventArgs e)
+        {
+            lock (sender)
+            {
+                ServiceInstances.Logger.Info("BSC: Detected file rename: \"{0}\" -> \"{1}\"", e.OldFullPath, e.FullPath);
+                processDelete(e.OldFullPath);
+                processAdd(e.FullPath);
+            }
+        }
+
+        private void processAdd(string fullPath)
+        {
+            string fullPathNoExtension = Path.Combine(Path.GetDirectoryName(fullPath),
+                Path.GetFileNameWithoutExtension(fullPath));
+            if (fullPathNoExtension.StartsWith(_path, StringComparison.InvariantCultureIgnoreCase))
+            {
+                string createdHint = fullPathNoExtension.Substring(_path.Length + 1);
+                lock (_cache)
+                {
+                    string foundKey = null;
+                    foreach (string hint in _cache.Keys)
+                    {
+                        if (hint.Equals(createdHint, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            foundKey = hint;
+                            break;
+                        }
+                    }
+                    if (foundKey != null)
+                    {
+                        if (null == _cache[foundKey]) _cache[foundKey] = fullPath;
+                        // otherwise it is a duplicate with a different extension
+                    }
+                }
+            }
+        }
+
+        private void processDelete(string fullPath)
+        {
+            lock (_cache)
+            {
+                string foundKey = null;
+                foreach (KeyValuePair<string, string> kvp in _cache)
+                {
+                    if (null == kvp.Value) continue;
+                    if (kvp.Value.Equals(fullPath, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        foundKey = kvp.Key;
+                        break;
+                    }
+                }
+                if (foundKey != null)
+                {
+                    string[] path = foundKey.Split(Path.DirectorySeparatorChar);
+                    if (2 == path.Length)
+                    {
+                        // try looking for other files with same name and different extension
+                        _cache[foundKey] = deriveExtension(path[0], path[1]);
+                    }
+                    else  // dunno what to do!
+                    {
+                        _cache[foundKey] = null;
+                        ServiceInstances.Logger.Error("BSC: Found an unknowk cache key type: '{0}'", foundKey);
+                    }
+                }
+            }
+        }
+    }
+
     internal class AliasMap
     {
+        private FileSystemWatcher _watcher;
         private string _filePath;
         private Dictionary<string, string> _map;
 
@@ -299,9 +468,8 @@ namespace Vre.Server.Redirection.HttpService
                 _filePath = Path.Combine(Path.GetDirectoryName(ServiceInstances.Configuration.FilePath), _filePath);
 
             _map = null;
-            reReadMap();
-
-            // TODO: implement auto re-read
+            _watcher = null;
+            initializeWatcher();
         }
 
         public string UriByAlias(string alias)
@@ -311,6 +479,71 @@ namespace Vre.Server.Redirection.HttpService
                 string result;
                 if (!_map.TryGetValue(alias, out result)) result = null;
                 return result;
+            }
+        }
+
+        private void initializeWatcher()
+        {
+            lock (this)
+            {
+                if (_watcher != null) return;
+
+                _watcher = new FileSystemWatcher(Path.GetDirectoryName(_filePath));
+                _watcher.Filter = Path.GetFileName(_filePath);
+                _watcher.IncludeSubdirectories = false;
+                _watcher.EnableRaisingEvents = false;
+
+                _watcher.Changed += new FileSystemEventHandler(_watcher_Changed);
+                _watcher.Created += new FileSystemEventHandler(_watcher_Created);
+                _watcher.Deleted += new FileSystemEventHandler(_watcher_Deleted);
+                _watcher.Error += new ErrorEventHandler(_watcher_Error);
+
+                ServiceInstances.Logger.Info("AC: Started reading alias map.");
+                reReadMap();
+                ServiceInstances.Logger.Info("AC: Reading alias map done.");
+
+                _watcher.EnableRaisingEvents = true;
+            }
+        }
+
+        private void _watcher_Error(object sender, ErrorEventArgs e)
+        {
+            lock (this)
+            {
+                ServiceInstances.Logger.Error("AC: File system watcher failed.  Recreating.\r\n{0}", e.GetException());
+                try { _watcher.Dispose(); }
+                catch { }
+                _watcher = null;
+                initializeWatcher();
+            }
+        }
+
+        private void _watcher_Deleted(object sender, FileSystemEventArgs e)
+        {
+            lock (this)
+            {
+                ServiceInstances.Logger.Info("AC: Detected removal of alias map: \"{0}\"", e.FullPath);
+                // NOOP; cache?
+            }
+        }
+
+        private void _watcher_Created(object sender, FileSystemEventArgs e)
+        {
+            lock (this)
+            {
+                ServiceInstances.Logger.Info("AC: Started reading alias map.");
+                reReadMap();
+                ServiceInstances.Logger.Info("AC: Reading alias map done.");
+            }
+        }
+
+        private void _watcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            lock (this)
+            {
+                ServiceInstances.Logger.Info("AC: Started reading alias map.");
+                reReadMap();
+                ServiceInstances.Logger.Info("AC: Reading alias map done.");
             }
         }
 
