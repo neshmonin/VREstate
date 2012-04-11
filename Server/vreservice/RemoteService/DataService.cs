@@ -10,10 +10,19 @@ namespace Vre.Server.RemoteService
 {
     internal class DataService
     {
+        private static bool _configured = false;
+        private static bool _allowUnsecureService = true;
+
         public const string ServicePathPrefix = ServicePathElement0 + "/";
         private const string ServicePathElement0 = "data";
 
         enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType }
+
+        private static void configure()
+        {
+            _allowUnsecureService = ServiceInstances.Configuration.GetValue("AllowSensitiveDataOverNonSecureConnection", false);
+            _configured = true;
+        }
 
         public static void ProcessGetRequest(IServiceRequest request)
         {
@@ -22,8 +31,10 @@ namespace Vre.Server.RemoteService
             long generation;
             bool includeDeleted;
 
-            // TODO: SECURITY: configurable required SSL check
-            //if (!request.UserInfo.Session.TrustedConnection) throw new PermissionException("Service available only over secure connection.");
+            if (!_configured) configure();
+
+            if (!_allowUnsecureService && !request.UserInfo.Session.TrustedConnection) 
+                throw new PermissionException("Service available only over secure connection.");
 
             getPathElements(request.Request.Path, out mo, out objectId);
 
@@ -123,6 +134,10 @@ namespace Vre.Server.RemoteService
             ModelObject mo;
             int objectId;
 
+            if (!_configured) configure();
+
+            if (!request.UserInfo.Session.TrustedConnection) throw new PermissionException("Service available only over secure connection.");
+
             getPathElements(request.Request.Path, out mo, out objectId);
             if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
 
@@ -147,6 +162,10 @@ namespace Vre.Server.RemoteService
             ModelObject mo;
             int objectId;
 
+            if (!_configured) configure();
+
+            if (!request.UserInfo.Session.TrustedConnection) throw new PermissionException("Service available only over secure connection.");
+
             getPathElements(request.Request.Path, out mo, out objectId);
 
             if (null == request.Request.Data) throw new ArgumentException("Object data not passed.");
@@ -165,6 +184,10 @@ namespace Vre.Server.RemoteService
         {
             ModelObject mo;
             int objectId;
+
+            if (!_configured) configure();
+
+            if (!request.UserInfo.Session.TrustedConnection) throw new PermissionException("Service available only over secure connection.");
 
             getPathElements(request.Request.Path, out mo, out objectId);
             if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
