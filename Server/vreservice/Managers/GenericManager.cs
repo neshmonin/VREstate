@@ -19,7 +19,7 @@ namespace Vre.Server.BusinessLogic
 
         public void Dispose()
         {
-            if (_initiatedSession) { _session.Disconnect(); _initiatedSession = true; }
+            if (_initiatedSession) { _session.Disconnect(); _initiatedSession = false; }
         }
     }
 }

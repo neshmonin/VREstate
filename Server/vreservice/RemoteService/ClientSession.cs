@@ -71,6 +71,9 @@ namespace Vre.Server.RemoteService
                 }
                 foreach (ClientSession cs in toremove.Values) cs.Dispose();
 
+                if (toremove.Count > 0) 
+                    ServiceInstances.Logger.Warn("Removed {0} stale session for this login.", toremove.Count);
+
                 string sessionId = Guid.NewGuid().ToString();
 
                 lock (_sessionList)
@@ -155,6 +158,7 @@ namespace Vre.Server.RemoteService
         public string AuthLogin { get; private set; }
         public User User { get; private set; }
         public ISession DbSession { get; private set; }
+        private int _dbSessionUseCount;
         public DateTime LastUsed { get; private set; }
         /// <summary>
         /// This session is fully trusted and extended functionality is allowed
@@ -168,6 +172,7 @@ namespace Vre.Server.RemoteService
             User = user;
             TrustedConnection = false;
             DbSession = null;
+            _dbSessionUseCount = 0;
             LastUsed = DateTime.UtcNow;
         }
 
@@ -178,6 +183,7 @@ namespace Vre.Server.RemoteService
             User = user;
             TrustedConnection = trustedConnection;
             DbSession = null;
+            _dbSessionUseCount = 0;
             LastUsed = DateTime.UtcNow;
         }
 
@@ -195,8 +201,21 @@ namespace Vre.Server.RemoteService
         /// <returns>true if session was started</returns>
         public bool Resume()
         {
-            if (null == DbSession) { DbSession = NHibernateHelper.GetSession(); return true; }
-            else return false;
+            lock (this)
+            {
+                if (null == DbSession) 
+                { 
+                    DbSession = NHibernateHelper.GetSession();
+                    _dbSessionUseCount = 1;
+                    return true; 
+                }
+                else 
+                {
+                    if (!DbSession.IsConnected) { DbSession.Reconnect(); _dbSessionUseCount = 1; }
+                    else _dbSessionUseCount++;
+                    return false; 
+                }
+            }
         }
 
         /// <summary>
@@ -204,18 +223,28 @@ namespace Vre.Server.RemoteService
         /// </summary>
         public void Disconnect()
         {
-            if (DbSession != null)
+            lock (this)
             {
-                DbSession.Flush();
-                DbSession.Close();
-                DbSession.Dispose();
-                DbSession = null;
+                if (DbSession != null)
+                {
+                    if (--_dbSessionUseCount < 1) DbSession.Disconnect();
+                }
             }
         }
 
         public void Dispose()
         {
-            Disconnect();
+            lock (this)
+            {
+                Disconnect();
+                if (DbSession != null)
+                {
+                    DbSession.Flush();
+                    DbSession.Close();
+                    DbSession.Dispose();
+                    DbSession = null;
+                }
+            }
         }
 
         public void Touch()

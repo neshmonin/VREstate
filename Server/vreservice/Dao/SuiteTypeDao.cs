@@ -11,17 +11,19 @@ namespace Vre.Server.Dao
 
         public SuiteType GetBySiteAndName(int siteId, string name)
         {
-            return _session.CreateCriteria<SuiteType>()
-                .Add(Restrictions.Eq("SiteID", siteId))
-                .Add(Restrictions.Eq("Name", name))
-                .UniqueResult<SuiteType>();
+            lock (_session) 
+                return _session.CreateCriteria<SuiteType>()
+                    .Add(Restrictions.Eq("SiteID", siteId))
+                    .Add(Restrictions.Eq("Name", name))
+                    .UniqueResult<SuiteType>();
         }
 
         public IList<SuiteType> GetBySite(int siteId)
         {
-            return _session.CreateCriteria<SuiteType>()
-                .Add(Restrictions.Eq("SiteID", siteId))
-                .List<SuiteType>();
+            lock (_session) 
+                return _session.CreateCriteria<SuiteType>()
+                    .Add(Restrictions.Eq("SiteID", siteId))
+                    .List<SuiteType>();
         }
     }
 }

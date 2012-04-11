@@ -10,12 +10,15 @@ namespace Vre.Server.Dao
 
         public Site[] GetByDeveloperId(int estateDeveloperId, bool includeDeleted)
         {
-            ICriteria c = _session.CreateCriteria<Site>().Add(Restrictions.Eq("Developer.AutoID", estateDeveloperId));
+            lock (_session)
+            {
+                ICriteria c = _session.CreateCriteria<Site>().Add(Restrictions.Eq("Developer.AutoID", estateDeveloperId));
 
-            if (!includeDeleted)
-                c = c.Add(Restrictions.Eq("Deleted", false));
+                if (!includeDeleted)
+                    c = c.Add(Restrictions.Eq("Deleted", false));
 
-            return NHibernateHelper.IListToArray<Site>(c.List<Site>());
+                return NHibernateHelper.IListToArray<Site>(c.List<Site>());
+            }
         }
     }
 }

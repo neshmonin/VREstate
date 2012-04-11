@@ -23,24 +23,33 @@ namespace Vre.Server.Dao
 
         public override TEntity GetById(int entityId)
         {
-            TEntity u = base.GetById(entityId);
-            if ((u != null) && u.Deleted) u = null;
-            return u;
+            lock (_session)
+            {
+                TEntity u = base.GetById(entityId);
+                if ((u != null) && u.Deleted) u = null;
+                return u;
+            }
         }
 
         public TEntity GetById(int entityId, bool getDeleted)
         {
-            TEntity u = base.GetById(entityId);
-            if ((u != null) && u.Deleted && !getDeleted) u = null;
-            return u;
+            lock (_session)
+            {
+                TEntity u = base.GetById(entityId);
+                if ((u != null) && u.Deleted && !getDeleted) u = null;
+                return u;
+            }
         }
 
         public override void Create(TEntity entity)
         {
-            entity.MarkUpdated();
-            base.Create(entity);
-            _session.Refresh(entity);
-            ServiceInstances.UpdateService.Update(entity);
+            lock (_session)
+            {
+                entity.MarkUpdated();
+                base.Create(entity);
+                _session.Refresh(entity);
+                ServiceInstances.UpdateService.Update(entity);
+            }
         }
 
         [Obsolete("Use SafeUpdate method instead.", true)]
@@ -50,17 +59,20 @@ namespace Vre.Server.Dao
         {
             if (entity.Deleted) throw new InvalidOperationException("Cannot modify deleted item.");
             entity.MarkUpdated();
-            try
+            lock (_session)
             {
-                base.Update(entity);
-                _session.Refresh(entity);
-                ServiceInstances.UpdateService.Update(entity);
-                return true;
-            }
-            catch (StaleObjectStateException)
-            {
-                _session.Refresh(entity);
-                return false;
+                try
+                {
+                    base.Update(entity);
+                    _session.Refresh(entity);
+                    ServiceInstances.UpdateService.Update(entity);
+                    return true;
+                }
+                catch (StaleObjectStateException)
+                {
+                    _session.Refresh(entity);
+                    return false;
+                }
             }
         }
 
@@ -71,17 +83,20 @@ namespace Vre.Server.Dao
         {
             if (entity.Deleted) throw new InvalidOperationException("Cannot modify deleted item.");
             entity.MarkUpdated();
-            try
+            lock (_session)
             {
-                base.CreateOrUpdate(entity);
-                _session.Refresh(entity);
-                ServiceInstances.UpdateService.Update(entity);
-                return true;
-            }
-            catch (StaleObjectStateException)
-            {
-                _session.Refresh(entity);
-                return false;
+                try
+                {
+                    base.CreateOrUpdate(entity);
+                    _session.Refresh(entity);
+                    ServiceInstances.UpdateService.Update(entity);
+                    return true;
+                }
+                catch (StaleObjectStateException)
+                {
+                    _session.Refresh(entity);
+                    return false;
+                }
             }
         }
 
@@ -91,17 +106,20 @@ namespace Vre.Server.Dao
         public bool SafeDelete(TEntity entity)
         {
             entity.MarkDeleted();
-            try
+            lock (_session)
             {
-                base.Update(entity);
-                _session.Refresh(entity);
-                ServiceInstances.UpdateService.Update(entity);
-                return true;
-            }
-            catch (StaleObjectStateException)
-            {
-                _session.Refresh(entity);
-                return false;
+                try
+                {
+                    base.Update(entity);
+                    _session.Refresh(entity);
+                    ServiceInstances.UpdateService.Update(entity);
+                    return true;
+                }
+                catch (StaleObjectStateException)
+                {
+                    _session.Refresh(entity);
+                    return false;
+                }
             }
         }
     }

@@ -39,14 +39,18 @@ namespace Vre.Server.Dao
         {
             if (_suiteOptionId >= 0) return;
 
-            OptionType o = _session.CreateCriteria<OptionType>()
-                .Add(Restrictions.Eq("Description", OptionType.SuiteOptionDescription))
-                .UniqueResult<OptionType>();
-
-            if (null == o)
+            OptionType o;
+            lock (_session)
             {
-                o = new OptionType(OptionType.SuiteOptionDescription);
-                Create(o);
+                o = _session.CreateCriteria<OptionType>()
+                    .Add(Restrictions.Eq("Description", OptionType.SuiteOptionDescription))
+                    .UniqueResult<OptionType>();
+
+                if (null == o)
+                {
+                    o = new OptionType(OptionType.SuiteOptionDescription);
+                    Create(o);
+                }
             }
 
             _suiteOptionId = o.AutoID;

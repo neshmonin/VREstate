@@ -184,7 +184,7 @@ namespace Vre.Server.ModelCache
         {
             lock (this)
             {
-                ServiceInstances.Logger.Error("MC: File system watcher failed.  Recreating.");
+                ServiceInstances.Logger.Error("MC: File system watcher failed.  Recreating.\r\n{0}", e.GetException());
                 try { _watcher.Dispose(); } catch { }
                 _watcher = null;
                 Initialize();
@@ -199,8 +199,7 @@ namespace Vre.Server.ModelCache
                 if (_cache.TryGetValue(e.OldFullPath, out mc))
                 {
                     _cache.Remove(e.OldFullPath);
-                    _cache.Add(e.FullPath, mc);
-                    ServiceInstances.Logger.Info("MC: Detected renaming of model file: \"{0}\" -> \"{1}\"", e.OldFullPath, e.FullPath);
+                    ServiceInstances.Logger.Info("MC: Detected renaming of model file: \"{0}\" -> \"{1}\"; model removed.", e.OldFullPath, e.FullPath);
                 }
             }
         }
@@ -308,7 +307,8 @@ namespace Vre.Server.ModelCache
                     if (int.TryParse(parts[startIdx + 1], out id))
                     {
                         level = ModelCache.ModelLevel.Site;
-                        result = true;
+                        result = Path.GetFileNameWithoutExtension(parts[startIdx + 2])
+                            .Equals("model", System.StringComparison.InvariantCultureIgnoreCase);
                     }
                 }
                 // path in form <developer id>\<site id>\<building id>\model.kmz

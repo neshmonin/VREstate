@@ -16,14 +16,17 @@ namespace Vre.Server.Dao
 
         public IList<Building> GetAll(int siteId, bool includeDeleted)
         {
-            if (includeDeleted)
-                return _session.CreateCriteria<Building>()
-                    .Add(Restrictions.Eq("ConstructionSite.AutoID", siteId))
-                    .List<Building>();
-            else
-                return _session.CreateCriteria<Building>()
-                    .Add(Restrictions.Eq("ConstructionSite.AutoID", siteId) && Restrictions.Eq("Deleted", false))
-                    .List<Building>();
+            lock (_session)
+            {
+                if (includeDeleted)
+                    return _session.CreateCriteria<Building>()
+                        .Add(Restrictions.Eq("ConstructionSite.AutoID", siteId))
+                        .List<Building>();
+                else
+                    return _session.CreateCriteria<Building>()
+                        .Add(Restrictions.Eq("ConstructionSite.AutoID", siteId) && Restrictions.Eq("Deleted", false))
+                        .List<Building>();
+            }
         }
 
         //public int DeleteBuildings(int estateDeveloperId)
