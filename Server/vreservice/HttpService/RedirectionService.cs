@@ -27,7 +27,7 @@ namespace Vre.Server.HttpService
         private static string _defaultRedirectUri;
         private static AliasMap _map, _testMap;
         private static ButtonStoreFsNameCache _imagePathCache;
-        private static bool _allowExtendedLogging;
+        private static bool _allowExtendedLogging, _allowReallyExtendedLogging;
 
         public static void PerformStartup()
         {
@@ -36,6 +36,8 @@ namespace Vre.Server.HttpService
             _httpListener = new HttpListener();
 
             _allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
+            _allowReallyExtendedLogging = _allowExtendedLogging & 
+                ServiceInstances.Configuration.GetValue("DebugAllowReallyExtendedLogging", false);
 
             _defaultRedirectUri = ServiceInstances.Configuration.GetValue("RedirectorDefaultUri", "http://3dcondox.com");
 
@@ -123,7 +125,14 @@ namespace Vre.Server.HttpService
                         string browserKey = Statistics.GetBrowserId(ctx);
 
                         if (_allowExtendedLogging)
-                            ServiceInstances.RequestLogger.Info("{0}: {1}", browserKey, ctx.Request.Url);
+                        {
+                            if (_allowReallyExtendedLogging)
+                                ServiceInstances.RequestLogger.Info("{0}: {1} {2} {3} {4} {5} {6}", browserKey,
+                                    ctx.Request.Url, ctx.Request.RemoteEndPoint, ctx.Request.UserAgent,
+                                    ctx.Request.UserHostAddress, ctx.Request.UserHostName, ctx.Request.UrlReferrer);
+                            else
+                                ServiceInstances.RequestLogger.Info("{0}: {1}", browserKey, ctx.Request.Url);
+                        }
 
                         string path = ctx.Request.Url.LocalPath;
                         if (path.StartsWith(_path))
