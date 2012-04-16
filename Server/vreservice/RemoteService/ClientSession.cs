@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading;
 using NHibernate;
 using Vre.Server.BusinessLogic;
+using Vre.Server.Dao;
 
 namespace Vre.Server.RemoteService
 {
@@ -51,28 +52,47 @@ namespace Vre.Server.RemoteService
             ServiceInstances.Logger.Info("User login attempt from {0}: type='{1}', login='{2}'.",
                 ep, loginType, login);
 
-            User user = UserManager.Login(loginType, role, estatedeveloperId, login, password);
+            User user;
+            bool dropOffConcurrentSessions;
+            // Anonymous web client login
+            if ((LoginType.Plain == loginType) && (User.Role.Buyer == role) && login.Equals("web") && password.Equals("web"))
+            {
+                bool exists;
+                using (EstateDeveloperDao dao = new EstateDeveloperDao(null))
+                    exists = dao.Exists(estatedeveloperId);
+
+                user = exists ? new User(estatedeveloperId, User.Role.Buyer) : null;
+                dropOffConcurrentSessions = false;
+            }
+            else
+            {
+                user = UserManager.Login(loginType, role, estatedeveloperId, login, password);
+                // TODO: Drop off other user sessions? Configurable?
+                dropOffConcurrentSessions = true;
+            }
 
             if (user != null)
             {
                 ServiceInstances.Logger.Info("User login from {0}, type='{1}', login='{2}' accepted.",
                     ep, loginType, login);
 
-                // TODO: Drop off other user sessions? Configurable?
-                Dictionary<string, ClientSession> toremove = new Dictionary<string, ClientSession>();
-                lock (_sessionList)
+                if (dropOffConcurrentSessions)
                 {
-                    foreach (KeyValuePair<string, ClientSession> kvp in _sessionList)
+                    Dictionary<string, ClientSession> toremove = new Dictionary<string, ClientSession>();
+                    lock (_sessionList)
                     {
-                        if ((kvp.Value.AuthLoginType == loginType) && (kvp.Value.AuthLogin.Equals(login)))
-                            toremove.Add(kvp.Key, kvp.Value);
+                        foreach (KeyValuePair<string, ClientSession> kvp in _sessionList)
+                        {
+                            if ((kvp.Value.AuthLoginType == loginType) && (kvp.Value.AuthLogin.Equals(login)))
+                                toremove.Add(kvp.Key, kvp.Value);
+                        }
+                        foreach (string key in toremove.Keys) _sessionList.Remove(key);
                     }
-                    foreach (string key in toremove.Keys) _sessionList.Remove(key);                    
-                }
-                foreach (ClientSession cs in toremove.Values) cs.Dispose();
+                    foreach (ClientSession cs in toremove.Values) cs.Dispose();
 
-                if (toremove.Count > 0) 
-                    ServiceInstances.Logger.Warn("Removed {0} stale session for this login.", toremove.Count);
+                    if (toremove.Count > 0)
+                        ServiceInstances.Logger.Warn("Removed {0} stale session for this login.", toremove.Count);
+                }
 
                 string sessionId = Guid.NewGuid().ToString();
 
@@ -124,7 +144,11 @@ namespace Vre.Server.RemoteService
                     foreach (string sid in toremove.Keys) _sessionList.Remove(sid);
                 }
 
-                foreach (ClientSession cs in toremove.Values) cs.Dispose();
+                foreach (ClientSession cs in toremove.Values)
+                {
+                    cs.Dispose();
+                    ServiceInstances.Logger.Info("Removed stale session for {0}", cs);
+                }
             }
         }
 
