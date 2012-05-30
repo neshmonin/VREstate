@@ -9,9 +9,9 @@ namespace Vre.Server
         // C# compiler does not allow these to be integers.
         // Still, to conform to compiler's build process, keep these values integer only.
         public const string Major = "1";
-        public const string Minor = "1";
-        public const string Build = "0";
-        public const string Revision = "2";
+        public const string Minor = "0";
+        public const string Build = "8";
+        public const string Revision = "1";
 
         public static string AssemblyVersionString = Major + "." + Minor + "." + Build + "." + Revision;
     }

@@ -274,13 +274,16 @@ namespace Vre.Server.ModelCache
 
         internal class BuildingInfo
         {
-            private GeoPoint _location;
+            private GeoPoint _location, _center;
+            private double _maxSuiteAlt;
             private Dictionary<string, SuiteInfo> _suiteInfo;
 
             public BuildingInfo(VrEstate.Building modelInfo)
             {
                 //Name = modelInfo.Name;
-                _location = new GeoPoint(modelInfo.Lon_d, modelInfo.Lat_d, modelInfo.Alt_m);
+                _location = new GeoPoint(modelInfo.LonModel_d, modelInfo.LatModel_d, modelInfo.AltModel_m);
+                _center = new GeoPoint(modelInfo.Lon_d, modelInfo.Lat_d, modelInfo.Alt_m);
+                _maxSuiteAlt = modelInfo.MaxAlt_m;
                 //modelInfo.BuildingId  // "ID<five-digit-int>"
                 //modelInfo.ID          // nine-digit-int
                 //modelInfo.MaxAlt_m
@@ -303,6 +306,8 @@ namespace Vre.Server.ModelCache
             public void UpdateBo(Building target, bool withSubObjects)
             {
                 target.Location = _location;
+                target.Center = _center;
+                target.MaxSuiteAltitude = _maxSuiteAlt;
 
                 if (withSubObjects)
                 {

@@ -29,6 +29,8 @@ namespace Vre.Server.BusinessLogic
         public virtual string Model { get; set; }
         public virtual GeoPoint Location { get; set; }
         public virtual double AltitudeAdjustment { get; set; }
+        public virtual GeoPoint Center { get; set; }
+        public virtual double MaxSuiteAltitude { get; set; }
 
         public virtual IList<Suite> Suites { get; protected set; }
 
@@ -41,7 +43,11 @@ namespace Vre.Server.BusinessLogic
             Name = name;
             Status = BuildingStatus.InProject;
             Location = GeoPoint.Empty;
+            Center = GeoPoint.Empty;
+            MaxSuiteAltitude = 0.0;
+            AltitudeAdjustment = 0.0;
             Suites = new List<Suite>();
+            if (constructionSite != null) constructionSite.Buildings.Add(this);
         }
 
         public Building(ClientData fromServer) : this(null, string.Empty)
@@ -62,8 +68,11 @@ namespace Vre.Server.BusinessLogic
             result.Add("status", Status);
             result.Add("openingDate", OpeningDate);
             result.Add("altitudeAdjustment", AltitudeAdjustment);
+            result.Add("maxSuiteAltitude", MaxSuiteAltitude);
 
             if (Location != null) result.Add("position", Location.GetClientData());
+
+            if (Center != null) result.Add("center", Center.GetClientData());
 
             return result;
         }
