@@ -61,6 +61,7 @@ namespace Vre.Server.BusinessLogic
             ClassName = null;
             CeilingHeight = ValueWithUM.EmptyLinear;
             ShowPanoramicView = true;
+            OptionsPossible = new List<Option>();
             if (Building != null) Building.Suites.Add(this);
         }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vrebo" namespace="Vre.Server.BusinessLogic">
-  <class name="SuiteType" table="SuiteTypes" dynamic-update="true" lazy="true">
+  <class name="SuiteType" table="SuiteTypes" dynamic-update="false" lazy="true">
 
     <id name="AutoID" column="AutoID" unsaved-value="0">
       <generator class="identity" />
@@ -25,7 +25,12 @@
       cascade="none" fetch="join" insert="true" update="false"
     />
 
-    <!--
+    <set inverse="true" name="SuitesInvolved">
+      <key column="SuiteTypeId" />
+      <one-to-many class="Suite" />
+    </set>
+    
+    <!--  
     <set name="Suites">
       <key column="SuiteTypeID" />
       <one-to-many class="Suite" />

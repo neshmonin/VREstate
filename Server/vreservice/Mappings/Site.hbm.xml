@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vrebo" namespace="Vre.Server.BusinessLogic">
-  <class name="Site" table="Sites" dynamic-update="true" lazy="true">
+  <class name="Site" table="Sites" dynamic-update="false" lazy="true">
 
     <id name="AutoID" column="AutoID" unsaved-value="0">
       <generator class="identity" />

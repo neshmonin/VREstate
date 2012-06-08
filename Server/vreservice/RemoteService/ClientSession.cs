@@ -200,13 +200,13 @@ namespace Vre.Server.RemoteService
             LastUsed = DateTime.UtcNow;
         }
 
-        private ClientSession(LoginType loginType, string login, User user, bool trustedConnection)
+        private ClientSession(LoginType loginType, string login, User user, bool trustedConnection, ISession dbSession)
         {
             AuthLoginType = loginType;
             AuthLogin = login;
             User = user;
             TrustedConnection = trustedConnection;
-            DbSession = null;
+            DbSession = dbSession;
             _dbSessionUseCount = 0;
             LastUsed = DateTime.UtcNow;
         }
@@ -216,7 +216,20 @@ namespace Vre.Server.RemoteService
         /// </summary>
         public static ClientSession MakeSystemSession()
         {
-            return new ClientSession(LoginType.Plain, "<system>", new User(null, User.Role.SuperAdmin), true);
+            return MakeSystemSession(null);
+        }
+
+        /// <summary>
+        /// Generates a session with virtual non-persistent full-powered user.
+        /// </summary>
+        public static ClientSession MakeSystemSession(ISession dbSession)
+        {
+            User u;
+            using (UserDao dao = new UserDao(dbSession)) u = dao.GetAnyActiveSuperAdmin();
+            if (u != null)
+                return new ClientSession(LoginType.Plain, "<system>", u, true, dbSession);
+            else
+                return new ClientSession(LoginType.Plain, "<system>", new User(null, User.Role.SuperAdmin), true, dbSession);
         }
 
         /// <summary>
@@ -263,7 +276,8 @@ namespace Vre.Server.RemoteService
                 Disconnect();
                 if (DbSession != null)
                 {
-                    DbSession.Flush();
+                    //try { DbSession.Flush(); }
+                    //catch (Exception e) { e.Equals(this); }
                     DbSession.Close();
                     DbSession.Dispose();
                     DbSession = null;

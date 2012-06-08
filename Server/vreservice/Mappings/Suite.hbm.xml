@@ -19,7 +19,7 @@
 
     <many-to-one name="SuiteType"
       column="SuiteTypeID" class="SuiteType"
-      cascade="none" fetch="join" insert="true" update="false"
+      cascade="none" fetch="join" insert="true" update="true"
     />
 
     <property name="PhysicalLevelNumber" column="PhysicalLevelNumber" />

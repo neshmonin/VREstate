@@ -11,12 +11,17 @@ namespace Vre.Server.BusinessLogic
         public virtual string Model { get; set; }
         public virtual IList<SuiteLevel> Levels { get; protected set; }
 
-        public virtual ValueWithUM FloorArea { get; protected set; }  // TODO: Should be computable field!
-        public virtual int BedroomCount { get; protected set; }  // TODO: Should be computable field!
-        public virtual int DenCount { get; protected set; }  // TODO: Should be computable field!
-        public virtual int BathroomCount { get; protected set; }  // TODO: Should be computable field!
-        public virtual int BalconyCount { get; protected set; }  // TODO: Should be computable field!
-        public virtual int TerraceCount { get; protected set; }  // TODO: Should be computable field!
+        public virtual ValueWithUM FloorArea { get; set; }  // TODO: Should be computable field!
+        public virtual int BedroomCount { get; set; }  // TODO: Should be computable field!
+        public virtual int DenCount { get; set; }  // TODO: Should be computable field!
+        public virtual int BathroomCount { get; set; }  // TODO: Should be computable field!
+        public virtual int BalconyCount { get; set; }  // TODO: Should be computable field!
+        public virtual int TerraceCount { get; set; }  // TODO: Should be computable field!
+
+        /// <summary>
+        /// Not used; required for proper inverse mapping and updating references from suites
+        /// </summary>
+        protected virtual IList<Suite> SuitesInvolved { get; set; }
 
         protected virtual string floorArea { get { return FloorArea.AsRaw; } set { FloorArea = new ValueWithUM(value); } }
 
@@ -31,6 +36,7 @@ namespace Vre.Server.BusinessLogic
             Model = null;
             Levels = new List<SuiteLevel>();
             WireframeModel = null;
+            if (constructionSite != null) constructionSite.SuiteTypes.Add(this);
         }
 
         public override ClientData GetClientData()

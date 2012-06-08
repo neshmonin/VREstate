@@ -25,6 +25,9 @@ namespace Vre.Server.BusinessLogic
             Name = name;
             Developer = developer;
             Location = GeoPoint.Empty;
+            Buildings = new List<Building>();
+            SuiteTypes = new List<SuiteType>();
+            if (developer != null) developer.Sites.Add(this);
         }
 
         public virtual ClientData GetClientData()

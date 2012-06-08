@@ -49,6 +49,12 @@ namespace Vre.Server.BusinessLogic
             MarkUpdated(); 
         }
 
+        public virtual void Undelete()
+        {
+            Deleted = false;
+            MarkUpdated();
+        }
+
         public virtual void MarkUpdated() 
         { 
             Updated = DateTime.UtcNow;  

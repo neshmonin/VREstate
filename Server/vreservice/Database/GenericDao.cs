@@ -277,7 +277,7 @@ namespace Vre.Server.Dao
         /// <summary>
         /// Default c'tor.  Uses default database connection string and no forced Flush().
         /// </summary>
-        protected GenericDisposableDao() : base(null, true) { }
+        protected GenericDisposableDao() : base(null, false) { }
         /// <summary>
         /// C'tor with forced Flush() control operations.
         /// </summary>
@@ -287,7 +287,7 @@ namespace Vre.Server.Dao
         /// C'tor with external session.  Session is NOT closed by this object.
         /// </summary>
         /// <param name="session">External session to use for all operations.</param>
-        protected GenericDisposableDao(ISession session) : base(session, true) { }
+        protected GenericDisposableDao(ISession session) : base(session, false) { }
         /// <summary>
         /// C'tor with external session.  Session is NOT closed by this object.
         /// </summary>
