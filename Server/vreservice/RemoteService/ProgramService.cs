@@ -83,7 +83,7 @@ namespace Vre.Server.RemoteService
             int estateDeveloperId;
             string password = request.Request.Query["pwd"];
             string newPassword = request.Request.Query["npwd"];
-            if (!Enum.TryParse<User.Role>(request.Request.Query["role"], true, out role)) role = User.Role.Buyer;
+            if (!Enum.TryParse<User.Role>(request.Request.Query["role"], true, out role)) role = User.Role.Visitor;
             // TODO: Add login by Estate Developer Alias
             if (!int.TryParse(request.Request.Query["ed"], out estateDeveloperId)) estateDeveloperId = -1;
 

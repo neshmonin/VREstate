@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Vre.Server.BusinessLogic
 {
@@ -13,7 +14,10 @@ namespace Vre.Server.BusinessLogic
             SuperAdmin = 1,
             DeveloperAdmin = 2,
             Subcontractor = 3,
-            SalesPerson = 4
+            SalesPerson = 4,
+            SellingAgent = 5,
+            Visitor = 6,
+            Kiosk = 7
 	    }
 
         public Role UserRole { get; private set; }
@@ -28,6 +32,15 @@ namespace Vre.Server.BusinessLogic
             UserRole = role;
             EstateDeveloperID = estateDeveloperId;
             PersonalInfo = new ContactInfo();
+        }
+
+        /// <summary>
+        /// True if this role requires valid Estate Developer association.
+        /// If false, NO Estate Developer must be associated with this user.
+        /// </summary>
+        public static bool IsEstateDeveloperTied(Role role)
+        {
+            return ((role != Role.SellingAgent) && (role != Role.SuperAdmin) && (role != Role.Buyer) && (role != Role.Visitor));
         }
 
         public void UpdatePersonalInfo(ContactInfo info)
