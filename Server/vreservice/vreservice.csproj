@@ -133,6 +133,9 @@
     <Compile Include="Authentication\Authentication.cs" />
     <Compile Include="Authentication\IAuthentication.cs" />
     <Compile Include="ChangeLog\ChangeLog.cs" />
+    <Compile Include="CommandMode\CommandHandler.cs" />
+    <Compile Include="CommandMode\ModelImport.cs" />
+    <Compile Include="CommandMode\Parameters.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Dao\AccountDao.cs" />
     <Compile Include="Dao\BuildingDao.cs" />

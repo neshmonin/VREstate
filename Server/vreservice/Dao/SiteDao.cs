@@ -20,5 +20,33 @@ namespace Vre.Server.Dao
                 return NHibernateHelper.IListToArray<Site>(c.List<Site>());
             }
         }
+
+        public Site GetById(string id)
+        {
+            lock (_session)
+            {
+                int key;
+                if (int.TryParse(id, out key)) return GetById(key);
+
+                return _session.CreateCriteria<Site>()
+                    .Add(Restrictions.Eq("Name", id))
+                    .Add(Restrictions.Eq("Deleted", false))
+                    .UniqueResult<Site>();
+            }        
+        }
+
+        public Site GetById(EstateDeveloper ed, string id)
+        {
+            lock (_session)
+            {
+                int key;
+                if (int.TryParse(id, out key)) return GetById(key);
+
+                foreach (Site s in ed.Sites)
+                    if (s.Name.Equals(id) && !s.Deleted) return s;
+            }
+
+            return null;
+        }
     }
 }

@@ -36,7 +36,7 @@ namespace Vre.Server
             {
                 if (Environment.UserInteractive)
                 {
-                    MessageBox.Show("Cannot access nHconfiguration file (" + cfgFilePath + ").\r\n"
+                    MessageBox.Show("Cannot access configuration file (" + cfgFilePath + ").\r\n"
                         + "Make sure server is installed properly.\r\n"
                         + "\r\n" + ex.Message,
                         ServiceName + " Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -46,7 +46,7 @@ namespace Vre.Server
                     EventLog el = new EventLog("Application", ".", ServiceName);
 
                     el.WriteEntry(
-                        "Cannot access nHconfiguration file (" + cfgFilePath + ").\r\n"
+                        "Cannot access configuration file (" + cfgFilePath + ").\r\n"
                         + "Make sure server is installed properly.\r\n"
                         + "\r\n" + ex.Message,
                         System.Diagnostics.EventLogEntryType.Error, 1000);
@@ -60,38 +60,53 @@ namespace Vre.Server
                 {
                     bool startUI = true;
 
-                    if (args.Length == 1)
+                    if (args.Length > 0)
                     {
-                        if (args[0].ToLower().Equals("install"))
+                        bool knownCommand = false;
+                        if (1 == args.Length)
                         {
-                            if (!install()) return 2;
+                            if (args[0].ToLower().Equals("install"))
+                            {
+                                knownCommand = true;
+                                if (!install()) return 2;
+                            }
+                            else if (args[0].ToLower().Equals("uninstall"))
+                            {
+                                knownCommand = true;
+                                if (!uninstall()) return 2;
+                            }
+                            else if (args[0].ToLower().Equals("start"))
+                            {
+                                knownCommand = true;
+                                new VrService(ServiceName).ServiceControl(VrService.ServiceCommand.Start);
+                            }
+                            else if (args[0].ToLower().Equals("stop"))
+                            {
+                                knownCommand = true;
+                                new VrService(ServiceName).ServiceControl(VrService.ServiceCommand.Stop);
+                            }
+                            else if (args[0].ToLower().Equals("restart"))
+                            {
+                                knownCommand = true;
+                                new VrService(ServiceName).ServiceControl(VrService.ServiceCommand.Restart);
+                            }
+                            else if (args[0].ToLower().Equals("debug"))
+                            {
+                                knownCommand = true;
+                                if (!System.Diagnostics.Debugger.IsAttached)
+                                    System.Diagnostics.Debugger.Launch();
+                            }
                         }
-                        else if (args[0].ToLower().Equals("uninstall"))
-                        {
-                            if (!uninstall()) return 2;
-                        }
-                        else if (args[0].ToLower().Equals("start"))
-                        {
-                            new VrService(ServiceName).ServiceControl(VrService.ServiceCommand.Start);
-                        }
-                        else if (args[0].ToLower().Equals("stop"))
-                        {
-                            new VrService(ServiceName).ServiceControl(VrService.ServiceCommand.Stop);
-                        }
-                        else if (args[0].ToLower().Equals("restart"))
-                        {
-                            new VrService(ServiceName).ServiceControl(VrService.ServiceCommand.Restart);
-                        }
-                        else if (args[0].ToLower().Equals("debug"))
-                        {
-                            if (!System.Diagnostics.Debugger.IsAttached)
-                                System.Diagnostics.Debugger.Launch();
-                        }
-                        else
+                        
+                        if (!knownCommand) knownCommand = Command.CommandHandler.HandleCommand(args);
+
+                        if (!knownCommand)
                         {
                             MessageBox.Show("Unknown command line parameter.\r\n",
                                 ServiceName + " Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return 5;
                         }
+
                         startUI = false;
                     }
 
