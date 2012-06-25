@@ -17,6 +17,16 @@ namespace Vre.Server.Dao
                 .List<User>().Count > 0);
         }
 
+        internal User GetAnyActiveSuperAdmin()
+        {
+            IList<User> result;
+            lock (_session) result = _session.CreateCriteria<User>()
+                .Add(Restrictions.Eq("UserRole", User.Role.SuperAdmin) && Restrictions.Eq("Deleted", false))
+                .List<User>();
+            if (result.Count > 0) return result[0];
+            else return null;
+        }
+
         public User[] ListSuperAdmins(string nameLookup, bool includeDeleted)
         {
             lock (_session)

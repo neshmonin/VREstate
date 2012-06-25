@@ -55,13 +55,9 @@ namespace Vre.Server.RemoteService
             User user;
             bool dropOffConcurrentSessions;
             // Anonymous web client login
-            if ((LoginType.Plain == loginType) && (User.Role.Buyer == role) && login.Equals("web") && password.Equals("web"))
+            if ((LoginType.Plain == loginType) && (User.Role.Visitor == role) && login.Equals("web") && password.Equals("web"))
             {
-                bool exists;
-                using (EstateDeveloperDao dao = new EstateDeveloperDao(null))
-                    exists = dao.Exists(estatedeveloperId);
-
-                user = exists ? new User(estatedeveloperId, User.Role.Buyer) : null;
+                user = new User(null, User.Role.Visitor);
                 dropOffConcurrentSessions = false;
             }
             else
@@ -296,7 +292,7 @@ namespace Vre.Server.RemoteService
             {
                 case BusinessLogic.User.Role.Buyer:
                     // TODO: embed authentication types
-                    return string.Format("ed{0}-buyer-plain-{1}", User.EstateDeveloperID, AuthLogin);
+                    return string.Format("buyer-plain-{0}", AuthLogin);
 
                 case BusinessLogic.User.Role.DeveloperAdmin:
                     return string.Format("ed{0}-admin-{1}", User.EstateDeveloperID, AuthLogin);
@@ -309,6 +305,15 @@ namespace Vre.Server.RemoteService
 
                 case BusinessLogic.User.Role.SuperAdmin:
                     return string.Format("superadmin-{0}", AuthLogin);
+
+                case BusinessLogic.User.Role.SellingAgent:
+                    return string.Format("sellingagent-{0}", AuthLogin);
+
+                case BusinessLogic.User.Role.Kiosk:
+                    return string.Format("ed{0}-kiosk-{1}", User.EstateDeveloperID, AuthLogin);
+
+                case BusinessLogic.User.Role.Visitor:
+                    return string.Format("visitor-{0}", AuthLogin);
 
                 default:
                     return "?";

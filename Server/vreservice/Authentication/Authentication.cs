@@ -47,7 +47,8 @@ namespace Vre.Server.BusinessLogic
             // 12 symbols are: 2 internal login construction service characters and 10 for estate developer ID (32-bit)
             if (login.Length > (64 - 12)) { errorReason = "Login is too long"; return false; }
             // See intLoginFromVisible() and loginElementsFromIntLogin() for more details
-            if (login.StartsWith("@")) { errorReason = "Login must start with a letter"; return false; }
+            if (!Char.IsLetterOrDigit(login[0])) { errorReason = "Login must start with a letter"; return false; }
+            //if (login.StartsWith("@")) { errorReason = "Login must start with a letter"; return false; }
             
             errorReason = null;
             return true;
@@ -184,7 +185,7 @@ namespace Vre.Server.BusinessLogic
             bool result = false;
 
             loginType = LoginType.Plain;
-            role = User.Role.Buyer;
+            role = User.Role.Visitor;
             estateDeveloperId = -1;
             login = null;
 
@@ -260,7 +261,13 @@ namespace Vre.Server.BusinessLogic
                     return string.Format("@{0}c{1}", estateDeveloperId, login);
 
                 case User.Role.Buyer:
-                    return string.Format("@{0}b{1}", estateDeveloperId, login);
+                    return string.Format("%{0}", login);
+
+                case User.Role.SellingAgent:
+                    return string.Format("#{0}", login);
+
+                case User.Role.Kiosk:
+                    return string.Format("@{0}k{1}", estateDeveloperId, login);
 
                 default:
                     throw new ArgumentException("Unknown user role");
@@ -287,8 +294,22 @@ namespace Vre.Server.BusinessLogic
                     if ('a' == intLogin[idx]) { role = User.Role.DeveloperAdmin; result = true; }
                     else if ('s' == intLogin[idx]) { role = User.Role.SalesPerson; result = true; }
                     else if ('c' == intLogin[idx]) { role = User.Role.Subcontractor; result = true; }
-                    else if ('b' == intLogin[idx]) { role = User.Role.Buyer; result = true; }
+                    else if ('k' == intLogin[idx]) { role = User.Role.Kiosk; result = true; }
                 }
+            }
+            else if (intLogin.StartsWith("#"))
+            {
+                role = User.Role.SellingAgent;
+                estateDeveloperId = -1;
+                login = intLogin.Substring(1);
+                result = true;
+            }
+            else if (intLogin.StartsWith("%"))
+            {
+                role = User.Role.Buyer;
+                estateDeveloperId = -1;
+                login = intLogin.Substring(1);
+                result = true;
             }
             else
             {

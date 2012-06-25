@@ -25,7 +25,7 @@ namespace Vre.Client.CommandLine
             Console.WriteLine("  building -parameters are:");
             Console.WriteLine("    site=<construction site id> -required.");
             Console.WriteLine("  user -limited to estate developer scope; parameters are:");
-            Console.WriteLine("    role={superadmin|developeradmin|subcontractor|salesperson|buyer}");
+            Console.WriteLine("    role={superadmin|developeradmin|subcontractor|salesperson|buyer|sellingagent|kiosk}");
             Console.WriteLine("        -optional, defaults to buyer.");
             Console.WriteLine("    ed=<estate developer id> -optional; superadmin only;");
             Console.WriteLine("        set or override current value.");

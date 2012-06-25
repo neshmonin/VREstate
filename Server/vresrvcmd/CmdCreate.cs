@@ -20,7 +20,7 @@ namespace Vre.Client.CommandLine
             Console.WriteLine("  user -parameters are:");
             Console.WriteLine("    login=<login> -unique new user login; required.");
             Console.WriteLine("    ed=<estate developer id> -required for any non-superadmin users.");
-            Console.WriteLine("    role={superadmin|developeradmin|subcontractor|salesperson|buyer} -required.");
+            Console.WriteLine("    role={superadmin|developeradmin|subcontractor|salesperson|buyer|sellingagent|kiosk} -required.");
             Console.WriteLine("Password is entered interactively.");
         }
 
@@ -54,6 +54,26 @@ namespace Vre.Client.CommandLine
             ClientData data = new ClientData();
             string paramValue;
 
+            // role
+            //
+            User.Role role;
+            if (options.TryGetValue("role", out paramValue))
+            {
+                if (paramValue.Equals("superadmin")) role = User.Role.SuperAdmin;
+                else if (paramValue.Equals("developeradmin")) role = User.Role.DeveloperAdmin;
+                else if (paramValue.Equals("subcontractor")) role = User.Role.Subcontractor;
+                else if (paramValue.Equals("salesperson")) role = User.Role.SalesPerson;
+                else if (paramValue.Equals("buyer")) role = User.Role.Buyer;
+                else if (paramValue.Equals("sellingagent")) role = User.Role.SellingAgent;
+                else if (paramValue.Equals("kiosk")) role = User.Role.Kiosk;
+                else throw new ArgumentException("Role specified is not valid.");
+                data.Add("role", role);
+            }
+            else
+            {
+                throw new ArgumentException("Must specify user role.");
+            }
+
             // estate developer id
             //
             if (options.TryGetValue("ed", out paramValue))
@@ -65,30 +85,15 @@ namespace Vre.Client.CommandLine
             {
                 paramValue = Program.EstateDeveloperId.ToString();
             }
-            if (string.IsNullOrEmpty(paramValue))
-                throw new ArgumentException("Estate developer ID must be specified.");
-            int edId;
-            if (int.TryParse(paramValue, out edId))
-                data.Add("ed", edId);
-            else
-                throw new ArgumentException("The estate developer ID is not valid.");
-
-            // role
-            //
-            if (options.TryGetValue("role", out paramValue))
+            if (User.IsEstateDeveloperTied(role))
             {
-                User.Role role;
-                if (paramValue.Equals("superadmin")) role = User.Role.SuperAdmin;
-                else if (paramValue.Equals("developeradmin")) role = User.Role.DeveloperAdmin;
-                else if (paramValue.Equals("subcontractor")) role = User.Role.Subcontractor;
-                else if (paramValue.Equals("salesperson")) role = User.Role.SalesPerson;
-                else if (paramValue.Equals("buyer")) role = User.Role.Buyer;
-                else throw new ArgumentException("Role specified is not valid.");
-                data.Add("role", role);
-            }
-            else
-            {
-                throw new ArgumentException("Must specify user role.");
+                if (string.IsNullOrEmpty(paramValue))
+                    throw new ArgumentException("Estate developer ID must be specified.");
+                int edId;
+                if (int.TryParse(paramValue, out edId))
+                    data.Add("ed", edId);
+                else
+                    throw new ArgumentException("The estate developer ID is not valid.");
             }
 
             // login

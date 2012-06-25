@@ -29,8 +29,8 @@ namespace Vre.Server.BusinessLogic
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
             {
                 string errorReason;
-
-                if (role != User.Role.SuperAdmin)
+                
+                if (User.IsEstateDeveloperTied(role))
                 {
                     using (EstateDeveloperDao devDao = new EstateDeveloperDao(_session.DbSession))
                     {
