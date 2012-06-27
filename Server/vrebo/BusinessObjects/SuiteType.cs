@@ -36,6 +36,7 @@ namespace Vre.Server.BusinessLogic
             Model = null;
             Levels = new List<SuiteLevel>();
             WireframeModel = null;
+            SuitesInvolved = new List<Suite>();
             if (constructionSite != null) constructionSite.SuiteTypes.Add(this);
         }
 
