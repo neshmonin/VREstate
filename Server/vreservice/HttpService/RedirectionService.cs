@@ -4,17 +4,20 @@ using System.IO;
 using System.Net;
 using System.Xml;
 using Vre.Server.RemoteService;
+using System.Reflection;
 
 namespace Vre.Server.HttpService
 {
     internal class RedirectionService
     {
-        enum ServiceType { Unknown, Redirection, Button }
+        enum ServiceType { Unknown, Const, Redirection, Button }
         private const string _defaultImage = "default.png";
         private const string _defaultImageExtension = ".png";
 
         private static readonly object _lock = new object();
         private static List<string> _listeners = new List<string>();
+
+        private static DateTime _buildTime = DateTime.MinValue;
 
         public static string Status = "Stopped.";
         public static string[] Listeners { get { lock (_listeners) return _listeners.ToArray(); } }
@@ -149,6 +152,10 @@ namespace Vre.Server.HttpService
                                     processButtonRequest(ctx, browserKey);
                                     break;
 
+                                case ServiceType.Const:
+                                    processConst(ctx);
+                                    break;
+
                                 default:
                                     ctx.Response.Redirect(_defaultRedirectUri);
                                     break;
@@ -184,6 +191,8 @@ namespace Vre.Server.HttpService
         {
             if (pathElement.Equals("start")) return ServiceType.Redirection;
             else if (pathElement.Equals("button")) return ServiceType.Button;
+            else if (pathElement.Equals("robots.txt")) return ServiceType.Const;
+            else if (pathElement.Equals("humans.txt")) return ServiceType.Const;
             return ServiceType.Unknown;
         }
 
@@ -259,6 +268,50 @@ namespace Vre.Server.HttpService
             //ctx.Request.UrlReferrer;
             // TODO: save statistics
 
+        }
+
+        private static void processConst(HttpListenerContext ctx)
+        {
+            ctx.Response.StatusCode = 200;
+            ctx.Response.ContentType = HttpServiceRequest.ContentTypeByExtension["txt"];
+
+            using (StreamWriter sw = new StreamWriter(ctx.Response.OutputStream))
+            {
+                if (ctx.Request.Url.LocalPath.EndsWith("robots.txt"))
+                {
+                    sw.WriteLine("User-agent: *");
+                    sw.WriteLine("Disallow: /");
+                    sw.WriteLine("Disallow: /harming/humans");
+                    sw.WriteLine("Disallow: /ignoring/human/orders");
+                    sw.WriteLine("Disallow: /harm/to/self");
+                }
+                else if (ctx.Request.Url.LocalPath.EndsWith("humans.txt"))
+                {
+                    if (DateTime.MinValue == _buildTime)
+                    {
+                        _buildTime = File.GetCreationTime(Assembly.GetExecutingAssembly().Location);
+                    }
+
+                    sw.WriteLine("/* humanstxt.org */");
+                    sw.WriteLine(string.Empty);
+                    sw.WriteLine("/* TEAM */");
+                    sw.WriteLine("\tAlexander Neshmonin, CEO and everything, Toronto");
+                    sw.WriteLine("\tEugene Simonov, Frontend, Ukraine");
+                    sw.WriteLine("\tAndrey Maslyuk, Backend, Toronto");
+                    sw.WriteLine(string.Empty);
+                    sw.WriteLine("/* THANKS */");
+                    sw.WriteLine("\tVitaly Zholudev");
+                    sw.WriteLine("\thttp://last.fm");
+                    sw.WriteLine("\thttp://stackoverflow.com");
+                    sw.WriteLine("");
+                    sw.WriteLine(string.Empty);
+                    sw.WriteLine("/* SITE */");
+                    sw.WriteLine("\tLast build: " + _buildTime.ToShortDateString());
+                    sw.WriteLine("\tLast update: today");
+                    sw.WriteLine("\tStandards: HTTP/1.1");
+                    sw.WriteLine("\tLanguages: none");
+                }
+            }
         }
 
         private static string deriveExtension(string aliasName, string imageName)

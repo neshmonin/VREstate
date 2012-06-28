@@ -39,7 +39,8 @@ namespace Vre.Server.Command
             catch (Exception e)
             {
                 importError = e;
-                log.AppendFormat("Error importing model: {0}\r\n{1}", e.Message, e.StackTrace);
+                log.AppendFormat("Error importing model: {0}\r\n{1}\r\n", e.Message, e.StackTrace);
+                while ((e = e.InnerException) != null) log.AppendFormat("  {0}\r\n{1}\r\n", e.Message, e.StackTrace);
             }
 
             logFile.Seek(0, SeekOrigin.End);
@@ -183,13 +184,13 @@ namespace Vre.Server.Command
                     if (dryRun)
                     {
                         tran.Rollback();
-                        _log.Append("DRY RUN MODE: all changes rolled back.");
+                        _log.Append("DRY RUN MODE: all changes rolled back.\r\n");
                     }
                     else
                     {
                         //_clientSession.DbSession.Flush();
                         tran.Commit();
-                        _log.Append("All changes comitted to database.");
+                        _log.Append("All changes comitted to database.\r\n");
                     }
                 }  // transaction
             }  // client session
@@ -252,7 +253,7 @@ namespace Vre.Server.Command
                 {
                     using (BuildingDao dao = new BuildingDao(_clientSession.DbSession))
                         if (!dao.SafeDelete(dbb)) throw new StaleObjectStateException("Building", dbb.AutoID);
-                    _log.AppendFormat("Removed building missing in model ID={0}, Name={1}", dbb.AutoID, dbb.Name);
+                    _log.AppendFormat("Removed building missing in model ID={0}, Name={1}\r\n", dbb.AutoID, dbb.Name);
                 }
             }
 
@@ -271,7 +272,7 @@ namespace Vre.Server.Command
                 {
                     using (SuiteTypeDao dao = new SuiteTypeDao(_clientSession.DbSession))
                         if (!dao.SafeDelete(dbst)) throw new StaleObjectStateException("SuiteType", dbst.AutoID);
-                    _log.AppendFormat("Removed suite type missing in model ID={0}, Name={1}", dbst.AutoID, dbst.Name);
+                    _log.AppendFormat("Removed suite type missing in model ID={0}, Name={1}\r\n", dbst.AutoID, dbst.Name);
                 }
             }
         }
@@ -331,7 +332,7 @@ namespace Vre.Server.Command
                 {
                     using (SuiteDao dao = new SuiteDao(_clientSession.DbSession))
                         if (!dao.SafeDelete(dbs)) throw new StaleObjectStateException("Suite", dbs.AutoID);
-                    _log.AppendFormat("Removed suite missing in model ID={0}, Name={1}", dbs.AutoID, dbs.SuiteName);
+                    _log.AppendFormat("Removed suite missing in model ID={0}, Name={1}\r\n", dbs.AutoID, dbs.SuiteName);
                 }
             }
         }
@@ -386,22 +387,29 @@ namespace Vre.Server.Command
 
             if (!_typeCache.TryGetValue(newClassName, out stype))
             {
-                stype = new SuiteType(dbSuite.Building.ConstructionSite, newClassName);
+                foreach (SuiteType st in dbSuite.Building.ConstructionSite.SuiteTypes)
+                    if (st.Name.Equals(newClassName) && !st.Deleted) { stype = st; break; }
 
-                stype.BalconyCount = _extraSuiteInfo.GetBalconyCount(newClassName);
-                stype.TerraceCount = _extraSuiteInfo.GetTerraceCount(newClassName);
-                stype.BathroomCount = _extraSuiteInfo.GetBathroomCount(newClassName);
-                stype.BedroomCount = _extraSuiteInfo.GetBedroomCount(newClassName);
-                stype.DenCount = _extraSuiteInfo.GetDenCount(newClassName);
-                stype.FloorArea = new ValueWithUM(_extraSuiteInfo.GetFloorAreaSqFt(newClassName), ValueWithUM.Unit.SqFeet);
+                if (null == stype)
+                {
+                    stype = new SuiteType(dbSuite.Building.ConstructionSite, newClassName);
 
-                _clientSession.DbSession.Save(stype);
-                _log.AppendFormat("Created new suite type ID={0}, Name={1}\r\n", stype.AutoID, stype.Name);
+                    stype.BalconyCount = _extraSuiteInfo.GetBalconyCount(newClassName);
+                    stype.TerraceCount = _extraSuiteInfo.GetTerraceCount(newClassName);
+                    stype.BathroomCount = _extraSuiteInfo.GetBathroomCount(newClassName);
+                    stype.BedroomCount = _extraSuiteInfo.GetBedroomCount(newClassName);
+                    stype.DenCount = _extraSuiteInfo.GetDenCount(newClassName);
+                    stype.FloorArea = new ValueWithUM(_extraSuiteInfo.GetFloorAreaSqFt(newClassName), ValueWithUM.Unit.SqFeet);
+
+                    _clientSession.DbSession.Save(stype);
+                    _log.AppendFormat("Created new suite type ID={0}, Name={1}\r\n", stype.AutoID, stype.Name);
+                }
 
                 _typeCache.Add(stype.Name, stype);
             }
 
-            dbSuite.SuiteType = stype;
+            //dbSuite.SuiteType = stype;
+            stype.debug_addSuite(dbSuite);
         }
 
         internal class CsvSuiteTypeInfo

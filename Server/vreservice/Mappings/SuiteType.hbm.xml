@@ -25,10 +25,10 @@
       cascade="none" fetch="join" insert="true" update="false"
     />
 
-    <set inverse="true" name="SuitesInvolved">
+    <bag inverse="true" name="SuitesInvolved">
       <key column="SuiteTypeId" />
       <one-to-many class="Suite" />
-    </set>
+    </bag>
     
     <!--  
     <set name="Suites">

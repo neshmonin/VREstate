@@ -40,6 +40,12 @@ namespace Vre.Server.BusinessLogic
             if (constructionSite != null) constructionSite.SuiteTypes.Add(this);
         }
 
+        public virtual void debug_addSuite(Suite s)
+        {
+            s.SuiteType = this;
+            SuitesInvolved.Add(s);
+        }
+
         public override ClientData GetClientData()
         {
             ClientData result = new ClientData();

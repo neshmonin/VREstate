@@ -13,7 +13,7 @@ namespace Vre.Server.Dao
         {
             lock (_session) 
                 return _session.CreateCriteria<SuiteType>()
-                    .Add(Restrictions.Eq("SiteID", siteId))
+                    .Add(Restrictions.Eq("ConstructionSite.AutoID", siteId))
                     .Add(Restrictions.Eq("Name", name))
                     .UniqueResult<SuiteType>();
         }
@@ -22,7 +22,7 @@ namespace Vre.Server.Dao
         {
             lock (_session) 
                 return _session.CreateCriteria<SuiteType>()
-                    .Add(Restrictions.Eq("SiteID", siteId))
+                    .Add(Restrictions.Eq("ConstructionSite.AutoID", siteId))
                     .List<SuiteType>();
         }
     }
