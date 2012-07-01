@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Configuration.Install;
 using System.Diagnostics;
 using System.ServiceProcess;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Vre.Server
@@ -189,12 +190,21 @@ namespace Vre.Server
                 
                 if (ex != null)
                     el.WriteEntry(
-                        "General unhandled error: " + ex.Message,
+                        "General unhandled error: " + ex.Message + "\r\n" + ex.StackTrace,
                         System.Diagnostics.EventLogEntryType.Warning, 1011);
                 else
                     el.WriteEntry(
                         "General unknown unhandled error.",
                         System.Diagnostics.EventLogEntryType.Warning, 1011);
+
+                if (!e.IsTerminating)
+                {
+                    Thread.CurrentThread.IsBackground = true;
+
+                    new VrService(ServiceName).ServiceControl(VrService.ServiceCommand.Stop);
+
+                    Thread.Sleep(Timeout.Infinite);
+                }
             }
         }
 

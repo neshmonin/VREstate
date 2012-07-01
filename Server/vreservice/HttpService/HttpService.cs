@@ -92,10 +92,14 @@ namespace Vre.Server.HttpService
                 if (null == _httpListener) return;  // shutdown case
                 if (!_httpListener.IsListening) return;  // shutdown case
 
-                HttpListenerContext ctx = _httpListener.EndGetContext(ar);
+                HttpListenerContext ctx = null;
+
+                try { ctx = _httpListener.EndGetContext(ar); }
+                catch { }  // make sure this does not prevent server from accepting further requests
 
                 _httpListener.BeginGetContext(httpCallback, null);
 
+                if (null == ctx) return;  // error case; just give up the request
                 try
                 {
                     // TODO: configurable required SSL check
@@ -138,17 +142,20 @@ namespace Vre.Server.HttpService
                     else 
                         ctx.Response.Close();
                 }
-                catch (HttpListenerException ex)  // these seem to be useless; just flooding logs
+                catch (HttpListenerException ex)  // these stack traces seem to be useless; just flooding logs
                 {
                     ServiceInstances.Logger.Error("HTTP request processing failed: {0}", ex.Message);
                 }
                 catch (Exception ex)
                 {
-                    //ctx.Response.Abort();
-                    ctx.Response.StatusCode = 500;
-                    ctx.Response.StatusDescription = "Server error.";
-                    ctx.Response.Close();
                     ServiceInstances.Logger.Error("HTTP request processing failed: {0}", ex);
+                    try
+                    {
+                        ctx.Response.StatusCode = 500;
+                        ctx.Response.StatusDescription = "Server error.";
+                        ctx.Response.Close();
+                    }
+                    catch { }  // make sure this does not break server with unhandled exception
                 }
             }
         }
