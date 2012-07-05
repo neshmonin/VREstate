@@ -31,6 +31,12 @@ namespace Vre.Server.BusinessLogic
         public virtual double AltitudeAdjustment { get; set; }
         public virtual GeoPoint Center { get; set; }
         public virtual double MaxSuiteAltitude { get; set; }
+        public virtual string InitialView { get; set; }
+
+        /// <summary>
+        /// Seller agent reference
+        /// </summary>
+        public virtual User SellingBy { get; set; }
 
         public virtual IList<Suite> Suites { get; protected set; }
 
@@ -48,6 +54,7 @@ namespace Vre.Server.BusinessLogic
             AltitudeAdjustment = 0.0;
             Suites = new List<Suite>();
             if (constructionSite != null) constructionSite.Buildings.Add(this);
+            InitialView = string.Empty;
         }
 
         public Building(ClientData fromServer) : this(null, string.Empty)
@@ -69,10 +76,14 @@ namespace Vre.Server.BusinessLogic
             result.Add("openingDate", OpeningDate);
             result.Add("altitudeAdjustment", AltitudeAdjustment);
             result.Add("maxSuiteAltitude", MaxSuiteAltitude);
+            result.Add("initialView", InitialView);
 
             if (Location != null) result.Add("position", Location.GetClientData());
 
             if (Center != null) result.Add("center", Center.GetClientData());
+
+            if (SellingBy != null)
+                result.Add("sellerId", SellingBy.AutoID);
 
             return result;
         }
@@ -86,6 +97,8 @@ namespace Vre.Server.BusinessLogic
             OpeningDate = data.UpdateProperty("openingDate", OpeningDate, ref changed);
 
             if (Location.UpdateFromClient(data.GetNextLevelDataItem("position"))) changed = true;
+
+            InitialView = data.UpdateProperty("initialView", InitialView, ref changed);
 
             return changed;
         }

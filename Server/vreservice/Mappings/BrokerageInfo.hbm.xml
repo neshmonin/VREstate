@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vrebo" namespace="Vre.Server.BusinessLogic">
-  <class name="ContactInfo" table="ContactInfo" dynamic-update="true" lazy="false">
+  <class name="BrokerageInfo" table="BrokerageInfo" dynamic-update="true" lazy="false">
     
     <id name="AutoID" column="AutoID" unsaved-value="0">
       <generator class="identity" />
@@ -12,20 +12,16 @@
 
     <property name="Emails" column="Emails" />
     <property name="PhoneNumbers" column="PhoneNumbers" />
-
-    <property name="PersonalTitle" column="PersonalTitle" />
-    <property name="FirstName" column="FirstName" />
-    <property name="LastName" column="LastName" />
-    <property name="MiddleName" column="MiddleName" />
-
-    <property name="PhotoUriRelative" column="Photo" />
-
+    
     <property name="AddressLine1" column="AddressLine1" />
     <property name="AddressLine2" column="AddressLine2" />
     <property name="City" column="City" />
     <property name="StateProvince" column="StateProvince" />
     <property name="PostalCode" column="PostalCode" />
     <property name="Country" column="Country" />
+
+    <property name="WebSite" column="Web" />
+    <property name="LogoUriRelative" column="Logo" />
 
   </class>
 </hibernate-mapping>

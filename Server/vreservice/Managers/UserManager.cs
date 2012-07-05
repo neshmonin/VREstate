@@ -14,7 +14,9 @@ namespace Vre.Server.BusinessLogic
 
         public void Create(User.Role role, int developerId, LoginType type, string login, string password)
         {
-            RolePermissionCheck.CheckCreateUser(_session, ((developerId >= 0) ? (int?)developerId : null), role);
+            //RolePermissionCheck.CheckCreateUser(_session, ((developerId >= 0) ? (int?)developerId : null), role);
+            RolePermissionCheck.CheckUserAccess(_session, ((developerId >= 0) ? (int?)developerId : null), role, 
+                RolePermissionCheck.UserInfoAccessLevel.Administrative);
 
             createUserInt(role, developerId, type, login, password);
 
@@ -45,6 +47,8 @@ namespace Vre.Server.BusinessLogic
 
                 if (newUser != null)
                 {
+                    newUser.LastLogin = NHibernateHelper.DateTimeMinValue;
+
                     using (UserDao dao = new UserDao(_session.DbSession))
                     {
                         dao.Create(newUser);
@@ -72,7 +76,15 @@ namespace Vre.Server.BusinessLogic
                     int userId;
                     if (auth.AuthenticateUser(type, role, estateDeveloperId, login, password, out userId))
                     {
-                        using (UserDao dao = new UserDao(session)) result = dao.GetById(userId);
+                        using (UserDao dao = new UserDao(session))
+                        {
+                            result = dao.GetById(userId);
+                            if (result != null)  // update last login value
+                            {
+                                result.Touch();
+                                dao.SafeUpdate(result);
+                            }
+                        }
                     }
                 }
             }
@@ -90,7 +102,8 @@ namespace Vre.Server.BusinessLogic
             }
 
             if (null == result) throw new FileNotFoundException("User object does not exist.");
-            RolePermissionCheck.CheckGetUser(_session, result);
+            //RolePermissionCheck.CheckGetUser(_session, result);
+            RolePermissionCheck.CheckUserAccess(_session, result, RolePermissionCheck.UserInfoAccessLevel.Contact);
             return result;
         }
 
@@ -108,7 +121,8 @@ namespace Vre.Server.BusinessLogic
             }
 
             if (null == result) throw new FileNotFoundException("User object does not exist.");
-            RolePermissionCheck.CheckGetUser(_session, result);
+            //RolePermissionCheck.CheckGetUser(_session, result);
+            RolePermissionCheck.CheckUserAccess(_session, result, RolePermissionCheck.UserInfoAccessLevel.Contact);
             return result;
         }
 
@@ -175,7 +189,8 @@ namespace Vre.Server.BusinessLogic
                     User u;
                     using (UserDao dao = new UserDao(_session.DbSession)) u = dao.GetById(userId);
 
-                    RolePermissionCheck.CheckDeleteUser(_session, u);
+                    //RolePermissionCheck.CheckDeleteUser(_session, u);
+                    RolePermissionCheck.CheckUserAccess(_session, u, RolePermissionCheck.UserInfoAccessLevel.Administrative);
 
                     string errorReason;
                     if (!auth.ChangePassword(userId, currentPassword, newPassword, out errorReason))
@@ -192,7 +207,8 @@ namespace Vre.Server.BusinessLogic
 
         public void ChangePassword(User user, string currentPassword, string newPassword)
         {
-            RolePermissionCheck.CheckDeleteUser(_session, user);
+            //RolePermissionCheck.CheckDeleteUser(_session, user);
+            RolePermissionCheck.CheckUserAccess(_session, user, RolePermissionCheck.UserInfoAccessLevel.Administrative);
 
             using (IAuthentication auth = new Authentication(_session.DbSession))
             {
@@ -206,20 +222,30 @@ namespace Vre.Server.BusinessLogic
 
         public User[] List(User.Role role, int estateDeveloperId, string nameLookup, bool includeDeleted)
         {
-            RolePermissionCheck.CheckListUsers(_session, ((estateDeveloperId >= 0) ? (int?)estateDeveloperId : null), role);
+            if (includeDeleted && (_session.User.UserRole != User.Role.SuperAdmin))
+                includeDeleted = false;  // only superadmins can see deleted records!
 
             using (UserDao dao = new UserDao(_session.DbSession))
             {
-                if (role != User.Role.SuperAdmin)
-                    return dao.ListUsers(role, estateDeveloperId, nameLookup, includeDeleted);
-                else
-                    return dao.ListSuperAdmins(nameLookup, includeDeleted);
+                IList<User> result = dao.ListUsers(role, ((estateDeveloperId >= 0) ? (int?)estateDeveloperId : null),
+                    nameLookup, includeDeleted);
+
+                for (int idx = result.Count - 1; idx >= 0; idx--)
+                {
+                    RolePermissionCheck.UserInfoAccessLevel lvl = RolePermissionCheck.GetUserAccess(_session, result[idx]);
+
+                    if (lvl < RolePermissionCheck.UserInfoAccessLevel.Contact)
+                        result.RemoveAt(idx);
+                }
+
+                return NHibernateHelper.IListToArray<User>(result);
             }
         }
 
         public void Update(User user)
         {
-            RolePermissionCheck.CheckUpdateUser(_session, user);
+            //RolePermissionCheck.CheckUpdateUser(_session, user);
+            RolePermissionCheck.CheckUserAccess(_session, user, RolePermissionCheck.UserInfoAccessLevel.Administrative);
 
             using (UserDao dao = new UserDao(_session.DbSession))
             {
@@ -232,7 +258,8 @@ namespace Vre.Server.BusinessLogic
 
         public void Delete(User user)
         {
-            RolePermissionCheck.CheckDeleteUser(_session, user);
+            //RolePermissionCheck.CheckUpdateUser(_session, user);
+            RolePermissionCheck.CheckUserAccess(_session, user, RolePermissionCheck.UserInfoAccessLevel.Administrative);
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
             {
@@ -240,14 +267,14 @@ namespace Vre.Server.BusinessLogic
                 {
                     if (user.UserRole == User.Role.SuperAdmin)
                     {
-                        if (dao.ListSuperAdmins(null, false).Length < 2)
+                        if (dao.ListUsers(User.Role.SuperAdmin, null, null, false).Count < 2)
                         {
                             throw new InvalidOperationException("Cannot delete last active Superadmin.");
                         }
                     }
                     else if (user.UserRole == User.Role.DeveloperAdmin)
                     {
-                        if (dao.ListUsers(User.Role.DeveloperAdmin, user.EstateDeveloperID.Value, null, false).Length < 2)
+                        if (dao.ListUsers(User.Role.DeveloperAdmin, user.EstateDeveloperID.Value, null, false).Count < 2)
                         {
                             throw new InvalidOperationException("Cannot delete last active Developer Admin.");
                         }
@@ -377,5 +404,53 @@ namespace Vre.Server.BusinessLogic
         //            estateDeveloper.AutoID, users, buildings);
         //    }
         //}
+
+        public void GrantViewPermissionTo(User user, bool revoke)
+        {
+            using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
+            {
+                using (UserDao dao = new UserDao(_session.DbSession))
+                {
+                    _session.Resume();
+
+                    User requester = /*_session.User;*/ dao.GetById(_session.User.AutoID);
+                    User accessGainer = /*user;*/ dao.GetById(user.AutoID);
+                    bool changed = false;
+
+                    if (requester.VisibleBy.Contains(accessGainer))
+                    {
+                        if (revoke)
+                        {
+                            requester.VisibleBy.Remove(accessGainer);
+                            accessGainer.CanView.Remove(requester);
+                            changed = true;
+                        }
+                    }
+                    else
+                    {
+                        if (!revoke)
+                        {
+                            requester.VisibleBy.Add(accessGainer);
+                            accessGainer.CanView.Add(requester);
+                            changed = true;
+                        }
+                    }
+
+                    if (changed)
+                    {
+                        if (!dao.SafeUpdate(accessGainer))
+                            throw new StaleObjectStateException("Record was updated by other user", accessGainer.AutoID);
+                        if (!dao.SafeUpdate(requester))
+                            throw new StaleObjectStateException("Record was updated by other user", requester.AutoID);
+
+                        tran.Commit();
+                        ServiceInstances.Logger.Info("User {0} (ID={1}) granted profile access to ID={2}.",
+                            _session, _session.User.AutoID, user.AutoID);
+                    }
+
+                    _session.Disconnect();
+                }  // DAO
+            }  // TRAN
+        }
     }
 }

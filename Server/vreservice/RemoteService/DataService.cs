@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using Vre.Server.BusinessLogic;
 using Vre.Server.BusinessLogic.Client;
+using System.Diagnostics;
 
 namespace Vre.Server.RemoteService
 {
@@ -21,6 +22,7 @@ namespace Vre.Server.RemoteService
         private static void configure()
         {
             _allowUnsecureService = ServiceInstances.Configuration.GetValue("AllowSensitiveDataOverNonSecureConnection", false);
+
             _configured = true;
         }
 
@@ -516,35 +518,53 @@ namespace Vre.Server.RemoteService
 
         private static void getUserList(ClientSession session, ServiceQuery query, IResponseData resp, bool includeDeleted)
         {
-            User.Role role;
-            if (!Enum.TryParse<User.Role>(query.GetParam("role", "buyer"), true, out role)) role = User.Role.Buyer;
-            int estateDeveloperId = query.GetParam("ed", -1);// data.GetProperty("ed", -1);
-            string nameLookup = query.GetParam("nameFilter", string.Empty);// data.GetProperty("nameFilter", string.Empty);
-            User[] list;
+            ClientData[] result;
 
-            using (UserManager manager = new UserManager(session))
+            if (query.GetParam("sellerMode", "false").Equals("true"))
             {
-                list = manager.List(role, estateDeveloperId, nameLookup, includeDeleted);
-            }
+                session.Resume();
 
-            // produce output
-            //
-            int cnt = list.Length;
-            ClientData[] result = new ClientData[cnt];
-            using (IAuthentication auth = new Authentication(session.DbSession))
-            {
+                User[] list = session.User.CanView.ToArray();
+
+                int cnt = list.Length;
+                result = new ClientData[cnt];
                 for (int idx = 0; idx < cnt; idx++)
-                {
                     result[idx] = list[idx].GetClientData();
 
-                    LoginType lt;
-                    User.Role ur;
-                    int ed;
-                    string login;
-                    if (auth.LoginByUserId(list[idx].AutoID, out lt, out ur, out ed, out login))
+                session.Disconnect();
+            }
+            else
+            {
+                User.Role role;
+                if (!Enum.TryParse<User.Role>(query.GetParam("role", "buyer"), true, out role)) role = User.Role.Buyer;
+                int estateDeveloperId = query.GetParam("ed", -1);// data.GetProperty("ed", -1);
+                string nameLookup = query.GetParam("nameFilter", string.Empty);// data.GetProperty("nameFilter", string.Empty);
+                User[] list;
+
+                using (UserManager manager = new UserManager(session))
+                    list = manager.List(role, estateDeveloperId, nameLookup, includeDeleted);
+
+                // produce output
+                //
+                int cnt = list.Length;
+                result = new ClientData[cnt];
+                using (IAuthentication auth = new Authentication(session.DbSession))
+                {
+                    for (int idx = 0; idx < cnt; idx++)
                     {
-                        result[idx].Add("loginType", lt);
-                        result[idx].Add("login", login);
+                        result[idx] = list[idx].GetClientData();
+
+                        // retrieve associated login information (which is not a part of user record)
+                        //
+                        LoginType lt;
+                        User.Role ur;
+                        int ed;
+                        string login;
+                        if (auth.LoginByUserId(list[idx].AutoID, out lt, out ur, out ed, out login))
+                        {
+                            result[idx].Add("loginType", lt);
+                            result[idx].Add("login", login);
+                        }
                     }
                 }
             }
@@ -570,7 +590,7 @@ namespace Vre.Server.RemoteService
                     building = manager.GetBuildingById(buildingId);
 
                     // this shall throw out if user has no right to modify building info
-                    manager.TestUserCanUpdate(building);
+                    //manager.TestUserCanUpdate(building);  <-- no need for this as we only update suites
 
                     foreach (ClientData suiteData in data.GetNextLevelDataArray("suites"))
                     {
@@ -702,7 +722,7 @@ namespace Vre.Server.RemoteService
         #region create
         private static void createUser(ClientSession session, ClientData data, IResponseData resp)
         {
-            User.Role role = data.GetProperty<User.Role>("role", User.Role.Buyer);
+            User.Role role = data.GetProperty<User.Role>("role", User.Role.Visitor);
             LoginType type = data.GetProperty<LoginType>("type", LoginType.Plain);
             int estateDeveloperId = data.GetProperty("ed", -1);
             string login = data.GetProperty("uid", string.Empty);

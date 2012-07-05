@@ -22,16 +22,43 @@ namespace Vre.Server.BusinessLogic
 
         public Role UserRole { get; private set; }
         public int? EstateDeveloperID { get; private set; }
+        public DateTime LastLogin { get; set; }
         public ContactInfo PersonalInfo { get; private set; }
+        public BrokerageInfo BrokerInfo { get; private set; }
+        public IList<UserLicense> Licenses { get; private set; }
+
+        /// <summary>
+        /// Suites managed by this user (sales person or selling agent); initially only used by latter.
+        /// </summary>
+        public virtual ICollection<Suite> ManagedSuites { get; private set; }
+        /// <summary>
+        /// Buildings managed by this user (sales person or selling agent); initially only used by latter.
+        /// </summary>
+        public virtual ICollection<Building> ManagedBuildings { get; private set; }
+
+        /// <summary>
+        /// List of other users (sellers) which can see this user's information
+        /// </summary>
+        public virtual ICollection<User> VisibleBy { get; protected set; }
+        /// <summary>
+        /// List of users (buyers) this user (seller) can view
+        /// </summary>
+        public virtual ICollection<User> CanView { get; protected set; }
 
         private User() { }
-
+        
 		public User(int? estateDeveloperId, Role role)
 		{
             InitializeNew();
             UserRole = role;
             EstateDeveloperID = estateDeveloperId;
-            PersonalInfo = new ContactInfo();
+            PersonalInfo = null;// new ContactInfo();
+            BrokerInfo = null;// new BrokerageInfo();
+            ManagedSuites = new List<Suite>();
+            ManagedBuildings = new List<Building>();
+            VisibleBy = new HashSet<User>();
+            CanView = new HashSet<User>();
+            Licenses = new List<UserLicense>();
         }
 
         /// <summary>
@@ -46,6 +73,63 @@ namespace Vre.Server.BusinessLogic
         public void UpdatePersonalInfo(ContactInfo info)
         {
             PersonalInfo = info;
+            MarkUpdated();
+        }
+
+        public void EmitLicense(Site constructionSite, DateTime expiryTime, User initiator)
+        {
+            bool updated = false;
+            foreach (UserLicense ul in Licenses)
+                if (ul.LicensedSite.Equals(constructionSite))
+                {
+                    ul.Prolong(expiryTime, initiator);
+                    updated = true;
+                }
+
+            if (!updated)
+                Licenses.Add(new UserLicense(this, constructionSite, expiryTime, initiator));
+
+            MarkUpdated();
+        }
+
+        /// <summary>
+        /// Returns true if user has a valid license for this site.
+        /// </summary>
+        public bool HasLicense(Site constructionSite)
+        {
+            bool result = false;
+
+            foreach (UserLicense ul in Licenses)
+                if (ul.LicensedSite.Equals(constructionSite))
+                {
+                    result = (ul.ExpiryTime > DateTime.UtcNow);
+                    break;
+                }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Returns true if user has any valid license.
+        /// </summary>
+        public bool HasAnyLicense()
+        {
+            bool result = false;
+
+            foreach (UserLicense ul in Licenses)
+                if (ul.ExpiryTime > DateTime.UtcNow)
+                {
+                    result = true;
+                    break;
+                }
+
+            return result;
+        }
+
+        public void Touch()
+        {
+            LastLogin = DateTime.UtcNow;
+            MarkUpdated();
         }
 
         public override ClientData GetClientData()
@@ -61,6 +145,9 @@ namespace Vre.Server.BusinessLogic
             if (PersonalInfo != null)
                 result.Add("personalInfo", PersonalInfo.GetClientData());
 
+            if (BrokerInfo != null)
+                result.Add("brokerageInfo", BrokerInfo.GetClientData());
+
             return result;
         }
 
@@ -72,7 +159,14 @@ namespace Vre.Server.BusinessLogic
             if (picd.Count > 0)
             {
                 if (null == PersonalInfo) PersonalInfo = new ContactInfo();
-                if (PersonalInfo.UpdateFromClient(data.GetNextLevelDataItem("personalInfo"))) changed = true;
+                if (PersonalInfo.UpdateFromClient(picd)) changed = true;
+            }
+
+            ClientData bicd = data.GetNextLevelDataItem("brokerageInfo");
+            if (bicd.Count > 0)
+            {
+                if (null == BrokerInfo) BrokerInfo = new BrokerageInfo();
+                if (BrokerInfo.UpdateFromClient(bicd)) changed = true;
             }
 
             return changed;

@@ -11,6 +11,7 @@ namespace Vre.Server.Dao
             DatabaseSettings schemaVerMin = null;
             DatabaseSettings schemaVerMax = null;
             DateTime created;
+            long status;
 
             try
             {
@@ -19,12 +20,15 @@ namespace Vre.Server.Dao
                     created = Get(DatabaseSettings.Setting.CreateTime, DateTime.MinValue);
                     schemaVerMin = dao.GetById((int)DatabaseSettings.Setting.DbSchemaVersionMin);
                     schemaVerMax = dao.GetById((int)DatabaseSettings.Setting.DbSchemaVersionMax);
+                    status = Get(DatabaseSettings.Setting.UpgradeStatus, 0);
                 }
             }
             catch (Exception ex)
             {
                 throw new ApplicationException("Database is not accessible or is invalid.", ex);
             }
+
+            if (0 != status) throw new ApplicationException("Database is in upgrade process.");
 
             long svMin = ((schemaVerMin != null) && schemaVerMin.IntValue.HasValue) ? schemaVerMin.IntValue.Value : -1;
             long svMax = ((schemaVerMax != null) && schemaVerMax.IntValue.HasValue) ? schemaVerMax.IntValue.Value : -1;

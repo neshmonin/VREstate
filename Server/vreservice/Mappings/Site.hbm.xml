@@ -31,6 +31,7 @@
     <property name="Name" column="Name" />
     <property name="GenericInfoModel" column="GenericInfoModel" />
     <property name="ExcursionModel" column="ExcursionModel" />
+    <property name="InitialView" column="InitialView" />
 
     <!-- Geometry-related elements are read directly from model cached
     <component name="Location">

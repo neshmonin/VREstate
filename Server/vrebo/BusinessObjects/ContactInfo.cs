@@ -1,62 +1,12 @@
 using System;
-using System.Diagnostics;
 
 namespace Vre.Server.BusinessLogic
 {
-	[Serializable]
+    [Serializable]
     public partial class ContactInfo : IClientDataProvider
-	{
-
-        public class PhoneNumber
-        {
-            public enum Category
-            {
-                Home,
-                Work,
-                Mobile,
-                Other
-            }
-
-            public Category PhoneCategory { get; private set; }
-            public string Number { get; private set; }
-            public string Extension { get; private set; }
-
-            public PhoneNumber(Category phoneCategory, string number, string extension)
-            {
-                // TODO: sanitize Number and Extension to numerics only!
-                PhoneCategory = phoneCategory;
-                Number = number;
-                Extension = extension;
-            }
-
-            public PhoneNumber(string encoded)
-            {
-                Debug.Assert((encoded != null) && (encoded.Length > 2), "Phone number format is invalid!");
-                
-                char type = encoded[0];
-                if ('h' == type) PhoneCategory = Category.Home;
-                else if ('m' == type) PhoneCategory = Category.Mobile;
-                else if ('w' == type) PhoneCategory = Category.Work;
-                else PhoneCategory = Category.Other;
-
-                int pos = encoded.IndexOf('#');
-                Number = encoded.Substring(2, pos - 2);
-                Extension = encoded.Substring(pos + 1);
-            }
-
-            public override string ToString()
-            {
-                char type;
-                switch (PhoneCategory)
-                {
-                    case Category.Home: type = 'h'; break;
-                    case Category.Mobile: type = 'm'; break;
-                    case Category.Work: type = 'w'; break;
-                    default: type = 'o'; break;
-                }
-                return string.Format("{0};{1}#{2}", type, Number, Extension);
-            }
-        }
+    {
+        public const char ArraySplitterC = ',';
+        public const string ArraySplitterS = ",";
 
         public enum Title
         {
@@ -84,54 +34,56 @@ namespace Vre.Server.BusinessLogic
         public string PostalCode { get; set; }
         public string Country { get; set; }
 
+        public string PhotoUriRelative { get; set; }
+
         public ContactInfo()
-		{
+        {
             Emails = string.Empty;
             PhoneNumbers = string.Empty;
-		}
-
-        public string[] EmailAddressList
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(Emails)) return Emails.Split(';');
-                else return new string[0];
-            }
-            set
-            {
-                if (null == value) Emails = string.Empty;
-                else if (0 == value.Length) Emails = string.Empty;
-                else Emails = string.Join(";", value);
-            }
         }
 
-        public PhoneNumber[] PhoneNumberList
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(PhoneNumbers)) return new PhoneNumber[0];
-                else
-                {
-                    string[] phs = PhoneNumbers.Split(';');
-                    PhoneNumber[] result = new PhoneNumber[phs.Length];
-                    for (int idx = phs.Length - 1; idx >= 0; idx--)
-                        result[idx] = new PhoneNumber(phs[idx]);
-                    return result;
-                }
-            }
-            set
-            {
-                if (null == value) PhoneNumbers = string.Empty;
-                else if (0 == value.Length) PhoneNumbers = string.Empty;
-                else
-                {
-                    string[] phs = new string[value.Length];
-                    for (int idx = value.Length - 1; idx >= 0; idx--)
-                        phs[idx] = value[idx].ToString();
-                    PhoneNumbers = string.Join(";", phs);
-                }
-            }
-        }
+        //public string[] EmailAddressList
+        //{
+        //    get
+        //    {
+        //        if (!string.IsNullOrEmpty(Emails)) return Emails.Split(';');
+        //        else return new string[0];
+        //    }
+        //    set
+        //    {
+        //        if (null == value) Emails = string.Empty;
+        //        else if (0 == value.Length) Emails = string.Empty;
+        //        else Emails = string.Join(";", value);
+        //    }
+        //}
+
+        //public PhoneNumber[] PhoneNumberList
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(PhoneNumbers)) return new PhoneNumber[0];
+        //        else
+        //        {
+        //            string[] phs = PhoneNumbers.Split(';');
+        //            PhoneNumber[] result = new PhoneNumber[phs.Length];
+        //            for (int idx = phs.Length - 1; idx >= 0; idx--)
+        //                result[idx] = new PhoneNumber(phs[idx]);
+        //            return result;
+        //        }
+        //    }
+        //    set
+        //    {
+        //        if (null == value) PhoneNumbers = string.Empty;
+        //        else if (0 == value.Length) PhoneNumbers = string.Empty;
+        //        else
+        //        {
+        //            string[] phs = new string[value.Length];
+        //            for (int idx = value.Length - 1; idx >= 0; idx--)
+        //                phs[idx] = value[idx].ToString();
+        //            PhoneNumbers = string.Join(";", phs);
+        //        }
+        //    }
+        //}
 
         public ClientData GetClientData()
         {
@@ -149,8 +101,8 @@ namespace Vre.Server.BusinessLogic
             result.Add("postalCode", PostalCode);
             result.Add("country", Country);
 
-            result.Add("phoneNumbers", PhoneNumbers);
-            result.Add("emails", Emails);
+            result.Add("phoneNumbers", PhoneNumbers.Split(ArraySplitterC));
+            result.Add("emails", Emails.Split(ArraySplitterC));
 
             return result;
         }
@@ -171,8 +123,10 @@ namespace Vre.Server.BusinessLogic
             PostalCode = data.UpdateProperty("postalCode", PostalCode, ref changed);
             Country = data.UpdateProperty("country", Country, ref changed);
 
-            PhoneNumbers = data.UpdateProperty("phoneNumbers", PhoneNumbers, ref changed);
-            Emails = data.UpdateProperty("emails", Emails, ref changed);
+            PhoneNumbers = string.Join(ArraySplitterS,
+                data.UpdateProperty("phoneNumbers", PhoneNumbers.Split(ArraySplitterC), ref changed));
+            Emails = string.Join(ArraySplitterS,
+                data.UpdateProperty("emails", Emails.Split(ArraySplitterC), ref changed));
 
             return changed;
         }

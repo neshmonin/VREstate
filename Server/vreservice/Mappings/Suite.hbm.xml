@@ -28,6 +28,11 @@
     <property name="Status" column="Status" />
     <property name="ShowPanoramicView" column="ShowPanoramicView" />
 
+    <many-to-one name="SellingBy"
+      column="SellerID" class="User"
+      cascade="none" fetch="join" insert="true" update="false"
+    />
+
     <!-- Geometry-related elements are read directly from model cached
     <property name="ceilingHeight" column="CeilingHeight" />
     <component name="Location">

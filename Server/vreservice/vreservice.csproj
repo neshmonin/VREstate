@@ -229,6 +229,8 @@
     <EmbeddedResource Include="Mappings\OptionType.hbm.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\BrokerageInfo.hbm.xml" />
+    <EmbeddedResource Include="Mappings\UserLicense.hbm.xml" />
     <Content Include="SQL\Constraint\Account.sql" />
     <Content Include="SQL\Constraint\DeveloperAdmin.sql" />
     <Content Include="SQL\Constraint\Price.sql" />

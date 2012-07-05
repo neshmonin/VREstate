@@ -124,6 +124,19 @@ namespace Vre.Server.RemoteService
             }
         }
 
+        public void DropSession(string sessionId)
+        {
+            ClientSession cs;
+
+            lock (_sessionList)
+            {
+                if (!_sessionList.TryGetValue(sessionId, out cs)) cs = null;
+                else _sessionList.Remove(sessionId);
+            }
+
+            if (cs != null) cs.Dispose();
+        }
+
         private void staleSessionDropThread()
         {
             while (!_staleSessionDropThreadExit.WaitOne(60000))

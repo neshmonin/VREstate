@@ -10,7 +10,7 @@ namespace Vre.Server
         /// <summary>
         /// Current schema version of database; to be verified against real DB on startup.
         /// </summary>
-        public const int CurrentDbVersion = 4;
+        public const int CurrentDbVersion = 6;
 
         /// <summary>
         /// Possible values of <see cref="Id"/> property.
@@ -20,6 +20,7 @@ namespace Vre.Server
             DbSchemaVersionMin = 1,
             CreateTime = 2,
             DbSchemaVersionMax = 3,
+            UpgradeStatus = 4
         }
 
         /// <summary>

@@ -57,6 +57,20 @@ namespace Vre.Server.RemoteService
                     loginType, role, estateDeveloperId, login, password);
             }
 
+            // test user validity
+            //
+            if (role == User.Role.SellingAgent)
+            {
+                ClientSession cs = ServiceInstances.SessionStore[sessionId];
+                if (!cs.User.HasAnyLicense())
+                {
+                    ServiceInstances.Logger.Info("User {0} has no valid licenses; rejecting login.", cs);
+                    cs = null;
+                    ServiceInstances.SessionStore.DropSession(sessionId);
+                    sessionId = null;
+                }
+            }
+
             // produce output
             //
             if (sessionId != null)

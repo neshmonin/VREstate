@@ -120,66 +120,6 @@ namespace Vre.Server.BusinessLogic
             }
         }
 
-        public void TestUserCanUpdate(Building building)
-        {
-            // ROLE PERMISSION LOGIC
-            if (User.Role.SuperAdmin == _session.User.UserRole)
-            {
-                // all OK
-                return;
-            }
-            else if (User.Role.DeveloperAdmin == _session.User.UserRole)
-            {
-                if (_session.User.EstateDeveloperID == building.ConstructionSite.Developer.AutoID)
-                {
-                    // all OK
-                    return;
-                }
-                else
-                {
-                    throw new PermissionException(
-                        string.Format("Developer admin ID={0} cannot modify foreign building record.",
-                        _session.User.AutoID, _session.User.UserRole));
-                }
-            }
-            else
-            {
-                throw new PermissionException(
-                    string.Format("User ID={0} with {1} role cannot modify building record.",
-                    _session.User.AutoID, _session.User.UserRole));
-            }
-        }
-
-        public void TestUserCanUpdate(Suite suite)
-        {
-            // ROLE PERMISSION LOGIC
-            if (User.Role.SuperAdmin == _session.User.UserRole)
-            {
-                // all OK
-                return;
-            }
-            else if (User.Role.DeveloperAdmin == _session.User.UserRole)
-            {
-                if (_session.User.EstateDeveloperID == suite.Building.ConstructionSite.Developer.AutoID)
-                {
-                    // all OK
-                    return;
-                }
-                else
-                {
-                    throw new PermissionException(
-                        string.Format("Developer admin ID={0} cannot modify foreign suite record.",
-                        _session.User.AutoID, _session.User.UserRole));
-                }
-            }
-            else
-            {
-                throw new PermissionException(
-                    string.Format("User ID={0} with {1} role cannot modify suite record.",
-                    _session.User.AutoID, _session.User.UserRole));
-            }
-        }
-
         public Suite GetSuiteById(int suiteId)
         {
             // ROLE PERMISSION LOGIC
@@ -195,8 +135,7 @@ namespace Vre.Server.BusinessLogic
 
         public bool UpdateSuite(Suite suite)
         {
-            // ROLE PERMISSION LOGIC
-            TestUserCanUpdate(suite);
+            RolePermissionCheck.CheckUpdateSuite(_session, suite);
 
             using (SuiteDao dao = new SuiteDao(_session.DbSession))
             {
@@ -232,8 +171,7 @@ namespace Vre.Server.BusinessLogic
 
         public bool SetSuitePrice(Suite suite, float price)
         {
-            // ROLE PERMISSION LOGIC
-            TestUserCanUpdate(suite);
+            RolePermissionCheck.CheckUpdateSuite(_session, suite);
 
             bool result = false;
 

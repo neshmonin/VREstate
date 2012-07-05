@@ -64,7 +64,7 @@ namespace Vre.Server.Dao
                 try
                 {
                     base.Update(entity);
-                    _session.Refresh(entity);
+                    //_session.Refresh(entity);
                     ServiceInstances.UpdateService.Update(entity);
                     return true;
                 }

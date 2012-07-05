@@ -58,14 +58,18 @@ namespace Vre.Server.BusinessLogic
                 {
                     using (UserManager um = new UserManager(_session))
                     {
-                        //string errorReason;
-                        foreach (User u in dao.ListUsers(estateDeveloper.AutoID, null, false))
+                        foreach (User.Role r in Enum.GetValues(typeof(User.Role)))
                         {
-                            um.Delete(u);
-                        }
-                        //if (Delete(u, out errorReason)) users++;
+                            if (!User.IsEstateDeveloperTied(r)) continue;
+                            //string errorReason;
+                            foreach (User u in dao.ListUsers(r, estateDeveloper.AutoID, null, false))
+                            {
+                                um.Delete(u);
+                            }
+                            //if (Delete(u, out errorReason)) users++;
 
-                        //else throw new Exception("Failed to delete user: " + errorReason);
+                            //else throw new Exception("Failed to delete user: " + errorReason);
+                        }
                     }
                     //users = dao.DeleteUsers(estateDeveloper.AutoID);
                 }

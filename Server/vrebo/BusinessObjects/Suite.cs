@@ -28,6 +28,11 @@ namespace Vre.Server.BusinessLogic
         public virtual ValueWithUM CeilingHeight { get; set; }
         public virtual bool ShowPanoramicView { get; set; }
 
+        /// <summary>
+        /// Seller agent reference
+        /// </summary>
+        public virtual User SellingBy { get; set; }
+
         /// <summary>For NHibernate</summary>
         protected virtual string ceilingHeight { get { return CeilingHeight.AsRaw; } set { CeilingHeight = new ValueWithUM(value); } }
 
@@ -97,6 +102,9 @@ namespace Vre.Server.BusinessLogic
 
             if (SuiteType != null)
                 result.Add("suiteTypeName", SuiteType.Name);  // informational only
+
+            if (SellingBy != null)
+                result.Add("sellerId", SellingBy.AutoID);
 
             return result;
         }

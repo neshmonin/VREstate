@@ -17,6 +17,8 @@
     <property name="UserRole" column="UserRole" />
     <property name="EstateDeveloperID" column="EstateDeveloperID" />
 
+    <property name="LastLogin" column="LastLogin" />
+
     <many-to-one name="PersonalInfo" class="ContactInfo" column="ContactInfoID" fetch="join" cascade="all" />
     <!--
     <bag name="VRTours" inverse="true" lazy="false" cascade="all-delete-orphan" >
@@ -24,5 +26,32 @@
       <one-to-many class="VRTour" />
     </bag>
     -->
+    <many-to-one name="BrokerInfo" class="BrokerageInfo" column="BrokerInfoID" fetch="join" cascade="all" />
+
+    <bag inverse="true" name="ManagedSuites">
+      <key column="SellerId" />
+      <one-to-many class="Suite" />
+    </bag>
+
+    <bag inverse="true" name="ManagedBuildings">
+      <key column="SellerId" />
+      <one-to-many class="Building" />
+    </bag>
+
+    <set inverse="true" name="VisibleBy" table="UserUserAccessMM" cascade="none">
+      <key column="FromId" />
+      <many-to-many class="User" column="ToId" />
+    </set>
+
+    <set name="CanView" table="UserUserAccessMM" cascade="none">
+      <key column="ToId" />
+      <many-to-many class="User" column="FromId" />
+    </set>
+
+    <bag inverse="true" name="Licenses">
+      <key column="LicenseeId" />
+      <one-to-many class="UserLicense" />
+    </bag>
+
   </class>
 </hibernate-mapping>

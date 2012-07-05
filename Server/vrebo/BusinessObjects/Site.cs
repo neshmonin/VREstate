@@ -16,6 +16,7 @@ namespace Vre.Server.BusinessLogic
         public virtual string GenericInfoModel { get; set; }
         public virtual string ExcursionModel { get; set; }
         public virtual GeoPoint Location { get; set; }
+        public virtual string InitialView { get; set; }
 
         protected Site() { }
 
@@ -28,6 +29,7 @@ namespace Vre.Server.BusinessLogic
             Buildings = new List<Building>();
             SuiteTypes = new List<SuiteType>();
             if (developer != null) developer.Sites.Add(this);
+            InitialView = string.Empty;
         }
 
         public virtual ClientData GetClientData()
@@ -47,6 +49,8 @@ namespace Vre.Server.BusinessLogic
 
             result.Add("genericInfoModel", GenericInfoModel);
             result.Add("excursionModel", ExcursionModel);
+
+            result.Add("initialView", InitialView);
 
             return result;
         }

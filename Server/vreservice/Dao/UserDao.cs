@@ -27,49 +27,49 @@ namespace Vre.Server.Dao
             else return null;
         }
 
-        public User[] ListSuperAdmins(string nameLookup, bool includeDeleted)
+        //public User[] ListSuperAdmins(string nameLookup, bool includeDeleted)
+        //{
+        //    lock (_session)
+        //    {
+        //        ICriteria c = _session.CreateCriteria<User>().Add(Restrictions.Eq("UserRole", User.Role.SuperAdmin));
+
+        //        if (!includeDeleted)
+        //            c = c.Add(Restrictions.Eq("Deleted", false));
+
+        //        if (!string.IsNullOrEmpty(nameLookup))
+        //            c.Add(Restrictions.Like("PersonalInfo.FirstName", nameLookup, MatchMode.Anywhere) &&
+        //                Restrictions.Like("PersonalInfo.LastName", nameLookup, MatchMode.Anywhere) &&
+        //                Restrictions.Like("PersonalInfo.MiddleName", nameLookup, MatchMode.Anywhere));
+
+        //        return NHibernateHelper.IListToArray<User>(c.List<User>());
+        //    }
+        //}
+
+        //public User[] ListUsers(int estateDeveloperId, string nameLookup, bool includeDeleted)
+        //{
+        //    lock (_session)
+        //    {
+        //        ICriteria c = _session.CreateCriteria<User>().Add(Restrictions.Eq("EstateDeveloperID", estateDeveloperId));
+
+        //        if (!includeDeleted)
+        //            c = c.Add(Restrictions.Eq("Deleted", false));
+
+        //        if (!string.IsNullOrEmpty(nameLookup))
+        //            c = c.CreateCriteria("PersonalInfo", NHibernate.SqlCommand.JoinType.InnerJoin).
+        //                Add(Restrictions.Like("FirstName", nameLookup, MatchMode.Anywhere) &&
+        //                Restrictions.Like("LastName", nameLookup, MatchMode.Anywhere) &&
+        //                Restrictions.Like("MiddleName", nameLookup, MatchMode.Anywhere));
+
+        //        return NHibernateHelper.IListToArray<User>(c.List<User>());
+        //    }
+        //}
+
+        public IList<User> ListUsers(User.Role role, int? estateDeveloperId, string nameLookup, bool includeDeleted)
         {
             lock (_session)
             {
-                ICriteria c = _session.CreateCriteria<User>().Add(Restrictions.Eq("UserRole", User.Role.SuperAdmin));
-
-                if (!includeDeleted)
-                    c = c.Add(Restrictions.Eq("Deleted", false));
-
-                if (!string.IsNullOrEmpty(nameLookup))
-                    c.Add(Restrictions.Like("PersonalInfo.FirstName", nameLookup, MatchMode.Anywhere) &&
-                        Restrictions.Like("PersonalInfo.LastName", nameLookup, MatchMode.Anywhere) &&
-                        Restrictions.Like("PersonalInfo.MiddleName", nameLookup, MatchMode.Anywhere));
-
-                return NHibernateHelper.IListToArray<User>(c.List<User>());
-            }
-        }
-
-        public User[] ListUsers(int estateDeveloperId, string nameLookup, bool includeDeleted)
-        {
-            lock (_session)
-            {
-                ICriteria c = _session.CreateCriteria<User>().Add(Restrictions.Eq("EstateDeveloperID", estateDeveloperId));
-
-                if (!includeDeleted)
-                    c = c.Add(Restrictions.Eq("Deleted", false));
-
-                if (!string.IsNullOrEmpty(nameLookup))
-                    c = c.CreateCriteria("PersonalInfo", NHibernate.SqlCommand.JoinType.InnerJoin).
-                        Add(Restrictions.Like("FirstName", nameLookup, MatchMode.Anywhere) &&
-                        Restrictions.Like("LastName", nameLookup, MatchMode.Anywhere) &&
-                        Restrictions.Like("MiddleName", nameLookup, MatchMode.Anywhere));
-
-                return NHibernateHelper.IListToArray<User>(c.List<User>());
-            }
-        }
-
-        public User[] ListUsers(User.Role role, int estateDeveloperId, string nameLookup, bool includeDeleted)
-        {
-            lock (_session)
-            {
-                ICriteria c = _session.CreateCriteria<User>().Add(Restrictions.Eq("UserRole", role) &&
-                    Restrictions.Eq("EstateDeveloperID", estateDeveloperId));
+                ICriteria c = _session.CreateCriteria<User>().Add(Restrictions.Eq("UserRole", role));
+                if (estateDeveloperId.HasValue) c = c.Add(Restrictions.Eq("EstateDeveloperID", estateDeveloperId));
 
                 if (!includeDeleted)
                     c = c.Add(Restrictions.Eq("Deleted", false));
@@ -80,7 +80,8 @@ namespace Vre.Server.Dao
                         Restrictions.Like("PersonalInfo.LastName", nameLookup, MatchMode.Anywhere) ||
                         Restrictions.Like("PersonalInfo.MiddleName", nameLookup, MatchMode.Anywhere));
 
-                return NHibernateHelper.IListToArray<User>(c.List<User>());
+                //return NHibernateHelper.IListToArray<User>(c.List<User>());
+                return c.List<User>();
             }
         }
 

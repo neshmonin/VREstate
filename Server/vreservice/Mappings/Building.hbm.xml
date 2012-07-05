@@ -30,6 +30,12 @@
     <property name="OpeningDate" column="OpeningDate" />
     <property name="Status" column="Status" />
     <property name="Model" column="Model" />
+    <property name="InitialView" column="InitialView" />
+
+    <many-to-one name="SellingBy"
+      column="SellerID" class="User"
+      cascade="none" fetch="join" insert="true" update="false"
+    />
 
     <!-- Geometry-related elements are read directly from model cached
     <component name="Location">

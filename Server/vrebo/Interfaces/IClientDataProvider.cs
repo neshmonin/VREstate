@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Vre.Server.BusinessLogic
 {
@@ -130,6 +131,22 @@ namespace Vre.Server.BusinessLogic
             if (TryGetValue(propertyName, out value))
             {
                 result = value as string;
+                if (null == result) result = defaultValue;
+                else read = true;
+            }
+
+            return result;
+        }
+
+        public string[] GetProperty(string propertyName, string[] defaultValue, out bool read)
+        {
+            string[] result = defaultValue;
+
+            object value;
+            read = false;
+            if (TryGetValue(propertyName, out value))
+            {
+                result = value as string[];
                 if (null == result) result = defaultValue;
                 else read = true;
             }
@@ -340,6 +357,39 @@ namespace Vre.Server.BusinessLogic
             if (read)
             {
                 if (!result.Equals(propertyValue)) changed = true;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Update string array property in business object.
+        /// <para>If ClientData has no related value status is considered <b>unchanged</b>.</para>
+        /// </summary>
+        /// <param name="propertyName">Property name in ClientData store.</param>
+        /// <param name="propertyValue">Current BO's property value.</param>
+        /// <param name="changed">Value updated to <b>true</b> if property value changed; 
+        /// value <b>not changed</b> if property value is same. This allows iterative calls with
+        /// minimal surrounded logic.</param>
+        /// <returns>Updated or same property value.</returns>
+        public string[] UpdateProperty(string propertyName, string[] propertyValue, ref bool changed)
+        {
+            bool read;
+            string[] result = GetProperty(propertyName, propertyValue, out read);
+            if (read)
+            {
+                int diff = propertyValue.Length;
+                if (diff == result.Length)
+                {
+                    foreach (string v in propertyValue)
+                        if (result.Contains(v)) diff--;
+
+                    if (diff != 0) changed = true;
+                }
+                else
+                {
+                    changed = true;
+                }
             }
 
             return result;

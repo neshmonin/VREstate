@@ -42,6 +42,10 @@ CD ..\setup\sql-parts
 COPY header.txt+generated.sql+footer.txt ..\ready\sql\vr-setup.sql
 IF ERRORLEVEL 1 GOTO quit
 
+COPY vr-*-upgrade.sql ..\ready\sql\
+IF ERRORLEVEL 1 GOTO quit
+
+
 CD ..\ready
 ECHO Done!
 
