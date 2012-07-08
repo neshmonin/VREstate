@@ -21,7 +21,7 @@ namespace Vre.Server.BusinessLogic
                 EstateDeveloper ed = new EstateDeveloper(configuration);
                 ed.Name = name;
                 dao.Create(ed);
-                dao.Flush();
+                //dao.Flush();
                 ServiceInstances.Logger.Info("Estate developer type <{0}> created (ID={1}).", configuration, ed.AutoID);
                 return ed;
             }

@@ -4,8 +4,8 @@
 --
 -- Adds
 --
--- Script version 1
--- Last Modified on 2012-07-02 by Andrew
+-- Script version 2
+-- Last Modified on 2012-07-08 by Andrew
 --
 -- ==========================================================================
 USE [VRT]
@@ -224,6 +224,9 @@ BEGIN
 
 		ALTER TABLE [dbo].[Users] 
 			ALTER COLUMN [LastLogin] [datetime] NOT NULL
+
+		ALTER TABLE [dbo].[Users] 
+			ALTER COLUMN [ContactInfoID] [int] NULL
 
 		UPDATE [DbSettings] SET [IntValue] = 6, [TimeValue] = GETDATE() WHERE [Id] = 1
 		UPDATE [DbSettings] SET [IntValue] = 6, [TimeValue] = GETDATE() WHERE [Id] = 3

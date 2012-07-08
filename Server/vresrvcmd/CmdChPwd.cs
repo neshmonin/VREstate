@@ -37,8 +37,8 @@ namespace Vre.Client.CommandLine
                 string npwd1 = readPassword("Repeat new password: ");
                 if (!npwd0.Equals(npwd1)) throw new ArgumentException("New password entries do not match");
 
-                ServerResponse resp = proxy.MakeProgramCall(string.Format("q=chpwd&uid={0}&pwd={1}&npwd={2}",
-                    login, cpwd, npwd0));
+                ServerResponse resp = proxy.MakeProgramCall(string.Format("q=chpwd&pwd={0}&npwd={1}",
+                    cpwd, npwd0));
 
                 if (HttpStatusCode.OK == resp.ResponseCode)
                 {

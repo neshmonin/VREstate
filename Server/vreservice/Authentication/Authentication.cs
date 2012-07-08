@@ -34,7 +34,7 @@ namespace Vre.Server.BusinessLogic
 
         public void Dispose()
         {
-            if (_initiatedSession) { _session.Flush(); _session.Dispose(); _initiatedSession = false; }
+            if (_initiatedSession) { _session.Dispose(); _initiatedSession = false; }
         }
 
         private static bool validateLogin(string login, out string errorReason)

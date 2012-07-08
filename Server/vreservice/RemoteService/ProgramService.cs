@@ -101,8 +101,6 @@ namespace Vre.Server.RemoteService
             // TODO: Add login by Estate Developer Alias
             if (!int.TryParse(request.Request.Query["ed"], out estateDeveloperId)) estateDeveloperId = -1;
 
-            // authenticate
-            //
             using (ISession session = NHibernateHelper.GetSession())
             {
                 using (UserManager manager = new UserManager(request.UserInfo.Session))
@@ -117,6 +115,8 @@ namespace Vre.Server.RemoteService
                     }
                 }
             }
+
+            request.Response.ResponseCode = HttpStatusCode.OK;
         }
 
         private static void sessionRenew(IServiceRequest request)
