@@ -30,7 +30,7 @@
 
     <many-to-one name="SellingBy"
       column="SellerID" class="User"
-      cascade="none" fetch="join" insert="true" update="false"
+      cascade="none" fetch="join" insert="true" update="true"
     />
 
     <!-- Geometry-related elements are read directly from model cached

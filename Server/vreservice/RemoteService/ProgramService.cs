@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Globalization;
 using System.Net;
-using Vre.Server.BusinessLogic;
 using NHibernate;
+using Vre.Server.BusinessLogic;
 
 namespace Vre.Server.RemoteService
 {
@@ -28,6 +29,21 @@ namespace Vre.Server.RemoteService
                 else if (command.Equals("chpwd"))
                 {
                     changePassword(request);
+                    return;
+                }
+                else if (command.Equals("grantaccess"))
+                {
+                    grantAccess(request);
+                    return;
+                }
+                else if (command.Equals("license"))
+                {
+                    licenseUser(request);
+                    return;
+                }
+                else if (command.Equals("assignseller"))
+                {
+                    assignSeller(request);
                     return;
                 }
             }
@@ -132,6 +148,77 @@ namespace Vre.Server.RemoteService
                 request.Response.ResponseCode = HttpStatusCode.BadRequest;
                 request.Response.ResponseCodeDescription = "Session ID not provided.";
             }
+        }
+
+        private static void grantAccess(IServiceRequest request)
+        {
+            string granteeId = request.Request.Query["user"];
+            bool grant = request.Request.Query.GetParam("grant", "true").Equals("true");
+
+            using (UserManager um = new UserManager(request.UserInfo.Session))
+            {
+                um.GrantViewPermissionTo(granteeId, !grant);
+            }
+
+            request.Response.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private static void licenseUser(IServiceRequest request)
+        {
+            string licenseeId = request.Request.Query["user"];
+            string siteId = request.Request.Query["site"];
+            DateTime limit;
+
+            if (!DateTime.TryParseExact(request.Request.Query["endtime"], "yyyy-MM-ddTHH:mm:ss",
+                CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out limit))
+            {
+                throw new ArgumentException("The time specified is not valid");
+            }
+
+            using (UserManager um = new UserManager(request.UserInfo.Session))
+            {
+                um.LicenseUser(licenseeId, siteId, limit.ToUniversalTime());
+            }
+
+            request.Response.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private static void assignSeller(IServiceRequest request)
+        {
+            string userId = request.Request.Query["user"];
+            string targetId;
+            bool processed = false;
+
+            if (!processed)
+            {
+                targetId = request.Request.Query["suite"];
+                if (!string.IsNullOrWhiteSpace(targetId))
+                {
+                    using (UserManager um = new UserManager(request.UserInfo.Session))
+                    {
+                        um.AssignSellerToSuite(userId, targetId);
+                    }
+                    processed = true;
+                }
+            }
+
+            if (!processed)
+            {
+                targetId = request.Request.Query["building"];
+                if (!string.IsNullOrWhiteSpace(targetId))
+                {
+                    using (UserManager um = new UserManager(request.UserInfo.Session))
+                    {
+                        um.AssignSellerToBuilding(userId, targetId);
+                    }
+                    processed = true;
+                }
+            }
+
+            if (processed)
+                request.Response.ResponseCode = HttpStatusCode.OK;
+            else
+                throw new ArgumentException("Object to assign to is not defined or is unknown");
         }
 
         private static LoginType parseLoginType(ServiceQuery args)

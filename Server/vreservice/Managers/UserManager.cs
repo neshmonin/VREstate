@@ -405,6 +405,23 @@ namespace Vre.Server.BusinessLogic
         //    }
         //}
 
+        public void GrantViewPermissionTo(string userId, bool revoke)
+        {
+            int granteeId;
+
+            if (!int.TryParse(userId, out granteeId)) throw new ArgumentException("User ID is invalid");
+
+            using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
+            {
+                User grantee = Get(granteeId);
+                if (null == grantee) throw new FileNotFoundException("User ID is not known.");
+                
+                GrantViewPermissionTo(grantee, revoke);
+
+                tran.Commit();
+            }
+        }
+
         public void GrantViewPermissionTo(User user, bool revoke)
         {
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
@@ -444,13 +461,128 @@ namespace Vre.Server.BusinessLogic
                             throw new StaleObjectStateException("Record was updated by other user", requester.AutoID);
 
                         tran.Commit();
-                        ServiceInstances.Logger.Info("User {0} (ID={1}) granted profile access to ID={2}.",
-                            _session, _session.User.AutoID, user.AutoID);
+                        ServiceInstances.Logger.Info("User {0} (ID={1}) {2} profile access to ID={3}.",
+                            _session, _session.User.AutoID, revoke ? "revoked" : "granted", user.AutoID);
                     }
 
                     _session.Disconnect();
                 }  // DAO
             }  // TRAN
+        }
+
+        public void LicenseUser(string userId, string siteId, DateTime endTimeUtc)
+        {
+            int licenseeId;
+            if (!int.TryParse(userId, out licenseeId)) throw new ArgumentException("User ID is invalid");
+
+            using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
+            {
+                Site site;
+
+                using (SiteDao sdao = new SiteDao(_session.DbSession))
+                    site = sdao.GetById(siteId);
+                if (null == site) throw new FileNotFoundException("Site ID is not known.");
+
+                User licensee = Get(licenseeId);
+                if (null == licensee) throw new FileNotFoundException("Licensee ID is not known.");
+
+                RolePermissionCheck.CheckUserAccess(_session, licensee,
+                    RolePermissionCheck.UserInfoAccessLevel.Administrative);
+
+                UserLicense lic = licensee.EmitLicense(site, endTimeUtc, _session.User);
+
+                _session.DbSession.Save(lic);
+                Update(licensee);
+
+                tran.Commit();
+
+                ServiceInstances.Logger.Info("User {0}(ID={1}) licensed user ID={2} for site {3}(ID={4}) until (UTC){5}.",
+                    _session, _session.User.AutoID,
+                    licensee.AutoID,
+                    site, site.AutoID,
+                    endTimeUtc);
+            }
+        }
+
+        public void AssignSellerToBuilding(string userId, string buildingId)
+        {
+            int licenseeId;
+            if (!int.TryParse(userId, out licenseeId)) throw new ArgumentException("User ID is invalid");
+
+            using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
+            {
+                Building building;
+
+                using (BuildingDao bdao = new BuildingDao(_session.DbSession))
+                    building = bdao.GetById(buildingId);
+                if (null == building) throw new FileNotFoundException("Building ID is not known.");
+
+                User licensee = Get(licenseeId);
+                if (null == licensee) throw new FileNotFoundException("Licensee ID is not known.");
+
+                RolePermissionCheck.CheckUserAccess(_session, licensee,
+                    RolePermissionCheck.UserInfoAccessLevel.Administrative);
+
+                User prev = building.SellingBy;
+                if (!licensee.Equals(prev))
+                {
+                    building.SellingBy = licensee;
+                    licensee.ManagedBuildings.Add(building);
+
+                    //Update(licensee);
+
+                    //_session.DbSession.Save(building);
+
+                    using (BuildingDao bdao = new BuildingDao(_session.DbSession))
+                        if (!bdao.SafeUpdate(building))
+                            throw new StaleObjectStateException("Record was updated by other user", building.AutoID);
+
+                    tran.Commit();
+
+                    ServiceInstances.Logger.Info("User {0}(ID={1}) assigned user ID={2} as seller for building {3}(ID={4}); previous seller was ID={5}.",
+                        _session, _session.User.AutoID,
+                        licensee.AutoID,
+                        building, building.AutoID,
+                        ((prev != null) ? prev.AutoID : -1));
+                }
+            }
+        }
+
+        public void AssignSellerToSuite(string userId, string suiteIdentity)
+        {
+            int licenseeId, suiteId;
+            if (!int.TryParse(userId, out licenseeId)) throw new ArgumentException("User ID is invalid");
+            if (!int.TryParse(suiteIdentity, out suiteId)) throw new ArgumentException("Suite ID is invalid");
+
+            using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
+            {
+                Suite suite;
+
+                using (SuiteDao sdao = new SuiteDao(_session.DbSession))
+                    suite = sdao.GetById(suiteId);
+                if (null == suite) throw new FileNotFoundException("Suite ID is not known.");
+
+                User licensee = Get(licenseeId);
+                if (null == licensee) throw new FileNotFoundException("Licensee ID is not known.");
+
+                RolePermissionCheck.CheckUserAccess(_session, licensee,
+                    RolePermissionCheck.UserInfoAccessLevel.Administrative);
+
+                User prev = suite.SellingBy;
+                suite.SellingBy = licensee;
+
+                using (SuiteDao sdao = new SuiteDao(_session.DbSession))
+                    if (!sdao.SafeUpdate(suite))
+                        throw new StaleObjectStateException("Record was updated by other user", suite.AutoID);
+
+                tran.Commit();
+
+                ServiceInstances.Logger.Info("User {0}(ID={1}) assigned user ID={2} as seller for suite {3}(ID={4}); previous seller was ID={5}.",
+                    _session, _session.User.AutoID,
+                    licensee.AutoID,
+                    suite, suite.AutoID,
+                    ((prev != null) ? prev.AutoID : -1));
+            }
         }
     }
 }

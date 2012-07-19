@@ -76,20 +76,26 @@ namespace Vre.Server.BusinessLogic
             MarkUpdated();
         }
 
-        public void EmitLicense(Site constructionSite, DateTime expiryTime, User initiator)
+        public UserLicense EmitLicense(Site constructionSite, DateTime expiryTime, User initiator)
         {
-            bool updated = false;
+            UserLicense result = null;
             foreach (UserLicense ul in Licenses)
                 if (ul.LicensedSite.Equals(constructionSite))
                 {
-                    ul.Prolong(expiryTime, initiator);
-                    updated = true;
+                    result = ul;
+                    result.Prolong(expiryTime, initiator);
+                    break;
                 }
 
-            if (!updated)
-                Licenses.Add(new UserLicense(this, constructionSite, expiryTime, initiator));
+            if (null == result)
+            {
+                result = new UserLicense(this, constructionSite, expiryTime, initiator);
+                Licenses.Add(result);
+            }
 
             MarkUpdated();
+
+            return result;
         }
 
         /// <summary>
@@ -134,10 +140,7 @@ namespace Vre.Server.BusinessLogic
 
         public override ClientData GetClientData()
         {
-            ClientData result = new ClientData();
-
-            result.Add("id", AutoID);  // informational only
-            result.Add("deleted", Deleted);  // informational only
+            ClientData result = base.GetClientData();
 
             result.Add("estateDeveloperId", EstateDeveloperID);  // informational only
             result.Add("role", UserRole);  // informational only
@@ -153,7 +156,7 @@ namespace Vre.Server.BusinessLogic
 
         public override bool UpdateFromClient(ClientData data)
         {
-            bool changed = false;
+            bool changed = base.UpdateFromClient(data);
 
             ClientData picd = data.GetNextLevelDataItem("personalInfo");
             if (picd.Count > 0)

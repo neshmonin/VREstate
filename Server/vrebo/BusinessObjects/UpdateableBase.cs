@@ -27,7 +27,7 @@ namespace Vre.Server.BusinessLogic
 
         public override bool Equals(object obj)
         {
-            User other = obj as User;
+            UpdateableBase other = obj as UpdateableBase;
             if (other != null) return other.AutoID == AutoID;
             else return false;
         }
@@ -64,7 +64,8 @@ namespace Vre.Server.BusinessLogic
         public virtual ClientData GetClientData()
         {
             ClientData result = new ClientData();
-            result.Add("id", AutoID);
+            result.Add("id", AutoID);  
+            result.Add("deleted", Deleted);
             result.Add("version", Version);
             return result;
         }
