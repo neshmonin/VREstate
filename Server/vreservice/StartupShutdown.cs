@@ -28,6 +28,8 @@ namespace Vre.Server
 
             DatabaseSettingsDao.VerifyDatabase();
 
+            RolePermissionCheck.FillAccessMatrix();
+
             using (ClientSession vcs = ClientSession.MakeSystemSession())
             {
                 vcs.Resume();
