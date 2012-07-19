@@ -90,7 +90,13 @@ namespace Vre.Server.RemoteService
                     {
                         int buildingId = request.Request.Query.GetParam("building", -1);
                         if (-1 == buildingId) throw new ArgumentException("Building ID is missing.");
-                        getSuiteList(request.UserInfo.Session, buildingId, request.Response, generation);
+
+                        Suite.SalesStatus filter;
+                        string filterStr = request.Request.Query.GetParam("statusFilter", "");
+                        if (Enum.TryParse<Suite.SalesStatus>(filterStr, true, out filter))
+                            getSuiteList(request.UserInfo.Session, buildingId, request.Response, generation, filter);
+                        else
+                            getSuiteList(request.UserInfo.Session, buildingId, request.Response, generation, null);
                     }
                     else
                     {
@@ -383,9 +389,10 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getSuiteList(ClientSession session, int buildingId, IResponseData resp, long generation)
+        private static void getSuiteList(ClientSession session, int buildingId, IResponseData resp, long generation,
+            Suite.SalesStatus? statusFilter)
         {
-            ClientData[] result = null;
+            List<ClientData> result = null;
 
             Spikes.PullUpdateService.UpdateInfo updateInfo =
                 ServiceInstances.UpdateService.GetUpdate(Spikes.PullUpdateService.EntityLevel.Building, buildingId, generation);
@@ -397,36 +404,50 @@ namespace Vre.Server.RemoteService
                 if (0 == generation)  // full request
                 {
                     int cnt = suiteList.Length;
-                    result = new ClientData[cnt];
+                    result = new List<ClientData>(cnt);
                     for (int idx = 0; idx < cnt; idx++)
                     {
                         Suite s = suiteList[idx];
-                        ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-                        result[idx] = SuiteEx.GetClientData(s, manager.GetCurrentSuitePrice(s));
+                        insertSuiteIntoResult(statusFilter, result, manager, s);
                     }
                 }
                 else if (updateInfo.Suites != null)  // changed item list
                 {
                     int cnt = updateInfo.Suites.Count;
-                    List<ClientData> suiteDataList = new List<ClientData>(cnt);
+                    result = new List<ClientData>(cnt);
                     foreach (Suite s in suiteList)
                     {
                         if (updateInfo.Suites.Contains(s.AutoID))
-                        {
-                            ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-                            suiteDataList.Add(SuiteEx.GetClientData(s, manager.GetCurrentSuitePrice(s)));
-                        }
+                            insertSuiteIntoResult(statusFilter, result, manager, s);
                     }
-                    result = suiteDataList.ToArray();
                 }
             }
 
             // produce output
             //
             resp.Data = new ClientData();
-            if (result != null) resp.Data.Add("suites", result);
+            if (result != null) resp.Data.Add("suites", NHibernateHelper.IListToArray<ClientData>(result));
             resp.Data.Add("generation", updateInfo.Generation);
             resp.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private static void insertSuiteIntoResult(Suite.SalesStatus? statusFilter, List<ClientData> result, 
+            SiteManager manager, Suite s)
+        {
+            bool add = false;
+            if (statusFilter != null)
+            {
+                if (s.Status.Equals(statusFilter.Value)) add = true;
+            }
+            else
+            {
+                add = true;
+            }
+            if (add)
+            {
+                ServiceInstances.ModelCache.FillWithModelInfo(s, false);
+                result.Add(SuiteEx.GetClientData(s, manager.GetCurrentSuitePrice(s)));
+            }
         }
 
         private static void getSuite(ClientSession session, int suiteId, IResponseData resp, long generation)
