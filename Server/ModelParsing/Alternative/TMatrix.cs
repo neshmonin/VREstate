@@ -28,7 +28,7 @@ namespace Vre.Server.Model.Kmz
         ////private const double _earthRm = 6378135.0;
 
         //public TransType MatrixType { get; private set; }
-        
+
         private double[][] _matrix;
         private double _matrixUnitInMeters;
 
@@ -148,6 +148,7 @@ namespace Vre.Server.Model.Kmz
 
         public EcefViewPoint Transform(EcefViewPoint vp)
         {
+            const double baseAngle = Math.PI / 4.0;
             const double fullCircle = Math.PI * 2.0;
             // http://www.physicsforums.com/showthread.php?t=293302
             // http://www.blancmange.info/notes/maths/vectors/mops/
@@ -159,13 +160,42 @@ namespace Vre.Server.Model.Kmz
                 result.Y = /*_matrix[0][1] * vp.X + _matrix[1][1] * vp.Y + _matrix[2][1] * vp.Z +*/ vp.Y + _matrix[1][3] * _matrixUnitInMeters;
                 result.Z = /*_matrix[0][2] * vp.X + _matrix[1][2] * vp.Y + _matrix[2][2] * vp.Z +*/ vp.Z + _matrix[2][3] * _matrixUnitInMeters;
 
-                double dx = _matrix[0][0] + _matrix[0][1] + _matrix[0][2];
-                double dy = _matrix[1][0] + _matrix[1][1] + _matrix[1][2];
-                double dz = _matrix[2][0] + _matrix[2][1] + _matrix[2][2];
+                double dx, dy, dz;
 
-                result.Ax = vp.Ax + Math.Acos(dx); if (result.Ax > Math.PI) result.Ax -= fullCircle;
-                result.Ay = vp.Ay + Math.Acos(dy); if (result.Ay > Math.PI) result.Ay -= fullCircle;
-                result.Az = vp.Az + Math.Acos(dz); if (result.Az > Math.PI) result.Az -= fullCircle;
+                dy = _matrix[1][1] + _matrix[2][1];
+                dz = _matrix[1][2] + _matrix[2][2];
+                result.Ax += baseAngle - Math.Atan2(dz, dy);
+
+                dx = _matrix[0][0] + _matrix[2][0];
+                dz = _matrix[0][2] + _matrix[2][2];
+                result.Ay += baseAngle - Math.Atan2(dz, dx);
+
+                dx = _matrix[0][0] + _matrix[1][0];
+                dy = _matrix[0][1] + _matrix[1][1];
+                result.Az += baseAngle - Math.Atan2(dy, dx);
+
+
+                //dx = _matrix[0][0] + _matrix[1][0] + _matrix[2][0];
+                //dy = _matrix[0][1] + _matrix[1][1] + _matrix[2][1];
+                //dz = _matrix[0][2] + _matrix[1][2] + _matrix[2][2];
+                ////double dx = _matrix[0][0] + _matrix[0][1] + _matrix[0][2];
+                ////double dy = _matrix[1][0] + _matrix[1][1] + _matrix[1][2];
+                ////double dz = _matrix[2][0] + _matrix[2][1] + _matrix[2][2];
+
+                ////result.Ax += baseAngle - Math.Atan2(dz, dy);
+                ////result.Ay += baseAngle - Math.Atan2(dz, dx);
+                ////result.Az += baseAngle - Math.Atan2(dy, dx);
+
+                ////if (isZero(_matrix[0][2]) && isZero(_matrix[1][2]) && isZero(_matrix[2][0]) && isZero(_matrix[2][1]) && isOne(_matrix[2][2]))
+                ////{   // rotation around Z
+                ////    result.Az += Math.Acos(_matrix[0][0]);
+                ////}
+                ////else
+                ////{
+                ////    result.Ax = vp.Ax + Math.Acos(dx); if (result.Ax > Math.PI) result.Ax -= fullCircle;
+                ////    result.Ay = vp.Ay + Math.Acos(dy); if (result.Ay > Math.PI) result.Ay -= fullCircle;
+                ////    result.Az = vp.Az + Math.Acos(dz); if (result.Az > Math.PI) result.Az -= fullCircle;
+                ////}
             }
             //else throw new InvalidOperationException("Don't know how to use the matrix for such transformation");
 

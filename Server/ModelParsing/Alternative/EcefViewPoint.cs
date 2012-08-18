@@ -50,18 +50,6 @@ namespace Vre.Server.Model.Kmz
         public double Ax { get; set; }
         public double Ay { get; set; }
         public double Az { get; set; }
-        ///// <summary>
-        ///// In radians
-        ///// </summary>
-        //public double Tilt { get; set; }
-        ///// <summary>
-        ///// In radians
-        ///// </summary>
-        //public double Pitch { get; set; }
-        ///// <summary>
-        ///// In radians
-        ///// </summary>
-        //public double Roll { get; set; }
 
         public ViewPoint Base { get; private set; }
 
@@ -132,14 +120,18 @@ namespace Vre.Server.Model.Kmz
 
         public ViewPoint AsViewPoint()
         {
+            // converting relative Cartesian coordinates to geographical using base geographical point
+
             ViewPoint result = new ViewPoint(Base);
 
+            // base point coordinates conversion
             double latSin = Math.Sin(Base.Latitude * DegreesToRad);
             double latCos = Math.Cos(Base.Latitude * DegreesToRad);
 
             double hdgSin = Math.Sin(Base.Heading * DegreesToRad);
             double hdgCos = Math.Cos(Base.Heading * DegreesToRad);
 
+            // relative coordinate translation
             double lonDx = X * hdgCos
                 - Y * hdgSin
                 - Z * Math.Sin(Base.Tilt * DegreesToRad);
@@ -152,13 +144,14 @@ namespace Vre.Server.Model.Kmz
                 + X * Math.Sin(Base.Tilt * DegreesToRad)
                 - Y * Math.Sin(Base.Roll * DegreesToRad);
 
+            // calculating long/lat/alt
             result.Altitude = result.Altitude + altDx;
             double Rn = EarthSemimajorAxisM / Math.Sqrt(1.0 - (EarthExSquared * latSin * latSin));
             result.Latitude = result.Latitude + Math.Asin(latDx / Rn) * RadToDegrees;
             Rn = Rn * latCos;
             result.Longitude = result.Longitude + lonDx / ((Rn * Math.PI * 2.0) / 360.0);
             
-            
+            // calculating viewpoint angles
             double xSin = Math.Sin(Ax);
             double xCos = Math.Cos(Ax);
             double ySin = Math.Sin(Ay);
@@ -190,6 +183,9 @@ namespace Vre.Server.Model.Kmz
             result.Roll = result.Roll + roll;
             if (result.Roll > 180.0) result.Roll = result.Roll - 360.0;
 
+
+            // Classic Earth-centric ECEF to Geographical coordinates translation
+            //
             //double lon = Math.Atan2(Y, X);
 
             //double p = Math.Sqrt(X * X + Y * Y);
@@ -207,6 +203,8 @@ namespace Vre.Server.Model.Kmz
             //    lat2 = Math.Atan2(Zp, 1.0 - EarthExSquared * (Rn / (Rn + alt)));
             //}
             //while (Math.Abs(lat - lat2) > 0.000000001);  // this is an empiric value to achieve required precision
+
+
 
             //ViewPoint result = new ViewPoint();
 

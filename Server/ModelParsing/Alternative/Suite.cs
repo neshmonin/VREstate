@@ -31,6 +31,7 @@ namespace Vre.Server.Model.Kmz
             Name = parts[0];
             LocationCart = tMatrix.Transform(parent.LocationCart);
 #if DEBUG
+            LocationCart = tMatrix.Transform(parent._site.LocationCart);
             _transformation = tMatrix;
 #endif
 
