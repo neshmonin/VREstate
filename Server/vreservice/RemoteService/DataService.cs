@@ -610,8 +610,10 @@ namespace Vre.Server.RemoteService
                 {
                     building = manager.GetBuildingById(buildingId);
 
-                    // this shall throw out if user has no right to modify building info
-                    //manager.TestUserCanUpdate(building);  <-- no need for this as we only update suites
+                    if (building.UpdateFromClient(data))
+                    {
+                        manager.UpdateBuilding(building);
+                    }
 
                     foreach (ClientData suiteData in data.GetNextLevelDataArray("suites"))
                     {

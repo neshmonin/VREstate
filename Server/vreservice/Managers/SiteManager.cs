@@ -148,6 +148,19 @@ namespace Vre.Server.BusinessLogic
             }
         }
 
+        public bool UpdateBuilding(Building building)
+        {
+            RolePermissionCheck.CheckUpdateBuilding(_session, building);
+
+            using (BuildingDao dao = new BuildingDao(_session.DbSession))
+            {
+                bool result = dao.SafeUpdate(building);
+                if (result)
+                    ServiceInstances.Logger.Info("User ID={0} updated building ID={1} ({2}).",
+                        _session.User.AutoID, building.AutoID, building);
+                return result;
+            }
+        }
 
         public float GetCurrentSuitePrice(Suite suite)
         {
