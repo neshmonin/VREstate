@@ -33,8 +33,8 @@ namespace Vre.Server.Command
 
                 ModelImport instance = new ModelImport();
                 instance._log = log;
-                instance.doImport(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName, dryRun);
-                //instance.generateSqlScript(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName);
+                //instance.doImport(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName, dryRun);
+                instance.generateSqlScript(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName);
             }
             catch (Exception e)
             {
@@ -61,6 +61,7 @@ namespace Vre.Server.Command
             {
                 using (StreamWriter sw = new StreamWriter(file))
                 {
+                    sw.WriteLine("begin tran");
                     sw.WriteLine("declare @sid int");
                     sw.WriteLine("declare @buildingid int");
                     sw.WriteLine("declare @siteid int");
@@ -77,15 +78,15 @@ namespace Vre.Server.Command
                         {
                             if (!stypes.ContainsKey(s.ClassName))
                             {
-                                string variable = "@st_" + s.ClassName.Replace('-', '_');
+                                string variable = "@st_" + s.ClassName.Replace('-', '_').Replace('.', '_');
                                 sw.WriteLine("declare " + variable + " int");
                                 sw.WriteLine("select " + variable + " = [autoid] from [suitetypes] where [siteid] = @siteid and [name] = '" + s.ClassName + "'");
                                 sw.WriteLine("if " + variable + " is null begin");
                                 sw.WriteLine("  insert into [suitetypes] ([created],[updated],[deleted],[name],[siteid],[floorarea],[bedroomcnt],[dencnt],[bathroomcnt],[balconycnt],[terracecnt]) values(@timestamp,@timestamp,0,'{0}',@siteid,'{1},2',{2},{3},{4},{5},{6})",
-                                    s.ClassName, _extraSuiteInfo.GetFloorAreaSqFt(s.ClassName),
+                                    s.ClassName, _extraSuiteInfo.GetIndoorFloorAreaSqFt(s.ClassName),
                                     _extraSuiteInfo.GetBedroomCount(s.ClassName),
                                     _extraSuiteInfo.GetDenCount(s.ClassName),
-                                    _extraSuiteInfo.GetBathroomCount(s.ClassName),
+                                    _extraSuiteInfo.GetShowerBathroomCount(s.ClassName) + _extraSuiteInfo.GetNoShowerBathroomCount(s.ClassName),
                                     _extraSuiteInfo.GetBalconyCount(s.ClassName),
                                     _extraSuiteInfo.GetTerraceCount(s.ClassName));
                                 sw.WriteLine("  set " + variable + " = @@identity");
@@ -96,8 +97,14 @@ namespace Vre.Server.Command
                     }
 
                     foreach (Vre.Server.Model.Kmz.Building bldg in kmz.Model.Site.Buildings)
-                    {                        
+                    {
+                        sw.WriteLine("set @buildingid = null");
                         sw.WriteLine("select @buildingid = [autoid] from [buildings] where [name] = '{0}' and siteid = @siteid", bldg.Name);
+                        sw.WriteLine("if @buildingid is null begin");
+                        sw.WriteLine("  insert into [buildings] ([created],[updated],[deleted],[name],[status],[siteid]) values(@timestamp,@timestamp,0,'{0}',0,@siteid)",
+                            bldg.Name);
+                        sw.WriteLine("  set @buildingid = @@identity");
+                        sw.WriteLine("end");
                         foreach (Vre.Server.Model.Kmz.Suite s in bldg.Suites)
                         {
                             sw.WriteLine("set @sid = null");
@@ -111,6 +118,7 @@ namespace Vre.Server.Command
                             sw.WriteLine("end");
                         }
                     }
+                    sw.WriteLine("commit tran");
                 }
             }
 
@@ -346,16 +354,15 @@ namespace Vre.Server.Command
                 // this must be the first call on new suite as it re-reads suite from DB;
                 // all subsequent changes shall be lost!
                 using (SiteManager mgr = new SiteManager(_clientSession))
-                    mgr.SetSuitePrice(dbSuite, (float)_extraSuiteInfo.GetDefaultInitialPrice(modelSuite.ClassName));
+                    mgr.SetSuitePrice(dbSuite, (float)modelSuite.InitialPrice);
 
                 if (0 == modelSuite.CeilingHeightFt)
-                    dbSuite.CeilingHeight = new ValueWithUM(
-                        _extraSuiteInfo.GetCeilingHeightFt(modelSuite.ClassName), ValueWithUM.Unit.Feet);
+                    dbSuite.CeilingHeight = new ValueWithUM(modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
                 else
                     dbSuite.CeilingHeight = new ValueWithUM(
                         modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
 
-                dbSuite.ShowPanoramicView = _extraSuiteInfo.GetDefaultShowPanoramicView(modelSuite.ClassName);
+                dbSuite.ShowPanoramicView = modelSuite.ShowPanoramicView;
 
                 dbSuite.Status = Suite.SalesStatus.Available;
 
@@ -396,10 +403,11 @@ namespace Vre.Server.Command
 
                     stype.BalconyCount = _extraSuiteInfo.GetBalconyCount(newClassName);
                     stype.TerraceCount = _extraSuiteInfo.GetTerraceCount(newClassName);
-                    stype.BathroomCount = _extraSuiteInfo.GetBathroomCount(newClassName);
+                    stype.BathroomCount = _extraSuiteInfo.GetShowerBathroomCount(newClassName)
+                        + _extraSuiteInfo.GetNoShowerBathroomCount(newClassName);
                     stype.BedroomCount = _extraSuiteInfo.GetBedroomCount(newClassName);
                     stype.DenCount = _extraSuiteInfo.GetDenCount(newClassName);
-                    stype.FloorArea = new ValueWithUM(_extraSuiteInfo.GetFloorAreaSqFt(newClassName), ValueWithUM.Unit.SqFeet);
+                    stype.FloorArea = new ValueWithUM(_extraSuiteInfo.GetIndoorFloorAreaSqFt(newClassName), ValueWithUM.Unit.SqFeet);
 
                     _clientSession.DbSession.Save(stype);
                     _log.AppendFormat("Created new suite type ID={0}, Name={1}\r\n", stype.AutoID, stype.Name);
@@ -414,6 +422,19 @@ namespace Vre.Server.Command
 
         internal class CsvSuiteTypeInfo
         {
+            private int _typeNameIdx = -1;
+            private int _levelsIdx = -1;
+            private int _indoorAreaIdx = -1;
+            private int _outdoorAreaIdx = -1;
+            private int _bedroomsIdx = -1;
+            private int _densIdx = -1;
+            private int _otherRoomsIdx = -1;
+            private int _showerBathIdx = -1;
+            private int _noShowerBathIdx = -1;
+            private int _balconiesIdx = -1;
+            private int _terracesIdx = -1;
+            private int _floorPlanNameIdx = -1;
+
             private Dictionary<string, string[]> _rawData;
 
             public CsvSuiteTypeInfo(string fileName)
@@ -427,15 +448,19 @@ namespace Vre.Server.Command
                     {
                         string line = sr.ReadLine();
                         string[] parts = splitCsvLine(line);
-                        if (10 != parts.Length) throw new ArgumentException("The suite type information file is not of correct format");
+                        int partCnt = parts.Length;
+                        //if (10 != parts.Length) throw new ArgumentException("The suite type information file is not of correct format");
+                        parseHeader(parts);
+
+                        if (_typeNameIdx < 0) throw new ArgumentException("The suite type information file is not of correct format (0)");
 
                         do
                         {
                             line = sr.ReadLine();
                             parts = splitCsvLine(line);
-                            if (10 != parts.Length) throw new ArgumentException("The suite type information file is not of correct format");
+                            if (partCnt != parts.Length) throw new ArgumentException("The suite type information file is not of correct format (1)");
 
-                            _rawData.Add(parts[0], parts);
+                            _rawData.Add(parts[_typeNameIdx], parts);
                         }
                         while (!sr.EndOfStream);
                     }
@@ -476,12 +501,47 @@ namespace Vre.Server.Command
                 return result;
             }
 
+            private void parseHeader(string[] items)
+            {
+                // Possible header items:
+                // TypeName,Levels,TotalIndoorArea,TotalOutdoorArea,Bedrooms,Dens,OtherRooms,Shower/Bath,NoShower/Bath,Balconies,Terrases,FloorplanFileName
+
+                for (int idx = items.Length - 1; idx >= 0; idx--)
+                {
+                    string item = items[idx].Trim().ToUpper();
+
+                    if (item.Equals("TYPENAME")) _typeNameIdx = idx;
+                    else if (item.Equals("LEVELS")) _levelsIdx = idx;
+                    else if (item.Equals("TOTALINDOORAREA")) _indoorAreaIdx = idx;
+                    else if (item.Equals("TOTALOUTDOORAREA")) _outdoorAreaIdx = idx;
+                    else if (item.Equals("BEDROOMS")) _bedroomsIdx = idx;
+                    else if (item.Equals("DENS")) _densIdx = idx;
+                    else if (item.Equals("OTHERROOMS")) _otherRoomsIdx = idx;
+                    else if (item.Equals("SHOWER/BATH")) _showerBathIdx = idx;
+                    else if (item.Equals("NOSHOWER/BATH")) _noShowerBathIdx = idx;
+                    else if (item.Equals("BALKONIES")) _balconiesIdx = idx;  // syntax error :)
+                    else if (item.Equals("BALCONIES")) _balconiesIdx = idx;
+                    else if (item.Equals("TERRASES")) _terracesIdx = idx;  // syntax error :)
+                    else if (item.Equals("TERRACES")) _terracesIdx = idx;
+                    else if (item.Equals("FLOORPLANFILENAME")) _floorPlanNameIdx = idx;
+                }
+            }
+
+
             private string[] getPropArray(string suiteType)
             {
                 if (null == _rawData) return null;
                 string[] result;
                 if (_rawData.TryGetValue(suiteType, out result)) return result;
                 return null;
+            }
+
+            private string getProp(string suiteType, int pos, string defValue)
+            {
+                string result = defValue;
+                string[] arr = getPropArray(suiteType);
+                if (arr != null) result = arr[pos];
+                return result;
             }
 
             private double getProp(string suiteType, int pos, double defValue)
@@ -522,49 +582,85 @@ namespace Vre.Server.Command
                 else { result = false; return false; }
             }
 
-            public double GetFloorAreaSqFt(string suiteType)
+            public double GetIndoorFloorAreaSqFt(string suiteType)
             {
-                return getProp(suiteType, 1, 0.0);
+                if (_indoorAreaIdx < 0) return 0.0;
+                return getProp(suiteType, _indoorAreaIdx, 0.0);
             }
 
-            public double GetCeilingHeightFt(string suiteType)
+            public double GetOutdoorFloorAreaSqFt(string suiteType)
             {
-                return getProp(suiteType, 7, 0.0);
+                if (_outdoorAreaIdx < 0) return 0.0;
+                return getProp(suiteType, _outdoorAreaIdx, 0.0);
             }
+
+            //public double GetCeilingHeightFt(string suiteType)
+            //{
+            //    return getProp(suiteType, 7, 0.0);
+            //}
 
             public int GetBedroomCount(string suiteType)
             {
-                return getProp(suiteType, 2, 0);
+                if (_bedroomsIdx < 0) return 0;
+                return getProp(suiteType, _bedroomsIdx, 0);
             }
 
             public int GetDenCount(string suiteType)
             {
-                return getProp(suiteType, 3, 0);
+                if (_densIdx < 0) return 0;
+                return getProp(suiteType, _densIdx, 0);
             }
 
-            public int GetBathroomCount(string suiteType)
+            public int GetOtherRoomsCount(string suiteType)
             {
-                return getProp(suiteType, 4, 0);
+                if (_otherRoomsIdx < 0) return 0;
+                return getProp(suiteType, _otherRoomsIdx, 0);
+            }
+
+            public int GetNoShowerBathroomCount(string suiteType)
+            {
+                if (_noShowerBathIdx < 0) return 0;
+                return getProp(suiteType, _noShowerBathIdx, 0);
+            }
+
+            public int GetShowerBathroomCount(string suiteType)
+            {
+                if (_showerBathIdx < 0) return 0;
+                return getProp(suiteType, _showerBathIdx, 0);
             }
 
             public int GetBalconyCount(string suiteType)
             {
-                return getProp(suiteType, 5, 0);
+                if (_balconiesIdx < 0) return 0;
+                return getProp(suiteType, _balconiesIdx, 0);
             }
 
             public int GetTerraceCount(string suiteType)
             {
-                return getProp(suiteType, 6, 0);
+                if (_terracesIdx < 0) return 0;
+                return getProp(suiteType, _terracesIdx, 0);
             }
 
-            public double GetDefaultInitialPrice(string suiteType)
+            public int GetLevels(string suiteType)
             {
-                return getProp(suiteType, 8, 0.0);
+                if (_levelsIdx < 0) return 0;
+                return getProp(suiteType, _levelsIdx, 0);
             }
 
-            public bool GetDefaultShowPanoramicView(string suiteType)
+            //public double GetDefaultInitialPrice(string suiteType)
+            //{
+            //    return getProp(suiteType, 8, 0.0);
+            //}
+
+            //public bool GetDefaultShowPanoramicView(string suiteType)
+            //{
+            //    return getProp(suiteType, 9, true);
+            //}
+
+            public string GetFloorPlanFileName(string suiteType)
             {
-                return getProp(suiteType, 9, true);
+                if (_floorPlanNameIdx < 0) return null;
+                return getProp(suiteType, _floorPlanNameIdx, string.Empty);
             }
         }
     }
