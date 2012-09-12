@@ -44,7 +44,7 @@ namespace Vre.Server.Model.Kmz
             {
                 Floor = parts[1];
 
-                if (parts.Length > 2)
+                if (parts.Length > 3)
                 {
                     CeilingHeightFt = int.Parse(parts[2]);
 
