@@ -12,10 +12,8 @@ namespace Vre.Server.Model.Kmz
         public double UnitInMeters { get; private set; }
 
         private List<Suite> _suites;
-#if DEBUG
         private TMatrix _transformation;
-        public ConstructionSite _site;
-#endif
+        internal ConstructionSite _site;
 
         public Building(ConstructionSite parent, string id, string buildingName, XmlNode buildingModel, 
             Dictionary<string, XmlNode> models, TMatrix tMatrix)
@@ -25,10 +23,9 @@ namespace Vre.Server.Model.Kmz
             Name = buildingName;
             LocationCart = tMatrix.Transform(parent.LocationCart);
             _suites = new List<Suite>();
-#if DEBUG
+
             _site = parent;
             _transformation = tMatrix;
-#endif
 
             foreach (XmlNode n in buildingModel.ChildNodes)
             {
