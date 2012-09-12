@@ -33,8 +33,8 @@ namespace Vre.Server.Command
 
                 ModelImport instance = new ModelImport();
                 instance._log = log;
-                //instance.doImport(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName, dryRun);
-                instance.generateSqlScript(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName);
+                instance.doImport(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName, dryRun);
+                //instance.generateSqlScript(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName);
             }
             catch (Exception e)
             {
