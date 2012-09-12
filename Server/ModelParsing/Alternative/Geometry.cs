@@ -108,7 +108,7 @@ namespace Vre.Server.Model.Kmz
                 {
                     XmlAttribute la = ln.Attributes["count"];
                     int cnt = int.Parse(la.Value);
-                    _lines = new Line[cnt / 2];
+                    _lines = new Line[cnt];
                     string[] parts = array.InnerText.Split(null);
                     for (int idx = _lines.Length - 1, pos = parts.Length - 2; idx >= 0; idx--, pos -= 2)
                         _lines[idx] = new Line(
