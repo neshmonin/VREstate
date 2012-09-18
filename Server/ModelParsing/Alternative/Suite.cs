@@ -16,11 +16,9 @@ namespace Vre.Server.Model.Kmz
 
         public string ClassName { get; private set; }
         public IEnumerable<string> GeometryIdList { get { return _geometryIdList; } }
+        public TMatrix Matrix { get; private set; }
 
         private List<string> _geometryIdList;
-#if DEBUG
-        private TMatrix _transformation;
-#endif
     
         public Suite(Building parent, string id, string suiteDescription, XmlNode suiteModel,
             Dictionary<string, XmlNode> models, TMatrix tMatrix)
@@ -29,11 +27,9 @@ namespace Vre.Server.Model.Kmz
 
             Id = id;
             Name = parts[0];
-            LocationCart = tMatrix.Transform(parent.LocationCart);
-#if DEBUG
+            //LocationCart = tMatrix.Transform(parent.LocationCart);
             LocationCart = tMatrix.Transform(parent._site.LocationCart);
-            _transformation = tMatrix;
-#endif
+            Matrix = tMatrix;
 
             // format of the suite description could be:
             // <name> <floor> <ceiling height> <suite type name>
@@ -50,8 +46,7 @@ namespace Vre.Server.Model.Kmz
 
                 if (parts.Length > 3)
                 {
-                    try { CeilingHeightFt = int.Parse(parts[2]); }
-                    catch (FormatException) { System.Diagnostics.Debugger.Break(); }
+                    CeilingHeightFt = int.Parse(parts[2]);
 
                     if (parts.Length > 4)  // assume last required element is suite type name
                     {

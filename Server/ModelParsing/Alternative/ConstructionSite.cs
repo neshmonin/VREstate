@@ -18,7 +18,7 @@ namespace Vre.Server.Model.Kmz
 
         public ConstructionSite(Model parent, string name, XmlNode rootNode,
             Dictionary<string, XmlNode> models,
-            XmlNode geometryRoot)
+            XmlNode geometryRoot, TMatrix tMatrix)
         {
             UnitInMeters = parent.UnitInMeters;
             Name = name;
@@ -65,7 +65,7 @@ namespace Vre.Server.Model.Kmz
 
                 if ((buildingNode != null) && (nn != null) && (nna != null))
                 {
-                    TMatrix matrix = new TMatrix(nn.InnerText, UnitInMeters);
+                    TMatrix matrix = new TMatrix(tMatrix, nn.InnerText, UnitInMeters);
                     string buildingName = nna.Value.Replace('_', ' ');
 
                     _buildings.Add(new Building(this, nodeId, buildingName, buildingNode, models, matrix));
