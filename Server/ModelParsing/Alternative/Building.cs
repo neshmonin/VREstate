@@ -13,7 +13,7 @@ namespace Vre.Server.Model.Kmz
 
         private List<Suite> _suites;
         private TMatrix _transformation;
-        private ConstructionSite _site;
+        internal ConstructionSite _site;
 
         public Building(ConstructionSite parent, string id, string buildingName, XmlNode buildingModel, 
             Dictionary<string, XmlNode> models, TMatrix tMatrix)
