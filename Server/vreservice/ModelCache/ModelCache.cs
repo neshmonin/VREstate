@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using Vre.Server.BusinessLogic;
 using Vre.Server.Dao;
 
@@ -16,7 +17,7 @@ namespace Vre.Server.ModelCache
         private SHA512 _lastCrc;
         private SiteInfo _info;
 
-        public ModelCache(string filePath, ModelLevel level, int objectId)
+        public ModelCache(string filePath, ModelLevel level, bool isOverride, int objectId)
         {
             _info = parseFile(filePath, objectId);
             if (_info != null)
@@ -24,11 +25,13 @@ namespace Vre.Server.ModelCache
                 _lastCrc = calcCrc(filePath);
                 FilePath = filePath;
                 UpdatedTime = File.GetLastWriteTimeUtc(filePath);
+                IsOverride = isOverride;
                 Level = level;
                 ObjectId = objectId;
             }
         }
 
+        public bool IsOverride { get; private set; }
         public bool IsValid { get { return _info != null; } }
         public string FilePath { get; private set; }
         public DateTime UpdatedTime { get; private set; }
@@ -111,15 +114,11 @@ namespace Vre.Server.ModelCache
 
             try
             {
-                VrEstate.Site siteData;
+                StringBuilder readWarnings = new StringBuilder();
 
-                using (VrEstate.Kmz kmz = VrEstate.Kmz.Open(filePath, System.IO.FileAccess.Read))
-                {
-                    VrEstate.Model.Setup(kmz.GetKmlDoc());
-                    siteData = new VrEstate.Site(kmz.GetColladaDoc());
-                }
+                Model.Kmz.Kmz kmz = new Model.Kmz.Kmz(filePath, readWarnings);
 
-                result = new SiteInfo(siteData, filePath, objectId);
+                result = new SiteInfo(kmz.Model.Site, filePath, objectId);
                 // see ModelCacheManager.objectFromPath for extending here
             }
             catch (Exception ex)
@@ -136,7 +135,7 @@ namespace Vre.Server.ModelCache
             private Dictionary<int, BuildingInfo> _buildingInfo;
             private Dictionary<string, SuiteClassInfo> _classInfo;
 
-            public SiteInfo(VrEstate.Site modelInfo, string path, int objectId)
+            public SiteInfo(Model.Kmz.ConstructionSite modelInfo, string path, int objectId)
             {
                 //Name = modelInfo.Name;
                 //string name = Path.GetFileName(path);
@@ -146,11 +145,12 @@ namespace Vre.Server.ModelCache
                 //if (pos > 0) name = name.Substring(0, pos - 1);
                 //Name = name.Trim();
 
-                _location = new GeoPoint(modelInfo.Lon_d, modelInfo.Lat_d, modelInfo.Alt_m);
+                Model.Kmz.ViewPoint vp = modelInfo.LocationCart.AsViewPoint();
+                _location = new GeoPoint(vp.Longitude, vp.Latitude, vp.Altitude);
                 //modelInfo.DirName  // null
                 //modelInfo.ID  // nine-digit-int
 
-                _buildingInfo = new Dictionary<int, BuildingInfo>(modelInfo.Buildings.Values.Count);
+                _buildingInfo = new Dictionary<int, BuildingInfo>(modelInfo.Buildings.Count());
                 _classInfo = new Dictionary<string, SuiteClassInfo>();
 
                 foreach (string className in modelInfo.Geometries.Keys)
@@ -171,7 +171,7 @@ namespace Vre.Server.ModelCache
                         throw new ArgumentException("Unknown site ID");
                     }
 
-                    foreach (VrEstate.Building buildingModelInfo in modelInfo.Buildings.Values)
+                    foreach (Model.Kmz.Building buildingModelInfo in modelInfo.Buildings)
                     {
                         // find related DB building object by name from model
                         //
@@ -199,19 +199,19 @@ namespace Vre.Server.ModelCache
                 }
             }
 
-            private static Wireframe[] processGeometries(VrEstate.Geometry[] geometries)
+            private static Wireframe[] processGeometries(Model.Kmz.Geometry[] geometries)
             {
                 int idx = 0;
                 Wireframe[] result = new Wireframe[geometries.Length];
 
-                foreach (VrEstate.Geometry geom in geometries)
+                foreach (Model.Kmz.Geometry geom in geometries)
                 {
-                    List<Wireframe.Point3D> points = new List<Wireframe.Point3D>(geom.Points.Length);
-                    foreach (VrEstate.Geometry.Point3 pt in geom.Points)
+                    List<Wireframe.Point3D> points = new List<Wireframe.Point3D>(geom.Points.Count());
+                    foreach (Model.Kmz.Geometry.Point3D pt in geom.Points)
                         points.Add(new Wireframe.Point3D(pt.X, pt.Y, pt.Z));
 
-                    List<Wireframe.Segment> segments = new List<Wireframe.Segment>(geom.Lines.Count);
-                    foreach (VrEstate.Geometry.Line ln in geom.Lines)
+                    List<Wireframe.Segment> segments = new List<Wireframe.Segment>(geom.Lines.Count());
+                    foreach (Model.Kmz.Geometry.Line ln in geom.Lines)
                         segments.Add(new Wireframe.Segment(ln.Start, ln.End));
 
                     result[idx++] = new Wireframe(points, segments);
@@ -278,18 +278,21 @@ namespace Vre.Server.ModelCache
             private double _maxSuiteAlt;
             private Dictionary<string, SuiteInfo> _suiteInfo;
 
-            public BuildingInfo(VrEstate.Building modelInfo)
+            public BuildingInfo(Model.Kmz.Building modelInfo)
             {
                 //Name = modelInfo.Name;
-                _location = new GeoPoint(modelInfo.LonModel_d, modelInfo.LatModel_d, modelInfo.AltModel_m);
-                _center = new GeoPoint(modelInfo.Lon_d, modelInfo.Lat_d, modelInfo.Alt_m);
-                _maxSuiteAlt = modelInfo.MaxAlt_m;
+                Model.Kmz.ViewPoint vp = modelInfo.LocationCart.AsViewPoint();
+                _location = new GeoPoint(vp.Longitude, vp.Latitude, vp.Altitude);
+                _maxSuiteAlt = 0.0;
                 //modelInfo.BuildingId  // "ID<five-digit-int>"
                 //modelInfo.ID          // nine-digit-int
                 //modelInfo.MaxAlt_m
 
-                _suiteInfo = new Dictionary<string, SuiteInfo>(modelInfo.Suites.Values.Count);
-                foreach (VrEstate.Suite suiteModelInfo in modelInfo.Suites.Values)
+                double mLon = 0.0, mLat = 0.0, mAlt = 0.0;
+                int suiteCnt = 0;
+
+                _suiteInfo = new Dictionary<string, SuiteInfo>(modelInfo.Suites.Count());
+                foreach (Model.Kmz.Suite suiteModelInfo in modelInfo.Suites)
                 {
                     SuiteInfo si = new SuiteInfo(suiteModelInfo);
 
@@ -300,7 +303,18 @@ namespace Vre.Server.ModelCache
                     }
 
                     _suiteInfo.Add(si.Name, si);
+
+                    vp = suiteModelInfo.LocationCart.AsViewPoint();
+                    mLon += vp.Longitude;
+                    mLat += vp.Latitude;
+                    mAlt += vp.Altitude;
+                    if (_maxSuiteAlt < vp.Altitude) _maxSuiteAlt = vp.Altitude;
+                    suiteCnt++;
                 }
+                _center = new GeoPoint(
+                    mLon / (double)suiteCnt,
+                    mLat / (double)suiteCnt,
+                    mAlt / (double)suiteCnt);
             }
 
             public void UpdateBo(Building target, bool withSubObjects)
@@ -348,14 +362,15 @@ namespace Vre.Server.ModelCache
             private double _ceilingHeightFt;
             private string _floor;
 
-            public SuiteInfo(VrEstate.Suite modelInfo)
+            public SuiteInfo(Model.Kmz.Suite modelInfo)
             {
                 Name = modelInfo.Name;
 
-                _classId = modelInfo.ClassId;
-                _ceilingHeightFt = modelInfo.CellingHeight;
-                _location = new ViewPoint(modelInfo.Lon_d, modelInfo.Lat_d, modelInfo.Alt_m, modelInfo.Heading_d);
-                _floor = modelInfo.FloorNumber;
+                _classId = modelInfo.ClassName;
+                _ceilingHeightFt = modelInfo.CeilingHeightFt;
+                Model.Kmz.ViewPoint vp = modelInfo.LocationCart.AsViewPoint();
+                _location = new ViewPoint(vp.Longitude, vp.Latitude, vp.Altitude, vp.Heading);
+                _floor = modelInfo.Floor;
 
                 //modelInfo.Id;  // "ID<five-digit-int>"
             }

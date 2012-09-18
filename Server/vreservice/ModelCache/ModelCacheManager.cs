@@ -6,8 +6,10 @@ namespace Vre.Server.ModelCache
 {
     internal class ModelCacheManager
     {
+        private const string _primaryModelFilename = "wires.kmz";
+        private const string _secondaryModelFilename = "model.kmz";
+
         private string _modelStorePath;
-        private string _modelStoreFilter;
         private FileSystemWatcher _watcher;
         private Dictionary<string, ModelCache> _cache;
         //private Dictionary<string, ModelCache> _cacheByName;
@@ -19,7 +21,6 @@ namespace Vre.Server.ModelCache
             _watcher = null;
 
             _modelStorePath = modelStorePath;// Path.GetDirectoryName(modelStorePath);
-            _modelStoreFilter = "model.kmz";// Path.GetFileName(modelStorePath);
         }
 
         public void Initialize()
@@ -29,7 +30,7 @@ namespace Vre.Server.ModelCache
                 if (_watcher != null) return;
 
                 _watcher = new FileSystemWatcher(_modelStorePath);
-                _watcher.Filter = Path.GetFileName(_modelStoreFilter);
+                _watcher.Filter = string.Empty;
                 _watcher.IncludeSubdirectories = true;
                 _watcher.EnableRaisingEvents = false;
 
@@ -49,7 +50,7 @@ namespace Vre.Server.ModelCache
 
                 // produce a list of all model files reverse-sorted by write time
                 List<string> files = new List<string>();
-                files.AddRange(Directory.EnumerateFiles(_modelStorePath, _modelStoreFilter, SearchOption.AllDirectories));
+                files.AddRange(Directory.EnumerateFiles(_modelStorePath, string.Empty, SearchOption.AllDirectories));
                 files.Sort(delegate(string x, string y) { return File.GetLastWriteTimeUtc(x).CompareTo(File.GetLastWriteTimeUtc(y)); });
 
                 foreach (string path in files) tryAddNewModel(path);
@@ -150,6 +151,14 @@ namespace Vre.Server.ModelCache
         {
             ModelCache.ModelLevel level;
             int objectId;
+            bool isOverride;
+
+            if (Path.GetFileName(path).Equals(_primaryModelFilename, System.StringComparison.InvariantCultureIgnoreCase))
+                isOverride = true;
+            else if (Path.GetFileName(path).Equals(_secondaryModelFilename, System.StringComparison.InvariantCultureIgnoreCase))
+                isOverride = false;
+            else
+                return;
 
             if (objectFromPath(path, out level, out objectId))
             {
@@ -163,13 +172,18 @@ namespace Vre.Server.ModelCache
                 if (cl != null)
                 {
                     if (cl.TryGetValue(objectId, out mc))  // if cache object exists...
-                        insert = (mc.UpdatedTime < File.GetLastWriteTimeUtc(path));  // ... check if new newer
+                    {
+                        if (!mc.IsOverride && isOverride) insert = true;
+                        else insert = (mc.UpdatedTime < File.GetLastWriteTimeUtc(path));  // ... check if new newer
+                    }
                     else
+                    {
                         insert = true;
+                    }
 
                     if (insert)
                     {
-                        mc = new ModelCache(path, level, objectId);
+                        mc = new ModelCache(path, level, isOverride, objectId);
                         if (mc.IsValid)
                         {
                             cl[objectId] = mc;
@@ -307,8 +321,9 @@ namespace Vre.Server.ModelCache
                     if (int.TryParse(parts[startIdx + 1], out id))
                     {
                         level = ModelCache.ModelLevel.Site;
-                        result = Path.GetFileNameWithoutExtension(parts[startIdx + 2])
-                            .Equals("model", System.StringComparison.InvariantCultureIgnoreCase);
+                        result = true;
+                        //result = Path.GetFileNameWithoutExtension(parts[startIdx + 2])
+                        //    .Equals("model", System.StringComparison.InvariantCultureIgnoreCase);
                     }
                 }
                 // path in form <developer id>\<site id>\<building id>\model.kmz

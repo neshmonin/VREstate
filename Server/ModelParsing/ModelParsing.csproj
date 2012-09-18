@@ -89,6 +89,17 @@
     <Compile Include="..\_version\versiongen.cs">
       <Link>Properties\versiongen.cs</Link>
     </Compile>
+    <Compile Include="Alternative\Building.cs" />
+    <Compile Include="Alternative\ConstructionSite.cs" />
+    <Compile Include="Alternative\EcefViewPoint.cs" />
+    <Compile Include="Alternative\Geometry.cs" />
+    <Compile Include="Alternative\GeoPoint.cs" />
+    <Compile Include="Alternative\Kmz.cs" />
+    <Compile Include="Alternative\Model.cs" />
+    <Compile Include="Alternative\Scale.cs" />
+    <Compile Include="Alternative\Suite.cs" />
+    <Compile Include="Alternative\TMatrix.cs" />
+    <Compile Include="Alternative\ViewPoint.cs" />
     <Compile Include="Angle.cs" />
     <Compile Include="Building.cs" />
     <Compile Include="Developer.cs" />
