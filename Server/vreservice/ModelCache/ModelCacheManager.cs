@@ -50,7 +50,7 @@ namespace Vre.Server.ModelCache
 
                 // produce a list of all model files reverse-sorted by write time
                 List<string> files = new List<string>();
-                files.AddRange(Directory.EnumerateFiles(_modelStorePath, string.Empty, SearchOption.AllDirectories));
+                files.AddRange(Directory.EnumerateFiles(_modelStorePath, "*.*", SearchOption.AllDirectories));
                 files.Sort(delegate(string x, string y) { return File.GetLastWriteTimeUtc(x).CompareTo(File.GetLastWriteTimeUtc(y)); });
 
                 foreach (string path in files) tryAddNewModel(path);
