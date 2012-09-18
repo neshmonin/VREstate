@@ -174,7 +174,7 @@ namespace Vre.Server.ModelCache
                     if (cl.TryGetValue(objectId, out mc))  // if cache object exists...
                     {
                         if (!mc.IsOverride && isOverride) insert = true;
-                        else insert = (mc.UpdatedTime < File.GetLastWriteTimeUtc(path));  // ... check if new newer
+                        else if (mc.IsOverride == isOverride) insert = (mc.UpdatedTime < File.GetLastWriteTimeUtc(path));  // ... check if new newer
                     }
                     else
                     {
@@ -186,6 +186,7 @@ namespace Vre.Server.ModelCache
                         mc = new ModelCache(path, level, isOverride, objectId);
                         if (mc.IsValid)
                         {
+                            ServiceInstances.Logger.Info("Added/replaced model: {0}", path);
                             cl[objectId] = mc;
                             _cache[path] = mc;
                         }
