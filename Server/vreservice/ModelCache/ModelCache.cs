@@ -368,7 +368,12 @@ namespace Vre.Server.ModelCache
 
                 _classId = modelInfo.ClassName;
                 _ceilingHeightFt = modelInfo.CeilingHeightFt;
-                Model.Kmz.ViewPoint vp = modelInfo.LocationCart.AsViewPoint();
+                Model.Kmz.ViewPoint vp = modelInfo.LocationGeo;// modelInfo.LocationCart.AsViewPoint();
+
+                // Client's heading issue patch
+                //vp.Heading += 90.0;
+                //if (vp.Heading >= 180.0) vp.Heading -= 360.0;
+
                 _location = new ViewPoint(vp.Longitude, vp.Latitude, vp.Altitude, vp.Heading);
                 _floor = modelInfo.Floor;
 

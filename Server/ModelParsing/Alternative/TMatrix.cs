@@ -255,7 +255,63 @@ namespace Vre.Server.Model.Kmz
                 return angle_d;
             }
         }
-        
+
+        /// <summary>
+        /// Patched heading calculation to parry client's (v1.0.0.17) heading usage issue.
+        /// </summary>
+        public double Heading_d_patch
+        {
+            get
+            {
+                double angle_d = 0.0f;
+                double heading0 = Math.Round(RadiansToDegrees(Math.Acos(Math.Round(_matrix[0][0], 3))), 2);
+                double heading1 = Math.Round(RadiansToDegrees(Math.Asin(Math.Round(_matrix[1][0], 3))), 2);
+                if (heading0 > 0 == heading1 > 0)
+                {
+                    if (Math.Sign(heading0) == Math.Sign(heading1))
+                    {   //    N A  * red
+                        //      | /
+                        //      |/ 
+                        //  <---+----->
+                        //  W   |     E
+                        //    S V
+                        angle_d = (90 - heading0);
+                    }
+                    else
+                    {   //    N A
+                        //      |
+                        //  <---+----->
+                        //  W   |\    E
+                        //      | \
+                        //    S V  * red
+                        angle_d = (90 + heading0);
+                    }
+                }
+                else
+                {
+                    if (Math.Sign(heading0) == Math.Sign(heading1))
+                    {   // red *  A N
+                        //      \ |
+                        //       \|
+                        //  <-----+--->
+                        //  W     |   E
+                        //      S V
+                        angle_d = heading1 + 270;
+                    }
+                    else
+                    {   //        A N
+                        //        |
+                        //  <-----+--->
+                        //  W    /|   E
+                        //      / |
+                        // red *  V S
+                        angle_d = heading0 + 90;
+                    }
+                }
+                return angle_d;
+            }
+        }
+
         /// <summary>
         /// This is a generic transform procedure - to rotate+translate a given Point3D with
         /// the TMatrix object.

@@ -12,7 +12,14 @@ namespace Vre.Server.Model.Kmz
         public int CeilingHeightFt { get; private set; }
         public bool ShowPanoramicView { get; private set; }
         public double InitialPrice { get; private set; }
+        /// <summary>
+        /// Currently this is calculated IMPROPERLY
+        /// </summary>
         public EcefViewPoint LocationCart { get; private set; }
+        /// <summary>
+        /// Calculated in alternative way compared to <see cref="LocationCart"/>; tested to be correct.
+        /// </summary>
+        public ViewPoint LocationGeo { get; private set; }
 
         public string ClassName { get; private set; }
         public IEnumerable<string> GeometryIdList { get { return _geometryIdList; } }
@@ -29,6 +36,8 @@ namespace Vre.Server.Model.Kmz
             Name = parts[0];
             //LocationCart = tMatrix.Transform(parent.LocationCart);
             LocationCart = tMatrix.Transform(parent._site.LocationCart);
+            LocationGeo = tMatrix.Point3D2ViewPoint(tMatrix.Transform(new Geometry.Point3D(0.0, 0.0, 0.0)), parent._site.LocationGeo);
+            LocationGeo.Heading += tMatrix.Heading_d_patch; if (LocationGeo.Heading >= 360.0) LocationGeo.Heading -= 360.0;
             Matrix = tMatrix;
 
             // format of the suite description could be:
