@@ -234,6 +234,8 @@ namespace VrEstate
         public XmlDocument GetColladaDoc()
         {
             m_collada = extractUpdatableItem("untitled.dae");
+            if (m_collada == null)
+                m_collada = extractUpdatableItem("untitled_98.dae");
 
             m_collada.stream.Seek(0, SeekOrigin.Begin);
             XmlDocument doc = new XmlDocument();

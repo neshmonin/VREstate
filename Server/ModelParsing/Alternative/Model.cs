@@ -196,7 +196,9 @@ namespace Vre.Server.Model.Kmz
             node = node["visual_scene"];
             if (null == node) throw new InvalidDataException("scene node does not contain a subnode in Collada structure");
 
-            Site = new ConstructionSite(this, Name, node, models, geometryNode);
+            // Creation of TMatrix object for the Model - so that ConstructionSite could adjust its TMatrix accordingly
+            TMatrix tMatrix = new TMatrix(Location.Heading);
+            Site = new ConstructionSite(this, Name, node, models, geometryNode, tMatrix);
         }
     }
 }

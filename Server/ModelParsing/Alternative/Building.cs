@@ -8,14 +8,19 @@ namespace Vre.Server.Model.Kmz
         public string Id { get; private set; }
         public string Name { get; private set; }
         public IEnumerable<Suite> Suites { get { return _suites; } }
+        /// <summary>
+        /// Currently this is calculated IMPROPERLY
+        /// </summary>
         public EcefViewPoint LocationCart { get; private set; }
+        /// <summary>
+        /// Calculated in alternative way compared to <see cref="LocationCart"/>; tested to be correct.
+        /// </summary>
+        public ViewPoint LocationGeo { get; private set; }
         public double UnitInMeters { get; private set; }
 
         private List<Suite> _suites;
-#if DEBUG
         private TMatrix _transformation;
-        public ConstructionSite _site;
-#endif
+        internal ConstructionSite _site;
 
         public Building(ConstructionSite parent, string id, string buildingName, XmlNode buildingModel, 
             Dictionary<string, XmlNode> models, TMatrix tMatrix)
@@ -24,11 +29,12 @@ namespace Vre.Server.Model.Kmz
             UnitInMeters = parent.UnitInMeters;
             Name = buildingName;
             LocationCart = tMatrix.Transform(parent.LocationCart);
+            LocationGeo = tMatrix.Point3D2ViewPoint(tMatrix.Transform(new Geometry.Point3D(0.0, 0.0, 0.0)), parent.LocationGeo);
+            LocationGeo.Heading += tMatrix.Heading_d_patch; if (LocationGeo.Heading >= 360.0) LocationGeo.Heading -= 360.0;
             _suites = new List<Suite>();
-#if DEBUG
+
             _site = parent;
             _transformation = tMatrix;
-#endif
 
             foreach (XmlNode n in buildingModel.ChildNodes)
             {

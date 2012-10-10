@@ -10,6 +10,10 @@ namespace Vre.Server.Model.Kmz
         public string Name { get; private set; }
         public IEnumerable<Building> Buildings { get { return _buildings; } }
         public EcefViewPoint LocationCart { get; private set; }
+        /// <summary>
+        /// Fall-back: direct value read from model file.
+        /// </summary>
+        public ViewPoint LocationGeo { get; private set; }
         public Dictionary<string, Geometry[]> Geometries { get { return _geometries; } }
         public double UnitInMeters { get; private set; }
 
@@ -18,11 +22,12 @@ namespace Vre.Server.Model.Kmz
 
         public ConstructionSite(Model parent, string name, XmlNode rootNode,
             Dictionary<string, XmlNode> models,
-            XmlNode geometryRoot)
+            XmlNode geometryRoot, TMatrix tMatrix)
         {
             UnitInMeters = parent.UnitInMeters;
             Name = name;
             LocationCart = new EcefViewPoint(parent.Location);
+            LocationGeo = new ViewPoint(parent.Location);
             _buildings = new List<Building>();
 
             XmlAttribute na = rootNode.Attributes["id"];
@@ -65,7 +70,7 @@ namespace Vre.Server.Model.Kmz
 
                 if ((buildingNode != null) && (nn != null) && (nna != null))
                 {
-                    TMatrix matrix = new TMatrix(nn.InnerText, UnitInMeters);
+                    TMatrix matrix = new TMatrix(tMatrix, nn.InnerText, UnitInMeters);
                     string buildingName = nna.Value.Replace('_', ' ');
 
                     _buildings.Add(new Building(this, nodeId, buildingName, buildingNode, models, matrix));
