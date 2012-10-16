@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Vre.Server.BusinessLogic
 {
     [Serializable]
-    public partial class Site : UpdateableBase, IClientDataProvider
+    public partial class Site : UpdateableBase
     {
         public virtual EstateDeveloper Developer { get; protected set; }
 
@@ -13,14 +13,17 @@ namespace Vre.Server.BusinessLogic
 
         public virtual string Name { get; set; }
 
-        public virtual string GenericInfoModel { get; set; }
+        public virtual string DisplayModelUrl { get; set; }
+        public virtual string OverlayModelUrl { get; set; }
+        public virtual string BubbleTemplateUrl { get; set; }
         public virtual string ExcursionModel { get; set; }
         public virtual GeoPoint Location { get; set; }
         public virtual string InitialView { get; set; }
+        public virtual string WireframeLocation { get; set; }
 
         protected Site() { }
 
-        public Site(EstateDeveloper developer, string name)
+        public Site(EstateDeveloper developer, string name) : base()
         {
             InitializeNew();
             Name = name;
@@ -34,11 +37,9 @@ namespace Vre.Server.BusinessLogic
 
         public virtual ClientData GetClientData()
         {
-            ClientData result = new ClientData();
+            ClientData result = base.GetClientData();
 
-            result.Add("id", AutoID);  // informational only
-            result.Add("deleted", Deleted);  // informational only
-
+            result.Add("estateDeveloperId", Developer.AutoID);
             result.Add("name", Name);
 
             //ClientData position = new ClientData();
@@ -47,8 +48,14 @@ namespace Vre.Server.BusinessLogic
             //position.Add("alt", Altitude);
             //result.Add("position", position);
 
-            result.Add("genericInfoModel", GenericInfoModel);
-            result.Add("excursionModel", ExcursionModel);
+            if (!string.IsNullOrEmpty(DisplayModelUrl))
+                result.Add("displayModelUrl", DisplayModelUrl);
+            if (!string.IsNullOrEmpty(OverlayModelUrl))
+                result.Add("overlayModelUrl", OverlayModelUrl);
+            if (!string.IsNullOrEmpty(BubbleTemplateUrl))
+                result.Add("bubbleTemplateUrl", BubbleTemplateUrl);
+            if (!string.IsNullOrEmpty(ExcursionModel))
+                result.Add("excursionModel", ExcursionModel);
 
             result.Add("initialView", InitialView);
 

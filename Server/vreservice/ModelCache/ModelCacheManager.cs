@@ -1,16 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Vre.Server.BusinessLogic;
+using Vre.Server.RemoteService;
+using Vre.Server.Dao;
 
 namespace Vre.Server.ModelCache
 {
     internal class ModelCacheManager
     {
+        private const string _primaryModelFilename = "wires.kmz";
+        private const string _secondaryModelFilename = "model.kmz";
+
         private string _modelStorePath;
-        private string _modelStoreFilter;
         private FileSystemWatcher _watcher;
         private Dictionary<string, ModelCache> _cache;
-        //private Dictionary<string, ModelCache> _cacheByName;
         private Dictionary<int, ModelCache> _cacheBySite;
         private Dictionary<int, ModelCache> _cacheByBuilding;
 
@@ -19,7 +22,6 @@ namespace Vre.Server.ModelCache
             _watcher = null;
 
             _modelStorePath = modelStorePath;// Path.GetDirectoryName(modelStorePath);
-            _modelStoreFilter = "model.kmz";// Path.GetFileName(modelStorePath);
         }
 
         public void Initialize()
@@ -29,7 +31,7 @@ namespace Vre.Server.ModelCache
                 if (_watcher != null) return;
 
                 _watcher = new FileSystemWatcher(_modelStorePath);
-                _watcher.Filter = Path.GetFileName(_modelStoreFilter);
+                _watcher.Filter = string.Empty;
                 _watcher.IncludeSubdirectories = true;
                 _watcher.EnableRaisingEvents = false;
 
@@ -49,15 +51,100 @@ namespace Vre.Server.ModelCache
 
                 // produce a list of all model files reverse-sorted by write time
                 List<string> files = new List<string>();
-                files.AddRange(Directory.EnumerateFiles(_modelStorePath, _modelStoreFilter, SearchOption.AllDirectories));
+                files.AddRange(Directory.EnumerateFiles(_modelStorePath, string.Empty, SearchOption.AllDirectories));
                 files.Sort(delegate(string x, string y) { return File.GetLastWriteTimeUtc(x).CompareTo(File.GetLastWriteTimeUtc(y)); });
 
                 foreach (string path in files) tryAddNewModel(path);
+
+                using (ClientSession cs = ClientSession.MakeSystemSession())
+                {
+                    cs.Resume();
+                    using (EstateDeveloperDao dao = new EstateDeveloperDao(cs.DbSession))
+                    {
+                        foreach (EstateDeveloper ed in dao.GetAll())
+                        {
+                            if (ed.Deleted) continue;
+
+                            string path;
+                            foreach (Site s in ed.Sites)
+                            {
+                                if (s.Deleted) continue;
+                                if (!string.IsNullOrEmpty(s.WireframeLocation))
+                                {
+                                    path = ServiceInstances.InternalFileStorageManager.ConvertToFullPath(s.WireframeLocation);
+                                    addNewModelInt(path, ModelCache.ModelLevel.Site, s.AutoID, true, _cacheBySite);
+                                }
+                                foreach (Building b in s.Buildings)
+                                {
+                                    if (b.Deleted) continue;
+                                    if (!string.IsNullOrEmpty(b.WireframeLocation))
+                                    {
+                                        path = ServiceInstances.InternalFileStorageManager.ConvertToFullPath(b.WireframeLocation);
+                                        ModelCache mc = addNewModelInt(path, ModelCache.ModelLevel.Building, b.AutoID, true, _cacheByBuilding);
+                                        if (mc != null)
+                                        {
+                                            // create/update a SuiteType-only site-level model cache
+                                            ModelCache smc;
+                                            if (_cacheBySite.TryGetValue(s.AutoID, out smc))
+                                            {
+                                                smc.MergeSuiteTypes(mc);
+                                            }
+                                            else
+                                            {
+                                                _cacheBySite.Add(s.AutoID, mc);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 
                 ServiceInstances.Logger.Info("MC: Reading model files done.");
 
                 _watcher.EnableRaisingEvents = true;
             }
+        }
+
+        /// <summary>
+        /// Generic auto type-resolving version
+        /// </summary>
+        public bool FillWithModelInfo(UpdateableBase target, bool withSubObjects)
+        {
+            bool result = false;
+
+            Site site = target as Site;
+            if (site != null)
+            {
+                result = FillWithModelInfo(site, withSubObjects);
+            }
+            else
+            {
+                Building building = target as Building;
+                if (building != null)
+                {
+                    result = FillWithModelInfo(building, withSubObjects);
+                }
+                else
+                {
+                    Suite suite = target as Suite;
+                    if (suite != null)
+                    {
+                        result = FillWithModelInfo(suite, withSubObjects);
+                    }
+                    else
+                    {
+                        SuiteType suiteType = target as SuiteType;
+                        if (suiteType != null)
+                        {
+                            result = FillWithModelInfo(suiteType, withSubObjects);
+                        }
+                    }
+                }
+            }
+
+            return result;
         }
 
         public bool FillWithModelInfo(Site site, bool withSubObjects)
@@ -150,34 +237,57 @@ namespace Vre.Server.ModelCache
         {
             ModelCache.ModelLevel level;
             int objectId;
+            bool isOverride;
+
+            if (Path.GetFileName(path).Equals(_primaryModelFilename, System.StringComparison.InvariantCultureIgnoreCase))
+                isOverride = true;
+            else if (Path.GetFileName(path).Equals(_secondaryModelFilename, System.StringComparison.InvariantCultureIgnoreCase))
+                isOverride = false;
+            else
+                return;
 
             if (objectFromPath(path, out level, out objectId))
             {
-                ModelCache mc;
-                bool insert = false;
                 Dictionary<int, ModelCache> cl = null;
 
                 if (ModelCache.ModelLevel.Site == level) cl = _cacheBySite;
                 else if (ModelCache.ModelLevel.Building == level) cl = _cacheByBuilding;
 
                 if (cl != null)
-                {
-                    if (cl.TryGetValue(objectId, out mc))  // if cache object exists...
-                        insert = (mc.UpdatedTime < File.GetLastWriteTimeUtc(path));  // ... check if new newer
-                    else
-                        insert = true;
+                    addNewModelInt(path, level, objectId, isOverride, cl);
+            }
+        }
 
-                    if (insert)
-                    {
-                        mc = new ModelCache(path, level, objectId);
-                        if (mc.IsValid)
-                        {
-                            cl[objectId] = mc;
-                            _cache[path] = mc;
-                        }
-                    }
+        private ModelCache addNewModelInt(string path, ModelCache.ModelLevel level, int objectId, bool isOverride, Dictionary<int, ModelCache> cl)
+        {
+            bool insert = false;
+            ModelCache result = null;
+
+            if (cl.TryGetValue(objectId, out result))  // if cache object exists...
+            {
+                if (!result.IsOverride && isOverride) insert = true;
+                else if (result.IsOverride == isOverride) insert = (result.UpdatedTime < File.GetLastWriteTimeUtc(path));  // ... check if new newer
+            }
+            else
+            {
+                insert = true;
+            }
+
+            if (insert)
+            {
+                result = new ModelCache(path, level, isOverride, objectId);
+                if (result.IsValid)
+                {
+                    ServiceInstances.Logger.Info("Added/replaced model: {0}", path);
+                    cl[objectId] = result;
+                    _cache[path] = result;
+                }
+                else
+                {
+                    result = null;
                 }
             }
+            return result;
         }
 
         private void _watcher_Error(object sender, ErrorEventArgs e)
@@ -307,8 +417,9 @@ namespace Vre.Server.ModelCache
                     if (int.TryParse(parts[startIdx + 1], out id))
                     {
                         level = ModelCache.ModelLevel.Site;
-                        result = Path.GetFileNameWithoutExtension(parts[startIdx + 2])
-                            .Equals("model", System.StringComparison.InvariantCultureIgnoreCase);
+                        result = true;
+                        //result = Path.GetFileNameWithoutExtension(parts[startIdx + 2])
+                        //    .Equals("model", System.StringComparison.InvariantCultureIgnoreCase);
                     }
                 }
                 // path in form <developer id>\<site id>\<building id>\model.kmz

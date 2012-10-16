@@ -11,7 +11,11 @@ namespace Vre.Server.RemoteService
     /// </summary>
     internal class ServiceQuery : NameValueCollection
     {
-        public ServiceQuery(NameValueCollection fromRequest) : base(fromRequest) { }
+        public ServiceQuery(NameValueCollection fromRequestPri, NameValueCollection fromRequestSec)
+            : base(fromRequestSec)
+        {
+            Add(fromRequestPri);  // duplicated keys get overwritten
+        }
 
         public int GetParam(string name, int defaultValue)
         {
@@ -79,6 +83,10 @@ namespace Vre.Server.RemoteService
         string DataPhysicalLocation { get; set; }
         Stream DataStream { get; }
         bool HoldResponseForServerPush { get; set; }
+        /// <summary>
+        /// Takes precedense over all other response modes.
+        /// </summary>
+        string RedirectionUrl { get; set; }
     }
 
     internal interface IServiceRequest

@@ -50,5 +50,7 @@
     <property name="TerraceCount" column="TerraceCnt" /> <!-- TODO: TEMPORARY -->
     <property name="floorArea" column="FloorArea" /> <!-- TODO: TEMPORARY -->
 
+    <property name="FloorPlanUrl" column="FloorPlanUrl" />
+    
   </class>
 </hibernate-mapping>

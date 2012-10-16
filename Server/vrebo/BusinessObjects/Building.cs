@@ -26,12 +26,15 @@ namespace Vre.Server.BusinessLogic
 
         public virtual DateTime? OpeningDate { get; set; }
         public virtual BuildingStatus Status { get; set; }
-        public virtual string Model { get; set; }
+        public virtual string DisplayModelUrl { get; set; }
+        public virtual string OverlayModelUrl { get; set; }
+        public virtual string BubbleTemplateUrl { get; set; }
         public virtual GeoPoint Location { get; set; }
         public virtual double AltitudeAdjustment { get; set; }
         public virtual GeoPoint Center { get; set; }
         public virtual double MaxSuiteAltitude { get; set; }
         public virtual string InitialView { get; set; }
+        public virtual string WireframeLocation { get; set; }
 
         /// <summary>
         /// Seller agent reference
@@ -42,7 +45,7 @@ namespace Vre.Server.BusinessLogic
 
         protected Building() { }
 
-		public Building(Site constructionSite, string name)
+		public Building(Site constructionSite, string name) : base()
 		{
             InitializeNew();
             ConstructionSite = constructionSite;
@@ -66,10 +69,9 @@ namespace Vre.Server.BusinessLogic
 
         public override ClientData GetClientData()
         {
-            ClientData result = new ClientData();
+            ClientData result = base.GetClientData();
 
-            result.Add("id", AutoID);
-            result.Add("deleted", Deleted);
+            result.Add("siteId", ConstructionSite.AutoID);
 
             result.Add("name", Name);
             result.Add("status", Status);
@@ -85,12 +87,19 @@ namespace Vre.Server.BusinessLogic
             if (SellingBy != null)
                 result.Add("sellerId", SellingBy.AutoID);
 
+            if (!string.IsNullOrEmpty(DisplayModelUrl))
+                result.Add("displayModelUrl", DisplayModelUrl);
+            if (!string.IsNullOrEmpty(OverlayModelUrl))
+                result.Add("overlayModelUrl", OverlayModelUrl);
+            if (!string.IsNullOrEmpty(BubbleTemplateUrl))
+                result.Add("bubbleTemplateUrl", BubbleTemplateUrl);
+
             return result;
         }
 
         public override bool UpdateFromClient(ClientData data)
         {
-            bool changed = false;
+            bool changed = base.UpdateFromClient(data);
 
             Name = data.UpdateProperty("name", Name, ref changed);
             Status = data.UpdateProperty<BuildingStatus>("status", Status, ref changed);

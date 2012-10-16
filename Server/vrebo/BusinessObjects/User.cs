@@ -23,7 +23,14 @@ namespace Vre.Server.BusinessLogic
         public Role UserRole { get; private set; }
         public int? EstateDeveloperID { get; private set; }
         public DateTime LastLogin { get; set; }
-        public ContactInfo PersonalInfo { get; private set; }
+        public string NickName { get; set; }
+        public string PrimaryEmailAddress { get; set; }
+        /// <summary>
+        /// For handling: http://code.google.com/p/noda-time/
+        /// </summary>
+        public string TimeZone { get; set; }
+        public string PersonalInfo { get; set; }
+        //public ContactInfo PersonalInfo { get; private set; }
         public BrokerageInfo BrokerInfo { get; private set; }
         public IList<UserLicense> Licenses { get; private set; }
 
@@ -47,11 +54,14 @@ namespace Vre.Server.BusinessLogic
 
         private User() { }
         
-		public User(int? estateDeveloperId, Role role)
+		public User(int? estateDeveloperId, Role role) : base()
 		{
             InitializeNew();
             UserRole = role;
             EstateDeveloperID = estateDeveloperId;
+            NickName = string.Empty;
+            PrimaryEmailAddress = string.Empty;
+            TimeZone = string.Empty;
             PersonalInfo = null;// new ContactInfo();
             BrokerInfo = null;// new BrokerageInfo();
             ManagedSuites = new List<Suite>();
@@ -70,7 +80,7 @@ namespace Vre.Server.BusinessLogic
             return ((role != Role.SellingAgent) && (role != Role.SuperAdmin) && (role != Role.Buyer) && (role != Role.Visitor));
         }
 
-        public void UpdatePersonalInfo(ContactInfo info)
+        public void UpdatePersonalInfo(string info)
         {
             PersonalInfo = info;
             MarkUpdated();
@@ -145,8 +155,11 @@ namespace Vre.Server.BusinessLogic
             result.Add("estateDeveloperId", EstateDeveloperID);  // informational only
             result.Add("role", UserRole);  // informational only
 
+            result.Add("nickName", NickName);
+            result.Add("primaryEmail", PrimaryEmailAddress);
+            result.Add("timeZone", TimeZone);
             if (PersonalInfo != null)
-                result.Add("personalInfo", PersonalInfo.GetClientData());
+                result.Add("personalInfo", PersonalInfo);
 
             if (BrokerInfo != null)
                 result.Add("brokerageInfo", BrokerInfo.GetClientData());
@@ -158,12 +171,10 @@ namespace Vre.Server.BusinessLogic
         {
             bool changed = base.UpdateFromClient(data);
 
-            ClientData picd = data.GetNextLevelDataItem("personalInfo");
-            if (picd.Count > 0)
-            {
-                if (null == PersonalInfo) PersonalInfo = new ContactInfo();
-                if (PersonalInfo.UpdateFromClient(picd)) changed = true;
-            }
+            NickName = data.UpdateProperty("nickName", NickName, ref changed);
+            PrimaryEmailAddress = data.UpdateProperty("primaryEmail", PrimaryEmailAddress, ref changed);
+            TimeZone = data.UpdateProperty("timeZone", TimeZone, ref changed);
+            PersonalInfo = data.UpdateProperty("personalInfo", PersonalInfo, ref changed);
 
             ClientData bicd = data.GetNextLevelDataItem("brokerageInfo");
             if (bicd.Count > 0)
@@ -173,6 +184,14 @@ namespace Vre.Server.BusinessLogic
             }
 
             return changed;
+        }
+
+        public override string ToString()
+        {
+            if (EstateDeveloperID != null)
+                return string.Format("ID={0},r={1},ED={2}", AutoID, UserRole, EstateDeveloperID);
+            else
+                return string.Format("ID={0},r={1}", AutoID, UserRole);
         }
     }
 }

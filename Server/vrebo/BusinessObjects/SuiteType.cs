@@ -18,6 +18,8 @@ namespace Vre.Server.BusinessLogic
         public virtual int BalconyCount { get; set; }  // TODO: Should be computable field!
         public virtual int TerraceCount { get; set; }  // TODO: Should be computable field!
 
+        public virtual string FloorPlanUrl { get; set; }
+
         /// <summary>
         /// Not used; required for proper inverse mapping and updating references from suites
         /// </summary>
@@ -48,13 +50,16 @@ namespace Vre.Server.BusinessLogic
 
         public override ClientData GetClientData()
         {
-            ClientData result = new ClientData();
+            ClientData result = base.GetClientData();
             int idx;
 
-            result.Add("id", AutoID);  // informational only
+            result.Add("siteId", ConstructionSite.AutoID);  // informational only
 
             result.Add("name", Name);
-            result.Add("modelName", Model);  // informatinal only
+            //result.Add("modelName", Model);  // informatinal only
+
+            if (!string.IsNullOrEmpty(FloorPlanUrl))
+                result.Add("floorPlanUrl", FloorPlanUrl);
 
             if (Levels != null)
             {

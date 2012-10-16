@@ -10,8 +10,15 @@ ECHO Checking repository status...
 %git% diff --exit-code --quiet
 IF ERRORLEVEL 1 GOTO dirty
 
+COPY /Y _version\versionp.cs _version\versionflag.cs >NUL
+GOTO next0
+
+:dirty
+COPY /Y _version\versiona.cs _version\versionflag.cs >NUL
 
 
+
+:next0
 ECHO Generating version stamp...
 _build\decout _version\versiongen.txt %git% describe --always > _version\versiongen.cs
 IF ERRORLEVEL 1 GOTO versionFailed

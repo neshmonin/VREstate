@@ -15,13 +15,18 @@ namespace Vre.Server.Command
         private StringBuilder _log;
         private Dictionary<string, SuiteType> _typeCache;
         private ClientSession _clientSession;
+        private string _importPath;
+        private List<string> _filesSaved = new List<string>();
         //private ISession _session;
 
-        public static void ImportModel(string estateDeveloperName, string siteName,
-            string modelFileName, string extraSuiteInfoFileName, bool dryRun)
+        public static void ImportModel(string estateDeveloperName, string siteName, string singleBuildingName,
+            string infoModelFileName, string displayModelFileName, string extraSuiteInfoFileName, 
+            bool importAsSite, bool dryRun)
         {
             StringBuilder log = new StringBuilder();
-            string logFileName = Path.Combine(Path.GetDirectoryName(modelFileName), Path.GetFileNameWithoutExtension(modelFileName)) 
+            string logFileName = Path.Combine(
+                    Path.GetDirectoryName(infoModelFileName), 
+                    Path.GetFileNameWithoutExtension(infoModelFileName)) 
                 + ".import.log.txt";
             FileStream logFile = File.Open(logFileName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
 
@@ -33,8 +38,9 @@ namespace Vre.Server.Command
 
                 ModelImport instance = new ModelImport();
                 instance._log = log;
-                //instance.doImport(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName, dryRun);
-                instance.generateSqlScript(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName);
+                instance.doImport(estateDeveloperName, siteName, singleBuildingName, 
+                    infoModelFileName, displayModelFileName, importAsSite, extraSuiteInfoFileName, dryRun);
+                //instance.generateSqlScript(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName);
             }
             catch (Exception e)
             {
@@ -124,10 +130,15 @@ namespace Vre.Server.Command
 
         }
 
-        private void doImport(string estateDeveloperName, string siteName,
-            string modelFileName, string extraSuiteInfoFileName, bool dryRun)
+        private void doImport(string estateDeveloperName, string siteName, string singleBuildingName,
+            string infoModelFileName, string displayModelFileName, bool isSiteModel, string extraSuiteInfoFileName, bool dryRun)
         {
             _extraSuiteInfo = new CsvSuiteTypeInfo(extraSuiteInfoFileName);
+
+            if (!string.IsNullOrWhiteSpace(extraSuiteInfoFileName) && File.Exists(extraSuiteInfoFileName))
+                _importPath = Path.GetDirectoryName(extraSuiteInfoFileName);
+            else
+                _importPath = Path.GetDirectoryName(infoModelFileName);
 
             //_session = NHibernateHelper.GetSession();
             using (_clientSession = ClientSession.MakeSystemSession())//_session))
@@ -167,7 +178,7 @@ namespace Vre.Server.Command
                     }
 
                     StringBuilder readWarnings = new StringBuilder();
-                    Vre.Server.Model.Kmz.Kmz kmz = new Vre.Server.Model.Kmz.Kmz(modelFileName, readWarnings);
+                    Vre.Server.Model.Kmz.Kmz kmz = new Vre.Server.Model.Kmz.Kmz(infoModelFileName, readWarnings);
 
                     if (null == site)
                     {
@@ -187,11 +198,17 @@ namespace Vre.Server.Command
                         }
                     }
 
-                    importSite(kmz.Model.Site, site, siteCreated);
+                    importSite(kmz.Model.Site, site, siteCreated, singleBuildingName,
+                        infoModelFileName, displayModelFileName, isSiteModel);
 
                     if (dryRun)
                     {
                         tran.Rollback();
+                        foreach (string file in _filesSaved)
+                        {
+                            try { ServiceInstances.InternalFileStorageManager.RemoveFile(file); }
+                            catch (FileNotFoundException) { ServiceInstances.FileStorageManager.RemoveFile(file); }
+                        }
                         _log.Append("DRY RUN MODE: all changes rolled back.\r\n");
                     }
                     else
@@ -204,13 +221,19 @@ namespace Vre.Server.Command
             }  // client session
         }
 
-        private void importSite(Vre.Server.Model.Kmz.ConstructionSite modelSite, Site dbSite, bool isCreated)
+        private void importSite(Vre.Server.Model.Kmz.ConstructionSite modelSite, Site dbSite, bool isCreated,
+            string singleBuildingName,
+            string infoModelFileName, string displayModelFileName, bool isSiteModel)
         {
             List<string> missingBuildings = new List<string>(dbSite.Buildings.Count);
             foreach (Building b in dbSite.Buildings) missingBuildings.Add(b.Name);
 
             foreach (Vre.Server.Model.Kmz.Building mb in modelSite.Buildings)
             {
+                // single building import
+                if ((singleBuildingName != null) && !singleBuildingName.Equals(mb.Name, StringComparison.InvariantCultureIgnoreCase))
+                    continue;
+
                 bool created = false;
                 Building dbb = null;
                 foreach (Building b in dbSite.Buildings)
@@ -246,46 +269,77 @@ namespace Vre.Server.Command
                     missingBuildings.Remove(dbb.Name);
                 }
 
-                importBuilding(mb, dbb, created);
+                importBuilding(mb, dbb, created,
+                    isSiteModel ? null : infoModelFileName,
+                    isSiteModel ? null : displayModelFileName);
             }
 
-            // hide missing buildings
-            //
-            foreach (string bn in missingBuildings)
+            if (isSiteModel)
             {
-                Building dbb = null;
-                foreach (Building b in dbSite.Buildings)
-                    if (b.Name.Equals(bn) && !b.Deleted) { dbb = b; break; }
-
-                if (dbb != null)
+                // hide missing buildings
+                //
+                foreach (string bn in missingBuildings)
                 {
-                    using (BuildingDao dao = new BuildingDao(_clientSession.DbSession))
-                        if (!dao.SafeDelete(dbb)) throw new StaleObjectStateException("Building", dbb.AutoID);
-                    _log.AppendFormat("Removed building missing in model ID={0}, Name={1}\r\n", dbb.AutoID, dbb.Name);
+                    Building dbb = null;
+                    foreach (Building b in dbSite.Buildings)
+                        if (b.Name.Equals(bn) && !b.Deleted) { dbb = b; break; }
+
+                    if (dbb != null)
+                    {
+                        using (BuildingDao dao = new BuildingDao(_clientSession.DbSession))
+                            if (!dao.SafeDelete(dbb)) throw new StaleObjectStateException("Building", dbb.AutoID);
+                        _log.AppendFormat("Removed building missing in model ID={0}, Name={1}\r\n", dbb.AutoID, dbb.Name);
+                    }
                 }
-            }
 
-            // find and hide unused suite types
-            //
-            List<string> missingSuiteTypes = new List<string>(dbSite.SuiteTypes.Count);
-            foreach (SuiteType st in dbSite.SuiteTypes) missingSuiteTypes.Add(st.Name);
-            foreach (string stn in _typeCache.Keys) missingSuiteTypes.Remove(stn);
-            foreach (string stn in missingSuiteTypes)
-            {
-                SuiteType dbst = null;
-                foreach (SuiteType st in dbSite.SuiteTypes)
-                    if (st.Name.Equals(stn) && !st.Deleted) { dbst = st; break; }
-
-                if (dbst != null)
+                // find and hide unused suite types
+                //
+                List<string> missingSuiteTypes = new List<string>(dbSite.SuiteTypes.Count);
+                foreach (SuiteType st in dbSite.SuiteTypes) missingSuiteTypes.Add(st.Name);
+                foreach (string stn in _typeCache.Keys) missingSuiteTypes.Remove(stn);
+                foreach (string stn in missingSuiteTypes)
                 {
-                    using (SuiteTypeDao dao = new SuiteTypeDao(_clientSession.DbSession))
-                        if (!dao.SafeDelete(dbst)) throw new StaleObjectStateException("SuiteType", dbst.AutoID);
-                    _log.AppendFormat("Removed suite type missing in model ID={0}, Name={1}\r\n", dbst.AutoID, dbst.Name);
+                    SuiteType dbst = null;
+                    foreach (SuiteType st in dbSite.SuiteTypes)
+                        if (st.Name.Equals(stn) && !st.Deleted) { dbst = st; break; }
+
+                    if (dbst != null)
+                    {
+                        using (SuiteTypeDao dao = new SuiteTypeDao(_clientSession.DbSession))
+                            if (!dao.SafeDelete(dbst)) throw new StaleObjectStateException("SuiteType", dbst.AutoID);
+                        _log.AppendFormat("Removed suite type missing in model ID={0}, Name={1}\r\n", dbst.AutoID, dbst.Name);
+                    }
                 }
+
+                // Update wireframe file
+                //
+                // TODO: Always remove previous file versions?
+                //if (!string.IsNullOrEmpty(dbSite.WireframeLocation))
+                //    ServiceInstances.InternalFileStorageManager.RemoveFile(dbSite.WireframeLocation);
+
+                using (FileStream fs = File.OpenRead(infoModelFileName))
+                    dbSite.WireframeLocation = ServiceInstances.InternalFileStorageManager.StoreFile(
+                        "wireframes", "s", Path.GetExtension(infoModelFileName), dbSite.AutoID.ToString(), fs);
+                _filesSaved.Add(dbSite.WireframeLocation);
+
+                if (displayModelFileName != null)
+                {
+                    // TODO: Always remove previous file versions?
+                    //if (!string.IsNullOrEmpty(dbSite.GenericInfoModel))
+                    //    ServiceInstances.FileStorageManager.RemoveFile(dbSite.GenericInfoModel);
+
+                    using (FileStream fs = File.OpenRead(displayModelFileName))
+                        dbSite.DisplayModelUrl = ServiceInstances.FileStorageManager.StoreFile(
+                            "models", "s", Path.GetExtension(displayModelFileName), dbSite.AutoID.ToString(), fs);
+                    _filesSaved.Add(dbSite.DisplayModelUrl);
+                }
+
+                _clientSession.DbSession.Update(dbSite);
             }
         }
 
-        private void importBuilding(Vre.Server.Model.Kmz.Building modelBuilding, Building dbBuilding, bool isCreated)
+        private void importBuilding(Vre.Server.Model.Kmz.Building modelBuilding, Building dbBuilding, bool isCreated,
+            string infoModelFileName, string displayModelFileName)
         {
             List<string> missingSuites = new List<string>(dbBuilding.Suites.Count);
 
@@ -343,6 +397,34 @@ namespace Vre.Server.Command
                     _log.AppendFormat("Removed suite missing in model ID={0}, Name={1}\r\n", dbs.AutoID, dbs.SuiteName);
                 }
             }
+
+            // Update wireframe file
+            //
+            if (infoModelFileName != null)
+            {
+                // TODO: Always remove previous file versions?
+                //if (!string.IsNullOrEmpty(dbBuilding.WireframeLocation))
+                //    ServiceInstances.InternalFileStorageManager.RemoveFile(dbBuilding.WireframeLocation);
+
+                using (FileStream fs = File.OpenRead(infoModelFileName))
+                    dbBuilding.WireframeLocation = ServiceInstances.InternalFileStorageManager.StoreFile(
+                        "wireframes", "b", Path.GetExtension(infoModelFileName), dbBuilding.AutoID.ToString(), fs);
+                _filesSaved.Add(dbBuilding.WireframeLocation);
+
+                if (displayModelFileName != null)
+                {
+                    // TODO: Always remove previous file versions?
+                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
+                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
+
+                    using (FileStream fs = File.OpenRead(displayModelFileName))
+                        dbBuilding.DisplayModelUrl = ServiceInstances.FileStorageManager.StoreFile(
+                            "models", "b", Path.GetExtension(displayModelFileName), dbBuilding.AutoID.ToString(), fs);
+                    _filesSaved.Add(dbBuilding.DisplayModelUrl);
+                }
+
+                _clientSession.DbSession.Update(dbBuilding);
+            }
         }
 
         private void importSuite(Vre.Server.Model.Kmz.Suite modelSuite, Suite dbSuite, bool isCreated)
@@ -392,24 +474,49 @@ namespace Vre.Server.Command
         {
             SuiteType stype = null;
 
-            if (!_typeCache.TryGetValue(newClassName, out stype))
+            string cn = newClassName;
+            if (!_extraSuiteInfo.HasType(cn)) cn = dbSuite.Building.Name + "/" + cn;
+
+            if (!_typeCache.TryGetValue(cn, out stype))
             {
                 foreach (SuiteType st in dbSuite.Building.ConstructionSite.SuiteTypes)
-                    if (st.Name.Equals(newClassName) && !st.Deleted) { stype = st; break; }
+                    if (st.Name.Equals(cn) && !st.Deleted) { stype = st; break; }
 
                 if (null == stype)
                 {
-                    stype = new SuiteType(dbSuite.Building.ConstructionSite, newClassName);
+                    stype = new SuiteType(dbSuite.Building.ConstructionSite, cn);
 
-                    stype.BalconyCount = _extraSuiteInfo.GetBalconyCount(newClassName);
-                    stype.TerraceCount = _extraSuiteInfo.GetTerraceCount(newClassName);
-                    stype.BathroomCount = _extraSuiteInfo.GetShowerBathroomCount(newClassName)
-                        + _extraSuiteInfo.GetNoShowerBathroomCount(newClassName);
-                    stype.BedroomCount = _extraSuiteInfo.GetBedroomCount(newClassName);
-                    stype.DenCount = _extraSuiteInfo.GetDenCount(newClassName);
-                    stype.FloorArea = new ValueWithUM(_extraSuiteInfo.GetIndoorFloorAreaSqFt(newClassName), ValueWithUM.Unit.SqFeet);
+                    stype.BalconyCount = _extraSuiteInfo.GetBalconyCount(cn);
+                    stype.TerraceCount = _extraSuiteInfo.GetTerraceCount(cn);
+                    stype.BathroomCount = _extraSuiteInfo.GetShowerBathroomCount(cn)
+                        + _extraSuiteInfo.GetNoShowerBathroomCount(cn);
+                    stype.BedroomCount = _extraSuiteInfo.GetBedroomCount(cn);
+                    stype.DenCount = _extraSuiteInfo.GetDenCount(cn);
+                    stype.FloorArea = new ValueWithUM(_extraSuiteInfo.GetIndoorFloorAreaSqFt(cn), ValueWithUM.Unit.SqFeet);
 
                     _clientSession.DbSession.Save(stype);
+
+                    string fpName = _extraSuiteInfo.GetFloorPlanFileName(cn);
+                    if (!string.IsNullOrWhiteSpace(fpName))
+                    {
+                        string srcPath = Path.Combine(_importPath, fpName);
+                        if (File.Exists(srcPath))
+                        {
+                            // This must go after object is saved to get object ID!
+
+                            using (FileStream fs = File.OpenRead(srcPath))
+                                stype.FloorPlanUrl = ServiceInstances.FileStorageManager.StoreFile(
+                                    "models", "fp", Path.GetExtension(fpName), stype.AutoID.ToString(), fs);
+                            _filesSaved.Add(stype.FloorPlanUrl);
+
+                            _clientSession.DbSession.Update(stype);  // TODO: DOES NOT WORK???!!!
+                        }
+                        else
+                        {
+                            _log.AppendFormat("Floor plan {0} does not exist (type name={1})\r\n", srcPath, stype.Name);
+                        }
+                    }
+
                     _log.AppendFormat("Created new suite type ID={0}, Name={1}\r\n", stype.AutoID, stype.Name);
                 }
 
@@ -459,6 +566,9 @@ namespace Vre.Server.Command
                             line = sr.ReadLine();
                             parts = splitCsvLine(line);
                             if (partCnt != parts.Length) throw new ArgumentException("The suite type information file is not of correct format (1)");
+
+                            if (_rawData.ContainsKey(parts[_typeNameIdx]))
+                                throw new ArgumentException("Suite type information file contains duplicate like for " + parts[_typeNameIdx]);
 
                             _rawData.Add(parts[_typeNameIdx], parts);
                         }
@@ -580,6 +690,11 @@ namespace Vre.Server.Command
                 else if (str.Equals("no") || str.Equals("false")
                     || str.Equals("n") || str.Equals("0")) { result = false; return true; }
                 else { result = false; return false; }
+            }
+
+            public bool HasType(string suiteType)
+            {
+                return (getPropArray(suiteType) != null);
             }
 
             public double GetIndoorFloorAreaSqFt(string suiteType)

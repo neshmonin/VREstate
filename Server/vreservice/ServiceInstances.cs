@@ -2,6 +2,7 @@
 using NLog;
 using Vre.Server.RemoteService;
 using Vre.Server.ModelCache;
+using Vre.Server.FileStorage;
 
 namespace Vre.Server
 {
@@ -91,12 +92,40 @@ namespace Vre.Server
             }
         }
 
+        private static IFileStorageManager _fileStorageManager = null;
+        public static IFileStorageManager FileStorageManager
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    if (null == _fileStorageManager) _fileStorageManager = new LocalFileStorageManager();
+                }
+                return _fileStorageManager;
+            }
+        }
+
+        private static IFileStorageManager _internalFileStorageManager = null;
+        public static IFileStorageManager InternalFileStorageManager
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    if (null == _internalFileStorageManager) _internalFileStorageManager = new IntLocalFileStorageManager();
+                }
+                return _internalFileStorageManager;
+            }
+        }
+
         public static void Dispose()
         {
             lock (_lock)
             {
                 if (null != _floodPreventor) { _floodPreventor.Dispose(); _floodPreventor = null; }
                 if (null != _clientSessionStore) { _clientSessionStore.Dispose(); _clientSessionStore = null; }
+                if (null != _fileStorageManager) { _fileStorageManager.Dispose(); _fileStorageManager = null; }
+                if (null != _internalFileStorageManager) { _internalFileStorageManager.Dispose(); _internalFileStorageManager = null; }
             }
         }
     }

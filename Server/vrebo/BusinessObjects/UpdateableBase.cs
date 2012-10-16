@@ -3,20 +3,31 @@ using System.Collections.Generic;
 
 namespace Vre.Server.BusinessLogic
 {
-    [Serializable]
-    public abstract class UpdateableBase : IClientDataProvider
+    public abstract class UpdateableBase : UpdateableBaseGen<int> 
     {
-        public virtual int AutoID { get; protected set; }
+        public UpdateableBase() : base() { }
+        public UpdateableBase(UpdateableBase copy) : base(copy) { }
+    }
+
+    public abstract class UpdateableGuidBase : UpdateableBaseGen<Guid> 
+    {
+        public UpdateableGuidBase() : base() { }
+        public UpdateableGuidBase(UpdateableGuidBase copy) : base(copy) { }
+    }
+
+    public abstract class UpdateableBaseGen<T> : IClientDataProvider
+    {
+        public virtual T AutoID { get; protected set; }
         protected virtual byte[] Version { get; set; }
         public virtual DateTime Created { get; protected set; }
         public virtual DateTime Updated { get; protected set; }
         public virtual bool Deleted { get; protected set; }
 
-        public UpdateableBase()
+        public UpdateableBaseGen()
         {
         }
 
-        protected UpdateableBase(UpdateableBase copy)
+        protected UpdateableBaseGen(UpdateableBaseGen<T> copy)
         {
             AutoID = copy.AutoID;
             Version = copy.Version;
@@ -27,14 +38,14 @@ namespace Vre.Server.BusinessLogic
 
         public override bool Equals(object obj)
         {
-            UpdateableBase other = obj as UpdateableBase;
-            if (other != null) return other.AutoID == AutoID;
+            UpdateableBaseGen<T> other = obj as UpdateableBaseGen<T>;
+            if (other != null) return other.AutoID.Equals(AutoID);
             else return false;
         }
 
         protected void InitializeNew()
         {
-            AutoID = 0;
+            AutoID = default(T);
             Version = null;
             Created = DateTime.UtcNow;
             Updated = Created;
@@ -65,7 +76,7 @@ namespace Vre.Server.BusinessLogic
         {
             ClientData result = new ClientData();
             result.Add("id", AutoID);  
-            result.Add("deleted", Deleted);
+            if (Deleted) result.Add("deleted", "true");
             result.Add("version", Version);
             return result;
         }

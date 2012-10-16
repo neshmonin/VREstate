@@ -137,5 +137,30 @@ namespace Vre.Server
             }
             return (Size);
         }
+
+        private static readonly char[] _radixXX = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 
+            'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+        private static readonly int _radixBase = _radixXX.Length;
+        private static readonly long _refBase = new DateTime(2012, 1, 1).Ticks;
+
+        public static string GenerateReferenceNumber()
+        {
+            return GenerateReferenceNumber(DateTime.UtcNow);
+        }
+
+        public static string GenerateReferenceNumber(DateTime time)
+        {
+            string result = string.Empty;
+            long t = (time.Ticks - _refBase) / 10000;
+
+            while (t > 0)
+            {
+                result = _radixXX[t % _radixBase] + result;
+                t /= _radixBase;
+            }
+
+            return result;
+        }
     }
 }

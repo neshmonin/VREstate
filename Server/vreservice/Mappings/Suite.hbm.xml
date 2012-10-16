@@ -27,6 +27,7 @@
     <property name="SuiteName" column="SuiteName" />
     <property name="Status" column="Status" />
     <property name="ShowPanoramicView" column="ShowPanoramicView" />
+    <property name="BubbleTemplateUrl" column="BubbleTemplateUrl" />
 
     <many-to-one name="SellingBy"
       column="SellerID" class="User"

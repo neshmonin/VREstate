@@ -19,7 +19,10 @@
 
     <property name="LastLogin" column="LastLogin" />
 
-    <many-to-one name="PersonalInfo" class="ContactInfo" column="ContactInfoID" fetch="join" cascade="all" />
+    <property name="NickName" column="NickName" />
+    <property name="PrimaryEmailAddress" column="PrimaryEmailAddress" />
+    <property name="TimeZone" column="TimeZone" />
+    <property name="PersonalInfo" column="PersonalInfo" />
     <!--
     <bag name="VRTours" inverse="true" lazy="false" cascade="all-delete-orphan" >
       <key column="SuiteID"/>

@@ -1,1 +1,1 @@
-namespace Vre.Server { internal static partial class VersionGen { public const string VersionStamp = "0e2dbe6"; } }
+namespace Vre.Server { internal static partial class VersionGen { public const string VersionStamp = "ef1842e"; } }

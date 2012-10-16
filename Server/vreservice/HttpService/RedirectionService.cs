@@ -5,46 +5,30 @@ using System.Net;
 using System.Xml;
 using Vre.Server.RemoteService;
 using System.Reflection;
+using System.Text;
 
 namespace Vre.Server.HttpService
 {
-    internal class RedirectionService
+    internal class RedirectionService : HttpServiceBase
     {
-        enum ServiceType { Unknown, Const, Redirection, Button }
+        enum ServiceType { Unknown, Const, Redirection, Button, Reverse }
         private const string _defaultImage = "default.png";
-        private const string _defaultImageExtension = ".png";
-
-        private static readonly object _lock = new object();
-        private static List<string> _listeners = new List<string>();
 
         private static DateTime _buildTime = DateTime.MinValue;
 
-        public static string Status = "Stopped.";
-        public static string[] Listeners { get { lock (_listeners) return _listeners.ToArray(); } }
+        private string _buttonStorePath;
+        private string _defaultRedirectUri;
+        private AliasMap _map, _testMap;
+        private ButtonStoreFsNameCache _imagePathCache;
+        private bool _allowReallyExtendedLogging;
+        private string _clientListingTemplate, _testClientListingTemplate;
 
-        private static HttpListener _httpListener;
-
-        private static int _fileBufferSize = 16384;
-        private static string _path;
-        private static string _buttonStorePath;
-        private static string _defaultRedirectUri;
-        private static AliasMap _map, _testMap;
-        private static ButtonStoreFsNameCache _imagePathCache;
-        private static bool _allowExtendedLogging, _allowReallyExtendedLogging;
-
-        public static void PerformStartup()
+        public RedirectionService() : base("HTTP Redirection")
         {
-            ServiceInstances.Logger.Info("Starting HTTP redirection service.");
-
-            _httpListener = new HttpListener();
-
-            _allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
             _allowReallyExtendedLogging = _allowExtendedLogging & 
                 ServiceInstances.Configuration.GetValue("DebugAllowReallyExtendedLogging", false);
 
             _defaultRedirectUri = ServiceInstances.Configuration.GetValue("RedirectorDefaultUri", "http://3dcondox.com");
-
-            _fileBufferSize = ServiceInstances.Configuration.GetValue("FileStreamingBufferSize", 16384);
 
             _buttonStorePath = ServiceInstances.Configuration.GetValue("RedirectorButtonsStore", string.Empty);
             if (string.IsNullOrWhiteSpace(_buttonStorePath))
@@ -61,150 +45,85 @@ namespace Vre.Server.HttpService
             _map = new AliasMap(ServiceInstances.Configuration.GetValue("RedirectionAliasMapFile", "aliases.config"));
             _testMap = new AliasMap(ServiceInstances.Configuration.GetValue("RedirectionTestAliasMapFile", "aliases.test.config"));
 
-            string uriText = ServiceInstances.Configuration.GetValue("HttpListenerUri", string.Empty);
-            if (string.IsNullOrEmpty(uriText))
-            {
-                ServiceInstances.Logger.Warn("HTTP service listening point is not set. HTTP service is not started.");
-                return;
-            }
-
-            ServiceInstances.Logger.Info("HTTP Redirection Service is starting:");
-
-            // TODO:
-            // - add ThreadPool for request serving
-            // - make sure server listens to remote connections
-
-            // BEGIN: Multiple URI support
-
-            Uri uri = new Uri(uriText.Replace("+", "localhost").Replace("*", "localhost"));
-
-            _path = uri.LocalPath;
-
-            _httpListener.Prefixes.Add(uriText);
-            _listeners.Add(uriText);
-            ServiceInstances.Logger.Info("- " + uriText);
-
-            // END: Multiple URI support
-
-            _httpListener.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
-            _httpListener.Start();
-            _httpListener.BeginGetContext(httpCallback, null);
-
-            ServiceInstances.Logger.Info("HTTP Redirection Service started.");
-
-            if (_allowExtendedLogging)
-                ServiceInstances.RequestLogger.Info("HTTP Redirection Service started");
+            _clientListingTemplate = ServiceInstances.Configuration.GetValue("RedirectionClientListingTemplate", "https://vrt.3dcondox.com/VREstate.html?listingId={0}");
+            _testClientListingTemplate = ServiceInstances.Configuration.GetValue("RedirectionTestClientListingTemplate", "https://vrt.3dcondox.com/vre/VREstate.html?listingId={0}");
         }
 
-        public static void PerformShutdown()
+        protected override IResponseData process(string browserKey, HttpListenerContext ctx)
         {
-            if (null != _httpListener)
+            IResponseData result = new HttpServiceRequest.ResponseData(new MemoryStream(0));
+
+            if (ctx.Request.HttpMethod.Equals("GET", StringComparison.InvariantCultureIgnoreCase))
             {
-                ServiceInstances.Logger.Info("HTTP Redirection Service is stopping.");
-                _httpListener.Stop();
-                _httpListener.Close();
-                _httpListener = null;
-                ServiceInstances.Logger.Info("HTTP Redirection Service stopped.");
-            }
-        }
-
-        //http://msdn.microsoft.com/en-us/magazine/cc163879.aspx
-
-        private static void httpCallback(IAsyncResult ar)
-        {
-            if (ar.IsCompleted)
-            {
-                if (null == _httpListener) return;  // shutdown case
-                if (!_httpListener.IsListening) return;  // shutdown case
-
-                HttpListenerContext ctx = null;
-
-                try { ctx = _httpListener.EndGetContext(ar); }
-                catch { }  // make sure this does not prevent server from accepting further requests
-
-                _httpListener.BeginGetContext(httpCallback, null);
-
-                if (null == ctx) return;  // error case; just give up the request
-                try
+                if (_allowExtendedLogging)
                 {
-                    if (ctx.Request.HttpMethod.Equals("GET", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        string browserKey = Statistics.GetBrowserId(ctx);
-
-                        if (_allowExtendedLogging)
-                        {
-                            if (_allowReallyExtendedLogging)
-                                ServiceInstances.RequestLogger.Info("{0}: {1} {2} {3} {4} {5} {6}", browserKey,
-                                    ctx.Request.Url, ctx.Request.RemoteEndPoint, ctx.Request.UserAgent,
-                                    ctx.Request.UserHostAddress, ctx.Request.UserHostName, ctx.Request.UrlReferrer);
-                            else
-                                ServiceInstances.RequestLogger.Info("{0}: {1}", browserKey, ctx.Request.Url);
-                        }
-
-                        string path = ctx.Request.Url.LocalPath;
-                        if (path.StartsWith(_path))
-                        {
-                            path = path.Remove(0, _path.Length);
-
-                            switch (serviceTypeByName(path))
-                            {
-                                case ServiceType.Redirection:
-                                    redirect(ctx, browserKey);
-                                    break;
-
-                                case ServiceType.Button:
-                                    processButtonRequest(ctx, browserKey);
-                                    break;
-
-                                case ServiceType.Const:
-                                    processConst(ctx);
-                                    break;
-
-                                default:
-                                    ctx.Response.Redirect(_defaultRedirectUri);
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            ctx.Response.Redirect(_defaultRedirectUri);
-                        }
-                    }
+                    if (_allowReallyExtendedLogging)
+                        ServiceInstances.RequestLogger.Info("{0}: {1} {2} {3} {4} {5} {6}", browserKey,
+                            ctx.Request.Url, ctx.Request.RemoteEndPoint, ctx.Request.UserAgent,
+                            ctx.Request.UserHostAddress, ctx.Request.UserHostName, ctx.Request.UrlReferrer);
                     else
-                    {
-                        ctx.Response.StatusCode = 501;
-                    }
+                        ServiceInstances.RequestLogger.Info("{0}: {1}", browserKey, ctx.Request.Url);
+                }
 
-                    ctx.Response.Close();
-                }
-                catch (HttpListenerException ex)  // these stack traces seem to be useless; just flooding logs
+                string path = ctx.Request.Url.LocalPath;
+                if (path.StartsWith(_path))
                 {
-                    ServiceInstances.Logger.Error("HTTP request processing failed: {0}", ex.Message);
-                }
-                catch (Exception ex)
-                {
-                    ServiceInstances.Logger.Error("HTTP request processing failed: {0}", ex);
-                    try
+                    path = path.Remove(0, _path.Length);
+                    if (path.Length > 0)
                     {
-                        ctx.Response.StatusCode = 500;
-                        ctx.Response.StatusDescription = "Server error.";
-                        ctx.Response.Close();
+                        switch (serviceTypeByName(path))
+                        {
+                            case ServiceType.Redirection:
+                                result.RedirectionUrl = redirect(ctx, browserKey);
+                                break;
+
+                            case ServiceType.Reverse:
+                                result.RedirectionUrl = reverse(ctx, browserKey);
+                                break;
+
+                            case ServiceType.Button:
+                                processButtonRequest(ctx, browserKey, result);
+                                break;
+
+                            case ServiceType.Const:
+                                processConst(ctx, path, result);
+                                break;
+
+                            default:
+                                ProcessFileRequest(path, result);
+                                break;
+                        }
                     }
-                    catch { }  // make sure this does not break server with unhandled exception
+                    else  // path is empty; test or error; redirect to main site
+                    {
+                        result.RedirectionUrl = _defaultRedirectUri;
+                    }
+                }
+                else
+                {
+                    result.RedirectionUrl = _defaultRedirectUri;
                 }
             }
+            else
+            {
+                result.ResponseCode = HttpStatusCode.NotImplemented;
+            }
+
+            return result;
         }
 
         private static ServiceType serviceTypeByName(string pathElement)
         {
             if (pathElement.Equals("start")) return ServiceType.Redirection;
             else if (pathElement.Equals("button")) return ServiceType.Button;
+            else if (pathElement.Equals("go")) return ServiceType.Reverse;
             else if (pathElement.Equals("robots.txt")) return ServiceType.Const;
             else if (pathElement.Equals("humans.txt")) return ServiceType.Const;
+            else if (pathElement.Equals("version")) return ServiceType.Const;
             return ServiceType.Unknown;
         }
 
-        private static void redirect(HttpListenerContext ctx, string browserKey)
+        private string redirect(HttpListenerContext ctx, string browserKey)
         {
             string finalUri = null;
             bool testMode = false;
@@ -233,11 +152,45 @@ namespace Vre.Server.HttpService
 
             //ctx.Request.UrlReferrer;
             // TODO: save statistics
-
-            ctx.Response.Redirect(finalUri);
+            //ctx.Response.Redirect(finalUri);
+            return finalUri;
         }
 
-        private static void processButtonRequest(HttpListenerContext ctx, string browserKey)
+        private string reverse(HttpListenerContext ctx, string browserKey)
+        {
+            bool testMode = false;
+            string id = null;
+
+            foreach (string k in ctx.Request.QueryString.AllKeys)
+            {
+                if (k.Equals("id"))
+                {
+                    id = ctx.Request.QueryString[k];
+                }
+                else if (k.Equals("test"))
+                {
+                    testMode = ctx.Request.QueryString[k].Equals("true");
+                }
+            }
+
+            string finalUri;
+
+            if (null == id)
+            {
+                finalUri = _defaultRedirectUri;
+            }
+            else
+            {
+                finalUri = string.Format(testMode ? _testClientListingTemplate : _clientListingTemplate, id);
+            }
+
+            //ctx.Request.UrlReferrer;
+            // TODO: save statistics
+            //ctx.Response.Redirect(finalUri);
+            return finalUri;
+        }
+
+        private void processButtonRequest(HttpListenerContext ctx, string browserKey, IResponseData response)
         {
             string aliasName = null;
             string imageName = "default";
@@ -259,107 +212,99 @@ namespace Vre.Server.HttpService
 
             if (aliasName != null)
             {
-                if (!RemoteServiceProvider.IsPathValid(imageName, false)) imageName = "default";
+                if (!IsPathValid(imageName, false)) imageName = "default";
                 
                 string fullPath = (_imagePathCache != null) ? _imagePathCache.PathByHint(aliasName, imageName) : null;
 
                 if (fullPath != null)
                 {
-                    streamImage(fullPath, Path.GetExtension(fullPath), ctx.Response);
+                    response.DataPhysicalLocation = fullPath;
+                    streamImage(fullPath, response);
                     served = true;
                 }
             }
 
             if (!served)
-                streamImage(Path.Combine(_buttonStorePath, _defaultImage), _defaultImageExtension, ctx.Response);
+                streamImage(Path.Combine(_buttonStorePath, _defaultImage), response);
 
             //ctx.Request.UrlReferrer;
             // TODO: save statistics
 
         }
 
-        private static void processConst(HttpListenerContext ctx)
+        private static void processConst(HttpListenerContext ctx, string path, IResponseData response)
         {
-            ctx.Response.StatusCode = 200;
-            ctx.Response.ContentType = HttpServiceRequest.ContentTypeByExtension["txt"];
+            response.ResponseCode = HttpStatusCode.OK;
+            response.DataStreamContentType = "txt";
 
-            using (StreamWriter sw = new StreamWriter(ctx.Response.OutputStream))
+            StringBuilder text = new StringBuilder();
+
+            if (path.Equals("robots.txt"))
             {
-                if (ctx.Request.Url.LocalPath.EndsWith("robots.txt"))
-                {
-                    sw.WriteLine("User-agent: *");
-                    sw.WriteLine("Disallow: /");
-                    sw.WriteLine("Disallow: /harming/humans");
-                    sw.WriteLine("Disallow: /ignoring/human/orders");
-                    sw.WriteLine("Disallow: /harm/to/self");
-                }
-                else if (ctx.Request.Url.LocalPath.EndsWith("humans.txt"))
-                {
-                    if (DateTime.MinValue == _buildTime)
-                    {
-                        _buildTime = File.GetCreationTime(Assembly.GetExecutingAssembly().Location);
-                    }
-
-                    sw.WriteLine("/* humanstxt.org */");
-                    sw.WriteLine(string.Empty);
-                    sw.WriteLine("/* TEAM */");
-                    sw.WriteLine("\tAlexander Neshmonin, CEO and everything, Toronto");
-                    sw.WriteLine("\tEugene Simonov, Frontend, Ukraine");
-                    sw.WriteLine("\tAndrey Maslyuk, Backend, Toronto");
-                    sw.WriteLine(string.Empty);
-                    sw.WriteLine("/* THANKS */");
-                    sw.WriteLine("\tVitaly Zholudev");
-                    sw.WriteLine("\thttp://last.fm");
-                    sw.WriteLine("\thttp://stackoverflow.com");
-                    sw.WriteLine("");
-                    sw.WriteLine(string.Empty);
-                    sw.WriteLine("/* SITE */");
-                    sw.WriteLine("\tLast build: " + _buildTime.ToShortDateString());
-                    sw.WriteLine("\tLast update: today");
-                    sw.WriteLine("\tStandards: HTTP/1.1");
-                    sw.WriteLine("\tLanguages: none");
-                }
+                text.Append("User-agent: *\r\n");
+                text.Append("Disallow: /\r\n");
+                text.Append("Disallow: /harming/humans\r\n");
+                text.Append("Disallow: /ignoring/human/orders\r\n");
+                text.Append("Disallow: /harm/to/self\r\n");
             }
+            else if (path.Equals("humans.txt"))
+            {
+                if (DateTime.MinValue == _buildTime)
+                {
+                    _buildTime = File.GetCreationTime(Assembly.GetExecutingAssembly().Location);
+                }
+
+                text.Append("/* humanstxt.org */\r\n");
+                text.Append("\r\n");
+                text.Append("/* TEAM */\r\n");
+                text.Append("\tAlexander Neshmonin, CEO and everything, Toronto\r\n");
+                text.Append("\tEugene Simonov, Frontend, Ukraine\r\n");
+                text.Append("\tAndrey Maslyuk, Backend, Toronto\r\n");
+                text.Append("\r\n");
+                text.Append("/* THANKS */\r\n");
+                text.Append("\tVitaly Zholudev\r\n");
+                text.Append("\thttp://last.fm\r\n");
+                text.Append("\thttp://stackoverflow.com\r\n");
+                text.Append("\r\n");
+                text.Append("\r\n");
+                text.Append("/* SITE */\r\n");
+                text.Append("\tLast build: " + _buildTime.ToShortDateString() + "\r\n");
+                text.Append("\tLast update: today\r\n");
+                text.Append("\tStandards: HTTP/1.1\r\n");
+                text.Append("\tLanguages: none\r\n");
+            }
+            else if (path.Equals("version"))
+            {
+                text.Append(RemoteServiceProvider.BuildVersionInformation());
+            }
+
+            byte[] buffer = Encoding.UTF8.GetBytes(text.ToString());
+            response.DataStream.Write(buffer, 0, buffer.Length);
         }
 
-        private static string deriveExtension(string aliasName, string imageName)
+        //private string deriveExtension(string aliasName, string imageName)
+        //{
+        //    string result = null;
+
+        //    try
+        //    {
+        //        foreach (string file in Directory.EnumerateFiles(
+        //            Path.Combine(_buttonStorePath, aliasName), imageName + ".*", SearchOption.TopDirectoryOnly))
+        //        {
+        //            result = Path.GetExtension(file);
+        //            break;
+        //        }
+        //    }
+        //    catch (DirectoryNotFoundException) { }
+
+        //    return result;
+        //}
+
+        private static void streamImage(string path, IResponseData response)
         {
-            string result = null;
-
-            try
-            {
-                foreach (string file in Directory.EnumerateFiles(
-                    Path.Combine(_buttonStorePath, aliasName), imageName + ".*", SearchOption.TopDirectoryOnly))
-                {
-                    result = Path.GetExtension(file);
-                    break;
-                }
-            }
-            catch (DirectoryNotFoundException) { }
-
-            return result;
-        }
-
-        private static void streamImage(string path, string extension, HttpListenerResponse response)
-        {
-            string type;
-            if (!HttpServiceRequest.ContentTypeByExtension.TryGetValue(extension.Substring(1), out type))
-                throw new InvalidDataException("Image file type in not known.");
-            
-            response.StatusCode = 200;
-            response.ContentType = type;
-
-            // stream file to response
-            byte[] buffer = new byte[_fileBufferSize];
-            using (Stream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                int read;
-                do
-                {
-                    read = fs.Read(buffer, 0, _fileBufferSize);
-                    response.OutputStream.Write(buffer, 0, read);
-                } while (read > 0);
-            }
+            response.ResponseCode = HttpStatusCode.OK;
+            response.DataStreamContentType = Path.GetExtension(path).ToLower().Substring(1);
+            response.DataPhysicalLocation = path;
         }
     }
 

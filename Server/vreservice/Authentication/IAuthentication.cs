@@ -8,6 +8,7 @@ namespace Vre.Server.BusinessLogic
     internal interface IAuthentication : IDisposable
     {
         bool CreateLogin(LoginType type, User.Role role, int estateDeveloperId, string login, string password, int userId, out string errorReason);
+        bool ChangeLogin(int userId, string newLogin, out string errorReason);
         bool ChangePassword(int userId, string currentPassword, string newPassword, out string errorReason);
         bool AuthenticateUser(LoginType type, User.Role role, int estateDeveloperId, string login, string password, out int userId);
         bool DropLogin(LoginType type, User.Role role, int estateDeveloperId, string login);

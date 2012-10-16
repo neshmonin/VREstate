@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vreservice" namespace="Vre.Server.BusinessLogic">
+  <class name="Listing" table="Listings" dynamic-update="false" lazy="false">
+
+    <id name="AutoID" column="AutoID" unsaved-value="00000000-0000-0000-0000-000000000000">
+      <generator class="assigned"/>
+    </id>
+    <version name="Version" generated="always" unsaved-value="null" type="BinaryBlob">
+      <column name="Version" not-null="false" sql-type="timestamp"/>
+    </version>
+    <property name="Created" column="Created" />
+    <property name="Updated" column="Updated" />
+    <property name="Deleted" column="Deleted" />
+
+    <property name="OwnerId" column="OwnerId" />
+    <property name="ExpiresOn" column="ExpiresOn" />
+    <property name="PaymentRefId" column="PaymentRefId" />
+
+    <property name="RequestCounter" column="RequestCounter" />
+    <property name="LastRequestTime" column="LastRequestTime" />
+    
+    <property name="Product" column="Product" />
+    <property name="ProductUrl" column="ProductUrl" />
+    <property name="MlsId" column="MlsId" />
+    <property name="TargetObjectType" column="TargetObjectType" />
+    <property name="TargetObjectId" column="TargetObjectId" />
+
+  </class>
+</hibernate-mapping>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using NHibernate;
@@ -31,6 +32,11 @@ namespace Vre.Server.RemoteService
                     changePassword(request);
                     return;
                 }
+                else if (command.Equals("chlogin"))
+                {
+                    changeLogin(request);
+                    return;
+                }
                 else if (command.Equals("grantaccess"))
                 {
                     grantAccess(request);
@@ -44,6 +50,16 @@ namespace Vre.Server.RemoteService
                 else if (command.Equals("assignseller"))
                 {
                     assignSeller(request);
+                    return;
+                }
+                else if (command.Equals("register"))
+                {
+                    register(request);
+                    return;
+                }
+                else if (command.Equals("check"))
+                {
+                    check(request);
                     return;
                 }
             }
@@ -75,17 +91,17 @@ namespace Vre.Server.RemoteService
 
             // test user validity
             //
-            if (role == User.Role.SellingAgent)
-            {
-                ClientSession cs = ServiceInstances.SessionStore[sessionId];
-                if (!cs.User.HasAnyLicense())
-                {
-                    ServiceInstances.Logger.Info("User {0} has no valid licenses; rejecting login.", cs);
-                    cs = null;
-                    ServiceInstances.SessionStore.DropSession(sessionId);
-                    sessionId = null;
-                }
-            }
+            //if (role == User.Role.SellingAgent)
+            //{
+            //    ClientSession cs = ServiceInstances.SessionStore[sessionId];
+            //    if (!cs.User.HasAnyLicense())
+            //    {
+            //        ServiceInstances.Logger.Info("User {0} has no valid licenses; rejecting login.", cs);
+            //        cs = null;
+            //        ServiceInstances.SessionStore.DropSession(sessionId);
+            //        sessionId = null;
+            //    }
+            //}
 
             // produce output
             //
@@ -132,6 +148,14 @@ namespace Vre.Server.RemoteService
                 }
             }
 
+            request.Response.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private static void changeLogin(IServiceRequest request)
+        {
+            string newLogin = request.Request.Query["newLogin"];
+            RolePermissionCheck.CheckUserChangeLogin(request.UserInfo.Session);
+            ReverseRequestService.InitiateLoginChange(request.Request, request.UserInfo.Session, newLogin);
             request.Response.ResponseCode = HttpStatusCode.OK;
         }
 
@@ -219,6 +243,137 @@ namespace Vre.Server.RemoteService
                 request.Response.ResponseCode = HttpStatusCode.OK;
             else
                 throw new ArgumentException("Object to assign to is not defined or is unknown");
+        }
+
+        private static void register(IServiceRequest request)
+        {
+            string entity = request.Request.Query["entity"];
+
+            if (string.IsNullOrWhiteSpace(entity)) throw new ArgumentException("entity not defined");
+
+            if (entity.Equals("listing"))
+            {
+                registerListing(request);
+            }
+            else if (entity.Equals("user"))
+            {
+                registerUser(request);
+            }
+            else if (entity.Equals("brokerage"))
+            {
+            }
+            else
+            {
+                throw new ArgumentException("unknown entity");
+            }
+        }
+
+        private static void check(IServiceRequest request)
+        {
+            string entity = request.Request.Query["entity"];
+
+            if (string.IsNullOrWhiteSpace(entity)) throw new ArgumentException("entity not defined");
+
+            if (entity.Equals("building"))
+            {
+                checkBuilding(request);
+            }
+            else
+            {
+                throw new ArgumentException("unknown entity");
+            }
+        }
+
+        private static void registerListing(IServiceRequest request)
+        {
+            DateTime expiresOn;
+            Listing.ListingType product;
+            string paymentRefId = request.Request.Query["pr"];
+            string productUrl = request.Request.Query["evt_url"];
+            string mslId = request.Request.Query["msl_id"];
+            int suiteId;
+
+            if (!DateTime.TryParseExact(request.Request.Query["expires"], "yyyy-MM-ddTHH:mm:ss",
+                CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out expiresOn))
+            {
+                throw new ArgumentException("The time specified is not valid");
+            }
+
+            string pt = request.Request.Query["product"];
+            if (string.IsNullOrWhiteSpace(pt)) throw new ArgumentException("Product type missing");
+            if (pt.Equals("fp")) product = Listing.ListingType.FloorPlan;
+            else if (pt.Equals("evt")) product = Listing.ListingType.ExternalTour;
+            else if (pt.Equals("3dt")) product = Listing.ListingType.VirtualTour3D;
+            else throw new ArgumentException("Product type is unknown");
+
+            if (string.IsNullOrWhiteSpace(paymentRefId)) throw new ArgumentException("Required parameter missing");
+
+            if ((product == Listing.ListingType.ExternalTour) && string.IsNullOrWhiteSpace(productUrl)) 
+                throw new ArgumentException("External Virtual Tour reference not provided");
+
+            if (string.IsNullOrWhiteSpace(mslId))
+            {
+                List<UpdateableBase> to = AddressHelper.ParseGeographicalAddressToModel(request.Request.Query, request.UserInfo.Session.DbSession);
+
+                // Only unique result is possible here
+                if ((null == to) || (to.Count < 1)) throw new ArgumentException("Address not found");
+                if (to.Count > 1) throw new ArgumentException("Address: non-unique result returned; please add details");
+
+                // Only suite is currently supported
+                Suite s = to[0] as Suite;
+                if (null == s) throw new NotImplementedException();
+                
+                suiteId = s.AutoID;
+            }
+            else
+            {
+                // TODO: Test against MLS DB
+                throw new NotImplementedException();
+            }
+
+            ReverseRequestService.CreateListing(request,
+                paymentRefId, product, mslId, Listing.SubjectType.Suite, suiteId, productUrl, expiresOn);
+
+            // request.Response.ResponseCode - set by .CreateListing()
+        }
+
+        private static void checkBuilding(IServiceRequest request)
+        {
+            List<UpdateableBase> to = AddressHelper.ParseGeographicalAddressToModel(request.Request.Query, request.UserInfo.Session.DbSession);
+            ClientData result = new ClientData();
+
+            if ((null == to) || (to.Count < 1)) 
+            {
+                result.Add("result", false);
+            }
+            else if (to.Count > 1)
+            {
+                throw new ArgumentException("Address: non-unique result returned; please add details");
+            }
+            else
+            {
+                // Only suite is currently supported
+                Suite s = to[0] as Suite;
+                if (null == s) throw new NotImplementedException();
+
+                result.Add("result", true);
+
+                string readable = AddressHelper.ConvertToReadableAddress(s.Building, s);
+                ClientData parsed = AddressHelper.ConvertToNormalizedAddress(s.Building, s);
+
+                result.Add("normalizedAddress", parsed);
+                result.Add("readableAddress", readable);
+            }
+
+            request.Response.Data = result;
+            request.Response.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private static void registerUser(IServiceRequest request)
+        {
+            string login = request.Request.Query["login"];
+            ReverseRequestService.InitiateUserRegistration(request.Request, request.UserInfo.Session, login);
+            request.Response.ResponseCode = HttpStatusCode.OK;
         }
 
         private static LoginType parseLoginType(ServiceQuery args)

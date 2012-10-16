@@ -695,6 +695,23 @@ namespace Vre.Server.BusinessLogic
         //{
         //    genericUserControlCheck(session, user, false);
         //}
+
+        public static void CheckUserChangeLogin(ClientSession session)
+        {
+            if (session.User.UserRole == User.Role.SellingAgent) return;
+
+            throw new PermissionException("This operation is not allowed.");
+        }
+        #endregion
+
+        #region listings
+        public static void CheckCreateListing(ClientSession session)
+        {
+            if (session.User.UserRole == User.Role.SuperAdmin) return;
+            if (session.User.UserRole == User.Role.SellingAgent) return;
+
+            throw new PermissionException("This operation is not allowed.");
+        }
         #endregion
     }
 }

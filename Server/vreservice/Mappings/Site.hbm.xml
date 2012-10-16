@@ -29,9 +29,12 @@
     />
 
     <property name="Name" column="Name" />
-    <property name="GenericInfoModel" column="GenericInfoModel" />
+    <property name="DisplayModelUrl" column="DisplayModelUrl" />
+    <property name="OverlayModelUrl" column="OverlayModelUrl" />
+    <property name="BubbleTemplateUrl" column="BubbleTemplateUrl" />
     <property name="ExcursionModel" column="ExcursionModel" />
     <property name="InitialView" column="InitialView" />
+    <property name="WireframeLocation" column="WireframeLocation" />
 
     <!-- Geometry-related elements are read directly from model cached
     <component name="Location">

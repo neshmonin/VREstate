@@ -24,9 +24,10 @@ namespace Vre.Server.BusinessLogic
         public virtual Building Building { get; protected set; }
         public virtual SuiteType SuiteType { get; set; }
         public virtual ViewPoint Location { get; set; }
-        public virtual string ClassName { get; set; }
         public virtual ValueWithUM CeilingHeight { get; set; }
         public virtual bool ShowPanoramicView { get; set; }
+
+        public virtual string BubbleTemplateUrl { get; set; }
 
         /// <summary>
         /// Seller agent reference
@@ -48,7 +49,6 @@ namespace Vre.Server.BusinessLogic
             Building = copy.Building;
             SuiteType = copy.SuiteType;
             Location = copy.Location;
-            ClassName = copy.ClassName;
             CeilingHeight = copy.CeilingHeight;
             ShowPanoramicView = copy.ShowPanoramicView;
         }
@@ -63,7 +63,6 @@ namespace Vre.Server.BusinessLogic
             SuiteName = suiteName;
             Status = SalesStatus.Available;
             Location = ViewPoint.Empty;
-            ClassName = null;
             CeilingHeight = ValueWithUM.EmptyLinear;
             ShowPanoramicView = true;
             OptionsPossible = new List<Option>();
@@ -81,37 +80,36 @@ namespace Vre.Server.BusinessLogic
 
         public override ClientData GetClientData()
         {
-            ClientData result = new ClientData();
+            ClientData result = base.GetClientData();
 
-            result.Add("id", AutoID);  // informational only
+            result.Add("buildingId", Building.AutoID);  // informational only
 
             result.Add("levelNumber", PhysicalLevelNumber);
             result.Add("floorName", FloorName);
             result.Add("name", SuiteName);
             if (CeilingHeight != null)
-            {
                 result.Add("ceilingHeightFt", CeilingHeight.ValueAs(ValueWithUM.Unit.Feet));
-            }
             result.Add("showPanoramicView", ShowPanoramicView);
             result.Add("status", ClientData.ConvertProperty<SalesStatus>(Status));
 
             if (Location != null)
-            {
                 result.Add("position", Location.GetClientData());
-            }
 
             if (SuiteType != null)
-                result.Add("suiteTypeName", SuiteType.Name);  // informational only
+                result.Add("suiteTypeId", SuiteType.AutoID);  // informational only
 
             if (SellingBy != null)
                 result.Add("sellerId", SellingBy.AutoID);
+
+            if (!string.IsNullOrEmpty(BubbleTemplateUrl))
+                result.Add("bubbleTemplateUrl", BubbleTemplateUrl);
 
             return result;
         }
 
         public override bool UpdateFromClient(ClientData data)
         {
-            bool changed = false;
+            bool changed = base.UpdateFromClient(data);
 
             PhysicalLevelNumber = data.UpdateProperty("levelNumber", PhysicalLevelNumber, ref changed);
             SuiteName = data.UpdateProperty("name", SuiteName, ref changed);

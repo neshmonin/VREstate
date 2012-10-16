@@ -47,7 +47,7 @@ namespace Vre.Server.BusinessLogic
             // 12 symbols are: 2 internal login construction service characters and 10 for estate developer ID (32-bit)
             if (login.Length > (64 - 12)) { errorReason = "Login is too long"; return false; }
             // See intLoginFromVisible() and loginElementsFromIntLogin() for more details
-            if (!Char.IsLetterOrDigit(login[0])) { errorReason = "Login must start with a letter"; return false; }
+            if (!Char.IsLetterOrDigit(login[0])) { errorReason = "Login must start with a letter or digit"; return false; }
             //if (login.StartsWith("@")) { errorReason = "Login must start with a letter"; return false; }
             
             errorReason = null;
@@ -133,6 +133,49 @@ namespace Vre.Server.BusinessLogic
                         else
                         {
                             errorReason = "Current password is not valid.";
+                        }
+                    }
+                    else
+                    {
+                        errorReason = "Login is not registered in the system.";
+                    }
+                }
+                if (result) tran.Commit();
+            }
+
+            return result;
+        }
+
+        public bool ChangeLogin(int userId, string newLogin, out string errorReason)
+        {
+            bool result = false;
+
+            if (!validateLogin(newLogin, out errorReason)) return false;
+
+            using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session))
+            {
+                using (CredentialsDao dao = new CredentialsDao(_session))
+                {
+                    Credentials item = dao.GetByUserId(userId);
+                    if (null != item)
+                    {
+                        User.Role role;
+                        int estateDeveloperId;
+                        string login = null;
+
+                        result = loginElementsFromIntLogin(item.Login, out role, out estateDeveloperId, out login);
+
+                        string test = intLoginFromVisible(role, estateDeveloperId, newLogin);
+
+                        if (null == dao.GetByLogin(LoginType.Plain, test))
+                        {
+                            item.Login = test;
+                            dao.Update(item);
+                            result = true;
+                        }
+                        else
+                        {
+                            errorReason = "New login is in use.";
                         }
                     }
                     else
@@ -380,7 +423,7 @@ namespace Vre.Server.BusinessLogic
     {
         private int Id { get; set; }  // for the sake of good NHibernate handling, compound PKs are not good.
         public LoginType Type { get; private set; }
-        public string Login { get; private set; }
+        public string Login { get; set; }
         public int UserId { get; private set; }
         private byte[] Password { get; set; }
         private byte[] Salt { get; set; }

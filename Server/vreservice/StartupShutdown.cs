@@ -21,32 +21,44 @@ namespace Vre.Server
         public static string Status = "Stopped.";
         public static string[] Listeners { get { lock (_listeners) return _listeners.ToArray(); } }
 
+        private static HttpServiceBase _httpService;
+
         public static void PerformStartup(bool startAsService)
         {
             ServiceInstances.Logger.Info("Starting server.");
             Status = "Starting...";
 
-            DatabaseSettingsDao.VerifyDatabase();
-
-            RolePermissionCheck.FillAccessMatrix();
-
-            using (ClientSession vcs = ClientSession.MakeSystemSession())
-            {
-                vcs.Resume();
-                UserManager um = new UserManager(vcs);
-                um.ConfirmPresetUsers();
-            }
-
             if (!Enum.TryParse<ServerRole>(ServiceInstances.Configuration.GetValue("ServerRole", "VRT"),
                 true, out _serverRole))
                 _serverRole = ServerRole.VRT;
 
-            if (ServerRole.VRT == _serverRole)
+            switch (_serverRole)
             {
-                ServiceInstances.FileCache = new FileCacheManager();
+                case ServerRole.VRT:
+                    {
+                        _httpService = new HttpServiceMain();
 
-                ServiceInstances.ModelCache = new ModelCache.ModelCacheManager(
-                    ServiceInstances.Configuration.GetValue("ModelFileStore", string.Empty));
+                        DatabaseSettingsDao.VerifyDatabase();
+
+                        RolePermissionCheck.FillAccessMatrix();
+
+                        using (ClientSession vcs = ClientSession.MakeSystemSession())
+                        {
+                            vcs.Resume();
+                            UserManager um = new UserManager(vcs);
+                            um.ConfirmPresetUsers();
+                        }
+
+                        ServiceInstances.FileCache = new FileCacheManager();
+
+                        ServiceInstances.ModelCache = new ModelCache.ModelCacheManager(
+                            ServiceInstances.Configuration.GetValue("ModelFileStore", string.Empty));
+                    }
+                    break;
+
+                case ServerRole.Redirector:
+                    _httpService = new RedirectionService();
+                    break;
             }
 
             if (startAsService)
@@ -129,18 +141,8 @@ namespace Vre.Server
                 //    }
                 //}
 
-                switch (_serverRole)
-                {
-                    case ServerRole.VRT:
-                        HttpServiceManager.PerformStartup();
-                        _listeners.AddRange(HttpServiceManager.Listeners);
-                        break;
-
-                    case ServerRole.Redirector:
-                        RedirectionService.PerformStartup();
-                        _listeners.AddRange(RedirectionService.Listeners);
-                        break;
-                }
+                _httpService.PerformStartup();
+                _listeners.AddRange(_httpService.Listeners);
             }
         }
 
@@ -148,16 +150,7 @@ namespace Vre.Server
         {
             lock (_lock)
             {
-                switch (_serverRole)
-                {
-                    case ServerRole.VRT:
-                        HttpServiceManager.PerformShutdown();
-                        break;
-
-                    case ServerRole.Redirector:
-                        RedirectionService.PerformShutdown();
-                        break;
-                }
+                _httpService.PerformShutdown();
 
                 //if (_hosts != null)
                 //{

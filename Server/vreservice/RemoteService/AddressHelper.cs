@@ -1,0 +1,259 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
+using NHibernate;
+using Vre.Server.BusinessLogic;
+using Vre.Server.Dao;
+
+namespace Vre.Server.RemoteService
+{
+    internal class AddressHelper
+    {
+        private static readonly List<string> _streetSuffixDictionaryUri = new List<string>
+        {
+            "1_4", "1_2", "3_4",
+            "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+            "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
+        };
+
+        public static List<UpdateableBase> ParseGeographicalAddressToModel(ServiceQuery query, ISession dbSession)
+        {
+            string country = query["ad_co"];
+            string postalCode = query["ad_po"];
+            string state = query["ad_stpr"];
+            string municipality = query["ad_mu"];
+            string street = query["ad_stn"];
+            string streetType = query["ad_stt"];
+            string streetDirection = query["ad_std"];
+            string streetSuffix = query["ad_sts"];
+            string building = query["ad_bn"];
+            string suite = query["ad_ibn"];
+            StringBuilder freetextAddress = new StringBuilder();
+            //TextInfo textInfo = System.Globalization.CultureInfo.InvariantCulture.TextInfo;
+
+            if (!string.IsNullOrWhiteSpace(country)) //throw new ArgumentException("Address: country is not provided");
+                country = country.Trim().ToUpperInvariant(); // textInfo.ToTitleCase(country.Trim().ToLowerInvariant());
+            else
+                country = null;
+
+            if (!string.IsNullOrWhiteSpace(postalCode)) //throw new ArgumentException("Address: postal code is not provided");
+                postalCode = postalCode.Trim().ToUpperInvariant();
+            else
+                postalCode = null;
+
+            if (!string.IsNullOrWhiteSpace(state)) //throw new ArgumentException("Address: state (province) is not provided");
+                state = state.Trim().ToUpperInvariant();
+            else
+                state = null;
+
+            if (!string.IsNullOrWhiteSpace(municipality)) //throw new ArgumentException("Address: municipality is not provided");
+                municipality = municipality.Trim().ToUpperInvariant(); // textInfo.ToTitleCase(municipality.Trim().ToLowerInvariant());
+            else
+                municipality = null;
+
+            if (!string.IsNullOrWhiteSpace(street)) //throw new ArgumentException("Address: street is not provided");
+            {
+                street = street.Trim().ToUpperInvariant();
+
+                if (!string.IsNullOrWhiteSpace(streetType))
+                {
+                    if (streetType.Equals("avenue")) streetType = "AVE";
+                    else if (streetType.Equals("court")) streetType = "CT";
+                    else if (streetType.Equals("crescent")) streetType = "CR";
+                    else if (streetType.Equals("drive")) streetType = "DR";
+                    else if (streetType.Equals("road")) streetType = "RD";
+                    else if (streetType.Equals("street")) streetType = "ST";
+                    else if (streetType.Equals("other")) streetType = "";
+                    else throw new ArgumentException("Address: street type is invalid");
+                }
+                else
+                {
+                    streetType = null;
+                }
+
+                if (!string.IsNullOrWhiteSpace(streetDirection))
+                {
+                    if (streetDirection.Equals("n")) streetDirection = "N";
+                    else if (streetDirection.Equals("nw")) streetDirection = "NW";
+                    else if (streetDirection.Equals("ne")) streetDirection = "NE";
+                    else if (streetDirection.Equals("w")) streetDirection = "W";
+                    else if (streetDirection.Equals("e")) streetDirection = "E";
+                    else if (streetDirection.Equals("sw")) streetDirection = "SW";
+                    else if (streetDirection.Equals("se")) streetDirection = "SE";
+                    else if (streetDirection.Equals("s")) streetDirection = "S";
+                    else throw new ArgumentException("Address: street direction is invalid");
+                }
+                else
+                {
+                    streetDirection = null;
+                }
+
+                if (!string.IsNullOrWhiteSpace(streetSuffix))
+                {
+                    if (!_streetSuffixDictionaryUri.Contains(streetSuffix))
+                        throw new ArgumentException("Address: street suffix is invalid");
+
+                    streetSuffix = streetSuffix.Replace('_', '/');
+                }
+                else
+                {
+                    streetSuffix = null;
+                }
+
+                if (string.IsNullOrWhiteSpace(building)) throw new ArgumentException("Address: building (house) number is not provided");
+                building = building.Trim().ToUpperInvariant();
+
+                freetextAddress.Append(building);
+                freetextAddress.Append(" ");
+                freetextAddress.Append(street);
+                freetextAddress.Append(" ");
+                if (streetSuffix != null) { freetextAddress.Append(streetSuffix); freetextAddress.Append(" "); }
+                if (streetType != null) { freetextAddress.Append(streetType); freetextAddress.Append(" "); }
+                if (streetDirection != null) { freetextAddress.Append(streetDirection); freetextAddress.Append(" "); }
+                freetextAddress.Append("*");
+            }
+
+            if (!string.IsNullOrWhiteSpace(suite)) suite = suite.Trim().ToUpperInvariant();
+            else suite = null;
+
+            IList<Building> searchResult;
+            using (BuildingDao dao = new BuildingDao(dbSession))
+                searchResult = dao.SearchByAddress(country, postalCode, state, municipality,
+                    (freetextAddress.Length > 0) ? freetextAddress.ToString() : null);
+
+            List<UpdateableBase> result = null;
+
+            if (searchResult.Count > 0)
+            {
+                if (searchResult.Count > 1) //throw new ArgumentException("Address: non-unique result returned; please add details");
+                {
+                    result = new List<UpdateableBase>(searchResult);
+                }
+                else
+                {
+                    Building b = searchResult[0];
+
+                    if (b.Suites.Count > 0)
+                    {
+                        if (b.Suites.Count > 1)
+                        {
+                            if (null == suite) throw new ArgumentException("Address: suite number is required");
+
+                            foreach (Suite s in b.Suites)
+                            {
+                                if (s.SuiteName.Equals(suite))
+                                {
+                                    result = new List<UpdateableBase>(1);
+                                    result.Add(s);
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            result = new List<UpdateableBase>(1);
+                            result.Add(b.Suites[0]);
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public static ClientData ConvertToNormalizedAddress(Building building, Suite suite)
+        {
+            ClientData comp = new ClientData();
+
+            // Suite part
+            //
+            if (suite != null)
+            {
+                comp.Add("ad_ibn", suite.SuiteName);
+                comp.Add("ad_ibt", "apt");
+            }
+
+            // Fine-level elements
+            // TODO: Needs revamping; currently need some fuzziness for proper processing
+            string sta = building.AddressLine1 + " " + building.AddressLine2;
+
+            // TODO: Dirty way of parsing free text address; should split it into elements
+            string[] stae = sta.Trim().Split(' ');
+            comp.Add("ad_bn", stae[0]);
+            if (stae.Length > 1)
+            {
+                int parsedElements = 0;
+                if (stae.Length > 2)
+                {
+                    string t = null;
+
+                    string d = stae[stae.Length - 1].ToUpperInvariant();
+                    if (d.Equals("N")) { comp.Add("ad_std", "n"); parsedElements++; }
+                    else if (d.Equals("NW")) { comp.Add("ad_std", "nw"); parsedElements++; }
+                    else if (d.Equals("NE")) { comp.Add("ad_std", "ne"); parsedElements++; }
+                    else if (d.Equals("W")) { comp.Add("ad_std", "w"); parsedElements++; }
+                    else if (d.Equals("E")) { comp.Add("ad_std", "e"); parsedElements++; }
+                    else if (d.Equals("SW")) { comp.Add("ad_std", "sw"); parsedElements++; }
+                    else if (d.Equals("SE")) { comp.Add("ad_std", "se"); parsedElements++; }
+                    else if (d.Equals("E")) { comp.Add("ad_std", "e"); parsedElements++; }
+                    else t = d;
+
+                    if ((null == t) && (stae.Length > 3)) t = stae[stae.Length - 2].ToUpperInvariant();
+
+                    if (t != null)
+                    {
+                        if (t.Equals("AVE")) { comp.Add("ad_stt", "avenue"); parsedElements++; }
+                        else if (t.Equals("CT")) { comp.Add("ad_stt", "court"); parsedElements++; }
+                        else if (t.Equals("CR")) { comp.Add("ad_stt", "crescent"); parsedElements++; }
+                        else if (t.Equals("DR")) { comp.Add("ad_stt", "drive"); parsedElements++; }
+                        else if (t.Equals("RD")) { comp.Add("ad_stt", "road"); parsedElements++; }
+                        else if (t.Equals("ST")) { comp.Add("ad_stt", "street"); parsedElements++; }
+                        else comp.Add("ad_stt", "other");
+                    }
+                    else comp.Add("ad_stt", "other");
+                }
+
+                // SLOW AND DIRTY
+                sta = " ";
+                int last = stae.Length - parsedElements;
+                for (int idx = 1; idx < last; idx++) sta += stae[idx] + " ";
+                comp.Add("ad_stn", sta.Trim());
+            }
+            // comp.Add("ad_sts", building.PostalCode.ToUpperInvariant()); - not supported
+
+            // Coarse-level elements
+            //
+            comp.Add("ad_co", building.Country.ToUpperInvariant());
+            comp.Add("ad_po", building.PostalCode.ToUpperInvariant());
+            comp.Add("ad_stpr", building.StateProvince.ToUpperInvariant());
+            comp.Add("ad_mu", building.City.ToUpperInvariant());
+
+            return comp;
+        }
+
+        public static string ConvertToReadableAddress(Building building, Suite suite)
+        {
+            StringBuilder rd = new StringBuilder();
+            TextInfo textInfo = System.Globalization.CultureInfo.InvariantCulture.TextInfo;
+
+            // Suite part
+            //
+            if (suite != null) rd.AppendFormat("{0}, ", suite.SuiteName);
+
+            // Fine-level elements
+            string sta = building.AddressLine1 + " " + building.AddressLine2;
+            rd.Append(sta.Trim());
+
+            // Coarse-level elements
+            //
+            rd.AppendFormat(", {0}, {1}, {2}, {3}",
+                textInfo.ToTitleCase(building.City),
+                building.StateProvince.ToUpperInvariant(),
+                building.PostalCode.ToUpperInvariant(),
+                building.Country);
+
+            return rd.ToString();
+        }
+    }
+}

@@ -29,8 +29,11 @@
 
     <property name="OpeningDate" column="OpeningDate" />
     <property name="Status" column="Status" />
-    <property name="Model" column="Model" />
+    <property name="DisplayModelUrl" column="DisplayModelUrl" />
+    <property name="OverlayModelUrl" column="OverlayModelUrl" />
+    <property name="BubbleTemplateUrl" column="BubbleTemplateUrl" />
     <property name="InitialView" column="InitialView" />
+    <property name="WireframeLocation" column="WireframeLocation" />
 
     <many-to-one name="SellingBy"
       column="SellerID" class="User"

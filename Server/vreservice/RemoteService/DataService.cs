@@ -6,6 +6,7 @@ using System.Net;
 using Vre.Server.BusinessLogic;
 using Vre.Server.BusinessLogic.Client;
 using System.Diagnostics;
+using Vre.Server.Dao;
 
 namespace Vre.Server.RemoteService
 {
@@ -17,7 +18,7 @@ namespace Vre.Server.RemoteService
         public const string ServicePathPrefix = ServicePathElement0 + "/";
         private const string ServicePathElement0 = "data";
 
-        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType }
+        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, Listing }
 
         private static void configure()
         {
@@ -30,6 +31,7 @@ namespace Vre.Server.RemoteService
         {
             ModelObject mo;
             int objectId;
+            string strObjectId;
             long generation;
             bool includeDeleted;
 
@@ -38,7 +40,7 @@ namespace Vre.Server.RemoteService
             if (!_allowUnsecureService && !request.UserInfo.Session.TrustedConnection) 
                 throw new PermissionException("Service available only over secure connection.");
 
-            getPathElements(request.Request.Path, out mo, out objectId);
+            getPathElements(request.Request.Path, out mo, out objectId, out strObjectId);
 
             if (!long.TryParse(request.Request.Query.GetParam("genval", "0"), out generation)) generation = 0;
             includeDeleted = request.Request.Query.GetParam("withdeleted", "false").Equals("true");
@@ -132,6 +134,11 @@ namespace Vre.Server.RemoteService
                         getUser(request.UserInfo.Session, objectId, request.Response);
                     }
                     return;
+
+                case ModelObject.Listing:
+                    if (null == strObjectId) throw new ArgumentException("Object ID missing.");
+                    getListing(request.UserInfo.Session, strObjectId, request.Response);
+                    return;
             }
 
             throw new NotImplementedException();
@@ -141,12 +148,13 @@ namespace Vre.Server.RemoteService
         {
             ModelObject mo;
             int objectId;
+            string strObjectId;
 
             if (!_configured) configure();
 
             if (!request.UserInfo.Session.TrustedConnection) throw new PermissionException("Service available only over secure connection.");
 
-            getPathElements(request.Request.Path, out mo, out objectId);
+            getPathElements(request.Request.Path, out mo, out objectId, out strObjectId);
             if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
 
             if (null == request.Request.Data) throw new ArgumentException("Object data not passed.");
@@ -169,12 +177,13 @@ namespace Vre.Server.RemoteService
         {
             ModelObject mo;
             int objectId;
+            string strObjectId;
 
             if (!_configured) configure();
 
             if (!request.UserInfo.Session.TrustedConnection) throw new PermissionException("Service available only over secure connection.");
 
-            getPathElements(request.Request.Path, out mo, out objectId);
+            getPathElements(request.Request.Path, out mo, out objectId, out strObjectId);
 
             if (null == request.Request.Data) throw new ArgumentException("Object data not passed.");
 
@@ -192,12 +201,13 @@ namespace Vre.Server.RemoteService
         {
             ModelObject mo;
             int objectId;
+            string strObjectId;
 
             if (!_configured) configure();
 
             if (!request.UserInfo.Session.TrustedConnection) throw new PermissionException("Service available only over secure connection.");
 
-            getPathElements(request.Request.Path, out mo, out objectId);
+            getPathElements(request.Request.Path, out mo, out objectId, out strObjectId);
             if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
 
             switch (mo)
@@ -210,7 +220,7 @@ namespace Vre.Server.RemoteService
             throw new NotImplementedException();
         }
 
-        private static void getPathElements(string path, out ModelObject mo, out int id)
+        private static void getPathElements(string path, out ModelObject mo, out int id, out string strId)
         {
             string[] elements = path.Split('/');
             if ((elements.Length < 2) || (elements.Length > 3)) throw new ArgumentException("Object path is invalid (0).");
@@ -223,7 +233,10 @@ namespace Vre.Server.RemoteService
             else if (elements[1].Equals("suite")) mo = ModelObject.Suite;
             else if (elements[1].Equals("user")) mo = ModelObject.User;
             else if (elements[1].Equals("suitetype")) mo = ModelObject.SuiteType;
+            else if (elements[1].Equals("listing")) mo = ModelObject.Listing;
             else throw new ArgumentException("Object path is invalid (2).");
+
+            strId = null;
 
             if (2 == elements.Length)
             {
@@ -231,7 +244,15 @@ namespace Vre.Server.RemoteService
             }
             else
             {
-                if (!int.TryParse(elements[2], out id)) throw new ArgumentException("Object path is invalid (3).");
+                if (mo != ModelObject.Listing)
+                {
+                    if (!int.TryParse(elements[2], out id)) throw new ArgumentException("Object path is invalid (3).");
+                }
+                else
+                {
+                    id = -1;
+                    strId = elements[2];
+                }
             }
         }
 
@@ -493,8 +514,8 @@ namespace Vre.Server.RemoteService
                 st = manager.GetSuiteTypeByName(siteId, name);
             }
 
-            // TODO ?!
-            //ServiceInstances.ModelCache.FillWithModelInfo(suite, false);
+            ServiceInstances.ModelCache.FillWithModelInfo(st, false);
+            UrlHelper.ConvertUrlsToAbsolute(st);
 
             // produce output
             //
@@ -511,7 +532,11 @@ namespace Vre.Server.RemoteService
                 list = manager.ListSuiteTypes(siteId);
             }
 
-            foreach (SuiteType st in list) ServiceInstances.ModelCache.FillWithModelInfo(st, false);
+            foreach (SuiteType st in list)
+            {
+                ServiceInstances.ModelCache.FillWithModelInfo(st, false);
+                UrlHelper.ConvertUrlsToAbsolute(st);
+            }
 
             // produce output
             //
@@ -592,6 +617,72 @@ namespace Vre.Server.RemoteService
 
             resp.Data = new ClientData();
             resp.Data.Add("users", result);
+            resp.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private static void getListing(ClientSession session, string listingId, IResponseData resp)
+        {
+            //UpdateableBase targetObject;
+            //Listing.ListingType type;
+            //string url;
+
+            //ReverseRequestService.DecodeListing(session, listingId, out targetObject, out type, out url);
+
+            Guid rqid;
+            if (!Guid.TryParseExact(listingId, "N", out rqid))
+                throw new ArgumentException();
+
+            Listing listing;
+            using (ListingDao dao = new ListingDao(session.DbSession))
+                listing = dao.GetById(rqid);
+
+            if ((null == listing) || (listing.ExpiresOn < DateTime.UtcNow)) throw new FileNotFoundException("Undefined or expired listing");
+
+            listing.Touch();
+            using (ListingDao dao = new ListingDao(session.DbSession))
+                dao.Update(listing);
+
+            Suite suite;
+            using (SuiteDao dao = new SuiteDao(session.DbSession))
+                suite = dao.GetById(listing.TargetObjectId);
+
+            if (null == suite) throw new FileNotFoundException("Unknown object listed");
+
+            resp.Data = new ClientData();
+
+            ClientData[] elements;
+                
+            elements = new ClientData[1];
+            ServiceInstances.ModelCache.FillWithModelInfo(suite, false);
+            elements[0] = suite.GetClientData();
+            resp.Data.Add("suites", elements);
+
+            elements = new ClientData[1];
+            ServiceInstances.ModelCache.FillWithModelInfo(suite.SuiteType, false);
+            UrlHelper.ConvertUrlsToAbsolute(suite.SuiteType);
+            elements[0] = suite.SuiteType.GetClientData();
+            resp.Data.Add("suiteTypes", elements);
+
+            elements = new ClientData[1];
+            ServiceInstances.ModelCache.FillWithModelInfo(suite.Building, false);
+            elements[0] = suite.Building.GetClientData();
+            elements[0].Add("address", AddressHelper.ConvertToReadableAddress(suite.Building, null));
+            resp.Data.Add("buildings", elements);
+
+            // Cannot reuse listing.GetClientData() here as it exposes too much information
+            elements = new ClientData[1];
+            ClientData cdListing = new ClientData();
+            cdListing.Add("id", listing.AutoID);
+            cdListing.Add("suiteId", listing.TargetObjectId);  // TODO: now Suites only!!!
+            cdListing.Add("product", ClientData.ConvertProperty<Listing.ListingType>(listing.Product));
+            cdListing.Add("mlsId", listing.MlsId);
+            cdListing.Add("productUrl", listing.ProductUrl);
+            elements[0] = cdListing;
+            resp.Data.Add("listings", elements);
+
+            resp.Data.Add("primaryListingId", listing.AutoID);
+            resp.Data.Add("initialView", "");  // TODO
+
             resp.ResponseCode = HttpStatusCode.OK;
         }
         #endregion

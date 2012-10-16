@@ -4,47 +4,22 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using Vre.Server.HttpService;
 
 namespace Vre.Server.RemoteService
 {
     internal class RemoteServiceProvider : MarshalByRefObject
     {
-        private static char[] _invalidPathChars = Path.GetInvalidPathChars();
-        private static char[] _invalidFileNameChars = Path.GetInvalidFileNameChars();
-        private static List<string> _allowedFileExtensions = new List<string>();
-        private static string _filesRootFolder = null;
+        private IHttpService _reverseRequestService = new ReverseRequestService();
 
-        private static void initialize()
+        public void ProcessRequest(HttpServiceBase server, IServiceRequest request)
         {
-            _filesRootFolder = ServiceInstances.Configuration.GetValue("FilesRoot",
-                Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
-
-            _allowedFileExtensions = Utilities.FromCsv(ServiceInstances.Configuration.GetValue("AllowedServedFileExtensions", string.Empty));
-        }
-
-        public static bool IsPathValid(string path, bool allowSubfolder)
-        {
-            if (string.IsNullOrWhiteSpace(path)) return false;
-
-            if (path.IndexOfAny(_invalidPathChars) >= 0) return false;
-            if (!allowSubfolder)
-            {
-                if (path.IndexOfAny(_invalidFileNameChars) >= 0) return false;
-            }
-
-            if (path.Contains("..") || path.StartsWith("\\") || path.StartsWith("/")) return false;
-
-            return true;
-        }
-
-        public void ProcessRequest(IServiceRequest request)
-        {
-            if (null == _filesRootFolder) initialize();
+            //if (null == _filesRootFolder) initialize();
 
             switch (request.Request.Type)
             {
                 case RequestType.Get:
-                    processReadRequest(request);
+                    processReadRequest(server, request);
                     break;
 
                 case RequestType.Insert:
@@ -83,8 +58,13 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private void processReadRequest(IServiceRequest request)
+        private void processReadRequest(HttpServiceBase server, IServiceRequest request)
         {
+            if (request.Request.Path.StartsWith(_reverseRequestService.ServicePathPrefix))  // programmatic requests, such as login
+            {
+                _reverseRequestService.ProcessGetRequest(request);
+                return;
+            }
             if (request.Request.Path.Equals(ProgramService.ServicePathPrefix))  // programmatic requests, such as login
             {
                 ProgramService.ProcessClientRequest(request);
@@ -108,7 +88,7 @@ namespace Vre.Server.RemoteService
             }
             else if (request.Request.Path.Equals("version"))
             {
-                byte[] buffer = Encoding.UTF8.GetBytes(buildVersionInformation());
+                byte[] buffer = Encoding.UTF8.GetBytes(BuildVersionInformation());
                 request.Response.DataStream.Write(buffer, 0, buffer.Length);
                 request.Response.DataStreamContentType = "txt";
                 request.Response.ResponseCode = HttpStatusCode.OK;
@@ -130,31 +110,13 @@ namespace Vre.Server.RemoteService
                 return;
             }
             else //if (0 == request.Request.Query.Count)  // FS file reading
-            {
-                string type, location;
-                processFileRequest(request.Request.Path, out type, out location);
-                request.Response.DataStreamContentType = type;
-                request.Response.DataPhysicalLocation = location;
-                request.Response.ResponseCode = HttpStatusCode.OK;
+            {                
+                server.ProcessFileRequest(request.Request.Path, request.Response);
                 return;
             }
         }
 
-        private void processFileRequest(string file, out string resourceType, out string resourcePath)
-        {
-            // validate path
-            if (!IsPathValid(file, true)) throw new FileNotFoundException("Path is invalid.");
-
-            // validate file type: only certain file types are accessible (!)
-            resourceType = Path.GetExtension(file).ToLower().Substring(1);
-            if (!_allowedFileExtensions.Contains(resourceType)) throw new FileNotFoundException("File type not known.");
-
-            // verify file presence
-            resourcePath = Path.Combine(_filesRootFolder, file);
-            if (!File.Exists(resourcePath)) throw new FileNotFoundException("File not found.");
-        }
-
-        private static string buildVersionInformation()
+        public static string BuildVersionInformation()
         {
             StringBuilder result = new StringBuilder();
 
@@ -162,6 +124,12 @@ namespace Vre.Server.RemoteService
 
             result.AppendFormat("\r\nVersion: {0}", Assembly.GetExecutingAssembly().GetName().Version);
             result.AppendFormat("\r\nBuild version stamp: {0}", VersionGen.VersionStamp);
+
+#if !DEBUG
+            if (VersionGen.IsAlpha)
+#endif
+            result.AppendFormat(" ALPHA {0:yyyyMMddHHmmss}",
+                File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location));
 
             return result.ToString();
         }

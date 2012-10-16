@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Net;
-using System.Text;
-using NHibernate;
 using Vre.Server.BusinessLogic;
 using Vre.Server.RemoteService;
 
@@ -12,10 +9,6 @@ namespace Vre.Server.HttpService
 {
     internal class HttpServiceRequest : IServiceRequest
     {
-        public static Dictionary<string, string> ContentTypeByExtension = new Dictionary<string, string>();
-        private static bool _allowExtendedLogging = false;
-        private static int _fileBufferSize = 16384;
-
         class RemoteUserInfo : IRemoteUserInfo
         {
             public RemoteUserInfo(IPEndPoint ep, NameValueCollection headers, ServiceQuery query)
@@ -98,7 +91,7 @@ namespace Vre.Server.HttpService
             }
         }
 
-        class ResponseData : IResponseData
+        public class ResponseData : IResponseData
         {
             public ResponseData(Stream httpResponseStream)
             {
@@ -108,6 +101,7 @@ namespace Vre.Server.HttpService
                 DataStream = httpResponseStream;
                 DataStreamContentType = null;
                 DataPhysicalLocation = null;
+                RedirectionUrl = null;
             }
             public HttpStatusCode ResponseCode { get; set; }
             public string ResponseCodeDescription { get; set; }
@@ -116,44 +110,37 @@ namespace Vre.Server.HttpService
             public Stream DataStream { get; private set; }
             public string DataPhysicalLocation { get; set; }
             public bool HoldResponseForServerPush { get; set; }
+            public string RedirectionUrl { get; set; }
         }
 
-        private static void initialize()
-        {
-            // http://www.iana.org/assignments/media-types/
+        //private static void initialize()
+        //{
+        //    // http://www.iana.org/assignments/media-types/
 
-            ContentTypeByExtension.Add("html", "text/html");
-            ContentTypeByExtension.Add("htm", "text/html");
-            ContentTypeByExtension.Add("txt", "text/plain");
-            ContentTypeByExtension.Add("xml", "text/xml");
-            ContentTypeByExtension.Add("css", "text/css");
+        //    ContentTypeByExtension.Add("html", "text/html");
+        //    ContentTypeByExtension.Add("htm", "text/html");
+        //    ContentTypeByExtension.Add("txt", "text/plain");
+        //    ContentTypeByExtension.Add("xml", "text/xml");
+        //    ContentTypeByExtension.Add("css", "text/css");
 
-            ContentTypeByExtension.Add("gif", "image/gif");
-            ContentTypeByExtension.Add("jpeg", "image/jpeg");
-            ContentTypeByExtension.Add("jpg", "image/jpeg");
-            ContentTypeByExtension.Add("png", "image/png");
+        //    ContentTypeByExtension.Add("gif", "image/gif");
+        //    ContentTypeByExtension.Add("jpeg", "image/jpeg");
+        //    ContentTypeByExtension.Add("jpg", "image/jpeg");
+        //    ContentTypeByExtension.Add("png", "image/png");
 
-            ContentTypeByExtension.Add("js", "application/javascript");
-            ContentTypeByExtension.Add("json", "application/json");
-            ContentTypeByExtension.Add("kml", "application/vnd.google-earth.kml+xml");
-            ContentTypeByExtension.Add("kmz", "application/vnd.google-earth.kmz");
+        //    ContentTypeByExtension.Add("js", "application/javascript");
+        //    ContentTypeByExtension.Add("json", "application/json");
+        //    ContentTypeByExtension.Add("kml", "application/vnd.google-earth.kml+xml");
+        //    ContentTypeByExtension.Add("kmz", "application/vnd.google-earth.kmz");
 
-            _allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
+        //    _allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
 
-            _fileBufferSize = ServiceInstances.Configuration.GetValue("FileStreamingBufferSize", 16384);
-        }
+        //    _fileBufferSize = ServiceInstances.Configuration.GetValue("FileStreamingBufferSize", 16384);
+        //}
 
         public IRemoteUserInfo UserInfo { get; private set; }
         public IRequestData Request { get; private set; }
         public IResponseData Response { get; private set; }
-
-        static HttpServiceRequest()
-        {
-            lock (ContentTypeByExtension)
-            {
-                initialize();
-            }
-        }
 
         public HttpServiceRequest(HttpListenerContext ctx, string servicePath)
         {
@@ -163,7 +150,7 @@ namespace Vre.Server.HttpService
             // TODO: verify this is acceptable:
             // ctx.Request.ContentType
 
-            ServiceQuery query = new ServiceQuery(ctx.Request.QueryString);
+            ServiceQuery query = new ServiceQuery(ctx.Request.Headers, ctx.Request.QueryString);
 
             string file = ctx.Request.Url.LocalPath;//.Replace("/", "");
             if (file.StartsWith(servicePath)) file = file.Remove(0, servicePath.Length);
@@ -180,121 +167,12 @@ namespace Vre.Server.HttpService
             {
                 ctx.Response.StatusCode = (int)HttpStatusCode.RequestTimeout;
                 ctx.Response.StatusDescription = "Session ID is invalid or dropped by timeout.";
-                if (_allowExtendedLogging)
-                    ServiceInstances.Logger.Error(string.Format(
-                        "HTTP request referred to unknows session ID from {0}.",
-                        ctx.Request.RemoteEndPoint));
-                else
-                    ServiceInstances.Logger.Error("HTTP request referred to unknows session ID.");
-            }
-        }
 
-        public void UpdateResponse(HttpListenerResponse response)
-        {
-            if (Response.DataStreamContentType != null)
-            {
-                string type = Response.DataStreamContentType;
-                if (!type.Contains("/"))  // result if a file extension rather a MIME type: convert it
-                {
-                    if (!ContentTypeByExtension.TryGetValue(type, out type))
-                        throw new InvalidDataException("Response type in not known.");
-                }
-                response.ContentType = type;
-            }
-
-            response.StatusCode = (int)Response.ResponseCode;
-            response.StatusDescription = Response.ResponseCodeDescription;
-
-            if (Response.Data != null)
-            {
-                //using (StreamWriter sw = new StreamWriter(response.OutputStream))
-                //    sw.Write(JavaScriptHelper.ClientDataToJson(Response.Data));
-
-                response.ContentEncoding = Encoding.UTF8;
-                response.ContentType = ContentTypeByExtension["json"];
-
-                byte[] resp = Encoding.UTF8.GetBytes(JavaScriptHelper.ClientDataToJson(Response.Data));
-                response.OutputStream.Write(resp, 0, resp.Length);
-            }
-            else if (Response.DataStream.Length > 0)
-            {
-                if (Response.DataStream.CanSeek) Response.DataStream.Seek(0, SeekOrigin.Begin);  // safeguard
-                Response.DataStream.CopyTo(response.OutputStream);
-            }
-            else if (Response.DataPhysicalLocation != null)
-            {
-                // stream file to response
-                byte[] buffer = new byte[_fileBufferSize];
-                using (Stream fs = File.Open(Response.DataPhysicalLocation, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                {
-                    int read;
-                    do
-                    {
-                        read = fs.Read(buffer, 0, _fileBufferSize);
-                        response.OutputStream.Write(buffer, 0, read);
-                    } while (read > 0);
-                }
-            }
-        }
-
-        public void UpdateResponse(HttpListenerResponse response, Exception e)
-        {
-            if (e is FileNotFoundException)
-            {
-                response.StatusCode = (int)HttpStatusCode.NotFound;
-                response.StatusDescription = "Content does not exist.";
-                ServiceInstances.Logger.Error("HTTP request for unknown entity: {0}", e.Message);
-            }
-            else if (e is PermissionException)
-            {
-                response.StatusCode = (int)HttpStatusCode.Forbidden;
-                response.StatusDescription = e.Message;// "Current user has no permission to view this object.";
-                ServiceInstances.Logger.Error("Attempt to retrieve object not granted: {0}", e.Message);
-            }
-            else if (e is InvalidOperationException)
-            {
-                response.StatusCode = (int)HttpStatusCode.PreconditionFailed;
-                response.StatusDescription = e.Message;
-                ServiceInstances.Logger.Error("Cannot perform operation: {0}", e.Message);
-            }
-            else if (e is StaleObjectStateException)
-            {
-                response.StatusCode = (int)HttpStatusCode.Conflict;
-                response.StatusDescription = e.Message;
-                ServiceInstances.Logger.Error("Stale object: {0}", e.Message);
-            }
-            else if (e is ArgumentException)
-            {
-                response.StatusCode = (int)HttpStatusCode.BadRequest;
-                response.StatusDescription = "Argument error.";
-                ServiceInstances.Logger.Error("{0}", e.Message);
-            }
-            else if (e is NotImplementedException)
-            {
-                response.StatusCode = (int)HttpStatusCode.NotImplemented;
-                response.StatusDescription = "Service not implemented.";
-                ServiceInstances.Logger.Error("Service not implemented: {0}", e.Message);
-            }
-            else if (e is InvalidDataException)
-            {
-                response.StatusCode = (int)HttpStatusCode.BadRequest;
-                response.StatusDescription = "The data passed to server is not valid.";
-                ServiceInstances.Logger.Error("Request processing fauled: {0}", e.Message);
-            }
-            else if (e is HttpListenerException)
-            {
-                ServiceInstances.Logger.Error("HTTP request processing failed: {0}", e.Message);
-                // no need to set status here as connection is no longer workable
-            }
-            else
-            {
-                //ctx.Response.Abort();
-                response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                response.StatusDescription = "Server error.";
-                if (e != null)
-                    ServiceInstances.Logger.Error("HTTP request processing failed: {0}", e);
-                else
-                    ServiceInstances.Logger.Error("HTTP request processing failed.");
+                ServiceInstances.Logger.Error(string.Format(
+                    "HTTP request referred to unknows session ID from {0}.",
+                    ctx.Request.RemoteEndPoint));
+                //else
+                //    ServiceInstances.Logger.Error("HTTP request referred to unknows session ID.");
             }
         }
     }

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using Vre.Server.BusinessLogic;
 using Vre.Server.Dao;
 
@@ -16,19 +17,21 @@ namespace Vre.Server.ModelCache
         private SHA512 _lastCrc;
         private SiteInfo _info;
 
-        public ModelCache(string filePath, ModelLevel level, int objectId)
+        public ModelCache(string filePath, ModelLevel level, bool isOverride, int objectId)
         {
-            _info = parseFile(filePath, objectId);
+            _info = parseFile(filePath, objectId, level);
             if (_info != null)
             {
                 _lastCrc = calcCrc(filePath);
                 FilePath = filePath;
                 UpdatedTime = File.GetLastWriteTimeUtc(filePath);
+                IsOverride = isOverride;
                 Level = level;
                 ObjectId = objectId;
             }
         }
 
+        public bool IsOverride { get; private set; }
         public bool IsValid { get { return _info != null; } }
         public string FilePath { get; private set; }
         public DateTime UpdatedTime { get; private set; }
@@ -42,7 +45,7 @@ namespace Vre.Server.ModelCache
 
             if (!newCrc.Equals(_lastCrc))
             {
-                SiteInfo si = parseFile(filePath, ObjectId);
+                SiteInfo si = parseFile(filePath, ObjectId, Level);
                 if (si != null)
                 {
                     _info = si;
@@ -59,6 +62,11 @@ namespace Vre.Server.ModelCache
             }
 
             return result;
+        }
+
+        public void MergeSuiteTypes(ModelCache merger)
+        {
+            _info.MergeSuiteClassInfos(merger._info);
         }
 
         public void UpdateBo(Site target, bool withSubObjects)
@@ -105,21 +113,17 @@ namespace Vre.Server.ModelCache
             return result;
         }
 
-        private static SiteInfo parseFile(string filePath, int objectId)
+        private static SiteInfo parseFile(string filePath, int objectId, ModelLevel level)
         {
             SiteInfo result = null;
 
             try
             {
-                VrEstate.Site siteData;
+                StringBuilder readWarnings = new StringBuilder();
 
-                using (VrEstate.Kmz kmz = VrEstate.Kmz.Open(filePath, System.IO.FileAccess.Read))
-                {
-                    VrEstate.Model.Setup(kmz.GetKmlDoc());
-                    siteData = new VrEstate.Site(kmz.GetColladaDoc());
-                }
+                Model.Kmz.Kmz kmz = new Model.Kmz.Kmz(filePath, readWarnings);
 
-                result = new SiteInfo(siteData, filePath, objectId);
+                result = new SiteInfo(kmz.Model.Site, filePath, objectId, (level == ModelLevel.Building));
                 // see ModelCacheManager.objectFromPath for extending here
             }
             catch (Exception ex)
@@ -136,7 +140,7 @@ namespace Vre.Server.ModelCache
             private Dictionary<int, BuildingInfo> _buildingInfo;
             private Dictionary<string, SuiteClassInfo> _classInfo;
 
-            public SiteInfo(VrEstate.Site modelInfo, string path, int objectId)
+            public SiteInfo(Model.Kmz.ConstructionSite modelInfo, string path, int objectId, bool singleBuilding)
             {
                 //Name = modelInfo.Name;
                 //string name = Path.GetFileName(path);
@@ -146,72 +150,120 @@ namespace Vre.Server.ModelCache
                 //if (pos > 0) name = name.Substring(0, pos - 1);
                 //Name = name.Trim();
 
-                _location = new GeoPoint(modelInfo.Lon_d, modelInfo.Lat_d, modelInfo.Alt_m);
+                Model.Kmz.ViewPoint vp = modelInfo.LocationCart.AsViewPoint();
+                _location = new GeoPoint(vp.Longitude, vp.Latitude, vp.Altitude);
                 //modelInfo.DirName  // null
                 //modelInfo.ID  // nine-digit-int
 
-                _buildingInfo = new Dictionary<int, BuildingInfo>(modelInfo.Buildings.Values.Count);
+                _buildingInfo = new Dictionary<int, BuildingInfo>(modelInfo.Buildings.Count());
                 _classInfo = new Dictionary<string, SuiteClassInfo>();
-
-                foreach (string className in modelInfo.Geometries.Keys)
-                {
-                    SuiteClassInfo sc = new SuiteClassInfo(processGeometries(modelInfo.Geometries[className]));
-                    _classInfo.Add(className, sc);
-                }
 
                 using (NHibernate.ISession dbSession = NHibernateHelper.GetSession())
                 {
-                    // find related DB site object by passed ID (from model's file path)
-                    //
-                    Site site;
-                    using (SiteDao dao = new SiteDao(dbSession)) site = dao.GetById(objectId);
-                    if (null == site)
+                    if (singleBuilding)
                     {
-                        ServiceInstances.Logger.Error("Unknown site ID used in model path: {0}", objectId);
-                        throw new ArgumentException("Unknown site ID");
-                    }
-
-                    foreach (VrEstate.Building buildingModelInfo in modelInfo.Buildings.Values)
-                    {
-                        // find related DB building object by name from model
-                        //
-                        Building building = null;
-                        // TODO: MODEL-DB TEXT COMPARISON
-                        // Here we match model's building name against its name in DB
-                        foreach (Building b in site.Buildings) if (b.Name.Equals(buildingModelInfo.Name)) { building = b; break; }
+                        Building building;
+                        using (BuildingDao dao = new BuildingDao(dbSession)) building = dao.GetById(objectId);
                         if (null == building)
                         {
-                            ServiceInstances.Logger.Error("Unknown building name used in model for {0} ({1}): {2}; building from model is skipped.",
-                                site.Name, site.AutoID, buildingModelInfo.Name);
-                            continue;
+                            ServiceInstances.Logger.Error("Unknown building ID used in model path: {0}", objectId);
+                            throw new ArgumentException("Unknown building ID");
                         }
 
-                        if (_buildingInfo.ContainsKey(building.AutoID))
+                        // find related model building object by name from DB
+                        //
+                        Model.Kmz.Building buildingModelInfo = null;
+                        // TODO: MODEL-DB TEXT COMPARISON
+                        // Here we match model's building name against its name in DB
+                        foreach (Model.Kmz.Building b in modelInfo.Buildings)
+                            if (b.Name.Equals(building.Name)) { buildingModelInfo = b; break; }
+                        if (null == buildingModelInfo)
                         {
-                            ServiceInstances.Logger.Error("Model ({0} ({1})) contains duplicate building names: '{2}'; second occurrence is skipped.",
-                                site.Name, site.AutoID, buildingModelInfo.Name);
-                            continue;
+                            ServiceInstances.Logger.Error("Unknown building name; model {0} does not have {1}; building not imported.",
+                                path, building.Name);
+                            return;
                         }
 
                         BuildingInfo bi = new BuildingInfo(buildingModelInfo);
                         _buildingInfo.Add(building.AutoID, bi);
+
+                        foreach (string className in modelInfo.Geometries.Keys)
+                        {
+                            SuiteClassInfo sc = new SuiteClassInfo(processGeometries(modelInfo.Geometries[className]));
+                            string cn = className;
+                            if (!cn.Contains('/')) cn = buildingModelInfo.Name + '/' + className;
+                            _classInfo.Add(cn, sc);
+                        }
                     }
+                    else  // full site processing (!singleBuilding)
+                    {
+                        // find related DB site object by passed ID (from model's file path)
+                        //
+                        Site site;
+                        using (SiteDao dao = new SiteDao(dbSession)) site = dao.GetById(objectId);
+                        if (null == site)
+                        {
+                            ServiceInstances.Logger.Error("Unknown site ID used in model path: {0}", objectId);
+                            throw new ArgumentException("Unknown site ID");
+                        }
+
+                        foreach (Model.Kmz.Building buildingModelInfo in modelInfo.Buildings)
+                        {
+                            // find related DB building object by name from model
+                            //
+                            Building building = null;
+                            // TODO: MODEL-DB TEXT COMPARISON
+                            // Here we match model's building name against its name in DB
+                            foreach (Building b in site.Buildings) if (b.Name.Equals(buildingModelInfo.Name)) { building = b; break; }
+                            if (null == building)
+                            {
+                                ServiceInstances.Logger.Error("Unknown building name used in model for {0} ({1}): {2}; building from model is skipped.",
+                                    site.Name, site.AutoID, buildingModelInfo.Name);
+                                continue;
+                            }
+
+                            if (_buildingInfo.ContainsKey(building.AutoID))
+                            {
+                                ServiceInstances.Logger.Error("Model ({0} ({1})) contains duplicate building names: '{2}'; second occurrence is skipped.",
+                                    site.Name, site.AutoID, buildingModelInfo.Name);
+                                continue;
+                            }
+
+                            BuildingInfo bi = new BuildingInfo(buildingModelInfo);
+                            _buildingInfo.Add(building.AutoID, bi);
+                        }
+
+                        foreach (string className in modelInfo.Geometries.Keys)
+                        {
+                            SuiteClassInfo sc = new SuiteClassInfo(processGeometries(modelInfo.Geometries[className]));
+                            _classInfo.Add(className, sc);
+                        }
+                    }  // site-level import
                 }
             }
 
-            private static Wireframe[] processGeometries(VrEstate.Geometry[] geometries)
+            public void MergeSuiteClassInfos(SiteInfo merger)
+            {
+                foreach (KeyValuePair<string, SuiteClassInfo> kvp in merger._classInfo)
+                {
+                    if (_classInfo.ContainsKey(kvp.Key)) _classInfo[kvp.Key] = kvp.Value;
+                    else _classInfo.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            private static Wireframe[] processGeometries(Model.Kmz.Geometry[] geometries)
             {
                 int idx = 0;
                 Wireframe[] result = new Wireframe[geometries.Length];
 
-                foreach (VrEstate.Geometry geom in geometries)
+                foreach (Model.Kmz.Geometry geom in geometries)
                 {
-                    List<Wireframe.Point3D> points = new List<Wireframe.Point3D>(geom.Points.Length);
-                    foreach (VrEstate.Geometry.Point3 pt in geom.Points)
+                    List<Wireframe.Point3D> points = new List<Wireframe.Point3D>(geom.Points.Count());
+                    foreach (Model.Kmz.Geometry.Point3D pt in geom.Points)
                         points.Add(new Wireframe.Point3D(pt.X, pt.Y, pt.Z));
 
-                    List<Wireframe.Segment> segments = new List<Wireframe.Segment>(geom.Lines.Count);
-                    foreach (VrEstate.Geometry.Line ln in geom.Lines)
+                    List<Wireframe.Segment> segments = new List<Wireframe.Segment>(geom.Lines.Count());
+                    foreach (Model.Kmz.Geometry.Line ln in geom.Lines)
                         segments.Add(new Wireframe.Segment(ln.Start, ln.End));
 
                     result[idx++] = new Wireframe(points, segments);
@@ -278,18 +330,21 @@ namespace Vre.Server.ModelCache
             private double _maxSuiteAlt;
             private Dictionary<string, SuiteInfo> _suiteInfo;
 
-            public BuildingInfo(VrEstate.Building modelInfo)
+            public BuildingInfo(Model.Kmz.Building modelInfo)
             {
                 //Name = modelInfo.Name;
-                _location = new GeoPoint(modelInfo.LonModel_d, modelInfo.LatModel_d, modelInfo.AltModel_m);
-                _center = new GeoPoint(modelInfo.Lon_d, modelInfo.Lat_d, modelInfo.Alt_m);
-                _maxSuiteAlt = modelInfo.MaxAlt_m;
+                Model.Kmz.ViewPoint vp = modelInfo.LocationCart.AsViewPoint();
+                _location = new GeoPoint(vp.Longitude, vp.Latitude, vp.Altitude);
+                _maxSuiteAlt = 0.0;
                 //modelInfo.BuildingId  // "ID<five-digit-int>"
                 //modelInfo.ID          // nine-digit-int
                 //modelInfo.MaxAlt_m
 
-                _suiteInfo = new Dictionary<string, SuiteInfo>(modelInfo.Suites.Values.Count);
-                foreach (VrEstate.Suite suiteModelInfo in modelInfo.Suites.Values)
+                double mLon = 0.0, mLat = 0.0, mAlt = 0.0;
+                int suiteCnt = 0;
+
+                _suiteInfo = new Dictionary<string, SuiteInfo>(modelInfo.Suites.Count());
+                foreach (Model.Kmz.Suite suiteModelInfo in modelInfo.Suites)
                 {
                     SuiteInfo si = new SuiteInfo(suiteModelInfo);
 
@@ -300,7 +355,18 @@ namespace Vre.Server.ModelCache
                     }
 
                     _suiteInfo.Add(si.Name, si);
+
+                    vp = suiteModelInfo.LocationCart.AsViewPoint();
+                    mLon += vp.Longitude;
+                    mLat += vp.Latitude;
+                    mAlt += vp.Altitude;
+                    if (_maxSuiteAlt < vp.Altitude) _maxSuiteAlt = vp.Altitude;
+                    suiteCnt++;
                 }
+                _center = new GeoPoint(
+                    mLon / (double)suiteCnt,
+                    mLat / (double)suiteCnt,
+                    mAlt / (double)suiteCnt);
             }
 
             public void UpdateBo(Building target, bool withSubObjects)
@@ -348,14 +414,20 @@ namespace Vre.Server.ModelCache
             private double _ceilingHeightFt;
             private string _floor;
 
-            public SuiteInfo(VrEstate.Suite modelInfo)
+            public SuiteInfo(Model.Kmz.Suite modelInfo)
             {
                 Name = modelInfo.Name;
 
-                _classId = modelInfo.ClassId;
-                _ceilingHeightFt = modelInfo.CellingHeight;
-                _location = new ViewPoint(modelInfo.Lon_d, modelInfo.Lat_d, modelInfo.Alt_m, modelInfo.Heading_d);
-                _floor = modelInfo.FloorNumber;
+                _classId = modelInfo.ClassName;
+                _ceilingHeightFt = modelInfo.CeilingHeightFt;
+                Model.Kmz.ViewPoint vp = modelInfo.LocationGeo;// modelInfo.LocationCart.AsViewPoint();
+
+                // Client's heading issue patch
+                //vp.Heading += 90.0;
+                //if (vp.Heading >= 180.0) vp.Heading -= 360.0;
+
+                _location = new ViewPoint(vp.Longitude, vp.Latitude, vp.Altitude, vp.Heading);
+                _floor = modelInfo.Floor;
 
                 //modelInfo.Id;  // "ID<five-digit-int>"
             }
@@ -366,7 +438,7 @@ namespace Vre.Server.ModelCache
                 ////target.SuiteType
                 target.FloorName = _floor;
                 target.Location = _location;
-                target.ClassName = _classId;
+                //target.ClassName = _classId;
             }
         }
 

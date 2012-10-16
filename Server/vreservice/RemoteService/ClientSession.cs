@@ -282,7 +282,7 @@ namespace Vre.Server.RemoteService
         {
             lock (this)
             {
-                Disconnect();
+                try { Disconnect(); } catch (NHibernate.HibernateException) {}  // SHOULD NOT OCCUR!!!
                 if (DbSession != null)
                 {
                     //try { DbSession.Flush(); }
