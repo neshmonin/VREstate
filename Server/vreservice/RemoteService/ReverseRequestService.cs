@@ -399,6 +399,12 @@ namespace Vre.Server.RemoteService
                     //
                     user = new User(null, User.Role.SellingAgent);
                     user.PrimaryEmailAddress = dbRequest.Login;
+                    {
+                        // TEMP? Use e-mail as a nickname
+                        int pos = dbRequest.Login.IndexOf('@');
+                        if (pos < 0) pos = dbRequest.Login.Length;
+                        user.NickName = dbRequest.Login.Substring(0, pos);
+                    }
                     user.PersonalInfo = null;  // TODO
                     //user.BrokerInfo = null;   // TODO
                     user.LastLogin = NHibernateHelper.DateTimeMinValue;
@@ -569,57 +575,78 @@ namespace Vre.Server.RemoteService
         #endregion
 
         #region Listing
-        public static void CreateListing(IServiceRequest srq, string paymentRefId,
+        public static string CreateListing(IServiceRequest srq, int targetUserId,
             Listing.ListingType product, string mlsId, 
             Listing.SubjectType type, int targetObjectId, string productUrl, DateTime expiresOn)
         {
             if (!_configured) configure();
 
-            RolePermissionCheck.CheckCreateListing(srq.UserInfo.Session);
-
+            string result = null;
+            User targetUser;
             Listing listing;
-            string rn = Utilities.GenerateReferenceNumber();
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(srq.UserInfo.Session.DbSession))
             {
-                //ReverseRequest request;
+                using (UserDao dao = new UserDao(srq.UserInfo.Session.DbSession))
+                    targetUser = dao.GetById(targetUserId);
+
+                if (null == targetUser) targetUser = srq.UserInfo.Session.User;  // if unknown/not specified - make a listing for caller
+
+                RolePermissionCheck.CheckCreateListing(srq.UserInfo.Session, targetUser);
 
                 using (ListingDao dao = new ListingDao(srq.UserInfo.Session.DbSession))
-                    listing = dao.Get(srq.UserInfo.Session.User.AutoID, type, targetObjectId);
+                    listing = dao.Get(targetUser.AutoID, type, targetObjectId);
 
                 if (null == listing)
                 {
-                    //request = ReverseRequest.CreateListing(srq.UserInfo.Session.User.AutoID, expiresOn);
-                    listing = new Listing(srq.UserInfo.Session.User.AutoID, paymentRefId,
+                    listing = new Listing(targetUser.AutoID, 
                         product, mlsId, type, targetObjectId, productUrl, expiresOn);
-
-                    //using (ReverseRequestDao dao = new ReverseRequestDao(srq.UserInfo.Session.DbSession))
-                    //    dao.Create(request);
 
                     using (ListingDao dao = new ListingDao(srq.UserInfo.Session.DbSession))
                         dao.Create(listing);
+
+                    // Generate financial transaction
+                    //
+                    FinancialTransaction ft = new FinancialTransaction(srq.UserInfo.Session.User.AutoID,
+                        FinancialTransaction.AccountType.User, targetUser.AutoID,
+                        FinancialTransaction.OperationType.Debit, 0m,
+                        FinancialTransaction.TranSubject.View,
+                        FinancialTransaction.TranTarget.Suite, targetObjectId, listing.AutoID.ToString());
+
+                    using (FinancialTransactionDao dao = new FinancialTransactionDao(srq.UserInfo.Session.DbSession))
+                    {
+                        dao.Create(ft);
+                        ft.SetSystemReferenceId(Utilities.FinancialTransactionRefNum(ft));
+                        dao.Update(ft);
+                    }
+
+                    result = ft.SystemRefId;
                 }
                 else
                 {
-                    listing.Update(paymentRefId, product, mlsId, productUrl, expiresOn);
+                    listing.Update(product, mlsId, productUrl, expiresOn);
 
                     using (ListingDao dao = new ListingDao(srq.UserInfo.Session.DbSession))
                         dao.Update(listing);
+
+                    result = Utilities.GenerateReferenceNumber();
                 }
 
                 srq.Response.ResponseCode = HttpStatusCode.OK;
                 srq.Response.Data = new ClientData();
                 srq.Response.Data.Add("listing-url", string.Format(_listingUrlTemplate, listing.AutoID.ToString("N")));
-                // TODO: generate response
+                // TODO: generate button into listing response
                 //srq.Response.Data.Add("button-url", string.Format(_listingUrlTemplate, request.Id.ToString("N")));
-                srq.Response.Data.Add("ref", rn);
+                srq.Response.Data.Add("ref", result);
 
                 tran.Commit();
             }
 
             ServiceInstances.Logger.Info(
-                "User {0} created a listing ({1}) for {2} id={3}, reference URL={4}, expires on {5}, RID={6}, RN={7}",
-                srq.UserInfo.Session.User, product, type, targetObjectId, productUrl, expiresOn, listing.AutoID, rn);
+                "User {0} created a listing for user {1}: ({2}) for {3} id={4}, reference URL={5}, expires on {6}, RID={7}, STRN={8}",
+                srq.UserInfo.Session.User, targetUser, product, type, targetObjectId, productUrl, expiresOn, listing.AutoID, result);
+
+            return result;
         }
 
         //public static void DecodeListing(ClientSession session, string listingId,

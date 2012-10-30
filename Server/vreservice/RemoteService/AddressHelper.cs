@@ -114,7 +114,7 @@ namespace Vre.Server.RemoteService
                 freetextAddress.Append("*");
             }
 
-            if (!string.IsNullOrWhiteSpace(suite)) suite = suite.Trim().ToUpperInvariant();
+            if (!string.IsNullOrWhiteSpace(suite)) suite = Utilities.NormalizeSuiteNumber(suite);
             else suite = null;
 
             IList<Building> searchResult;

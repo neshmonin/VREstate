@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Net;
 using NHibernate;
 using Vre.Server.BusinessLogic;
+using Vre.Server.HttpService;
 
 namespace Vre.Server.RemoteService
 {
@@ -193,11 +194,7 @@ namespace Vre.Server.RemoteService
             string siteId = request.Request.Query["site"];
             DateTime limit;
 
-            if (!DateTime.TryParseExact(request.Request.Query["endtime"], "yyyy-MM-ddTHH:mm:ss",
-                CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out limit))
-            {
-                throw new ArgumentException("The time specified is not valid");
-            }
+            limit = HttpServiceBase.ParseDateTimeParam(request.Request.Query["endtime"], null);
 
             using (UserManager um = new UserManager(request.UserInfo.Session))
             {
@@ -274,9 +271,9 @@ namespace Vre.Server.RemoteService
 
             if (string.IsNullOrWhiteSpace(entity)) throw new ArgumentException("entity not defined");
 
-            if (entity.Equals("building"))
+            if (entity.Equals("address"))
             {
-                checkBuilding(request);
+                checkAddress(request);
             }
             else
             {
@@ -291,13 +288,23 @@ namespace Vre.Server.RemoteService
             string paymentRefId = request.Request.Query["pr"];
             string productUrl = request.Request.Query["evt_url"];
             string mslId = request.Request.Query["msl_id"];
+            string propertyType = request.Request.Query["propertyType"];
+            string propertyId = request.Request.Query["propertyId"];
+            string ownerId = request.Request.Query["ownerId"];
             int suiteId;
 
-            if (!DateTime.TryParseExact(request.Request.Query["expires"], "yyyy-MM-ddTHH:mm:ss",
-                CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out expiresOn))
             {
-                throw new ArgumentException("The time specified is not valid");
+                string dv = request.Request.Query["daysValid"];
+                if (string.IsNullOrWhiteSpace(dv)) throw new ArgumentException("Missing validation period");
+                int idv;
+                if (!int.TryParse(dv, out idv)) throw new ArgumentException("Validation period value is invalid");
+                expiresOn = DateTime.Now.AddDays(idv).ToLocalTime().Date;
             }
+            //if (!DateTime.TryParseExact(request.Request.Query["expires"], "yyyy-MM-ddTHH:mm:ss",
+            //    CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out expiresOn))
+            //{
+            //    throw new ArgumentException("The time specified is not valid");
+            //}
 
             string pt = request.Request.Query["product"];
             if (string.IsNullOrWhiteSpace(pt)) throw new ArgumentException("Product type missing");
@@ -308,36 +315,58 @@ namespace Vre.Server.RemoteService
 
             if (string.IsNullOrWhiteSpace(paymentRefId)) throw new ArgumentException("Required parameter missing");
 
-            if ((product == Listing.ListingType.ExternalTour) && string.IsNullOrWhiteSpace(productUrl)) 
+            if ((product == Listing.ListingType.ExternalTour) && string.IsNullOrWhiteSpace(productUrl))
                 throw new ArgumentException("External Virtual Tour reference not provided");
 
             if (string.IsNullOrWhiteSpace(mslId))
             {
-                List<UpdateableBase> to = AddressHelper.ParseGeographicalAddressToModel(request.Request.Query, request.UserInfo.Session.DbSession);
+                if (string.IsNullOrWhiteSpace(propertyType) || string.IsNullOrWhiteSpace(propertyId))
+                {
+                    // view by address lookup
+                    //
+                    List<UpdateableBase> to = AddressHelper.ParseGeographicalAddressToModel(request.Request.Query, request.UserInfo.Session.DbSession);
 
-                // Only unique result is possible here
-                if ((null == to) || (to.Count < 1)) throw new ArgumentException("Address not found");
-                if (to.Count > 1) throw new ArgumentException("Address: non-unique result returned; please add details");
+                    // Only unique result is possible here
+                    if ((null == to) || (to.Count < 1)) throw new ArgumentException("Address not found");
+                    if (to.Count > 1) throw new ArgumentException("Address: non-unique result returned; please add details");
 
-                // Only suite is currently supported
-                Suite s = to[0] as Suite;
-                if (null == s) throw new NotImplementedException();
-                
-                suiteId = s.AutoID;
+                    // Only suite is currently supported
+                    Suite s = to[0] as Suite;
+                    if (null == s) throw new NotImplementedException();
+
+                    suiteId = s.AutoID;
+                }
+                else
+                {
+                    // view by property ID
+                    //
+                    if (!propertyType.Equals("suite")) throw new ArgumentException("Unknown property type");
+                    if (!int.TryParse(propertyId, out suiteId)) throw new ArgumentException("Property ID is not valid");
+
+                    // TODO: Verify that property ID exists?
+                }
             }
             else
             {
                 // TODO: Test against MLS DB
+                //
                 throw new NotImplementedException();
             }
 
-            ReverseRequestService.CreateListing(request,
-                paymentRefId, product, mslId, Listing.SubjectType.Suite, suiteId, productUrl, expiresOn);
+            // use override for listing owner
+            int userId = -1;
+            if (!string.IsNullOrWhiteSpace(ownerId))
+            {
+                if (!int.TryParse(ownerId, out userId)) userId = -1;
+            }
+
+            string listingId = ReverseRequestService.CreateListing(request, userId,
+                /*paymentRefId,*/ product, mslId, Listing.SubjectType.Suite, suiteId, productUrl, expiresOn);
 
             // request.Response.ResponseCode - set by .CreateListing()
         }
 
-        private static void checkBuilding(IServiceRequest request)
+        private static void checkAddress(IServiceRequest request)
         {
             List<UpdateableBase> to = AddressHelper.ParseGeographicalAddressToModel(request.Request.Query, request.UserInfo.Session.DbSession);
             ClientData result = new ClientData();
@@ -363,6 +392,8 @@ namespace Vre.Server.RemoteService
 
                 result.Add("normalizedAddress", parsed);
                 result.Add("readableAddress", readable);
+                result.Add("propertyType", "suite");
+                result.Add("propertyId", s.AutoID);
             }
 
             request.Response.Data = result;
@@ -371,7 +402,7 @@ namespace Vre.Server.RemoteService
 
         private static void registerUser(IServiceRequest request)
         {
-            string login = request.Request.Query["login"];
+            string login = request.Request.Query["email"];
             ReverseRequestService.InitiateUserRegistration(request.Request, request.UserInfo.Session, login);
             request.Response.ResponseCode = HttpStatusCode.OK;
         }

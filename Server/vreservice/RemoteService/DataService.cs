@@ -18,7 +18,7 @@ namespace Vre.Server.RemoteService
         public const string ServicePathPrefix = ServicePathElement0 + "/";
         private const string ServicePathElement0 = "data";
 
-        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, Listing }
+        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, Listing, View, FinancialTransaction }
 
         private static void configure()
         {
@@ -77,9 +77,7 @@ namespace Vre.Server.RemoteService
                 case ModelObject.Building:
                     if (-1 == objectId)
                     {
-                        int siteId = request.Request.Query.GetParam("site", -1);
-                        if (-1 == siteId) throw new ArgumentException("Site ID is missing.");
-                        getBuildingList(request.UserInfo.Session, siteId, request.Response, generation, includeDeleted);
+                        getBuildingList(request.UserInfo.Session, request.Request.Query, request.Response, generation, includeDeleted);
                     }
                     else
                     {
@@ -136,8 +134,29 @@ namespace Vre.Server.RemoteService
                     return;
 
                 case ModelObject.Listing:
-                    if (null == strObjectId) throw new ArgumentException("Object ID missing.");
-                    getListing(request.UserInfo.Session, strObjectId, request.Response);
+                    if (-1 == objectId)
+                    {
+                        getListingList(request.UserInfo.Session, request.Request.Query, request.Response, includeDeleted);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+                    return;
+
+                case ModelObject.View:
+                    getView(request.UserInfo.Session, request.Request.Query, request.Response);
+                    return;
+
+                case ModelObject.FinancialTransaction:
+                    if (-1 == objectId)
+                    {
+                        getFinancialTransactionList(request.UserInfo.Session, request.Request.Query, request.Response);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
                     return;
             }
 
@@ -168,6 +187,10 @@ namespace Vre.Server.RemoteService
                 case ModelObject.User:
                     updateUser(request.UserInfo.Session, objectId, request.Request.Data, request.Response);
                     return;
+
+                case ModelObject.Listing:
+                    updateListing(request.UserInfo.Session, strObjectId, request.Request.Data, request.Response);
+                    return;
             }
 
             throw new NotImplementedException();
@@ -192,6 +215,10 @@ namespace Vre.Server.RemoteService
                 case ModelObject.User:
                     createUser(request.UserInfo.Session, request.Request.Data, request.Response);
                     return;
+
+                case ModelObject.Listing:
+                    createListing(request.UserInfo.Session, request.Request.Data, request.Response);
+                    return;
             }
 
             throw new NotImplementedException();
@@ -215,6 +242,10 @@ namespace Vre.Server.RemoteService
                 case ModelObject.User:
                     deleteUser(request.UserInfo.Session, objectId, request.Response);
                     return;
+
+                case ModelObject.Listing:
+                    deleteListing(request.UserInfo.Session, strObjectId, request.Response);
+                    return;
             }
 
             throw new NotImplementedException();
@@ -234,6 +265,8 @@ namespace Vre.Server.RemoteService
             else if (elements[1].Equals("user")) mo = ModelObject.User;
             else if (elements[1].Equals("suitetype")) mo = ModelObject.SuiteType;
             else if (elements[1].Equals("listing")) mo = ModelObject.Listing;
+            else if (elements[1].Equals("view")) mo = ModelObject.View;
+            else if (elements[1].Equals("ft")) mo = ModelObject.FinancialTransaction;
             else throw new ArgumentException("Object path is invalid (2).");
 
             strId = null;
@@ -329,42 +362,63 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getBuildingList(ClientSession session, int siteId, IResponseData resp, 
+        private static void getBuildingList(ClientSession session, ServiceQuery query, IResponseData resp, 
             long generation, bool includeDeleted)
         {
+            List<Building> toReturn = null;
             ClientData[] result = null;
+            long resGeneration = -1;
 
-            Spikes.PullUpdateService.UpdateInfo updateInfo =
-                ServiceInstances.UpdateService.GetUpdate(Spikes.PullUpdateService.EntityLevel.Site, siteId, generation);
+            string scopeType = query.GetParam("scopeType", "site");
 
-            using (SiteManager manager = new SiteManager(session))
+            if (scopeType.Equals("address"))
             {
-                Building[] buildingList = manager.ListBuildings(siteId, includeDeleted);
-
-                if (0 == generation)  // full request
+                toReturn = new List<Building>();
+                foreach (UpdateableBase u in AddressHelper.ParseGeographicalAddressToModel(query, session.DbSession))
                 {
-                    int cnt = buildingList.Length;
-                    result = new ClientData[cnt];
-                    for (int idx = 0; idx < cnt; idx++)
-                    {
-                        Building b = buildingList[idx];
-                        ServiceInstances.ModelCache.FillWithModelInfo(b, false);
-                        result[idx] = b.GetClientData();
-                    }
+                    Building b = u as Building;
+                    if (b != null) toReturn.Add(b);
                 }
-                else if (updateInfo.Buildings != null)  // changed item list
+            }
+            else if (scopeType.Equals("site"))
+            {
+                int siteId = query.GetParam("site", -1);
+                if (-1 == siteId) throw new ArgumentException("Site ID is missing.");
+
+                Spikes.PullUpdateService.UpdateInfo updateInfo =
+                    ServiceInstances.UpdateService.GetUpdate(Spikes.PullUpdateService.EntityLevel.Site, siteId, generation);
+
+                using (SiteManager manager = new SiteManager(session))
                 {
-                    int cnt = updateInfo.Buildings.Count;
-                    List<ClientData> buildingDataList = new List<ClientData>(cnt);
-                    foreach (Building b in buildingList)
+                    Building[] buildingList = manager.ListBuildings(siteId, includeDeleted);
+
+                    if (0 == generation)  // full request
                     {
-                        if (updateInfo.Buildings.Contains(b.AutoID))
+                        toReturn = new List<Building>(buildingList);
+                    }
+                    else if (updateInfo.Buildings != null)  // changed item list
+                    {
+                        toReturn = new List<Building>(updateInfo.Buildings.Count);
+                        foreach (Building b in buildingList)
                         {
-                            ServiceInstances.ModelCache.FillWithModelInfo(b, false);
-                            buildingDataList.Add(b.GetClientData());
+                            if (updateInfo.Buildings.Contains(b.AutoID)) toReturn.Add(b);
                         }
                     }
-                    result = buildingDataList.ToArray();
+                }
+
+                resGeneration = updateInfo.Generation;
+            }
+            else throw new NotImplementedException("Unknown scope type");
+
+            if (toReturn != null)
+            {
+                int cnt = toReturn.Count;
+                result = new ClientData[cnt];
+                for (int idx = 0; idx < cnt; idx++)
+                {
+                    Building b = toReturn[idx];
+                    ServiceInstances.ModelCache.FillWithModelInfo(b, false);
+                    result[idx] = b.GetClientData();
                 }
             }
 
@@ -372,7 +426,7 @@ namespace Vre.Server.RemoteService
             //
             resp.Data = new ClientData();
             if (result != null) resp.Data.Add("buildings", result);
-            resp.Data.Add("generation", updateInfo.Generation);
+            if (resGeneration >= 0) resp.Data.Add("generation", resGeneration);
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
@@ -620,23 +674,97 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getListing(ClientSession session, string listingId, IResponseData resp)
+        private static void getFinancialTransactionList(ClientSession session, ServiceQuery query, IResponseData resp)
         {
-            //UpdateableBase targetObject;
-            //Listing.ListingType type;
-            //string url;
+            ClientData[] result;
 
-            //ReverseRequestService.DecodeListing(session, listingId, out targetObject, out type, out url);
+            int userId = query.GetParam("userId", -1);
+            User user;
+            FinancialTransaction[] list;
+
+            // TODO: implement paging
+            query.GetParam("pgStartIdx", -1);
+            query.GetParam("pgMaxCount", -1);
+
+            using (UserDao dao = new UserDao(session.DbSession))
+                user = dao.GetById(userId);
+
+            if (null == user) throw new FileNotFoundException("User does not exist");
+
+            RolePermissionCheck.CheckUserAccess(session, user, RolePermissionCheck.UserInfoAccessLevel.Transactional);
+
+            using (FinancialTransactionDao dao = new FinancialTransactionDao(session.DbSession))
+                list = dao.Get(FinancialTransaction.AccountType.User, userId);
+
+            // produce output
+            //
+            int cnt = list.Length;
+            result = new ClientData[cnt];
+            for (int idx = 0; idx < cnt; idx++)
+                result[idx] = list[idx].GetClientData();
+
+            resp.Data = new ClientData();
+            resp.Data.Add("transactions", result);
+            resp.Data.Add("totalCount", result.Count());
+            resp.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private static void getListingList(ClientSession session, ServiceQuery query, IResponseData resp, bool includeDeleted)
+        {
+            ClientData[] result;
+
+            int userId = query.GetParam("userId", -1);
+            User user;
+            Listing[] list;
+
+            using (UserDao dao = new UserDao(session.DbSession))
+                user = dao.GetById(userId);
+
+            if (null == user) throw new FileNotFoundException("User does not exist");
+
+            RolePermissionCheck.CheckUserAccess(session, user, RolePermissionCheck.UserInfoAccessLevel.Transactional);
+
+            using (ListingDao dao = new ListingDao(session.DbSession))
+                list = dao.Get(userId, includeDeleted);
+
+            // produce output
+            //
+            int cnt = list.Length;
+            result = new ClientData[cnt];
+            for (int idx = 0; idx < cnt; idx++)
+                result[idx] = list[idx].GetClientData();
+
+            resp.Data = new ClientData();
+            resp.Data.Add("listings", result);
+            resp.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private static void getView(ClientSession session, ServiceQuery query, IResponseData resp)
+        {
+            string type = query.GetParam("type", "listing");
+
+            if (type.Equals("listing")) getViewListing(session, query, resp);
+            else if (type.Equals("site")) getViewSite(session, query, resp);
+            else if (type.Equals("building")) throw new NotImplementedException();
+            else if (type.Equals("suite")) throw new NotImplementedException();
+            else if (type.Equals("geo")) throw new NotImplementedException();
+            else throw new NotImplementedException();
+        }
+
+        private static void getViewListing(ClientSession session, ServiceQuery query, IResponseData resp)
+        {
+            string strObjectId = query["id"];
+            if (null == strObjectId) throw new ArgumentException("Object ID missing.");
 
             Guid rqid;
-            if (!Guid.TryParseExact(listingId, "N", out rqid))
+            if (!Guid.TryParseExact(strObjectId, "N", out rqid))
                 throw new ArgumentException();
 
             Listing listing;
             using (ListingDao dao = new ListingDao(session.DbSession))
                 listing = dao.GetById(rqid);
 
-            if ((null == listing) || (listing.ExpiresOn < DateTime.UtcNow)) throw new FileNotFoundException("Undefined or expired listing");
+            if ((null == listing) || !listing.Enabled || (listing.ExpiresOn < DateTime.UtcNow)) throw new FileNotFoundException("Undefined or expired listing");
 
             listing.Touch();
             using (ListingDao dao = new ListingDao(session.DbSession))
@@ -648,39 +776,101 @@ namespace Vre.Server.RemoteService
 
             if (null == suite) throw new FileNotFoundException("Unknown object listed");
 
+            generateViewResponse(
+                new Site[] { suite.Building.ConstructionSite },
+                new Building[] { suite.Building },
+                new SuiteType[] { suite.SuiteType },
+                new Suite[] { suite },
+                new Listing[] { listing },
+                listing.AutoID,
+                resp);
+        }
+
+        private static void getViewSite(ClientSession session, ServiceQuery query, IResponseData resp)
+        {
+            int objectId = query.GetParam("id", -1);
+            if (objectId < 0) throw new ArgumentException("Object ID missing.");
+
+            Site site;
+            using (SiteDao dao = new SiteDao(session.DbSession))
+                site = dao.GetById(objectId);
+
+            if (null == site) throw new FileNotFoundException("Unknown site");
+
+            List<Suite> suites = new List<Suite>();
+            foreach (Building b in site.Buildings) suites.AddRange(b.Suites);
+
+            generateViewResponse(
+                new Site[] { site },
+                site.Buildings.ToArray(),  
+                site.SuiteTypes.ToArray(),
+                suites.ToArray(),
+                new Listing[0],
+                Guid.Empty,
+                resp);
+        }
+
+        private static void generateViewResponse(
+            IEnumerable<Site> sites, IEnumerable<Building> buildings, 
+            IEnumerable<SuiteType> suiteTypes, IEnumerable<Suite> suites,
+            IEnumerable<Listing> listings,
+            Guid primaryListingId,
+            IResponseData resp)
+        {
             resp.Data = new ClientData();
 
-            ClientData[] elements;
+            List<ClientData> elements;
                 
-            elements = new ClientData[1];
-            ServiceInstances.ModelCache.FillWithModelInfo(suite, false);
-            elements[0] = suite.GetClientData();
-            resp.Data.Add("suites", elements);
+            elements = new List<ClientData>(suites.Count());
+            foreach (Suite s in suites)
+            {
+                ServiceInstances.ModelCache.FillWithModelInfo(s, false);
+                elements.Add(s.GetClientData());
+            }
+            resp.Data.Add("suites", elements.ToArray());
 
-            elements = new ClientData[1];
-            ServiceInstances.ModelCache.FillWithModelInfo(suite.SuiteType, false);
-            UrlHelper.ConvertUrlsToAbsolute(suite.SuiteType);
-            elements[0] = suite.SuiteType.GetClientData();
-            resp.Data.Add("suiteTypes", elements);
+            elements = new List<ClientData>(suiteTypes.Count());
+            foreach (SuiteType st in suiteTypes)
+            {
+                ServiceInstances.ModelCache.FillWithModelInfo(st, false);
+                UrlHelper.ConvertUrlsToAbsolute(st);
+                elements.Add(st.GetClientData());
+            }
+            resp.Data.Add("suiteTypes", elements.ToArray());
 
-            elements = new ClientData[1];
-            ServiceInstances.ModelCache.FillWithModelInfo(suite.Building, false);
-            elements[0] = suite.Building.GetClientData();
-            elements[0].Add("address", AddressHelper.ConvertToReadableAddress(suite.Building, null));
-            resp.Data.Add("buildings", elements);
+            elements = new List<ClientData>(buildings.Count());
+            foreach (Building b in buildings)
+            {
+                ServiceInstances.ModelCache.FillWithModelInfo(b, false);
+                ClientData cd = b.GetClientData();
+                cd.Add("address", AddressHelper.ConvertToReadableAddress(b, null));
+                elements.Add(cd);
+            }
+            resp.Data.Add("buildings", elements.ToArray());
 
+            elements = new List<ClientData>(sites.Count());
+            foreach (Site s in sites)
+            {
+                ServiceInstances.ModelCache.FillWithModelInfo(s, false);
+                elements.Add(s.GetClientData());
+            }
+            resp.Data.Add("sites", elements.ToArray());
+            
             // Cannot reuse listing.GetClientData() here as it exposes too much information
-            elements = new ClientData[1];
-            ClientData cdListing = new ClientData();
-            cdListing.Add("id", listing.AutoID);
-            cdListing.Add("suiteId", listing.TargetObjectId);  // TODO: now Suites only!!!
-            cdListing.Add("product", ClientData.ConvertProperty<Listing.ListingType>(listing.Product));
-            cdListing.Add("mlsId", listing.MlsId);
-            cdListing.Add("productUrl", listing.ProductUrl);
-            elements[0] = cdListing;
-            resp.Data.Add("listings", elements);
+            elements = new List<ClientData>(listings.Count());
+            foreach (Listing l in listings)
+            {
+                ClientData cd = new ClientData();
+                cd.Add("id", l.AutoID);
+                cd.Add("suiteId", l.TargetObjectId);  // TODO: now Suites only!!!
+                cd.Add("product", ClientData.ConvertProperty<Listing.ListingType>(l.Product));
+                cd.Add("mlsId", l.MlsId);
+                cd.Add("productUrl", l.ProductUrl);
+                elements.Add(cd);
+            }
+            resp.Data.Add("listings", elements.ToArray());
 
-            resp.Data.Add("primaryListingId", listing.AutoID);
+            if (!primaryListingId.Equals(Guid.Empty)) resp.Data.Add("primaryListingId", primaryListingId);
             resp.Data.Add("initialView", "");  // TODO
 
             resp.ResponseCode = HttpStatusCode.OK;
@@ -818,6 +1008,7 @@ namespace Vre.Server.RemoteService
 
                 if (user.UpdateFromClient(data))
                 {
+                    user.MarkUpdated();
                     manager.Update(user);
                     resp.ResponseCode = HttpStatusCode.OK;
                     resp.Data = new ClientData();
@@ -831,11 +1022,78 @@ namespace Vre.Server.RemoteService
                 }
             }
         }
+
+        private static void updateListing(ClientSession session, string strObjectId, ClientData data, IResponseData resp)
+        {
+            Guid rqid;
+            if (!Guid.TryParseExact(strObjectId, "N", out rqid))
+                throw new ArgumentException();
+
+            Listing listing;
+            using (ListingDao dao = new ListingDao(session.DbSession))
+                listing = dao.GetById(rqid);
+
+            if (null == listing) throw new FileNotFoundException("Undefined listing");
+
+            User owner;
+            using (UserDao dao = new UserDao(session.DbSession))
+                owner = dao.GetById(listing.OwnerId);
+
+            RolePermissionCheck.CheckUpdateListing(session, owner);
+
+            if (listing.UpdateFromClient(data))
+            {
+                listing.MarkUpdated();
+
+                using (ListingDao dao = new ListingDao(session.DbSession))
+                    dao.Update(listing);
+
+                resp.ResponseCode = HttpStatusCode.OK;
+                resp.Data = new ClientData();
+                resp.Data.Add("updated", 1);
+            }
+            else
+            {
+                resp.ResponseCode = HttpStatusCode.NotModified;
+                resp.Data = new ClientData();
+                resp.Data.Add("updated", 0);
+            }
+        }
         #endregion
 
         #region create
         private static void createUser(ClientSession session, ClientData data, IResponseData resp)
         {
+            User.Role role = data.GetProperty<User.Role>("role", User.Role.Visitor);
+            LoginType type = data.GetProperty<LoginType>("type", LoginType.Plain);
+            int estateDeveloperId = data.GetProperty("ed", -1);
+            string login = data.GetProperty("uid", string.Empty);
+            string password = data.GetProperty("pwd", string.Empty);
+
+            using (UserManager manager = new UserManager(session))
+            {
+                manager.Create(role, estateDeveloperId, type, login, password);
+                try
+                {
+                    // create contact info block with any added fields from inbound JSON
+                    User u = manager.Get(type, role, estateDeveloperId, login);
+                    u.UpdateFromClient(data);
+                    resp.ResponseCode = HttpStatusCode.OK;
+                }
+                catch (Exception ex)
+                {
+                    resp.ResponseCode = HttpStatusCode.Created;
+                    resp.ResponseCodeDescription = "Contact information was not stored.";
+                    ServiceInstances.Logger.Error("Contact information for created user {0}[{1}] was not saved: {2}", type, login, ex);
+                }
+            }
+        }
+
+        private static void createListing(ClientSession session, ClientData data, IResponseData resp)
+        {
+
+
+
             User.Role role = data.GetProperty<User.Role>("role", User.Role.Visitor);
             LoginType type = data.GetProperty<LoginType>("type", LoginType.Plain);
             int estateDeveloperId = data.GetProperty("ed", -1);
@@ -876,6 +1134,33 @@ namespace Vre.Server.RemoteService
                 resp.Data = new ClientData();
                 resp.Data.Add("deleted", 1);
             }
+        }
+
+        private static void deleteListing(ClientSession session, string strObjectId, IResponseData resp)
+        {
+            Guid rqid;
+            if (!Guid.TryParseExact(strObjectId, "N", out rqid))
+                throw new ArgumentException();
+
+            Listing listing;
+            using (ListingDao dao = new ListingDao(session.DbSession))
+                listing = dao.GetById(rqid);
+
+            if (null == listing) throw new FileNotFoundException("Undefined listing");
+
+            User owner;
+            using (UserDao dao = new UserDao(session.DbSession))
+                owner = dao.GetById(listing.OwnerId);
+
+            RolePermissionCheck.CheckDeleteListing(session, owner);
+
+            listing.MarkDeleted();
+            using (ListingDao dao = new ListingDao(session.DbSession))
+                dao.Update(listing);
+
+            resp.ResponseCode = HttpStatusCode.OK;
+            resp.Data = new ClientData();
+            resp.Data.Add("deleted", 1);
         }
         #endregion
     }

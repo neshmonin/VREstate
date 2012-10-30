@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vreservice" namespace="Vre.Server.BusinessLogic">
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vrebo" namespace="Vre.Server.BusinessLogic">
   <class name="Listing" table="Listings" dynamic-update="false" lazy="false">
 
     <id name="AutoID" column="AutoID" unsaved-value="00000000-0000-0000-0000-000000000000">
@@ -14,7 +14,7 @@
 
     <property name="OwnerId" column="OwnerId" />
     <property name="ExpiresOn" column="ExpiresOn" />
-    <property name="PaymentRefId" column="PaymentRefId" />
+    <property name="Enabled" column="Enabled" />
 
     <property name="RequestCounter" column="RequestCounter" />
     <property name="LastRequestTime" column="LastRequestTime" />

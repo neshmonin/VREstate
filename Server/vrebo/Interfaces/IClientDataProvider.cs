@@ -226,6 +226,38 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
+        public decimal GetProperty(string propertyName, decimal defaultValue)
+        {
+            decimal result = defaultValue;
+
+            object value;
+            if (TryGetValue(propertyName, out value))
+            {
+                if (value is decimal)
+                {
+                    result = (decimal)value;
+                }
+                else if (value is double)
+                {
+                    result = (decimal)(double)value;
+                }
+                else if (value is int)
+                {
+                    result = (int)value;
+                }
+                else if (value is long)
+                {
+                    result = (long)value;
+                }
+                else if (value is string)
+                {
+                    if (!decimal.TryParse(value as string, out result)) result = defaultValue;
+                }
+            }
+
+            return result;
+        }
+
         public DateTime GetProperty(string propertyName, DateTime defaultValue)
         {
             bool read;

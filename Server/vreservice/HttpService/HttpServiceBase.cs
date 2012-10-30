@@ -7,6 +7,7 @@ using NHibernate;
 using Vre.Server.BusinessLogic;
 using Vre.Server.RemoteService;
 using System.Reflection;
+using System.Globalization;
 
 namespace Vre.Server.HttpService
 {
@@ -17,6 +18,7 @@ namespace Vre.Server.HttpService
     {
         public static Dictionary<string, string> ContentTypeByExtension = new Dictionary<string, string>();
 
+        private static DateTime _buildTime = DateTime.MinValue;
         private static char[] _invalidPathChars = Path.GetInvalidPathChars();
         private static char[] _invalidFileNameChars = Path.GetInvalidFileNameChars();
 
@@ -275,21 +277,29 @@ namespace Vre.Server.HttpService
 
         public void ProcessFileRequest(string file, IResponseData response)
         {
-            // validate path
-            if (!IsPathValid(file, true)) throw new FileNotFoundException("Path is invalid.");
+            if (file.Equals("version")) rq_version(response);
+            else if (file.Equals("test")) rq_version(response);
+            else if (file.Equals("humans.txt")) rq_text(1, response);
+            else if (file.Equals("robots.txt")) rq_text(0, response);
+            else if (file.Equals("base")) rq_redirect(0, response);
+            else
+            {
+                // validate path
+                if (!IsPathValid(file, true)) throw new FileNotFoundException("Path is invalid.");
 
-            // validate file type: only certain file types are accessible (!)
-            response.DataStreamContentType = Path.GetExtension(file).ToLower().Substring(1);
-            if (!_allowedFileExtensions.Contains(response.DataStreamContentType)) throw new FileNotFoundException("File type not known.");
+                // validate file type: only certain file types are accessible (!)
+                response.DataStreamContentType = Path.GetExtension(file).ToLower().Substring(1);
+                if (!_allowedFileExtensions.Contains(response.DataStreamContentType)) throw new FileNotFoundException("File type not known.");
 
-            // getfullpath shall resolve any back-steps (..)
-            response.DataPhysicalLocation = Path.GetFullPath(Path.Combine(_filesRootFolder, file));
-            // do not allow going into up-level directories
-            if (!response.DataPhysicalLocation.StartsWith(_filesRootFolder)) throw new FileNotFoundException("File not found.");
-            // verify file presence
-            if (!File.Exists(response.DataPhysicalLocation)) throw new FileNotFoundException("File not found.");
+                // getfullpath shall resolve any back-steps (..)
+                response.DataPhysicalLocation = Path.GetFullPath(Path.Combine(_filesRootFolder, file));
+                // do not allow going into up-level directories
+                if (!response.DataPhysicalLocation.StartsWith(_filesRootFolder)) throw new FileNotFoundException("File not found.");
+                // verify file presence
+                if (!File.Exists(response.DataPhysicalLocation)) throw new FileNotFoundException("File not found.");
 
-            response.ResponseCode = HttpStatusCode.OK;
+                response.ResponseCode = HttpStatusCode.OK;
+            }
         }
 
         private static void initializeContentType()
@@ -327,6 +337,112 @@ namespace Vre.Server.HttpService
             if (path.Contains("..") || path.StartsWith("\\") || path.StartsWith("/")) return false;
 
             return true;
+        }
+
+        public static DateTime ParseDateTimeParam(string paramValue, DateTime? defaultValue)
+        {
+            DateTime result;
+            if (!DateTime.TryParseExact(paramValue, "yyyy-MM-ddTHH:mm:ssZ",
+                CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out result))
+            {
+                if (defaultValue.HasValue) result = defaultValue.Value;
+                else throw new ArgumentException("The time specified is not valid");
+            }
+            return result;
+        }
+
+        private void rq_version(IResponseData response)
+        {
+            byte[] buffer = Encoding.UTF8.GetBytes(BuildVersionInformation());
+            response.DataStream.Write(buffer, 0, buffer.Length);
+            response.DataStreamContentType = "txt";
+            response.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private void rq_test(IResponseData response)
+        {
+            // EXPERIMENTAL: starts an HTTP server push response which responds with progressing 
+            // status pushes until client shuts connection down
+            response.ResponseCode = HttpStatusCode.OK;
+            response.HoldResponseForServerPush = true;
+            response.Data = new BusinessLogic.ClientData();
+            response.Data.Add("status", 0);
+        }
+
+        private void rq_text(int type, IResponseData response)
+        {
+            response.ResponseCode = HttpStatusCode.OK;
+            response.DataStreamContentType = "txt";
+
+            StringBuilder text = new StringBuilder();
+
+            switch (type)
+            {
+                case 0:  //robots.txt
+                    text.Append("User-agent: *\r\n");
+                    text.Append("Disallow: /\r\n");
+                    text.Append("Disallow: /harming/humans\r\n");
+                    text.Append("Disallow: /ignoring/human/orders\r\n");
+                    text.Append("Disallow: /harm/to/self\r\n");
+                    break;
+
+                case 1:  // humans.txt
+                    if (DateTime.MinValue == _buildTime)
+                    {
+                        _buildTime = File.GetCreationTime(Assembly.GetExecutingAssembly().Location);
+                    }
+
+                    text.Append("/* humanstxt.org */\r\n");
+                    text.Append("\r\n");
+                    text.Append("/* TEAM */\r\n");
+                    text.Append("\tAlexander Neshmonin, CEO and everything, Toronto\r\n");
+                    text.Append("\tEugene Simonov, Frontend, Ukraine\r\n");
+                    text.Append("\tAndrey Maslyuk, Backend, Toronto\r\n");
+                    text.Append("\r\n");
+                    text.Append("/* THANKS */\r\n");
+                    text.Append("\tVitaly Zholudev\r\n");
+                    text.Append("\thttp://last.fm\r\n");
+                    text.Append("\thttp://stackoverflow.com\r\n");
+                    text.Append("\r\n");
+                    text.Append("\r\n");
+                    text.Append("/* SITE */\r\n");
+                    text.Append("\tLast build: " + _buildTime.ToShortDateString() + "\r\n");
+                    text.Append("\tLast update: today\r\n");
+                    text.Append("\tStandards: HTTP/1.1\r\n");
+                    text.Append("\tLanguages: none\r\n");
+                    break;
+            }
+
+            byte[] buffer = Encoding.UTF8.GetBytes(text.ToString());
+            response.DataStream.Write(buffer, 0, buffer.Length);
+        }
+
+        private void rq_redirect(int type, IResponseData response)
+        {
+            switch (type)
+            {
+                case 0:
+                    response.RedirectionUrl = "http://3dcondox.com";
+                    break;
+            }
+        }
+
+        public static string BuildVersionInformation()
+        {
+            StringBuilder result = new StringBuilder();
+
+            result.AppendFormat("{0}, {1}", VersionGen.ProductName, VersionGen.CopyrightString);
+
+            result.AppendFormat("\r\nVersion: {0}", Assembly.GetExecutingAssembly().GetName().Version);
+            result.AppendFormat("\r\nBuild version stamp: {0}", VersionGen.VersionStamp);
+
+#if !DEBUG
+            if (VersionGen.IsAlpha)
+#endif
+            result.AppendFormat(" ALPHA {0:yyyyMMddHHmmss}",
+                File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location));
+
+            return result.ToString();
         }
     }
 }

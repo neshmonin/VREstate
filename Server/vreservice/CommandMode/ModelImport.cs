@@ -349,18 +349,19 @@ namespace Vre.Server.Command
             {
                 bool created = false;
                 Suite dbs = null;
+                string modelSuiteName = Utilities.NormalizeSuiteNumber(ms.Name);
                 foreach (Suite s in dbBuilding.Suites)
-                    if (s.SuiteName.Equals(ms.Name) && !s.Deleted) { dbs = s; break; }
+                    if (s.SuiteName.Equals(modelSuiteName) && !s.Deleted) { dbs = s; break; }
 
                 if (null == dbs)
                 {
                     foreach (Suite s in dbBuilding.Suites)
-                        if (s.SuiteName.Equals(ms.Name)) { dbs = s; break; }
+                        if (s.SuiteName.Equals(modelSuiteName)) { dbs = s; break; }
                 }
 
                 if (null == dbs)
                 {
-                    dbs = new Suite(dbBuilding, -1, ms.Floor, ms.Name);
+                    dbs = new Suite(dbBuilding, -1, ms.Floor, modelSuiteName);
                     _clientSession.DbSession.Save(dbs);
                     created = true;
                     _log.AppendFormat("Created new suite ID={0}, Name={1}\r\n", dbs.AutoID, dbs.SuiteName);

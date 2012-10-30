@@ -70,30 +70,30 @@ namespace Vre.Server.RemoteService
                 ProgramService.ProcessClientRequest(request);
                 return;
             }
-            else if (request.Request.Path.Equals("test"))  // test ping/pong; LEGACY
-            {
-                //using (System.IO.StreamWriter w = new System.IO.StreamWriter(request.Response.DataStream))
-                //    w.WriteLine("VRE Works!");
-                //request.Response.DataStreamContentType = "txt";
-                //request.Response.ResponseCode = HttpStatusCode.OK;
+            //else if (request.Request.Path.Equals("test"))  // test ping/pong; LEGACY
+            //{
+            //    //using (System.IO.StreamWriter w = new System.IO.StreamWriter(request.Response.DataStream))
+            //    //    w.WriteLine("VRE Works!");
+            //    //request.Response.DataStreamContentType = "txt";
+            //    //request.Response.ResponseCode = HttpStatusCode.OK;
 
-                // EXPERIMENTAL: starts an HTTP server push response which responds with progressing 
-                // status pushes until client shuts connection down
-                request.Response.ResponseCode = HttpStatusCode.OK;
-                request.Response.HoldResponseForServerPush = true;
-                request.Response.Data = new BusinessLogic.ClientData();
-                request.Response.Data.Add("status", 0);
+            //    // EXPERIMENTAL: starts an HTTP server push response which responds with progressing 
+            //    // status pushes until client shuts connection down
+            //    request.Response.ResponseCode = HttpStatusCode.OK;
+            //    request.Response.HoldResponseForServerPush = true;
+            //    request.Response.Data = new BusinessLogic.ClientData();
+            //    request.Response.Data.Add("status", 0);
 
-                return;
-            }
-            else if (request.Request.Path.Equals("version"))
-            {
-                byte[] buffer = Encoding.UTF8.GetBytes(BuildVersionInformation());
-                request.Response.DataStream.Write(buffer, 0, buffer.Length);
-                request.Response.DataStreamContentType = "txt";
-                request.Response.ResponseCode = HttpStatusCode.OK;
-                return;
-            }
+            //    return;
+            //}
+            //else if (request.Request.Path.Equals("version"))
+            //{
+            //    byte[] buffer = Encoding.UTF8.GetBytes(BuildVersionInformation());
+            //    request.Response.DataStream.Write(buffer, 0, buffer.Length);
+            //    request.Response.DataStreamContentType = "txt";
+            //    request.Response.ResponseCode = HttpStatusCode.OK;
+            //    return;
+            //}
             else if (request.Request.Path.StartsWith(GenerationService.ServicePathPrefix))  // on-the-fly generated content (requires session)
             {
                 GenerationService.ProcessClientRequest(request);
@@ -114,24 +114,6 @@ namespace Vre.Server.RemoteService
                 server.ProcessFileRequest(request.Request.Path, request.Response);
                 return;
             }
-        }
-
-        public static string BuildVersionInformation()
-        {
-            StringBuilder result = new StringBuilder();
-
-            result.AppendFormat("{0}, {1}", VersionGen.ProductName, VersionGen.CopyrightString);
-
-            result.AppendFormat("\r\nVersion: {0}", Assembly.GetExecutingAssembly().GetName().Version);
-            result.AppendFormat("\r\nBuild version stamp: {0}", VersionGen.VersionStamp);
-
-#if !DEBUG
-            if (VersionGen.IsAlpha)
-#endif
-            result.AppendFormat(" ALPHA {0:yyyyMMddHHmmss}",
-                File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location));
-
-            return result.ToString();
         }
     }
 }

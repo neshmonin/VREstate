@@ -127,11 +127,15 @@
     <Compile Include="..\_version\version.cs">
       <Link>Properties\version.cs</Link>
     </Compile>
+    <Compile Include="..\_version\versionflag.cs">
+      <Link>Properties\versionflag.cs</Link>
+    </Compile>
     <Compile Include="..\_version\versiongen.cs">
       <Link>Properties\versiongen.cs</Link>
     </Compile>
     <Compile Include="Authentication\Authentication.cs" />
     <Compile Include="Authentication\IAuthentication.cs" />
+    <Compile Include="BusinessObjects\ReverseRequest.cs" />
     <Compile Include="ChangeLog\ChangeLog.cs" />
     <Compile Include="CommandMode\CommandHandler.cs" />
     <Compile Include="CommandMode\ModelImport.cs" />
@@ -139,8 +143,11 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Dao\AccountDao.cs" />
     <Compile Include="Dao\BuildingDao.cs" />
+    <Compile Include="Dao\FinancialTransactionDao.cs" />
+    <Compile Include="Dao\ListingDao.cs" />
     <Compile Include="Dao\OptionDao.cs" />
     <Compile Include="Dao\OptionTypeDao.cs" />
+    <Compile Include="Dao\ReverseRequestDao.cs" />
     <Compile Include="Dao\RoomCategoryDao.cs" />
     <Compile Include="Dao\RoomDao.cs" />
     <Compile Include="Dao\SiteDao.cs" />
@@ -157,13 +164,20 @@
     <Compile Include="Database\NHibernateHelper.cs" />
     <Compile Include="Experimental\HttpServerPush.cs" />
     <Compile Include="FileCacheManager.cs" />
+    <Compile Include="FileStorage\FsFileStorageManagerBase.cs" />
+    <Compile Include="FileStorage\IntLocalFileStorageManager.cs" />
+    <Compile Include="FileStorage\LocalFileStorageManager.cs" />
+    <Compile Include="FileStorage\IFileStorageManager.cs" />
     <Compile Include="FloodPreventor.cs" />
+    <Compile Include="HttpService\HttpServiceBase.cs" />
+    <Compile Include="HttpService\IHttpService.cs" />
     <Compile Include="HttpService\RedirectionService.cs" />
     <Compile Include="HttpService\Statistics.cs" />
     <Compile Include="Managers\DeveloperManager.cs" />
     <Compile Include="Managers\RolePermissionCheck.cs" />
     <Compile Include="ModelCache\ModelCache.cs" />
     <Compile Include="ModelCache\ModelCacheManager.cs" />
+    <Compile Include="RemoteService\AddressHelper.cs" />
     <Compile Include="RemoteService\ClientSession.cs" />
     <Compile Include="RemoteService\GenerationService.cs" />
     <Compile Include="RemoteService\DataService.cs" />
@@ -176,7 +190,10 @@
     <Compile Include="Managers\UserManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RemoteService\RemoteServiceProvider.cs" />
+    <Compile Include="RemoteService\ReverseRequestService.cs" />
     <Compile Include="RemoteService\ServiceRequest.cs" />
+    <Compile Include="RemoteService\StaticService.cs" />
+    <Compile Include="RemoteService\UrlHelper.cs" />
     <Compile Include="ServiceInstances.cs" />
     <Compile Include="Spikes\PullUpdateService.cs" />
     <Compile Include="StartupShutdown.cs" />
@@ -202,7 +219,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Mappings\Transaction.hbm.xml" />
-    <EmbeddedResource Include="Mappings\User.hbm.xml" />
+    <EmbeddedResource Include="Mappings\User.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Mappings\VRTour.hbm.xml" />
     <EmbeddedResource Include="ChangeLog\ChangeLog.hbm.xml" />
     <EmbeddedResource Include="Mappings\EstateDeveloper.hbm.xml">
@@ -231,6 +250,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Mappings\BrokerageInfo.hbm.xml" />
     <EmbeddedResource Include="Mappings\UserLicense.hbm.xml" />
+    <EmbeddedResource Include="Mappings\ReverseRequest.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\Listing.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\FinancialTransaction.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <Content Include="SQL\Constraint\Account.sql" />
     <Content Include="SQL\Constraint\DeveloperAdmin.sql" />
     <Content Include="SQL\Constraint\Price.sql" />

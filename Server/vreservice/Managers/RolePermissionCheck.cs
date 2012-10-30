@@ -705,12 +705,27 @@ namespace Vre.Server.BusinessLogic
         #endregion
 
         #region listings
-        public static void CheckCreateListing(ClientSession session)
+        public static void CheckCreateListing(ClientSession session, User targetUser)
         {
-            if (session.User.UserRole == User.Role.SuperAdmin) return;
-            if (session.User.UserRole == User.Role.SellingAgent) return;
+            // superadmin can make a listing for selling agent
+            if ((session.User.UserRole == User.Role.SuperAdmin)
+                && (targetUser.UserRole == User.Role.SellingAgent)) return;
+
+            // selling agent can make a listing for himself
+            if ((session.User.UserRole == User.Role.SellingAgent)
+                && (targetUser.Equals(session.User))) return;
 
             throw new PermissionException("This operation is not allowed.");
+        }
+
+        public static void CheckUpdateListing(ClientSession session, User targetUser)
+        {
+            CheckCreateListing(session, targetUser);  // same permissions
+        }
+
+        public static void CheckDeleteListing(ClientSession session, User targetUser)
+        {
+            CheckCreateListing(session, targetUser);  // same permissions
         }
         #endregion
     }

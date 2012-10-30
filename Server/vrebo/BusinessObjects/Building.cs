@@ -64,6 +64,20 @@ namespace Vre.Server.BusinessLogic
         {
             AutoID = fromServer.GetProperty("id", -1);
 
+            AltitudeAdjustment = fromServer.GetProperty("altitudeAdjustment", 0.0);
+            MaxSuiteAltitude = fromServer.GetProperty("maxSuiteAltitude", 0.0);
+
+            DisplayModelUrl = fromServer.GetProperty("displayModelUrl", string.Empty);
+            OverlayModelUrl = fromServer.GetProperty("overlayModelUrl", string.Empty);
+            BubbleTemplateUrl = fromServer.GetProperty("bubbleTemplateUrl", string.Empty);
+
+            AddressLine1 = fromServer.GetProperty("addressLine1", string.Empty);
+            AddressLine2 = fromServer.GetProperty("addressLine2", string.Empty);
+            City = fromServer.GetProperty("city", string.Empty);
+            StateProvince = fromServer.GetProperty("stateProvince", string.Empty);
+            PostalCode = fromServer.GetProperty("postalCode", string.Empty);
+            Country = fromServer.GetProperty("country", string.Empty);
+
             UpdateFromClient(fromServer);
         }
 
@@ -93,6 +107,19 @@ namespace Vre.Server.BusinessLogic
                 result.Add("overlayModelUrl", OverlayModelUrl);
             if (!string.IsNullOrEmpty(BubbleTemplateUrl))
                 result.Add("bubbleTemplateUrl", BubbleTemplateUrl);
+
+            if (!string.IsNullOrEmpty(AddressLine1))
+                result.Add("addressLine1", AddressLine1);
+            if (!string.IsNullOrEmpty(AddressLine2))
+                result.Add("addressLine2", AddressLine2);
+            if (!string.IsNullOrEmpty(City))
+                result.Add("city", City);
+            if (!string.IsNullOrEmpty(StateProvince))
+                result.Add("stateProvince", StateProvince);
+            if (!string.IsNullOrEmpty(PostalCode))
+                result.Add("postalCode", PostalCode);
+            if (!string.IsNullOrEmpty(Country))
+                result.Add("country", Country);
 
             return result;
         }

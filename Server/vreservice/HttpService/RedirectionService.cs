@@ -11,10 +11,8 @@ namespace Vre.Server.HttpService
 {
     internal class RedirectionService : HttpServiceBase
     {
-        enum ServiceType { Unknown, Const, Redirection, Button, Reverse }
+        enum ServiceType { Unknown, /*Const,*/ Redirection, Button, Reverse }
         private const string _defaultImage = "default.png";
-
-        private static DateTime _buildTime = DateTime.MinValue;
 
         private string _buttonStorePath;
         private string _defaultRedirectUri;
@@ -85,9 +83,9 @@ namespace Vre.Server.HttpService
                                 processButtonRequest(ctx, browserKey, result);
                                 break;
 
-                            case ServiceType.Const:
-                                processConst(ctx, path, result);
-                                break;
+                            //case ServiceType.Const:
+                            //    processConst(ctx, path, result);
+                            //    break;
 
                             default:
                                 ProcessFileRequest(path, result);
@@ -117,9 +115,9 @@ namespace Vre.Server.HttpService
             if (pathElement.Equals("start")) return ServiceType.Redirection;
             else if (pathElement.Equals("button")) return ServiceType.Button;
             else if (pathElement.Equals("go")) return ServiceType.Reverse;
-            else if (pathElement.Equals("robots.txt")) return ServiceType.Const;
-            else if (pathElement.Equals("humans.txt")) return ServiceType.Const;
-            else if (pathElement.Equals("version")) return ServiceType.Const;
+            //else if (pathElement.Equals("robots.txt")) return ServiceType.Const;
+            //else if (pathElement.Equals("humans.txt")) return ServiceType.Const;
+            //else if (pathElement.Equals("version")) return ServiceType.Const;
             return ServiceType.Unknown;
         }
 
@@ -232,55 +230,55 @@ namespace Vre.Server.HttpService
 
         }
 
-        private static void processConst(HttpListenerContext ctx, string path, IResponseData response)
-        {
-            response.ResponseCode = HttpStatusCode.OK;
-            response.DataStreamContentType = "txt";
+        //private static void processConst(HttpListenerContext ctx, string path, IResponseData response)
+        //{
+        //    response.ResponseCode = HttpStatusCode.OK;
+        //    response.DataStreamContentType = "txt";
 
-            StringBuilder text = new StringBuilder();
+        //    StringBuilder text = new StringBuilder();
 
-            if (path.Equals("robots.txt"))
-            {
-                text.Append("User-agent: *\r\n");
-                text.Append("Disallow: /\r\n");
-                text.Append("Disallow: /harming/humans\r\n");
-                text.Append("Disallow: /ignoring/human/orders\r\n");
-                text.Append("Disallow: /harm/to/self\r\n");
-            }
-            else if (path.Equals("humans.txt"))
-            {
-                if (DateTime.MinValue == _buildTime)
-                {
-                    _buildTime = File.GetCreationTime(Assembly.GetExecutingAssembly().Location);
-                }
+        //    if (path.Equals("robots.txt"))
+        //    {
+        //        text.Append("User-agent: *\r\n");
+        //        text.Append("Disallow: /\r\n");
+        //        text.Append("Disallow: /harming/humans\r\n");
+        //        text.Append("Disallow: /ignoring/human/orders\r\n");
+        //        text.Append("Disallow: /harm/to/self\r\n");
+        //    }
+        //    else if (path.Equals("humans.txt"))
+        //    {
+        //        if (DateTime.MinValue == _buildTime)
+        //        {
+        //            _buildTime = File.GetCreationTime(Assembly.GetExecutingAssembly().Location);
+        //        }
 
-                text.Append("/* humanstxt.org */\r\n");
-                text.Append("\r\n");
-                text.Append("/* TEAM */\r\n");
-                text.Append("\tAlexander Neshmonin, CEO and everything, Toronto\r\n");
-                text.Append("\tEugene Simonov, Frontend, Ukraine\r\n");
-                text.Append("\tAndrey Maslyuk, Backend, Toronto\r\n");
-                text.Append("\r\n");
-                text.Append("/* THANKS */\r\n");
-                text.Append("\tVitaly Zholudev\r\n");
-                text.Append("\thttp://last.fm\r\n");
-                text.Append("\thttp://stackoverflow.com\r\n");
-                text.Append("\r\n");
-                text.Append("\r\n");
-                text.Append("/* SITE */\r\n");
-                text.Append("\tLast build: " + _buildTime.ToShortDateString() + "\r\n");
-                text.Append("\tLast update: today\r\n");
-                text.Append("\tStandards: HTTP/1.1\r\n");
-                text.Append("\tLanguages: none\r\n");
-            }
-            else if (path.Equals("version"))
-            {
-                text.Append(RemoteServiceProvider.BuildVersionInformation());
-            }
+        //        text.Append("/* humanstxt.org */\r\n");
+        //        text.Append("\r\n");
+        //        text.Append("/* TEAM */\r\n");
+        //        text.Append("\tAlexander Neshmonin, CEO and everything, Toronto\r\n");
+        //        text.Append("\tEugene Simonov, Frontend, Ukraine\r\n");
+        //        text.Append("\tAndrey Maslyuk, Backend, Toronto\r\n");
+        //        text.Append("\r\n");
+        //        text.Append("/* THANKS */\r\n");
+        //        text.Append("\tVitaly Zholudev\r\n");
+        //        text.Append("\thttp://last.fm\r\n");
+        //        text.Append("\thttp://stackoverflow.com\r\n");
+        //        text.Append("\r\n");
+        //        text.Append("\r\n");
+        //        text.Append("/* SITE */\r\n");
+        //        text.Append("\tLast build: " + _buildTime.ToShortDateString() + "\r\n");
+        //        text.Append("\tLast update: today\r\n");
+        //        text.Append("\tStandards: HTTP/1.1\r\n");
+        //        text.Append("\tLanguages: none\r\n");
+        //    }
+        //    else if (path.Equals("version"))
+        //    {
+        //        text.Append(RemoteServiceProvider.BuildVersionInformation());
+        //    }
 
-            byte[] buffer = Encoding.UTF8.GetBytes(text.ToString());
-            response.DataStream.Write(buffer, 0, buffer.Length);
-        }
+        //    byte[] buffer = Encoding.UTF8.GetBytes(text.ToString());
+        //    response.DataStream.Write(buffer, 0, buffer.Length);
+        //}
 
         //private string deriveExtension(string aliasName, string imageName)
         //{

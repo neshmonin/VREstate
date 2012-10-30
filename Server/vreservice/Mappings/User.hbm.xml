@@ -23,6 +23,9 @@
     <property name="PrimaryEmailAddress" column="PrimaryEmailAddress" />
     <property name="TimeZone" column="TimeZone" />
     <property name="PersonalInfo" column="PersonalInfo" />
+
+    <property name="CreditUnits" column="CreditUnits" />
+
     <!--
     <bag name="VRTours" inverse="true" lazy="false" cascade="all-delete-orphan" >
       <key column="SuiteID"/>

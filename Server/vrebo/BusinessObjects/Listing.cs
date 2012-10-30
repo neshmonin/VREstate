@@ -2,7 +2,7 @@
 
 namespace Vre.Server.BusinessLogic
 {
-    internal class Listing : UpdateableGuidBase
+    public class Listing : UpdateableGuidBase
     {
         public enum ListingType : int
         {
@@ -19,7 +19,7 @@ namespace Vre.Server.BusinessLogic
 
         public int OwnerId { get; private set; }
         public DateTime ExpiresOn { get; private set; }
-        public string PaymentRefId { get; private set; }
+        public bool Enabled { get; set; }
 
         public int RequestCounter { get; private set; }
         public DateTime LastRequestTime { get; private set; }
@@ -32,7 +32,7 @@ namespace Vre.Server.BusinessLogic
 
         private Listing() { }
 
-        public Listing(int ownerId, string paymentRefId,
+        public Listing(int ownerId, 
             Listing.ListingType product, string mlsId, 
             SubjectType type, int targetObjectId, string productUrl, DateTime expiresOn)
         {
@@ -41,7 +41,6 @@ namespace Vre.Server.BusinessLogic
             AutoID = Guid.NewGuid();
 
             OwnerId = ownerId;
-            PaymentRefId = paymentRefId;
             Product = product;
             MlsId = mlsId;
             ProductUrl = productUrl;
@@ -53,11 +52,10 @@ namespace Vre.Server.BusinessLogic
             LastRequestTime = DateTime.UtcNow;
         }
 
-        public void Update(string paymentRefId,
+        public void Update(
             Listing.ListingType product, string mlsId,
             string productUrl, DateTime expiresOn)
         {
-            PaymentRefId = paymentRefId;
             Product = product;
             MlsId = mlsId;
             ProductUrl = productUrl;
@@ -72,6 +70,18 @@ namespace Vre.Server.BusinessLogic
             LastRequestTime = DateTime.UtcNow;
         }
 
+        public Listing (ClientData data) : base(data)
+        {
+            OwnerId = data.GetProperty("ownerId", -1);
+            ExpiresOn = data.GetProperty("expiresOn", DateTime.MinValue);
+            Product = data.GetProperty<ListingType>("product", ListingType.FloorPlan);
+            MlsId = data.GetProperty("mlsIs", string.Empty);
+            ProductUrl = data.GetProperty("productUrl", string.Empty);
+            TargetObjectType = data.GetProperty<SubjectType>("targetObjectType", SubjectType.Suite);
+            RequestCounter = data.GetProperty("requestCounter", 0);
+            LastRequestTime = data.GetProperty("lastRequestTime", DateTime.MinValue);
+        }
+
         public override ClientData GetClientData()
         {
             // See also Vre.Server.RemoteService.DataService.getListing()
@@ -80,8 +90,8 @@ namespace Vre.Server.BusinessLogic
 
             result.Add("ownerId", OwnerId);  // informational only
             result.Add("expiresOn", ExpiresOn);  // informational only
+            result.Add("enabled", Enabled);
 
-            result.Add("paymentRefId", PaymentRefId);
             result.Add("product", Product);
             result.Add("mlsId", MlsId);
             result.Add("productUrl", ProductUrl);
@@ -96,6 +106,8 @@ namespace Vre.Server.BusinessLogic
         public override bool UpdateFromClient(ClientData data)
         {
             bool result = base.UpdateFromClient(data);
+
+            Enabled = data.UpdateProperty("enabled", Enabled, ref result);
 
             return result;
         }

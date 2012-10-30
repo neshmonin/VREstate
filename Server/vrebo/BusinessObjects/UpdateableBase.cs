@@ -5,17 +5,25 @@ namespace Vre.Server.BusinessLogic
 {
     public abstract class UpdateableBase : UpdateableBaseGen<int> 
     {
-        public UpdateableBase() : base() { }
+        protected UpdateableBase() : base() { }
+        protected UpdateableBase(ClientData data) : base(data)
+        {
+            AutoID = int.Parse(data.GetProperty("id", string.Empty));
+        }
         public UpdateableBase(UpdateableBase copy) : base(copy) { }
     }
 
     public abstract class UpdateableGuidBase : UpdateableBaseGen<Guid> 
     {
-        public UpdateableGuidBase() : base() { }
+        protected UpdateableGuidBase() : base() { }
+        protected UpdateableGuidBase(ClientData data) : base(data)
+        {
+            AutoID = Guid.Parse(data.GetProperty("id", string.Empty));
+        }
         public UpdateableGuidBase(UpdateableGuidBase copy) : base(copy) { }
     }
 
-    public abstract class UpdateableBaseGen<T> : IClientDataProvider
+    public abstract class UpdateableBaseGen<T> : IClientDataProvider where T : struct
     {
         public virtual T AutoID { get; protected set; }
         protected virtual byte[] Version { get; set; }
@@ -23,7 +31,7 @@ namespace Vre.Server.BusinessLogic
         public virtual DateTime Updated { get; protected set; }
         public virtual bool Deleted { get; protected set; }
 
-        public UpdateableBaseGen()
+        protected UpdateableBaseGen()
         {
         }
 
@@ -71,6 +79,14 @@ namespace Vre.Server.BusinessLogic
             Updated = DateTime.UtcNow;  
         }
 
+        protected UpdateableBaseGen(ClientData data)
+        {
+            Deleted = data.GetProperty<bool>("deleted", false);
+            UpdateFromClient(data);
+            Created = DateTime.MinValue;
+            Updated = DateTime.MinValue;
+        }
+
         #region IClientDataProvide members and related methods
         public virtual ClientData GetClientData()
         {
@@ -85,7 +101,7 @@ namespace Vre.Server.BusinessLogic
         {
             bool result;
             Version = data.GetProperty("version", new byte[0], out result);
-            return false;  // possible version value rollback should not count as an object value change
+            return false;  // possible version value rollback should not count as an object value change; if all other fields remain intact - we consider object unchanged
         }
         #endregion
     }

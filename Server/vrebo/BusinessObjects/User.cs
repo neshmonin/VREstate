@@ -33,6 +33,7 @@ namespace Vre.Server.BusinessLogic
         //public ContactInfo PersonalInfo { get; private set; }
         public BrokerageInfo BrokerInfo { get; private set; }
         public IList<UserLicense> Licenses { get; private set; }
+        public decimal CreditUnits { get; private set; }
 
         /// <summary>
         /// Suites managed by this user (sales person or selling agent); initially only used by latter.
@@ -69,6 +70,7 @@ namespace Vre.Server.BusinessLogic
             VisibleBy = new HashSet<User>();
             CanView = new HashSet<User>();
             Licenses = new List<UserLicense>();
+            CreditUnits = 0m;
         }
 
         /// <summary>
@@ -146,6 +148,13 @@ namespace Vre.Server.BusinessLogic
         {
             LastLogin = DateTime.UtcNow;
             MarkUpdated();
+        }
+
+        public User(ClientData data) : base(data)
+        {
+            EstateDeveloperID = data.GetProperty("estateDeveloperId", -1);
+            UserRole = data.GetProperty<User.Role>("role", Role.Visitor);
+            // TODO: deal with personal info (vCard) and brokerage
         }
 
         public override ClientData GetClientData()

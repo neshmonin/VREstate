@@ -3,11 +3,32 @@ using System.Reflection;
 using System.Text;
 using System.Collections.Generic;
 using System.IO;
+using Vre.Server.BusinessLogic;
 
 namespace Vre.Server
 {
     public class Utilities
     {
+        private const string FinancialTransactionRefNumPrefix = "3DCX";
+        private const int FinancialTransactionRefNumKey = 0x752EB3A6;
+
+        public static string FinancialTransactionRefNum(FinancialTransaction ft)
+        {
+            return string.Format("{0}{1}",
+                FinancialTransactionRefNumPrefix,
+                GenerateReferenceNumber(ft.AutoID ^ FinancialTransactionRefNumKey));
+        }
+
+        /// <summary>
+        /// Makes suite number normalized for DB storage and search.
+        /// </summary>
+        public static string NormalizeSuiteNumber(string suiteNumber)
+        {
+            string result = suiteNumber.Trim().ToLowerInvariant();
+            while (result.StartsWith("0")) result = result.Substring(1);
+            return result;
+        }
+
         public static string ExplodeException(Exception ex)
         {
             return ExplodeException(ex, string.Empty);
@@ -151,13 +172,17 @@ namespace Vre.Server
 
         public static string GenerateReferenceNumber(DateTime time)
         {
-            string result = string.Empty;
-            long t = (time.Ticks - _refBase) / 10000;
+            return GenerateReferenceNumber((time.Ticks - _refBase) / 10000);
+        }
 
-            while (t > 0)
+        public static string GenerateReferenceNumber(long intValue)
+        {
+            string result = string.Empty;
+
+            while (intValue > 0)
             {
-                result = _radixXX[t % _radixBase] + result;
-                t /= _radixBase;
+                result = _radixXX[intValue % _radixBase] + result;
+                intValue /= _radixBase;
             }
 
             return result;
