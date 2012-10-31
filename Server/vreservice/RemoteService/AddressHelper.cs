@@ -242,18 +242,23 @@ namespace Vre.Server.RemoteService
             if (suite != null) rd.AppendFormat("{0}, ", suite.SuiteName);
 
             // Fine-level elements
-            string sta = building.AddressLine1 + " " + building.AddressLine2;
-            rd.Append(sta.Trim());
+            if (!string.IsNullOrWhiteSpace(building.AddressLine1) || !string.IsNullOrWhiteSpace(building.AddressLine2))
+            {
+                string sta = building.AddressLine1 + " " + building.AddressLine2;
+                sta = sta.Trim();
+                if (sta.Length > 0) rd.AppendFormat("{0}, ", sta);
+            }
 
             // Coarse-level elements
             //
-            rd.AppendFormat(", {0}, {1}, {2}, {3}",
-                textInfo.ToTitleCase(building.City),
-                building.StateProvince.ToUpperInvariant(),
-                building.PostalCode.ToUpperInvariant(),
-                building.Country);
-
-            return rd.ToString();
+            if (!string.IsNullOrWhiteSpace(building.City)) rd.AppendFormat("{0}, ", building.City);
+            if (!string.IsNullOrWhiteSpace(building.StateProvince)) rd.AppendFormat("{0}, ", building.StateProvince.ToUpperInvariant());
+            if (!string.IsNullOrWhiteSpace(building.PostalCode)) rd.AppendFormat("{0}, ", building.PostalCode.ToUpperInvariant());
+            if (!string.IsNullOrWhiteSpace(building.Country)) rd.AppendFormat("{0}, ", building.Country);
+            
+            string result = rd.ToString();
+            if (result.Length > 0) return result.Substring(0, result.Length - 2);  // trim trailing comma
+            else return string.Empty;
         }
     }
 }
