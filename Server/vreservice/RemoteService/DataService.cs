@@ -134,13 +134,16 @@ namespace Vre.Server.RemoteService
                     return;
 
                 case ModelObject.Listing:
-                    if (-1 == objectId)
+                    if (null == strObjectId)
                     {
-                        getListingList(request.UserInfo.Session, request.Request.Query, request.Response, includeDeleted);
+                        if (-1 == objectId)
+                            getListingList(request.UserInfo.Session, request.Request.Query, request.Response, includeDeleted);
+                        else
+                            throw new NotImplementedException();
                     }
                     else
                     {
-                        throw new NotImplementedException();
+                        getListing(request.UserInfo.Session, strObjectId, request.Response);
                     }
                     return;
 
@@ -174,21 +177,23 @@ namespace Vre.Server.RemoteService
             if (!request.UserInfo.Session.TrustedConnection) throw new PermissionException("Service available only over secure connection.");
 
             getPathElements(request.Request.Path, out mo, out objectId, out strObjectId);
-            if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
 
             if (null == request.Request.Data) throw new ArgumentException("Object data not passed.");
 
             switch (mo)
             {
                 case ModelObject.Building:
+                    if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
                     updateBuilding(request.UserInfo.Session, objectId, request.Request.Data, request.Response);
                     return;
 
                 case ModelObject.User:
+                    if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
                     updateUser(request.UserInfo.Session, objectId, request.Request.Data, request.Response);
                     return;
 
                 case ModelObject.Listing:
+                    if (null == strObjectId) throw new ArgumentException("Object ID is missing.");
                     updateListing(request.UserInfo.Session, strObjectId, request.Request.Data, request.Response);
                     return;
             }
@@ -235,15 +240,16 @@ namespace Vre.Server.RemoteService
             if (!request.UserInfo.Session.TrustedConnection) throw new PermissionException("Service available only over secure connection.");
 
             getPathElements(request.Request.Path, out mo, out objectId, out strObjectId);
-            if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
 
             switch (mo)
             {
                 case ModelObject.User:
+                    if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
                     deleteUser(request.UserInfo.Session, objectId, request.Response);
                     return;
 
                 case ModelObject.Listing:
+                    if (null == strObjectId) throw new ArgumentException("Object ID is missing.");
                     deleteListing(request.UserInfo.Session, strObjectId, request.Response);
                     return;
             }
@@ -709,10 +715,24 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
+        private static void getListing(ClientSession session, string strObjectId, IResponseData resp)
+        {
+            Guid rqid;
+            if (!Guid.TryParseExact(strObjectId, "N", out rqid))
+                throw new ArgumentException();
+
+            Listing listing;
+            using (ListingDao dao = new ListingDao(session.DbSession))
+                listing = dao.GetById(rqid);
+
+            if (null == listing) throw new FileNotFoundException("Listing does not exist");
+
+            resp.Data = listing.GetClientData();
+            resp.ResponseCode = HttpStatusCode.OK;
+        }
+
         private static void getListingList(ClientSession session, ServiceQuery query, IResponseData resp, bool includeDeleted)
         {
-            ClientData[] result;
-
             int userId = query.GetParam("userId", -1);
             User user;
             Listing[] list;
@@ -727,15 +747,26 @@ namespace Vre.Server.RemoteService
             using (ListingDao dao = new ListingDao(session.DbSession))
                 list = dao.Get(userId, includeDeleted);
 
+            DateTime timeLim = DateTime.MaxValue;
+
+            if ("expired".Equals(query["status"]))
+            {
+                // filter expired listings only
+                timeLim = DateTime.UtcNow;
+            }
+
             // produce output
             //
             int cnt = list.Length;
-            result = new ClientData[cnt];
+            List<ClientData> result = new List<ClientData>(cnt);
             for (int idx = 0; idx < cnt; idx++)
-                result[idx] = list[idx].GetClientData();
+            {
+                Listing l = list[idx];
+                if (l.ExpiresOn < timeLim) result.Add(l.GetClientData());
+            }
 
             resp.Data = new ClientData();
-            resp.Data.Add("listings", result);
+            resp.Data.Add("listings", result.ToArray());
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
@@ -1029,34 +1060,39 @@ namespace Vre.Server.RemoteService
             if (!Guid.TryParseExact(strObjectId, "N", out rqid))
                 throw new ArgumentException();
 
-            Listing listing;
-            using (ListingDao dao = new ListingDao(session.DbSession))
-                listing = dao.GetById(rqid);
-
-            if (null == listing) throw new FileNotFoundException("Undefined listing");
-
-            User owner;
-            using (UserDao dao = new UserDao(session.DbSession))
-                owner = dao.GetById(listing.OwnerId);
-
-            RolePermissionCheck.CheckUpdateListing(session, owner);
-
-            if (listing.UpdateFromClient(data))
+            using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
-                listing.MarkUpdated();
-
+                Listing listing;
                 using (ListingDao dao = new ListingDao(session.DbSession))
-                    dao.Update(listing);
+                    listing = dao.GetById(rqid);
 
-                resp.ResponseCode = HttpStatusCode.OK;
-                resp.Data = new ClientData();
-                resp.Data.Add("updated", 1);
-            }
-            else
-            {
-                resp.ResponseCode = HttpStatusCode.NotModified;
-                resp.Data = new ClientData();
-                resp.Data.Add("updated", 0);
+                if (null == listing) throw new FileNotFoundException("Undefined listing");
+
+                User owner;
+                using (UserDao dao = new UserDao(session.DbSession))
+                    owner = dao.GetById(listing.OwnerId);
+
+                RolePermissionCheck.CheckUpdateListing(session, owner);
+
+                if (listing.UpdateFromClient(data))
+                {
+                    listing.MarkUpdated();
+
+                    using (ListingDao dao = new ListingDao(session.DbSession))
+                        dao.Update(listing);
+
+                    resp.ResponseCode = HttpStatusCode.OK;
+                    resp.Data = new ClientData();
+                    resp.Data.Add("updated", 1);
+                }
+                else
+                {
+                    resp.ResponseCode = HttpStatusCode.NotModified;
+                    resp.Data = new ClientData();
+                    resp.Data.Add("updated", 0);
+                }
+
+                tran.Commit();
             }
         }
         #endregion

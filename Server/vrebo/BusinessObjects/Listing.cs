@@ -72,12 +72,11 @@ namespace Vre.Server.BusinessLogic
 
         public Listing (ClientData data) : base(data)
         {
-            OwnerId = data.GetProperty("ownerId", -1);
-            ExpiresOn = data.GetProperty("expiresOn", DateTime.MinValue);
             Product = data.GetProperty<ListingType>("product", ListingType.FloorPlan);
             MlsId = data.GetProperty("mlsIs", string.Empty);
             ProductUrl = data.GetProperty("productUrl", string.Empty);
             TargetObjectType = data.GetProperty<SubjectType>("targetObjectType", SubjectType.Suite);
+            TargetObjectId = data.GetProperty("targetObjectId", -1);
             RequestCounter = data.GetProperty("requestCounter", 0);
             LastRequestTime = data.GetProperty("lastRequestTime", DateTime.MinValue);
         }
@@ -89,13 +88,14 @@ namespace Vre.Server.BusinessLogic
             ClientData result = base.GetClientData();
 
             result.Add("ownerId", OwnerId);  // informational only
-            result.Add("expiresOn", ExpiresOn);  // informational only
+            result.Add("expiresOn", ExpiresOn);
             result.Add("enabled", Enabled);
 
             result.Add("product", Product);
             result.Add("mlsId", MlsId);
             result.Add("productUrl", ProductUrl);
             result.Add("targetObjectType", TargetObjectType);
+            result.Add("targetObjectId", TargetObjectId);
 
             result.Add("requestCounter", RequestCounter);  // informational (stats) only
             result.Add("lastRequestTime", LastRequestTime);  // informational (stats) only
@@ -108,6 +108,8 @@ namespace Vre.Server.BusinessLogic
             bool result = base.UpdateFromClient(data);
 
             Enabled = data.UpdateProperty("enabled", Enabled, ref result);
+            ExpiresOn = data.UpdateProperty("expiresOn", ExpiresOn, ref result);
+            OwnerId = data.UpdateProperty("ownerId", OwnerId, ref result);
 
             return result;
         }

@@ -298,7 +298,8 @@ namespace Vre.Server.RemoteService
                 if (string.IsNullOrWhiteSpace(dv)) throw new ArgumentException("Missing validation period");
                 int idv;
                 if (!int.TryParse(dv, out idv)) throw new ArgumentException("Validation period value is invalid");
-                expiresOn = DateTime.Now.AddDays(idv).ToLocalTime().Date;
+                // TODO: LOCAL TIME HERE!
+                expiresOn = DateTime.Now.AddDays(idv).ToUniversalTime().Date;
             }
             //if (!DateTime.TryParseExact(request.Request.Query["expires"], "yyyy-MM-ddTHH:mm:ss",
             //    CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out expiresOn))

@@ -21,6 +21,7 @@ namespace Vre.Server.BusinessLogic
         {
             Dictionary<string, ClientData> itemsToReplace = new Dictionary<string, ClientData>();
             Dictionary<string, ClientData[]> arraysToReplace = new Dictionary<string, ClientData[]>();
+            Dictionary<string, int[]> intArraysToReplace = new Dictionary<string, int[]>();
 
             foreach (KeyValuePair<string, object> kvp in this)
             {
@@ -35,18 +36,37 @@ namespace Vre.Server.BusinessLogic
                     if (suba != null)
                     {
                         int idx = suba.Length;
-                        ClientData[] items = new ClientData[idx];
-                        for (idx--; idx >= 0; idx--)
+                        if (idx > 0)
                         {
-                            Dictionary<string, object> subsub = suba[idx] as Dictionary<string, object>;
-                            if (subsub != null) items[idx] = new ClientData(subsub);
+                            Type t = suba[0].GetType();
+                            if (t.Equals(typeof(int)))
+                            {
+                                int[] items = new int[idx];
+                                // unboxing
+                                for (idx--; idx >= 0; idx--) items[idx] = (int)suba[idx];
+                                intArraysToReplace.Add(kvp.Key, items);
+                            }
+                            else
+                            {
+                                ClientData[] items = new ClientData[idx];
+                                for (idx--; idx >= 0; idx--)
+                                {
+                                    Dictionary<string, object> subsub = suba[idx] as Dictionary<string, object>;
+                                    if (subsub != null) items[idx] = new ClientData(subsub);
+                                }
+                                arraysToReplace.Add(kvp.Key, items);
+                            }
                         }
-                        arraysToReplace.Add(kvp.Key, items);
+                        else
+                        {
+                            arraysToReplace.Add(kvp.Key, new ClientData[0]);
+                        }
                     }
                 }
             }
             foreach (KeyValuePair<string, ClientData> kvp in itemsToReplace) this[kvp.Key] = kvp.Value;
             foreach (KeyValuePair<string, ClientData[]> kvp in arraysToReplace) this[kvp.Key] = kvp.Value;
+            foreach (KeyValuePair<string, int[]> kvp in intArraysToReplace) this[kvp.Key] = kvp.Value;
         }
 
         public void Merge(ClientData mergingData) { Merge(mergingData, false); }
@@ -115,8 +135,23 @@ namespace Vre.Server.BusinessLogic
             if (TryGetValue(propertyName, out value))
             {
                 result = value as byte[];
-                if (null == result) result = defaultValue;
-                else read = true;
+                if (null == result)
+                {
+                    int[] ir = value as int[];
+                    if (ir != null)
+                    {
+                        result = new byte[ir.Length];
+                        for (int idx = ir.Length - 1; idx >= 0; idx--) result[idx] = (byte)ir[idx];
+                    }
+                    else
+                    {
+                        result = defaultValue;
+                    }
+                }
+                else
+                {
+                    read = true;
+                }
             }
 
             return result;

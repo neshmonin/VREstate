@@ -20,9 +20,9 @@ namespace Vre.Server.HttpService
             {
                 ClientSession cs = rq.UserInfo.Session;
                 if (cs != null)
-                    ServiceInstances.RequestLogger.Info("Session={0}; BK={1}; URL={2}", cs, browserKey, ctx.Request.Url);
+                    ServiceInstances.RequestLogger.Info("Session={0}; BK={1}; {2}; URL={3}", cs, browserKey, ctx.Request.HttpMethod, ctx.Request.Url);
                 else
-                    ServiceInstances.RequestLogger.Info("Anonymous; BK={0}; URL={1}", browserKey, ctx.Request.Url);
+                    ServiceInstances.RequestLogger.Info("Anonymous; BK={0}; {1}; URL={2}", browserKey, ctx.Request.HttpMethod, ctx.Request.Url);
             }
 
             if (!rq.UserInfo.StaleSession)
