@@ -35,6 +35,19 @@ namespace Vre.Server.BusinessLogic
             InitialView = string.Empty;
         }
 
+        public Site(ClientData data) : base(data) { }
+
+        public override bool UpdateFromClient(ClientData data)
+        {
+            bool result = false;
+
+            Name = data.UpdateProperty("name", Name, ref result);
+            ExcursionModel = data.UpdateProperty("excursionModel", ExcursionModel, ref result);
+            InitialView = data.UpdateProperty("initialView", InitialView, ref result);
+
+            return result;
+        }
+
         public virtual ClientData GetClientData()
         {
             ClientData result = base.GetClientData();

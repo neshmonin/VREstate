@@ -707,13 +707,12 @@ namespace Vre.Server.BusinessLogic
         #region listings
         public static void CheckCreateListing(ClientSession session, User targetUser)
         {
-            // superadmin can make a listing for selling agent
-            if ((session.User.UserRole == User.Role.SuperAdmin)
-                && (targetUser.UserRole == User.Role.SellingAgent)) return;
+            // superadmin can make a listing for anyone
+            if (session.User.UserRole == User.Role.SuperAdmin) return;
 
-            // selling agent can make a listing for himself
-            if ((session.User.UserRole == User.Role.SellingAgent)
-                && (targetUser.Equals(session.User))) return;
+            //// selling agent can make a listing for himself
+            //if ((session.User.UserRole == User.Role.SellingAgent)
+            //    && (targetUser.Equals(session.User))) return;
 
             throw new PermissionException("This operation is not allowed.");
         }

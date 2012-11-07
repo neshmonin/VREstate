@@ -112,6 +112,7 @@ namespace Vre.Server.RemoteService
                 request.Response.Data = new ClientData();
                 request.Response.Data.Add("sid", sessionId);
                 request.Response.Data.Add("keepalivePeriodSec", ServiceInstances.SessionStore.ClientKeepalivePeriodSec);
+                request.Response.Data.Add("userId", ServiceInstances.SessionStore[sessionId].User.AutoID);
             }
             else
             {
@@ -314,7 +315,7 @@ namespace Vre.Server.RemoteService
             else if (pt.Equals("3dt")) product = Listing.ListingType.VirtualTour3D;
             else throw new ArgumentException("Product type is unknown");
 
-            if (string.IsNullOrWhiteSpace(paymentRefId)) throw new ArgumentException("Required parameter missing");
+            //if (string.IsNullOrWhiteSpace(paymentRefId)) throw new ArgumentException("Required parameter missing");
 
             if ((product == Listing.ListingType.ExternalTour) && string.IsNullOrWhiteSpace(productUrl))
                 throw new ArgumentException("External Virtual Tour reference not provided");
@@ -362,7 +363,7 @@ namespace Vre.Server.RemoteService
             }
 
             string listingId = ReverseRequestService.CreateListing(request, userId,
-                /*paymentRefId,*/ product, mslId, Listing.SubjectType.Suite, suiteId, productUrl, expiresOn);
+                product, mslId, Listing.SubjectType.Suite, suiteId, productUrl, expiresOn, paymentRefId);
 
             // request.Response.ResponseCode - set by .CreateListing()
         }

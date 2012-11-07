@@ -26,6 +26,18 @@ namespace Vre.Server.BusinessLogic
             VREConfiguration = vreConfiguration;
         }
 
+        public EstateDeveloper(ClientData data) : base(data) { }
+
+        public override bool UpdateFromClient(ClientData data)
+        {
+            bool result = base.UpdateFromClient(data);
+
+            Name = data.UpdateProperty("name", Name, ref result);
+            VREConfiguration = data.UpdateProperty("configuration", VREConfiguration, ref result);
+
+            return result;
+        }
+        
         public override string ToString()
         {
             return Name;

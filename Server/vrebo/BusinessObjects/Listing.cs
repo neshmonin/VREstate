@@ -47,6 +47,7 @@ namespace Vre.Server.BusinessLogic
             TargetObjectType = type;
             TargetObjectId = targetObjectId;
             ExpiresOn = expiresOn;
+            Enabled = true;
 
             RequestCounter = 0;
             LastRequestTime = DateTime.UtcNow;

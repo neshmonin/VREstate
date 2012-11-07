@@ -577,7 +577,8 @@ namespace Vre.Server.RemoteService
         #region Listing
         public static string CreateListing(IServiceRequest srq, int targetUserId,
             Listing.ListingType product, string mlsId, 
-            Listing.SubjectType type, int targetObjectId, string productUrl, DateTime expiresOn)
+            Listing.SubjectType type, int targetObjectId, string productUrl, DateTime expiresOn,
+            string paymentSystemRefId)
         {
             if (!_configured) configure();
 
@@ -612,6 +613,9 @@ namespace Vre.Server.RemoteService
                         FinancialTransaction.OperationType.Debit, 0m,
                         FinancialTransaction.TranSubject.View,
                         FinancialTransaction.TranTarget.Suite, targetObjectId, listing.AutoID.ToString());
+
+                    if (!string.IsNullOrWhiteSpace(paymentSystemRefId))
+                        ft.SetPaymentSystemReference(FinancialTransaction.PaymentSystemType.CondoExplorer, paymentSystemRefId);
 
                     using (FinancialTransactionDao dao = new FinancialTransactionDao(srq.UserInfo.Session.DbSession))
                     {

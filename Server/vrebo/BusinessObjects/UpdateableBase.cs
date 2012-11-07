@@ -8,7 +8,7 @@ namespace Vre.Server.BusinessLogic
         protected UpdateableBase() : base() { }
         protected UpdateableBase(ClientData data) : base(data)
         {
-            AutoID = int.Parse(data.GetProperty("id", string.Empty));
+            AutoID = data.GetProperty("id", -1);
         }
         public UpdateableBase(UpdateableBase copy) : base(copy) { }
     }

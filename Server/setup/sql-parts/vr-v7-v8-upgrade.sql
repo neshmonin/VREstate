@@ -45,7 +45,7 @@ BEGIN
 		-- ----------------------------------------------------------------------
 
 		CREATE TABLE [dbo].[FT] (
-			[AutoID] [int] NOT NULL,
+			[AutoID] [int] NOT NULL IDENTITY(1,1),
 			[Created] [datetime] NOT NULL,
 			[SystemRefId] [varchar](256) NULL,
 			[InitiatorId] [int] NOT NULL,

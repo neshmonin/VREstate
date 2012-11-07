@@ -30,6 +30,7 @@ namespace Vre.Server.BusinessLogic
         public virtual Wireframe[] WireframeModel { get; set; }
 
         protected SuiteType() { }
+
         public SuiteType(Site constructionSite, string name) : base()
         {
             InitializeNew();
@@ -42,10 +43,30 @@ namespace Vre.Server.BusinessLogic
             if (constructionSite != null) constructionSite.SuiteTypes.Add(this);
         }
 
+        public SuiteType(ClientData data) : base(data) { }
+
         public virtual void debug_addSuite(Suite s)
         {
             s.SuiteType = this;
             SuitesInvolved.Add(s);
+        }
+
+        public override bool UpdateFromClient(ClientData data)
+        {
+            bool result = false;
+
+            Name = data.UpdateProperty("name", Name, ref result);
+            //Model = data.UpdateProperty("modelName", Model, ref changed);
+            BedroomCount = data.UpdateProperty("bedrooms", BedroomCount, ref result);
+            DenCount = data.UpdateProperty("dens", DenCount, ref result);
+            BathroomCount = data.UpdateProperty("bathrooms", BathroomCount, ref result);
+            BalconyCount = data.UpdateProperty("balconies", BalconyCount, ref result);
+            TerraceCount = data.UpdateProperty("terraces", TerraceCount, ref result);
+            //FloorArea.SetValue(
+            //    data.UpdateProperty("area", FloorArea.ValueAs(FloorArea.StoredAs), ref changed),
+            //    ValueWithUM.Unit.SqFeet);
+
+            return result;
         }
 
         public override ClientData GetClientData()
