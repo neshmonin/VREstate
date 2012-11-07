@@ -67,7 +67,7 @@ namespace Vre.Server.BusinessLogic
             /// </summary>
             /// <remarks>
             /// <para>TODO: ???</para>
-            /// <para>The notification owner is in <see cref="ReverseRequest.UserId"/>; this can be used to list user's listings.</para>
+            /// <para>The notification owner is in <see cref="ReverseRequest.UserId"/>; this can be used to list user's view orders.</para>
             /// </remarks>
             NotificationCancel = 5
 

@@ -18,7 +18,7 @@ namespace Vre.Server.RemoteService
         public const string ServicePathPrefix = ServicePathElement0 + "/";
         private const string ServicePathElement0 = "data";
 
-        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, Listing, View, FinancialTransaction }
+        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction }
 
         private static void configure()
         {
@@ -133,17 +133,17 @@ namespace Vre.Server.RemoteService
                     }
                     return;
 
-                case ModelObject.Listing:
+                case ModelObject.ViewOrder:
                     if (null == strObjectId)
                     {
                         if (-1 == objectId)
-                            getListingList(request.UserInfo.Session, request.Request.Query, request.Response, includeDeleted);
+                            getViewOrderList(request.UserInfo.Session, request.Request.Query, request.Response, includeDeleted);
                         else
                             throw new NotImplementedException();
                     }
                     else
                     {
-                        getListing(request.UserInfo.Session, strObjectId, request.Response);
+                        getViewOrder(request.UserInfo.Session, strObjectId, request.Response);
                     }
                     return;
 
@@ -192,9 +192,9 @@ namespace Vre.Server.RemoteService
                     updateUser(request.UserInfo.Session, objectId, request.Request.Data, request.Response);
                     return;
 
-                case ModelObject.Listing:
+                case ModelObject.ViewOrder:
                     if (null == strObjectId) throw new ArgumentException("Object ID is missing.");
-                    updateListing(request.UserInfo.Session, strObjectId, request.Request.Data, request.Response);
+                    updateViewOrder(request.UserInfo.Session, strObjectId, request.Request.Data, request.Response);
                     return;
             }
 
@@ -221,9 +221,9 @@ namespace Vre.Server.RemoteService
                     createUser(request.UserInfo.Session, request.Request.Data, request.Response);
                     return;
 
-                case ModelObject.Listing:
-                    createListing(request.UserInfo.Session, request.Request.Data, request.Response);
-                    return;
+                //case ModelObject.ViewOrder:
+                //    createListing(request.UserInfo.Session, request.Request.Data, request.Response);
+                //    return;
             }
 
             throw new NotImplementedException();
@@ -248,9 +248,9 @@ namespace Vre.Server.RemoteService
                     deleteUser(request.UserInfo.Session, objectId, request.Response);
                     return;
 
-                case ModelObject.Listing:
+                case ModelObject.ViewOrder:
                     if (null == strObjectId) throw new ArgumentException("Object ID is missing.");
-                    deleteListing(request.UserInfo.Session, strObjectId, request.Response);
+                    deleteViewOrder(request.UserInfo.Session, strObjectId, request.Response);
                     return;
             }
 
@@ -270,7 +270,7 @@ namespace Vre.Server.RemoteService
             else if (elements[1].Equals("suite")) mo = ModelObject.Suite;
             else if (elements[1].Equals("user")) mo = ModelObject.User;
             else if (elements[1].Equals("suitetype")) mo = ModelObject.SuiteType;
-            else if (elements[1].Equals("listing")) mo = ModelObject.Listing;
+            else if (elements[1].Equals("viewOrder")) mo = ModelObject.ViewOrder;
             else if (elements[1].Equals("view")) mo = ModelObject.View;
             else if (elements[1].Equals("ft")) mo = ModelObject.FinancialTransaction;
             else throw new ArgumentException("Object path is invalid (2).");
@@ -283,7 +283,7 @@ namespace Vre.Server.RemoteService
             }
             else
             {
-                if (mo != ModelObject.Listing)
+                if (mo != ModelObject.ViewOrder)
                 {
                     if (!int.TryParse(elements[2], out id)) throw new ArgumentException("Object path is invalid (3).");
                 }
@@ -715,27 +715,27 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getListing(ClientSession session, string strObjectId, IResponseData resp)
+        private static void getViewOrder(ClientSession session, string strObjectId, IResponseData resp)
         {
             Guid rqid;
             if (!Guid.TryParseExact(strObjectId, "N", out rqid))
                 throw new ArgumentException();
 
-            Listing listing;
-            using (ListingDao dao = new ListingDao(session.DbSession))
-                listing = dao.GetById(rqid);
+            ViewOrder viewOrder;
+            using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                viewOrder = dao.GetById(rqid);
 
-            if (null == listing) throw new FileNotFoundException("Listing does not exist");
+            if (null == viewOrder) throw new FileNotFoundException("Listing does not exist");
 
-            resp.Data = listing.GetClientData();
+            resp.Data = viewOrder.GetClientData();
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getListingList(ClientSession session, ServiceQuery query, IResponseData resp, bool includeDeleted)
+        private static void getViewOrderList(ClientSession session, ServiceQuery query, IResponseData resp, bool includeDeleted)
         {
             int userId = query.GetParam("userId", -1);
             User user;
-            Listing[] list;
+            ViewOrder[] list;
 
             using (UserDao dao = new UserDao(session.DbSession))
                 user = dao.GetById(userId);
@@ -744,14 +744,14 @@ namespace Vre.Server.RemoteService
 
             RolePermissionCheck.CheckUserAccess(session, user, RolePermissionCheck.UserInfoAccessLevel.Transactional);
 
-            using (ListingDao dao = new ListingDao(session.DbSession))
+            using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
                 list = dao.Get(userId, includeDeleted);
 
             DateTime timeLim = DateTime.MaxValue;
 
             if ("expired".Equals(query["status"]))
             {
-                // filter expired listings only
+                // filter expired view orders only
                 timeLim = DateTime.UtcNow;
             }
 
@@ -761,20 +761,20 @@ namespace Vre.Server.RemoteService
             List<ClientData> result = new List<ClientData>(cnt);
             for (int idx = 0; idx < cnt; idx++)
             {
-                Listing l = list[idx];
+                ViewOrder l = list[idx];
                 if (l.ExpiresOn < timeLim) result.Add(l.GetClientData());
             }
 
             resp.Data = new ClientData();
-            resp.Data.Add("listings", result.ToArray());
+            resp.Data.Add("viewOrders", result.ToArray());
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
         private static void getView(ClientSession session, ServiceQuery query, IResponseData resp)
         {
-            string type = query.GetParam("type", "listing");
+            string type = query.GetParam("type", "viewOrder");
 
-            if (type.Equals("listing")) getViewListing(session, query, resp);
+            if (type.Equals("viewOrder")) getViewViewOrder(session, query, resp);
             else if (type.Equals("site")) getViewSite(session, query, resp);
             else if (type.Equals("building")) throw new NotImplementedException();
             else if (type.Equals("suite")) throw new NotImplementedException();
@@ -782,7 +782,7 @@ namespace Vre.Server.RemoteService
             else throw new NotImplementedException();
         }
 
-        private static void getViewListing(ClientSession session, ServiceQuery query, IResponseData resp)
+        private static void getViewViewOrder(ClientSession session, ServiceQuery query, IResponseData resp)
         {
             string strObjectId = query["id"];
             if (null == strObjectId) throw new ArgumentException("Object ID missing.");
@@ -791,19 +791,19 @@ namespace Vre.Server.RemoteService
             if (!Guid.TryParseExact(strObjectId, "N", out rqid))
                 throw new ArgumentException();
 
-            Listing listing;
-            using (ListingDao dao = new ListingDao(session.DbSession))
-                listing = dao.GetById(rqid);
+            ViewOrder viewOrder;
+            using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                viewOrder = dao.GetById(rqid);
 
-            if ((null == listing) || !listing.Enabled || (listing.ExpiresOn < DateTime.UtcNow)) throw new FileNotFoundException("Undefined or expired listing");
+            if ((null == viewOrder) || !viewOrder.Enabled || (viewOrder.ExpiresOn < DateTime.UtcNow)) throw new FileNotFoundException("Undefined or expired view order");
 
-            listing.Touch();
-            using (ListingDao dao = new ListingDao(session.DbSession))
-                dao.Update(listing);
+            viewOrder.Touch();
+            using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                dao.Update(viewOrder);
 
             Suite suite;
             using (SuiteDao dao = new SuiteDao(session.DbSession))
-                suite = dao.GetById(listing.TargetObjectId);
+                suite = dao.GetById(viewOrder.TargetObjectId);
 
             if (null == suite) throw new FileNotFoundException("Unknown object listed");
 
@@ -812,8 +812,8 @@ namespace Vre.Server.RemoteService
                 new Building[] { suite.Building },
                 new SuiteType[] { suite.SuiteType },
                 new Suite[] { suite },
-                new Listing[] { listing },
-                listing.AutoID,
+                new ViewOrder[] { viewOrder },
+                viewOrder.AutoID,
                 resp);
         }
 
@@ -836,7 +836,7 @@ namespace Vre.Server.RemoteService
                 site.Buildings.ToArray(),  
                 site.SuiteTypes.ToArray(),
                 suites.ToArray(),
-                new Listing[0],
+                new ViewOrder[0],
                 Guid.Empty,
                 resp);
         }
@@ -844,7 +844,7 @@ namespace Vre.Server.RemoteService
         private static void generateViewResponse(
             IEnumerable<Site> sites, IEnumerable<Building> buildings, 
             IEnumerable<SuiteType> suiteTypes, IEnumerable<Suite> suites,
-            IEnumerable<Listing> listings,
+            IEnumerable<ViewOrder> viewOrders,
             Guid primaryListingId,
             IResponseData resp)
         {
@@ -887,21 +887,21 @@ namespace Vre.Server.RemoteService
             }
             resp.Data.Add("sites", elements.ToArray());
             
-            // Cannot reuse listing.GetClientData() here as it exposes too much information
-            elements = new List<ClientData>(listings.Count());
-            foreach (Listing l in listings)
+            // Cannot reuse viewOrder.GetClientData() here as it exposes too much information
+            elements = new List<ClientData>(viewOrders.Count());
+            foreach (ViewOrder l in viewOrders)
             {
                 ClientData cd = new ClientData();
                 cd.Add("id", l.AutoID);
                 cd.Add("suiteId", l.TargetObjectId);  // TODO: now Suites only!!!
-                cd.Add("product", ClientData.ConvertProperty<Listing.ListingType>(l.Product));
+                cd.Add("product", ClientData.ConvertProperty<ViewOrder.ViewOrderType>(l.Product));
                 cd.Add("mlsId", l.MlsId);
                 cd.Add("productUrl", l.ProductUrl);
                 elements.Add(cd);
             }
-            resp.Data.Add("listings", elements.ToArray());
+            resp.Data.Add("viewOrders", elements.ToArray());
 
-            if (!primaryListingId.Equals(Guid.Empty)) resp.Data.Add("primaryListingId", primaryListingId);
+            if (!primaryListingId.Equals(Guid.Empty)) resp.Data.Add("primaryViewOrderId", primaryListingId);
             resp.Data.Add("initialView", "");  // TODO
 
             resp.ResponseCode = HttpStatusCode.OK;
@@ -1054,7 +1054,7 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void updateListing(ClientSession session, string strObjectId, ClientData data, IResponseData resp)
+        private static void updateViewOrder(ClientSession session, string strObjectId, ClientData data, IResponseData resp)
         {
             Guid rqid;
             if (!Guid.TryParseExact(strObjectId, "N", out rqid))
@@ -1062,24 +1062,24 @@ namespace Vre.Server.RemoteService
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
-                Listing listing;
-                using (ListingDao dao = new ListingDao(session.DbSession))
-                    listing = dao.GetById(rqid);
+                ViewOrder viewOrder;
+                using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                    viewOrder = dao.GetById(rqid);
 
-                if (null == listing) throw new FileNotFoundException("Undefined listing");
+                if (null == viewOrder) throw new FileNotFoundException("Undefined view order");
 
                 User owner;
                 using (UserDao dao = new UserDao(session.DbSession))
-                    owner = dao.GetById(listing.OwnerId);
+                    owner = dao.GetById(viewOrder.OwnerId);
 
-                RolePermissionCheck.CheckUpdateListing(session, owner);
+                RolePermissionCheck.CheckUpdateViewOrder(session, owner);
 
-                if (listing.UpdateFromClient(data))
+                if (viewOrder.UpdateFromClient(data))
                 {
-                    listing.MarkUpdated();
+                    viewOrder.MarkUpdated();
 
-                    using (ListingDao dao = new ListingDao(session.DbSession))
-                        dao.Update(listing);
+                    using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                        dao.Update(viewOrder);
 
                     resp.ResponseCode = HttpStatusCode.OK;
                     resp.Data = new ClientData();
@@ -1125,35 +1125,35 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void createListing(ClientSession session, ClientData data, IResponseData resp)
-        {
+        //private static void createListing(ClientSession session, ClientData data, IResponseData resp)
+        //{
 
 
 
-            User.Role role = data.GetProperty<User.Role>("role", User.Role.Visitor);
-            LoginType type = data.GetProperty<LoginType>("type", LoginType.Plain);
-            int estateDeveloperId = data.GetProperty("ed", -1);
-            string login = data.GetProperty("uid", string.Empty);
-            string password = data.GetProperty("pwd", string.Empty);
+        //    User.Role role = data.GetProperty<User.Role>("role", User.Role.Visitor);
+        //    LoginType type = data.GetProperty<LoginType>("type", LoginType.Plain);
+        //    int estateDeveloperId = data.GetProperty("ed", -1);
+        //    string login = data.GetProperty("uid", string.Empty);
+        //    string password = data.GetProperty("pwd", string.Empty);
 
-            using (UserManager manager = new UserManager(session))
-            {
-                manager.Create(role, estateDeveloperId, type, login, password);
-                try
-                {
-                    // create contact info block with any added fields from inbound JSON
-                    User u = manager.Get(type, role, estateDeveloperId, login);
-                    u.UpdateFromClient(data);
-                    resp.ResponseCode = HttpStatusCode.OK;
-                }
-                catch (Exception ex)
-                {
-                    resp.ResponseCode = HttpStatusCode.Created;
-                    resp.ResponseCodeDescription = "Contact information was not stored.";
-                    ServiceInstances.Logger.Error("Contact information for created user {0}[{1}] was not saved: {2}", type, login, ex);
-                }
-            }
-        }
+        //    using (UserManager manager = new UserManager(session))
+        //    {
+        //        manager.Create(role, estateDeveloperId, type, login, password);
+        //        try
+        //        {
+        //            // create contact info block with any added fields from inbound JSON
+        //            User u = manager.Get(type, role, estateDeveloperId, login);
+        //            u.UpdateFromClient(data);
+        //            resp.ResponseCode = HttpStatusCode.OK;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            resp.ResponseCode = HttpStatusCode.Created;
+        //            resp.ResponseCodeDescription = "Contact information was not stored.";
+        //            ServiceInstances.Logger.Error("Contact information for created user {0}[{1}] was not saved: {2}", type, login, ex);
+        //        }
+        //    }
+        //}
         #endregion
 
         #region delete
@@ -1172,27 +1172,27 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void deleteListing(ClientSession session, string strObjectId, IResponseData resp)
+        private static void deleteViewOrder(ClientSession session, string strObjectId, IResponseData resp)
         {
             Guid rqid;
             if (!Guid.TryParseExact(strObjectId, "N", out rqid))
                 throw new ArgumentException();
 
-            Listing listing;
-            using (ListingDao dao = new ListingDao(session.DbSession))
-                listing = dao.GetById(rqid);
+            ViewOrder viewOrder;
+            using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                viewOrder = dao.GetById(rqid);
 
-            if (null == listing) throw new FileNotFoundException("Undefined listing");
+            if (null == viewOrder) throw new FileNotFoundException("Undefined view order");
 
             User owner;
             using (UserDao dao = new UserDao(session.DbSession))
-                owner = dao.GetById(listing.OwnerId);
+                owner = dao.GetById(viewOrder.OwnerId);
 
-            RolePermissionCheck.CheckDeleteListing(session, owner);
+            RolePermissionCheck.CheckDeleteViewOrder(session, owner);
 
-            listing.MarkDeleted();
-            using (ListingDao dao = new ListingDao(session.DbSession))
-                dao.Update(listing);
+            viewOrder.MarkDeleted();
+            using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                dao.Update(viewOrder);
 
             resp.ResponseCode = HttpStatusCode.OK;
             resp.Data = new ClientData();

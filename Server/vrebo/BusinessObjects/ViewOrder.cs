@@ -2,9 +2,9 @@
 
 namespace Vre.Server.BusinessLogic
 {
-    public class Listing : UpdateableGuidBase
+    public class ViewOrder : UpdateableGuidBase
     {
-        public enum ListingType : int
+        public enum ViewOrderType : int
         {
             FloorPlan = 0,
             ExternalTour = 1,
@@ -24,16 +24,16 @@ namespace Vre.Server.BusinessLogic
         public int RequestCounter { get; private set; }
         public DateTime LastRequestTime { get; private set; }
         
-        public ListingType Product { get; private set; }
+        public ViewOrderType Product { get; private set; }
         public string MlsId { get; private set; }
         public string ProductUrl { get; private set; }
         public SubjectType TargetObjectType { get; private set; }
         public int TargetObjectId { get; private set; }
 
-        private Listing() { }
+        private ViewOrder() { }
 
-        public Listing(int ownerId, 
-            Listing.ListingType product, string mlsId, 
+        public ViewOrder(int ownerId, 
+            ViewOrder.ViewOrderType product, string mlsId, 
             SubjectType type, int targetObjectId, string productUrl, DateTime expiresOn)
         {
             InitializeNew();
@@ -54,7 +54,7 @@ namespace Vre.Server.BusinessLogic
         }
 
         public void Update(
-            Listing.ListingType product, string mlsId,
+            ViewOrder.ViewOrderType product, string mlsId,
             string productUrl, DateTime expiresOn)
         {
             Product = product;
@@ -71,9 +71,9 @@ namespace Vre.Server.BusinessLogic
             LastRequestTime = DateTime.UtcNow;
         }
 
-        public Listing (ClientData data) : base(data)
+        public ViewOrder(ClientData data) : base(data)
         {
-            Product = data.GetProperty<ListingType>("product", ListingType.FloorPlan);
+            Product = data.GetProperty<ViewOrderType>("product", ViewOrderType.FloorPlan);
             MlsId = data.GetProperty("mlsIs", string.Empty);
             ProductUrl = data.GetProperty("productUrl", string.Empty);
             TargetObjectType = data.GetProperty<SubjectType>("targetObjectType", SubjectType.Suite);
@@ -84,7 +84,7 @@ namespace Vre.Server.BusinessLogic
 
         public override ClientData GetClientData()
         {
-            // See also Vre.Server.RemoteService.DataService.getListing()
+            // See also Vre.Server.RemoteService.DataService.getViewOrder()
 
             ClientData result = base.GetClientData();
 

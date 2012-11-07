@@ -19,7 +19,7 @@ namespace Vre.Server.HttpService
         private AliasMap _map, _testMap;
         private ButtonStoreFsNameCache _imagePathCache;
         private bool _allowReallyExtendedLogging;
-        private string _clientListingTemplate, _testClientListingTemplate;
+        private string _clientViewOrderTemplate, _testViewOrderListingTemplate;
 
         public RedirectionService() : base("HTTP Redirection")
         {
@@ -43,8 +43,8 @@ namespace Vre.Server.HttpService
             _map = new AliasMap(ServiceInstances.Configuration.GetValue("RedirectionAliasMapFile", "aliases.config"));
             _testMap = new AliasMap(ServiceInstances.Configuration.GetValue("RedirectionTestAliasMapFile", "aliases.test.config"));
 
-            _clientListingTemplate = ServiceInstances.Configuration.GetValue("RedirectionClientListingTemplate", "https://vrt.3dcondox.com/VREstate.html?listingId={0}");
-            _testClientListingTemplate = ServiceInstances.Configuration.GetValue("RedirectionTestClientListingTemplate", "https://vrt.3dcondox.com/vre/VREstate.html?listingId={0}");
+            _clientViewOrderTemplate = ServiceInstances.Configuration.GetValue("RedirectionClientViewOrderTemplate", "https://vrt.3dcondox.com/VREstate.html?viewOrderId={0}");
+            _testViewOrderListingTemplate = ServiceInstances.Configuration.GetValue("RedirectionTestClientViewOrderTemplate", "https://vrt.3dcondox.com/vre/VREstate.html?viewOrderId={0}");
         }
 
         protected override IResponseData process(string browserKey, HttpListenerContext ctx)
@@ -179,7 +179,7 @@ namespace Vre.Server.HttpService
             }
             else
             {
-                finalUri = string.Format(testMode ? _testClientListingTemplate : _clientListingTemplate, id);
+                finalUri = string.Format(testMode ? _testViewOrderListingTemplate : _clientViewOrderTemplate, id);
             }
 
             //ctx.Request.UrlReferrer;

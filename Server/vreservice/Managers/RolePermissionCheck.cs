@@ -704,8 +704,8 @@ namespace Vre.Server.BusinessLogic
         }
         #endregion
 
-        #region listings
-        public static void CheckCreateListing(ClientSession session, User targetUser)
+        #region view orders
+        public static void CheckCreateViewOrder(ClientSession session, User targetUser)
         {
             // superadmin can make a listing for anyone
             if (session.User.UserRole == User.Role.SuperAdmin) return;
@@ -717,14 +717,14 @@ namespace Vre.Server.BusinessLogic
             throw new PermissionException("This operation is not allowed.");
         }
 
-        public static void CheckUpdateListing(ClientSession session, User targetUser)
+        public static void CheckUpdateViewOrder(ClientSession session, User targetUser)
         {
-            CheckCreateListing(session, targetUser);  // same permissions
+            CheckCreateViewOrder(session, targetUser);  // same permissions
         }
 
-        public static void CheckDeleteListing(ClientSession session, User targetUser)
+        public static void CheckDeleteViewOrder(ClientSession session, User targetUser)
         {
-            CheckCreateListing(session, targetUser);  // same permissions
+            CheckCreateViewOrder(session, targetUser);  // same permissions
         }
         #endregion
     }

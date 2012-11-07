@@ -22,7 +22,7 @@ namespace Vre.Server.RemoteService
         private static bool _smtpUseSsl;
         private static string _smtpLogin;
         private static string _smtpPassword;
-        private static string _listingUrlTemplate;
+        private static string _viewOrderUrlTemplate;
 
         private static Dictionary<string, string> _messageTemplates = new Dictionary<string, string>();
 
@@ -46,7 +46,7 @@ namespace Vre.Server.RemoteService
 
             _linkExpirationTime = new TimeSpan(0, 0, ServiceInstances.Configuration.GetValue("ReversRequestLinkExpirationSec", 3600));
 
-            _listingUrlTemplate = ServiceInstances.Configuration.GetValue("ListingUrlTemplate", "http://ref.3dcondox.com/go?id={0}");
+            _viewOrderUrlTemplate = ServiceInstances.Configuration.GetValue("ViewOrderUrlTemplate", "http://ref.3dcondox.com/go?id={0}");
 
             scanTemplates(ServiceInstances.Configuration.GetValue("MessageTemplateRoot", "."));
 
@@ -574,37 +574,37 @@ namespace Vre.Server.RemoteService
         }
         #endregion
 
-        #region Listing
-        public static string CreateListing(IServiceRequest srq, int targetUserId,
-            Listing.ListingType product, string mlsId, 
-            Listing.SubjectType type, int targetObjectId, string productUrl, DateTime expiresOn,
+        #region ViewOrder
+        public static string CreateViewOrder(IServiceRequest srq, int targetUserId,
+            ViewOrder.ViewOrderType product, string mlsId, 
+            ViewOrder.SubjectType type, int targetObjectId, string productUrl, DateTime expiresOn,
             string paymentSystemRefId)
         {
             if (!_configured) configure();
 
             string result = null;
             User targetUser;
-            Listing listing;
+            ViewOrder viewOrder;
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(srq.UserInfo.Session.DbSession))
             {
                 using (UserDao dao = new UserDao(srq.UserInfo.Session.DbSession))
                     targetUser = dao.GetById(targetUserId);
 
-                if (null == targetUser) targetUser = srq.UserInfo.Session.User;  // if unknown/not specified - make a listing for caller
+                if (null == targetUser) targetUser = srq.UserInfo.Session.User;  // if unknown/not specified - make a view order for caller
 
-                RolePermissionCheck.CheckCreateListing(srq.UserInfo.Session, targetUser);
+                RolePermissionCheck.CheckCreateViewOrder(srq.UserInfo.Session, targetUser);
 
-                using (ListingDao dao = new ListingDao(srq.UserInfo.Session.DbSession))
-                    listing = dao.Get(targetUser.AutoID, type, targetObjectId);
+                using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))
+                    viewOrder = dao.Get(targetUser.AutoID, type, targetObjectId);
 
-                if (null == listing)
+                if (null == viewOrder)
                 {
-                    listing = new Listing(targetUser.AutoID, 
+                    viewOrder = new ViewOrder(targetUser.AutoID, 
                         product, mlsId, type, targetObjectId, productUrl, expiresOn);
 
-                    using (ListingDao dao = new ListingDao(srq.UserInfo.Session.DbSession))
-                        dao.Create(listing);
+                    using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))
+                        dao.Create(viewOrder);
 
                     // Generate financial transaction
                     //
@@ -612,7 +612,7 @@ namespace Vre.Server.RemoteService
                         FinancialTransaction.AccountType.User, targetUser.AutoID,
                         FinancialTransaction.OperationType.Debit, 0m,
                         FinancialTransaction.TranSubject.View,
-                        FinancialTransaction.TranTarget.Suite, targetObjectId, listing.AutoID.ToString());
+                        FinancialTransaction.TranTarget.Suite, targetObjectId, viewOrder.AutoID.ToString());
 
                     if (!string.IsNullOrWhiteSpace(paymentSystemRefId))
                         ft.SetPaymentSystemReference(FinancialTransaction.PaymentSystemType.CondoExplorer, paymentSystemRefId);
@@ -628,17 +628,17 @@ namespace Vre.Server.RemoteService
                 }
                 else
                 {
-                    listing.Update(product, mlsId, productUrl, expiresOn);
+                    viewOrder.Update(product, mlsId, productUrl, expiresOn);
 
-                    using (ListingDao dao = new ListingDao(srq.UserInfo.Session.DbSession))
-                        dao.Update(listing);
+                    using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))
+                        dao.Update(viewOrder);
 
                     result = Utilities.GenerateReferenceNumber();
                 }
 
                 srq.Response.ResponseCode = HttpStatusCode.OK;
                 srq.Response.Data = new ClientData();
-                srq.Response.Data.Add("listing-url", string.Format(_listingUrlTemplate, listing.AutoID.ToString("N")));
+                srq.Response.Data.Add("viewOrder-url", string.Format(_viewOrderUrlTemplate, viewOrder.AutoID.ToString("N")));
                 // TODO: generate button into listing response
                 //srq.Response.Data.Add("button-url", string.Format(_listingUrlTemplate, request.Id.ToString("N")));
                 srq.Response.Data.Add("ref", result);
@@ -647,8 +647,8 @@ namespace Vre.Server.RemoteService
             }
 
             ServiceInstances.Logger.Info(
-                "User {0} created a listing for user {1}: ({2}) for {3} id={4}, reference URL={5}, expires on {6}, RID={7}, STRN={8}",
-                srq.UserInfo.Session.User, targetUser, product, type, targetObjectId, productUrl, expiresOn, listing.AutoID, result);
+                "User {0} created a view order for user {1}: ({2}) for {3} id={4}, reference URL={5}, expires on {6}, RID={7}, STRN={8}",
+                srq.UserInfo.Session.User, targetUser, product, type, targetObjectId, productUrl, expiresOn, viewOrder.AutoID, result);
 
             return result;
         }

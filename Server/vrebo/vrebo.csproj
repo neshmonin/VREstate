@@ -115,7 +115,7 @@
     <Compile Include="BusinessObjects\ContactInfo.cs" />
     <Compile Include="BusinessObjects\BrokerageInfo.cs" />
     <Compile Include="BusinessObjects\FinancialTransaction.cs" />
-    <Compile Include="BusinessObjects\Listing.cs" />
+    <Compile Include="BusinessObjects\ViewOrder.cs" />
     <Compile Include="BusinessObjects\PhoneNumber.cs" />
     <Compile Include="BusinessObjects\UserLicense.cs" />
     <Compile Include="BusinessObjects\Wireframe.cs" />

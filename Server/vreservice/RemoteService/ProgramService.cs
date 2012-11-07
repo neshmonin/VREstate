@@ -249,9 +249,9 @@ namespace Vre.Server.RemoteService
 
             if (string.IsNullOrWhiteSpace(entity)) throw new ArgumentException("entity not defined");
 
-            if (entity.Equals("listing"))
+            if (entity.Equals("viewOrder"))
             {
-                registerListing(request);
+                registerViewOrder(request);
             }
             else if (entity.Equals("user"))
             {
@@ -282,10 +282,10 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void registerListing(IServiceRequest request)
+        private static void registerViewOrder(IServiceRequest request)
         {
             DateTime expiresOn;
-            Listing.ListingType product;
+            ViewOrder.ViewOrderType product;
             string paymentRefId = request.Request.Query["pr"];
             string productUrl = request.Request.Query["evt_url"];
             string mslId = request.Request.Query["msl_id"];
@@ -310,14 +310,14 @@ namespace Vre.Server.RemoteService
 
             string pt = request.Request.Query["product"];
             if (string.IsNullOrWhiteSpace(pt)) throw new ArgumentException("Product type missing");
-            if (pt.Equals("fp")) product = Listing.ListingType.FloorPlan;
-            else if (pt.Equals("evt")) product = Listing.ListingType.ExternalTour;
-            else if (pt.Equals("3dt")) product = Listing.ListingType.VirtualTour3D;
+            if (pt.Equals("fp")) product = ViewOrder.ViewOrderType.FloorPlan;
+            else if (pt.Equals("evt")) product = ViewOrder.ViewOrderType.ExternalTour;
+            else if (pt.Equals("3dt")) product = ViewOrder.ViewOrderType.VirtualTour3D;
             else throw new ArgumentException("Product type is unknown");
 
             //if (string.IsNullOrWhiteSpace(paymentRefId)) throw new ArgumentException("Required parameter missing");
 
-            if ((product == Listing.ListingType.ExternalTour) && string.IsNullOrWhiteSpace(productUrl))
+            if ((product == ViewOrder.ViewOrderType.ExternalTour) && string.IsNullOrWhiteSpace(productUrl))
                 throw new ArgumentException("External Virtual Tour reference not provided");
 
             if (string.IsNullOrWhiteSpace(mslId))
@@ -355,15 +355,15 @@ namespace Vre.Server.RemoteService
                 throw new NotImplementedException();
             }
 
-            // use override for listing owner
+            // use override for view order owner
             int userId = -1;
             if (!string.IsNullOrWhiteSpace(ownerId))
             {
                 if (!int.TryParse(ownerId, out userId)) userId = -1;
             }
 
-            string listingId = ReverseRequestService.CreateListing(request, userId,
-                product, mslId, Listing.SubjectType.Suite, suiteId, productUrl, expiresOn, paymentRefId);
+            string viewOrderId = ReverseRequestService.CreateViewOrder(request, userId,
+                product, mslId, ViewOrder.SubjectType.Suite, suiteId, productUrl, expiresOn, paymentRefId);
 
             // request.Response.ResponseCode - set by .CreateListing()
         }

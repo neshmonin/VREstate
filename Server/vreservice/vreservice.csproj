@@ -144,7 +144,7 @@
     <Compile Include="Dao\AccountDao.cs" />
     <Compile Include="Dao\BuildingDao.cs" />
     <Compile Include="Dao\FinancialTransactionDao.cs" />
-    <Compile Include="Dao\ListingDao.cs" />
+    <Compile Include="Dao\ViewOrderDao.cs" />
     <Compile Include="Dao\OptionDao.cs" />
     <Compile Include="Dao\OptionTypeDao.cs" />
     <Compile Include="Dao\ReverseRequestDao.cs" />
@@ -253,7 +253,7 @@
     <EmbeddedResource Include="Mappings\ReverseRequest.hbm.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Mappings\Listing.hbm.xml">
+    <EmbeddedResource Include="Mappings\ViewOrder.hbm.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Mappings\FinancialTransaction.hbm.xml">
