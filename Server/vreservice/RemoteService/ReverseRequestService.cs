@@ -638,7 +638,8 @@ namespace Vre.Server.RemoteService
 
                 srq.Response.ResponseCode = HttpStatusCode.OK;
                 srq.Response.Data = new ClientData();
-                srq.Response.Data.Add("viewOrder-url", string.Format(_viewOrderUrlTemplate, viewOrder.AutoID.ToString("N")));
+                srq.Response.Data.Add("viewOrder-url", ConstructViewOrderUrl(viewOrder));
+                srq.Response.Data.Add("viewOrder-id", viewOrder.AutoID);
                 // TODO: generate button into listing response
                 //srq.Response.Data.Add("button-url", string.Format(_listingUrlTemplate, request.Id.ToString("N")));
                 srq.Response.Data.Add("ref", result);
@@ -651,6 +652,13 @@ namespace Vre.Server.RemoteService
                 srq.UserInfo.Session.User, targetUser, product, type, targetObjectId, productUrl, expiresOn, viewOrder.AutoID, result);
 
             return result;
+        }
+
+        public static string ConstructViewOrderUrl(ViewOrder viewOrder)
+        {
+            if (!_configured) configure();
+
+            return string.Format(_viewOrderUrlTemplate, viewOrder.AutoID.ToString("N"));
         }
 
         //public static void DecodeListing(ClientSession session, string listingId,

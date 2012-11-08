@@ -728,6 +728,7 @@ namespace Vre.Server.RemoteService
             if (null == viewOrder) throw new FileNotFoundException("Listing does not exist");
 
             resp.Data = viewOrder.GetClientData();
+            resp.Data.Add("viewOrder-url", ReverseRequestService.ConstructViewOrderUrl(viewOrder));
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
@@ -761,8 +762,13 @@ namespace Vre.Server.RemoteService
             List<ClientData> result = new List<ClientData>(cnt);
             for (int idx = 0; idx < cnt; idx++)
             {
-                ViewOrder l = list[idx];
-                if (l.ExpiresOn < timeLim) result.Add(l.GetClientData());
+                ViewOrder vo = list[idx];
+                if (vo.ExpiresOn < timeLim)
+                {
+                    ClientData cd = vo.GetClientData();
+                    cd.Add("viewOrder-url", ReverseRequestService.ConstructViewOrderUrl(vo));
+                    result.Add(cd);
+                }
             }
 
             resp.Data = new ClientData();
@@ -792,14 +798,20 @@ namespace Vre.Server.RemoteService
                 throw new ArgumentException();
 
             ViewOrder viewOrder;
-            using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
-                viewOrder = dao.GetById(rqid);
 
-            if ((null == viewOrder) || !viewOrder.Enabled || (viewOrder.ExpiresOn < DateTime.UtcNow)) throw new FileNotFoundException("Undefined or expired view order");
+            using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
+            {
+                using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                    viewOrder = dao.GetById(rqid);
 
-            viewOrder.Touch();
-            using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
-                dao.Update(viewOrder);
+                if ((null == viewOrder) || !viewOrder.Enabled || (viewOrder.ExpiresOn < DateTime.UtcNow)) throw new FileNotFoundException("Undefined or expired view order");
+
+                viewOrder.Touch();
+                using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                    dao.Update(viewOrder);
+
+                tran.Commit();
+            }
 
             Suite suite;
             using (SuiteDao dao = new SuiteDao(session.DbSession))
@@ -1178,21 +1190,26 @@ namespace Vre.Server.RemoteService
             if (!Guid.TryParseExact(strObjectId, "N", out rqid))
                 throw new ArgumentException();
 
-            ViewOrder viewOrder;
-            using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
-                viewOrder = dao.GetById(rqid);
+            using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
+            {
+                ViewOrder viewOrder;
+                using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                    viewOrder = dao.GetById(rqid);
 
-            if (null == viewOrder) throw new FileNotFoundException("Undefined view order");
+                if (null == viewOrder) throw new FileNotFoundException("Undefined view order");
 
-            User owner;
-            using (UserDao dao = new UserDao(session.DbSession))
-                owner = dao.GetById(viewOrder.OwnerId);
+                User owner;
+                using (UserDao dao = new UserDao(session.DbSession))
+                    owner = dao.GetById(viewOrder.OwnerId);
 
-            RolePermissionCheck.CheckDeleteViewOrder(session, owner);
+                RolePermissionCheck.CheckDeleteViewOrder(session, owner);
 
-            viewOrder.MarkDeleted();
-            using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
-                dao.Update(viewOrder);
+                viewOrder.MarkDeleted();
+                using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                    dao.Update(viewOrder);
+
+                tran.Commit();
+            }
 
             resp.ResponseCode = HttpStatusCode.OK;
             resp.Data = new ClientData();
