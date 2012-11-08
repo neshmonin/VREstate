@@ -143,7 +143,7 @@ namespace Vre.Server.RemoteService
                     }
                     else
                     {
-                        getViewOrder(request.UserInfo.Session, strObjectId, request.Response);
+                        getViewOrder(request.UserInfo.Session, request.Request.Query, strObjectId, request.Response);
                     }
                     return;
 
@@ -194,7 +194,7 @@ namespace Vre.Server.RemoteService
 
                 case ModelObject.ViewOrder:
                     if (null == strObjectId) throw new ArgumentException("Object ID is missing.");
-                    updateViewOrder(request.UserInfo.Session, strObjectId, request.Request.Data, request.Response);
+                    updateViewOrder(request.UserInfo.Session, request.Request.Query, strObjectId, request.Request.Data, request.Response);
                     return;
             }
 
@@ -715,7 +715,7 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getViewOrder(ClientSession session, string strObjectId, IResponseData resp)
+        private static void getViewOrder(ClientSession session, ServiceQuery query, string strObjectId, IResponseData resp)
         {
             Guid rqid;
             if (!Guid.TryParseExact(strObjectId, "N", out rqid))
@@ -729,6 +729,33 @@ namespace Vre.Server.RemoteService
 
             resp.Data = viewOrder.GetClientData();
             resp.Data.Add("viewOrder-url", ReverseRequestService.ConstructViewOrderUrl(viewOrder));
+
+            if ("true".Equals(query["verbose"]))
+            {
+                string label = null;
+                switch (viewOrder.TargetObjectType)
+                {
+                    case ViewOrder.SubjectType.Building:
+                        {
+                            Building b;
+                            using (BuildingDao dao = new BuildingDao(session.DbSession))
+                                b = dao.GetById(viewOrder.TargetObjectId);
+                            label = AddressHelper.ConvertToReadableAddress(b, null);
+                        }
+                        break;
+
+                    case ViewOrder.SubjectType.Suite:
+                        {
+                            Suite s;
+                            using (SuiteDao dao = new SuiteDao(session.DbSession))
+                                s = dao.GetById(viewOrder.TargetObjectId);
+                            label = AddressHelper.ConvertToReadableAddress(s.Building, s);
+                        }
+                        break;
+                }
+                if (label != null) resp.Data.Add("label", label);
+            }
+
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
@@ -1066,11 +1093,13 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void updateViewOrder(ClientSession session, string strObjectId, ClientData data, IResponseData resp)
+        private static void updateViewOrder(ClientSession session, ServiceQuery query, string strObjectId, ClientData data, IResponseData resp)
         {
             Guid rqid;
             if (!Guid.TryParseExact(strObjectId, "N", out rqid))
                 throw new ArgumentException();
+
+            string paymentSystemRefId = query["pr"];
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
@@ -1093,8 +1122,33 @@ namespace Vre.Server.RemoteService
                     using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
                         dao.Update(viewOrder);
 
+                    // Generate financial transaction
+                    //
+                    FinancialTransaction.TranTarget tt = FinancialTransaction.TranTarget.Suite;
+                    switch (viewOrder.TargetObjectType)
+                    {
+                        case ViewOrder.SubjectType.Building: tt = FinancialTransaction.TranTarget.Building; break;
+                        case ViewOrder.SubjectType.Suite: tt = FinancialTransaction.TranTarget.Suite; break;
+                    }
+                    FinancialTransaction ft = new FinancialTransaction(session.User.AutoID,
+                        FinancialTransaction.AccountType.User, viewOrder.OwnerId,
+                        FinancialTransaction.OperationType.Debit, 0m,
+                        FinancialTransaction.TranSubject.View,
+                        tt, viewOrder.TargetObjectId, viewOrder.AutoID.ToString());
+
+                    if (!string.IsNullOrWhiteSpace(paymentSystemRefId))
+                        ft.SetPaymentSystemReference(FinancialTransaction.PaymentSystemType.CondoExplorer, paymentSystemRefId);
+
+                    using (FinancialTransactionDao dao = new FinancialTransactionDao(session.DbSession))
+                    {
+                        dao.Create(ft);
+                        ft.SetSystemReferenceId(Utilities.FinancialTransactionRefNum(ft));
+                        dao.Update(ft);
+                    }
+
                     resp.ResponseCode = HttpStatusCode.OK;
                     resp.Data = new ClientData();
+                    resp.Data.Add("ref", ft.SystemRefId);
                     resp.Data.Add("updated", 1);
                 }
                 else
