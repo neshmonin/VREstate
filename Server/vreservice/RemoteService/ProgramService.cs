@@ -5,6 +5,7 @@ using System.Net;
 using NHibernate;
 using Vre.Server.BusinessLogic;
 using Vre.Server.HttpService;
+using System.Web;
 
 namespace Vre.Server.RemoteService
 {
@@ -317,8 +318,12 @@ namespace Vre.Server.RemoteService
 
             //if (string.IsNullOrWhiteSpace(paymentRefId)) throw new ArgumentException("Required parameter missing");
 
-            if ((product == ViewOrder.ViewOrderType.ExternalTour) && string.IsNullOrWhiteSpace(productUrl))
-                throw new ArgumentException("External Virtual Tour reference not provided");
+            if (product == ViewOrder.ViewOrderType.ExternalTour)
+            {
+                if (string.IsNullOrWhiteSpace(productUrl))
+                    throw new ArgumentException("External Virtual Tour reference not provided");
+                productUrl = HttpUtility.UrlDecode(productUrl);
+            }
 
             if (string.IsNullOrWhiteSpace(mslId))
             {

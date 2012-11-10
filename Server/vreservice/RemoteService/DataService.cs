@@ -727,8 +727,8 @@ namespace Vre.Server.RemoteService
 
             if (null == viewOrder) throw new FileNotFoundException("Listing does not exist");
 
+            viewOrder.ViewOrderURL = ReverseRequestService.ConstructViewOrderUrl(viewOrder);
             resp.Data = viewOrder.GetClientData();
-            resp.Data.Add("viewOrder-url", ReverseRequestService.ConstructViewOrderUrl(viewOrder));
 
             if ("true".Equals(query["verbose"]))
             {
@@ -792,8 +792,8 @@ namespace Vre.Server.RemoteService
                 ViewOrder vo = list[idx];
                 if (vo.ExpiresOn < timeLim)
                 {
+                    vo.ViewOrderURL = ReverseRequestService.ConstructViewOrderUrl(vo);
                     ClientData cd = vo.GetClientData();
-                    cd.Add("viewOrder-url", ReverseRequestService.ConstructViewOrderUrl(vo));
                     result.Add(cd);
                 }
             }

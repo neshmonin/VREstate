@@ -30,6 +30,11 @@ namespace Vre.Server.BusinessLogic
         public SubjectType TargetObjectType { get; private set; }
         public int TargetObjectId { get; private set; }
 
+        /// <summary>
+        /// NON-PERSISTENT PROPERTY
+        /// </summary>
+        public string ViewOrderURL { get; set; }
+
         private ViewOrder() { }
 
         public ViewOrder(int ownerId, 
@@ -80,6 +85,7 @@ namespace Vre.Server.BusinessLogic
             TargetObjectId = data.GetProperty("targetObjectId", -1);
             RequestCounter = data.GetProperty("requestCounter", 0);
             LastRequestTime = data.GetProperty("lastRequestTime", DateTime.MinValue);
+            ViewOrderURL = data.GetProperty("viewOrder-url", string.Empty);
         }
 
         public override ClientData GetClientData()
@@ -100,6 +106,8 @@ namespace Vre.Server.BusinessLogic
 
             result.Add("requestCounter", RequestCounter);  // informational (stats) only
             result.Add("lastRequestTime", LastRequestTime);  // informational (stats) only
+
+            result.Add("viewOrder-url", ViewOrderURL);
 
             return result;
         }

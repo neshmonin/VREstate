@@ -72,32 +72,28 @@ namespace Vre.Server.Dao
         {
             lock (_session)
             {
-                StringBuilder qs = new StringBuilder("FROM Vre.Server.BusinessLogic.Building WHERE");
+                StringBuilder qs = new StringBuilder("FROM Vre.Server.BusinessLogic.Building WHERE Deleted=false");
                 int filterCriteriaCnt = 0;
 
                 if (country != null) 
                 { 
-                    qs.Append(" Country=:co"); filterCriteriaCnt++; 
+                    qs.Append(" AND Country=:co"); filterCriteriaCnt++; 
                 }
                 if (postalCode != null) 
                 { 
-                    if (filterCriteriaCnt > 0) qs.Append(" AND"); 
-                    qs.Append(" PostalCode=:po"); filterCriteriaCnt++; 
+                    qs.Append(" AND PostalCode=:po"); filterCriteriaCnt++; 
                 }
                 if (state != null) 
                 { 
-                    if (filterCriteriaCnt > 0) qs.Append(" AND"); 
-                    qs.Append(" StateProvince=:stpr"); filterCriteriaCnt++; 
+                    qs.Append(" AND StateProvince=:stpr"); filterCriteriaCnt++; 
                 }
                 if (municipality != null) 
                 { 
-                    if (filterCriteriaCnt > 0) qs.Append(" AND"); 
-                    qs.Append(" City=:mu"); filterCriteriaCnt++; 
+                    qs.Append(" AND City=:mu"); filterCriteriaCnt++; 
                 }
                 if (addressFreeText != null) 
                 { 
-                    if (filterCriteriaCnt > 0) qs.Append(" AND"); 
-                    qs.Append(" AddressLine1+' '+AddressLine2 LIKE :fa"); filterCriteriaCnt++; 
+                    qs.Append(" AND AddressLine1+' '+AddressLine2 LIKE :fa"); filterCriteriaCnt++; 
                 }
 
                 if (0 == filterCriteriaCnt) throw new ArgumentException("Need at least one address criterion");
@@ -111,17 +107,6 @@ namespace Vre.Server.Dao
                 if (addressFreeText != null) q = q.SetString("fa", addressFreeText.Replace('*', '%'));
                     
                 return q.List<Building>();
-
-                //return _session.CreateQuery(
-                //    "FROM Vre.Server.BusinessLogic.Building WHERE Country=:co " 
-                //    + "AND PostalCode=:po AND StateProvince=:stpr AND City=:mu "
-                //    + "AND AddressLine1+' '+AddressLine2 LIKE :fa")
-                //    .SetString("co", country)
-                //    .SetString("po", postalCode)
-                //    .SetString("stpr", state)
-                //    .SetString("mu", municipality)
-                //    .SetString("fa", addressFreeText.Replace('*', '%'))
-                //    .List<Building>();
             }
         }
     }
