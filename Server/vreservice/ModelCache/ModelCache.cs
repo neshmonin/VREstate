@@ -235,7 +235,14 @@ namespace Vre.Server.ModelCache
 
                         foreach (string className in modelInfo.Geometries.Keys)
                         {
-                            SuiteClassInfo sc = new SuiteClassInfo(processGeometries(modelInfo.Geometries[className]));
+                            Model.Kmz.Geometry[] geometries = modelInfo.Geometries[className];
+                            if (null == geometries)
+                            {
+                                ServiceInstances.Logger.Error("Model ({0} ({1})) contains no geometries for suite type '{2}'.",
+                                    site.Name, site.AutoID, className);
+                                continue;
+                            }
+                            SuiteClassInfo sc = new SuiteClassInfo(processGeometries(geometries));
                             _classInfo.Add(className, sc);
                         }
                     }  // site-level import

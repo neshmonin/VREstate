@@ -142,6 +142,7 @@ BEGIN
 		-- ----------------------------------------------------------------------
 
 		DECLARE @rpath varchar(1024)
+		DECLARE @rfilebase varchar(1024)
 		DECLARE @rfile varchar(1024)
 		DECLARE @path varchar(1024)
 		DECLARE @exists int
@@ -187,24 +188,42 @@ BEGIN
 		CLOSE bldg
 		DEALLOCATE bldg
 		
+
 		DECLARE sttp CURSOR FOR SELECT s.[EstateDeveloperID] AS [eid], st.[SiteID] as [sid], st.[AutoID], st.[Name]
 			FROM [dbo].[SuiteTypes] st
 			INNER JOIN [dbo].[Sites] s ON s.[AutoID] = st.[SiteID]
-			WHERE st.[Deleted] = 0
+			WHERE st.[Deleted] = 0 AND [FloorPlanUrl] IS NULL
 		OPEN sttp
 
 		FETCH NEXT FROM sttp INTO @eid, @sid, @id, @name
 		WHILE @@FETCH_STATUS = 0 BEGIN
 			
-			SET @rfile = @vrrel + CAST(@eid AS varchar(4)) + '\' + CAST(@sid AS varchar(4)) + '\SuitesWeb\' + CAST(@name AS varchar(256)) + '.html'
+			SET @rfilebase = @vrrel + CAST(@eid AS varchar(4)) + '\' + CAST(@sid AS varchar(4)) --+ '\SuitesWeb\' + CAST(@name AS varchar(256))
 
+			SET @rfile = @rfilebase + '\SuitesWeb\' + CAST(@name AS varchar(256)) + '.html'
 			SET @path = @vrroot + @rfile
 			EXEC master.dbo.xp_fileexist @path, @exists OUTPUT
+			IF @exists <> 1 BEGIN
+				SET @rfile = @rfilebase + '\SuitesWeb\images\' + CAST(@name AS varchar(256)) + '.jpg'
+				SET @path = @vrroot + @rfile
+				EXEC master.dbo.xp_fileexist @path, @exists OUTPUT
+			END
+			IF @exists <> 1 BEGIN
+				SET @rfile = @rfilebase + '\SuitesWeb\images\' + CAST(@name AS varchar(256)) + '.png'
+				SET @path = @vrroot + @rfile
+				EXEC master.dbo.xp_fileexist @path, @exists OUTPUT
+			END
+			IF @exists <> 1 BEGIN
+				SET @rfile = @rfilebase + '\Site\' + CAST(@name AS varchar(256)) + '.html'
+				SET @path = @vrroot + @rfile
+				EXEC master.dbo.xp_fileexist @path, @exists OUTPUT
+			END
+
 			IF @exists = 1 BEGIN
 				UPDATE [dbo].[SuiteTypes]
 					SET [FloorPlanUrl] = REPLACE(@rfile, '\', '/')
 					WHERE [AutoID] = @id
-				PRINT 'Floor plan: ' + @path
+				PRINT 'Floor plan: ' + REPLACE(@rfile, '\', '/')--@path
 			END
 
 			FETCH NEXT FROM sttp INTO @eid, @sid, @id, @name

@@ -239,7 +239,7 @@ namespace Vre.Server.RemoteService
 
             // Suite part
             //
-            if (suite != null) rd.AppendFormat("{0}, ", suite.SuiteName);
+            if (suite != null) rd.AppendFormat("{0} - ", suite.SuiteName);
 
             // Fine-level elements
             if (!string.IsNullOrWhiteSpace(building.AddressLine1) || !string.IsNullOrWhiteSpace(building.AddressLine2))

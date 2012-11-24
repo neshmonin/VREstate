@@ -618,7 +618,10 @@ namespace Vre.Server.RemoteService
                 user = manager.Get(userId);
             }
             
-            resp.Data = user.GetClientData();
+            ClientData result = user.GetClientData();
+            using (IAuthentication auth = new Authentication(session.DbSession))
+                fillInLoginInfo(ref result, ref user, auth);
+            resp.Data = result;
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
@@ -659,18 +662,7 @@ namespace Vre.Server.RemoteService
                     for (int idx = 0; idx < cnt; idx++)
                     {
                         result[idx] = list[idx].GetClientData();
-
-                        // retrieve associated login information (which is not a part of user record)
-                        //
-                        LoginType lt;
-                        User.Role ur;
-                        int ed;
-                        string login;
-                        if (auth.LoginByUserId(list[idx].AutoID, out lt, out ur, out ed, out login))
-                        {
-                            result[idx].Add("loginType", lt);
-                            result[idx].Add("login", login);
-                        }
+                        fillInLoginInfo(ref result[idx], ref list[idx], auth);
                     }
                 }
             }
@@ -678,6 +670,19 @@ namespace Vre.Server.RemoteService
             resp.Data = new ClientData();
             resp.Data.Add("users", result);
             resp.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private static void fillInLoginInfo(ref ClientData result, ref User user, IAuthentication auth)
+        {
+            LoginType lt;
+            User.Role ur;
+            int ed;
+            string login;
+            if (auth.LoginByUserId(user.AutoID, out lt, out ur, out ed, out login))
+            {
+                result.Add("loginType", lt);
+                result.Add("login", login);
+            }
         }
 
         private static void getFinancialTransactionList(ClientSession session, ServiceQuery query, IResponseData resp)
@@ -727,10 +732,17 @@ namespace Vre.Server.RemoteService
 
             if (null == viewOrder) throw new FileNotFoundException("Listing does not exist");
 
-            viewOrder.ViewOrderURL = ReverseRequestService.ConstructViewOrderUrl(viewOrder);
-            resp.Data = viewOrder.GetClientData();
+            resp.Data = convertViewOrderdata(session, viewOrder, "true".Equals(query["verbose"]));
 
-            if ("true".Equals(query["verbose"]))
+            resp.ResponseCode = HttpStatusCode.OK;
+        }
+
+        private static ClientData convertViewOrderdata(ClientSession session, ViewOrder viewOrder, bool verbose)
+        {
+            viewOrder.ViewOrderURL = ReverseRequestService.ConstructViewOrderUrl(viewOrder);
+            ClientData result = viewOrder.GetClientData();
+
+            if (verbose)
             {
                 string label = null;
                 switch (viewOrder.TargetObjectType)
@@ -753,10 +765,10 @@ namespace Vre.Server.RemoteService
                         }
                         break;
                 }
-                if (label != null) resp.Data.Add("label", label);
+                if (label != null) result.Add("label", label);
             }
 
-            resp.ResponseCode = HttpStatusCode.OK;
+            return result;
         }
 
         private static void getViewOrderList(ClientSession session, ServiceQuery query, IResponseData resp, bool includeDeleted)
@@ -785,17 +797,14 @@ namespace Vre.Server.RemoteService
 
             // produce output
             //
+            bool verbose = "true".Equals(query["verbose"]);
             int cnt = list.Length;
             List<ClientData> result = new List<ClientData>(cnt);
             for (int idx = 0; idx < cnt; idx++)
             {
                 ViewOrder vo = list[idx];
                 if (vo.ExpiresOn < timeLim)
-                {
-                    vo.ViewOrderURL = ReverseRequestService.ConstructViewOrderUrl(vo);
-                    ClientData cd = vo.GetClientData();
-                    result.Add(cd);
-                }
+                    result.Add(convertViewOrderdata(session, vo, verbose));
             }
 
             resp.Data = new ClientData();

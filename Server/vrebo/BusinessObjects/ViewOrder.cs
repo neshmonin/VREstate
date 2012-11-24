@@ -78,9 +78,6 @@ namespace Vre.Server.BusinessLogic
 
         public ViewOrder(ClientData data) : base(data)
         {
-            Product = data.GetProperty<ViewOrderType>("product", ViewOrderType.FloorPlan);
-            MlsId = data.GetProperty("mlsIs", string.Empty);
-            ProductUrl = data.GetProperty("productUrl", string.Empty);
             TargetObjectType = data.GetProperty<SubjectType>("targetObjectType", SubjectType.Suite);
             TargetObjectId = data.GetProperty("targetObjectId", -1);
             RequestCounter = data.GetProperty("requestCounter", 0);
@@ -119,6 +116,9 @@ namespace Vre.Server.BusinessLogic
             Enabled = data.UpdateProperty("enabled", Enabled, ref result);
             ExpiresOn = data.UpdateProperty("expiresOn", ExpiresOn, ref result);
             OwnerId = data.UpdateProperty("ownerId", OwnerId, ref result);
+            Product = data.GetProperty<ViewOrderType>("product", ViewOrderType.FloorPlan);
+            MlsId = data.GetProperty("mlsIs", string.Empty);
+            ProductUrl = data.GetProperty("productUrl", string.Empty);
 
             return result;
         }
