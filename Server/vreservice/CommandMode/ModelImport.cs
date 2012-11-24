@@ -581,7 +581,7 @@ namespace Vre.Server.Command
             private static string[] splitCsvLine(string line)
             {
                 int cnt = 1, idx, idx0;
-                bool escape = false;
+                bool escape = false, escaped = false;
 
                 for (idx = 0; idx < line.Length; idx++)
                     if ('\"' == line[idx]) escape = !escape;
@@ -595,10 +595,12 @@ namespace Vre.Server.Command
                     if ('\"' == line[idx])
                     {
                         escape = !escape;
+                        escaped = true;
                     }
                     else if ((',' == line[idx]) && !escape)
                     {
-                        result[cnt] = line.Substring(idx0, idx - idx0);
+                        if (escaped) result[cnt] = line.Substring(idx0 + 1, idx - idx0 - 2);
+                        else result[cnt] = line.Substring(idx0, idx - idx0);
                         idx0 = idx + 1;
                         cnt++;
                     }
@@ -607,7 +609,8 @@ namespace Vre.Server.Command
                 } 
                 while (idx < line.Length);
 
-                result[cnt] = line.Substring(idx0, idx - idx0);
+                if (escaped) result[cnt] = line.Substring(idx0 + 1, idx - idx0 - 2);
+                else result[cnt] = line.Substring(idx0, idx - idx0);
 
                 return result;
             }
