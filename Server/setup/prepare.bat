@@ -4,13 +4,13 @@ ECHO ON
 CD /D "%~dp0"
 
 
+IF NOT EXIST ready\NUL GOTO noready
+RMDIR /S /Q ready
 
+:noready
 MKDIR ready
 CD ready
 IF ERRORLEVEL 1 GOTO quit
-
-DEL /S /Q *.*
-RMDIR /S /Q .\*.*
 
 
 
