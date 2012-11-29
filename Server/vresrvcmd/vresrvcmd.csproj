@@ -72,9 +72,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\NetClient\ServerProxy.cs">
-      <Link>ServerProxy.cs</Link>
-    </Compile>
+    <Compile Include="ServerProxy.cs" />
     <Compile Include="..\_version\version.cs">
       <Link>Properties\version.cs</Link>
     </Compile>
