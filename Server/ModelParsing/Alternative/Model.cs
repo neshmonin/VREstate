@@ -69,7 +69,7 @@ namespace Vre.Server.Model.Kmz
             }
 
             if (null == core) throw new InvalidDataException("Model file does not contain a link to core model file");
-            if (null == Location) throw new InvalidDataException("Model file does not contain location information");
+            if (null == Location) throw new InvalidDataException("Model file does not contain Location node");
 
             readDocumentRoot(core, readWarnings);
         }
@@ -118,7 +118,7 @@ namespace Vre.Server.Model.Kmz
                     {
                         ColladaModelVersion = ver.Value;
                         if (!ColladaModelVersion.Equals("1.4.1")) 
-                            readWarnings.Append("\r\nCollada model version may be incompatible; expected is 1.4.1; actual is " + ColladaModelVersion);
+                            readWarnings.Append("\r\nMDVR00: Collada model version may be incompatible; expected is 1.4.1; actual is " + ColladaModelVersion);
                     }
 
                     readColladaStructure(node, readWarnings);

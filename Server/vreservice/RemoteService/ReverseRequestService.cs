@@ -620,7 +620,7 @@ namespace Vre.Server.RemoteService
                     using (FinancialTransactionDao dao = new FinancialTransactionDao(srq.UserInfo.Session.DbSession))
                     {
                         dao.Create(ft);
-                        ft.SetSystemReferenceId(Utilities.FinancialTransactionRefNum(ft));
+                        ft.SetAutoSystemReferenceId();
                         dao.Update(ft);
                     }
 

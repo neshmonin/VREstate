@@ -47,7 +47,7 @@ namespace Vre.Server.Dao
             {
                 entity.MarkUpdated();
                 base.Create(entity);
-                _session.Refresh(entity);
+                //_session.Refresh(entity);
                 ServiceInstances.UpdateService.Update(entity);
             }
         }
@@ -88,7 +88,7 @@ namespace Vre.Server.Dao
                 try
                 {
                     base.CreateOrUpdate(entity);
-                    _session.Refresh(entity);
+                    //_session.Refresh(entity);
                     ServiceInstances.UpdateService.Update(entity);
                     return true;
                 }
@@ -111,7 +111,7 @@ namespace Vre.Server.Dao
                 try
                 {
                     base.Update(entity);
-                    _session.Refresh(entity);
+                    //_session.Refresh(entity);
                     ServiceInstances.UpdateService.Update(entity);
                     return true;
                 }

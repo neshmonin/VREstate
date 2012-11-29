@@ -235,14 +235,7 @@ namespace Vre.Server.ModelCache
 
                         foreach (string className in modelInfo.Geometries.Keys)
                         {
-                            Model.Kmz.Geometry[] geometries = modelInfo.Geometries[className];
-                            if (null == geometries)
-                            {
-                                ServiceInstances.Logger.Error("Model ({0} ({1})) contains no geometries for suite type '{2}'.",
-                                    site.Name, site.AutoID, className);
-                                continue;
-                            }
-                            SuiteClassInfo sc = new SuiteClassInfo(processGeometries(geometries));
+                            SuiteClassInfo sc = new SuiteClassInfo(processGeometries(modelInfo.Geometries[className]));
                             _classInfo.Add(className, sc);
                         }
                     }  // site-level import
@@ -263,8 +256,16 @@ namespace Vre.Server.ModelCache
                 int idx = 0;
                 Wireframe[] result = new Wireframe[geometries.Length];
 
+                bool errors = false;
                 foreach (Model.Kmz.Geometry geom in geometries)
                 {
+                    if ((null == geom.Points) || (null == geom.Lines))
+                    {
+                        // TODO!!!
+                        errors = true;
+                        continue;
+                    }
+
                     List<Wireframe.Point3D> points = new List<Wireframe.Point3D>(geom.Points.Count());
                     foreach (Model.Kmz.Geometry.Point3D pt in geom.Points)
                         points.Add(new Wireframe.Point3D(pt.X, pt.Y, pt.Z));
@@ -275,6 +276,8 @@ namespace Vre.Server.ModelCache
 
                     result[idx++] = new Wireframe(points, segments);
                 }
+
+                if (errors) ServiceInstances.Logger.Error("Geometry has one or more errors (model invalid); improper segments skipped.");
 
                 return result;
             }

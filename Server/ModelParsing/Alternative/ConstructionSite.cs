@@ -103,7 +103,7 @@ namespace Vre.Server.Model.Kmz
                 if (null == gna) continue;
 
                 if (usedGeometryIds.Contains(gna.Value))
-                    geometries.Add(gna.Value, new Geometry(gn));
+                    geometries.Add(gna.Value, new Geometry(gna.Value, gn));
             }
 
             // build class-geometry dictionary

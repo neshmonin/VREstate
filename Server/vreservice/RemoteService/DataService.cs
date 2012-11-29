@@ -14,6 +14,7 @@ namespace Vre.Server.RemoteService
     {
         private static bool _configured = false;
         private static bool _allowUnsecureService = true;
+        private static string _disabledViewOrderRecoverUrl = null;
 
         public const string ServicePathPrefix = ServicePathElement0 + "/";
         private const string ServicePathElement0 = "data";
@@ -23,6 +24,7 @@ namespace Vre.Server.RemoteService
         private static void configure()
         {
             _allowUnsecureService = ServiceInstances.Configuration.GetValue("AllowSensitiveDataOverNonSecureConnection", false);
+            _disabledViewOrderRecoverUrl = ServiceInstances.Configuration.GetValue("DisabledViewOrderRecoverUrl", "http://3dcondox.com/order?recoverId={0}");
 
             _configured = true;
         }
@@ -818,8 +820,8 @@ namespace Vre.Server.RemoteService
 
             if (type.Equals("viewOrder")) getViewViewOrder(session, query, resp);
             else if (type.Equals("site")) getViewSite(session, query, resp);
-            else if (type.Equals("building")) throw new NotImplementedException();
-            else if (type.Equals("suite")) throw new NotImplementedException();
+            else if (type.Equals("building")) getViewBuilding(session, query, resp);
+            else if (type.Equals("suite")) getViewSuite(session, query, resp);
             else if (type.Equals("geo")) throw new NotImplementedException();
             else throw new NotImplementedException();
         }
@@ -840,29 +842,95 @@ namespace Vre.Server.RemoteService
                 using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
                     viewOrder = dao.GetById(rqid);
 
-                if ((null == viewOrder) || !viewOrder.Enabled || (viewOrder.ExpiresOn < DateTime.UtcNow)) throw new FileNotFoundException("Undefined or expired view order");
+                if (null == viewOrder) throw new FileNotFoundException("Undefined or expired view order");
+                if (viewOrder.Deleted || !viewOrder.Enabled || (viewOrder.ExpiresOn < DateTime.UtcNow))
+                {
+                    if (viewOrder.OwnerId == session.User.AutoID)  // in case of owner viewing disabled order - return something meaningful
+                    {
+                        // make up same response data structure
+                        resp.Data = new ClientData();
 
-                viewOrder.Touch();
-                using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
-                    dao.Update(viewOrder);
+                        ClientData[] vol = new ClientData[1];
+                        vol[0] = generateDisabledViewOrderData(viewOrder);
+                        resp.Data.Add("viewOrders", vol);
 
-                tran.Commit();
+                        resp.Data.Add("primaryViewOrderId", viewOrder.AutoID);
+                        resp.Data.Add("initialView", "");  // TODO
+
+                        resp.ResponseCode = HttpStatusCode.OK;
+
+                        viewOrder = null;
+                    }
+                    else
+                    {
+                        throw new FileNotFoundException("Undefined or expired view order");
+                    }
+                }
+                else
+                {
+                    viewOrder.Touch();
+
+                    using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                        dao.Update(viewOrder);
+
+                    tran.Commit();
+                }
             }
 
-            Suite suite;
-            using (SuiteDao dao = new SuiteDao(session.DbSession))
-                suite = dao.GetById(viewOrder.TargetObjectId);
+            if (viewOrder != null)
+            {
+                Suite suite = null;
+                Building building = null;
 
-            if (null == suite) throw new FileNotFoundException("Unknown object listed");
+                switch (viewOrder.TargetObjectType)
+                {
+                    case ViewOrder.SubjectType.Suite:
+                        {
+                            using (SuiteDao dao = new SuiteDao(session.DbSession))
+                                suite = dao.GetById(viewOrder.TargetObjectId);
 
-            generateViewResponse(
-                new Site[] { suite.Building.ConstructionSite },
-                new Building[] { suite.Building },
-                new SuiteType[] { suite.SuiteType },
-                new Suite[] { suite },
-                new ViewOrder[] { viewOrder },
-                viewOrder.AutoID,
-                resp);
+                            if (null == suite) throw new FileNotFoundException("Unknown object listed");
+                            building = suite.Building;
+                        }
+                        break;
+
+                    case ViewOrder.SubjectType.Building:
+                        {
+                            using (BuildingDao dao = new BuildingDao(session.DbSession))
+                                building = dao.GetById(viewOrder.TargetObjectId);
+
+                            if (null == building) throw new FileNotFoundException("Unknown object listed");
+                            if (1 == building.Suites.Count) suite = building.Suites[0];
+                        }
+                        break;
+
+                    default:
+                        throw new NotImplementedException("7FD8B0");
+                }
+
+                generateViewResponse(
+                    new Site[] { building.ConstructionSite },
+                    new Building[] { building },
+                    suite != null ? new SuiteType[] { suite.SuiteType } : new SuiteType[0],
+                    suite != null ? new Suite[] { suite } : new Suite[0],
+                    new ViewOrder[] { viewOrder },
+                    viewOrder.AutoID,
+                    resp);
+            }
+        }
+
+        private static ClientData generateDisabledViewOrderData(ViewOrder order)
+        {
+            ClientData result = new ClientData();
+
+            result.Add("id", order.AutoID);
+
+            if (order.Deleted) result.Add("reason", "deleted");
+            else if (!order.Enabled) result.Add("reason", "disabled");
+            else result.Add("reason", "expired");
+
+            result.Add("recoverUrl", string.Format(_disabledViewOrderRecoverUrl, order.AutoID.ToString("N")));
+            return result;
         }
 
         private static void getViewSite(ClientSession session, ServiceQuery query, IResponseData resp)
@@ -874,7 +942,7 @@ namespace Vre.Server.RemoteService
             using (SiteDao dao = new SiteDao(session.DbSession))
                 site = dao.GetById(objectId);
 
-            if (null == site) throw new FileNotFoundException("Unknown site");
+            if ((null == site) || site.Deleted) throw new FileNotFoundException("Unknown site");
 
             List<Suite> suites = new List<Suite>();
             foreach (Building b in site.Buildings) suites.AddRange(b.Suites);
@@ -884,6 +952,52 @@ namespace Vre.Server.RemoteService
                 site.Buildings.ToArray(),  
                 site.SuiteTypes.ToArray(),
                 suites.ToArray(),
+                new ViewOrder[0],
+                Guid.Empty,
+                resp);
+        }
+
+        private static void getViewBuilding(ClientSession session, ServiceQuery query, IResponseData resp)
+        {
+            int objectId = query.GetParam("id", -1);
+            if (objectId < 0) throw new ArgumentException("Object ID missing.");
+
+            Building building;
+            using (BuildingDao dao = new BuildingDao(session.DbSession))
+                building = dao.GetById(objectId);
+
+            if ((null == building) || building.Deleted) throw new FileNotFoundException("Unknown building");
+
+            List<SuiteType> suiteTypes = new List<SuiteType>();
+            foreach (Suite s in building.Suites)
+                if (!suiteTypes.Contains(s.SuiteType) /* TODO: this may be slow! */) suiteTypes.Add(s.SuiteType);
+
+            generateViewResponse(
+                new Site[] { building.ConstructionSite },
+                new Building[] { building },
+                suiteTypes.ToArray(),
+                building.Suites.ToArray(),
+                new ViewOrder[0],
+                Guid.Empty,
+                resp);
+        }
+
+        private static void getViewSuite(ClientSession session, ServiceQuery query, IResponseData resp)
+        {
+            int objectId = query.GetParam("id", -1);
+            if (objectId < 0) throw new ArgumentException("Object ID missing.");
+
+            Suite suite;
+            using (SuiteDao dao = new SuiteDao(session.DbSession))
+                suite = dao.GetById(objectId);
+
+            if ((null == suite) || suite.Deleted) throw new FileNotFoundException("Unknown suite");
+
+            generateViewResponse(
+                new Site[] { suite.Building.ConstructionSite },
+                new Building[] { suite.Building },
+                new SuiteType[] { suite.SuiteType },
+                new Suite[] { suite },
                 new ViewOrder[0],
                 Guid.Empty,
                 resp);
@@ -937,14 +1051,22 @@ namespace Vre.Server.RemoteService
             
             // Cannot reuse viewOrder.GetClientData() here as it exposes too much information
             elements = new List<ClientData>(viewOrders.Count());
-            foreach (ViewOrder l in viewOrders)
+            DateTime now = DateTime.UtcNow;
+            foreach (ViewOrder vo in viewOrders)
             {
+                if (vo.Deleted || !vo.Enabled || (vo.ExpiresOn < now))
+                {
+                    if (vo.AutoID.Equals(primaryListingId)) primaryListingId = Guid.Empty;  // reset primary order id if skipped
+                    continue;
+                }
+
                 ClientData cd = new ClientData();
-                cd.Add("id", l.AutoID);
-                cd.Add("suiteId", l.TargetObjectId);  // TODO: now Suites only!!!
-                cd.Add("product", ClientData.ConvertProperty<ViewOrder.ViewOrderType>(l.Product));
-                cd.Add("mlsId", l.MlsId);
-                cd.Add("productUrl", l.ProductUrl);
+                cd.Add("id", vo.AutoID);
+                cd.Add("targetObjectType", ClientData.ConvertProperty<ViewOrder.SubjectType>(vo.TargetObjectType));
+                cd.Add("targetObjectId", vo.TargetObjectId);
+                cd.Add("product", ClientData.ConvertProperty<ViewOrder.ViewOrderType>(vo.Product));
+                cd.Add("mlsId", vo.MlsId);
+                cd.Add("productUrl", vo.ProductUrl);
                 elements.Add(cd);
             }
             resp.Data.Add("viewOrders", elements.ToArray());
@@ -1075,7 +1197,7 @@ namespace Vre.Server.RemoteService
                 resp.ResponseCodeDescription = error;
                 resp.Data = new ClientData();
                 resp.Data.Add("updated", 0);
-                if (staleIds.Count > 0) resp.Data.Add("staleIds", Utilities.ToCsv<int>(staleIds));
+                if (staleIds.Count > 0) resp.Data.Add("staleIds", CsvUtilities.ToString<int>(staleIds));
             }
         }
 
@@ -1151,7 +1273,7 @@ namespace Vre.Server.RemoteService
                     using (FinancialTransactionDao dao = new FinancialTransactionDao(session.DbSession))
                     {
                         dao.Create(ft);
-                        ft.SetSystemReferenceId(Utilities.FinancialTransactionRefNum(ft));
+                        ft.SetAutoSystemReferenceId();
                         dao.Update(ft);
                     }
 

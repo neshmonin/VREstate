@@ -33,6 +33,7 @@ namespace Vre.Server.Model.Kmz
 
         public IEnumerable<Point3D> Points { get { return _points; } }
         public IEnumerable<Line> Lines { get { return _lines; } }
+        public string Id { get; private set; }
 
         private Point3D[] _points;
         private Line[] _lines;
@@ -73,8 +74,9 @@ namespace Vre.Server.Model.Kmz
         //    </mesh>
         //</geometry>
 
-        public Geometry(XmlNode root)
+        public Geometry(string id, XmlNode root)
         {
+            Id = id;
             _points = null;
             _lines = null;
 

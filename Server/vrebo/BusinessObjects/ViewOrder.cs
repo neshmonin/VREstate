@@ -95,10 +95,10 @@ namespace Vre.Server.BusinessLogic
             result.Add("expiresOn", ExpiresOn);
             result.Add("enabled", Enabled);
 
-            result.Add("product", Product);
+            result.Add("product", ClientData.ConvertProperty<ViewOrderType>(Product));
             result.Add("mlsId", MlsId);
             result.Add("productUrl", ProductUrl);
-            result.Add("targetObjectType", TargetObjectType);
+            result.Add("targetObjectType", ClientData.ConvertProperty<SubjectType>(TargetObjectType));
             result.Add("targetObjectId", TargetObjectId);
 
             result.Add("requestCounter", RequestCounter);  // informational (stats) only

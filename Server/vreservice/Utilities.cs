@@ -1,24 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Collections.Generic;
-using System.IO;
-using Vre.Server.BusinessLogic;
 
 namespace Vre.Server
 {
     public class Utilities
     {
-        private const string FinancialTransactionRefNumPrefix = "3DCX";
-        private const int FinancialTransactionRefNumKey = 0x752EB3A6;
-
-        public static string FinancialTransactionRefNum(FinancialTransaction ft)
-        {
-            return string.Format("{0}{1}",
-                FinancialTransactionRefNumPrefix,
-                GenerateReferenceNumber(ft.AutoID ^ FinancialTransactionRefNumKey));
-        }
-
         /// <summary>
         /// Makes suite number normalized for DB storage and search.
         /// </summary>
@@ -55,37 +43,6 @@ namespace Vre.Server
 
             return text.ToString();
         }
-
-        public static string ToCsv<T>(IEnumerable<T> items)
-        {
-            StringBuilder result = new StringBuilder();
-            bool comma = false;
-            foreach (T item in items)
-            {
-                if (comma) result.Append(',');
-                else comma = true;
-                result.Append(item);
-            }
-            return result.ToString();
-        }
-
-        public static List<string> FromCsv(string csv)
-        {
-            string[] parts = csv.Split(',');
-            return new List<string>(parts);
-        }
-
-        //public string ToCsv<T>(T[] items)
-        //{
-        //    StringBuilder result = new StringBuilder();
-        //    int cnt = items.Length;
-        //    for (int idx = 0; idx < cnt; idx++)
-        //    {
-        //        if (idx > 0) result.Append(',');
-        //        result.Append(items[idx]);
-        //    }
-        //    return result.ToString();
-        //}
 
         //http://social.msdn.microsoft.com/Forums/en-US/csharpgeneral/thread/3928b8cb-3703-4672-8ccd-33718148d1e3/
         public static string BytesToHexStr(byte[] p)

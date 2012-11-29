@@ -36,7 +36,7 @@ namespace Vre.Server.HttpService
 
         protected string _name;
 
-        protected List<string> _allowedFileExtensions = new List<string>();
+        protected HashSet<string> _allowedFileExtensions = new HashSet<string>();
         protected string _filesRootFolder = null;
 
         public HttpServiceBase(string serviceName)
@@ -51,7 +51,7 @@ namespace Vre.Server.HttpService
             _filesRootFolder = ServiceInstances.Configuration.GetValue("FilesRoot",
                 Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
-            _allowedFileExtensions = Utilities.FromCsv(ServiceInstances.Configuration.GetValue("AllowedServedFileExtensions", string.Empty));
+            _allowedFileExtensions = new HashSet<string>(CsvUtilities.Split(ServiceInstances.Configuration.GetValue("AllowedServedFileExtensions", string.Empty)));
         }
 
         public void PerformStartup()

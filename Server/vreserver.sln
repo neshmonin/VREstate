@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelReaderTest", "ModelReaderTest\ModelReaderTest.csproj", "{1F5CCD78-6D0E-4F62-AF1F-592B6440B1B3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelReaderTest", "Legacy\ModelReaderTest\ModelReaderTest.csproj", "{1F5CCD78-6D0E-4F62-AF1F-592B6440B1B3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelParsing", "ModelParsing\ModelParsing.csproj", "{C0DEDA10-3530-447A-8123-6FCED0A1B7BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KioskManager.legacy", "KioskManagerLegacy\KioskManager.legacy.csproj", "{A9F460C4-1B21-4930-B42D-B848597455F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KioskManager.legacy", "Legacy\KioskManagerLegacy\KioskManager.legacy.csproj", "{A9F460C4-1B21-4930-B42D-B848597455F2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vrebo", "vrebo\vrebo.csproj", "{60458EA7-5B11-4E8B-8644-4538CD08FAFD}"
 EndProject
@@ -13,13 +13,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vreservice", "vreservice\vr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vreserver", "vreserver\vreserver.csproj", "{9A8F1119-63BB-4747-B6D9-6DDC0CDB8253}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagementConsole", "ManagementConsole\ManagementConsole.csproj", "{B4D2A256-7611-4977-A73F-9655A4AC1D38}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagementConsole", "Legacy\ManagementConsole\ManagementConsole.csproj", "{B4D2A256-7611-4977-A73F-9655A4AC1D38}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "decout", "decout\decout.csproj", "{3B881C02-D119-4CF5-9F4D-8F83438BEA81}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "decout", "Tools\decout\decout.csproj", "{3B881C02-D119-4CF5-9F4D-8F83438BEA81}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetClient", "NetClient\NetClient.csproj", "{7173F3D1-5519-47D0-BC1B-0B0C5379EBAB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetClient", "Tests\NetClient\NetClient.csproj", "{7173F3D1-5519-47D0-BC1B-0B0C5379EBAB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vresrvcmd", "vresrvcmd\vresrvcmd.csproj", "{86AC5E98-C725-421F-AB1E-BF67278414F4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{28FFBF48-AEAC-4A3B-B7AE-15240E846494}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PayFlowSandbox", "Tests\PayFlowSandbox\PayFlowSandbox.csproj", "{8F601F61-2CC5-4FEF-8ED1-9ADDC6ADF358}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelPackageTester", "Tools\ModelPackageTester\ModelPackageTester.csproj", "{158574F1-D618-4C9F-9B51-944A8889D166}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{BF8BD2DE-A2B1-4401-A20F-C68F4DBE743E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Legacy", "Legacy", "{F3D1908C-372B-4ADD-81D3-4E6626E11F62}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -171,8 +181,41 @@ Global
 		{86AC5E98-C725-421F-AB1E-BF67278414F4}.Release|x64.ActiveCfg = Release|x86
 		{86AC5E98-C725-421F-AB1E-BF67278414F4}.Release|x86.ActiveCfg = Release|x86
 		{86AC5E98-C725-421F-AB1E-BF67278414F4}.Release|x86.Build.0 = Release|x86
+		{8F601F61-2CC5-4FEF-8ED1-9ADDC6ADF358}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{8F601F61-2CC5-4FEF-8ED1-9ADDC6ADF358}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{8F601F61-2CC5-4FEF-8ED1-9ADDC6ADF358}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{8F601F61-2CC5-4FEF-8ED1-9ADDC6ADF358}.Debug|x64.ActiveCfg = Debug|x86
+		{8F601F61-2CC5-4FEF-8ED1-9ADDC6ADF358}.Debug|x86.ActiveCfg = Debug|x86
+		{8F601F61-2CC5-4FEF-8ED1-9ADDC6ADF358}.Debug|x86.Build.0 = Debug|x86
+		{8F601F61-2CC5-4FEF-8ED1-9ADDC6ADF358}.Release|Any CPU.ActiveCfg = Release|x86
+		{8F601F61-2CC5-4FEF-8ED1-9ADDC6ADF358}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{8F601F61-2CC5-4FEF-8ED1-9ADDC6ADF358}.Release|Mixed Platforms.Build.0 = Release|x86
+		{8F601F61-2CC5-4FEF-8ED1-9ADDC6ADF358}.Release|x64.ActiveCfg = Release|x86
+		{8F601F61-2CC5-4FEF-8ED1-9ADDC6ADF358}.Release|x86.ActiveCfg = Release|x86
+		{8F601F61-2CC5-4FEF-8ED1-9ADDC6ADF358}.Release|x86.Build.0 = Release|x86
+		{158574F1-D618-4C9F-9B51-944A8889D166}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{158574F1-D618-4C9F-9B51-944A8889D166}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{158574F1-D618-4C9F-9B51-944A8889D166}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{158574F1-D618-4C9F-9B51-944A8889D166}.Debug|x64.ActiveCfg = Debug|x86
+		{158574F1-D618-4C9F-9B51-944A8889D166}.Debug|x86.ActiveCfg = Debug|x86
+		{158574F1-D618-4C9F-9B51-944A8889D166}.Debug|x86.Build.0 = Debug|x86
+		{158574F1-D618-4C9F-9B51-944A8889D166}.Release|Any CPU.ActiveCfg = Release|x86
+		{158574F1-D618-4C9F-9B51-944A8889D166}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{158574F1-D618-4C9F-9B51-944A8889D166}.Release|Mixed Platforms.Build.0 = Release|x86
+		{158574F1-D618-4C9F-9B51-944A8889D166}.Release|x64.ActiveCfg = Release|x86
+		{158574F1-D618-4C9F-9B51-944A8889D166}.Release|x86.ActiveCfg = Release|x86
+		{158574F1-D618-4C9F-9B51-944A8889D166}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8F601F61-2CC5-4FEF-8ED1-9ADDC6ADF358} = {28FFBF48-AEAC-4A3B-B7AE-15240E846494}
+		{7173F3D1-5519-47D0-BC1B-0B0C5379EBAB} = {28FFBF48-AEAC-4A3B-B7AE-15240E846494}
+		{3B881C02-D119-4CF5-9F4D-8F83438BEA81} = {BF8BD2DE-A2B1-4401-A20F-C68F4DBE743E}
+		{158574F1-D618-4C9F-9B51-944A8889D166} = {BF8BD2DE-A2B1-4401-A20F-C68F4DBE743E}
+		{A9F460C4-1B21-4930-B42D-B848597455F2} = {F3D1908C-372B-4ADD-81D3-4E6626E11F62}
+		{B4D2A256-7611-4977-A73F-9655A4AC1D38} = {F3D1908C-372B-4ADD-81D3-4E6626E11F62}
+		{1F5CCD78-6D0E-4F62-AF1F-592B6440B1B3} = {F3D1908C-372B-4ADD-81D3-4E6626E11F62}
 	EndGlobalSection
 EndGlobal

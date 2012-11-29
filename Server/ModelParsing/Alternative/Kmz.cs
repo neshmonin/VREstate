@@ -44,8 +44,14 @@ namespace Vre.Server.Model.Kmz
             {
                 if (node.Name.Equals(RootNodeName))
                 {
-                    if (Name != null) readWarnings.Append("\r\nMultiple 'kml' nodes in KML are not supported; subsequent nodes ignored.");
-                    else readKmlNode(node, readWarnings);
+                    if (Name != null)
+                    {
+                        if (readWarnings != null) readWarnings.Append("\r\nMDSC00: Multiple 'kml' nodes in KML are not supported; subsequent nodes ignored.");
+                    }
+                    else
+                    {
+                        readKmlNode(node, readWarnings);
+                    }
                 }
                 node = node.NextSibling;
             }
@@ -61,8 +67,14 @@ namespace Vre.Server.Model.Kmz
             {
                 if (node.Name.Equals(PlacemarkNodeName))
                 {
-                    if (Name != null) readWarnings.Append("\r\nMultiple placemarks in KML are not supported; subsequent placemark ignored.");
-                    else readPlacemarkNode(node, readWarnings);
+                    if (Name != null)
+                    {
+                        if (readWarnings != null) readWarnings.Append("\r\nMDSC01: Multiple placemarks in KML are not supported; subsequent placemark ignored.");
+                    }
+                    else
+                    {
+                        readPlacemarkNode(node, readWarnings);
+                    }
                 }
                 node = node.NextSibling;
             }
@@ -81,18 +93,36 @@ namespace Vre.Server.Model.Kmz
             {
                 if (node.Name.Equals(NameNodeName))
                 {
-                    if (Name != null) readWarnings.Append("\r\nMultiple 'name' nodes in placemark; subsequent node ignored.");
-                    else Name = node.InnerText;
+                    if (Name != null)
+                    {
+                        if (readWarnings != null) readWarnings.Append("\r\nMDSC02: Multiple 'name' nodes in placemark; subsequent node ignored.");
+                    }
+                    else
+                    {
+                        Name = node.InnerText;
+                    }
                 }
                 else if (node.Name.Equals(DescriptionNodeName))
                 {
-                    if (Description != null) readWarnings.Append("\r\nMultiple 'description' nodes in placemark; subsequent node ignored.");
-                    else Description = node.InnerText;
+                    if (Description != null)
+                    {
+                        if (readWarnings != null) readWarnings.Append("\r\nMDSC03: Multiple 'description' nodes in placemark; subsequent node ignored.");
+                    }
+                    else
+                    {
+                        Description = node.InnerText;
+                    }
                 }
                 else if (node.Name.Equals(ModelNodeName))
                 {
-                    if (modelNode != null) readWarnings.Append("\r\nMultiple models in placemark are not supported; subsequent model ignored.");
-                    else modelNode = node;
+                    if (modelNode != null)
+                    {
+                        if (readWarnings != null) readWarnings.Append("\r\nMDSC04: Multiple models in placemark are not supported; subsequent model ignored.");
+                    }
+                    else
+                    {
+                        modelNode = node;
+                    }
                 }
                 node = node.NextSibling;
             }
