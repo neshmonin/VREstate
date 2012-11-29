@@ -22,8 +22,15 @@ I. Prerequisites
 
 
 
-II. Build
----------
+II. Preparations
+----------------
+
+Run preset.bat once after pulling out of GIT.
+
+
+
+III. Build
+----------
 
 1. Open build.bat and verify paths to devenv.exe and git.exe are valid.
 
@@ -31,4 +38,4 @@ II. Build
 
 
 
-20111113
+20121128
