@@ -1,6 +1,8 @@
-﻿using System.Xml;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using System.Globalization;
+using System.IO;
+using System.Xml;
 
 namespace Vre.Server.Model.Kmz
 {
@@ -30,7 +32,8 @@ namespace Vre.Server.Model.Kmz
         public Suite(Building parent, string id, string suiteDescription, XmlNode suiteModel,
             Dictionary<string, XmlNode> models, TMatrix tMatrix)
         {
-            string[] parts = suiteDescription.Trim().Split(' ');
+            string suiteDescriptionDelimited = suiteDescription.Replace('_', ' ');
+            string[] parts = suiteDescriptionDelimited.Trim().Split(' ');
 
             Id = id;
             Name = parts[0];
@@ -59,7 +62,7 @@ namespace Vre.Server.Model.Kmz
 
                     if (parts.Length > 4)  // assume last required element is suite type name
                     {
-                        try { InitialPrice = double.Parse(parts[3]); }
+                        try { InitialPrice = double.Parse(parts[3], CultureInfo.InvariantCulture); }
                         catch (FormatException) { }
 
                         if (parts.Length > 5)  // assume last required element is suite type name
@@ -71,9 +74,16 @@ namespace Vre.Server.Model.Kmz
                 }
             }
 
-            ClassName = null;
+            ClassName = parts[parts.Length - 1];
             XmlAttribute na = suiteModel.Attributes["name"];
-            if (na != null) ClassName = na.Value.Trim('_');
+            if (na != null)
+            {
+                string realClassName = na.Value.Trim('_');
+                if (!realClassName.Equals(ClassName))
+                    throw new InvalidDataException(string.Format(
+                        "MDSC22: Suite '{0}->{1}': Definition {2} does not match the last section of the name",
+                        parent.Name, suiteDescription, realClassName));
+            }
 
             _geometryIdList = new List<string>();
             foreach (XmlNode n in suiteModel.ChildNodes)

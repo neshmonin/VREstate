@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace Vre.Server.Model.Kmz
 {
@@ -109,7 +110,7 @@ namespace Vre.Server.Model.Kmz
                     string ee = e.Trim();
                     if (ee.Length > 0)
                     {
-                        double x = double.Parse(ee);
+                        double x = double.Parse(ee, CultureInfo.InvariantCulture);
 
                         if (i > 3) throw new FormatException("Matrix string is invalid (2)");  // extra values
 

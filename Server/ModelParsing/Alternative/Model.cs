@@ -1,8 +1,9 @@
 ﻿using System;
-using System.IO;
-using System.Xml;
-using System.Text;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text;
+using System.Xml;
 
 namespace Vre.Server.Model.Kmz
 {
@@ -21,6 +22,8 @@ namespace Vre.Server.Model.Kmz
         public string ColladaModelVersion { get; private set; }
         public string AltitudeMode { get; private set; }
 
+        internal Kmz _store;
+
         public Model(Kmz store, XmlNode root, StringBuilder readWarnings)
         {
             const string IdAttributeName = "id";
@@ -30,6 +33,7 @@ namespace Vre.Server.Model.Kmz
             const string ScaleNodeName = "Scale";
             const string LinkNodeName = "Link";
 
+            _store = store;
             Name = store.Name;
 
             XmlAttribute xattr = root.Attributes[IdAttributeName];
@@ -68,8 +72,8 @@ namespace Vre.Server.Model.Kmz
                 node = node.NextSibling;
             }
 
-            if (null == core) throw new InvalidDataException("Model file does not contain a link to core model file");
-            if (null == Location) throw new InvalidDataException("Model file does not contain Location node");
+            if (null == core) throw new InvalidDataException("MDSC20: Model file does not contain a link to core model file");
+            if (null == Location) throw new InvalidDataException("MDSC21: Model file does not contain Location node");
 
             readDocumentRoot(core, readWarnings);
         }
@@ -91,7 +95,7 @@ namespace Vre.Server.Model.Kmz
             if (filePath != null)
             {
                 Stream s = store.GetFile(filePath);
-                if (null == s) throw new InvalidDataException("Model file does not contain core model file: " + filePath);
+                if (null == s) throw new InvalidDataException("MDSC12: Model file does not contain core model file: " + filePath);
 
                 XmlDocument result = new XmlDocument();
                 result.Load(s);
@@ -99,7 +103,7 @@ namespace Vre.Server.Model.Kmz
             }
             else
             {
-                throw new InvalidDataException("Link node does not contain reference to core model file");
+                throw new InvalidDataException("MDSC11: Link node does not contain reference to core model file");
             }
         }
 
@@ -135,17 +139,17 @@ namespace Vre.Server.Model.Kmz
             const string GeometriesNodeName = "library_geometries";
 
             XmlNode node = root[AssetNodeName];
-            if (null == node) throw new InvalidDataException("asset node does not exist in Collada structure");
+            if (null == node) throw new InvalidDataException("MDSC13: Asset node does not exist in Collada structure");
 
             {
                 node = node["unit"];
-                if (null == node) throw new InvalidDataException("unit node does not exist in Collada structure");
+                if (null == node) throw new InvalidDataException("MDSC14: nit node does not exist in Collada structure");
 
                 XmlAttribute na = node.Attributes["meter"];
-                UnitInMeters = double.Parse(na.Value);
+                UnitInMeters = double.Parse(na.Value, CultureInfo.InvariantCulture);
                 if (Math.Abs(UnitInMeters - 0.025) < 0.001) UnitScale = MeasureScale.Inches;
                 else if (Math.Abs(UnitInMeters - 1.0) < 0.001) UnitScale = MeasureScale.Meters;
-                else throw new InvalidDataException("unknown unit scale");
+                else throw new InvalidDataException("MDSC15: Unknown unit scale");
 
                 // up-axis
                 // https://collada.org/public_forum/viewtopic.php?p=4533#p4533
@@ -169,7 +173,7 @@ namespace Vre.Server.Model.Kmz
             // scan nodes and build an <id>-<node> xref
             //
             node = root[NodesNodeName];
-            if (null == node) throw new InvalidDataException("nodes node does not exist in Collada structure");
+            if (null == node) throw new InvalidDataException("MDSC16: Nodes node does not exist in Collada structure");
 
             Dictionary<string, XmlNode> models = new Dictionary<string, XmlNode>();
 
@@ -186,19 +190,19 @@ namespace Vre.Server.Model.Kmz
             // get a geometry node (used by ConstructionSite object)
             //
             XmlNode geometryNode = root[GeometriesNodeName];
-            if (null == geometryNode) throw new InvalidDataException("geometry node does not exist in Collada structure");
+            if (null == geometryNode) throw new InvalidDataException("MDSC17: Geometry node does not exist in Collada structure");
 
             // find a construction site node
             //
             node = root[ScenesNodeName];
-            if (null == node) throw new InvalidDataException("scene node does not exist in Collada structure");
+            if (null == node) throw new InvalidDataException("MDSC18: Scene node does not exist in Collada structure");
 
             node = node["visual_scene"];
-            if (null == node) throw new InvalidDataException("scene node does not contain a subnode in Collada structure");
+            if (null == node) throw new InvalidDataException("MDSC19: Scene node does not contain a subnode in Collada structure");
 
             // Creation of TMatrix object for the Model - so that ConstructionSite could adjust its TMatrix accordingly
             TMatrix tMatrix = new TMatrix(Location.Heading);
-            Site = new ConstructionSite(this, Name, node, models, geometryNode, tMatrix);
+            Site = new ConstructionSite(this, Name, node, models, geometryNode, tMatrix, readWarnings);
         }
     }
 }

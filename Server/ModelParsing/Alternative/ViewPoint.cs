@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System.Globalization;
+using System.Xml;
 
 namespace Vre.Server.Model.Kmz
 {
@@ -69,9 +70,9 @@ namespace Vre.Server.Model.Kmz
             XmlNode node = root.FirstChild;
             while (node != null)
             {
-                if (node.Name.Equals(HeadingNodeName)) Heading = double.Parse(node.InnerText);
-                else if (node.Name.Equals(TiltNodeName)) Tilt = double.Parse(node.InnerText);
-                else if (node.Name.Equals(RollNodeName)) Roll = double.Parse(node.InnerText);
+                if (node.Name.Equals(HeadingNodeName)) Heading = double.Parse(node.InnerText, CultureInfo.InvariantCulture);
+                else if (node.Name.Equals(TiltNodeName)) Tilt = double.Parse(node.InnerText, CultureInfo.InvariantCulture);
+                else if (node.Name.Equals(RollNodeName)) Roll = double.Parse(node.InnerText, CultureInfo.InvariantCulture);
 
                 node = node.NextSibling;
             }

@@ -7,10 +7,11 @@ using System.Text;
 using System.Windows.Forms;
 using Vre.Server.Model;
 using Vre.Server.Model.Kmz;
+using System.Globalization;
 
 namespace ModelPackageTester
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         private string _modelFileName = null;
         private string _stiFileName = null;
@@ -20,14 +21,45 @@ namespace ModelPackageTester
         {
             StringBuilder readWarnings = new StringBuilder();
 
+            readWarnings.AppendFormat("    MODEL:   {0}\r\n    TYPES:    {1}\r\n    PLANS:    {2}\r\n",
+                                        _modelFileName,
+                                        _stiFileName,
+                                        _floorPlanPath);
+
+            readWarnings.Append("\r\nStep 1: =========== Reading in and parsing the KMZ =============");
             // Parse KMZ into object model
             //
-            Kmz kmzx = new Kmz(_modelFileName, readWarnings);
+            Kmz kmzx = null;
+            
+            try
+            {
+                kmzx = new Kmz(_modelFileName, readWarnings);
+            }
+            catch (InvalidDataException ae)
+            {
+                readWarnings.Append("\r\n");
+                readWarnings.Append(ae.Message);
+                readWarnings.Append("\r\n\r\nTEST NOT PASSED.");
+                return readWarnings.ToString();
+            }
 
+            readWarnings.Append("\r\nStep 2: =========== Reading in and parsing the CSV =============");
             // Read in CSV
             //
-            CsvSuiteTypeInfo info = new CsvSuiteTypeInfo(_stiFileName, readWarnings);
+            CsvSuiteTypeInfo info = null;
+            try
+            {
+                info = new CsvSuiteTypeInfo(_stiFileName, readWarnings);
+            }
+            catch (ArgumentException ae)
+            {
+                readWarnings.Append("\r\n");
+                readWarnings.Append(ae.Message);
+                readWarnings.Append("\r\n\r\nTEST NOT PASSED.");
+                return readWarnings.ToString();
+            }
 
+            readWarnings.Append("\r\nStep 3: =========== Binding floorplan files to the Model =============");
             // Test floor plan files presense
             //
             foreach (string stn in info.TypeInfoList)
@@ -35,15 +67,17 @@ namespace ModelPackageTester
                 string file = info.GetFloorPlanFileName(stn);
                 if (!string.IsNullOrWhiteSpace(file))
                 {
-                    file = Path.Combine(_floorPlanPath, file);
+                    file = Path.Combine(_floorPlanPath, file.Replace('/', '\\'));
                     if (!File.Exists(file))
-                        readWarnings.AppendFormat("\r\nFPFS00: Suite type {0} lists floor plan {1} which does not exist.", stn, file);
+                        readWarnings.AppendFormat("\r\nFPFS00: Suite type \'{0}\' lists floor plan {1} which does not exist.", stn, file);
                 }
                 else
                 {
                     readWarnings.AppendFormat("\r\nSTMD00: Suite type {0} lists no floor plan.", stn);
                 }
             }
+
+            readWarnings.Append("\r\nStep 4: =========== Cross-reference testing =============");
 
             // Test common cross-reference issues
             //
@@ -52,31 +86,39 @@ namespace ModelPackageTester
 
             foreach (Building b in kmzx.Model.Site.Buildings)
             {
+                HashSet<string> suiteNames = new HashSet<string>();
                 foreach (Suite s in b.Suites)
                 {
-                    if (info.HasType(s.ClassName))
+                    if (suiteNames.Add(s.Name))
                     {
-                        if (missingTypes.Add(s.ClassName))
-                            readWarnings.AppendFormat("\r\nSTMD01: Suite type {0} in model file has no related entry in SuiteTypeInfo.", s.ClassName);
+                        readWarnings.AppendFormat("\r\nMDMD01: Building '{0}' contains multiple suites with same name '{1}'",
+                            b.Name, s.Name);
                     }
-                    else if (passedTypes.Add(s.ClassName))
+
+                    string testingType = b.Type + "/" + s.ClassName;
+                    if (!info.HasType(testingType))
                     {
-                        if (!kmzx.Model.Site.Geometries.ContainsKey(s.ClassName))
+                        if (missingTypes.Add(testingType))
+                            readWarnings.AppendFormat("\r\nSTMD01: Suite type \'{0}\' in KMZ has no related entry in CSV.", testingType);
+                    }
+                    else if (passedTypes.Add(testingType))
+                    {
+                        if (!kmzx.Model.Site.Geometries.ContainsKey(testingType))
                         {
-                            readWarnings.AppendFormat("\r\nMDMD00: Suite type {0} has no geometry list in model.",
-                                s.ClassName);
+                            readWarnings.AppendFormat("\r\nMDMD00: Suite type \'{0}\' has no geometry list in model.",
+                                testingType);
                         }
                         else
                         {
-                            Geometry[] gl = kmzx.Model.Site.Geometries[s.ClassName];
+                            Geometry[] gl = kmzx.Model.Site.Geometries[testingType];
                             foreach (Geometry geom in gl)
                             {
                                 // This is a known problem.
                                 // Model may have a geometry node in non-lines format.
                                 if ((null == geom.Points) || (null == geom.Lines))
                                 {
-                                    readWarnings.AppendFormat("\r\nMDER00: Geometry ID={0} uses unknown format. Points and lines are not read.",
-                                        geom.Id);
+                                    readWarnings.AppendFormat("\r\nMDER00: Suite type \'{0}\' uses unknown format of geometry (Geometry ID={1}). Points and lines are not read.",
+                                        testingType, geom.Id);
                                 }
                             }
                         }                        
@@ -84,6 +126,7 @@ namespace ModelPackageTester
                 }
             }
 
+            readWarnings.Append("\r\nStep 5: =========== Generating KML preview of the parsed geometry =============");
             // Generate test preview of parsed model
             //
             string kmlFile = Path.Combine(Path.GetDirectoryName(_modelFileName), "wireframe-test-output.kml");
@@ -101,7 +144,7 @@ namespace ModelPackageTester
             return readWarnings.ToString();
         }
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
 
@@ -288,13 +331,13 @@ namespace ModelPackageTester
             }
         }
 
-        private void Form1_DragEnter(object sender, DragEventArgs e)
+        private void MainForm_DragEnter(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
                 e.Effect = DragDropEffects.Copy;
         }
 
-        private void Form1_DragDrop(object sender, DragEventArgs e)
+        private void MainForm_DragDrop(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
@@ -370,24 +413,24 @@ namespace ModelPackageTester
                     sw.WriteLine("<LineStyle><color>ff0088ff</color><width>3</width></LineStyle>");
                     sw.WriteLine("</Style>");
 
-
                     /*
-        <Placemark> 
-                <name>My Path</name> 
-    <styleUrl>#myStyle</styleUrl> 
-    <MultiGeometry> 
-                <LineString> 
-                        <tessellate>1</tessellate> 
-                        <coordinates> 
--107.0303781250365,30.27056500199735,0 
--106.6109752769761,30.27616399690955,0 
--106.0800016002764,30.25957244616284,0 </coordinates> 
-                </LineString> 
-    <Point> 
-    <coordinates>-106.6109752769761,30.27616399690955,0</coordinates> 
-    </Point> 
-    </MultiGeometry> 
-        </Placemark> 
+                        <Placemark> 
+                            <name>My Path</name> 
+                            <styleUrl>#myStyle</styleUrl> 
+                            <MultiGeometry> 
+                                <LineString> 
+                                    <tessellate>1</tessellate> 
+                                    <coordinates> 
+                                        -107.0303781250365,30.27056500199735,0 
+                                        -106.6109752769761,30.27616399690955,0 
+                                        -106.0800016002764,30.25957244616284,0
+                                    </coordinates> 
+                                </LineString> 
+                                <Point> 
+                                    <coordinates>-106.6109752769761,30.27616399690955,0</coordinates> 
+                                </Point> 
+                            </MultiGeometry> 
+                        </Placemark> 
                      */
                     writePlacemark(sw, "s1", "Base", "Construction site",
                         readModel.Model.Location, readModel.Model.Site.LocationCart.AsViewPoint(), altAdj);
@@ -399,18 +442,10 @@ namespace ModelPackageTester
 
                         foreach (Vre.Server.Model.Kmz.Suite s in bldg.Suites)
                         {
-                            writePlacemark(sw, "s3", s.Name, "Suite",
-                                bldg.LocationCart, s.LocationCart, altAdj);
-
                             Vre.Server.Model.Kmz.Geometry[] geo;
-                            if (readModel.Model.Site.Geometries.TryGetValue(s.ClassName, out geo))
+                            string fullType = bldg.Type + "/" + s.ClassName;
+                            if (readModel.Model.Site.Geometries.TryGetValue(fullType, out geo))
                                 writeGeometry(sw, "s6", s.LocationCart, geo, s.Matrix, altAdj);
-                            //foreach (string id in s.GeometryIdList)
-                            //{
-                            //    Vre.Server.Model.Kmz.Geometry[] geo;
-                            //    if (readModel.Model.Site.Geometries.TryGetValue(id, out geo))
-                            //        writeGeometry(sw, "s6", s.LocationCart, geo, altAdj);
-                            //}
                         }
                     }
 
@@ -441,45 +476,12 @@ namespace ModelPackageTester
             sw.WriteLine(viewPointToKmlNotation(to, altAdj));
             sw.WriteLine("</coordinates></Point>");
 
-            //            sw.WriteLine("<MultiGeometry>");
-            sw.WriteLine("<LineString><altitudeMode>relativeToGround</altitudeMode><coordinates>");
-            sw.WriteLine("{0}{1}{2},{3},{4}",
-                viewPointToKmlNotation(from, altAdj), viewPointToKmlNotation(to, altAdj),
-                to.Longitude, to.Latitude, to.Altitude + 2.0 + altAdj);
-            sw.WriteLine("</coordinates></LineString>");
-            //            sw.WriteLine("</MultiGeometry>");
-
-            sw.WriteLine("</Placemark>");
-
-            double lon, lat, alt;
-            string style;
-            if ((to.Heading >= 0.0) && (to.Heading < 360.0))
-            {
-                lon = to.Longitude - Math.Sin(to.Heading * Vre.Server.Model.Kmz.EcefViewPoint.DegreesToRad) * 0.0001;
-                lat = to.Latitude + Math.Cos(to.Heading * Vre.Server.Model.Kmz.EcefViewPoint.DegreesToRad) * 0.0001;
-                alt = to.Altitude + altAdj;
-                style = "s4";
-            }
-            else
-            {
-                lon = to.Longitude;
-                lat = to.Latitude;
-                alt = to.Altitude + 4.0 + altAdj;
-                style = "s5";
-            }
-            sw.WriteLine("<Placemark>");
-            if (styleUrl != null) sw.WriteLine("<styleUrl>{0}</styleUrl>", style);
-
-            sw.WriteLine("<LineString><altitudeMode>relativeToGround</altitudeMode><coordinates>");
-            sw.WriteLine("{0},{1},{2} {3}", lon, lat, alt, viewPointToKmlNotation(to, altAdj));
-            sw.WriteLine("</coordinates></LineString>");
-
             sw.WriteLine("</Placemark>");
         }
 
         private static string viewPointToKmlNotation(Vre.Server.Model.Kmz.ViewPoint vp, double altAdj)
         {
-            return string.Format("{0},{1},{2} ", vp.Longitude, vp.Latitude, vp.Altitude + altAdj);
+            return string.Format(CultureInfo.InvariantCulture, "{0},{1},{2} ", vp.Longitude, vp.Latitude, vp.Altitude + altAdj);
         }
 
         private static void writeGeometry(

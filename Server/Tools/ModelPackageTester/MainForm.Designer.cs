@@ -1,6 +1,6 @@
 ﻿namespace ModelPackageTester
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.label1 = new System.Windows.Forms.Label();
             this.lblModelPath = new System.Windows.Forms.Label();
             this.btnBrowseModel = new System.Windows.Forms.Button();
@@ -54,9 +55,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(12, 9);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(55, 13);
+            this.label1.Size = new System.Drawing.Size(49, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Model file:";
+            this.label1.Text = "KMZ file:";
             // 
             // lblModelPath
             // 
@@ -66,14 +67,14 @@
             this.lblModelPath.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.lblModelPath.Location = new System.Drawing.Point(107, 9);
             this.lblModelPath.Name = "lblModelPath";
-            this.lblModelPath.Size = new System.Drawing.Size(359, 13);
+            this.lblModelPath.Size = new System.Drawing.Size(661, 13);
             this.lblModelPath.TabIndex = 0;
             this.lblModelPath.Text = "drop file here or press Browse -->";
             // 
             // btnBrowseModel
             // 
             this.btnBrowseModel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnBrowseModel.Location = new System.Drawing.Point(504, 4);
+            this.btnBrowseModel.Location = new System.Drawing.Point(806, 4);
             this.btnBrowseModel.Name = "btnBrowseModel";
             this.btnBrowseModel.Size = new System.Drawing.Size(75, 23);
             this.btnBrowseModel.TabIndex = 0;
@@ -86,9 +87,9 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(12, 35);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(93, 13);
+            this.label3.Size = new System.Drawing.Size(47, 13);
             this.label3.TabIndex = 0;
-            this.label3.Text = "Suite type info file:";
+            this.label3.Text = "CSV file:";
             // 
             // lblSuiteTypeInfoPath
             // 
@@ -98,14 +99,14 @@
             this.lblSuiteTypeInfoPath.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.lblSuiteTypeInfoPath.Location = new System.Drawing.Point(107, 35);
             this.lblSuiteTypeInfoPath.Name = "lblSuiteTypeInfoPath";
-            this.lblSuiteTypeInfoPath.Size = new System.Drawing.Size(359, 13);
+            this.lblSuiteTypeInfoPath.Size = new System.Drawing.Size(661, 13);
             this.lblSuiteTypeInfoPath.TabIndex = 0;
             this.lblSuiteTypeInfoPath.Text = "drop file here or press Browse -->";
             // 
             // btnBrowseSuiteTypeInfo
             // 
             this.btnBrowseSuiteTypeInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnBrowseSuiteTypeInfo.Location = new System.Drawing.Point(504, 30);
+            this.btnBrowseSuiteTypeInfo.Location = new System.Drawing.Point(806, 30);
             this.btnBrowseSuiteTypeInfo.Name = "btnBrowseSuiteTypeInfo";
             this.btnBrowseSuiteTypeInfo.Size = new System.Drawing.Size(75, 23);
             this.btnBrowseSuiteTypeInfo.TabIndex = 2;
@@ -118,9 +119,9 @@
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(12, 61);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(91, 13);
+            this.label5.Size = new System.Drawing.Size(87, 13);
             this.label5.TabIndex = 0;
-            this.label5.Text = "Suite plans folder:";
+            this.label5.Text = "Floorplans folder:";
             // 
             // lblFloorPlansPath
             // 
@@ -130,14 +131,14 @@
             this.lblFloorPlansPath.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.lblFloorPlansPath.Location = new System.Drawing.Point(107, 61);
             this.lblFloorPlansPath.Name = "lblFloorPlansPath";
-            this.lblFloorPlansPath.Size = new System.Drawing.Size(359, 13);
+            this.lblFloorPlansPath.Size = new System.Drawing.Size(661, 13);
             this.lblFloorPlansPath.TabIndex = 0;
             this.lblFloorPlansPath.Text = "drop folder here or press Browse -->";
             // 
             // btnBrowseFloorPlanFolder
             // 
             this.btnBrowseFloorPlanFolder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnBrowseFloorPlanFolder.Location = new System.Drawing.Point(504, 56);
+            this.btnBrowseFloorPlanFolder.Location = new System.Drawing.Point(806, 56);
             this.btnBrowseFloorPlanFolder.Name = "btnBrowseFloorPlanFolder";
             this.btnBrowseFloorPlanFolder.Size = new System.Drawing.Size(75, 23);
             this.btnBrowseFloorPlanFolder.TabIndex = 4;
@@ -149,7 +150,7 @@
             // 
             this.btnTest.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnTest.Enabled = false;
-            this.btnTest.Location = new System.Drawing.Point(504, 85);
+            this.btnTest.Location = new System.Drawing.Point(806, 85);
             this.btnTest.Name = "btnTest";
             this.btnTest.Size = new System.Drawing.Size(75, 23);
             this.btnTest.TabIndex = 5;
@@ -167,7 +168,7 @@
             this.tbResults.Multiline = true;
             this.tbResults.Name = "tbResults";
             this.tbResults.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.tbResults.Size = new System.Drawing.Size(564, 232);
+            this.tbResults.Size = new System.Drawing.Size(866, 312);
             this.tbResults.TabIndex = 6;
             // 
             // label2
@@ -183,7 +184,7 @@
             // 
             this.btnGuessSuiteTypeInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnGuessSuiteTypeInfo.Enabled = false;
-            this.btnGuessSuiteTypeInfo.Location = new System.Drawing.Point(471, 30);
+            this.btnGuessSuiteTypeInfo.Location = new System.Drawing.Point(773, 30);
             this.btnGuessSuiteTypeInfo.Name = "btnGuessSuiteTypeInfo";
             this.btnGuessSuiteTypeInfo.Size = new System.Drawing.Size(27, 23);
             this.btnGuessSuiteTypeInfo.TabIndex = 1;
@@ -195,7 +196,7 @@
             // 
             this.btnGuessFloorPlanFolder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnGuessFloorPlanFolder.Enabled = false;
-            this.btnGuessFloorPlanFolder.Location = new System.Drawing.Point(471, 56);
+            this.btnGuessFloorPlanFolder.Location = new System.Drawing.Point(773, 56);
             this.btnGuessFloorPlanFolder.Name = "btnGuessFloorPlanFolder";
             this.btnGuessFloorPlanFolder.Size = new System.Drawing.Size(27, 23);
             this.btnGuessFloorPlanFolder.TabIndex = 3;
@@ -211,9 +212,9 @@
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 349);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 429);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(591, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(893, 22);
             this.statusStrip1.TabIndex = 7;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -223,12 +224,12 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(487, 17);
             this.toolStripStatusLabel1.Text = "Comments and info: andrey.masliuk@3dcondox.com CC: alex.neshmonin@3dcondox.com";
             // 
-            // Form1
+            // MainForm
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(591, 371);
+            this.ClientSize = new System.Drawing.Size(893, 451);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.btnGuessFloorPlanFolder);
             this.Controls.Add(this.btnGuessSuiteTypeInfo);
@@ -244,10 +245,12 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.lblModelPath);
             this.Controls.Add(this.label1);
-            this.Name = "Form1";
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimumSize = new System.Drawing.Size(550, 270);
+            this.Name = "MainForm";
             this.Text = "Model Package Tester - 3D Condo Explorer";
-            this.DragDrop += new System.Windows.Forms.DragEventHandler(this.Form1_DragDrop);
-            this.DragEnter += new System.Windows.Forms.DragEventHandler(this.Form1_DragEnter);
+            this.DragDrop += new System.Windows.Forms.DragEventHandler(this.MainForm_DragDrop);
+            this.DragEnter += new System.Windows.Forms.DragEventHandler(this.MainForm_DragEnter);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);

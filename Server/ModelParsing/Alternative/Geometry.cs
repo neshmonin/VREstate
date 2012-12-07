@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Xml;
 
 namespace Vre.Server.Model.Kmz
@@ -74,49 +75,54 @@ namespace Vre.Server.Model.Kmz
         //    </mesh>
         //</geometry>
 
-        public Geometry(string id, XmlNode root)
+        public static Geometry Create(string id, XmlNode root)
+        {
+            XmlNode meshCheck = root["mesh"];
+            if (meshCheck == null || meshCheck["lines"] == null)
+                return null;
+
+            return new Geometry(id, meshCheck);
+        }
+
+        private Geometry(string id, XmlNode meshNode)
         {
             Id = id;
             _points = null;
             _lines = null;
 
-            XmlNode meshNode = root["mesh"];
-            if (meshNode != null)
+            XmlNode pn = meshNode["source"];
+            XmlNode array = (pn != null) ? pn["float_array"] : null;
+
+            // TODO: read these nodes to verify point array format!
+            //XmlNode techNode = pn["technique_common"];
+            //XmlNode accessorNode = (techNode != null) ? techNode["accessor"] : null;
+
+            if (array != null)
             {
-                XmlNode pn = meshNode["source"];
-                XmlNode array = (pn != null) ? pn["float_array"] : null;
+                XmlAttribute aa = array.Attributes["count"];
+                int cnt = int.Parse(aa.Value);
+                _points = new Point3D[cnt / 3];
+                string[] parts = array.InnerText.Split(null);
+                for (int idx = _points.Length - 1, pos = parts.Length - 3; idx >= 0; idx--, pos -= 3)
+                    _points[idx] = new Point3D(
+                        double.Parse(parts[pos], CultureInfo.InvariantCulture),
+                        double.Parse(parts[pos + 1], CultureInfo.InvariantCulture),
+                        double.Parse(parts[pos + 2], CultureInfo.InvariantCulture));
+            }
 
-                // TODO: read these nodes to verify point array format!
-                //XmlNode techNode = pn["technique_common"];
-                //XmlNode accessorNode = (techNode != null) ? techNode["accessor"] : null;
+            XmlNode ln = meshNode["lines"];
+            array = (ln != null) ? ln["p"] : null;
 
-                if (array != null)
-                {
-                    XmlAttribute aa = array.Attributes["count"];
-                    int cnt = int.Parse(aa.Value);
-                    _points = new Point3D[cnt / 3];
-                    string[] parts = array.InnerText.Split(null);
-                    for (int idx = _points.Length - 1, pos = parts.Length - 3; idx >= 0; idx--, pos -= 3)
-                        _points[idx] = new Point3D(
-                            double.Parse(parts[pos]),
-                            double.Parse(parts[pos + 1]),
-                            double.Parse(parts[pos + 2]));
-                }
-
-                XmlNode ln = meshNode["lines"];
-                array = (ln != null) ? ln["p"] : null;
-
-                if (array != null)
-                {
-                    XmlAttribute la = ln.Attributes["count"];
-                    int cnt = int.Parse(la.Value);
-                    _lines = new Line[cnt];
-                    string[] parts = array.InnerText.Split(null);
-                    for (int idx = _lines.Length - 1, pos = parts.Length - 2; idx >= 0; idx--, pos -= 2)
-                        _lines[idx] = new Line(
-                            int.Parse(parts[pos]),
-                            int.Parse(parts[pos + 1]));
-                }
+            if (array != null)
+            {
+                XmlAttribute la = ln.Attributes["count"];
+                int cnt = int.Parse(la.Value);
+                _lines = new Line[cnt];
+                string[] parts = array.InnerText.Split(null);
+                for (int idx = _lines.Length - 1, pos = parts.Length - 2; idx >= 0; idx--, pos -= 2)
+                    _lines[idx] = new Line(
+                        int.Parse(parts[pos]),
+                        int.Parse(parts[pos + 1]));
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System.Globalization;
+using System.Xml;
 
 namespace Vre.Server.Model.Kmz
 {
@@ -51,9 +52,9 @@ namespace Vre.Server.Model.Kmz
             XmlNode node = root.FirstChild;
             while (node != null)
             {
-                if (node.Name.Equals(LongitudeNodeName)) Longitude = double.Parse(node.InnerText);
-                else if (node.Name.Equals(LatitudeNodeName)) Latitude = double.Parse(node.InnerText);
-                else if (node.Name.Equals(AltitudeNodeName)) Altitude = double.Parse(node.InnerText);
+                if (node.Name.Equals(LongitudeNodeName)) Longitude = double.Parse(node.InnerText, CultureInfo.InvariantCulture);
+                else if (node.Name.Equals(LatitudeNodeName)) Latitude = double.Parse(node.InnerText, CultureInfo.InvariantCulture);
+                else if (node.Name.Equals(AltitudeNodeName)) Altitude = double.Parse(node.InnerText, CultureInfo.InvariantCulture);
 
                 node = node.NextSibling;
             }

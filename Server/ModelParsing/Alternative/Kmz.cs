@@ -11,6 +11,7 @@ namespace Vre.Server.Model.Kmz
     {
         private KmzReader _reader;
         private XmlDocument _kml;
+        private string _kmzPath;
 
         public string Name { get; private set; }
         public string Description { get; private set; }
@@ -18,12 +19,14 @@ namespace Vre.Server.Model.Kmz
 
         public Kmz(string path, StringBuilder readWarnings)
         {
-            _reader = KmzReader.Open(path);
+            _kmzPath = path;
+            _reader = KmzReader.Open(_kmzPath);
 
             Stream s;
 
             s = _reader.GetFile("doc.kml");
-            if (null == s) throw new InvalidDataException("The model file does not contain root KML entry");
+            if (null == s)
+                throw new InvalidDataException(string.Format("MDSC09: The model file {0} does not contain root KML entry", _kmzPath));
 
             _kml = new XmlDocument();
             _kml.Load(s);
@@ -46,7 +49,8 @@ namespace Vre.Server.Model.Kmz
                 {
                     if (Name != null)
                     {
-                        if (readWarnings != null) readWarnings.Append("\r\nMDSC00: Multiple 'kml' nodes in KML are not supported; subsequent nodes ignored.");
+                        if (readWarnings != null) 
+                            readWarnings.Append("\r\nMDSC00: Multiple 'kml' nodes in KML are not supported; subsequent nodes ignored.");
                     }
                     else
                     {
@@ -60,6 +64,7 @@ namespace Vre.Server.Model.Kmz
         private void readKmlNode(XmlNode root, StringBuilder readWarnings)
         {
             const string PlacemarkNodeName = "Placemark";
+            bool placemarkFound = false;
 
             XmlNode node = root.FirstChild;
 
@@ -67,9 +72,11 @@ namespace Vre.Server.Model.Kmz
             {
                 if (node.Name.Equals(PlacemarkNodeName))
                 {
+                    placemarkFound = true;
                     if (Name != null)
                     {
-                        if (readWarnings != null) readWarnings.Append("\r\nMDSC01: Multiple placemarks in KML are not supported; subsequent placemark ignored.");
+                        if (readWarnings != null)
+                            readWarnings.Append("\r\nMDSC01: Multiple placemarks in KML are not supported; subsequent placemark ignored.");
                     }
                     else
                     {
@@ -78,6 +85,9 @@ namespace Vre.Server.Model.Kmz
                 }
                 node = node.NextSibling;
             }
+
+            if (!placemarkFound)
+                throw new InvalidDataException(string.Format("MDSC10: There is no Placemark section in {0}.", _kmzPath));
         }
 
         private void readPlacemarkNode(XmlNode root, StringBuilder readWarnings)

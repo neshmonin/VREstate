@@ -474,6 +474,7 @@ namespace Vre.Server.Command
 
         private void setSuiteType(Suite dbSuite, string newClassName)
         {
+            bool newType = false, updated = false;
             SuiteType stype = null;
 
             string cn = newClassName;
@@ -487,8 +488,7 @@ namespace Vre.Server.Command
                 if (null == stype)
                 {
                     stype = new SuiteType(dbSuite.Building.ConstructionSite, cn);
-                    _clientSession.DbSession.Save(stype);
-                    _log.AppendFormat("Created new suite type ID={0}, Name={1}\r\n", stype.AutoID, stype.Name);
+                    newType = true;
                 }
 
                 stype.BalconyCount = _extraSuiteInfo.GetBalconyCount(cn);
@@ -499,10 +499,16 @@ namespace Vre.Server.Command
                 stype.DenCount = _extraSuiteInfo.GetDenCount(cn);
                 stype.FloorArea = new ValueWithUM(_extraSuiteInfo.GetIndoorFloorAreaSqFt(cn), ValueWithUM.Unit.SqFeet);
 
+                if (newType)
+                {
+                    _clientSession.DbSession.Save(stype);
+                    _log.AppendFormat("Created new suite type ID={0}, Name={1}\r\n", stype.AutoID, stype.Name);
+                }
+
                 string fpName = _extraSuiteInfo.GetFloorPlanFileName(cn);
                 if (!string.IsNullOrWhiteSpace(fpName))
                 {
-                    string srcPath = Path.Combine(_importPath, fpName);
+                    string srcPath = Path.Combine(_importPath, fpName.Replace('/', '\\'));
                     if (File.Exists(srcPath))
                     {
                         // NOTE that each committed update creates duplicated NEW floorplan files in storage
@@ -513,12 +519,16 @@ namespace Vre.Server.Command
                         _filesSaved.Add(stype.FloorPlanUrl);
 
                         _clientSession.DbSession.Update(stype);
+                        updated = true;
                     }
                     else
                     {
                         _log.AppendFormat("Floor plan {0} does not exist (type name={1})\r\n", srcPath, stype.Name);
                     }
                 }
+
+                if (!newType && !updated)
+                    _clientSession.DbSession.Update(stype);
 
                 _typeCache.Add(stype.Name, stype);
             }

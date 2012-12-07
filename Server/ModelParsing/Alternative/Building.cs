@@ -1,12 +1,16 @@
-﻿using System.Xml;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Xml;
 
 namespace Vre.Server.Model.Kmz
 {
     public class Building
     {
+        public const string XmlPrefix = "_building_";
         public string Id { get; private set; }
         public string Name { get; private set; }
+        public string Type { get; private set; }
         public IEnumerable<Suite> Suites { get { return _suites; } }
         /// <summary>
         /// Currently this is calculated IMPROPERLY
@@ -22,12 +26,14 @@ namespace Vre.Server.Model.Kmz
         private TMatrix _transformation;
         internal ConstructionSite _site;
 
-        public Building(ConstructionSite parent, string id, string buildingName, XmlNode buildingModel, 
+        public Building(ConstructionSite parent, string id, string buildingName, string buildingType, XmlNode buildingModel, 
             Dictionary<string, XmlNode> models, TMatrix tMatrix)
         {
+            StringBuilder fatalErrors = new StringBuilder();
             Id = id;
             UnitInMeters = parent.UnitInMeters;
             Name = buildingName;
+            Type = buildingType;
             LocationCart = tMatrix.Transform(parent.LocationCart);
             LocationGeo = tMatrix.Point3D2ViewPoint(tMatrix.Transform(new Geometry.Point3D(0.0, 0.0, 0.0)), parent.LocationGeo);
             LocationGeo.Heading += tMatrix.Heading_d_patch; if (LocationGeo.Heading >= 360.0) LocationGeo.Heading -= 360.0;
@@ -68,11 +74,22 @@ namespace Vre.Server.Model.Kmz
                 if ((suiteNode != null) && (nn != null) && (na != null))
                 {
                     TMatrix matrix = new TMatrix(_transformation, nn.InnerText, UnitInMeters);
-                    string suiteDescription = na.Value.Replace('_', ' ');
 
-                    _suites.Add(new Suite(this, nodeId, suiteDescription, suiteNode, models, matrix));
+                    try
+                    {
+                        _suites.Add(new Suite(this, nodeId, na.Value, suiteNode, models, matrix));
+                    }
+                    catch (InvalidDataException ide)
+                    {
+                        fatalErrors.AppendFormat("\r\n{0}", ide.Message);
+                    }
                 }
             }
+
+            if (fatalErrors.Length > 0)
+                throw new InvalidDataException(string.Format(
+                    "Building Name \'{0}\'({1}) - detected problems: {2}", 
+                    buildingName, buildingType, fatalErrors.ToString()));
         }
     }
 }
