@@ -127,7 +127,7 @@ public class GE {
 //							plugin.getNavigationControl().setVisibility(
 //									GEVisibility.VISIBILITY_HIDE);
 
-						plugin.getOptions().setMouseNavigationEnabled(false);
+						plugin.getOptions().setMouseNavigationEnabled(true);
 						// show some layers
 						
 						plugin.enableLayer(GELayerId.LAYER_BUILDINGS, true);
