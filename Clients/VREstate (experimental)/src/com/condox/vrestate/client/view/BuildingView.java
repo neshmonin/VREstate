@@ -8,7 +8,6 @@ import com.condox.vrestate.client.document.Site;
 import com.condox.vrestate.client.document.Suite;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.BuildingInteractor;
-import com.google.gwt.user.client.Timer;
 import com.nitrous.gwt.earth.client.api.KmlAltitudeMode;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlLookAt;
@@ -56,7 +55,7 @@ public class BuildingView extends GEView {
 			Update(1);
 		}
 		// address_overlay.setVisibility(value);
-//		interactor.setEnabled(value);
+		interactor.setEnabled(value);
 		// Draw();
 	}
 
@@ -100,16 +99,40 @@ public class BuildingView extends GEView {
 		if (new_speed < 0)
 			new_speed = GE.getPlugin().getFlyToSpeedTeleport();
 		GE.getPlugin().getOptions().setFlyToSpeed(new_speed);
-		Log.write("Update:");
-		Log.write("heading: " + look_at.getHeading());
-		Log.write("tilt: " + look_at.getTilt());
-		Log.write("range: " + look_at.getRange());
+//		Log.write("look_at.heading: " + look_at.getHeading());
+//		Log.write("look_at.tilt: " + look_at.getTilt());
+//		Log.write("look_at.range: " + look_at.getRange());
 		GE.getView().setAbstractView(look_at);
 		GE.getPlugin().getOptions().setFlyToSpeed(old_speed);
 	}
 
 	private double tilt = 0;
 	private double range = 100;
+
+	public void Move(double dH, double dT, double dR) {
+		Log.write("Move: " + dH + " " + dT + " " + dR);
+		heading += dH / 8;
+		tilt -= dT / 12;
+		range += dR;
+
+		// if (Math.abs(heading - selection.getPosition().getHeading()) < 45)
+		// look_at.setHeading(heading);
+		// if (Math.abs(heading - selection.getPosition().getHeading()) > 315)
+		// look_at.setHeading(heading);
+		while (heading < 0)
+			heading += 360;
+		while (heading > 360)
+			heading -= 360;
+		tilt = Math.max(tilt, 10);
+		tilt = Math.min(tilt, 170);
+
+		range = Math.max(range, 100);
+
+		look_at.setHeading(heading);
+		look_at.setTilt(tilt);
+		look_at.setRange(range);
+		// Update(0);
+	}
 
 	@Override
 	public void Update() {
@@ -131,55 +154,45 @@ public class BuildingView extends GEView {
 				Update(-1);
 		}
 	}
-
+	
 	private double heading_diff = 0;
 	private double tilt_diff = 0;
 	private double range_diff = 0;
-
+	
 	public void addHeadingDiff(double value) {
-		// heading_diff += value;
-		// Log.write("heading_diff: " + heading_diff);
+		heading_diff += value;
 	}
-
+	
 	public void addTiltDiff(double value) {
 		tilt_diff += value;
-		Log.write("tilt_diff: " + tilt_diff);
 	}
-
+	
 	public void addRangeDiff(double value) {
 		range_diff += value;
 	}
-
-	int direction = 1;
-
+	
 	public void onFrameEnd() {
-//		Log.write("onFrameEnd");
-//
-//		look_at.setTilt(look_at.getTilt() + direction * 1);
-//		if ((look_at.getTilt() < 10) || (look_at.getTilt() > 80))
-//			direction *= -1;
-//		if (moved) {
-//			moved = false;
-//			Update(-1);
-//		}
+		heading += heading_diff;
+		heading_diff = 0;
+		tilt -= tilt_diff;
+		tilt_diff = 0;
+		range += range_diff;
+		range_diff = 0;
+		
+		while (heading < 0)
+			heading += 360;
+		while (heading > 360)
+			heading -= 360;
+		
+		tilt = Math.max(tilt, 10);
+		tilt = Math.min(tilt, 170);
+
+		range = Math.max(range, 100);
+		
+		look_at.setHeading(heading);
+		look_at.setTilt(tilt);
+		look_at.setRange(range);
+		Update(-1);
 	}
 	
-	boolean moved = false;
-
-	public void Debug() {
-		moved = true;
-		Log.write("GE.heading: "
-				+ GE.getView()
-						.copyAsLookAt(
-								KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND)
-						.getHeading());
-		Log.write("GE.tilt: "
-				+ GE.getView()
-						.copyAsLookAt(
-								KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND)
-						.getTilt());
-		// Log.write("range: " +
-		// GE.getView().copyAsLookAt(KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND).getRange());
-	}
-
 }

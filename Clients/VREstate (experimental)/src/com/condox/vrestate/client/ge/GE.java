@@ -116,25 +116,26 @@ public class GE {
 				earth.addPluginReadyListener(new GEPluginReadyListener() {
 					public void pluginReady(GEPlugin ge) {
 						// show map content once the plug-in has loaded
-						plugin = earth.getGEPlugin();
-						plugin.getWindow().setVisibility(true);
+//						plugin = earth.getGEPlugin();
+						plugin = ge;
+						ge.getWindow().setVisibility(true);
 
 						// add a navigation control
 //						if (VRE.OPTIONS_NAVIGATION_CONTROLS)
-							plugin.getNavigationControl().setVisibility(
+							ge.getNavigationControl().setVisibility(
 									GEVisibility.VISIBILITY_AUTO);
 //						else
-//							plugin.getNavigationControl().setVisibility(
+//							ge.getNavigationControl().setVisibility(
 //									GEVisibility.VISIBILITY_HIDE);
 
-						plugin.getOptions().setMouseNavigationEnabled(true);
+						ge.getOptions().setMouseNavigationEnabled(false);
 						// show some layers
 						
-						plugin.enableLayer(GELayerId.LAYER_BUILDINGS, true);
-						plugin.enableLayer(GELayerId.LAYER_BORDERS, true);
-						plugin.enableLayer(GELayerId.LAYER_ROADS, true);
-						plugin.enableLayer(GELayerId.LAYER_TERRAIN, true);
-						plugin.enableLayer(GELayerId.LAYER_TREES, true);
+						ge.enableLayer(GELayerId.LAYER_BUILDINGS, true);
+						ge.enableLayer(GELayerId.LAYER_BORDERS, true);
+						ge.enableLayer(GELayerId.LAYER_ROADS, true);
+						ge.enableLayer(GELayerId.LAYER_TERRAIN, true);
+						ge.enableLayer(GELayerId.LAYER_TREES, true);
 						// ========================
 //						setupEvents();
 						isReady = true;

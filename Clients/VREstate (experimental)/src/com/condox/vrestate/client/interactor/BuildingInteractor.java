@@ -35,180 +35,180 @@ public class BuildingInteractor extends Interactor {
 	@Override
 	public void setEnabled(boolean value) {
 		Log.write("BuildingInteractor:" + value);
-//		if (value) {
-//			if (mouse_listener == null)
-//				mouse_listener = GE.getPlugin().getWindow()
-//						.addMouseListener(new MouseListener() {
-//
-//							private int x = 0;
-//							private int y = 0;
-//							private int z = 0;
-//							boolean action = false;
-//							Timer zoomer = new Timer() {
-//
-//								@Override
-//								public void run() {
-//									// TODO Auto-generated method stub
-////									ChangeRange(10);
-//								}
-//							};
-//
-//							Timer unzoomer = new Timer() {
-//
-//								@Override
-//								public void run() {
-////									ChangeRange(-10);
-//								}
-//							};
-//
-//							@Override
-//							public void onClick(KmlMouseEvent event) {
-//								event.preventDefault();
-//								Log.write("BuildingInteractor::onClick()");
-//
-//								if (event.getTarget().getType()
-//										.equals("KmlPlacemark")) {
-//									KmlPlacemark placemark = (KmlPlacemark) event
-//											.getTarget();
-//									String json = placemark.getSnippet();
-//									JSONObject obj = JSONParser.parseLenient(
-//											json).isObject();
-//									// TODO Добавить проверку obj на null
-//									String type = obj.get("type").isString()
-//											.stringValue();
-//									int id = (int) obj.get("id").isNumber()
-//											.doubleValue();
-//									Log.write("" + obj.toString());
-//									 view.Select(type, id);
-//								}
-//								// Изменить!!
-//								// view.Select(null, 0);
-//							}
-//
-//							@Override
-//							public void onDoubleClick(KmlMouseEvent event) {
-//							}
-//
-//							@Override
-//							public void onMouseDown(KmlMouseEvent event) {
-//								event.preventDefault();
-//								x = event.getClientX();
-//								y = event.getClientY();
-//								z = event.getClientY();
-//								action = true;
-//
-//								if ((50 < x)
-//										&& (x < 150)
-//										&& (GE.getEarth().getOffsetHeight() - 150 < y)
-//										&& (y < GE.getEarth().getOffsetHeight() - 50))
-//									zoomer.scheduleRepeating(1);
-//								if ((50 < x)
-//										&& (x < 150)
-//										&& (GE.getEarth().getOffsetHeight() - 300 < y)
-//										&& (y < GE.getEarth().getOffsetHeight() - 200))
-//									unzoomer.scheduleRepeating(1);
-////								Log.write(x + " " + y);
-//
-//							}
-//
-//							@Override
-//							public void onMouseUp(KmlMouseEvent event) {
-//								event.preventDefault();
-//								action = false;
-//								zoomer.cancel();
-//								unzoomer.cancel();
-//								view.Draw();
-//							}
-//
-//							@Override
-//							public void onMouseOver(KmlMouseEvent event) {
-//							}
-//
-//							@Override
-//							public void onMouseOut(KmlMouseEvent event) {
-//							}
-//
-//							@Override
-//							public void onMouseMove(KmlMouseEvent event) {
-//								event.preventDefault();
-//								if (action) {
-//									switch (event.getButton()) {
-//									case 0: // LEFT
-//										double dX = event.getClientX() - x;
-//										double dY = event.getClientY() - y;
-////										view.Move(dX, dY, 0);
-////										view.Update();
-//										Log.write("dX: " + dX);
-//										Log.write("dY: " + dY);
-//										view.addHeadingDiff(dX);
-//										view.addTiltDiff(dY);
-//										x += dX;
-//										y += dY;
-//										break;
-//									case 2: // RIGHT
-//										double dZ = event.getClientY() - z;
-////										ChangeRange(-dZ);
-//										view.addRangeDiff(-dZ);
-//										z += dZ;
-//										break;
-//									}
-//								}
-//							}
-//						});
-//		} else {
-//			// Log.write("1");
-//			mouse_listener.removeHandler();
-//			mouse_listener = null;
-//			// Log.write("2");
-//		}
+		if (value) {
+			if (mouse_listener == null)
+				mouse_listener = GE.getPlugin().getWindow()
+						.addMouseListener(new MouseListener() {
 
-//		if (value) {
-//			if (view_listener == null)
-//				view_listener = GE.getView().addViewChangeListener(
-//						new ViewChangeListener() {
-//							@Override
-//							public void onViewChangeBegin() {
-//								// TODO Auto-generated method stub
-//
-//							}
-//
-//							@Override
-//							public void onViewChange() {
-//								// TODO Auto-generated method stub
+							private int x = 0;
+							private int y = 0;
+							private int z = 0;
+							boolean action = false;
+							Timer zoomer = new Timer() {
+
+								@Override
+								public void run() {
+									// TODO Auto-generated method stub
+//									ChangeRange(10);
+								}
+							};
+
+							Timer unzoomer = new Timer() {
+
+								@Override
+								public void run() {
+//									ChangeRange(-10);
+								}
+							};
+
+							@Override
+							public void onClick(KmlMouseEvent event) {
+								event.preventDefault();
+								Log.write("BuildingInteractor::onClick()");
+
+								if (event.getTarget().getType()
+										.equals("KmlPlacemark")) {
+									KmlPlacemark placemark = (KmlPlacemark) event
+											.getTarget();
+									String json = placemark.getSnippet();
+									JSONObject obj = JSONParser.parseLenient(
+											json).isObject();
+									// TODO Добавить проверку obj на null
+									String type = obj.get("type").isString()
+											.stringValue();
+									int id = (int) obj.get("id").isNumber()
+											.doubleValue();
+									Log.write("" + obj.toString());
+									 view.Select(type, id);
+								}
+								// Изменить!!
+								// view.Select(null, 0);
+							}
+
+							@Override
+							public void onDoubleClick(KmlMouseEvent event) {
+							}
+
+							@Override
+							public void onMouseDown(KmlMouseEvent event) {
+								event.preventDefault();
+								x = event.getClientX();
+								y = event.getClientY();
+								z = event.getClientY();
+								action = true;
+
+								if ((50 < x)
+										&& (x < 150)
+										&& (GE.getEarth().getOffsetHeight() - 150 < y)
+										&& (y < GE.getEarth().getOffsetHeight() - 50))
+									zoomer.scheduleRepeating(1);
+								if ((50 < x)
+										&& (x < 150)
+										&& (GE.getEarth().getOffsetHeight() - 300 < y)
+										&& (y < GE.getEarth().getOffsetHeight() - 200))
+									unzoomer.scheduleRepeating(1);
+//								Log.write(x + " " + y);
+
+							}
+
+							@Override
+							public void onMouseUp(KmlMouseEvent event) {
+								event.preventDefault();
+								action = false;
+								zoomer.cancel();
+								unzoomer.cancel();
+								view.Draw();
+							}
+
+							@Override
+							public void onMouseOver(KmlMouseEvent event) {
+							}
+
+							@Override
+							public void onMouseOut(KmlMouseEvent event) {
+							}
+
+							@Override
+							public void onMouseMove(KmlMouseEvent event) {
+								event.preventDefault();
+								if (action) {
+									switch (event.getButton()) {
+									case 0: // LEFT
+										double dX = event.getClientX() - x;
+										double dY = event.getClientY() - y;
+//										view.Move(dX, dY, 0);
+//										view.Update();
+										Log.write("dX: " + dX);
+										Log.write("dY: " + dY);
+										view.addHeadingDiff(dX);
+										view.addTiltDiff(dY);
+										x += dX;
+										y += dY;
+										break;
+									case 2: // RIGHT
+										double dZ = event.getClientY() - z;
+//										ChangeRange(-dZ);
+										view.addRangeDiff(-dZ);
+										z += dZ;
+										break;
+									}
+								}
+							}
+						});
+		} else {
+			// Log.write("1");
+			mouse_listener.removeHandler();
+			mouse_listener = null;
+			// Log.write("2");
+		}
+
+		if (value) {
+			if (view_listener == null)
+				view_listener = GE.getView().addViewChangeListener(
+						new ViewChangeListener() {
+							@Override
+							public void onViewChangeBegin() {
+								// TODO Auto-generated method stub
+
+							}
+
+							@Override
+							public void onViewChange() {
+								// TODO Auto-generated method stub
 //								view.Debug();
-//							}
-//
-//							// private double centerX =
-//							// GE.getEarth().getOffsetWidth() / 2;
-//							// private double centerY = GE.getEarth()
-//							// .getOffsetHeight() / 2;
-//
-//							@Override
-//							public void onViewChangeEnd() {
+							}
+
+							// private double centerX =
+							// GE.getEarth().getOffsetWidth() / 2;
+							// private double centerY = GE.getEarth()
+							// .getOffsetHeight() / 2;
+
+							@Override
+							public void onViewChangeEnd() {
 //								view.Debug();
-//							}
-//						});
-//		} else {
-//			view_listener.removeHandler();
-//			view_listener = null;
-//		}
+							}
+						});
+		} else {
+			view_listener.removeHandler();
+			view_listener = null;
+		}
 		
-//		if (value) {
-//			if (frame_listener == null)
-//				frame_listener = GE.getPlugin().addFrameEndListener(
-//						new FrameEndListener() {
-//
-//							@Override
-//							public void onFrameEnd() {
-//								// TODO Auto-generated method stub
-//								frame_ended = true;
-//								view.onFrameEnd();
-//							}
-//						});
-//		} else {
-//			frame_listener.removeHandler();
-//			frame_listener = null;
-//		}
+		if (value) {
+			if (frame_listener == null)
+				frame_listener = GE.getPlugin().addFrameEndListener(
+						new FrameEndListener() {
+
+							@Override
+							public void onFrameEnd() {
+								// TODO Auto-generated method stub
+								frame_ended = true;
+								view.onFrameEnd();
+							}
+						});
+		} else {
+			frame_listener.removeHandler();
+			frame_listener = null;
+		}
 		
 
 		if (zoom_overlay == null) {
