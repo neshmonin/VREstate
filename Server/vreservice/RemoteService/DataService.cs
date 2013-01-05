@@ -7,6 +7,8 @@ using Vre.Server.BusinessLogic;
 using Vre.Server.BusinessLogic.Client;
 using System.Diagnostics;
 using Vre.Server.Dao;
+using NHibernate;
+using NHibernate.Criterion;
 
 namespace Vre.Server.RemoteService
 {
@@ -382,7 +384,7 @@ namespace Vre.Server.RemoteService
             if (scopeType.Equals("address"))
             {
                 toReturn = new List<Building>();
-                foreach (UpdateableBase u in AddressHelper.ParseGeographicalAddressToModel(query, session.DbSession))
+                foreach (UpdateableBase u in AddressHelper.ParseGeographicalAddressToModel(query, session.DbSession, true))
                 {
                     Building b = u as Building;
                     if (b != null) toReturn.Add(b);
@@ -908,14 +910,14 @@ namespace Vre.Server.RemoteService
                         throw new NotImplementedException("7FD8B0");
                 }
 
-                generateViewResponse(
+                generateViewResponse(session.DbSession,
                     new Site[] { building.ConstructionSite },
                     new Building[] { building },
-                    suite != null ? new SuiteType[] { suite.SuiteType } : new SuiteType[0],
-                    suite != null ? new Suite[] { suite } : new Suite[0],
+                    suite != null ? new SuiteType[] { suite.SuiteType } : building.ConstructionSite.SuiteTypes,
+                    suite != null ? new Suite[] { suite } : building.Suites,
                     new ViewOrder[] { viewOrder },
                     viewOrder.AutoID,
-                    resp);
+                    resp, true /*does not really matter here*/, true);
             }
         }
 
@@ -938,6 +940,8 @@ namespace Vre.Server.RemoteService
             int objectId = query.GetParam("id", -1);
             if (objectId < 0) throw new ArgumentException("Object ID missing.");
 
+            bool showSold = query.GetParam("showSold", "false").Equals("true");
+
             Site site;
             using (SiteDao dao = new SiteDao(session.DbSession))
                 site = dao.GetById(objectId);
@@ -947,20 +951,22 @@ namespace Vre.Server.RemoteService
             List<Suite> suites = new List<Suite>();
             foreach (Building b in site.Buildings) suites.AddRange(b.Suites);
 
-            generateViewResponse(
+            generateViewResponse(session.DbSession,
                 new Site[] { site },
                 site.Buildings.ToArray(),  
                 site.SuiteTypes.ToArray(),
                 suites.ToArray(),
                 new ViewOrder[0],
                 Guid.Empty,
-                resp);
+                resp, showSold, false);
         }
 
         private static void getViewBuilding(ClientSession session, ServiceQuery query, IResponseData resp)
         {
             int objectId = query.GetParam("id", -1);
             if (objectId < 0) throw new ArgumentException("Object ID missing.");
+
+            bool showSold = query.GetParam("showSold", "false").Equals("true");
 
             Building building;
             using (BuildingDao dao = new BuildingDao(session.DbSession))
@@ -972,14 +978,14 @@ namespace Vre.Server.RemoteService
             foreach (Suite s in building.Suites)
                 if (!suiteTypes.Contains(s.SuiteType) /* TODO: this may be slow! */) suiteTypes.Add(s.SuiteType);
 
-            generateViewResponse(
+            generateViewResponse(session.DbSession,
                 new Site[] { building.ConstructionSite },
                 new Building[] { building },
                 suiteTypes.ToArray(),
                 building.Suites.ToArray(),
                 new ViewOrder[0],
                 Guid.Empty,
-                resp);
+                resp, showSold, true);
         }
 
         private static void getViewSuite(ClientSession session, ServiceQuery query, IResponseData resp)
@@ -993,38 +999,52 @@ namespace Vre.Server.RemoteService
 
             if ((null == suite) || suite.Deleted) throw new FileNotFoundException("Unknown suite");
 
-            generateViewResponse(
+            generateViewResponse(session.DbSession,
                 new Site[] { suite.Building.ConstructionSite },
                 new Building[] { suite.Building },
                 new SuiteType[] { suite.SuiteType },
                 new Suite[] { suite },
                 new ViewOrder[0],
                 Guid.Empty,
-                resp);
+                resp, true, true);
         }
 
-        private static void generateViewResponse(
+        private static void generateViewResponse(ISession dbSession,
             IEnumerable<Site> sites, IEnumerable<Building> buildings, 
             IEnumerable<SuiteType> suiteTypes, IEnumerable<Suite> suites,
             IEnumerable<ViewOrder> viewOrders,
             Guid primaryListingId,
-            IResponseData resp)
+            IResponseData resp,
+            bool showSoldProperty, bool minimizeOutput)
         {
             resp.Data = new ClientData();
 
             List<ClientData> elements;
-                
+
+            HashSet<SuiteType> usedSuiteTypes = new HashSet<SuiteType>();
+            HashSet<Building> usedBuildings = new HashSet<Building>();
+            HashSet<Site> usedSites = new HashSet<Site>();
+
+            TempReconcileViewOrdersNow(suites, dbSession);
+
             elements = new List<ClientData>(suites.Count());
             foreach (Suite s in suites)
             {
+                if (!showSoldProperty)
+                {
+                    if (s.Status == Suite.SalesStatus.Sold) continue;
+                }
+
                 ServiceInstances.ModelCache.FillWithModelInfo(s, false);
                 elements.Add(s.GetClientData());
+                usedSuiteTypes.Add(s.SuiteType); usedBuildings.Add(s.Building);
             }
             resp.Data.Add("suites", elements.ToArray());
 
             elements = new List<ClientData>(suiteTypes.Count());
             foreach (SuiteType st in suiteTypes)
             {
+                if (!usedSuiteTypes.Contains(st)) continue;
                 ServiceInstances.ModelCache.FillWithModelInfo(st, false);
                 UrlHelper.ConvertUrlsToAbsolute(st);
                 elements.Add(st.GetClientData());
@@ -1034,16 +1054,19 @@ namespace Vre.Server.RemoteService
             elements = new List<ClientData>(buildings.Count());
             foreach (Building b in buildings)
             {
+                if (minimizeOutput && !usedBuildings.Contains(b)) continue;
                 ServiceInstances.ModelCache.FillWithModelInfo(b, false);
                 ClientData cd = b.GetClientData();
                 cd.Add("address", AddressHelper.ConvertToReadableAddress(b, null));
                 elements.Add(cd);
+                usedSites.Add(b.ConstructionSite);
             }
             resp.Data.Add("buildings", elements.ToArray());
 
             elements = new List<ClientData>(sites.Count());
             foreach (Site s in sites)
             {
+                if (!usedSites.Contains(s)) continue;
                 ServiceInstances.ModelCache.FillWithModelInfo(s, false);
                 elements.Add(s.GetClientData());
             }
@@ -1203,24 +1226,29 @@ namespace Vre.Server.RemoteService
 
         private static void updateUser(ClientSession session, int userId, ClientData data, IResponseData resp)
         {
-            using (UserManager manager = new UserManager(session))
+            using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
-                User user = manager.Get(userId);
+                using (UserManager manager = new UserManager(session))
+                {
+                    User user = manager.Get(userId);
 
-                if (user.UpdateFromClient(data))
-                {
-                    user.MarkUpdated();
-                    manager.Update(user);
-                    resp.ResponseCode = HttpStatusCode.OK;
-                    resp.Data = new ClientData();
-                    resp.Data.Add("updated", 1);
+                    if (user.UpdateFromClient(data))
+                    {
+                        user.MarkUpdated();
+                        manager.Update(user);
+                        resp.ResponseCode = HttpStatusCode.OK;
+                        resp.Data = new ClientData();
+                        resp.Data.Add("updated", 1);
+                    }
+                    else
+                    {
+                        resp.ResponseCode = HttpStatusCode.NotModified;
+                        resp.Data = new ClientData();
+                        resp.Data.Add("updated", 0);
+                    }
                 }
-                else
-                {
-                    resp.ResponseCode = HttpStatusCode.NotModified;
-                    resp.Data = new ClientData();
-                    resp.Data.Add("updated", 0);
-                }
+
+                tran.Commit();
             }
         }
 
@@ -1276,6 +1304,8 @@ namespace Vre.Server.RemoteService
                         ft.SetAutoSystemReferenceId();
                         dao.Update(ft);
                     }
+
+                    ReflectViewOrderStatusInTarget(viewOrder, session.DbSession);
 
                     resp.ResponseCode = HttpStatusCode.OK;
                     resp.Data = new ClientData();
@@ -1393,12 +1423,148 @@ namespace Vre.Server.RemoteService
                 using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
                     dao.Update(viewOrder);
 
+                ReflectViewOrderStatusInTarget(viewOrder, session.DbSession);
+
                 tran.Commit();
             }
 
             resp.ResponseCode = HttpStatusCode.OK;
             resp.Data = new ClientData();
             resp.Data.Add("deleted", 1);
+        }
+        #endregion
+
+        #region extra methods which should go to manager class (?)
+        internal static bool ReflectViewOrderStatusInTarget(ViewOrder viewOrder, ISession dbSession)
+        {
+            bool result = false;
+            bool isActive = !viewOrder.Deleted && viewOrder.Enabled && (viewOrder.ExpiresOn > DateTime.UtcNow);
+
+            switch (viewOrder.TargetObjectType)
+            {
+                case ViewOrder.SubjectType.Suite:
+                    using (SuiteDao dao = new SuiteDao(dbSession))
+                    {
+                        Suite s = dao.GetById(viewOrder.TargetObjectId);
+                        if (isActive && (s.Status != Suite.SalesStatus.ResaleAvailable))
+                        {
+                            s.Status = Suite.SalesStatus.ResaleAvailable;
+                            result = true;
+                        }
+                        else if (!isActive && (s.Status == Suite.SalesStatus.ResaleAvailable))
+                        {
+                            s.Status = Suite.SalesStatus.Sold;
+                            result = true;
+                        }
+                        if (result) dao.SafeUpdate(s);
+                    }
+                    break;
+
+                case ViewOrder.SubjectType.Building:
+                    // TODO: ???
+                    break;
+            }
+
+            return result;
+        }
+
+        private static void TempReconcileViewOrdersNow(IEnumerable<Suite> suites, ISession dbSession)
+        {
+            System.Collections.Generic.HashSet<int> ids = new HashSet<int>();
+            foreach (Suite s in suites) ids.Add(s.AutoID);
+
+            int ccnt = 0;
+
+            IQuery q = dbSession.CreateQuery("FROM Vre.Server.BusinessLogic.ViewOrder"
+                + " WHERE TargetObjectType=:tot"
+                + " AND Deleted=0 AND Enabled=1 AND ExpiresOn<:ex");
+            q.SetParameter<ViewOrder.SubjectType>("tot", ViewOrder.SubjectType.Suite);
+            q.SetTime("ex", DateTime.UtcNow);
+
+            using (SuiteDao dao = new SuiteDao(dbSession))
+            {
+                foreach (ViewOrder vo in q.List<ViewOrder>())
+                {
+                    if (!ids.Contains(vo.TargetObjectId)) continue;
+
+                    Suite suite = suites.First(s => s.AutoID == vo.TargetObjectId);
+                    if (suite.Status == Suite.SalesStatus.Sold) continue;
+
+                    suite.Status = Suite.SalesStatus.Sold;
+                    dao.SafeUpdate(suite);
+                    ccnt++;
+                }
+            }
+
+            if (ccnt > 0)
+                ServiceInstances.Logger.Info("On-the-fly ViewOrder reconcile adjusted {0} suite states.", ccnt);
+
+            //return;
+            
+            //int cnt = suites.Count();
+            //int[] ids = new int[cnt];
+            //cnt = 0;
+            //foreach (Suite s in suites) ids[cnt++] = s.AutoID;
+
+            //cnt = 0;
+            //using (SuiteDao dao = new SuiteDao(dbSession))
+            //{
+            //    foreach (ViewOrder vo in dbSession.CreateCriteria<ViewOrder>()
+            //        .Add(Expression.Eq("TargetObjectType", ViewOrder.SubjectType.Suite))
+            //        .Add(Expression.Eq("Deleted", false))
+            //        .Add(Expression.Eq("Enabled", true))
+            //        .Add(Expression.Lt("ExpiresOn", DateTime.UtcNow))
+            //        .Add(Expression.("TargetObjectId", ids))
+            //        .List<ViewOrder>())
+            //    {
+            //        Suite suite = suites.First(s => s.AutoID == vo.TargetObjectId);
+            //        suite.Status = Suite.SalesStatus.Sold;
+            //        dao.SafeUpdate(suite);
+            //        cnt++;
+            //    }
+            //}
+            //if (cnt > 0)
+            //    ServiceInstances.Logger.Info("On-the-fly ViewOrder reconcile adjusted {0} suite states.", cnt);
+
+            //int ccnt = 0;
+
+            //IQuery q = dbSession.CreateQuery("FROM Vre.Server.BusinessLogic.ViewOrder"
+            //    + " WHERE TargetObjectType=:tot"
+            //    + " AND Deleted=0 AND Enabled=1 AND ExpiresOn<:ex"
+            //    + " AND TargetObjectId IN (:ids)");
+            //q.SetParameter<ViewOrder.SubjectType>("tot", ViewOrder.SubjectType.Suite);
+            //q.SetTime("ex", DateTime.UtcNow);
+
+            //Suite[] asuites = suites.ToArray();
+            //int scnt = asuites.Length;
+            //int offset = 0;
+            //do
+            //{
+            //    int cnt = scnt - offset;
+            //    if (cnt > 100) cnt = 100;
+            //    int[] ids = new int[cnt];
+            //    for (int idx = cnt - 1; idx >= 0; idx--) ids[idx] = asuites[idx + offset].AutoID;
+            //    offset += cnt;
+
+            //    //q.SetString("ids", CsvUtilities.ToString<int>(ids));
+            //    q.set
+            //    q.SetParameter<int[]>("ids", ids);
+              
+            //    using (SuiteDao dao = new SuiteDao(dbSession))
+            //    {
+            //        foreach (ViewOrder vo in q.List<ViewOrder>())
+            //        {
+            //            Suite suite = suites.First(s => s.AutoID == vo.TargetObjectId);
+            //            suite.Status = Suite.SalesStatus.Sold;
+            //            dao.SafeUpdate(suite);
+            //            ccnt++;
+            //        }
+            //    }
+            //}
+            //while (true);
+
+            //if (ccnt > 0)
+            //    ServiceInstances.Logger.Info("On-the-fly ViewOrder reconcile adjusted {0} suite states.", ccnt);
         }
         #endregion
     }

@@ -26,45 +26,52 @@ namespace Vre.Server.Testing
             {
                 Thread.Sleep(1000 * _refreshTimeSec);
 
-                using (ClientSession session = ClientSession.MakeSystemSession())
+                try
                 {
-                    session.Resume();
-
-                    EstateDeveloper developer;
-                    Site site;
-                    Building building;
-                    Suite suite;
-                    using (EstateDeveloperDao eddao = new EstateDeveloperDao(session.DbSession))
+                    using (ClientSession session = ClientSession.MakeSystemSession())
                     {
-                        IList<EstateDeveloper> list = eddao.GetAll();
-                        developer = list[rnd.Next(list.Count)];
-                        site = developer.Sites[rnd.Next(developer.Sites.Count)];
-                        building = site.Buildings[rnd.Next(site.Buildings.Count)];
-                        suite = building.Suites[rnd.Next(building.Suites.Count)];
+                        session.Resume();
+
+                        EstateDeveloper developer;
+                        Site site;
+                        Building building;
+                        Suite suite;
+                        using (EstateDeveloperDao eddao = new EstateDeveloperDao(session.DbSession))
+                        {
+                            IList<EstateDeveloper> list = eddao.GetAll();
+                            developer = list[rnd.Next(list.Count)];
+                            site = developer.Sites[rnd.Next(developer.Sites.Count)];
+                            building = site.Buildings[rnd.Next(site.Buildings.Count)];
+                            suite = building.Suites[rnd.Next(building.Suites.Count)];
+                        }
+
+                        switch (rnd.Next(4))
+                        {
+                            case 0:
+                                using (EstateDeveloperDao seddao = new EstateDeveloperDao(session.DbSession))
+                                    seddao.SafeUpdate(developer);
+                                break;
+
+                            case 1:
+                                using (SiteDao ssdao = new SiteDao(session.DbSession))
+                                    ssdao.SafeUpdate(site);
+                                break;
+
+                            case 2:
+                                using (BuildingDao sbdao = new BuildingDao(session.DbSession))
+                                    sbdao.SafeUpdate(building);
+                                break;
+
+                            case 3:
+                                using (SuiteDao ssudao = new SuiteDao(session.DbSession))
+                                    ssudao.SafeUpdate(suite);
+                                break;
+                        }
                     }
-
-                    switch (rnd.Next(4))
-                    {
-                        case 0:
-                            using (EstateDeveloperDao seddao = new EstateDeveloperDao(session.DbSession))
-                                seddao.SafeUpdate(developer);
-                            break;
-
-                        case 1:
-                            using (SiteDao ssdao = new SiteDao(session.DbSession))
-                                ssdao.SafeUpdate(site);
-                            break;
-
-                        case 2:
-                            using (BuildingDao sbdao = new BuildingDao(session.DbSession))
-                                sbdao.SafeUpdate(building);
-                            break;
-
-                        case 3:
-                            using (SuiteDao ssudao = new SuiteDao(session.DbSession))
-                                ssudao.SafeUpdate(suite);
-                            break;
-                    }
+                }
+                catch (Exception e)
+                {
+                    ServiceInstances.Logger.Error("Testing:RandomUpdater failed iteration: {0}", e);
                 }
             }
         }

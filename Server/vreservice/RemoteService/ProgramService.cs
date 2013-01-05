@@ -6,6 +6,8 @@ using NHibernate;
 using Vre.Server.BusinessLogic;
 using Vre.Server.HttpService;
 using System.Web;
+using System.IO;
+using Vre.Server.Dao;
 
 namespace Vre.Server.RemoteService
 {
@@ -293,7 +295,8 @@ namespace Vre.Server.RemoteService
             string propertyType = request.Request.Query["propertyType"];
             string propertyId = request.Request.Query["propertyId"];
             string ownerId = request.Request.Query["ownerId"];
-            int suiteId;
+            ViewOrder.SubjectType targetType;
+            int targetId;
 
             {
                 string dv = request.Request.Query["daysValid"];
@@ -325,71 +328,100 @@ namespace Vre.Server.RemoteService
                 productUrl = HttpUtility.UrlDecode(productUrl);
             }
 
-            if (string.IsNullOrWhiteSpace(mslId))
+            using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(request.UserInfo.Session.DbSession))
             {
-                if (string.IsNullOrWhiteSpace(propertyType) || string.IsNullOrWhiteSpace(propertyId))
+                if (string.IsNullOrWhiteSpace(mslId))
                 {
-                    // view by address lookup
-                    //
-                    List<UpdateableBase> to = AddressHelper.ParseGeographicalAddressToModel(request.Request.Query, request.UserInfo.Session.DbSession);
+                    if (string.IsNullOrWhiteSpace(propertyType) || string.IsNullOrWhiteSpace(propertyId))
+                    {
+                        // view by address lookup
+                        //
+                        UpdateableBase to = AddressHelper.ParseGeographicalAddressToModel(request.Request.Query, request.UserInfo.Session.DbSession);
 
-                    // Only unique result is possible here
-                    if ((null == to) || (to.Count < 1)) throw new ArgumentException("Address not found");
-                    if (to.Count > 1) throw new ArgumentException("Address: non-unique result returned; please add details");
+                        Suite s = to as Suite;
+                        if (s != null)
+                        {
+                            targetType = ViewOrder.SubjectType.Suite;
+                            targetId = s.AutoID;
+                        }
+                        else
+                        {
+                            Building b = to as Building;
+                            if (b != null)
+                            {
+                                targetType = ViewOrder.SubjectType.Building;
+                                targetId = b.AutoID;
+                            }
+                            else
+                            {
+                                throw new FileNotFoundException("Property not found in system.");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // view by property ID
+                        //
+                        if (!int.TryParse(propertyId, out targetId)) throw new ArgumentException("Property ID is not valid");
 
-                    // Only suite is currently supported
-                    Suite s = to[0] as Suite;
-                    if (null == s) throw new NotImplementedException();
+                        UpdateableBase to = null;
 
-                    suiteId = s.AutoID;
+                        if (propertyType.Equals("suite"))
+                        {
+                            targetType = ViewOrder.SubjectType.Suite;
+                            Suite s;
+                            using (SuiteDao dao = new SuiteDao(request.UserInfo.Session.DbSession)) s = dao.GetById(targetId);
+                            if (s.Status != Suite.SalesStatus.Sold) throw new ObjectExistsException("Suite status in not SOLD");
+                            to = s;
+                        }
+                        else if (propertyType.Equals("building"))
+                        {
+                            targetType = ViewOrder.SubjectType.Building;
+                            Building b;
+                            using (BuildingDao dao = new BuildingDao(request.UserInfo.Session.DbSession)) b = dao.GetById(targetId);
+                            if (b.Status != Building.BuildingStatus.Sold) throw new ObjectExistsException("Building status in not SOLD");
+                            to = b;
+                        }
+                        else throw new ArgumentException("Unknown property type");
+
+                        if (null == to) throw new FileNotFoundException("Property not found in system.");
+                    }
                 }
                 else
                 {
-                    // view by property ID
+                    // TODO: Test against MLS DB
                     //
-                    if (!propertyType.Equals("suite")) throw new ArgumentException("Unknown property type");
-                    if (!int.TryParse(propertyId, out suiteId)) throw new ArgumentException("Property ID is not valid");
-
-                    // TODO: Verify that property ID exists?
+                    throw new NotImplementedException();
                 }
-            }
-            else
-            {
-                // TODO: Test against MLS DB
-                //
-                throw new NotImplementedException();
-            }
 
-            // use override for view order owner
-            int userId = -1;
-            if (!string.IsNullOrWhiteSpace(ownerId))
-            {
-                if (!int.TryParse(ownerId, out userId)) userId = -1;
+                // use override for view order owner
+                int userId = -1;
+                if (!string.IsNullOrWhiteSpace(ownerId))
+                {
+                    if (!int.TryParse(ownerId, out userId)) userId = -1;
+                }
+
+                string viewOrderId = ReverseRequestService.CreateViewOrder(request, userId,
+                    product, mslId, targetType, targetId, productUrl, expiresOn, paymentRefId);
+
+                // request.Response.ResponseCode - set by .CreateListing()
+                tran.Commit();
             }
-
-            string viewOrderId = ReverseRequestService.CreateViewOrder(request, userId,
-                product, mslId, ViewOrder.SubjectType.Suite, suiteId, productUrl, expiresOn, paymentRefId);
-
-            // request.Response.ResponseCode - set by .CreateListing()
         }
 
         private static void checkAddress(IServiceRequest request)
         {
-            List<UpdateableBase> to = AddressHelper.ParseGeographicalAddressToModel(request.Request.Query, request.UserInfo.Session.DbSession);
+            UpdateableBase to = AddressHelper.ParseGeographicalAddressToModel(request.Request.Query, request.UserInfo.Session.DbSession);
             ClientData result = new ClientData();
 
-            if ((null == to) || (to.Count < 1)) 
+            if (null == to)
             {
                 result.Add("result", false);
-            }
-            else if (to.Count > 1)
-            {
-                throw new ArgumentException("Address: non-unique result returned; please add details");
             }
             else
             {
                 // Only suite is currently supported
-                Suite s = to[0] as Suite;
+                Suite s = to as Suite;
                 if (null == s) throw new NotImplementedException();
 
                 result.Add("result", true);

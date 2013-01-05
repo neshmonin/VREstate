@@ -84,6 +84,7 @@ namespace Vre.Server.Model.Kmz
                         "MDSC22: Suite '{0}->{1}': Definition {2} does not match the last section of the name",
                         parent.Name, suiteDescription, realClassName));
             }
+            if (!ClassName.Contains("/")) ClassName = parent.Type + "/" + ClassName;  // legacy support
 
             _geometryIdList = new List<string>();
             foreach (XmlNode n in suiteModel.ChildNodes)

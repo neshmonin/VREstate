@@ -164,7 +164,7 @@ namespace Vre.Server.Model.Kmz
             {
                 foreach (Suite s in b.Suites)
                 {
-                    string fullType = b.Type + "/" + s.ClassName;
+                    string fullType = s.ClassName.Contains("/") ? s.ClassName : b.Type + "/" + s.ClassName;
                     if (_geometries.ContainsKey(fullType)) continue;
 
                     IEnumerable<string> gidl = s.GeometryIdList;

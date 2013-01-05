@@ -216,6 +216,12 @@ namespace Vre.Server.HttpService
 
         private void updateResponse(HttpListenerResponse response, Exception e)
         {
+            if (e is ObjectExistsException)
+            {
+                response.StatusCode = (int)HttpStatusCode.Conflict;
+                response.StatusDescription = "Entity already exists.";
+                ServiceInstances.Logger.Error("Entity already exists: {0}", e.Message);
+            }
             if (e is FileNotFoundException)
             {
                 response.StatusCode = (int)HttpStatusCode.NotFound;

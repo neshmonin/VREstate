@@ -47,6 +47,7 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.btnImport = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -153,7 +154,7 @@
             this.btnTest.Location = new System.Drawing.Point(806, 85);
             this.btnTest.Name = "btnTest";
             this.btnTest.Size = new System.Drawing.Size(75, 23);
-            this.btnTest.TabIndex = 5;
+            this.btnTest.TabIndex = 6;
             this.btnTest.Text = "Test";
             this.btnTest.UseVisualStyleBackColor = true;
             this.btnTest.Click += new System.EventHandler(this.btnTest_Click);
@@ -169,7 +170,7 @@
             this.tbResults.Name = "tbResults";
             this.tbResults.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.tbResults.Size = new System.Drawing.Size(866, 312);
-            this.tbResults.TabIndex = 6;
+            this.tbResults.TabIndex = 7;
             // 
             // label2
             // 
@@ -224,12 +225,24 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(487, 17);
             this.toolStripStatusLabel1.Text = "Comments and info: andrey.masliuk@3dcondox.com CC: alex.neshmonin@3dcondox.com";
             // 
+            // btnImport
+            // 
+            this.btnImport.Enabled = false;
+            this.btnImport.Location = new System.Drawing.Point(725, 85);
+            this.btnImport.Name = "btnImport";
+            this.btnImport.Size = new System.Drawing.Size(75, 23);
+            this.btnImport.TabIndex = 5;
+            this.btnImport.Text = "Import...";
+            this.btnImport.UseVisualStyleBackColor = true;
+            this.btnImport.Click += new System.EventHandler(this.btnImport_Click);
+            // 
             // MainForm
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(893, 451);
+            this.Controls.Add(this.btnImport);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.btnGuessFloorPlanFolder);
             this.Controls.Add(this.btnGuessSuiteTypeInfo);
@@ -277,6 +290,7 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.Button btnImport;
     }
 }
 

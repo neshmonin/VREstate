@@ -606,6 +606,8 @@ namespace Vre.Server.RemoteService
                     using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))
                         dao.Create(viewOrder);
 
+                    DataService.ReflectViewOrderStatusInTarget(viewOrder, srq.UserInfo.Session.DbSession);
+
                     // Generate financial transaction
                     //
                     FinancialTransaction ft = new FinancialTransaction(srq.UserInfo.Session.User.AutoID,
@@ -628,12 +630,14 @@ namespace Vre.Server.RemoteService
                 }
                 else
                 {
-                    viewOrder.Update(product, mlsId, productUrl, expiresOn);
+                    throw new ObjectExistsException("View Order already exists.");
 
-                    using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))
-                        dao.Update(viewOrder);
+                    //viewOrder.Update(product, mlsId, productUrl, expiresOn);
 
-                    result = Utilities.GenerateReferenceNumber();
+                    //using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))
+                    //    dao.Update(viewOrder);
+
+                    //result = Utilities.GenerateReferenceNumber();
                 }
 
                 srq.Response.ResponseCode = HttpStatusCode.OK;

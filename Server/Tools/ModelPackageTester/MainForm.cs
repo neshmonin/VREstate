@@ -8,18 +8,22 @@ using System.Windows.Forms;
 using Vre.Server.Model;
 using Vre.Server.Model.Kmz;
 using System.Globalization;
+using System.Diagnostics;
+using System.Net;
 
 namespace ModelPackageTester
 {
     public partial class MainForm : Form
     {
         private string _modelFileName = null;
+        private Kmz _lastModel = null;
         private string _stiFileName = null;
         private string _floorPlanPath = null;
 
         private string doTest()
         {
             StringBuilder readWarnings = new StringBuilder();
+            bool canImport = true;
 
             readWarnings.AppendFormat("    MODEL:   {0}\r\n    TYPES:    {1}\r\n    PLANS:    {2}\r\n",
                                         _modelFileName,
@@ -29,11 +33,13 @@ namespace ModelPackageTester
             readWarnings.Append("\r\nStep 1: =========== Reading in and parsing the KMZ =============");
             // Parse KMZ into object model
             //
-            Kmz kmzx = null;
-            
+            _lastModel = null;
+
             try
             {
-                kmzx = new Kmz(_modelFileName, readWarnings);
+                int len = readWarnings.Length;
+                _lastModel = new Kmz(_modelFileName, readWarnings);
+                if (readWarnings.Length != len) canImport = false;
             }
             catch (InvalidDataException ae)
             {
@@ -49,7 +55,9 @@ namespace ModelPackageTester
             CsvSuiteTypeInfo info = null;
             try
             {
+                int len = readWarnings.Length;
                 info = new CsvSuiteTypeInfo(_stiFileName, readWarnings);
+                if (readWarnings.Length != len) canImport = false;
             }
             catch (ArgumentException ae)
             {
@@ -69,48 +77,62 @@ namespace ModelPackageTester
                 {
                     file = Path.Combine(_floorPlanPath, file.Replace('/', '\\'));
                     if (!File.Exists(file))
+                    {
                         readWarnings.AppendFormat("\r\nFPFS00: Suite type \'{0}\' lists floor plan {1} which does not exist.", stn, file);
+                        canImport = false;
+                    }
                 }
-                else
-                {
-                    readWarnings.AppendFormat("\r\nSTMD00: Suite type {0} lists no floor plan.", stn);
-                }
+                //else
+                //{
+                //    readWarnings.AppendFormat("\r\nSTMD00: suite type {0} lists no floor plan.", stn);
+                //    canImport = false;
+                //}
             }
 
             readWarnings.Append("\r\nStep 4: =========== Cross-reference testing =============");
 
             // Test common cross-reference issues
             //
-            HashSet<string> missingTypes = new HashSet<string>();
-            HashSet<string> passedTypes = new HashSet<string>();
+            List<string> missingTypes = new List<string>();
+            List<string> passedTypes = new List<string>();
 
-            foreach (Building b in kmzx.Model.Site.Buildings)
+            foreach (Building b in _lastModel.Model.Site.Buildings)
             {
-                HashSet<string> suiteNames = new HashSet<string>();
+                List<string> suiteNames = new List<string>();
                 foreach (Suite s in b.Suites)
                 {
-                    if (suiteNames.Add(s.Name))
+                    if (suiteNames.Contains(s.Name))
                     {
                         readWarnings.AppendFormat("\r\nMDMD01: Building '{0}' contains multiple suites with same name '{1}'",
                             b.Name, s.Name);
+                        canImport = false;
                     }
+                    suiteNames.Add(s.Name);
 
-                    string testingType = b.Type + "/" + s.ClassName;
+                    string testingType = /*b.Type + "/" + */s.ClassName;
                     if (!info.HasType(testingType))
                     {
-                        if (missingTypes.Add(testingType))
-                            readWarnings.AppendFormat("\r\nSTMD01: Suite type \'{0}\' in KMZ has no related entry in CSV.", testingType);
-                    }
-                    else if (passedTypes.Add(testingType))
-                    {
-                        if (!kmzx.Model.Site.Geometries.ContainsKey(testingType))
+                        if (missingTypes.Contains(testingType))
                         {
-                            readWarnings.AppendFormat("\r\nMDMD00: Suite type \'{0}\' has no geometry list in model.",
-                                testingType);
+                            readWarnings.AppendFormat("\r\nSTMD01: Suite type \'{0}\' in KMZ has no related entry in CSV.", testingType);
+                            canImport = false;
                         }
                         else
                         {
-                            Geometry[] gl = kmzx.Model.Site.Geometries[testingType];
+                            missingTypes.Add(testingType);
+                        }
+                    }
+                    else if (!passedTypes.Contains(testingType))
+                    {
+                        if (!_lastModel.Model.Site.Geometries.ContainsKey(testingType))
+                        {
+                            readWarnings.AppendFormat("\r\nMDMD00: Suite type \'{0}\' has no geometry list in model.",
+                                testingType);
+                            canImport = false;
+                        }
+                        else
+                        {
+                            Geometry[] gl = _lastModel.Model.Site.Geometries[testingType];
                             foreach (Geometry geom in gl)
                             {
                                 // This is a known problem.
@@ -121,7 +143,8 @@ namespace ModelPackageTester
                                         testingType, geom.Id);
                                 }
                             }
-                        }                        
+                        }
+                        passedTypes.Add(testingType);
                     }
                 }
             }
@@ -132,16 +155,26 @@ namespace ModelPackageTester
             string kmlFile = Path.Combine(Path.GetDirectoryName(_modelFileName), "wireframe-test-output.kml");
             try
             {
-                TestKmlWriter.GenerateCoordinateKml(kmzx, 0.0, kmlFile);
+                TestKmlWriter.GenerateCoordinateKml(_lastModel, 0.0, kmlFile);
                 readWarnings.AppendFormat("\r\n\r\nCreated test preview at {0}", kmlFile);
             }
             catch (Exception e)
             {
                 File.Delete(kmlFile);
                 readWarnings.AppendFormat("\r\n{0}\r\n{1}", e.Message, e.StackTrace);
+                canImport = false;
             }
 
+            btnImport.Enabled = canImport;
+
             return readWarnings.ToString();
+        }
+
+        private static string getImportExecutablePath()
+        {
+            string path = Assembly.GetExecutingAssembly().GetName().CodeBase;
+            if (path.StartsWith("file:///")) path = path.Substring(8).Replace('/', Path.DirectorySeparatorChar);
+            return Path.Combine(Path.GetDirectoryName(path), "vreserver.exe");
         }
 
         public MainForm()
@@ -152,6 +185,9 @@ namespace ModelPackageTester
 
             toolTip1.SetToolTip(btnGuessSuiteTypeInfo, "Try guessing Suite Type Info file");
             toolTip1.SetToolTip(btnGuessFloorPlanFolder, "Try guessing Fllor Plan folder");
+
+            btnImport.Visible = File.Exists(getImportExecutablePath());
+            if (btnImport.Visible) Text = Text.Replace("Tester", "Tester/Importer");
         }
 
         private void onNewModelFileName(string filename)
@@ -355,6 +391,8 @@ namespace ModelPackageTester
                             string ext = Path.GetExtension(file).ToLowerInvariant();
                             if (ext.Equals(".kmz")) onNewModelFileName(file);
                             else if (ext.Equals(".csv")) onNewSuiteTypeInfoFileName(file);
+                            else MessageBox.Show("Unknown file type dropped.",
+                                Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                 }
@@ -371,6 +409,13 @@ namespace ModelPackageTester
         {
             guessFloorPlanPath();
             checkEnableTestButton();
+        }
+
+        private void btnImport_Click(object sender, EventArgs e)
+        {
+            ImportForm iform = new ImportForm();
+            iform.Init(_modelFileName, _stiFileName, _floorPlanPath, _lastModel, getImportExecutablePath());
+            iform.ShowDialog();
         }
     }
 
@@ -443,7 +488,7 @@ namespace ModelPackageTester
                         foreach (Vre.Server.Model.Kmz.Suite s in bldg.Suites)
                         {
                             Vre.Server.Model.Kmz.Geometry[] geo;
-                            string fullType = bldg.Type + "/" + s.ClassName;
+                            string fullType = (s.ClassName.Contains('/')) ? s.ClassName : bldg.Type + "/" + s.ClassName;
                             if (readModel.Model.Site.Geometries.TryGetValue(fullType, out geo))
                                 writeGeometry(sw, "s6", s.LocationCart, geo, s.Matrix, altAdj);
                         }

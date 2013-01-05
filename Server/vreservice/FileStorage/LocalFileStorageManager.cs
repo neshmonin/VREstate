@@ -32,7 +32,10 @@ namespace Vre.Server.FileStorage
 
         public override string ConvertToFullPath(string relativePath)
         {
-            return _accessRoot + relativePath;
+            if (!relativePath.StartsWith(_accessRoot))
+                return _accessRoot + relativePath;
+            else
+                return relativePath;
         }
 
         public override void RemoveFile(string relativePath)

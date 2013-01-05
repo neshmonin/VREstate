@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using NHibernate;
 using Vre.Server.BusinessLogic;
@@ -17,7 +18,117 @@ namespace Vre.Server.RemoteService
             "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
         };
 
-        public static List<UpdateableBase> ParseGeographicalAddressToModel(ServiceQuery query, ISession dbSession)
+        public static UpdateableBase ParseGeographicalAddressToModel(ServiceQuery query, ISession dbSession)
+        {
+            string suite = query["ad_ibn"];
+
+            if (!string.IsNullOrWhiteSpace(suite)) suite = Utilities.NormalizeSuiteNumber(suite);
+            else suite = null;
+
+            IList<Building> searchResult = parseGeographicalAddress(query, dbSession);
+            UpdateableBase result = null;
+
+            if (searchResult.Count > 0)
+            {
+                if (searchResult.Count > 1)
+                {
+                    throw new ArgumentException("Address: non-unique result returned; please add details");
+                }
+                else
+                {
+                    Building b = searchResult[0];
+
+                    if ((suite != null) && (b.Suites.Count > 0))
+                    {
+                        if (b.Suites.Count > 1)
+                        {
+                            //if (null == suite) throw new ArgumentException("Address: suite number is required");
+
+                            foreach (Suite s in b.Suites)
+                            {
+                                if (s.SuiteName.Equals(suite))
+                                {
+                                    result = s;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            result = b.Suites[0];
+                        }
+                    }
+                    else
+                    {
+                        result = b;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public static IEnumerable<UpdateableBase> ParseGeographicalAddressToModel(ServiceQuery query, ISession dbSession,
+            bool allowMultipleResults)
+        {
+            string suite = query["ad_ibn"];
+
+            if (!string.IsNullOrWhiteSpace(suite)) suite = Utilities.NormalizeSuiteNumber(suite);
+            else suite = null;
+
+            IList<Building> searchResult = parseGeographicalAddress(query, dbSession);
+            IEnumerable<UpdateableBase> result = new UpdateableBase[0];
+
+            if (searchResult.Count > 0)
+            {
+                if (searchResult.Count > 1)
+                {
+                    if (allowMultipleResults)
+                        result = searchResult.ToArray();
+                    else
+                        throw new ArgumentException("Address: non-unique result returned; please add details");
+                }
+                else
+                {
+                    Building b = searchResult[0];
+
+                    if ((suite != null) && (b.Suites.Count > 0))
+                    {
+                        if (b.Suites.Count > 1)
+                        {
+                            //if (null == suite) throw new ArgumentException("Address: suite number is required");
+
+                            foreach (Suite s in b.Suites)
+                            {
+                                if (s.SuiteName.Equals(suite))
+                                {
+                                    UpdateableBase[] res = new UpdateableBase[1];
+                                    res[0] = s;
+                                    result = res;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            UpdateableBase[] res = new UpdateableBase[1];
+                            res[0] = b.Suites[0];
+                            result = res;
+                        }
+                    }
+                    else
+                    {
+                        UpdateableBase[] res = new UpdateableBase[1];
+                        res[0] = b;
+                        result = res;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private static IList<Building> parseGeographicalAddress(ServiceQuery query, ISession dbSession)
         {
             string country = query["ad_co"];
             string postalCode = query["ad_po"];
@@ -28,7 +139,6 @@ namespace Vre.Server.RemoteService
             string streetDirection = query["ad_std"];
             string streetSuffix = query["ad_sts"];
             string building = query["ad_bn"];
-            string suite = query["ad_ibn"];
             StringBuilder freetextAddress = new StringBuilder();
             //TextInfo textInfo = System.Globalization.CultureInfo.InvariantCulture.TextInfo;
 
@@ -114,52 +224,9 @@ namespace Vre.Server.RemoteService
                 freetextAddress.Append("*");
             }
 
-            if (!string.IsNullOrWhiteSpace(suite)) suite = Utilities.NormalizeSuiteNumber(suite);
-            else suite = null;
-
-            IList<Building> searchResult;
             using (BuildingDao dao = new BuildingDao(dbSession))
-                searchResult = dao.SearchByAddress(country, postalCode, state, municipality,
+                return dao.SearchByAddress(country, postalCode, state, municipality,
                     (freetextAddress.Length > 0) ? freetextAddress.ToString() : null);
-
-            List<UpdateableBase> result = null;
-
-            if (searchResult.Count > 0)
-            {
-                if (searchResult.Count > 1) //throw new ArgumentException("Address: non-unique result returned; please add details");
-                {
-                    result = new List<UpdateableBase>(searchResult);
-                }
-                else
-                {
-                    Building b = searchResult[0];
-
-                    if (b.Suites.Count > 0)
-                    {
-                        if (b.Suites.Count > 1)
-                        {
-                            if (null == suite) throw new ArgumentException("Address: suite number is required");
-
-                            foreach (Suite s in b.Suites)
-                            {
-                                if (s.SuiteName.Equals(suite))
-                                {
-                                    result = new List<UpdateableBase>(1);
-                                    result.Add(s);
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            result = new List<UpdateableBase>(1);
-                            result.Add(b.Suites[0]);
-                        }
-                    }
-                }
-            }
-
-            return result;
         }
 
         public static ClientData ConvertToNormalizedAddress(Building building, Suite suite)

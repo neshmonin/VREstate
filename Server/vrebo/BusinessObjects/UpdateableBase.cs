@@ -104,5 +104,10 @@ namespace Vre.Server.BusinessLogic
             return false;  // possible version value rollback should not count as an object value change; if all other fields remain intact - we consider object unchanged
         }
         #endregion
+
+        public override int GetHashCode()
+        {
+            return AutoID.GetHashCode();
+        }
     }
 }

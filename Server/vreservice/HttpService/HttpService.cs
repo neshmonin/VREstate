@@ -27,14 +27,24 @@ namespace Vre.Server.HttpService
 
             if (!rq.UserInfo.StaleSession)
             {
-                try
+                if (rq.UserInfo.Session != null)
                 {
-                    if (rq.UserInfo.Session != null) rq.UserInfo.Session.Resume();
-                    _rsp.ProcessRequest(this, rq);
+                    lock (rq.UserInfo.Session)
+                    {
+                        try
+                        {
+                            rq.UserInfo.Session.Resume();
+                            _rsp.ProcessRequest(this, rq);
+                        }
+                        finally
+                        {
+                            rq.UserInfo.Session.Disconnect();
+                        }
+                    }
                 }
-                finally
+                else
                 {
-                    if (rq.UserInfo.Session != null) rq.UserInfo.Session.Disconnect();
+                    _rsp.ProcessRequest(this, rq);
                 }
             }
 

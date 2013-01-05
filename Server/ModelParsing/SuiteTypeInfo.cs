@@ -39,16 +39,53 @@ namespace Vre.Server.Model
 
                     if (_typeNameIdx < 0) throw new ArgumentException("The suite type information file is not of correct format (0)");
 
+                    int lineNum = 2;
                     do
                     {
                         line = sr.ReadLine();
                         parts = CsvUtilities.Split(line);
-                        if (partCnt != parts.Length) throw new ArgumentException("The suite type information file is not of correct format (1)");
+                        if (partCnt != parts.Length)
+                        {
+                            if (readWarnings != null)
+                                readWarnings.AppendFormat("\r\nSTMD04: Suite type information file line {0} format is invalid (missing fields?)", line);
+                            else
+                                throw new ArgumentException("The suite type information file is not of correct format (line " + line + ") (1)");
+                        }
 
                         if (_rawData.ContainsKey(parts[_typeNameIdx]))
-                            throw new ArgumentException("Suite type information file contains duplicate like for " + parts[_typeNameIdx]);
+                        {
+                            if (readWarnings != null)
+                                readWarnings.AppendFormat("\r\nSTMD05: Suite type information file contains duplicate type name (line {0}): {1}", line, parts[_typeNameIdx]);
+                            else
+                                throw new ArgumentException(
+                                    "Suite type information file contains duplicate type name (line " + line + "): " + parts[_typeNameIdx]);
+                        }
 
+                        if (string.IsNullOrWhiteSpace(parts[_typeNameIdx]))
+                        {
+                            if (readWarnings != null)
+                                readWarnings.AppendFormat("\r\nSTMD06: Suite type information file contains empty type name (line {0}).", line);
+                            else
+                                throw new ArgumentException(
+                                    "Suite type information file contains empty type name (line " + line + "): " + parts[_typeNameIdx]);
+                        }
+                            
                         _rawData.Add(parts[_typeNameIdx], parts);
+
+                        for (int ii = 0; ii < parts.Length; ii++)
+                        {
+                            if (string.IsNullOrWhiteSpace(parts[ii]))
+                            {
+                                if (readWarnings != null)
+                                    readWarnings.AppendFormat("\r\nSTMD03: Warning: line {0} ({1}): item \'{2}\' cannot be empty.",
+                                        lineNum, parts[_typeNameIdx], headerItemName(ii));
+                            }
+                            else if (parts[ii].Equals("?"))
+                            {
+                                parts[ii] = string.Empty;
+                            }
+                        }
+                        lineNum++;
                     }
                     while (!sr.EndOfStream);
                 }
@@ -97,6 +134,24 @@ namespace Vre.Server.Model
                 else if (item.Equals("TERRACES")) _terracesIdx = idx;
                 else if (item.Equals("FLOORPLANFILENAME")) _floorPlanNameIdx = idx;
             }
+        }
+
+        private string headerItemName(int index)
+        {
+            if (index == _typeNameIdx) return "TypeName";
+            else if (index == _levelsIdx) return "Levels";
+            else if (index == _indoorAreaIdx) return "TotalIndoorArea";
+            else if (index == _outdoorAreaIdx) return "TotalOutdoorArea";
+            else if (index == _bedroomsIdx) return "Bedrooms";
+            else if (index == _densIdx) return "Dens";
+            else if (index == _otherRoomsIdx) return "OtherRooms";
+            else if (index == _showerBathIdx) return "Shower/Bath";
+            else if (index == _noShowerBathIdx) return "NoShower/Bath";
+            else if (index == _balconiesIdx) return "Balconies";
+            else if (index == _terracesIdx) return "Terraces";
+            else if (index == _floorPlanNameIdx) return "FloorplanFileName";
+
+            return "";
         }
 
         private string[] getPropArray(string suiteType)

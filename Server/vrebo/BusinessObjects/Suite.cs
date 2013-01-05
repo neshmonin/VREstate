@@ -6,11 +6,12 @@ namespace Vre.Server.BusinessLogic
 	[Serializable]
 	public partial class Suite : UpdateableBase
 	{
-	    public enum SalesStatus
+	    public enum SalesStatus : byte
 	    {
-            Available,
-            OnHold,
-            Sold
+            Available = 0,
+            OnHold = 1,
+            Sold = 2,
+            ResaleAvailable = 3
 	    }
 
         public virtual int PhysicalLevelNumber { get; set; }

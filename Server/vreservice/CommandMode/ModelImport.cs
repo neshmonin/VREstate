@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Text;
 using NHibernate;
 using Vre.Server.BusinessLogic;
@@ -30,6 +31,10 @@ namespace Vre.Server.Command
                     Path.GetFileNameWithoutExtension(infoModelFileName)) 
                 + ".import.log.txt";
             FileStream logFile = File.Open(logFileName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+
+            log.AppendLine("=========================================================");
+            log.AppendLine(Environment.CommandLine);
+            log.AppendLine("---------------------------------------------------------");
 
             Exception importError = null;
             
@@ -343,6 +348,7 @@ namespace Vre.Server.Command
             string infoModelFileName, string displayModelFileName)
         {
             List<string> missingSuites = new List<string>(dbBuilding.Suites.Count);
+            bool modified = false;
 
             foreach (Suite s in dbBuilding.Suites) missingSuites.Add(s.SuiteName);
 
@@ -425,8 +431,27 @@ namespace Vre.Server.Command
                     _filesSaved.Add(dbBuilding.DisplayModelUrl);
                 }
 
-                _clientSession.DbSession.Update(dbBuilding);
+                modified = true;                
             }
+
+            // Try setting altitude if it exactly zero.
+            //
+            if (dbBuilding.AltitudeAdjustment == 0.0)
+            {
+                try
+                {
+                    Model.Kmz.ViewPoint vp = modelBuilding.LocationCart.AsViewPoint();
+                    dbBuilding.AltitudeAdjustment =
+                        queryForLocationAltitude(vp.Longitude, vp.Latitude) - vp.Altitude;
+                    modified = true;
+                }
+                catch (Exception ex)
+                {
+                    _log.AppendFormat("ERROR: Failed querying altitude for {0}: {1}", dbBuilding.Name, ex.Message);
+                }
+            }
+
+            if (modified) _clientSession.DbSession.Update(dbBuilding);
         }
 
         private void importSuite(Vre.Server.Model.Kmz.Suite modelSuite, Suite dbSuite, bool isCreated)
@@ -506,7 +531,7 @@ namespace Vre.Server.Command
                 }
 
                 string fpName = _extraSuiteInfo.GetFloorPlanFileName(cn);
-                if (!string.IsNullOrWhiteSpace(fpName))
+                if (!string.IsNullOrWhiteSpace(fpName) && !fpName.Equals("?"))
                 {
                     string srcPath = Path.Combine(_importPath, fpName.Replace('/', '\\'));
                     if (File.Exists(srcPath))
@@ -535,6 +560,54 @@ namespace Vre.Server.Command
 
             //dbSuite.SuiteType = stype;
             stype.debug_addSuite(dbSuite);
+        }
+
+        internal static double queryForLocationAltitude(double longitude, double latitude)
+        {
+            double result;
+
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(string.Format(
+                    "http://maps.googleapis.com/maps/api/elevation/json?sensor=false&locations={0},{1}",
+                    latitude, longitude));
+                request.Timeout = 10 * 1000;
+
+                request.Method = "GET";
+
+                HttpWebResponse response;
+
+                try
+                {
+                    response = request.GetResponse() as HttpWebResponse;
+                }
+                catch (WebException ex)
+                {
+                    response = ex.Response as HttpWebResponse;
+                }
+                if (null == response) throw new InvalidOperationException("Google API query returned invalid result.");
+
+                ClientData respData = JavaScriptHelper.JsonToClientData(response.GetResponseStream());
+
+                if (!respData.GetProperty("status", string.Empty).Equals("OK"))
+                    throw new Exception("Google API query failed (0).");
+
+                ClientData[] resultList = respData.GetNextLevelDataArray("results");
+                if (resultList.Length != 1)
+                    throw new Exception("Google API query failed (1).");
+
+                double resolution = resultList[0].GetProperty("resolution", 1000000000.0);
+                if (resolution > 1000.0)
+                    throw new Exception("Result precision is too low.");
+
+                result = resultList[0].GetProperty("elevation", 0.0);
+            }
+            catch (WebException ex)
+            {
+                throw new Exception("Google API query failed: " + ex.Response, ex);
+            }
+
+            return result;
         }
     }
 }

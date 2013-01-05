@@ -3,6 +3,8 @@ using System.IO;
 using Vre.Server.BusinessLogic;
 using Vre.Server.RemoteService;
 using Vre.Server.Dao;
+using System.Threading;
+using System;
 
 namespace Vre.Server.ModelCache
 {
@@ -103,9 +105,80 @@ namespace Vre.Server.ModelCache
 
                 ServiceInstances.Logger.Info("MC: Reading model files done.");
 
+// TODO: TEMP TESTING!!!
+new Thread(aaTestThread) { IsBackground = true }.Start();
+
                 _watcher.EnableRaisingEvents = true;
             }
         }
+
+        #region Altitude Adjustment test
+        private const bool _aaAutoAdjust = true;
+        private Random _aaTestRandom = new Random();
+
+        private void aaTestThread()
+        {
+            HashSet<int> processedBuildings = new HashSet<int>();
+            foreach (ModelCache mc in _cache.Values) aaTest(mc, ref processedBuildings);
+            foreach (ModelCache mc in _cacheBySite.Values) aaTest(mc, ref processedBuildings);
+            foreach (ModelCache mc in _cacheByBuilding.Values) aaTest(mc, ref processedBuildings);
+        }
+
+        private void aaTest(ModelCache mc, ref HashSet<int> processedBuildings)
+        {
+            foreach (KeyValuePair<int, ModelCache.BuildingInfo> kvp in mc._info._buildingInfo)
+            {
+                if (processedBuildings.Add(kvp.Key))
+                {
+                    Thread.Sleep(5000 + _aaTestRandom.Next(10000));  // provide delay not to overuse Google API
+                    try
+                    {
+                        aaTestBuilding(kvp.Key, kvp.Value);
+                    }
+                    catch (Exception ex)
+                    {
+                        ServiceInstances.Logger.Error("AA Test for buidling {0} ({1}) failed: {2}", kvp.Value._name, kvp.Key, ex);
+                    }
+                }
+            }
+        }
+
+        protected void aaTestBuilding(int bid, ModelCache.BuildingInfo mcb)
+        {
+            double aa =
+                Vre.Server.Command.ModelImport.queryForLocationAltitude(mcb._location.Longitude, mcb._location.Latitude)
+                - mcb._location.Altitude;
+
+            Building b;
+            bool adjusted = false;
+            double originalDbAa;
+            using (NHibernate.ISession dbSession = NHibernateHelper.GetSession())
+                using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(dbSession))
+                {
+                    using (BuildingDao dao = new BuildingDao(dbSession))
+                    {
+                        b = dao.GetById(bid);
+                        originalDbAa = b.AltitudeAdjustment;
+
+                        if (_aaAutoAdjust &&
+                            ((Math.Abs(originalDbAa) < 0.000001)
+                            || (Math.Abs(originalDbAa * 100.0 - (int)(originalDbAa * 100.0)) < 0.000001)))
+                        {
+                            b.AltitudeAdjustment = aa;
+                            b.MarkUpdated();
+                            dao.SafeUpdate(b);
+                            adjusted = true;
+                        }
+                    }
+                    if (adjusted) tran.Commit();
+                }
+
+            if (adjusted)
+                ServiceInstances.Logger.Debug("AA Test {0} ({1}): GAA={2} DBAA={3} -> ADJUSTED", mcb._name, bid, aa, originalDbAa);
+            else
+                ServiceInstances.Logger.Debug("AA Test {0} ({1}): GAA={2} DBAA={3}", mcb._name, bid, aa, originalDbAa);
+        }
+        #endregion
 
         /// <summary>
         /// Generic auto type-resolving version

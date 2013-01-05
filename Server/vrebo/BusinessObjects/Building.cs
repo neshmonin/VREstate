@@ -88,7 +88,7 @@ namespace Vre.Server.BusinessLogic
             result.Add("siteId", ConstructionSite.AutoID);
 
             result.Add("name", Name);
-            result.Add("status", Status);
+            result.Add("status", ClientData.ConvertProperty<Building.BuildingStatus>(Status));
             result.Add("openingDate", OpeningDate);
             result.Add("altitudeAdjustment", AltitudeAdjustment);
             result.Add("maxSuiteAltitude", MaxSuiteAltitude);

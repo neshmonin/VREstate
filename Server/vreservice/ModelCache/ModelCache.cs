@@ -18,7 +18,7 @@ namespace Vre.Server.ModelCache
         private static Logger _debugLogger = null;
 
         private SHA512 _lastCrc;
-        private SiteInfo _info;
+        internal SiteInfo _info;
 
         public ModelCache(string filePath, ModelLevel level, bool isOverride, int objectId)
         {
@@ -146,7 +146,7 @@ namespace Vre.Server.ModelCache
         internal class SiteInfo
         {
             private GeoPoint _location;
-            private Dictionary<int, BuildingInfo> _buildingInfo;
+            internal Dictionary<int, BuildingInfo> _buildingInfo;
             private Dictionary<string, SuiteClassInfo> _classInfo;
 
             public SiteInfo(Model.Kmz.ConstructionSite modelInfo, string path, int objectId, bool singleBuilding)
@@ -195,6 +195,7 @@ namespace Vre.Server.ModelCache
                         {
                             ServiceInstances.Logger.Error("Unknown building name; model {0} does not have {1}; building not imported.",
                                 path, building.Name);
+                            _debugLogger.Info(debug.ToString());
                             return;
                         }
 
@@ -206,9 +207,17 @@ namespace Vre.Server.ModelCache
                         {
                             SuiteClassInfo sc = new SuiteClassInfo(processGeometries(modelInfo.Geometries[className]));
                             string cn = className;
-                            if (!cn.Contains('/')) cn = buildingModelInfo.Type + '/' + className;
+                            //if (!cn.Contains('/')) cn = buildingModelInfo.Type + '/' + className;
                             debug.AppendFormat("\r\n- {0} ({1})", cn, className);
                             _classInfo.Add(cn, sc);
+
+                            // LEGACY: Make sure Building-type-less class names from DB (legacy imported) can still work
+                            int pos;
+                            if ((pos = cn.IndexOf('/')) > 0)
+                            {
+                                cn = cn.Substring(pos + 1);
+                                if (!_classInfo.ContainsKey(cn)) _classInfo.Add(cn, sc);
+                            }
                         }
                     }
                     else  // full site processing (!singleBuilding)
@@ -258,6 +267,14 @@ namespace Vre.Server.ModelCache
                             SuiteClassInfo sc = new SuiteClassInfo(processGeometries(modelInfo.Geometries[className]));
                             debug.AppendFormat("\r\n- {0}", className);
                             _classInfo.Add(className, sc);
+
+                            // LEGACY: Make sure Building-type-less class names from DB (legacy imported) can still work
+                            int pos;
+                            if ((pos = className.IndexOf('/')) > 0)
+                            {
+                                string cn = className.Substring(pos + 1);
+                                if (!_classInfo.ContainsKey(cn)) _classInfo.Add(cn, sc);
+                            }
                         }
                     }  // site-level import
                 }
@@ -376,7 +393,7 @@ namespace Vre.Server.ModelCache
 
         internal class BuildingInfo
         {
-            private GeoPoint _location, _center;
+            internal GeoPoint _location, _center;
             private double _maxSuiteAlt;
             internal string _name;
             internal Dictionary<string, SuiteInfo> _suiteInfo;
@@ -469,7 +486,7 @@ namespace Vre.Server.ModelCache
 
             public SuiteInfo(Model.Kmz.Suite modelInfo)
             {
-                _name = modelInfo.Name;
+                _name = Utilities.NormalizeSuiteNumber(modelInfo.Name);
 
                 _classId = modelInfo.ClassName;
                 _ceilingHeightFt = modelInfo.CeilingHeightFt;
