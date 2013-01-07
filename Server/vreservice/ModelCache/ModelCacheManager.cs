@@ -162,7 +162,7 @@ new Thread(aaTestThread) { IsBackground = true }.Start();
 
                         if (_aaAutoAdjust &&
                             ((Math.Abs(originalDbAa) < 0.000001)
-                            || (Math.Abs(originalDbAa * 100.0 - (int)(originalDbAa * 100.0)) < 0.000001)))
+                            || (Math.Abs(originalDbAa - Math.Round(originalDbAa, 2)) < 0.000001)))
                         {
                             b.AltitudeAdjustment = aa;
                             b.MarkUpdated();

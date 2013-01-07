@@ -80,6 +80,9 @@ namespace Vre.Server.Model.Kmz
                         if (buildingTypeName.StartsWith(Building.XmlPrefix))
                         {
                             buildingTypeName = buildingTypeName.Substring(Building.XmlPrefix.Length);
+                            if (buildingTypeName.Contains("_"))
+                                fatalErrors.AppendFormat("\r\nBuilding type name '{0}' contains underscores.", 
+                                    buildingNode.Attributes["name"].Value);
                         }
                         else
                         {
@@ -100,7 +103,7 @@ namespace Vre.Server.Model.Kmz
                 if ((buildingNode != null) && (nn != null) && (nna != null) && !string.IsNullOrEmpty(buildingTypeName))
                 {
                     TMatrix matrix = new TMatrix(tMatrix, nn.InnerText, UnitInMeters);
-                    string buildingName = nna.Value.Replace('_', ' ');
+                    string buildingName = nna.Value.Replace('_', ' ').Trim();
 
                     try
                     {

@@ -32,8 +32,8 @@ namespace Vre.Server.Model.Kmz
         public Suite(Building parent, string id, string suiteDescription, XmlNode suiteModel,
             Dictionary<string, XmlNode> models, TMatrix tMatrix)
         {
-            string suiteDescriptionDelimited = suiteDescription.Replace('_', ' ');
-            string[] parts = suiteDescriptionDelimited.Trim().Split(' ');
+            string suiteDescriptionDelimited = suiteDescription.Replace("__", "_").Trim('_');
+            string[] parts = suiteDescriptionDelimited.Split('_');
 
             Id = id;
             Name = parts[0];

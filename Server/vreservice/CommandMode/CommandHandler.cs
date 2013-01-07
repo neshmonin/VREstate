@@ -11,16 +11,7 @@ namespace Vre.Server.Command
             if (par.ContainsParameter("importmodel"))
             {
                 string infoModelFileName = par.GetOption("infomodel");
-                string displayModelFileName = par.GetOption("displaymodel");
-                string extraSuiteInfoFileName = par.GetOption("sti");
                 string estateDeveloper = par.GetOption("ed");
-                string constructionSite = par.GetOption("site");
-                string building = par.GetOption("building");
-                string strDryRun = par.GetOption("dryrun");
-                string strAsBuilding = par.GetOption("asbuilding");
-
-                bool dryRun = str2bool(strDryRun, true);
-                bool asBuilding = str2bool(strAsBuilding, false);
 
                 if ((null == infoModelFileName) || (null == estateDeveloper))
                 {
@@ -28,8 +19,7 @@ namespace Vre.Server.Command
                 }
                 else
                 {
-                    ModelImport.ImportModel(estateDeveloper, constructionSite, building,
-                        infoModelFileName, displayModelFileName, extraSuiteInfoFileName, !asBuilding, dryRun);
+                    ModelImport.ImportModel(estateDeveloper, infoModelFileName, par);
                     result = true;
                 }
             }
@@ -37,7 +27,7 @@ namespace Vre.Server.Command
             return result;
         }
 
-        private static bool str2bool(string param, bool defaultValue)
+        public static bool str2bool(string param, bool defaultValue)
         {
             bool result;
             string lc = null;

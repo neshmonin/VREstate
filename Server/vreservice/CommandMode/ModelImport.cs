@@ -21,10 +21,12 @@ namespace Vre.Server.Command
         private List<string> _filesSaved = new List<string>();
         //private ISession _session;
 
-        public static void ImportModel(string estateDeveloperName, string siteName, string singleBuildingName,
-            string infoModelFileName, string displayModelFileName, string extraSuiteInfoFileName, 
-            bool importAsSite, bool dryRun)
+        public static void ImportModel(string estateDeveloperName, string infoModelFileName, Parameters param)
         {
+            string extraSuiteInfoFileName = param.GetOption("sti");
+            string siteName = param.GetOption("site");
+            bool dryRun = CommandHandler.str2bool(param.GetOption("dryrun"), true);
+
             StringBuilder log = new StringBuilder();
             string logFileName = Path.Combine(
                     Path.GetDirectoryName(infoModelFileName), 
@@ -44,8 +46,8 @@ namespace Vre.Server.Command
 
                 ModelImport instance = new ModelImport();
                 instance._log = log;
-                instance.doImport(estateDeveloperName, siteName, singleBuildingName, 
-                    infoModelFileName, displayModelFileName, importAsSite, extraSuiteInfoFileName, dryRun);
+                instance.doImport(estateDeveloperName, siteName, 
+                    infoModelFileName, extraSuiteInfoFileName, dryRun, param);
                 //instance.generateSqlScript(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName);
             }
             catch (Exception e)
@@ -136,8 +138,9 @@ namespace Vre.Server.Command
 
         }
 
-        private void doImport(string estateDeveloperName, string siteName, string singleBuildingName,
-            string infoModelFileName, string displayModelFileName, bool isSiteModel, string extraSuiteInfoFileName, bool dryRun)
+        private void doImport(string estateDeveloperName, string siteName, 
+            string infoModelFileName, string extraSuiteInfoFileName, 
+            bool dryRun, Parameters extras)
         {
             _extraSuiteInfo = new CsvSuiteTypeInfo(extraSuiteInfoFileName, null);
 
@@ -204,8 +207,7 @@ namespace Vre.Server.Command
                         }
                     }
 
-                    importSite(kmz.Model.Site, site, siteCreated, singleBuildingName,
-                        infoModelFileName, displayModelFileName, isSiteModel);
+                    importSite(kmz.Model.Site, site, siteCreated, infoModelFileName, extras);
 
                     if (dryRun)
                     {
@@ -227,10 +229,13 @@ namespace Vre.Server.Command
             }  // client session
         }
 
-        private void importSite(Vre.Server.Model.Kmz.ConstructionSite modelSite, Site dbSite, bool isCreated,
-            string singleBuildingName,
-            string infoModelFileName, string displayModelFileName, bool isSiteModel)
+        private void importSite(Vre.Server.Model.Kmz.ConstructionSite modelSite, Site dbSite, bool isCreated,            
+            string infoModelFileName, Parameters extras)
         {
+            string displayModelFileName = extras.GetOption("displaymodel");
+            bool isSiteModel = !CommandHandler.str2bool(extras.GetOption("asbuilding"), false);
+            string singleBuildingName = extras.GetOption("building");
+
             List<string> missingBuildings = new List<string>(dbSite.Buildings.Count);
             foreach (Building b in dbSite.Buildings) missingBuildings.Add(b.Name);
 
@@ -277,7 +282,8 @@ namespace Vre.Server.Command
 
                 importBuilding(mb, dbb, created,
                     isSiteModel ? null : infoModelFileName,
-                    isSiteModel ? null : displayModelFileName);
+                    isSiteModel ? null : displayModelFileName,
+                    extras);
             }
 
             if (isSiteModel)
@@ -345,10 +351,14 @@ namespace Vre.Server.Command
         }
 
         private void importBuilding(Vre.Server.Model.Kmz.Building modelBuilding, Building dbBuilding, bool isCreated,
-            string infoModelFileName, string displayModelFileName)
+            string infoModelFileName, string displayModelFileName, Parameters extras)
         {
             List<string> missingSuites = new List<string>(dbBuilding.Suites.Count);
             bool modified = false;
+
+            Suite.SalesStatus newSuiteStatus;
+            if (!Enum.TryParse<Suite.SalesStatus>(extras.GetOption("suiteStatus"), out newSuiteStatus))
+                newSuiteStatus = Suite.SalesStatus.Sold;
 
             foreach (Suite s in dbBuilding.Suites) missingSuites.Add(s.SuiteName);
 
@@ -369,6 +379,7 @@ namespace Vre.Server.Command
                 if (null == dbs)
                 {
                     dbs = new Suite(dbBuilding, -1, ms.Floor, modelSuiteName);
+                    dbs.Status = newSuiteStatus;
                     _clientSession.DbSession.Save(dbs);
                     created = true;
                     _log.AppendFormat("Created new suite ID={0}, Name={1}\r\n", dbs.AutoID, dbs.SuiteName);
@@ -390,6 +401,8 @@ namespace Vre.Server.Command
                 }
 
                 importSuite(ms, dbs, created);
+
+                _clientSession.DbSession.Update(dbs);
             }
 
             foreach (string sn in missingSuites)
@@ -447,11 +460,91 @@ namespace Vre.Server.Command
                 }
                 catch (Exception ex)
                 {
-                    _log.AppendFormat("ERROR: Failed querying altitude for {0}: {1}", dbBuilding.Name, ex.Message);
+                    _log.AppendFormat("ERROR: Failed querying altitude for {0}: {1}\r\n", dbBuilding.Name, ex.Message);
                 }
             }
 
+            if (isCreated && (infoModelFileName != null))  // new single building imported; attempt to write address
+            {
+                dbBuilding.Country = conditionString(extras.GetOption("ad_co"), 128);
+                dbBuilding.PostalCode = conditionString(extras.GetOption("ad_po"), 10);
+                dbBuilding.StateProvince = conditionString(extras.GetOption("ad_stpr"), 8);
+                dbBuilding.City = conditionString(extras.GetOption("ad_mu"), 64);
+
+                string rawaddr = extras.GetOption("ad_sta");
+                if (null == rawaddr)
+                {
+                    dbBuilding.AddressLine1 = string.Empty;
+                    dbBuilding.AddressLine2 = string.Empty;
+                }
+                else
+                {
+                    const int maxpartlen = 128;
+                    
+                    rawaddr = rawaddr.Trim();
+                    int len = rawaddr.Length, len2;
+                    do { len2 = len; rawaddr = rawaddr.Replace("  ", " "); len = rawaddr.Length; }
+                    while (len != len2);
+
+                    if (len <= maxpartlen)
+                    {
+                        dbBuilding.AddressLine1 = rawaddr;
+                        dbBuilding.AddressLine2 = string.Empty;
+                    }
+                    else
+                    {
+                        int pos = -1, ppos;
+
+                        do { ppos = pos; pos = rawaddr.IndexOf(' ', pos + 1); }
+                        while ((pos > 0) && (pos < maxpartlen));
+                        if (ppos > 0)
+                        {
+                            dbBuilding.AddressLine1 = rawaddr.Substring(0, ppos);
+                            rawaddr = rawaddr.Substring(ppos + 1);
+                        }
+                        else
+                        {
+                            dbBuilding.AddressLine1 = rawaddr.Substring(0, maxpartlen);
+                            rawaddr = rawaddr.Substring(maxpartlen + 1);
+                        }
+
+                        len = rawaddr.Length;
+                        if (len <= maxpartlen)
+                        {
+                            dbBuilding.AddressLine2 = rawaddr;
+                        }
+                        else
+                        {
+                            pos = -1;
+                            do { ppos = pos; pos = rawaddr.IndexOf(' ', pos + 1); }
+                            while ((pos > 0) && (pos < maxpartlen));
+                            if (ppos > 0)
+                            {
+                                dbBuilding.AddressLine2 = rawaddr.Substring(0, ppos);
+                            }
+                            else
+                            {
+                                dbBuilding.AddressLine2 = rawaddr.Substring(0, maxpartlen);
+                            }
+                        }
+                    }
+                }
+
+                _log.AppendFormat("Effective building address is set to: {0}\r\n", 
+                    AddressHelper.ConvertToReadableAddress(dbBuilding, null));
+
+                modified = true;
+            }
+
             if (modified) _clientSession.DbSession.Update(dbBuilding);
+        }
+
+        private static string conditionString(string input, int maxlen)
+        {
+            if (null == input) return string.Empty;
+            input = input.Trim();
+            if (input.Length <= maxlen) return input;
+            else return input.Substring(0, maxlen);
         }
 
         private void importSuite(Vre.Server.Model.Kmz.Suite modelSuite, Suite dbSuite, bool isCreated)
@@ -473,7 +566,7 @@ namespace Vre.Server.Command
 
                 dbSuite.ShowPanoramicView = modelSuite.ShowPanoramicView;
 
-                dbSuite.Status = Suite.SalesStatus.Available;
+                //dbSuite.Status = Suite.SalesStatus.Available;
 
                 setSuiteType(dbSuite, modelSuite.ClassName);
             }

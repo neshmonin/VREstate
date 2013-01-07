@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -82,6 +83,10 @@ namespace Vre.Server.Model.Kmz
                     catch (InvalidDataException ide)
                     {
                         fatalErrors.AppendFormat("\r\n{0}", ide.Message);
+                    }
+                    catch (FormatException)
+                    {
+                        fatalErrors.AppendFormat("\r\nSuite's node name attribute is invalid: '{0}'", na.Value);
                     }
                 }
             }
