@@ -104,6 +104,8 @@ namespace ModelPackageTester
         {
             InitializeComponent();
 
+            Icon = Properties.Resources.cloudservice;
+
             cbxNewSuiteStatus.Items.Add("Available");
             cbxNewSuiteStatus.Items.Add("OnHold");
             cbxNewSuiteStatus.Items.Add("Sold");

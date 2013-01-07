@@ -198,6 +198,8 @@ namespace ModelPackageTester
 
             Text = Text + " - v" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
+            Icon = Properties.Resources.cloudservice;
+
             toolTip1.SetToolTip(btnGuessSuiteTypeInfo, "Try guessing Suite Type Info file");
             toolTip1.SetToolTip(btnGuessFloorPlanFolder, "Try guessing Fllor Plan folder");
 

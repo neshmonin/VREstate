@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.label1 = new System.Windows.Forms.Label();
             this.lblModelPath = new System.Windows.Forms.Label();
             this.btnBrowseModel = new System.Windows.Forms.Button();
@@ -258,7 +257,6 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.lblModelPath);
             this.Controls.Add(this.label1);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(550, 270);
             this.Name = "MainForm";
             this.Text = "Model Package Tester - 3D Condo Explorer";
