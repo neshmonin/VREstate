@@ -31,7 +31,7 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 		instance = new PriceSection();
 		instance.stackPanel = stackPanel;  
 		instance.setSpacing(5);
-		stackPanel.add(instance, "Price", false);
+		stackPanel.add(instance, "Price (any)", false);
 		instance.setSize("100%", "150px");
 
 		HorizontalPanel horizontalPanel_1 = new HorizontalPanel();
@@ -47,8 +47,12 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 				cbMaxPrice.setSelectedIndex(Math.max(
 						cbMaxPrice.getSelectedIndex(),
 						cbMinPrice.getSelectedIndex()));
-				instance.isAny = cbMaxPrice.getSelectedIndex() == 0 &&
-								 cbMinPrice.getSelectedIndex() == (cbMinPrice.getItemCount()-1); 
+				instance.isAny = cbMinPrice.getSelectedIndex() == 0 &&
+								 cbMaxPrice.getSelectedIndex() == (cbMaxPrice.getItemCount()-1); 
+				if (instance.isAny)
+					instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Price (any)");
+				else
+					instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Price");
 			}
 		});
 		cbMinPrice.setWidth("100%");
@@ -61,8 +65,12 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 				cbMinPrice.setSelectedIndex(Math.min(
 						cbMinPrice.getSelectedIndex(),
 						cbMaxPrice.getSelectedIndex()));
-				instance.isAny = cbMaxPrice.getSelectedIndex() == 0 &&
-				 cbMinPrice.getSelectedIndex() == (cbMinPrice.getItemCount()-1); 
+				instance.isAny = cbMinPrice.getSelectedIndex() == 0 &&
+				 cbMaxPrice.getSelectedIndex() == (cbMaxPrice.getItemCount()-1); 
+				if (instance.isAny)
+					instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Price (any)");
+				else
+					instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Price");
 			}
 		});
 		cbMaxPrice.setWidth("100%");
@@ -87,9 +95,9 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 		int price = suite.getPrice();
 		if (prices.isEmpty())
 			return true;
-		if (price < prices.get(cbMinPrice.getSelectedIndex()))
+		if (price <= prices.get(cbMinPrice.getSelectedIndex()))
 			return false;
-		if (price > prices.get(cbMaxPrice.getSelectedIndex()))
+		if (price >= prices.get(cbMaxPrice.getSelectedIndex() + 1))
 			return false;
 		return true;
 	}
@@ -115,18 +123,29 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 			i++;
 
 		prices.clear();
+		
+		// prices.add(Integer.MIN_VALUE);
 
 		while (a * i < max_price) {
 			prices.add(a * i);
 			i++;
 		}
 		prices.add(a * i);
+		// prices.add(Integer.MAX_VALUE);
 
 		cbMinPrice.clear();
 		cbMaxPrice.clear();
+		
 		for (Integer item : prices) {
-			cbMinPrice.addItem("Min: $" + item, item.toString());
-			cbMaxPrice.addItem("Max: $" + item, item.toString());
+			int index = prices.indexOf(item);
+			if (index == 0)
+				cbMinPrice.addItem("Minimal", item.toString());
+			else if (index == prices.size() - 1)
+				cbMaxPrice.addItem("Maximal", item.toString());
+			else {
+				cbMinPrice.addItem("Min :$" + item, item.toString());
+				cbMaxPrice.addItem("Max :$" + item, item.toString());
+			}
 		}
 		isAny = true;
 	}

@@ -97,10 +97,17 @@ public class Suite {
 				
 				break;
 			}
-		// TODO Сделать нормальную обработку цен
-		// price = params.getInteger("currentPrice");
+		
+		price = -1;
+		
+		
+		if ((obj.get("currentPrice") != null)&&
+			(obj.get("currentPrice").isNumber() != null))
+			price = (int) obj.get("currentPrice").isNumber().doubleValue();
+		// Workaround for prices	
 		price = (int) (500 + 500 * Math.random());
 		price *= 1000;
+		
 	}
 	
 	public void CalcLineCoords() {

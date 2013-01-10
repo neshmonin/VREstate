@@ -99,11 +99,6 @@ public class Filter extends StackPanel implements I_FilterSection {
 		dockPanel.add(stackPanel, DockPanel.CENTER);
 		stackPanel.setSize("100%", "150px");
 
-		sections.add(PriceSection.CreateSectionPanel("Price", stackPanel));
-		sections.add(BedroomsSection.CreateSectionPanel("Bedrooms", stackPanel));
-		sections.add(BathroomSection.CreateSectionPanel("Bathrooms", stackPanel));
-		sections.add(AreaSection.CreateSectionPanel("Area", stackPanel));
-		sections.add(BalconySection.CreateSectionPanel("Balconies", stackPanel));
 
 		dpFilter.getElement().getStyle().setZIndex(Integer.MAX_VALUE);
 
@@ -121,31 +116,40 @@ public class Filter extends StackPanel implements I_FilterSection {
 		frame = com.google.gwt.dom.client.Document.get().createIFrameElement();
 		com.google.gwt.dom.client.Document.get().getBody().appendChild(frame);
 
-		Init();
+		
+		sections.add(PriceSection.CreateSectionPanel("Price", stackPanel));
+		sections.add(BedroomsSection.CreateSectionPanel("Bedrooms", stackPanel));
+		sections.add(BathroomSection.CreateSectionPanel("Bathrooms", stackPanel));
+		sections.add(AreaSection.CreateSectionPanel("Area", stackPanel));
+		sections.add(BalconySection.CreateSectionPanel("Balconies", stackPanel));
+		// Init();
+		for (I_FilterSection section : sections)
+			section.Init();
+
+		Reset();
 		UpdateSize();
 	}
 
 	@Override
 	public void Init() {
-		for (I_FilterSection section : sections)
-			section.Init();
-
-		Reset();
 	}
 
 	private boolean isOpened = false;
 
 	public void setVisible(boolean visible) {
-		// Log.write("Filter->setVisible:" + visible);
+		Log.write("Filter->setVisible:" + visible);
 		if ((visible) && (Options.getViewOrderId() == null)
 				&& (Options.USE_FILTER)) {
 			dpFilter.setOpen(isOpened);
+			dpFilter.setVisible(true);
 			UpdateSize();
 		} else {
 			isOpened = dpFilter.isOpen();
-			dpFilter.setOpen(false);
-			frame.getStyle().setHeight(0, Unit.PX);
-			frame.getStyle().setWidth(0, Unit.PX);
+			dpFilter.setVisible(false);
+			UpdateSize();
+			// dpFilter.setOpen(false);
+			// frame.getStyle().setHeight(0, Unit.PX);
+			// frame.getStyle().setWidth(0, Unit.PX);
 		}
 	}
 
@@ -154,16 +158,28 @@ public class Filter extends StackPanel implements I_FilterSection {
 
 			@Override
 			public void execute() {
-				frame.setAttribute(
-						"style",
-						"z-index: " + (Integer.MAX_VALUE - 1) + ";"
-								+ " width: " + dpFilter.getOffsetWidth()
-								+ "px;" + " height: "
-								+ dpFilter.getOffsetHeight() + "px;"
-								+ " position: absolute;" + " left: "
-								+ dpFilter.getAbsoluteLeft() + "px;" + " top: "
-								+ dpFilter.getAbsoluteTop() + "px;"
-								+ " background: white;");
+				if (dpFilter.isVisible()) 
+					frame.setAttribute(
+							"style",
+							"z-index: " + (Integer.MAX_VALUE - 1) + ";"
+							+ " width: " + dpFilter.getOffsetWidth()
+							+ "px;" + " height: "
+							+ dpFilter.getOffsetHeight() + "px;"
+							+ " position: absolute;" + " left: "
+							+ dpFilter.getAbsoluteLeft() + "px;" + " top: "
+							+ dpFilter.getAbsoluteTop() + "px;"
+							+ " background: white;");
+				else
+					frame.setAttribute(
+							"style",
+							"z-index: " + (Integer.MAX_VALUE - 1) + ";"
+							+ " width: 0px;" 
+							+ " height: 0px;"
+							+ " position: absolute;" 
+							+ " left: "
+							+ dpFilter.getAbsoluteLeft() + "px;" + " top: "
+							+ dpFilter.getAbsoluteTop() + "px;"
+							+ " background: white;");
 			}
 		});
 	}

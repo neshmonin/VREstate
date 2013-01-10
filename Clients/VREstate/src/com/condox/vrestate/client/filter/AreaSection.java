@@ -25,7 +25,7 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 	public static AreaSection CreateSectionPanel(String sectionLabel, StackPanel stackPanel) {
 		instance = new AreaSection();
 		instance.stackPanel = stackPanel;  
-		stackPanel.add(instance, "Area", false);
+		stackPanel.add(instance, "Area (any)", false);
 		instance.setSize("100%", "150px");
 
 		HorizontalPanel horizontalPanel_2 = new HorizontalPanel();
@@ -36,11 +36,16 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 		lbMinArea = new ListBox();
 		lbMinArea.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
-				lbMinArea.setSelectedIndex(Math.min(
+				lbMaxArea.setSelectedIndex(Math.max(
 						lbMinArea.getSelectedIndex(),
 						lbMaxArea.getSelectedIndex()));
 				instance.isAny = lbMinArea.getSelectedIndex() == 0 &&
 								 lbMaxArea.getSelectedIndex() == (lbMaxArea.getItemCount()-1);
+				if (instance.isAny)
+					instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Area (any)");
+				else
+					instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Area");
+					
 			}
 		});
 		lbMinArea.setEnabled(false);
@@ -54,7 +59,11 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 						lbMinArea.getSelectedIndex(),
 						lbMaxArea.getSelectedIndex()));
 				instance.isAny = lbMinArea.getSelectedIndex() == 0 &&
-				 lbMaxArea.getSelectedIndex() == (lbMaxArea.getItemCount()-1); 
+					lbMaxArea.getSelectedIndex() == (lbMaxArea.getItemCount()-1); 
+				if (instance.isAny)
+					instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Area (any)");
+				else
+					instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Area");
 			}
 		});
 		lbMaxArea.setEnabled(false);
@@ -95,10 +104,22 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 
 		lbMinArea.clear();
 		lbMaxArea.clear();
-		for (Double area : areas) {
-			Double item = (area > 0) ? area : 100;
-			lbMinArea.addItem("Min: " + item, item.toString() + " Sq.Ft.");
-			lbMaxArea.addItem("Max: " + item, item.toString() + " Sq.Ft.");
+		for (Double item : areas) {
+			// item = (item > 0) ? item : 100;
+			int index = areas.indexOf(item);
+			if (index == 0)
+				lbMinArea.addItem("Minimal", item.toString());
+			else if (index == areas.size() - 1)
+				lbMaxArea.addItem("Maximal", item.toString());
+			else {
+				lbMinArea.addItem("Min: " + item + " Sq.Ft", item.toString());
+				lbMaxArea.addItem("Max: " + item + " Sq.Ft", item.toString());
+			}
+			
+			
+			
+			// lbMinArea.addItem("Min: " + item, item.toString() + " Sq.Ft.");
+			// lbMaxArea.addItem("Max: " + item, item.toString() + " Sq.Ft.");
 		}		// TODO Auto-generated method stub
 
 		isAny = true;
@@ -120,9 +141,9 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 		
 		SuiteType type = suite.getSuiteType();
 		double area = type.getArea();
-		if (area < areas.get(lbMinArea.getSelectedIndex()))
+		if (area <= areas.get(lbMinArea.getSelectedIndex()))
 			return false;
-		if (area > areas.get(lbMaxArea.getSelectedIndex()))
+		if (area >= areas.get(lbMaxArea.getSelectedIndex() + 1))
 			return false;
 
 		return true;
