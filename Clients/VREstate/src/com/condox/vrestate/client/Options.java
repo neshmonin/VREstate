@@ -21,6 +21,7 @@ public class Options implements RequestCallback{
 	public static Integer SUITE_DISTANCE;
 	public static boolean SHOW_SOLD = false;
 	public static boolean USE_FILTER = true;
+	public static final boolean DEBUG_MODE = true;
 
 	private static Options theOptions = null;
 	private VREstate vrEstate = null;
@@ -62,11 +63,10 @@ public class Options implements RequestCallback{
 		// SUITE_DISTANCE = Integer.valueOf(params.containsKey("Distance")?
 		// params.get("Distance").get(0) : "-1");
 
-		if (GWT.getModuleBaseURL().contains("vrt.3dcondox.com"))
-			HOME_URL = GWT.getModuleBaseURL().replace("listing/", "");
+		if (DEBUG_MODE)
+			HOME_URL = "https://vrt.3dcondox.com/vre/";
 		else
 			HOME_URL = "https://vrt.3dcondox.com/";
-		HOME_URL = "https://vrt.3dcondox.com/";
 		
 		ZOOM_IN_URL = HOME_URL + "buttons/Unzoom.png";
 		ZOOM_OUT_URL = HOME_URL + "buttons/Zoom.png";
