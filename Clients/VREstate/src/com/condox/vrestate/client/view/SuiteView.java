@@ -119,17 +119,21 @@ public class SuiteView extends _GEView {
 		obj.put("Floor", new JSONString(suiteGeo.suite.getFloor_name()));
 
 		SuiteType type = suiteGeo.suite.getSuiteType();
-//		if (type.getBedrooms() >= 0)
-			obj.put("bedrooms", new JSONNumber(type.getBedrooms()));
-//		if (type.getBalconies() >= 0)
-			obj.put("balcony", new JSONNumber(type.getBalconies()));
-		 obj.put("ceiling", new JSONNumber(suiteGeo.suite.getCeiling_height_ft()));
 
-		 if (type.getFloorPlanUrl() != null)
-			 obj.put("more", new JSONString(type.getFloorPlanUrl()));
-		 obj.put("panoramicViewURL", new JSONString(""));
+		obj.put("bedrooms", new JSONString(type.getRoomsStr()));
+		obj.put("balcony", new JSONNumber(type.getBalconies()));
+		//obj.put("ceiling", new JSONNumber(suiteGeo.suite.getCeiling_height_ft()));
+
+		String externalLinkUrl = suiteGeo.suite.getExternalLinkUrl(); 
+		if (externalLinkUrl == null)
+			externalLinkUrl = type.getFloorPlanUrl();
+			
+		if (externalLinkUrl != null)
+			obj.put("more", new JSONString(externalLinkUrl));
+			 
+		obj.put("panoramicViewURL", new JSONString(""));
 		// if (suite_type.area > 0)
-		 obj.put("area", new JSONNumber(type.getArea()));
+		obj.put("area", new JSONNumber(type.getArea()));
 		// obj.put("photo", new JSONString("PhotoUrl"));
 		// obj.put("more", new JSONString("MoreInfoUrl"));
 		// obj.put("mail", new JSONString("MailUrl"));
@@ -174,21 +178,19 @@ public class SuiteView extends _GEView {
 	}-*/;
 
 	private void ShowPanoramicView() {
-//		Window.alert("PanoramicView");
-//		GE.getPlugin().setBalloon(null);
 		IGeoItem suiteGeo = _AbstractView.getSuiteGeoItem(theGeoItem.getId());
 		_AbstractView.Push(new PanoramicView(suiteGeo));
 	}
 
 	private void ShowMore() {
-		SuiteType type = suiteGeo.suite.getSuiteType();
-		if (type.getFloorPlanUrl() != null)
-			Window.open(type.getFloorPlanUrl(), "_blank", null);
-		// Error
-		// else
-		// Window.open("google.com", "name", null);
-
-		// Window.alert("FloorPlan");
+		String externalLinkUrl = suiteGeo.suite.getExternalLinkUrl(); 
+		if (externalLinkUrl == null) {
+			SuiteType type = suiteGeo.suite.getSuiteType();
+			externalLinkUrl = type.getFloorPlanUrl();
+		}
+					
+		if (externalLinkUrl != null)
+			Window.open(externalLinkUrl, "_blank", null);
 	}
 
 	public void Update(double speed) {

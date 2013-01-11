@@ -25,6 +25,13 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 	private BedroomsSection(){super();}
 	
 	public static BedroomsSection CreateSectionPanel(String sectionLabel, StackPanel stackPanel) {
+		//=====================================================
+		boolean creating = false;
+		for (SuiteType suite_type : Document.get().getSuiteTypes())
+			creating = creating || (suite_type.getBedrooms() >= 0);
+		if (!creating)
+			return null;
+		//=====================================================
 		instance = new BedroomsSection();
 		instance.stackPanel = stackPanel;  
 		stackPanel.add(instance, "Bedrooms", false);

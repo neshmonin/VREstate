@@ -28,6 +28,22 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 	}
 	
 	public static PriceSection CreateSectionPanel(String sectionLabel, StackPanel stackPanel) {
+		
+		//==============
+		int min_price = Integer.MAX_VALUE;
+		int max_price = Integer.MIN_VALUE;
+		for (Suite suite : Document.get().getSuites()) {
+			min_price = Math.min(min_price, suite.getPrice());
+			max_price = Math.max(max_price, suite.getPrice());
+		}
+		if (min_price <= 0)
+			return null;
+		if (max_price <= 0)
+			return null;
+		if (max_price <= min_price)
+			return null;
+		//==============
+		
 		instance = new PriceSection();
 		instance.stackPanel = stackPanel;  
 		instance.setSpacing(5);

@@ -24,6 +24,13 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 	private BathroomSection(){ super();	}
 	
 	public static BathroomSection CreateSectionPanel(String sectionLabel, StackPanel stackPanel) {
+		//=====================================================
+		boolean creating = false;
+		for (SuiteType suite_type : Document.get().getSuiteTypes())
+			creating = creating || (suite_type.getBathrooms() >= 0);
+		if (!creating)
+			return null;
+		//=====================================================
 		instance = new BathroomSection();
 		instance.stackPanel = stackPanel;  
 		instance.setSpacing(5);

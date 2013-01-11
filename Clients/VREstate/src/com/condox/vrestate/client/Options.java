@@ -2,23 +2,13 @@ package com.condox.vrestate.client;
 
 import java.util.List;
 import java.util.Map;
-
 import com.google.gwt.core.client.GWT;
-//import com.google.gwt.dom.client.Document;
-//import com.google.gwt.dom.client.Element;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
-//import com.google.gwt.user.client.ui.Frame;
-//import com.google.gwt.user.client.ui.RootLayoutPanel;
 
 public class Options implements RequestCallback{
-	// public static String USER_NAME = "adminan";
-	// public static String USER_PASS = "smelatoronto";
-
-	// public static String DEVELOPER_ID;
-//	public static int SITE_ID;
 	public static int BUILDING_ID;
 	public static int SUITE_ID;
 	public static String HOME_URL;
@@ -29,7 +19,6 @@ public class Options implements RequestCallback{
 	public static String URL_BUTTON_CENTER_PANORAMIC_VIEW;
 	public static String SUITE_INFO_TEMPLATE;
 	public static Integer SUITE_DISTANCE;
-	//private static boolean isReady = false;
 	public static boolean SHOW_SOLD = false;
 	public static boolean USE_FILTER = true;
 
@@ -76,8 +65,8 @@ public class Options implements RequestCallback{
 		if (GWT.getModuleBaseURL().contains("vrt.3dcondox.com"))
 			HOME_URL = GWT.getModuleBaseURL().replace("listing/", "");
 		else
-			HOME_URL = "https://vrt.3dcondox.com/vre/";
-		HOME_URL = "https://vrt.3dcondox.com/vre/";
+			HOME_URL = "https://vrt.3dcondox.com/";
+		HOME_URL = "https://vrt.3dcondox.com/";
 		
 		ZOOM_IN_URL = HOME_URL + "buttons/Unzoom.png";
 		ZOOM_OUT_URL = HOME_URL + "buttons/Zoom.png";

@@ -1,6 +1,8 @@
 package com.condox.vrestate.client.filter;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.document.Document;
@@ -122,9 +124,13 @@ public class Filter extends StackPanel implements I_FilterSection {
 		sections.add(BathroomSection.CreateSectionPanel("Bathrooms", stackPanel));
 		sections.add(AreaSection.CreateSectionPanel("Area", stackPanel));
 		sections.add(BalconySection.CreateSectionPanel("Balconies", stackPanel));
-		// Init();
-		for (I_FilterSection section : sections)
-			section.Init();
+			
+		Iterator<I_FilterSection> iterator = sections.iterator();
+		while (iterator.hasNext())
+			if (iterator.next() == null)
+				iterator.remove();
+		
+		Init();
 
 		Reset();
 		UpdateSize();
@@ -132,6 +138,8 @@ public class Filter extends StackPanel implements I_FilterSection {
 
 	@Override
 	public void Init() {
+		for (I_FilterSection section : sections)
+			section.Init();
 	}
 
 	private boolean isOpened = false;

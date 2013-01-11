@@ -55,7 +55,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 		String json = response.getText();
 		Document.get().Parse(json);
 
-		Site site = Document.get().getSites().get(0);
+		Site site = (Site) Document.get().getSites().toArray()[0];
 		if (!Options.isViewOrder())
 			if (site.getDisplayModelUrl() != "")
 				GE.getPlugin().fetchKml(Options.HOME_URL + site.getDisplayModelUrl(), this);

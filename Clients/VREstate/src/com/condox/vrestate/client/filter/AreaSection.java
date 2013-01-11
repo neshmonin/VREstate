@@ -23,6 +23,22 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 	private AreaSection(){super();}
 	
 	public static AreaSection CreateSectionPanel(String sectionLabel, StackPanel stackPanel) {
+		
+		//==============
+		double min_area = Integer.MAX_VALUE;
+		double max_area = Integer.MIN_VALUE;
+		for (SuiteType suite_type : Document.get().getSuiteTypes()) {
+			min_area = Math.min(min_area, suite_type.getArea());
+			max_area = Math.max(max_area, suite_type.getArea());
+		}
+		if (min_area <= 0)
+			return null;
+		if (max_area <= 0)
+			return null;
+		if (max_area <= min_area)
+			return null;
+		//==============
+		
 		instance = new AreaSection();
 		instance.stackPanel = stackPanel;  
 		stackPanel.add(instance, "Area (any)", false);

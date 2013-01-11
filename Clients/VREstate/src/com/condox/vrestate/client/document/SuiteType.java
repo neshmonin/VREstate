@@ -32,13 +32,44 @@ public class SuiteType {
 	private ArrayList<Double> points = new ArrayList<Double>();
 	
 	private int bedrooms = 0;
+	private int dens = 0;
+	private int otherRooms = 0;
 	private int bathrooms = 0;
 	private int balconies = 0;
 	private double area = 0;
+	private String roomsStr = "";
 	private String floorPlanUrl = null;
-	
+
 	void Parse(JSONValue value) {
-//		Log.write(value.toString());
+		/*=======================================================
+		{
+			"id":1393,"version":[0,0,0,0,0,1,236,30],
+			"siteId":15,
+			"name":"25Esplanade/D",
+			"floorPlanUrl":"https://vrt.3dcondox.com/models/1393_fp.jpg",
+			"levels":[],
+			"geometries":
+			[
+				{
+					"points":
+					[
+						0,-128.06228579081539,0,
+						2.2737367544323211E-13,88.47314728005108,0,
+						2.2737367544323211E-13,-128.06228579081559,118.1102362204724,
+						0,88.47314728005108,118.1102362204724
+					],
+					"lines":[1,0,0,2,3,2,3,1]
+				}
+			],
+			"area":641,
+			"areaUm":"sqFt",
+			"bedrooms":0,
+			"dens":1,
+			"bathrooms":1,
+			"balconies":0,
+			"terraces":0
+		}
+		===========================================================*/
 		JSONObject obj = value.isObject();
 		id = (int) obj.get("id").isNumber().doubleValue();
 		parent_id = (int) obj.get("siteId").isNumber().doubleValue();
@@ -57,6 +88,14 @@ public class SuiteType {
 				}
 			}
 		bedrooms = params.getInteger("bedrooms");
+		dens = params.getInteger("dens");
+		//otherRooms = params.getInteger("otherRooms");
+		roomsStr += bedrooms == 0? "St" : bedrooms;
+		if (dens == 1)
+			roomsStr += "+D";
+		else if  (dens > 1)
+			roomsStr += "+" + dens + "D";
+			
 		bathrooms = params.getInteger("bathrooms");
 		balconies = params.getInteger("balconies");
 		area = params.getDouble("area");
@@ -72,12 +111,24 @@ public class SuiteType {
 		return bedrooms;
 	}
 
+	public int getOtherRooms() {
+		return otherRooms;
+	}
+
+	public int getDens() {
+		return dens;
+	}
+
 	public int getBathrooms() {
 		return bathrooms;
 	}
 
 	public double getArea() {
 		return area;
+	}
+
+	public String getRoomsStr() {
+		return roomsStr;
 	}
 
 	public int getBalconies() {
@@ -97,7 +148,6 @@ public class SuiteType {
 	}
 
 	public String getFloorPlanUrl() {
-//		return null;
 		return floorPlanUrl;
 	}
 
