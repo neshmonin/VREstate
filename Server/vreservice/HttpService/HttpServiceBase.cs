@@ -222,7 +222,13 @@ namespace Vre.Server.HttpService
                 response.StatusDescription = "Entity already exists.";
                 ServiceInstances.Logger.Error("Entity already exists: {0}", e.Message);
             }
-            if (e is FileNotFoundException)
+            else if (e is ExpiredException)
+            {
+                response.StatusCode = (int)HttpStatusCode.Gone;
+                response.StatusDescription = e.Message != null ? e.Message : "Content expired.";
+                ServiceInstances.Logger.Error("Requested entity is expired: {0}", e.Message);
+            }
+            else if (e is FileNotFoundException)
             {
                 response.StatusCode = (int)HttpStatusCode.NotFound;
                 response.StatusDescription = "Content does not exist.";

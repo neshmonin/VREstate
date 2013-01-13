@@ -109,7 +109,7 @@ namespace ModelPackageTester
                     }
                     suiteNames.Add(s.Name);
 
-                    if (!s.Floor.Equals(floorNumberFromSuiteName(s.Name)))
+                    if (!s.Name.StartsWith(s.Floor))
                     {
                         readWarnings.AppendFormat("\r\nMDMD02: Building '{0}' suite '{1}' is set on wrong floor ({2}).",
                             b.Name, s.Name, s.Floor);
@@ -175,14 +175,6 @@ namespace ModelPackageTester
             btnImport.Enabled = canImport;
 
             return readWarnings.ToString();
-        }
-
-        private static string floorNumberFromSuiteName(string suiteName)
-        {
-            int pos = 0;
-            for (; pos < suiteName.Length; pos++) if (!char.IsDigit(suiteName[pos])) break;
-            if (pos > 2) return suiteName.Substring(0, pos - 2);
-            else return string.Empty;
         }
 
         private static string getImportExecutablePath()

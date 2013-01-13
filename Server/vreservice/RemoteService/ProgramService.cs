@@ -302,11 +302,23 @@ namespace Vre.Server.RemoteService
 
             {
                 string dv = request.Request.Query["daysValid"];
-                if (string.IsNullOrWhiteSpace(dv)) throw new ArgumentException("Missing validation period");
-                int idv;
-                if (!int.TryParse(dv, out idv)) throw new ArgumentException("Validation period value is invalid");
-                // TODO: LOCAL TIME HERE!
-                expiresOn = DateTime.Now.AddDays(idv).ToUniversalTime().Date;
+                if (string.IsNullOrWhiteSpace(dv))
+                {
+                    dv = request.Request.Query["expiresOn"];
+                    if (string.IsNullOrWhiteSpace(dv)) throw new ArgumentException("Missing validation period/expiry");
+
+                    if (!DateTime.TryParseExact(dv, "yyyy-MM-ddTHH:mm:ss", null, System.Globalization.DateTimeStyles.None, out expiresOn))
+                        throw new ArgumentException("Validation expiry value is invalid");
+
+                    if (expiresOn.CompareTo(DateTime.UtcNow) < 1) throw new ArgumentException("Validation expiry value is too old");
+                }
+                else
+                {
+                    int idv;
+                    if (!int.TryParse(dv, out idv)) throw new ArgumentException("Validation period value is invalid");
+                    // LEGACY: SERVER LOCAL TIME HERE!
+                    expiresOn = DateTime.Now.Date.AddDays(idv + 1).ToUniversalTime();
+                }
             }
             //if (!DateTime.TryParseExact(request.Request.Query["expires"], "yyyy-MM-ddTHH:mm:ss",
             //    CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out expiresOn))

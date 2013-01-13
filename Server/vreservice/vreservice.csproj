@@ -135,6 +135,7 @@
     </Compile>
     <Compile Include="Authentication\Authentication.cs" />
     <Compile Include="Authentication\IAuthentication.cs" />
+    <Compile Include="BusinessLogic\ExpiredException.cs" />
     <Compile Include="BusinessLogic\ObjectExistsException.cs" />
     <Compile Include="BusinessObjects\FinancialTransactionExt.cs" />
     <Compile Include="BusinessObjects\ReverseRequest.cs" />

@@ -144,5 +144,33 @@ namespace Vre.Server
 
             return result;
         }
+
+        /// <summary>
+        /// Sanitize URL for logging: make sure no sensitive data (passwords) gets logged.
+        /// </summary>
+        public static string SanitizeUrl(string url)
+        {
+            if (null == url) return null;
+            if (url.Length > 1024) url = url.Substring(0, 1024);            
+            int pos, pos2;
+            
+            pos = url.IndexOf("&pwd=");
+            if (pos > 0)
+            {
+                pos2 = url.IndexOf('&', pos + 1);
+                if (pos2 < 0) pos2 = url.Length;
+                url = url.Remove(pos + 5, pos2 - pos - 5);
+            }
+
+            pos = url.IndexOf("&npwd=");
+            if (pos > 0)
+            {
+                pos2 = url.IndexOf('&', pos + 1);
+                if (pos2 < 0) pos2 = url.Length;
+                url = url.Remove(pos + 5, pos2 - pos - 5);
+            }
+
+            return url;
+        }
     }
 }

@@ -19,10 +19,11 @@ namespace Vre.Server.HttpService
             if (_allowExtendedLogging)
             {
                 ClientSession cs = rq.UserInfo.Session;
+                string url = Utilities.SanitizeUrl(ctx.Request.Url.ToString());
                 if (cs != null)
-                    ServiceInstances.RequestLogger.Info("Session={0}; BK={1}; {2}; URL={3}", cs, browserKey, ctx.Request.HttpMethod, ctx.Request.Url);
+                    ServiceInstances.RequestLogger.Info("Session={0}; BK={1}; {2}; URL={3}", cs, browserKey, ctx.Request.HttpMethod, url);
                 else
-                    ServiceInstances.RequestLogger.Info("Anonymous; BK={0}; {1}; URL={2}", browserKey, ctx.Request.HttpMethod, ctx.Request.Url);
+                    ServiceInstances.RequestLogger.Info("Anonymous; BK={0}; {1}; URL={2}", browserKey, ctx.Request.HttpMethod, url);
             }
 
             if (!rq.UserInfo.StaleSession)
