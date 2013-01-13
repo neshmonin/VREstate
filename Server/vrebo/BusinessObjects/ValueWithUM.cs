@@ -13,7 +13,7 @@ namespace Vre.Server.BusinessLogic
 
         public enum Unit : byte
         {
-            Feet, Meters, SqFeet, SqMeters
+            Feet = 0, Meters = 1, SqFeet = 2, SqMeters = 3
         }
 
         protected double _rawValue;

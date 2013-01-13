@@ -106,7 +106,7 @@ namespace Vre.Server.ModelCache
                 ServiceInstances.Logger.Info("MC: Reading model files done.");
 
 // TODO: TEMP TESTING!!!
-new Thread(aaTestThread) { IsBackground = true }.Start();
+//new Thread(aaTestThread) { IsBackground = true }.Start();
 
                 _watcher.EnableRaisingEvents = true;
             }

@@ -14,7 +14,9 @@ namespace Vre.Server.BusinessLogic
         public virtual ValueWithUM FloorArea { get; set; }  // TODO: Should be computable field!
         public virtual int BedroomCount { get; set; }  // TODO: Should be computable field!
         public virtual int DenCount { get; set; }  // TODO: Should be computable field!
-        public virtual int BathroomCount { get; set; }  // TODO: Should be computable field!
+        public virtual int OtherRoomCount { get; set; }  // TODO: Should be computable field!
+        public virtual int ShowerBathroomCount { get; set; }  // TODO: Should be computable field!
+        public virtual int NoShowerBathroomCount { get; set; }  // TODO: Should be computable field!
         public virtual int BalconyCount { get; set; }  // TODO: Should be computable field!
         public virtual int TerraceCount { get; set; }  // TODO: Should be computable field!
 
@@ -59,7 +61,9 @@ namespace Vre.Server.BusinessLogic
             //Model = data.UpdateProperty("modelName", Model, ref changed);
             BedroomCount = data.UpdateProperty("bedrooms", BedroomCount, ref result);
             DenCount = data.UpdateProperty("dens", DenCount, ref result);
-            BathroomCount = data.UpdateProperty("bathrooms", BathroomCount, ref result);
+            OtherRoomCount = data.UpdateProperty("otherRooms", OtherRoomCount, ref result);
+            ShowerBathroomCount = data.UpdateProperty("showerBathrooms", ShowerBathroomCount, ref result);
+            NoShowerBathroomCount = data.UpdateProperty("noShowerBathrooms", NoShowerBathroomCount, ref result);
             BalconyCount = data.UpdateProperty("balconies", BalconyCount, ref result);
             TerraceCount = data.UpdateProperty("terraces", TerraceCount, ref result);
             //FloorArea.SetValue(
@@ -116,7 +120,12 @@ namespace Vre.Server.BusinessLogic
 
             result.Add("bedrooms", BedroomCount);
             result.Add("dens", DenCount);
-            result.Add("bathrooms", BathroomCount);
+            result.Add("otherRooms", OtherRoomCount);
+            result.Add("showerBathrooms", ShowerBathroomCount);
+            result.Add("noShowerBathrooms", NoShowerBathroomCount);
+            result.Add("bathrooms", (NoShowerBathroomCount <= 1)
+                ? ((float)ShowerBathroomCount + 0.5f * (float)NoShowerBathroomCount)
+                : (float)(ShowerBathroomCount + NoShowerBathroomCount - 1) + 0.5f);
             result.Add("balconies", BalconyCount);
             result.Add("terraces", TerraceCount);
 

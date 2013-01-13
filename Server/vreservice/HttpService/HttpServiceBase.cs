@@ -328,6 +328,8 @@ namespace Vre.Server.HttpService
             ContentTypeByExtension.Add("json", "application/json");
             ContentTypeByExtension.Add("kml", "application/vnd.google-earth.kml+xml");
             ContentTypeByExtension.Add("kmz", "application/vnd.google-earth.kmz");
+
+            ContentTypeByExtension.Add("pdf", "application/pdf");
         }
 
         public static bool IsPathValid(string path, bool allowSubfolder)

@@ -611,8 +611,9 @@ namespace Vre.Server.Command
 
                 stype.BalconyCount = _extraSuiteInfo.GetBalconyCount(cn);
                 stype.TerraceCount = _extraSuiteInfo.GetTerraceCount(cn);
-                stype.BathroomCount = _extraSuiteInfo.GetShowerBathroomCount(cn)
-                    + _extraSuiteInfo.GetNoShowerBathroomCount(cn);
+                stype.OtherRoomCount = _extraSuiteInfo.GetOtherRoomsCount(cn);
+                stype.ShowerBathroomCount = _extraSuiteInfo.GetShowerBathroomCount(cn);
+                stype.NoShowerBathroomCount = _extraSuiteInfo.GetNoShowerBathroomCount(cn);
                 stype.BedroomCount = _extraSuiteInfo.GetBedroomCount(cn);
                 stype.DenCount = _extraSuiteInfo.GetDenCount(cn);
                 stype.FloorArea = new ValueWithUM(_extraSuiteInfo.GetIndoorFloorAreaSqFt(cn), ValueWithUM.Unit.SqFeet);

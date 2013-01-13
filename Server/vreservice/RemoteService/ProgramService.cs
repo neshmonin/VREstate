@@ -291,7 +291,9 @@ namespace Vre.Server.RemoteService
             ViewOrder.ViewOrderType product;
             string paymentRefId = request.Request.Query["pr"];
             string productUrl = request.Request.Query["evt_url"];
-            string mslId = request.Request.Query["msl_id"];
+            string mlsId = request.Request.Query["mls_id"];
+            string mlsUrl = request.Request.Query["mls_url"];
+            string note = request.Request.Query["note"];
             string propertyType = request.Request.Query["propertyType"];
             string propertyId = request.Request.Query["propertyId"];
             string ownerId = request.Request.Query["ownerId"];
@@ -330,68 +332,59 @@ namespace Vre.Server.RemoteService
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(request.UserInfo.Session.DbSession))
             {
-                if (string.IsNullOrWhiteSpace(mslId))
+                if (string.IsNullOrWhiteSpace(propertyType) || string.IsNullOrWhiteSpace(propertyId))
                 {
-                    if (string.IsNullOrWhiteSpace(propertyType) || string.IsNullOrWhiteSpace(propertyId))
-                    {
-                        // view by address lookup
-                        //
-                        UpdateableBase to = AddressHelper.ParseGeographicalAddressToModel(request.Request.Query, request.UserInfo.Session.DbSession);
+                    // view by address lookup
+                    //
+                    UpdateableBase to = AddressHelper.ParseGeographicalAddressToModel(request.Request.Query, request.UserInfo.Session.DbSession);
 
-                        Suite s = to as Suite;
-                        if (s != null)
-                        {
-                            targetType = ViewOrder.SubjectType.Suite;
-                            targetId = s.AutoID;
-                        }
-                        else
-                        {
-                            Building b = to as Building;
-                            if (b != null)
-                            {
-                                targetType = ViewOrder.SubjectType.Building;
-                                targetId = b.AutoID;
-                            }
-                            else
-                            {
-                                throw new FileNotFoundException("Property not found in system.");
-                            }
-                        }
+                    Suite s = to as Suite;
+                    if (s != null)
+                    {
+                        targetType = ViewOrder.SubjectType.Suite;
+                        targetId = s.AutoID;
                     }
                     else
                     {
-                        // view by property ID
-                        //
-                        if (!int.TryParse(propertyId, out targetId)) throw new ArgumentException("Property ID is not valid");
-
-                        UpdateableBase to = null;
-
-                        if (propertyType.Equals("suite"))
-                        {
-                            targetType = ViewOrder.SubjectType.Suite;
-                            Suite s;
-                            using (SuiteDao dao = new SuiteDao(request.UserInfo.Session.DbSession)) s = dao.GetById(targetId);
-                            if (s.Status != Suite.SalesStatus.Sold) throw new ObjectExistsException("Suite status in not SOLD");
-                            to = s;
-                        }
-                        else if (propertyType.Equals("building"))
+                        Building b = to as Building;
+                        if (b != null)
                         {
                             targetType = ViewOrder.SubjectType.Building;
-                            Building b;
-                            using (BuildingDao dao = new BuildingDao(request.UserInfo.Session.DbSession)) b = dao.GetById(targetId);
-                            if (b.Status != Building.BuildingStatus.Sold) throw new ObjectExistsException("Building status in not SOLD");
-                            to = b;
+                            targetId = b.AutoID;
                         }
-                        else throw new ArgumentException("Unknown property type");
-
-                        if (null == to) throw new FileNotFoundException("Property not found in system.");
+                        else
+                        {
+                            throw new FileNotFoundException("Property not found in system.");
+                        }
                     }
                 }
                 else
                 {
-                    // TODO: Test against MLS DB
+                    // view by property ID
                     //
-                    throw new NotImplementedException();
+                    if (!int.TryParse(propertyId, out targetId)) throw new ArgumentException("Property ID is not valid");
+
+                    UpdateableBase to = null;
+
+                    if (propertyType.Equals("suite"))
+                    {
+                        targetType = ViewOrder.SubjectType.Suite;
+                        Suite s;
+                        using (SuiteDao dao = new SuiteDao(request.UserInfo.Session.DbSession)) s = dao.GetById(targetId);
+                        if (s.Status != Suite.SalesStatus.Sold) throw new ObjectExistsException("Suite status in not SOLD");
+                        to = s;
+                    }
+                    else if (propertyType.Equals("building"))
+                    {
+                        targetType = ViewOrder.SubjectType.Building;
+                        Building b;
+                        using (BuildingDao dao = new BuildingDao(request.UserInfo.Session.DbSession)) b = dao.GetById(targetId);
+                        if (b.Status != Building.BuildingStatus.Sold) throw new ObjectExistsException("Building status in not SOLD");
+                        to = b;
+                    }
+                    else throw new ArgumentException("Unknown property type");
+
+                    if (null == to) throw new FileNotFoundException("Property not found in system.");
                 }
 
                 // use override for view order owner
@@ -401,8 +394,8 @@ namespace Vre.Server.RemoteService
                     if (!int.TryParse(ownerId, out userId)) userId = -1;
                 }
 
-                string viewOrderId = ReverseRequestService.CreateViewOrder(request, userId,
-                    product, mslId, targetType, targetId, productUrl, expiresOn, paymentRefId);
+                string viewOrderId = ReverseRequestService.CreateViewOrder(request, userId, note,
+                    product, mlsId, mlsUrl, targetType, targetId, productUrl, expiresOn, paymentRefId);
 
                 // request.Response.ResponseCode - set by .CreateListing()
                 tran.Commit();

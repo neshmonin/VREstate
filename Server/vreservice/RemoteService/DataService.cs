@@ -1088,7 +1088,7 @@ namespace Vre.Server.RemoteService
                 cd.Add("targetObjectType", ClientData.ConvertProperty<ViewOrder.SubjectType>(vo.TargetObjectType));
                 cd.Add("targetObjectId", vo.TargetObjectId);
                 cd.Add("product", ClientData.ConvertProperty<ViewOrder.ViewOrderType>(vo.Product));
-                cd.Add("mlsId", vo.MlsId);
+                cd.Add("mlsUrl", vo.MlsUrl);
                 cd.Add("productUrl", vo.ProductUrl);
                 elements.Add(cd);
             }

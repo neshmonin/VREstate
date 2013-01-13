@@ -15,6 +15,7 @@
     <property name="OwnerId" column="OwnerId" />
     <property name="ExpiresOn" column="ExpiresOn" />
     <property name="Enabled" column="Enabled" />
+    <property name="Note" column="Note" />
 
     <property name="RequestCounter" column="RequestCounter" />
     <property name="LastRequestTime" column="LastRequestTime" />
@@ -22,6 +23,7 @@
     <property name="Product" column="Product" />
     <property name="ProductUrl" column="ProductUrl" />
     <property name="MlsId" column="MlsId" />
+    <property name="MlsUrl" column="MlsUrl" />
     <property name="TargetObjectType" column="TargetObjectType" />
     <property name="TargetObjectId" column="TargetObjectId" />
 

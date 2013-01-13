@@ -575,8 +575,8 @@ namespace Vre.Server.RemoteService
         #endregion
 
         #region ViewOrder
-        public static string CreateViewOrder(IServiceRequest srq, int targetUserId,
-            ViewOrder.ViewOrderType product, string mlsId, 
+        public static string CreateViewOrder(IServiceRequest srq, int targetUserId, string note,
+            ViewOrder.ViewOrderType product, string mlsId, string mlsUrl,
             ViewOrder.SubjectType type, int targetObjectId, string productUrl, DateTime expiresOn,
             string paymentSystemRefId)
         {
@@ -602,6 +602,9 @@ namespace Vre.Server.RemoteService
                 {
                     viewOrder = new ViewOrder(targetUser.AutoID, 
                         product, mlsId, type, targetObjectId, productUrl, expiresOn);
+
+                    viewOrder.MlsUrl = mlsUrl;
+                    viewOrder.Note = note;
 
                     using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))
                         dao.Create(viewOrder);
