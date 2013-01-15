@@ -9,7 +9,10 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
+import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlObject;
+import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
+import com.nitrous.gwt.earth.client.api.KmlUnits;
 import com.nitrous.gwt.earth.client.api.event.KmlLoadCallback;
 
 public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
@@ -63,6 +66,21 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 		_AbstractView.CreateAllGeoItems();
 		final SiteView view = new SiteView(_AbstractView.getSiteGeoItem(site.getId()));
 		_AbstractView.Push(view);
+		
+		//=================================================================
+//		KmlIcon icon = GE.getPlugin().createIcon("");
+//		KmlScreenOverlay overlay = GE.getPlugin().createScreenOverlay("");
+//		overlay.setIcon(icon);
+//		overlay.getOverlayXY().set(50, KmlUnits.UNITS_PIXELS, 100,KmlUnits.UNITS_INSET_PIXELS);
+//		overlay.getScreenXY().set(0, KmlUnits.UNITS_PIXELS, 0,KmlUnits.UNITS_INSET_PIXELS);
+//		GE.getPlugin().getFeatures().appendChild(overlay);
+//		String href = "Filtered 100 suites out of 200 (Prices from $1000,000 to $1000,000; Bathrooms:1,2(dens),3,4(dens); Bedrooms:1,2(dens),3,4(dens); Area: from $1000,000 to $1000,000;";
+//		href = Options.HOME_URL + "gen/txt?height=15&shadow=2&text="
+//				+ href + "&txtClr=16777215&shdClr=0&frame=0";
+//		icon.setHref(href);
+//		overlay.setVisibility(true);
+//		overlay.setOpacity(0.5f);
+		//=================================================================
 	}
 
 	@Override

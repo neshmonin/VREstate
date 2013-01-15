@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.condox.vrestate.client.JSONParams;
+import com.condox.vrestate.client.Log;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
@@ -35,6 +36,7 @@ public class SuiteType {
 	private int dens = 0;
 	private int otherRooms = 0;
 	private int bathrooms = 0;
+	private int __bathrooms = 0;
 	private int balconies = 0;
 	private double area = 0;
 	private String roomsStr = "";
@@ -96,10 +98,17 @@ public class SuiteType {
 		else if  (dens > 1)
 			roomsStr += "+" + dens + "D";
 			
-		bathrooms = params.getInteger("bathrooms");
+//		bathrooms = params.getInteger("bathrooms");
+		bathrooms = params.getDouble("bathrooms").intValue();
+		__bathrooms = (int) (2*(params.getDouble("bathrooms").doubleValue() - bathrooms));
+		
 		balconies = params.getInteger("balconies");
+		
 		area = params.getDouble("area");
+		area = (area > 100)? area : 100;
+		
 		floorPlanUrl = params.getString("floorPlanUrl");
+//		Log.write("Parsed!");
 	}
 	//====================================
 
@@ -121,6 +130,10 @@ public class SuiteType {
 
 	public int getBathrooms() {
 		return bathrooms;
+	}
+	
+	public int get__Bathrooms() {
+		return __bathrooms;
 	}
 
 	public double getArea() {

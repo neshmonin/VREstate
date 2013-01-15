@@ -16,6 +16,7 @@
 	<inherits name='com.nitrous.gwt.earth.GwtEarthAPI' />
 	<inherits name='com.google.gwt.xml.XML' />
 	<inherits name='com.google.gwt.http.HTTP' />
+	<inherits name="com.google.gwt.i18n.I18N"/>
 	<!-- Specify the app entry point class.                         -->
 
 	<!-- Specify the paths for translatable code                    -->

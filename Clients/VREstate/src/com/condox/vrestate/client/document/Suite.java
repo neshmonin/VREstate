@@ -92,11 +92,23 @@ public class Suite {
 
 		int type_id = (int) obj.get("suiteTypeId").isNumber()
 				.doubleValue();
-		for (SuiteType type : Document.get().getSuiteTypes())
+//		Log.write("suiteTypeId:" + type_id);
+//		suite_type = SuiteType.get(type_id);
+//		Log.write("suite_type:" + suite_type.toString());
+		
+		for (SuiteType type : Document.get().getSuiteTypes()) {
+//			Log.write("" + type.getId());
 			if (type.getId() == type_id) {
+//				Log.write("OK");
 				suite_type = type;
 				break;
 			}
+		}
+//		if (suite_type == null)
+//			Log.write("++");
+//		if (suite_type == null)
+//			Log.write("suiteTypeId:" + type_id);
+		
 		
 		price = -1;
 		if ((obj.get("currentPrice") != null)&&
