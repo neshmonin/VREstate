@@ -193,7 +193,7 @@ namespace ModelPackageTester
             Icon = Properties.Resources.cloudservice;
 
             toolTip1.SetToolTip(btnGuessSuiteTypeInfo, "Try guessing Suite Type Info file");
-            toolTip1.SetToolTip(btnGuessFloorPlanFolder, "Try guessing Fllor Plan folder");
+            toolTip1.SetToolTip(btnGuessFloorPlanFolder, "Try guessing Floor Plan folder");
 
             btnImport.Visible = File.Exists(getImportExecutablePath());
             if (btnImport.Visible) Text = Text.Replace("Tester", "Tester/Importer");

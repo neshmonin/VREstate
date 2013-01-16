@@ -865,7 +865,8 @@ namespace Vre.Server.RemoteService
                     }
                     else
                     {
-                        throw new FileNotFoundException("Undefined or expired view order");
+                        throw new ExpiredException("Expired view order");
+                        //throw new FileNotFoundException("Undefined or expired view order");
                     }
                 }
                 else

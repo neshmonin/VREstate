@@ -122,7 +122,7 @@ namespace Vre.Server.BusinessLogic
             ExpiresOn = data.UpdateProperty("expiresOn", ExpiresOn, ref result);
             OwnerId = data.UpdateProperty("ownerId", OwnerId, ref result);
             Product = data.GetProperty<ViewOrderType>("product", ViewOrderType.FloorPlan);
-            MlsId = data.GetProperty("mlsIs", string.Empty);
+            MlsId = data.GetProperty("mlsId", string.Empty);
             MlsUrl = data.GetProperty("mlsUrl", string.Empty);
             ProductUrl = data.GetProperty("productUrl", string.Empty);
 
