@@ -182,4 +182,16 @@ public class SuiteGeoItem implements IGeoItem {
 	public KmlPlacemark getExtendedDataLines() {
 		return extended_data_lines;
 	}
+	
+	public String getFloor_name() {
+		return suite.getFloor_name();
+	}
+	
+	public int getCellingHeight() {
+		return suite.getCeiling_height_ft();
+	}
+	
+	public int getPrice() {
+		return suite.getPrice();
+	}
 }

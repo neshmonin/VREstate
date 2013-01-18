@@ -31,43 +31,50 @@ public class Document implements IDocument {
 	public static Suite targetSuite = null;
 	
 	@Override
-	public void Parse(String json) {
+	public boolean Parse(String json) {
 		progressBar = new ProgressBar();
-		progressBar.Update(ProgressBar.ProgressLabel.Loading);
-		progressBar.Update(0.0);
-		ParseSuiteTypes(json);
-		progressBar.Update(10.0);
-		ParseBuildings(json);
-		progressBar.Update(80.0);
-		ParseSuites(json);
-		progressBar.Update(90.0);
-		ParseSites(json);
-		progressBar.Update(100.0);
-		ParseViewOrders(json);
-		
-		JSONObject obj = JSONParser.parseLenient(json).isObject();
-		if (obj.get("primaryViewOrderId") != null) {
-			JSONString jsonString = obj.get("primaryViewOrderId").isString();
-			String primaryViewOrderId = jsonString.stringValue();
-			ViewOrder vo = viewOrders.get(primaryViewOrderId);
-			if (vo != null) {
-				switch (vo.getTargetObjectType())
-				{
-				case Suite:
-					targetSuite = suites.get(vo.getTargetObjectId());
-					targetSuite.setStatus(Suite.Status.Selected);
-					if (vo.getProduct() == ViewOrder.ProductType.ExternalTour)
-						targetSuite.setExternalLinkUrl(vo.getProductUrl());
-					break;
-					// TODO - should handle other viewOrder targets here
-				}
-			}
-		}		
-		
-		for (Suite suite : getSuites())
-			suite.CalcLineCoords();
+		if (json.equals("")) {
+			progressBar.Update(-1.0);
+			progressBar.Update(ProgressBar.ProgressLabel.Error);
+			return false;
+		} else {
+			progressBar.Update(ProgressBar.ProgressLabel.Loading);
+			progressBar.Update(0.0);
+			ParseSuiteTypes(json);
+			progressBar.Update(10.0);
+			ParseBuildings(json);
+			progressBar.Update(80.0);
+			ParseSuites(json);
+			progressBar.Update(90.0);
+			ParseSites(json);
+			progressBar.Update(100.0);
+			ParseViewOrders(json);
 
-		progressBar.Cleanup();
+			JSONObject obj = JSONParser.parseLenient(json).isObject();
+			if (obj.get("primaryViewOrderId") != null) {
+				JSONString jsonString = obj.get("primaryViewOrderId").isString();
+				String primaryViewOrderId = jsonString.stringValue();
+				ViewOrder vo = viewOrders.get(primaryViewOrderId);
+				if (vo != null) {
+					switch (vo.getTargetObjectType())
+					{
+					case Suite:
+						targetSuite = suites.get(vo.getTargetObjectId());
+						targetSuite.setStatus(Suite.Status.Selected);
+						if (vo.getProduct() == ViewOrder.ProductType.ExternalTour)
+							targetSuite.setExternalLinkUrl(vo.getProductUrl());
+						break;
+						// TODO - should handle other viewOrder targets here
+					}
+				}
+			}		
+
+			for (Suite suite : getSuites())
+				suite.CalcLineCoords();
+
+			progressBar.Cleanup();
+			return true;
+		}
 	}
 
 	private void ParseSuiteTypes(String json) {

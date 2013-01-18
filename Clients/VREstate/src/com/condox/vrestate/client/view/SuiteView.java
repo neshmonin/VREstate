@@ -1,5 +1,6 @@
 package com.condox.vrestate.client.view;
 
+import com.condox.vrestate.client.GET;
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.document.SuiteType;
@@ -9,6 +10,9 @@ import com.condox.vrestate.client.view.Camera.Camera;
 import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -189,10 +193,42 @@ public class SuiteView extends _GEView {
 			externalLinkUrl = type.getFloorPlanUrl();
 		}
 					
-		if (externalLinkUrl != null)
-			Window.open(externalLinkUrl, "_blank", null);
-	}
+		if (externalLinkUrl != null) {
+			final String link = externalLinkUrl;
+			GET.send(externalLinkUrl, new RequestCallback() {
 
+				@Override
+				public void onResponseReceived(Request request,
+						Response response) {
+					String html = response.getText();
+					html = html.replace("images/", link.substring(0, link.lastIndexOf("/") + 1) + "images/");
+					Log.write(link);
+					Log.write(html);
+					// TODO - доделать
+					html = html.replace("_parameter_SuiteNo",suiteGeo.getName());
+					html = html.replace("_parameter_FloorNo",suiteGeo.getFloor_name());
+					html = html.replace("_parameter_CellingHeight",String.valueOf(suiteGeo.getCellingHeight()) + " ft.");
+					html = html.replace("_parameter_Price",String.valueOf(suiteGeo.getPrice()));
+					open(html);
+				}
+
+				@Override
+				public void onError(Request request, Throwable exception) {
+					// TODO Auto-generated method stub
+					
+				}});
+		}
+	}
+	
+	private native void open(String html) /*-{
+		var wnd = window.open("","_blank","");
+		wnd.document.write(html);
+	}-*/;	
+	
+	
+	
+	
+	
 	public void Update(double speed) {
 	}
 

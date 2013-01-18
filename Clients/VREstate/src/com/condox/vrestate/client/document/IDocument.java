@@ -4,7 +4,7 @@ import java.util.Collection;
 
 public interface IDocument {
 
-	void Parse(String json);
+	boolean Parse(String json);
 	Collection<Site> getSites();
 	Collection<Building> getBuildings();
 	Collection<Suite> getSuites();
