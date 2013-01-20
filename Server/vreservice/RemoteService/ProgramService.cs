@@ -288,7 +288,8 @@ namespace Vre.Server.RemoteService
         private static void registerViewOrder(IServiceRequest request)
         {
             DateTime expiresOn;
-            ViewOrder.ViewOrderType product;
+            ViewOrder.ViewOrderProduct product;
+            ViewOrder.ViewOrderOptions options;
             string paymentRefId = request.Request.Query["pr"];
             string productUrl = request.Request.Query["evt_url"];
             string mlsId = request.Request.Query["mls_id"];
@@ -328,14 +329,27 @@ namespace Vre.Server.RemoteService
 
             string pt = request.Request.Query["product"];
             if (string.IsNullOrWhiteSpace(pt)) throw new ArgumentException("Product type missing");
-            if (pt.Equals("fp")) product = ViewOrder.ViewOrderType.FloorPlan;
-            else if (pt.Equals("evt")) product = ViewOrder.ViewOrderType.ExternalTour;
-            else if (pt.Equals("3dt")) product = ViewOrder.ViewOrderType.VirtualTour3D;
+            if (pt.Equals("prl")) product = ViewOrder.ViewOrderProduct.PrivateListing;
+            else if (pt.Equals("pul")) product = ViewOrder.ViewOrderProduct.PublicListing;
+            else if (pt.Equals("b3dl")) product = ViewOrder.ViewOrderProduct.Building3DLayout;
             else throw new ArgumentException("Product type is unknown");
+
+            string op = request.Request.Query["options"];
+            if (!string.IsNullOrWhiteSpace(op))
+            {
+                if (pt.Equals("fp")) options = ViewOrder.ViewOrderOptions.FloorPlan;
+                else if (pt.Equals("evt")) options = ViewOrder.ViewOrderOptions.ExternalTour;
+                else if (pt.Equals("3dt")) options = ViewOrder.ViewOrderOptions.VirtualTour3D;
+                else throw new ArgumentException("Option is unknown");
+            }
+            else
+            {
+                options = ViewOrder.ViewOrderOptions.FloorPlan;
+            }
 
             //if (string.IsNullOrWhiteSpace(paymentRefId)) throw new ArgumentException("Required parameter missing");
 
-            if (product == ViewOrder.ViewOrderType.ExternalTour)
+            if (options == ViewOrder.ViewOrderOptions.ExternalTour)
             {
                 if (string.IsNullOrWhiteSpace(productUrl))
                     throw new ArgumentException("External Virtual Tour reference not provided");
@@ -407,7 +421,7 @@ namespace Vre.Server.RemoteService
                 }
 
                 string viewOrderId = ReverseRequestService.CreateViewOrder(request, userId, note,
-                    product, mlsId, mlsUrl, targetType, targetId, productUrl, expiresOn, paymentRefId);
+                    product, options, mlsId, mlsUrl, targetType, targetId, productUrl, expiresOn, paymentRefId);
 
                 // request.Response.ResponseCode - set by .CreateListing()
                 tran.Commit();

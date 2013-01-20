@@ -837,39 +837,49 @@ namespace Vre.Server.RemoteService
             if (!Guid.TryParseExact(strObjectId, "N", out rqid))
                 throw new ArgumentException();
 
+            List<ViewOrder> viewOrders = new List<ViewOrder>(1);
             ViewOrder viewOrder;
+            bool viewOrderValid = false;
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
                 using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
                     viewOrder = dao.GetById(rqid);
 
-                if (null == viewOrder) throw new FileNotFoundException("Undefined or expired view order");
-                if (viewOrder.Deleted || !viewOrder.Enabled || (viewOrder.ExpiresOn < DateTime.UtcNow))
-                {
-                    if (viewOrder.OwnerId == session.User.AutoID)  // in case of owner viewing disabled order - return something meaningful
-                    {
-                        // make up same response data structure
-                        resp.Data = new ClientData();
+                if ((null == viewOrder) || (viewOrder.Deleted)) throw new FileNotFoundException("Undefined view order");
 
-                        ClientData[] vol = new ClientData[1];
-                        vol[0] = generateDisabledViewOrderData(viewOrder);
-                        resp.Data.Add("viewOrders", vol);
+                viewOrders.Add(viewOrder);
+                viewOrderValid = (viewOrder.Enabled && (viewOrder.ExpiresOn > DateTime.UtcNow));
 
-                        resp.Data.Add("primaryViewOrderId", viewOrder.AutoID);
-                        resp.Data.Add("initialView", "");  // TODO
+                //if (!viewOrder.Enabled || (viewOrder.ExpiresOn < DateTime.UtcNow))
+                //{
+                //    if (viewOrder.OwnerId == session.User.AutoID)  // in case of owner viewing disabled order - return something meaningful
+                //    {
+                //        // make up same response data structure
+                //        resp.Data = new ClientData();
 
-                        resp.ResponseCode = HttpStatusCode.OK;
+                //        ClientData[] vol = new ClientData[1];
+                //        vol[0] = generateDisabledViewOrderData(viewOrder);
+                //        resp.Data.Add("viewOrders", vol);
 
-                        viewOrder = null;
-                    }
-                    else
-                    {
-                        throw new ExpiredException("Expired view order");
-                        //throw new FileNotFoundException("Undefined or expired view order");
-                    }
-                }
-                else
+                //        resp.Data.Add("primaryViewOrderId", viewOrder.AutoID);
+                //        resp.Data.Add("initialView", "");  // TODO
+
+                //        resp.ResponseCode = HttpStatusCode.OK;
+
+                //        viewOrder = null;
+                //    }
+                //    else if (viewOrder.Deleted)
+                //    {
+                //        throw new FileNotFoundException("Undefined or expired view order");
+                //    }
+                //    else
+                //    {
+                //        throw new ExpiredException("Expired view order");
+                //    }
+                //}
+                //else
+                if (viewOrderValid)
                 {
                     viewOrder.Touch();
 
@@ -880,7 +890,7 @@ namespace Vre.Server.RemoteService
                 }
             }
 
-            if (viewOrder != null)
+            //if (viewOrderValid)
             {
                 Suite suite = null;
                 Building building = null;
@@ -893,6 +903,13 @@ namespace Vre.Server.RemoteService
                                 suite = dao.GetById(viewOrder.TargetObjectId);
 
                             if (null == suite) throw new FileNotFoundException("Unknown object listed");
+
+                            if (viewOrder.Product == ViewOrder.ViewOrderProduct.PublicListing)
+                            {
+                                using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                                    viewOrders.AddRange(dao.GetActiveSameBuilding(ViewOrder.ViewOrderProduct.PublicListing, suite));
+                            }
+
                             building = suite.Building;
                         }
                         break;
@@ -916,25 +933,33 @@ namespace Vre.Server.RemoteService
                     new Building[] { building },
                     suite != null ? new SuiteType[] { suite.SuiteType } : building.ConstructionSite.SuiteTypes,
                     suite != null ? new Suite[] { suite } : building.Suites,
-                    new ViewOrder[] { viewOrder },
+                    viewOrders, //new ViewOrder[] { viewOrder },
                     viewOrder.AutoID,
-                    resp, true /*does not really matter here*/, true);
+                    resp, true, true);
             }
+            //else
+            //{
+            //    generateViewResponse(session.DbSession,
+            //        new Site[0], new Building[0], new SuiteType[0], new Suite[0],
+            //        new ViewOrder[] { viewOrder },
+            //        viewOrder.AutoID,
+            //        resp, true /*does not really matter here*/, true);
+            //}
         }
 
-        private static ClientData generateDisabledViewOrderData(ViewOrder order)
-        {
-            ClientData result = new ClientData();
+        //private static ClientData generateDisabledViewOrderData(ViewOrder order)
+        //{
+        //    ClientData result = new ClientData();
 
-            result.Add("id", order.AutoID);
+        //    result.Add("id", order.AutoID);
 
-            if (order.Deleted) result.Add("reason", "deleted");
-            else if (!order.Enabled) result.Add("reason", "disabled");
-            else result.Add("reason", "expired");
+        //    if (order.Deleted) result.Add("reason", "deleted");
+        //    else if (!order.Enabled) result.Add("reason", "disabled");
+        //    else result.Add("reason", "expired");
 
-            result.Add("recoverUrl", string.Format(_disabledViewOrderRecoverUrl, order.AutoID.ToString("N")));
-            return result;
-        }
+        //    result.Add("recoverUrl", string.Format(_disabledViewOrderRecoverUrl, order.AutoID.ToString("N")));
+        //    return result;
+        //}
 
         private static void getViewSite(ClientSession session, ServiceQuery query, IResponseData resp)
         {
@@ -1037,7 +1062,9 @@ namespace Vre.Server.RemoteService
                 }
 
                 ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-                elements.Add(s.GetClientData());
+                ClientData cd = s.GetClientData();
+                //if (maskSaleStatus) cd["status"] = "Selected";
+                elements.Add(cd);
                 usedSuiteTypes.Add(s.SuiteType); usedBuildings.Add(s.Building);
             }
             resp.Data.Add("suites", elements.ToArray());
@@ -1055,9 +1082,18 @@ namespace Vre.Server.RemoteService
             elements = new List<ClientData>(buildings.Count());
             foreach (Building b in buildings)
             {
-                if (minimizeOutput && !usedBuildings.Contains(b)) continue;
+                if (!usedBuildings.Contains(b))
+                {
+                    if (!showSoldProperty)  // make sure suites in output are always backed
+                    // by building disregarding building status
+                    {
+                        if (b.Status == Building.BuildingStatus.Sold) continue;
+                    }
+                    if (minimizeOutput) continue;
+                }
                 ServiceInstances.ModelCache.FillWithModelInfo(b, false);
                 ClientData cd = b.GetClientData();
+                //if (maskSaleStatus) cd["status"] = "Selected";
                 cd.Add("address", AddressHelper.ConvertToReadableAddress(b, null));
                 elements.Add(cd);
                 usedSites.Add(b.ConstructionSite);
@@ -1078,19 +1114,29 @@ namespace Vre.Server.RemoteService
             DateTime now = DateTime.UtcNow;
             foreach (ViewOrder vo in viewOrders)
             {
-                if (vo.Deleted || !vo.Enabled || (vo.ExpiresOn < now))
-                {
-                    if (vo.AutoID.Equals(primaryListingId)) primaryListingId = Guid.Empty;  // reset primary order id if skipped
-                    continue;
-                }
+                //if (vo.Deleted || !vo.Enabled || (vo.ExpiresOn < now))
+                //{
+                //    if (vo.AutoID.Equals(primaryListingId)) primaryListingId = Guid.Empty;  // reset primary order id if skipped
+                //    continue;
+                //}
 
                 ClientData cd = new ClientData();
                 cd.Add("id", vo.AutoID);
                 cd.Add("targetObjectType", ClientData.ConvertProperty<ViewOrder.SubjectType>(vo.TargetObjectType));
                 cd.Add("targetObjectId", vo.TargetObjectId);
-                cd.Add("product", ClientData.ConvertProperty<ViewOrder.ViewOrderType>(vo.Product));
+                cd.Add("product", ClientData.ConvertProperty<ViewOrder.ViewOrderProduct>(vo.Product));
+                cd.Add("options", ClientData.ConvertProperty<ViewOrder.ViewOrderOptions>(vo.Options));
                 cd.Add("mlsUrl", vo.MlsUrl);
                 cd.Add("productUrl", vo.ProductUrl);
+
+                if (!vo.Enabled || (vo.ExpiresOn < now))
+                {
+                    if (!vo.Enabled) cd.Add("reason", "disabled");
+                    else cd.Add("reason", "expired");
+
+                    cd.Add("recoverUrl", string.Format(_disabledViewOrderRecoverUrl, vo.AutoID.ToString("N")));
+                }
+
                 elements.Add(cd);
             }
             resp.Data.Add("viewOrders", elements.ToArray());
@@ -1389,14 +1435,28 @@ namespace Vre.Server.RemoteService
         {
             User user = null;
 
-            using (UserManager manager = new UserManager(session))
+            using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
-                user = manager.Get(userId);
+                using (UserManager manager = new UserManager(session))
+                {
+                    user = manager.Get(userId);
 
-                manager.Delete(user);
-                resp.ResponseCode = HttpStatusCode.OK;
-                resp.Data = new ClientData();
-                resp.Data.Add("deleted", 1);
+                    manager.Delete(user);
+
+                    using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                    {
+                        foreach (ViewOrder vo in dao.Get(session.User.AutoID))
+                        {
+                            vo.MarkDeleted();
+                            dao.Update(vo);
+                        }
+                    }
+
+                    resp.ResponseCode = HttpStatusCode.OK;
+                    resp.Data = new ClientData();
+                    resp.Data.Add("deleted", 1);
+                }
+                tran.Commit();
             }
         }
 
@@ -1447,15 +1507,27 @@ namespace Vre.Server.RemoteService
                     using (SuiteDao dao = new SuiteDao(dbSession))
                     {
                         Suite s = dao.GetById(viewOrder.TargetObjectId);
-                        if (isActive && (s.Status != Suite.SalesStatus.ResaleAvailable))
+                        switch (viewOrder.Product)
                         {
-                            s.Status = Suite.SalesStatus.ResaleAvailable;
-                            result = true;
-                        }
-                        else if (!isActive && (s.Status == Suite.SalesStatus.ResaleAvailable))
-                        {
-                            s.Status = Suite.SalesStatus.Sold;
-                            result = true;
+                            case ViewOrder.ViewOrderProduct.PublicListing:
+                                if (isActive && (s.Status != Suite.SalesStatus.ResaleAvailable))
+                                {
+                                    s.Status = Suite.SalesStatus.ResaleAvailable;
+                                    result = true;
+                                }
+                                else if (!isActive && (s.Status == Suite.SalesStatus.ResaleAvailable))
+                                {
+                                    s.Status = Suite.SalesStatus.Sold;
+                                    result = true;
+                                }
+                                break;
+
+                            case ViewOrder.ViewOrderProduct.PrivateListing:
+                                // NO-OP
+                                break;
+
+                            default:
+                                break;
                         }
                         if (result) dao.SafeUpdate(s);
                     }
@@ -1476,96 +1548,27 @@ namespace Vre.Server.RemoteService
 
             int ccnt = 0;
 
-            IQuery q = dbSession.CreateQuery("FROM Vre.Server.BusinessLogic.ViewOrder"
-                + " WHERE TargetObjectType=:tot"
-                + " AND Deleted=0 AND Enabled=1 AND ExpiresOn<:ex");
-            q.SetParameter<ViewOrder.SubjectType>("tot", ViewOrder.SubjectType.Suite);
-            q.SetTime("ex", DateTime.UtcNow);
-
             using (SuiteDao dao = new SuiteDao(dbSession))
             {
-                foreach (ViewOrder vo in q.List<ViewOrder>())
+                using (ViewOrderDao vodao = new ViewOrderDao(dbSession))
                 {
-                    if (!ids.Contains(vo.TargetObjectId)) continue;
+                    foreach (ViewOrder vo in vodao.GetAllExpiredStillActive(ViewOrder.SubjectType.Suite))
+                    {
+                        if (!ids.Contains(vo.TargetObjectId)) continue;
 
-                    Suite suite = suites.First(s => s.AutoID == vo.TargetObjectId);
-                    if (suite.Status == Suite.SalesStatus.Sold) continue;
+                        Suite suite = suites.First(s => s.AutoID == vo.TargetObjectId);
+                        if (suite.Status == Suite.SalesStatus.Sold) continue;
 
-                    suite.Status = Suite.SalesStatus.Sold;
-                    dao.SafeUpdate(suite);
-                    ccnt++;
+                        suite.Status = Suite.SalesStatus.Sold;
+                        dao.SafeUpdate(suite);
+
+                        ccnt++;
+                    }
                 }
             }
 
             if (ccnt > 0)
                 ServiceInstances.Logger.Info("On-the-fly ViewOrder reconcile adjusted {0} suite states.", ccnt);
-
-            //return;
-            
-            //int cnt = suites.Count();
-            //int[] ids = new int[cnt];
-            //cnt = 0;
-            //foreach (Suite s in suites) ids[cnt++] = s.AutoID;
-
-            //cnt = 0;
-            //using (SuiteDao dao = new SuiteDao(dbSession))
-            //{
-            //    foreach (ViewOrder vo in dbSession.CreateCriteria<ViewOrder>()
-            //        .Add(Expression.Eq("TargetObjectType", ViewOrder.SubjectType.Suite))
-            //        .Add(Expression.Eq("Deleted", false))
-            //        .Add(Expression.Eq("Enabled", true))
-            //        .Add(Expression.Lt("ExpiresOn", DateTime.UtcNow))
-            //        .Add(Expression.("TargetObjectId", ids))
-            //        .List<ViewOrder>())
-            //    {
-            //        Suite suite = suites.First(s => s.AutoID == vo.TargetObjectId);
-            //        suite.Status = Suite.SalesStatus.Sold;
-            //        dao.SafeUpdate(suite);
-            //        cnt++;
-            //    }
-            //}
-            //if (cnt > 0)
-            //    ServiceInstances.Logger.Info("On-the-fly ViewOrder reconcile adjusted {0} suite states.", cnt);
-
-            //int ccnt = 0;
-
-            //IQuery q = dbSession.CreateQuery("FROM Vre.Server.BusinessLogic.ViewOrder"
-            //    + " WHERE TargetObjectType=:tot"
-            //    + " AND Deleted=0 AND Enabled=1 AND ExpiresOn<:ex"
-            //    + " AND TargetObjectId IN (:ids)");
-            //q.SetParameter<ViewOrder.SubjectType>("tot", ViewOrder.SubjectType.Suite);
-            //q.SetTime("ex", DateTime.UtcNow);
-
-            //Suite[] asuites = suites.ToArray();
-            //int scnt = asuites.Length;
-            //int offset = 0;
-            //do
-            //{
-            //    int cnt = scnt - offset;
-            //    if (cnt > 100) cnt = 100;
-            //    int[] ids = new int[cnt];
-            //    for (int idx = cnt - 1; idx >= 0; idx--) ids[idx] = asuites[idx + offset].AutoID;
-            //    offset += cnt;
-
-            //    //q.SetString("ids", CsvUtilities.ToString<int>(ids));
-            //    q.set
-            //    q.SetParameter<int[]>("ids", ids);
-              
-            //    using (SuiteDao dao = new SuiteDao(dbSession))
-            //    {
-            //        foreach (ViewOrder vo in q.List<ViewOrder>())
-            //        {
-            //            Suite suite = suites.First(s => s.AutoID == vo.TargetObjectId);
-            //            suite.Status = Suite.SalesStatus.Sold;
-            //            dao.SafeUpdate(suite);
-            //            ccnt++;
-            //        }
-            //    }
-            //}
-            //while (true);
-
-            //if (ccnt > 0)
-            //    ServiceInstances.Logger.Info("On-the-fly ViewOrder reconcile adjusted {0} suite states.", ccnt);
         }
         #endregion
     }

@@ -576,7 +576,7 @@ namespace Vre.Server.RemoteService
 
         #region ViewOrder
         public static string CreateViewOrder(IServiceRequest srq, int targetUserId, string note,
-            ViewOrder.ViewOrderType product, string mlsId, string mlsUrl,
+            ViewOrder.ViewOrderProduct product, ViewOrder.ViewOrderOptions options, string mlsId, string mlsUrl,
             ViewOrder.SubjectType type, int targetObjectId, string productUrl, DateTime expiresOn,
             string paymentSystemRefId)
         {
@@ -595,53 +595,60 @@ namespace Vre.Server.RemoteService
 
                 RolePermissionCheck.CheckCreateViewOrder(srq.UserInfo.Session, targetUser);
 
+                switch (product)
+                {
+                    case ViewOrder.ViewOrderProduct.PrivateListing:
+                        using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))
+                        {
+                            if (dao.GetActive(type, targetObjectId).Count > 0)
+                                throw new ObjectExistsException("Listing cannot be created.");  // TODO: should this be exposed?!
+                        }
+                        break;
+
+                    case ViewOrder.ViewOrderProduct.PublicListing:
+                        using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))
+                        {
+                            if (dao.GetActive(type, targetObjectId).Count > 0)
+                                throw new ObjectExistsException("Listing cannot be created.");  // TODO: should this be exposed?!
+                        }
+                        break;
+
+                    case ViewOrder.ViewOrderProduct.Building3DLayout:
+                        if (type == ViewOrder.SubjectType.Suite)
+                            throw new ArgumentException("This product type applies to buildings only.");
+                        break;
+                }
+
+                viewOrder = new ViewOrder(targetUser.AutoID, 
+                    product, options, mlsId, type, targetObjectId, productUrl, expiresOn);
+
+                viewOrder.MlsUrl = mlsUrl;
+                viewOrder.Note = note;
+
                 using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))
-                    viewOrder = dao.Get(targetUser.AutoID, type, targetObjectId);
+                    dao.Create(viewOrder);
 
-                if (null == viewOrder)
+                DataService.ReflectViewOrderStatusInTarget(viewOrder, srq.UserInfo.Session.DbSession);
+
+                // Generate financial transaction
+                //
+                FinancialTransaction ft = new FinancialTransaction(srq.UserInfo.Session.User.AutoID,
+                    FinancialTransaction.AccountType.User, targetUser.AutoID,
+                    FinancialTransaction.OperationType.Debit, 0m,
+                    FinancialTransaction.TranSubject.View,
+                    FinancialTransaction.TranTarget.Suite, targetObjectId, viewOrder.AutoID.ToString());
+
+                if (!string.IsNullOrWhiteSpace(paymentSystemRefId))
+                    ft.SetPaymentSystemReference(FinancialTransaction.PaymentSystemType.CondoExplorer, paymentSystemRefId);
+
+                using (FinancialTransactionDao dao = new FinancialTransactionDao(srq.UserInfo.Session.DbSession))
                 {
-                    viewOrder = new ViewOrder(targetUser.AutoID, 
-                        product, mlsId, type, targetObjectId, productUrl, expiresOn);
-
-                    viewOrder.MlsUrl = mlsUrl;
-                    viewOrder.Note = note;
-
-                    using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))
-                        dao.Create(viewOrder);
-
-                    DataService.ReflectViewOrderStatusInTarget(viewOrder, srq.UserInfo.Session.DbSession);
-
-                    // Generate financial transaction
-                    //
-                    FinancialTransaction ft = new FinancialTransaction(srq.UserInfo.Session.User.AutoID,
-                        FinancialTransaction.AccountType.User, targetUser.AutoID,
-                        FinancialTransaction.OperationType.Debit, 0m,
-                        FinancialTransaction.TranSubject.View,
-                        FinancialTransaction.TranTarget.Suite, targetObjectId, viewOrder.AutoID.ToString());
-
-                    if (!string.IsNullOrWhiteSpace(paymentSystemRefId))
-                        ft.SetPaymentSystemReference(FinancialTransaction.PaymentSystemType.CondoExplorer, paymentSystemRefId);
-
-                    using (FinancialTransactionDao dao = new FinancialTransactionDao(srq.UserInfo.Session.DbSession))
-                    {
-                        dao.Create(ft);
-                        ft.SetAutoSystemReferenceId();
-                        dao.Update(ft);
-                    }
-
-                    result = ft.SystemRefId;
+                    dao.Create(ft);
+                    ft.SetAutoSystemReferenceId();
+                    dao.Update(ft);
                 }
-                else
-                {
-                    throw new ObjectExistsException("View Order already exists.");
 
-                    //viewOrder.Update(product, mlsId, productUrl, expiresOn);
-
-                    //using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))
-                    //    dao.Update(viewOrder);
-
-                    //result = Utilities.GenerateReferenceNumber();
-                }
+                result = ft.SystemRefId;
 
                 srq.Response.ResponseCode = HttpStatusCode.OK;
                 srq.Response.Data = new ClientData();

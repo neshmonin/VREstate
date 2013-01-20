@@ -11,7 +11,8 @@ namespace Vre.Server.BusinessLogic
             InProject = 0,
             Constructing = 1,
             Built = 2,
-            Sold = 3
+            Sold = 3,
+            ResaleAvailable = 4,
 	    }
 
         public virtual Site ConstructionSite { get; protected set; }

@@ -4,7 +4,14 @@ namespace Vre.Server.BusinessLogic
 {
     public class ViewOrder : UpdateableGuidBase
     {
-        public enum ViewOrderType : int
+        public enum ViewOrderProduct : int
+        {
+            PrivateListing = 0,
+            PublicListing = 1,
+            Building3DLayout = 2
+        }
+
+        public enum ViewOrderOptions : int
         {
             FloorPlan = 0,
             ExternalTour = 1,
@@ -24,8 +31,9 @@ namespace Vre.Server.BusinessLogic
 
         public int RequestCounter { get; private set; }
         public DateTime LastRequestTime { get; private set; }
-        
-        public ViewOrderType Product { get; private set; }
+
+        public ViewOrderProduct Product { get; private set; }
+        public ViewOrderOptions Options { get; private set; }
         public string MlsId { get; private set; }
         public string MlsUrl { get; set; }
         public string ProductUrl { get; private set; }
@@ -40,7 +48,7 @@ namespace Vre.Server.BusinessLogic
         private ViewOrder() { }
 
         public ViewOrder(int ownerId, 
-            ViewOrder.ViewOrderType product, string mlsId, 
+            ViewOrderProduct product, ViewOrderOptions options, string mlsId, 
             SubjectType type, int targetObjectId, string productUrl, DateTime expiresOn)
         {
             InitializeNew();
@@ -49,6 +57,7 @@ namespace Vre.Server.BusinessLogic
 
             OwnerId = ownerId;
             Product = product;
+            Options = options;
             MlsId = mlsId;
             ProductUrl = productUrl;
             TargetObjectType = type;
@@ -61,11 +70,12 @@ namespace Vre.Server.BusinessLogic
         }
 
         public void Update(
-            ViewOrder.ViewOrderType product, string mlsId,
+            ViewOrder.ViewOrderOptions options, string mlsId, string mlsUrl,
             string productUrl, DateTime expiresOn)
         {
-            Product = product;
+            Options = options;
             MlsId = mlsId;
+            MlsUrl = mlsUrl;
             ProductUrl = productUrl;
             ExpiresOn = expiresOn;
 
@@ -98,7 +108,8 @@ namespace Vre.Server.BusinessLogic
             result.Add("enabled", Enabled);
             result.Add("note", Note);
 
-            result.Add("product", ClientData.ConvertProperty<ViewOrderType>(Product));
+            result.Add("product", ClientData.ConvertProperty<ViewOrderProduct>(Product));
+            result.Add("options", ClientData.ConvertProperty<ViewOrderOptions>(Options));
             result.Add("mlsId", MlsId);
             result.Add("mlsUrl", MlsUrl);
             result.Add("productUrl", ProductUrl);
@@ -121,10 +132,11 @@ namespace Vre.Server.BusinessLogic
             Note = data.GetProperty("note", string.Empty);
             ExpiresOn = data.UpdateProperty("expiresOn", ExpiresOn, ref result);
             OwnerId = data.UpdateProperty("ownerId", OwnerId, ref result);
-            Product = data.GetProperty<ViewOrderType>("product", ViewOrderType.FloorPlan);
-            MlsId = data.GetProperty("mlsId", string.Empty);
-            MlsUrl = data.GetProperty("mlsUrl", string.Empty);
-            ProductUrl = data.GetProperty("productUrl", string.Empty);
+            Product = data.UpdateProperty<ViewOrderProduct>("product", Product, ref result);
+            Options = data.UpdateProperty<ViewOrderOptions>("options", Options, ref result);
+            MlsId = data.UpdateProperty("mlsId", MlsId, ref result);
+            MlsUrl = data.UpdateProperty("mlsUrl", MlsUrl, ref result);
+            ProductUrl = data.UpdateProperty("productUrl", ProductUrl, ref result);
 
             return result;
         }
