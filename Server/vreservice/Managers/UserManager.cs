@@ -267,6 +267,7 @@ namespace Vre.Server.BusinessLogic
                 {
                     if (user.UserRole == User.Role.SuperAdmin)
                     {
+                        if (_session.User.Equals(user)) throw new InvalidOperationException("Superadmin cannot commit suicide.");
                         if (dao.ListUsers(User.Role.SuperAdmin, null, null, false).Count < 2)
                         {
                             throw new InvalidOperationException("Cannot delete last active Superadmin.");
@@ -274,6 +275,7 @@ namespace Vre.Server.BusinessLogic
                     }
                     else if (user.UserRole == User.Role.DeveloperAdmin)
                     {
+                        if (_session.User.Equals(user)) throw new InvalidOperationException("Developer Admin cannot commit suicide.");
                         if (dao.ListUsers(User.Role.DeveloperAdmin, user.EstateDeveloperID.Value, null, false).Count < 2)
                         {
                             throw new InvalidOperationException("Cannot delete last active Developer Admin.");
