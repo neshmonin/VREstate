@@ -1126,8 +1126,8 @@ namespace Vre.Server.RemoteService
                 cd.Add("targetObjectId", vo.TargetObjectId);
                 cd.Add("product", ClientData.ConvertProperty<ViewOrder.ViewOrderProduct>(vo.Product));
                 cd.Add("options", ClientData.ConvertProperty<ViewOrder.ViewOrderOptions>(vo.Options));
-                cd.Add("mlsUrl", vo.MlsUrl);
-                cd.Add("productUrl", vo.ProductUrl);
+                cd.Add("mlsUrl", vo.InfoUrl);
+                cd.Add("productUrl", vo.VTourUrl);
 
                 if (!vo.Enabled || (vo.ExpiresOn < now))
                 {

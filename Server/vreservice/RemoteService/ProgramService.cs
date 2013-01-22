@@ -337,9 +337,9 @@ namespace Vre.Server.RemoteService
             string op = request.Request.Query["options"];
             if (!string.IsNullOrWhiteSpace(op))
             {
-                if (pt.Equals("fp")) options = ViewOrder.ViewOrderOptions.FloorPlan;
-                else if (pt.Equals("evt")) options = ViewOrder.ViewOrderOptions.ExternalTour;
-                else if (pt.Equals("3dt")) options = ViewOrder.ViewOrderOptions.VirtualTour3D;
+                if (op.Equals("fp")) options = ViewOrder.ViewOrderOptions.FloorPlan;
+                else if (op.Equals("evt")) options = ViewOrder.ViewOrderOptions.ExternalTour;
+                else if (op.Equals("3dt")) options = ViewOrder.ViewOrderOptions.VirtualTour3D;
                 else throw new ArgumentException("Option is unknown");
             }
             else

@@ -622,7 +622,7 @@ namespace Vre.Server.RemoteService
                 viewOrder = new ViewOrder(targetUser.AutoID, 
                     product, options, mlsId, type, targetObjectId, productUrl, expiresOn);
 
-                viewOrder.MlsUrl = mlsUrl;
+                viewOrder.InfoUrl = mlsUrl;
                 viewOrder.Note = note;
 
                 using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))

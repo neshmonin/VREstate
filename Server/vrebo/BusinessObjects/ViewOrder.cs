@@ -35,8 +35,8 @@ namespace Vre.Server.BusinessLogic
         public ViewOrderProduct Product { get; private set; }
         public ViewOrderOptions Options { get; private set; }
         public string MlsId { get; private set; }
-        public string MlsUrl { get; set; }
-        public string ProductUrl { get; private set; }
+        public string InfoUrl { get; set; }
+        public string VTourUrl { get; private set; }
         public SubjectType TargetObjectType { get; private set; }
         public int TargetObjectId { get; private set; }
 
@@ -59,7 +59,7 @@ namespace Vre.Server.BusinessLogic
             Product = product;
             Options = options;
             MlsId = mlsId;
-            ProductUrl = productUrl;
+            VTourUrl = productUrl;
             TargetObjectType = type;
             TargetObjectId = targetObjectId;
             ExpiresOn = expiresOn;
@@ -75,8 +75,8 @@ namespace Vre.Server.BusinessLogic
         {
             Options = options;
             MlsId = mlsId;
-            MlsUrl = mlsUrl;
-            ProductUrl = productUrl;
+            InfoUrl = mlsUrl;
+            VTourUrl = productUrl;
             ExpiresOn = expiresOn;
 
             MarkUpdated();
@@ -111,8 +111,8 @@ namespace Vre.Server.BusinessLogic
             result.Add("product", ClientData.ConvertProperty<ViewOrderProduct>(Product));
             result.Add("options", ClientData.ConvertProperty<ViewOrderOptions>(Options));
             result.Add("mlsId", MlsId);
-            result.Add("mlsUrl", MlsUrl);
-            result.Add("productUrl", ProductUrl);
+            result.Add("infoUrl", InfoUrl);
+            result.Add("vTourUrl", VTourUrl);
             result.Add("targetObjectType", ClientData.ConvertProperty<SubjectType>(TargetObjectType));
             result.Add("targetObjectId", TargetObjectId);
 
@@ -135,8 +135,8 @@ namespace Vre.Server.BusinessLogic
             Product = data.UpdateProperty<ViewOrderProduct>("product", Product, ref result);
             Options = data.UpdateProperty<ViewOrderOptions>("options", Options, ref result);
             MlsId = data.UpdateProperty("mlsId", MlsId, ref result);
-            MlsUrl = data.UpdateProperty("mlsUrl", MlsUrl, ref result);
-            ProductUrl = data.UpdateProperty("productUrl", ProductUrl, ref result);
+            InfoUrl = data.UpdateProperty("infoUrl", InfoUrl, ref result);
+            VTourUrl = data.UpdateProperty("vTourUrl", VTourUrl, ref result);
 
             return result;
         }
