@@ -9,6 +9,14 @@ import com.google.gwt.json.client.JSONValue;
 
 public class Suite {
 
+	public enum Status {
+		Sold, 
+		Available, 
+		OnHold, 
+		ResaleAvailable,
+		Selected
+	}
+	
 	private int id = -1;
 	// private version
 	private int parent_id = -1;
@@ -18,11 +26,12 @@ public class Suite {
 	private String name = "";
 	private int ceiling_height_ft = 0;
 	//private boolean show_panoramic_view = false;
-	private SuiteStatus status = null;
+	private Status status = null;
 	private Position position = new Position();
 	private SuiteType suite_type = null;
 	private int price = 0;
 	private ArrayList<Double> points = new ArrayList<Double>();
+	private String externalLinkUrl = null;
 	
 	void Parse(JSONValue value) {
 //		Log.write(value.toString());
@@ -47,23 +56,18 @@ public class Suite {
 			ceiling_height_ft = (int) obj.get("ceilingHeightFt")
 					.isNumber().doubleValue();
 		// TODO show_panoramic_view
-		// TODO status
+	
 		if (obj.get("status").isString() != null) {
 			String status = obj.get("status").isString().stringValue();
-			this.status = (status.equals("Available")) ? SuiteStatus.STATUS_AVAILABLE
-					: this.status;
-			this.status = (status.equals("ResaleAvailable")) ? SuiteStatus.STATUS_RESALE_AVAILABLE
-					: this.status;
-			this.status = (status.equals("Sold")) ? SuiteStatus.STATUS_SOLD
-					: this.status;
-			this.status = (status.equals("OnHold")) ? SuiteStatus.STATUS_ON_HOLD
-					: this.status;
-			
+			if (status.equals("Available")) this.status = Status.Available;
+			else if (status.equals("ResaleAvailable")) this.status = Status.ResaleAvailable;
+			else if (status.equals("Sold")) this.status = Status.Sold;
+			else if (status.equals("OnHold")) this.status = Status.OnHold;
+			else this.status = Status.Selected;
 		} else
-//			Log.write("Error: status == null at the " + obj.toString());
-		this.status = SuiteStatus.STATUS_AVAILABLE;
+			this.status = Status.Selected;
 		
-		// TODO position
+		// TODO position		
 		if (obj.containsKey("position")) {
 			JSONObject position = obj.get("position").isObject();
 			double longitude = position.get("lon").isNumber().doubleValue();
@@ -72,11 +76,11 @@ public class Suite {
 			double heading = position.get("hdg").isNumber().doubleValue();
 			double tilt = 45;
 			double range = 100;
-//			suite.position = new Position();
+
 			this.position.setLongitude(longitude);
 			this.position.setLatitude(latitude);
 			this.position.setAltitude(altitude);
-//			Log.write("alt: " + this.position.getAltitude());
+
 			this.position.setHeading(heading);
 			this.position.setTilt(tilt);
 			this.position.setRange(range);
@@ -88,26 +92,31 @@ public class Suite {
 
 		int type_id = (int) obj.get("suiteTypeId").isNumber()
 				.doubleValue();
-		for (SuiteType type : Document.get().getSuiteTypes())
+//		Log.write("suiteTypeId:" + type_id);
+//		suite_type = SuiteType.get(type_id);
+//		Log.write("suite_type:" + suite_type.toString());
+		
+		for (SuiteType type : Document.get().getSuiteTypes()) {
+//			Log.write("" + type.getId());
 			if (type.getId() == type_id) {
+//				Log.write("OK");
 				suite_type = type;
-				//================
-//				calcLineCoords();
-				//================
-				
 				break;
 			}
+		}
+//		if (suite_type == null)
+//			Log.write("++");
+//		if (suite_type == null)
+//			Log.write("suiteTypeId:" + type_id);
+		
 		
 		price = -1;
-		
-		
 		if ((obj.get("currentPrice") != null)&&
 			(obj.get("currentPrice").isNumber() != null))
 			price = (int) obj.get("currentPrice").isNumber().doubleValue();
 		// Workaround for prices	
-		price = (int) (500 + 500 * Math.random());
-		price *= 1000;
-		
+		 price = (int) (500 + 500 * Math.random());
+		 price *= 1000;
 	}
 	
 	public void CalcLineCoords() {
@@ -178,8 +187,12 @@ public class Suite {
 		return name;
 	}
 
-	public SuiteStatus getStatus() {
+	public Status getStatus() {
 		return status;
+	}
+	
+	public void setStatus(Status newStatrus) {
+		status = newStatrus;
 	}
 
 	public Position getPosition() {
@@ -271,6 +284,13 @@ public class Suite {
 		return parent;
 	}
 	
-	
+	public void setExternalLinkUrl(String externalLinkUrl) {
+		this.externalLinkUrl = externalLinkUrl;
+	}
+
+	public String getExternalLinkUrl() {
+		return externalLinkUrl;
+	}
+
 	
 }

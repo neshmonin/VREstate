@@ -2,7 +2,6 @@ package com.condox.vrestate.client.view;
 
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.document.Document;
-import com.condox.vrestate.client.document.Suite;
 import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.SB_Interactor;
@@ -71,10 +70,9 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 		if (Document.progressBar != null){
 			// This is initial loading
 			onHeadingChanged();
-			if(Options.isViewOrder()) {
-				Suite suite = Document.get().getSuites().get(0);
-				Select("suite", suite.getId());
-			}
+			if(Document.targetSuite != null)
+				Select("suite", Document.targetSuite.getId());
+
 			Document.progressBar = null;
 		}
 		else

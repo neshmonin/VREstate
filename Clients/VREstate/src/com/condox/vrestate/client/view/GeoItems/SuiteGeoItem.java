@@ -29,23 +29,29 @@ public class SuiteGeoItem implements IGeoItem {
 		KmlStyle style = GE.getPlugin().createStyle("");
 		String href = "";
 		switch (suite.getStatus()) {
-		case STATUS_AVAILABLE:
+		case Available:
 			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=65280&shdClr=65280&frame=0";
 			style.getLineStyle().getColor().set("FF00FF00"); // GREEN
 			break;
-		case STATUS_SOLD:
+		case Sold:
 			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=16711680&shdClr=16711680&frame=0";
 			style.getLineStyle().getColor().set("FF0000FF"); // RED
 			break;
-		case STATUS_RESALE_AVAILABLE:
+		case ResaleAvailable:
 			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=1048575&shdClr=1048575&frame=0";
 			style.getLineStyle().getColor().set("FFFFFF00"); // BLUE ??
+			break;
+		case Selected:
+			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
+					+ suite.getName()
+					+ "&txtClr=16777215&shdClr=1048575&frame=0";
+			style.getLineStyle().getColor().set("FFFFFFFF"); // WHITE ??
 			break;
 		}
 	
@@ -175,5 +181,17 @@ public class SuiteGeoItem implements IGeoItem {
 	
 	public KmlPlacemark getExtendedDataLines() {
 		return extended_data_lines;
+	}
+	
+	public String getFloor_name() {
+		return suite.getFloor_name();
+	}
+	
+	public int getCellingHeight() {
+		return suite.getCeiling_height_ft();
+	}
+	
+	public int getPrice() {
+		return suite.getPrice();
 	}
 }

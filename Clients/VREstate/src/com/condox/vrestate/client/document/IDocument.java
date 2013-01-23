@@ -1,12 +1,13 @@
 package com.condox.vrestate.client.document;
 
-import java.util.ArrayList;
+import java.util.Collection;
 
 public interface IDocument {
 
-	void Parse(String json);
-	ArrayList<Site> getSites();
-	ArrayList<Building> getBuildings();
-	ArrayList<Suite> getSuites();
-	ArrayList<SuiteType> getSuiteTypes();
+	boolean Parse(String json);
+	Collection<Site> getSites();
+	Collection<Building> getBuildings();
+	Collection<Suite> getSuites();
+	Collection<SuiteType> getSuiteTypes();
+	Collection<ViewOrder> getViewOrders();
 }

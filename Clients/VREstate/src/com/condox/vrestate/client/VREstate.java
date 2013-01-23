@@ -3,19 +3,44 @@ package com.condox.vrestate.client;
 import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.Site;
 import com.condox.vrestate.client.ge.GE;
+import com.condox.vrestate.client.page.MainPage;
 import com.condox.vrestate.client.view.SiteView;
 import com.condox.vrestate.client.view._AbstractView;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlObject;
+import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
+import com.nitrous.gwt.earth.client.api.KmlUnits;
 import com.nitrous.gwt.earth.client.api.event.KmlLoadCallback;
+import com.google.gwt.user.client.ui.TabLayoutPanel;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.LayoutPanel;
 
 public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 
+	/**
+	 * @wbp.parser.entryPoint
+	 */
 	@Override
 	public void onModuleLoad() {
+//		LayoutPanel panel = RootLayoutPanel.get();
+//		MainPage page = new MainPage();
+//		page.Load(page);
+		
+		
+		
+		
+		
 		Log.write("onModuleLoad -> Options.Init(this);");
 		Options.Init(this);
 	}
@@ -53,16 +78,31 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 	public void onResponseReceived(Request request,
 			Response response) {
 		String json = response.getText();
-		Document.get().Parse(json);
+		if (Document.get().Parse(json)) {
 
-		Site site = Document.get().getSites().get(0);
-		if (!Options.isViewOrder())
-			if (site.getDisplayModelUrl() != "")
-				GE.getPlugin().fetchKml(Options.HOME_URL + site.getDisplayModelUrl(), this);
+			Site site = (Site) Document.get().getSites().toArray()[0];
+			if (!Options.isViewOrder())
+				if (site.getDisplayModelUrl() != "")
+					GE.getPlugin().fetchKml(Options.HOME_URL + site.getDisplayModelUrl(), this);
 
-		_AbstractView.CreateAllGeoItems();
-		final SiteView view = new SiteView(_AbstractView.getSiteGeoItem(site.getId()));
-		_AbstractView.Push(view);
+			_AbstractView.CreateAllGeoItems();
+			final SiteView view = new SiteView(_AbstractView.getSiteGeoItem(site.getId()));
+			_AbstractView.Push(view);
+		}
+		//=================================================================
+//		KmlIcon icon = GE.getPlugin().createIcon("");
+//		KmlScreenOverlay overlay = GE.getPlugin().createScreenOverlay("");
+//		overlay.setIcon(icon);
+//		overlay.getOverlayXY().set(50, KmlUnits.UNITS_PIXELS, 100,KmlUnits.UNITS_INSET_PIXELS);
+//		overlay.getScreenXY().set(0, KmlUnits.UNITS_PIXELS, 0,KmlUnits.UNITS_INSET_PIXELS);
+//		GE.getPlugin().getFeatures().appendChild(overlay);
+//		String href = "Filtered 100 suites out of 200 (Prices from $1000,000 to $1000,000; Bathrooms:1,2(dens),3,4(dens); Bedrooms:1,2(dens),3,4(dens); Area: from $1000,000 to $1000,000;";
+//		href = Options.HOME_URL + "gen/txt?height=15&shadow=2&text="
+//				+ href + "&txtClr=16777215&shdClr=0&frame=0";
+//		icon.setHref(href);
+//		overlay.setVisibility(true);
+//		overlay.setOpacity(0.5f);
+		//=================================================================
 	}
 
 	@Override
@@ -75,7 +115,6 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 		if (feature != null)
 			GE.getPlugin().getFeatures().appendChild(feature);
 	}
-
 }
 // private static final String EARTH_API_KEY =
 // "ABQIAAAAm7LIvLNR-PkJLewH4qmS7hREGtQZq9OFJfHndXhPP8gxXzlLARQtA_EfZjc9zs77WO25FrLcaZ4ZVA";

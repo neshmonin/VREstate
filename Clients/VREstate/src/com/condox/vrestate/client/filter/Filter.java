@@ -1,6 +1,8 @@
 package com.condox.vrestate.client.filter;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.document.Document;
@@ -28,6 +30,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 
 public class Filter extends StackPanel implements I_FilterSection {
+	public static boolean initialized = false;
 	private static Filter instance = new Filter();
 	private static int filteredIn_suites = 0;
 
@@ -43,6 +46,8 @@ public class Filter extends StackPanel implements I_FilterSection {
 
 	private DisclosurePanel dpFilter = null;
 	private IFrameElement frame = null;
+	public Button btnApply = null;
+	public Button btnReset = null;
 
 	// ========================================
 
@@ -70,34 +75,40 @@ public class Filter extends StackPanel implements I_FilterSection {
 
 		HorizontalPanel horizontalPanel = new HorizontalPanel();
 		dockPanel.add(horizontalPanel, DockPanel.SOUTH);
-		horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
+		horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		horizontalPanel
 				.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-		horizontalPanel.setSize("104px", "73px");
+		horizontalPanel.setSize("104px", "20px");
 
-		Button btnReset = new Button("New button");
+		btnReset = new Button("New button");
 		btnReset.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				Reset();
+				btnReset.setEnabled(false);
+				Apply();
+				btnApply.setEnabled(false);
 			}
 		});
+		btnReset.setEnabled(false);
 		btnReset.setText("Reset");
 		horizontalPanel.add(btnReset);
 		btnReset.setWidth("100px");
 
-		Button btnApply = new Button("New button");
+		btnApply = new Button("New button");
 		btnApply.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				Apply();
+				btnApply.setEnabled(false);
 			}
 		});
+		btnApply.setEnabled(false);
 		btnApply.setText("Apply");
 		horizontalPanel.add(btnApply);
 		btnApply.setWidth("100px");
 
 		StackPanel stackPanel = new StackPanel();
 		dockPanel.add(stackPanel, DockPanel.CENTER);
-		stackPanel.setSize("100%", "150px");
+		stackPanel.setSize("100%", "250px");
 
 
 		dpFilter.getElement().getStyle().setZIndex(Integer.MAX_VALUE);
@@ -122,16 +133,23 @@ public class Filter extends StackPanel implements I_FilterSection {
 		sections.add(BathroomSection.CreateSectionPanel("Bathrooms", stackPanel));
 		sections.add(AreaSection.CreateSectionPanel("Area", stackPanel));
 		sections.add(BalconySection.CreateSectionPanel("Balconies", stackPanel));
-		// Init();
-		for (I_FilterSection section : sections)
-			section.Init();
+			
+		Iterator<I_FilterSection> iterator = sections.iterator();
+		while (iterator.hasNext())
+			if (iterator.next() == null)
+				iterator.remove();
+		
+		Init();
 
 		Reset();
 		UpdateSize();
+		initialized = true;
 	}
 
 	@Override
 	public void Init() {
+		for (I_FilterSection section : sections)
+			section.Init();
 	}
 
 	private boolean isOpened = false;
@@ -185,6 +203,8 @@ public class Filter extends StackPanel implements I_FilterSection {
 	}
 
 	public void Apply() {
+		for (I_FilterSection section : sections)
+			section.Apply();
 		filteredIn_suites = 0;
 		_AbstractView.ApplyFilter();
 		if (Filter.filteredIn_suites == Document.get().getSuites().size())
@@ -224,5 +244,23 @@ public class Filter extends StackPanel implements I_FilterSection {
 			if (!section.isAny())
 				return false;
 		return true;
+	}
+
+	@Override
+	public boolean isChanged() {
+		for (I_FilterSection section : sections)
+			if (section.isChanged())
+				return true;
+		return false;
+	}
+	
+	public void onChanged() {
+		Log.write("onChanged");
+		if (isChanged()) {
+			if (btnApply != null)
+				btnApply.setEnabled(true);
+			if (btnReset != null)
+				btnReset.setEnabled(true);
+		}
 	}
 }
