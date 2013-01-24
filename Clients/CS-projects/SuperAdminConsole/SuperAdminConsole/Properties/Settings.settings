@@ -1,0 +1,139 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SuperAdminConsole.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="emailFrom" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">ecommerce@3dcondox.com</Value>
+    </Setting>
+    <Setting Name="emailPwd" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">kharkov141159</Value>
+    </Setting>
+    <Setting Name="serverRequestTimeoutSec" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">120</Value>
+    </Setting>
+    <Setting Name="PriceOf3DListing" Type="System.Decimal" Scope="Application">
+      <Value Profile="(Default)">49.99</Value>
+    </Setting>
+    <Setting Name="SalesTaxValuePercent" Type="System.Decimal" Scope="Application">
+      <Value Profile="(Default)">13</Value>
+    </Setting>
+    <Setting Name="ChangeViewOrderOptionsFee" Type="System.Decimal" Scope="Application">
+      <Value Profile="(Default)">9.99</Value>
+    </Setting>
+    <Setting Name="orderConfirmationTemplate" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">PLEASE DO NOT REPLY TO THIS MESSAGE.
+
+Dear {0},
+Thank you for ordering from 3D Condo Explorer Inc!
+
+Here are your order details:
+---------------------------
+    Order Number: {1}
+    Order Date: {2} 
+    Interactive 3D Listing Address:
+        {3}
+
+Options (to change call Customer Support 1-855-332-6630 ext.2):
+    Inside the Unit: {4}
+    
+You cannot change address of the Interactive 3D Listing, but other options can be changed
+at any time
+
+Interactive 3D Listing URL:
+    {5}
+    Please copy-paste this link to use in your MLS listing.
+
+(Note: this Interactive 3D Listing will be valid for {6} days. You can extend this term any time,
+as many times as you want free of charge - by calling Customer Support 1-855-332-6630 ext.2).
+
+Price:    ${7:00.00}
+HST:      ${8:00.00}
+-------------------
+Total:    ${9:00.00}
+
+
+We hope you enjoy your purchase!
+
+Sincerely, 
+
+The 3D Condo Explorer Sales Team</Value>
+    </Setting>
+    <Setting Name="clientLogin" Type="System.String" Scope="User">
+      <Value Profile="(Default)">adminan</Value>
+    </Setting>
+    <Setting Name="clientPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">smelatoronto</Value>
+    </Setting>
+    <Setting Name="serverEndPoint" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://vrt.3dcondox.com/vre/</Value>
+    </Setting>
+    <Setting Name="defaultDaysValidTemp" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="defaultDaysValidPermanent" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">120</Value>
+    </Setting>
+    <Setting Name="the300charsTemplate" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">We created Interactive 3D Listing for this property:
+{0}
+It is free, just try it!
+This link will die in {1} days. If you want to keep it, send email to sales@3DcondoX.com.  
+For more info see http://youtu.be/byMQRkqmFmU
+  Thanks, 3dcondox.com
+</Value>
+    </Setting>
+    <Setting Name="listingPromoTemplate" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Dear {0},
+
+I noticed that you posted an MLS listing {7}for the following property:
+
+    {1}
+
+Let me introduce "Interactive 3D Listing (TM)" - new Google Earth-based 3D Virtual Tour. 
+This is a new, exciting and breathtaking 3D Virtual Tour, that will grab everyone.
+
+Try it right now, it is free for you - just click this link:
+
+{2}
+
+   ... or if hesitating - check first this video (http://youtu.be/byMQRkqmFmU).
+
+Did you watch / try it?
+
+Yes, this is completely NEW product - you never saw anything like this before!
+This is a new way how to present a real estate! 
+And we give it to you FOR FREE (value of ${3:00.00} - our gift for you) - use it now!
+You can post this link with your MLS record - just like a regular virtual tour.
+Or/and you can email it to your prospects - it is extremely informational, presenting 100%
+accurate out-of-window view.
+
+Where is the catch? No catch! This is a promotional action of the 3D Condo Explorer Inc.
+
+ONLY ONE THING - PLEASE READ THIS: This Interactive 3D Listing(TM) link is temporary, 
+if you do nothing, it'll automatically die in {4} days (i.e. after {5} 
+it will stop working). 
+So, IF YOU WANT TO KEEP IT, PLEASE COPY THIS MESSAGE AND SEND IT TO sales@3DcondoX.com.
+
+If you want more info, call us at:
+    1-855-332-6630 (1-855-3d cond0) ext.2 ("Sales and Marketing"), 9AM-5PM weekdays
+        ... or ...
+    email your questions to sales@3DcondoX.com
+
+We are glad to help you with your highly competitive and challenging business.
+
+Yours,
+{8}
+{6}</Value>
+    </Setting>
+    <Setting Name="defaultSignature" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">3D Condo Explorer team
+www.3dcondox.com
+sales@3DcondoX.com
+1-855-332-6630 x.2
+</Value>
+    </Setting>
+    <Setting Name="defaultPromoSubject" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Check this out - new 3D Virtual Tour, and free!</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
