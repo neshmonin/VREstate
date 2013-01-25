@@ -21,7 +21,7 @@ public class Site implements I_VRObject {
 	private int parent_id = -1;
 	private String name = "";
 	private String displayModelUrl = "";
-
+	private String infoUrl = null;
 	private Position position = new Position();
 
 	// private double max_suite_altitude = 0;
@@ -92,4 +92,15 @@ public class Site implements I_VRObject {
 	public VRObjectType getType() {
 		return VRObjectType.Site;
 	}
+
+	@Override
+	public void setInfoUrl(String infoUrl) {
+		this.infoUrl = infoUrl;
+	}
+
+	@Override
+	public String getInfoUrl() {
+		return infoUrl;
+	}
+
 }

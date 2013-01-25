@@ -3,7 +3,6 @@ package com.condox.vrestate.client.view;
 import com.condox.vrestate.client.GET;
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
-import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.SuiteType;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.SuiteInteractor;
@@ -142,19 +141,13 @@ public class SuiteView extends _GEView {
 		if (type.getArea() > 0)
 			obj.put("area", new JSONNumber(type.getArea()));
 		// obj.put("photo", new JSONString("PhotoUrl"));
+
+		String infoUrl = suiteGeo.suite.getInfoUrl();
 		
-		if (Document.targetViewOrder != null) {
-			String infoUrl = Document.targetViewOrder.getInfoUrl();
-			
-			if (Options.DEBUG_MODE)
-				infoUrl = "http://www.google.com";
-			else
-				infoUrl = "";
-			
-			if (infoUrl != null && infoUrl.length() > 0)
-				obj.put("moreInfo", new JSONString(infoUrl));
-//			Log.write(infoUrl);
-		}
+		if (infoUrl != null && infoUrl.length() > 0)
+			obj.put("moreInfo", new JSONString(infoUrl));
+		else if (Options.DEBUG_MODE)
+			obj.put("moreInfo", new JSONString("http://www.google.com"));
 		
 		// obj.put("mail", new JSONString("MailUrl"));
 		// obj.put("phone", new JSONString("123456789"));

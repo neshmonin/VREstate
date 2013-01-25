@@ -241,6 +241,7 @@ public class Document implements IDocument {
 			case Suite:
 				Suite targetSuite = this.suites.get(viewOrder.getTargetObjectId());
 				viewOrder.setTargetObject(targetSuite);
+				targetSuite.setInfoUrl(viewOrder.getInfoUrl());
 
 				if (viewOrder.getProductType() == ViewOrder.ProductType.Building3DLayout)
 					targetSuite.setStatus(Suite.Status.Layout);
@@ -248,6 +249,7 @@ public class Document implements IDocument {
 			case Building:
 				Building targetBuilding = this.buildings.get(viewOrder.getTargetObjectId());
 				viewOrder.setTargetObject(targetBuilding);
+				targetBuilding.setInfoUrl(viewOrder.getInfoUrl());
 				break;
 			case Site:
 				Site targetSite = this.sites.get(viewOrder.getTargetObjectId());

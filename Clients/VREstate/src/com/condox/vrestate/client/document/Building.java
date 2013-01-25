@@ -19,6 +19,7 @@ public class Building implements I_VRObject {
 	private String address = "";
 	private Position position = null;
 	private Double altitude_adjustment = null;
+	private String infoUrl = null;
 	
 	void Parse(JSONValue value) {
 		JSONObject obj = value.isObject();
@@ -125,9 +126,15 @@ public class Building implements I_VRObject {
 	public VRObjectType getType() {
 		return VRObjectType.Building;
 	}
-	
-	
-	
-	
+
+	@Override
+	public void setInfoUrl(String infoUrl) {
+		this.infoUrl = infoUrl;
+	}
+
+	@Override
+	public String getInfoUrl() {
+		return infoUrl;
+	}
 
 }

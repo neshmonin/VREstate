@@ -33,6 +33,7 @@ public class Suite implements I_VRObject {
 	private int price = 0;
 	private ArrayList<Double> points = new ArrayList<Double>();
 	private String vTourUrl = null;
+	private String infoUrl = null;
 	
 	void Parse(JSONValue value) {
 //		Log.write(value.toString());
@@ -291,6 +292,16 @@ public class Suite implements I_VRObject {
 
 	public String getVTourUrl() {
 		return vTourUrl;
+	}
+
+	@Override
+	public void setInfoUrl(String infoUrl) {
+		this.infoUrl = infoUrl;
+	}
+
+	@Override
+	public String getInfoUrl() {
+		return infoUrl;
 	}
 
 	@Override
