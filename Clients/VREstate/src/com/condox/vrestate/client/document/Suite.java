@@ -2,6 +2,7 @@ package com.condox.vrestate.client.document;
 
 import java.util.ArrayList;
 import com.condox.vrestate.client.Log;
+import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.Position;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -111,14 +112,18 @@ public class Suite implements I_VRObject {
 //		if (suite_type == null)
 //			Log.write("suiteTypeId:" + type_id);
 		
-		
 		price = -1;
 		if ((obj.get("currentPrice") != null)&&
-			(obj.get("currentPrice").isNumber() != null))
+			(obj.get("currentPrice").isNumber() != null) &&
+			obj.get("currentPrice").isNumber().doubleValue() != 0)
 			price = (int) obj.get("currentPrice").isNumber().doubleValue();
-		// Workaround for prices	
-		 price = (int) (500 + 500 * Math.random());
-		 price *= 1000;
+		
+		if (Options.DEBUG_MODE)
+		{
+			 // Workaround for prices	
+			 price = (int) (500 + 500 * Math.random());
+			 price *= 1000;
+		}
 	}
 	
 	public void CalcLineCoords() {
