@@ -35,6 +35,7 @@
             this.tbLogin = new System.Windows.Forms.TextBox();
             this.tbPassword = new System.Windows.Forms.TextBox();
             this.buttonLogin = new System.Windows.Forms.Button();
+            this.checkBoxIsSuperadmin = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // label1
@@ -90,7 +91,7 @@
             // 
             // buttonLogin
             // 
-            this.buttonLogin.Location = new System.Drawing.Point(99, 102);
+            this.buttonLogin.Location = new System.Drawing.Point(190, 102);
             this.buttonLogin.Name = "buttonLogin";
             this.buttonLogin.Size = new System.Drawing.Size(161, 26);
             this.buttonLogin.TabIndex = 6;
@@ -98,12 +99,26 @@
             this.buttonLogin.UseVisualStyleBackColor = true;
             this.buttonLogin.Click += new System.EventHandler(this.buttonLogin_Click);
             // 
+            // checkBoxIsSuperadmin
+            // 
+            this.checkBoxIsSuperadmin.AutoSize = true;
+            this.checkBoxIsSuperadmin.Checked = true;
+            this.checkBoxIsSuperadmin.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxIsSuperadmin.Location = new System.Drawing.Point(17, 108);
+            this.checkBoxIsSuperadmin.Name = "checkBoxIsSuperadmin";
+            this.checkBoxIsSuperadmin.Size = new System.Drawing.Size(135, 17);
+            this.checkBoxIsSuperadmin.TabIndex = 7;
+            this.checkBoxIsSuperadmin.Text = "Login as a SuperAdmin";
+            this.checkBoxIsSuperadmin.UseVisualStyleBackColor = true;
+            this.checkBoxIsSuperadmin.CheckedChanged += new System.EventHandler(this.checkBoxIsSuperadmin_CheckedChanged);
+            // 
             // LoginForm
             // 
             this.AcceptButton = this.buttonLogin;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(367, 140);
+            this.Controls.Add(this.checkBoxIsSuperadmin);
             this.Controls.Add(this.buttonLogin);
             this.Controls.Add(this.tbPassword);
             this.Controls.Add(this.tbLogin);
@@ -131,5 +146,6 @@
         public System.Windows.Forms.TextBox tbLogin;
         public System.Windows.Forms.TextBox tbPassword;
         private System.Windows.Forms.Button buttonLogin;
+        private System.Windows.Forms.CheckBox checkBoxIsSuperadmin;
     }
 }

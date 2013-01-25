@@ -16,6 +16,7 @@ namespace SuperAdminConsole
             InitializeComponent();
             lblServer.Text = server;
             tbLogin.Text = login;
+            IsSuperAdmin = checkBoxIsSuperadmin.Checked;
         }
 
         private void LoginForm_Shown(object sender, EventArgs e)
@@ -29,5 +30,11 @@ namespace SuperAdminConsole
             DialogResult = DialogResult.OK;
         }
 
+        private void checkBoxIsSuperadmin_CheckedChanged(object sender, EventArgs e)
+        {
+            IsSuperAdmin = checkBoxIsSuperadmin.Checked;
+        }
+
+        public bool IsSuperAdmin { get; private set; }
     }
 }

@@ -132,36 +132,56 @@ namespace SuperAdminConsole
             return true;
         }
 
+        LoginForm loginForm = null;
         private bool doLogin(string login, string password)
         {
             // attempt auto-login once with credentials passed
-            if (!string.IsNullOrWhiteSpace(login) && !string.IsNullOrWhiteSpace(password))
+            //if (!string.IsNullOrWhiteSpace(login) && !string.IsNullOrWhiteSpace(password))
+            //{
+            //    if (m_superServer.SuperadminLogin(login, password))
+            //    {
+            //        Trace.WriteLine(DateTime.Now.ToString() + "> Connected to server " +
+            //                        Properties.Settings.Default.serverEndPoint +
+            //                        ", Login=" + login +
+            //                        ", SID=" + ServerProxy.SID, "Info");
+            //        Trace.Flush();
+            //        return true;
+            //    }
+            //}
+
+            loginForm = new LoginForm(ServerProxy.ServerEndpoint, login);
+            while (DialogResult.OK == loginForm.ShowDialog(this))
             {
-                if (m_superServer.SuperadminLogin(login, password))
+                login = loginForm.tbLogin.Text;
+                password = loginForm.tbPassword.Text;
+                myRole = loginForm.IsSuperAdmin ? "SuperAdmin" : "Admin";
+
+                if (loginForm.IsSuperAdmin)
                 {
-                    Trace.WriteLine(DateTime.Now.ToString() + "> Connected to server " +
-                                    Properties.Settings.Default.serverEndPoint +
-                                    ", Login=" + login +
-                                    ", SID=" + ServerProxy.SID, "Info");
-                    Trace.Flush();
-                    return true;
+                    if (m_superServer.SuperadminLogin(login, password))
+                    {
+                        Trace.WriteLine(DateTime.Now.ToString() + "> Connected to server " +
+                                        Properties.Settings.Default.serverEndPoint +
+                                        ", Login=" + login +
+                                        ", SID=" + ServerProxy.SID, "Info");
+                        Trace.Flush();
+                        return true;
+                    }
                 }
-            }
-
-            LoginForm lf = new LoginForm(ServerProxy.ServerEndpoint, login);
-            while (DialogResult.OK == lf.ShowDialog(this))
-            {
-                login = lf.tbLogin.Text;
-                password = lf.tbPassword.Text;
-
-                if (m_superServer.SuperadminLogin(login, password))
+                else
                 {
-                    Trace.WriteLine(DateTime.Now.ToString() + "> Connected to server " +
-                                    Properties.Settings.Default.serverEndPoint +
-                                    ", Login=" + login +
-                                    ", SID=" + ServerProxy.SID, "Info");
-                    Trace.Flush();
-                    return true;
+                    string developerId = "6"; // Must be "Resale"
+                    if (m_superServer.Login(login, password, "developeradmin", developerId))
+                    {
+                        Trace.WriteLine(DateTime.Now.ToString() + "> Connected to server " +
+                                        Properties.Settings.Default.serverEndPoint +
+                                        ", Login=" + login +
+                                        ", role=developeradmin" +
+                                        ", developerId=" + developerId +
+                                        ", SID=" + ServerProxy.SID, "Info");
+                        Trace.Flush();
+                        return true;
+                    }
                 }
             }
             return false;
@@ -225,6 +245,7 @@ namespace SuperAdminConsole
 
         public int MyID { private set; get; }
 
+        string myRole;
         private void refreshUserAccounts()
         {
             ListViewOrders.Items.Clear();
@@ -240,7 +261,8 @@ namespace SuperAdminConsole
             //                                  new TreeNode("Logs") };
             TreeNode[] ch = new TreeNode[2] { new TreeNode("ViewOrders"),
                                               new TreeNode("Logs") };
-            TreeNode superAdminNode = new TreeNode("SELF (superAdmin)", ch);
+
+            TreeNode superAdminNode = new TreeNode(string.Format("SELF ({0})", myRole), ch);
             superAdminNode.Tag = admin;
             treeViewAccounts.Nodes.Add(superAdminNode);
 
@@ -306,7 +328,7 @@ namespace SuperAdminConsole
             if (m_agent != null)
             {
                 m_email = m_agent.PrimaryEmailAddress == string.Empty?"no email":m_agent.PrimaryEmailAddress;
-                m_nickname = m_agent.NickName == string.Empty?"superAdmin":m_agent.NickName;
+                m_nickname = m_agent.NickName == string.Empty ? myRole : m_agent.NickName;
             }
 
             if (e.Node.Parent == null)
@@ -656,7 +678,8 @@ namespace SuperAdminConsole
             if (e.Button != System.Windows.Forms.MouseButtons.Left)
                 return;
 
-            if (m_agent.UserRole != User.Role.SuperAdmin)
+            if (m_agent.UserRole != User.Role.SuperAdmin &&
+                m_agent.UserRole != User.Role.DeveloperAdmin)
                 return;
 
             if (ListViewOrders.SelectedItems.Count != 0)
@@ -704,7 +727,8 @@ namespace SuperAdminConsole
                 return;
             }
 
-            if (newUser.UserRole == User.Role.SuperAdmin)
+            if (newUser.UserRole == User.Role.SuperAdmin ||
+                newUser.UserRole == User.Role.DeveloperAdmin)
             {
                 e.Effect = DragDropEffects.None;
                 return;

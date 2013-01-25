@@ -144,7 +144,8 @@ namespace SuperAdminConsole
                 numericUpDownDaysValid.Value = Properties.Settings.Default.defaultDaysValidPermanent;
             }
 
-            if (user.UserRole == User.Role.SuperAdmin)
+            if (user.UserRole == User.Role.SuperAdmin ||
+                user.UserRole == User.Role.DeveloperAdmin)
             {
                 paymentSkip = true;
                 numericUpDownDaysValid.Value = Properties.Settings.Default.defaultDaysValidTemp;
@@ -287,7 +288,8 @@ namespace SuperAdminConsole
                     buttonPrev.Visible = paymentSkip && !viewOrderUrlGenerated;
                     buttonSendEmailk.Enabled = viewOrderUrlGenerated && !emailSent;
                     buttonSendEmailk.Visible = viewOrderUrlGenerated;
-                    buttonFinish.Enabled = theUser.UserRole == User.Role.SuperAdmin &&
+                    buttonFinish.Enabled = (theUser.UserRole == User.Role.SuperAdmin ||
+                                            theUser.UserRole == User.Role.DeveloperAdmin) &&
                                                 viewOrderUrlGenerated;
                     buttonGenerateURL.Enabled = !viewOrderUrlGenerated;
                     buttonNext.Visible = false;
@@ -625,7 +627,9 @@ namespace SuperAdminConsole
         private void buttonSendEmailk_Click(object sender, EventArgs e)
         {
             EmailViewOrder.Template templ = EmailViewOrder.Template.OrderConfirmation;
-            if (theReason == ChangeReason.Creation && theUser.UserRole == User.Role.SuperAdmin)
+            if (theReason == ChangeReason.Creation && 
+                    (theUser.UserRole == User.Role.SuperAdmin ||
+                     theUser.UserRole == User.Role.DeveloperAdmin))
                 templ = EmailViewOrder.Template.ListingPromotion;
 
             EmailViewOrder email = EmailViewOrder.Create(ViewOrderID,
