@@ -125,7 +125,10 @@ public class SuiteView extends _GEView {
 		SuiteType type = suiteGeo.suite.getSuiteType();
 
 		obj.put("bedrooms", new JSONString(type.getRoomsStr()));
-		obj.put("balcony", new JSONNumber(type.getBalconies()));
+		if (type.getBalconies() > 0)
+			obj.put("balcony", new JSONNumber(type.getBalconies()));
+		else
+			obj.put("balcony", new JSONString("none"));
 		//obj.put("ceiling", new JSONNumber(suiteGeo.suite.getCeiling_height_ft()));
 
 		String externalLinkUrl = suiteGeo.suite.getVTourUrl(); 
@@ -136,8 +139,8 @@ public class SuiteView extends _GEView {
 			obj.put("more", new JSONString(externalLinkUrl));
 			 
 		obj.put("panoramicViewURL", new JSONString(""));
-		// if (suite_type.area > 0)
-		obj.put("area", new JSONNumber(type.getArea()));
+		if (type.getArea() > 0)
+			obj.put("area", new JSONNumber(type.getArea()));
 		// obj.put("photo", new JSONString("PhotoUrl"));
 		
 		String infoUrl = Document.targetViewOrder.getInfoUrl();
