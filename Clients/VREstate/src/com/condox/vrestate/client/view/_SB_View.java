@@ -1,7 +1,7 @@
 package com.condox.vrestate.client.view;
 
-import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.document.Document;
+import com.condox.vrestate.client.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.SB_Interactor;
@@ -33,8 +33,11 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 			_interactor = null;
 		}
 
-		if (!Options.isViewOrder())
-			Filter.get().setVisible(enabling);
+		if(Document.targetViewOrder != null && 
+				(Document.targetViewOrder.getProductType() == ProductType.PublicListing ||
+				 Document.targetViewOrder.getProductType() == ProductType.Building3DLayout)) {
+				Filter.get().setVisible(enabling);
+		}
 	}
 
 	@Override
@@ -70,8 +73,18 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 		if (Document.progressBar != null){
 			// This is initial loading
 			onHeadingChanged();
-			if(Document.targetSuite != null)
-				Select("suite", Document.targetSuite.getId());
+			if(Document.targetViewOrder != null) {
+				int targetId = Document.targetViewOrder.getTargetObject().getId();
+				switch (Document.targetViewOrder.getTargetObjectType())
+				{
+				case Suite:
+					Select("suite", targetId);
+					break;
+				case Building:
+					Select("building", targetId);
+					break;
+				}
+			}
 
 			Document.progressBar = null;
 		}

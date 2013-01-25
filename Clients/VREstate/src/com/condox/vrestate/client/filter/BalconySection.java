@@ -1,6 +1,5 @@
 package com.condox.vrestate.client.filter;
 
-import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.document.Suite;
 import com.condox.vrestate.client.document.SuiteType;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;

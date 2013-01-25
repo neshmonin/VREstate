@@ -74,7 +74,7 @@
             this.buttonPayment = new System.Windows.Forms.Button();
             this.groupBoxListingOptions = new System.Windows.Forms.GroupBox();
             this.textBoxMLS = new System.Windows.Forms.RichTextBox();
-            this.textBoxMlsUrl = new System.Windows.Forms.TextBox();
+            this.textBoxInfoUrl = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.labelPercent = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
@@ -576,7 +576,7 @@
             // 
             this.tabPageViewOrderOptions.BackColor = System.Drawing.SystemColors.Control;
             this.tabPageViewOrderOptions.Controls.Add(this.textBoxNote);
-            this.tabPageViewOrderOptions.Controls.Add(this.textBoxMlsUrl);
+            this.tabPageViewOrderOptions.Controls.Add(this.textBoxInfoUrl);
             this.tabPageViewOrderOptions.Controls.Add(this.label12);
             this.tabPageViewOrderOptions.Controls.Add(this.label11);
             this.tabPageViewOrderOptions.Controls.Add(this.buttonPayment);
@@ -661,15 +661,15 @@
             this.textBoxMLS.Text = "";
             this.textBoxMLS.TextChanged += new System.EventHandler(this.updateStateEvent);
             // 
-            // textBoxMlsUrl
+            // textBoxInfoUrl
             // 
-            this.textBoxMlsUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBoxInfoUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxMlsUrl.Location = new System.Drawing.Point(71, 167);
-            this.textBoxMlsUrl.Name = "textBoxMlsUrl";
-            this.textBoxMlsUrl.Size = new System.Drawing.Size(405, 20);
-            this.textBoxMlsUrl.TabIndex = 5;
-            this.textBoxMlsUrl.TextChanged += new System.EventHandler(this.updateStateEvent);
+            this.textBoxInfoUrl.Location = new System.Drawing.Point(71, 167);
+            this.textBoxInfoUrl.Name = "textBoxInfoUrl";
+            this.textBoxInfoUrl.Size = new System.Drawing.Size(405, 20);
+            this.textBoxInfoUrl.TabIndex = 5;
+            this.textBoxInfoUrl.TextChanged += new System.EventHandler(this.updateStateEvent);
             // 
             // label12
             // 
@@ -1023,7 +1023,7 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox textBox300Chars;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.TextBox textBoxMlsUrl;
+        private System.Windows.Forms.TextBox textBoxInfoUrl;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.RichTextBox textBoxNote;

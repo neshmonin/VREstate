@@ -11,7 +11,6 @@ import com.condox.vrestate.client.view._AbstractView;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.IFrameElement;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -26,8 +25,6 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.StackPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.CheckBox;
 
 public class Filter extends StackPanel implements I_FilterSection {
 	public static boolean initialized = false;
@@ -156,8 +153,7 @@ public class Filter extends StackPanel implements I_FilterSection {
 
 	public void setVisible(boolean visible) {
 		Log.write("Filter->setVisible:" + visible);
-		if ((visible) && (Options.getViewOrderId() == null)
-				&& (Options.USE_FILTER)) {
+		if (visible && Options.USE_FILTER) {
 			dpFilter.setOpen(isOpened);
 			dpFilter.setVisible(true);
 			UpdateSize();

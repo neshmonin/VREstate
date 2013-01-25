@@ -7,7 +7,7 @@ import com.condox.vrestate.client.Position;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 
-public class Building {
+public class Building implements I_VRObject {
 
 	private static Map<Integer, Building> ids = new HashMap<Integer, Building>();
 	
@@ -119,6 +119,11 @@ public class Building {
 
 	public void setExtendedData(Object extended_data) {
 		this.extended_data = extended_data;
+	}
+
+	@Override
+	public VRObjectType getType() {
+		return VRObjectType.Building;
 	}
 	
 	

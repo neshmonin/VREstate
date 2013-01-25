@@ -53,6 +53,12 @@ public class SuiteGeoItem implements IGeoItem {
 					+ "&txtClr=16777215&shdClr=1048575&frame=0";
 			style.getLineStyle().getColor().set("FFFFFFFF"); // WHITE ??
 			break;
+		case Layout:
+			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
+					+ suite.getName()
+					+ "&txtClr=16777215&shdClr=1048575&frame=0";
+			style.getLineStyle().getColor().set("FFCCCCCC"); // LIGHT GRAY
+			break;
 		}
 	
 		KmlIcon icon = GE.getPlugin().createIcon("");

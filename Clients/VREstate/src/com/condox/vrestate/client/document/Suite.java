@@ -7,14 +7,15 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
-public class Suite {
+public class Suite implements I_VRObject {
 
 	public enum Status {
 		Sold, 
 		Available, 
 		OnHold, 
 		ResaleAvailable,
-		Selected
+		Selected,
+		Layout
 	}
 	
 	private int id = -1;
@@ -31,7 +32,7 @@ public class Suite {
 	private SuiteType suite_type = null;
 	private int price = 0;
 	private ArrayList<Double> points = new ArrayList<Double>();
-	private String externalLinkUrl = null;
+	private String vTourUrl = null;
 	
 	void Parse(JSONValue value) {
 //		Log.write(value.toString());
@@ -284,12 +285,17 @@ public class Suite {
 		return parent;
 	}
 	
-	public void setExternalLinkUrl(String externalLinkUrl) {
-		this.externalLinkUrl = externalLinkUrl;
+	public void setVTourUrl(String vTourUrl) {
+		this.vTourUrl = vTourUrl;
 	}
 
-	public String getExternalLinkUrl() {
-		return externalLinkUrl;
+	public String getVTourUrl() {
+		return vTourUrl;
+	}
+
+	@Override
+	public VRObjectType getType() {
+		return VRObjectType.Suite;
 	}
 
 	

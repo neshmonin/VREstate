@@ -112,7 +112,7 @@ namespace SuperAdminConsole
                 }
                 PostalAddress = theOrder.GetProperty("label", string.Empty);
                 textBoxMLS.Text = theOrder.GetProperty("mlsId", string.Empty);
-                textBoxMlsUrl.Text = theOrder.GetProperty("infoUrl", string.Empty);
+                textBoxInfoUrl.Text = theOrder.GetProperty("infoUrl", string.Empty);
                 textBoxNote.Text = theOrder.GetProperty("note", string.Empty);
             }
 
@@ -159,13 +159,13 @@ namespace SuperAdminConsole
             initialFloorPlanOption = radioButtonFloorplan.Checked;
             initialExternalLinkOption = textExternalLink.Text;
             initialMLS = textBoxMLS.Text;
-            initialMlsUrl = textBoxMlsUrl.Text;
+            initialMlsUrl = textBoxInfoUrl.Text;
             initialNote = textBoxNote.Text;
 
             lvwColumnSorter = new ListViewColumnSorter();
             listViewAddresses.ListViewItemSorter = lvwColumnSorter;
             textBoxMLS.ReadOnly = theReason != ChangeReason.Creation;
-            textBoxMlsUrl.ReadOnly = theReason != ChangeReason.Creation;
+            textBoxInfoUrl.ReadOnly = theReason != ChangeReason.Creation;
             textBoxNote.Visible = theReason == ChangeReason.Creation;
             label11.Visible = theReason == ChangeReason.Creation;
 
@@ -249,7 +249,7 @@ namespace SuperAdminConsole
                                                   (paymentRefId != string.Empty ||
                                                    numericUpDownPrice.Value == 0M) ||
                                                 initialMLS != textBoxMLS.Text ||
-                                                initialMlsUrl != textBoxMlsUrl.Text ||
+                                                initialMlsUrl != textBoxInfoUrl.Text ||
                                                 initialNote != textBoxNote.Text;
                     }
                     else
@@ -438,37 +438,59 @@ namespace SuperAdminConsole
                 //                                      propertyId=<suite ID>&
                 //                                      sid=<SID>
                 string product = string.Empty;
-                if (radioButtonPrivateListing.Checked)
-                    product = "prl";
-                else if (radioButtonSharedListing.Checked)
-                    product = "pul";
-                else if (radioButton3DLayout.Checked)
-                    product = "b3dl";
 
-                string parameters = string.Format("q=register&" +
-                                                  "entity=viewOrder&" +
-                                                  "ownerId={0}&" +
-                                                  "{1}" +
-                                                  "daysValid={2}&" +
-                                                  "product={10}&" +
-                                                  "options={3}" +
-                                                  "{4}&" +
-                                                  "mls_id={7}&" +
-                                                  "mls_url={8}&" +
-                                                  "note=\"{9}\"&" +
-                                                  "propertyType={5}&" +
-                                                  "propertyId={6}",
-                                                  theUser.AutoID,
-                                                  numericUpDownPrice.Value==0?"":"pr="+paymentRefId+"&",
-                                                  DaysValid,
-                                                  radioButtonFloorplan.Checked?"fp":"evt",
-                                                  radioButtonExternalLink.Checked ? "&evt_url=" + HttpUtility.UrlEncodeUnicode(textExternalLink.Text) : string.Empty,
-                                                  PropertyType,
-                                                  PropertyID,
-                                                  textBoxMLS.Text,
-                                                  HttpUtility.UrlEncodeUnicode(textBoxMlsUrl.Text),
-                                                  HttpUtility.UrlEncodeUnicode(textBoxNote.Text),
-                                                  product);
+                string parameters;
+                if (radioButton3DLayout.Checked)
+                {
+                    string noteParam = string.IsNullOrEmpty(textBoxNote.Text) ? "" :
+                                "note=\"" + HttpUtility.UrlEncodeUnicode(textBoxNote.Text) + "\"&";
+                    string infoUrlParam = string.IsNullOrEmpty(textBoxInfoUrl.Text) ? "" :
+                                "mls_url=\"" + HttpUtility.UrlEncodeUnicode(textBoxInfoUrl.Text) + "\"&";
+                    parameters = string.Format("q=register&entity=viewOrder&product=b3dl&" +
+                                               "ownerId={0}&" +
+                                               "{1}" +
+                                               "{2}" +
+                                               "daysValid={3}&" +
+                                               "propertyType={4}&" +
+                                               "propertyId={5}",
+                                               theUser.AutoID,
+                                               noteParam,
+                                               infoUrlParam,
+                                               DaysValid,
+                                               PropertyType,
+                                               PropertyID);
+                }
+                else
+                {
+                    if (radioButtonPrivateListing.Checked)
+                        product = "prl";
+                    else if (radioButtonSharedListing.Checked)
+                        product = "pul";
+                    parameters = string.Format("q=register&" +
+                                               "entity=viewOrder&" +
+                                               "ownerId={0}&" +
+                                               "{1}" +
+                                               "daysValid={2}&" +
+                                               "product={10}&" +
+                                               "options={3}" +
+                                               "{4}&" +
+                                               "mls_id={7}&" +
+                                               "mls_url={8}&" +
+                                               "note=\"{9}\"&" +
+                                               "propertyType={5}&" +
+                                               "propertyId={6}",
+                                               theUser.AutoID,
+                                               numericUpDownPrice.Value == 0 ? "" : "pr=" + paymentRefId + "&",
+                                               DaysValid,
+                                               radioButtonFloorplan.Checked ? "fp" : "evt",
+                                               radioButtonExternalLink.Checked ? "&evt_url=" + HttpUtility.UrlEncodeUnicode(textExternalLink.Text) : string.Empty,
+                                               PropertyType,
+                                               PropertyID,
+                                               textBoxMLS.Text,
+                                               string.IsNullOrEmpty(textBoxInfoUrl.Text) ? "" : HttpUtility.UrlEncodeUnicode(textBoxInfoUrl.Text),
+                                               HttpUtility.UrlEncodeUnicode(textBoxNote.Text),
+                                               product);
+                }
                 ServerResponse resp = ServerProxy.MakeGenericRequest(ServerProxy.RequestType.Get,
                                                                   "program",
                                                                   parameters, null);
@@ -592,7 +614,7 @@ namespace SuperAdminConsole
                 theOrder["options"] = (int)options;
                 theOrder["vTourUrl"] = radioButtonExternalLink.Checked ? textExternalLink.Text : string.Empty;
                 theOrder["mlsId"] = textBoxMLS.Text;
-                theOrder["infoUrl"] = textBoxMlsUrl.Text;
+                theOrder["infoUrl"] = textBoxInfoUrl.Text;
                 theOrder["mlsNote"] = textBoxNote.Text;
             }
 
@@ -730,10 +752,10 @@ namespace SuperAdminConsole
             textCity.Text = item.SubItems[3].Text;
             textPostalCode.Text = item.SubItems[4].Text;
 
+            ClientData building = item.Tag as ClientData;
             if (radioButtonPrivateListing.Checked || radioButtonSharedListing.Checked)
             {
                 Cursor.Current = Cursors.WaitCursor;
-                ClientData building = item.Tag as ClientData;
                 if (suitesTableForm != null)
                     suitesTableForm.Dispose();
                 suitesTableForm = new SuitesTableForm(building);
@@ -743,6 +765,14 @@ namespace SuperAdminConsole
                     Cursor.Current = Cursors.Default;
                 });
                 suitesTableForm.Show(this);
+            }
+            else if (radioButton3DLayout.Checked)
+            {
+                PostalAddress = textStreet.Text;
+                PropertyType = "building";
+                PropertyID = building.GetProperty("id", -1);
+
+                addressVerified = true;
             }
 
             UpdateState();

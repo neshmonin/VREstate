@@ -468,21 +468,31 @@ namespace SuperAdminConsole
                 else
                 {
                     int separatorIndex = label.IndexOf(" - ");
-                    string aptNum = label.Substring(0, separatorIndex);
-                    string buildingAddr = label.Substring(separatorIndex + 3);
+                    string aptNum;
+                    string buildingAddr;
+                    if (separatorIndex != -1)
+                    {
+                        aptNum = label.Substring(0, separatorIndex);
+                        buildingAddr = label.Substring(separatorIndex + 3);
+                    }
+                    else
+                    {
+                        aptNum = "---";
+                        buildingAddr = label;
+                    }
                     subitems[0] = aptNum;
                     subitems[1] = buildingAddr;
                 }
 
-                switch (viewOrder.GetProperty("targetObjectType", 0))
+                switch (viewOrder.GetProperty<ViewOrder.ViewOrderProduct>("product", ViewOrder.ViewOrderProduct.PublicListing))
                 {
-                    case 0:
+                    case ViewOrder.ViewOrderProduct.PrivateListing:
                         subitems[2] = "PrL";
                         break;
-                    case 1:
+                    case ViewOrder.ViewOrderProduct.PublicListing:
                         subitems[2] = "PuL";
                         break;
-                    case 2:
+                    case ViewOrder.ViewOrderProduct.Building3DLayout:
                         subitems[2] = "3DL";
                         break;
                 }

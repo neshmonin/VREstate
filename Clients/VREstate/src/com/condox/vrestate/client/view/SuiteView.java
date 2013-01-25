@@ -3,6 +3,7 @@ package com.condox.vrestate.client.view;
 import com.condox.vrestate.client.GET;
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
+import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.SuiteType;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.SuiteInteractor;
@@ -16,7 +17,6 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.google.gwt.user.client.Window;
 import com.nitrous.gwt.earth.client.api.GEHtmlDivBalloon;
 import com.nitrous.gwt.earth.client.api.GEVisibility;
 import com.nitrous.gwt.earth.client.api.KmlFeature;
@@ -128,7 +128,7 @@ public class SuiteView extends _GEView {
 		obj.put("balcony", new JSONNumber(type.getBalconies()));
 		//obj.put("ceiling", new JSONNumber(suiteGeo.suite.getCeiling_height_ft()));
 
-		String externalLinkUrl = suiteGeo.suite.getExternalLinkUrl(); 
+		String externalLinkUrl = suiteGeo.suite.getVTourUrl(); 
 		if (externalLinkUrl == null)
 			externalLinkUrl = type.getFloorPlanUrl();
 			
@@ -139,7 +139,11 @@ public class SuiteView extends _GEView {
 		// if (suite_type.area > 0)
 		obj.put("area", new JSONNumber(type.getArea()));
 		// obj.put("photo", new JSONString("PhotoUrl"));
-		// obj.put("more", new JSONString("MoreInfoUrl"));
+		
+		String infoUrl = Document.targetViewOrder.getInfoUrl();
+		if (infoUrl != null && infoUrl.length() > 0)
+			obj.put("more", new JSONString(infoUrl));
+		
 		// obj.put("mail", new JSONString("MailUrl"));
 		// obj.put("phone", new JSONString("123456789"));
 		// Log.write("json:" + obj.toString());
@@ -187,7 +191,7 @@ public class SuiteView extends _GEView {
 	}
 
 	private void ShowMore() {
-		String externalLinkUrl = suiteGeo.suite.getExternalLinkUrl(); 
+		String externalLinkUrl = suiteGeo.suite.getVTourUrl(); 
 		if (externalLinkUrl == null) {
 			SuiteType type = suiteGeo.suite.getSuiteType();
 			externalLinkUrl = type.getFloorPlanUrl();

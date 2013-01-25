@@ -8,7 +8,7 @@ import com.condox.vrestate.client.Position;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 
-public class Site {
+public class Site implements I_VRObject {
 
 	public Position getPosition() {
 		return position;
@@ -86,5 +86,10 @@ public class Site {
 		ArrayList<Site> result = new ArrayList<Site>();
 		result.addAll(ids.values());
 		return result;
+	}
+
+	@Override
+	public VRObjectType getType() {
+		return VRObjectType.Site;
 	}
 }

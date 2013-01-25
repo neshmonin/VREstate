@@ -2,29 +2,16 @@ package com.condox.vrestate.client;
 
 import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.Site;
+import com.condox.vrestate.client.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.ge.GE;
-import com.condox.vrestate.client.page.MainPage;
 import com.condox.vrestate.client.view.SiteView;
 import com.condox.vrestate.client.view._AbstractView;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlObject;
-import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
-import com.nitrous.gwt.earth.client.api.KmlUnits;
 import com.nitrous.gwt.earth.client.api.event.KmlLoadCallback;
-import com.google.gwt.user.client.ui.TabLayoutPanel;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.user.client.ui.TabPanel;
-import com.google.gwt.user.client.ui.LayoutPanel;
 
 public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 
@@ -79,9 +66,10 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 			Response response) {
 		String json = response.getText();
 		if (Document.get().Parse(json)) {
-
 			Site site = (Site) Document.get().getSites().toArray()[0];
-			if (!Options.isViewOrder())
+			if (!Options.isViewOrder() ||
+					Document.targetViewOrder.getProductType() == ProductType.PublicListing ||
+					Document.targetViewOrder.getProductType() == ProductType.Building3DLayout)
 				if (site.getDisplayModelUrl() != "")
 					GE.getPlugin().fetchKml(Options.HOME_URL + site.getDisplayModelUrl(), this);
 

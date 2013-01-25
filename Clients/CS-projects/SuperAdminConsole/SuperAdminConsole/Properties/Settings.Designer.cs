@@ -77,50 +77,6 @@ namespace SuperAdminConsole.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(@"PLEASE DO NOT REPLY TO THIS MESSAGE.
-
-Dear {0},
-Thank you for ordering from 3D Condo Explorer Inc!
-
-Here are your order details:
----------------------------
-    Order Number: {1}
-    Order Date: {2} 
-    Interactive 3D Listing Address:
-        {3}
-
-Options (to change call Customer Support 1-855-332-6630 ext.2):
-    Inside the Unit: {4}
-    
-You cannot change address of the Interactive 3D Listing, but other options can be changed
-at any time
-
-Interactive 3D Listing URL:
-    {5}
-    Please copy-paste this link to use in your MLS listing.
-
-(Note: this Interactive 3D Listing will be valid for {6} days. You can extend this term any time,
-as many times as you want free of charge - by calling Customer Support 1-855-332-6630 ext.2).
-
-Price:    ${7:00.00}
-HST:      ${8:00.00}
--------------------
-Total:    ${9:00.00}
-
-
-We hope you enjoy your purchase!
-
-Sincerely, 
-
-The 3D Condo Explorer Sales Team")]
-        public string orderConfirmationTemplate {
-            get {
-                return ((string)(this["orderConfirmationTemplate"]));
-            }
-        }
-        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("adminan")]
@@ -186,34 +142,6 @@ The 3D Condo Explorer Sales Team")]
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Dear {0},\r\n\r\nI noticed that you posted an MLS listing {7}for the following proper" +
-            "ty:\r\n\r\n    {1}\r\n\r\nLet me introduce \"Interactive 3D Listing (TM)\" - new Google Ea" +
-            "rth-based 3D Virtual Tour. \r\nThis is a new, exciting and breathtaking 3D Virtual" +
-            " Tour, that will grab everyone.\r\n\r\nTry it right now, it is free for you - just c" +
-            "lick this link:\r\n\r\n{2}\r\n\r\n   ... or if hesitating - check first this video (http" +
-            "://youtu.be/byMQRkqmFmU).\r\n\r\nDid you watch / try it?\r\n\r\nYes, this is completely " +
-            "NEW product - you never saw anything like this before!\r\nThis is a new way how to" +
-            " present a real estate! \r\nAnd we give it to you FOR FREE (value of ${3:00.00} - " +
-            "our gift for you) - use it now!\r\nYou can post this link with your MLS record - j" +
-            "ust like a regular virtual tour.\r\nOr/and you can email it to your prospects - it" +
-            " is extremely informational, presenting 100%\r\naccurate out-of-window view.\r\n\r\nWh" +
-            "ere is the catch? No catch! This is a promotional action of the 3D Condo Explore" +
-            "r Inc.\r\n\r\nONLY ONE THING - PLEASE READ THIS: This Interactive 3D Listing(TM) lin" +
-            "k is temporary, \r\nif you do nothing, it\'ll automatically die in {4} days (i.e. a" +
-            "fter {5} \r\nit will stop working). \r\nSo, IF YOU WANT TO KEEP IT, PLEASE COPY THIS" +
-            " MESSAGE AND SEND IT TO sales@3DcondoX.com.\r\n\r\nIf you want more info, call us at" +
-            ":\r\n    1-855-332-6630 (1-855-3d cond0) ext.2 (\"Sales and Marketing\"), 9AM-5PM we" +
-            "ekdays\r\n        ... or ...\r\n    email your questions to sales@3DcondoX.com\r\n\r\nWe" +
-            " are glad to help you with your highly competitive and challenging business.\r\n\r\n" +
-            "Yours,\r\n{8}\r\n{6}")]
-        public string listingPromoTemplate {
-            get {
-                return ((string)(this["listingPromoTemplate"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("3D Condo Explorer team\r\nwww.3dcondox.com\r\nsales@3DcondoX.com\r\n1-855-332-6630 x.2\r" +
             "\n")]
         public string defaultSignature {
@@ -228,6 +156,77 @@ The 3D Condo Explorer Sales Team")]
         public string defaultPromoSubject {
             get {
                 return ((string)(this["defaultPromoSubject"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"PLEASE DO NOT REPLY TO THIS MESSAGE.
+
+Dear {0},
+Thank you for ordering from 3D Condo Explorer Inc!
+
+Here are your order details:
+---------------------------
+    Order Number: {1}
+    Order Date: {2} 
+    {10} Address:
+        {3}
+
+Options (to change call Customer Support 1-855-332-6630 ext.2):
+    Inside the Unit: {4}
+    
+You cannot change address of the Interactive 3D Listing, but other options can be changed
+at any time
+
+Interactive 3D Listing URL:
+    {5}
+    Please copy-paste this link to use in your MLS listing.
+
+(Note: this Interactive 3D Listing will be valid for {6} days. You can extend this term any time,
+as many times as you want free of charge - by calling Customer Support 1-855-332-6630 ext.2).
+
+Price:    ${7:00.00}
+HST:      ${8:00.00}
+-------------------
+Total:    ${9:00.00}
+
+
+We hope you enjoy your purchase!
+
+Sincerely, 
+
+The 3D Condo Explorer Sales Team")]
+        public string orderConfirmationTemplate {
+            get {
+                return ((string)(this["orderConfirmationTemplate"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Dear {0},\r\n\r\nI noticed that you posted an MLS listing {7}for the following proper" +
+            "ty:\r\n\r\n    {1}\r\n\r\nLet me introduce \"{9}(TM)\" - new Google Earth-based 3D Virtual" +
+            " Tour. \r\nThis is a new, exciting and breathtaking 3D Virtual Tour, that will gra" +
+            "b everyone.\r\n\r\nTry it right now, it is free for you - just click this link:\r\n\r\n{" +
+            "2}\r\n\r\n   ... or if hesitating - check first this video (http://youtu.be/byMQRkqm" +
+            "FmU).\r\n\r\nDid you watch / try it?\r\n\r\nYes, this is completely NEW product - you ne" +
+            "ver saw anything like this before!\r\nThis is a new way how to present a real esta" +
+            "te! \r\nAnd we give it to you FOR FREE (value of ${3:00.00} - our gift for you) - " +
+            "use it now!\r\nYou can post this link with your MLS record - just like a regular v" +
+            "irtual tour.\r\nOr/and you can email it to your prospects - it is extremely inform" +
+            "ational, presenting 100%\r\naccurate out-of-window view.\r\n\r\nWhere is the catch? No" +
+            " catch! This is a promotional action of the 3D Condo Explorer Inc.\r\n\r\nONLY ONE T" +
+            "HING - PLEASE READ THIS: This Interactive 3D Listing(TM) link is temporary, \r\nif" +
+            " you do nothing, it\'ll automatically die in {4} days (i.e. after {5} \r\nit will s" +
+            "top working). \r\nSo, IF YOU WANT TO KEEP IT, PLEASE COPY THIS MESSAGE AND SEND IT" +
+            " TO sales@3DcondoX.com.\r\n\r\nIf you want more info, call us at:\r\n    1-855-332-663" +
+            "0 (1-855-3d cond0) ext.2 (\"Sales and Marketing\"), 9AM-5PM weekdays\r\n        ... " +
+            "or ...\r\n    email your questions to sales@3DcondoX.com\r\n\r\nWe are glad to help yo" +
+            "u with your highly competitive and challenging business.\r\n\r\nYours,\r\n{8}\r\n{6}")]
+        public string listingPromoTemplate {
+            get {
+                return ((string)(this["listingPromoTemplate"]));
             }
         }
     }

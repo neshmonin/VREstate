@@ -2,14 +2,13 @@ package com.condox.vrestate.client;
 
 import java.util.List;
 import java.util.Map;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
 
 public class Options implements RequestCallback{
-	public static final boolean DEBUG_MODE = false;
+	public static final boolean DEBUG_MODE = true;
 
 	public static String URL_VRT = DEBUG_MODE? "https://vrt.3dcondox.com/vre/" : "https://vrt.3dcondox.com/";
 	public static String URL_STATIC = DEBUG_MODE? "https://static.3dcondox.com/vre/" : "https://static.3dcondox.com/";

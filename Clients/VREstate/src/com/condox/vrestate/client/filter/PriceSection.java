@@ -1,10 +1,6 @@
 package com.condox.vrestate.client.filter;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Formatter;
-
-import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.Suite;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -30,8 +26,8 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 	private static ArrayList<Integer> prices = new ArrayList<Integer>();
 	private int min_price_range = 0;
 	private int max_price_range = 0;
-	private int last_min_price_range = 0;
-	private int last_max_price_range = 0;
+	//private int last_min_price_range = 0;
+	//private int last_max_price_range = 0;
 
 	private PriceSection() {
 		super();
@@ -234,7 +230,7 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 		return isChanged;
 	}
 
-	private JSONObject getJSON() {
+	public JSONObject getJSON() {
 		return null;
 	}
 
