@@ -33,11 +33,11 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 			_interactor = null;
 		}
 
-		if(Document.targetViewOrder != null && 
-				(Document.targetViewOrder.getProductType() == ProductType.PublicListing ||
-				 Document.targetViewOrder.getProductType() == ProductType.Building3DLayout)) {
-				Filter.get().setVisible(enabling);
-		}
+		if(Document.targetViewOrder == null) 
+			Filter.get().setVisible(enabling);
+		else if (Document.targetViewOrder.getProductType() == ProductType.PublicListing ||
+				 Document.targetViewOrder.getProductType() == ProductType.Building3DLayout)
+			Filter.get().setVisible(enabling);
 	}
 
 	@Override
