@@ -142,7 +142,7 @@ public class SuiteView extends _GEView {
 		
 		String infoUrl = Document.targetViewOrder.getInfoUrl();
 		if (infoUrl != null && infoUrl.length() > 0)
-			obj.put("more", new JSONString(infoUrl));
+			obj.put("moreInfo", new JSONString(infoUrl));
 		
 		// obj.put("mail", new JSONString("MailUrl"));
 		// obj.put("phone", new JSONString("123456789"));
