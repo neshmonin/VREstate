@@ -143,15 +143,25 @@ public class SuiteView extends _GEView {
 			obj.put("area", new JSONNumber(type.getArea()));
 		// obj.put("photo", new JSONString("PhotoUrl"));
 		
-		String infoUrl = Document.targetViewOrder.getInfoUrl();
-		if (infoUrl != null && infoUrl.length() > 0)
-			obj.put("moreInfo", new JSONString(infoUrl));
+		if (Document.targetViewOrder != null) {
+			String infoUrl = Document.targetViewOrder.getInfoUrl();
+			
+			if (Options.DEBUG_MODE)
+				infoUrl = "http://www.google.com";
+			else
+				infoUrl = "";
+			
+			if (infoUrl != null && infoUrl.length() > 0)
+				obj.put("moreInfo", new JSONString(infoUrl));
+//			Log.write(infoUrl);
+		}
 		
 		// obj.put("mail", new JSONString("MailUrl"));
 		// obj.put("phone", new JSONString("123456789"));
 		// Log.write("json:" + obj.toString());
 		// Log.write("balconies: " + suite_type.balconies);
 		// Log.write("suite_type: " + suite_type.name);
+		Log.write(obj.toString());
 		return obj.toString();
 	};
 
@@ -181,7 +191,9 @@ public class SuiteView extends _GEView {
 			suite.@com.condox.vrestate.client.view.SuiteView::ShowMore()();
 			//		return false;
 		}
+//		$wnd.alert(element.innerHTML);
 		$wnd.project(element, json, show_panoramic_view, show_more);
+//		$wnd.alert(element.innerHTML);
 	}-*/;
 
 	public native void removeElement(Element element) /*-{

@@ -91,6 +91,13 @@
 	top:0px;
 	left:0px;
 }
+.more_info_
+{
+	position:absolute;
+	top:25px;
+	left:50px;
+	font:100% Arial, Helvetica, sans-serif;
+}
 .exterior_button_
 {
 	position:absolute;
@@ -190,6 +197,13 @@ function project(container, json, onExterior, onInterior)
   	  exterior_img.onclick = onExterior;
 	  container.appendChild(exterior_img);
 	}
+	
+	if (typeof (params.moreInfo) !== 'undefined') {
+		var more_link = document.createElement("div");
+		more_link.innerHTML = "<a href=\"" + params.moreInfo + "\">More info...</a>";
+		more_link.className = 'more_info_';
+		container.appendChild(more_link);
+	}
 
 	if (typeof (params.more) == 'undefined') {
 	  var interior_img = document.createElement('img');
@@ -206,12 +220,6 @@ function project(container, json, onExterior, onInterior)
 	  container.appendChild(interior_img);
 	}
 }
-
-/*var json = '{price:null,area:"1234",suitName:"1212",suitModel:"Sea Wind",Floor:"12",bedrooms:"2",ceiling:"2",photo:"PhotoUrl",mail:"mJohnDoe@MyMail.com",phone:"(905)789-3265", panoramicViewURL:"panoramicView"}';
-var element = document.createElement('div');
-document.getElementsByTagName('body')[0].appendChild(element);
-project(element, json);*/
-
 
 </script>
 </body>

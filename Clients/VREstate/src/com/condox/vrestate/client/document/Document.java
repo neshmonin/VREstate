@@ -155,7 +155,7 @@ public class Document implements IDocument {
 	private void ParseSuites(String json) {
 		JSONObject obj = JSONParser.parseLenient(json).isObject();
 		JSONArray suites = obj.get("suites").isArray();
-		for (int index = 0; index < suites.size(); index++) {
+		for (int index = 0; index < suites.size()/*10*/; index++) {
 			Suite suite = new Suite();
 			suite.Parse(suites.get(index));
 			this.suites.put(suite.getId(), suite);
