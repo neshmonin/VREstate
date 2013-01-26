@@ -27,43 +27,38 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 		instance.setSpacing(10);
 		stackPanel.add(instance, "Balconies / Terrases", false);
 		instance.setSize("100%", "150px");
+		
+		rbBalconyAny = new RadioButton("new name", "Any");
+		rbBalconyAny.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				instance.isAny = rbBalconyAny.getValue();// == true;
+				instance.UpdateCaption();
+
+			}});
+		rbBalconyAny.setValue(true, true);
+		instance.add(rbBalconyAny);
 
 		rbBalconyYes = new RadioButton("new name", "Yes");
 		rbBalconyYes.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				instance.isAny = rbBalconyAny.getValue() == true;
-				if (rbBalconyAny.getValue())
-					instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Balconies/Terrases(any)");
-				else
-					instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Balconies/Terrases");
+				instance.isAny = rbBalconyAny.getValue();// == true;
+				instance.UpdateCaption();
 			}});
+		rbBalconyYes.addStyleDependentName("margined");
 		instance.add(rbBalconyYes);
 
 		rbBalconyNo = new RadioButton("new name", "No");
+		rbBalconyNo.addStyleDependentName("margined");
 		rbBalconyNo.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				instance.isAny = rbBalconyAny.getValue() == true;
-				if (rbBalconyAny.getValue())
-					instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Balconies/Terrases(any)");
-				else
-					instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Balconies/Terrases");
+				instance.isAny = rbBalconyAny.getValue();// == true;
+				instance.UpdateCaption();
 			}});
 		instance.add(rbBalconyNo);
 
-		rbBalconyAny = new RadioButton("new name", "Any");
-		rbBalconyAny.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				instance.isAny = rbBalconyAny.getValue() == true;
-				if (rbBalconyAny.getValue())
-					instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Balconies/Terrases(any)");
-				else
-					instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Balconies/Terrases");
-			}});
-		rbBalconyAny.setValue(true, true);
-		instance.add(rbBalconyAny);
 
 		return instance;
 	}
@@ -97,5 +92,29 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 	@Override
 	public boolean isAny() {
 		return isAny;
+	}
+
+	@Override
+	public void Apply() {
+		instance.isChanged = false;
+		if (Filter.initialized == true)
+			Filter.get().onChanged();
+	}
+
+	private boolean isChanged = false;
+	@Override
+	public boolean isChanged() {
+		// TODO Auto-generated method stub
+		return isChanged;
+	}
+	
+	private void UpdateCaption() {
+		if (isAny)
+			instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Balconies/Terrases(any)");
+		else
+			instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Balconies/Terrases");
+		isChanged = true;
+		if (Filter.initialized == true)
+			Filter.get().onChanged();
 	}
 }

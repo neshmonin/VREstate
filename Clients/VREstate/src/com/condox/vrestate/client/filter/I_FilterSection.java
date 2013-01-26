@@ -7,4 +7,6 @@ public interface I_FilterSection {
 	public void Reset();
 	public boolean isFileredIn(Suite suite);
 	public boolean isAny();
+	public void Apply();
+	public boolean isChanged();
 }

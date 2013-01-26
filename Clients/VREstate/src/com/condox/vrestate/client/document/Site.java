@@ -8,7 +8,7 @@ import com.condox.vrestate.client.Position;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 
-public class Site {
+public class Site implements I_VRObject {
 
 	public Position getPosition() {
 		return position;
@@ -21,7 +21,7 @@ public class Site {
 	private int parent_id = -1;
 	private String name = "";
 	private String displayModelUrl = "";
-
+	private String infoUrl = null;
 	private Position position = new Position();
 
 	// private double max_suite_altitude = 0;
@@ -87,4 +87,20 @@ public class Site {
 		result.addAll(ids.values());
 		return result;
 	}
+
+	@Override
+	public VRObjectType getType() {
+		return VRObjectType.Site;
+	}
+
+	@Override
+	public void setInfoUrl(String infoUrl) {
+		this.infoUrl = infoUrl;
+	}
+
+	@Override
+	public String getInfoUrl() {
+		return infoUrl;
+	}
+
 }

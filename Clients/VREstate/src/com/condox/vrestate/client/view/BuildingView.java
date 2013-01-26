@@ -1,6 +1,8 @@
 package com.condox.vrestate.client.view;
 
 import com.condox.vrestate.client.Options;
+import com.condox.vrestate.client.document.Document;
+import com.condox.vrestate.client.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.view.GeoItems.BuildingGeoItem;
 import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 
@@ -15,7 +17,9 @@ public class BuildingView extends _SB_View {
 		if (type.equals("building")) {
 			BuildingGeoItem buildingGeoItem = _AbstractView.getBuildingGeoItem(id);
 			if (theGeoItem.getId() == id) {
-				if (!Options.isViewOrder())
+				if (!Options.isViewOrder() ||
+					Document.targetViewOrder.getProductType() == ProductType.PublicListing ||
+					Document.targetViewOrder.getProductType() == ProductType.Building3DLayout)
 				{
 					buildingGeoItem.onSelectionChanged(false);
 					_AbstractView.Pop();
