@@ -942,7 +942,7 @@ namespace Vre.Server.RemoteService
             int objectId = query.GetParam("id", -1);
             if (objectId < 0) throw new ArgumentException("Object ID missing.");
 
-            bool showSold = query.GetParam("showSold", "false").Equals("true");
+            //bool showSold = query.GetParam("showSold", "true").Equals("true");
 
             Site site;
             using (SiteDao dao = new SiteDao(session.DbSession))
@@ -953,7 +953,7 @@ namespace Vre.Server.RemoteService
             List<Suite> suites = new List<Suite>();
             foreach (Building b in site.Buildings) suites.AddRange(b.Suites);
 
-            generateViewResponse(session.DbSession, suites.ToArray(), resp, showSold, false);
+            generateViewResponse(session.DbSession, suites.ToArray(), resp, true, false);
         }
 
         private static void getViewBuilding(ClientSession session, ServiceQuery query, IResponseData resp)
@@ -961,7 +961,7 @@ namespace Vre.Server.RemoteService
             int objectId = query.GetParam("id", -1);
             if (objectId < 0) throw new ArgumentException("Object ID missing.");
 
-            bool showSold = query.GetParam("showSold", "false").Equals("true");
+            //bool showSold = query.GetParam("showSold", "false").Equals("true");
 
             Building building;
             using (BuildingDao dao = new BuildingDao(session.DbSession))
@@ -973,7 +973,7 @@ namespace Vre.Server.RemoteService
             foreach (Suite s in building.Suites)
                 if (!suiteTypes.Contains(s.SuiteType) /* TODO: this may be slow! */) suiteTypes.Add(s.SuiteType);
 
-            generateViewResponse(session.DbSession, building.Suites.ToArray(), resp, showSold, true);
+            generateViewResponse(session.DbSession, building.Suites.ToArray(), resp, true, true);
         }
 
         private static void getViewSuite(ClientSession session, ServiceQuery query, IResponseData resp)
