@@ -77,20 +77,37 @@ namespace Vre.Server.RemoteService
             //
             LoginType loginType = parseLoginType(request.Request.Query);
             User.Role role;
-            int estateDeveloperId;
+            string estateDeveloperId = request.Request.Query["ed"];
             string login = request.Request.Query["uid"];
             string password = request.Request.Query["pwd"];
             string sessionId = null;
+
+            // role with default of superadmin
             if (!Enum.TryParse<User.Role>(request.Request.Query["role"], true, out role)) role = User.Role.SuperAdmin;
-            // TODO: Add login by Estate Developer Alias
-            if (!int.TryParse(request.Request.Query["ed"], out estateDeveloperId)) estateDeveloperId = -1;
+
+            // estate developer ID with default of none and reference by name support
+            int edId = -1;
+            if (estateDeveloperId != null)
+            {
+                if (!int.TryParse(estateDeveloperId, out edId))
+                {
+                    using (ISession session = NHibernateHelper.GetSession())
+                    {
+                        using (EstateDeveloperDao dao = new EstateDeveloperDao(session))
+                        {
+                            EstateDeveloper ed = dao.GetById(estateDeveloperId);
+                            if (ed != null) edId = ed.AutoID;
+                        }
+                    }
+                }
+            }
 
             // authenticate
             //
             if ((!string.IsNullOrWhiteSpace(login)) && (!string.IsNullOrWhiteSpace(password)))
             {
                 sessionId = ServiceInstances.SessionStore.LoginUser(request.UserInfo.EndPoint, 
-                    loginType, role, estateDeveloperId, login, password);
+                    loginType, role, edId, login, password);
             }
 
             // test user validity
@@ -358,6 +375,24 @@ namespace Vre.Server.RemoteService
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(request.UserInfo.Session.DbSession))
             {
+                User targetUser;
+
+                // use override for view order owner
+                int userId = -1;
+                if (!string.IsNullOrWhiteSpace(ownerId))
+                {
+                    if (!int.TryParse(ownerId, out userId)) userId = -1;
+                }
+
+                using (UserDao dao = new UserDao(request.UserInfo.Session.DbSession))
+                    targetUser = dao.GetById(userId);
+
+                if (null == targetUser) targetUser = request.UserInfo.Session.User;  // if unknown/not specified - make a view order for caller
+
+
+                // ========================================================
+                // BE CAREFUL WITH PERMISSION CHECKS IN THIS "IF" STATEMENT
+                //
                 if (string.IsNullOrWhiteSpace(propertyType) || string.IsNullOrWhiteSpace(propertyId))
                 {
                     // view by address lookup
@@ -367,16 +402,23 @@ namespace Vre.Server.RemoteService
                     Suite s = to as Suite;
                     if (s != null)
                     {
+                        if (s.Status != Suite.SalesStatus.Sold) throw new ObjectExistsException("Suite status in not SOLD");
                         targetType = ViewOrder.SubjectType.Suite;
                         targetId = s.AutoID;
+                        RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, s.Building);
                     }
                     else
                     {
                         Building b = to as Building;
                         if (b != null)
                         {
+                            if (product != ViewOrder.ViewOrderProduct.Building3DLayout)
+                            {
+                                if (b.Status != Building.BuildingStatus.Sold) throw new ObjectExistsException("Building status in not SOLD");
+                            }
                             targetType = ViewOrder.SubjectType.Building;
                             targetId = b.AutoID;
+                            RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, b);
                         }
                         else
                         {
@@ -399,28 +441,27 @@ namespace Vre.Server.RemoteService
                         using (SuiteDao dao = new SuiteDao(request.UserInfo.Session.DbSession)) s = dao.GetById(targetId);
                         if (s.Status != Suite.SalesStatus.Sold) throw new ObjectExistsException("Suite status in not SOLD");
                         to = s;
+                        RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, s.Building);
                     }
                     else if (propertyType.Equals("building"))
                     {
                         targetType = ViewOrder.SubjectType.Building;
                         Building b;
                         using (BuildingDao dao = new BuildingDao(request.UserInfo.Session.DbSession)) b = dao.GetById(targetId);
-                        if (b.Status != Building.BuildingStatus.Sold) throw new ObjectExistsException("Building status in not SOLD");
+                        if (product != ViewOrder.ViewOrderProduct.Building3DLayout)
+                        {
+                            if (b.Status != Building.BuildingStatus.Sold) throw new ObjectExistsException("Building status in not SOLD");
+                        }
                         to = b;
+                        RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, b);
                     }
                     else throw new ArgumentException("Unknown property type");
 
                     if (null == to) throw new FileNotFoundException("Property not found in system.");
                 }
 
-                // use override for view order owner
-                int userId = -1;
-                if (!string.IsNullOrWhiteSpace(ownerId))
-                {
-                    if (!int.TryParse(ownerId, out userId)) userId = -1;
-                }
 
-                string viewOrderId = ReverseRequestService.CreateViewOrder(request, userId, note,
+                string viewOrderId = ReverseRequestService.CreateViewOrder(request, targetUser, note,
                     product, options, mlsId, mlsUrl, targetType, targetId, productUrl, expiresOn, paymentRefId);
 
                 // request.Response.ResponseCode - set by .CreateListing()

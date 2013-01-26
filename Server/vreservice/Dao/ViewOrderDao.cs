@@ -49,7 +49,7 @@ namespace Vre.Server.Dao
             return _session.CreateSQLQuery(@"SELECT vo.* FROM ViewOrders vo 
 INNER JOIN Suites s ON s.AutoID=vo.TargetObjectId
 WHERE vo.Product=:pr AND vo.TargetObjectType=:ty AND vo.Deleted=0 AND vo.[Enabled]=1 AND vo.ExpiresOn>GETUTCDATE()
-AND s.BuildingID=:bid")
+AND s.BuildingID=:bid").AddEntity(typeof(ViewOrder))
                 .SetEnum("pr", product)
                 .SetEnum("ty", ViewOrder.SubjectType.Suite)
                 .SetInt32("bid", suite.Building.AutoID)

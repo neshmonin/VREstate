@@ -30,6 +30,16 @@ namespace Vre.Server.Dao
             }
         }
 
+        public IList<Suite> GetByIdList(List<int> list)
+        {
+            lock (_session)
+            {
+                return _session.CreateCriteria<Suite>()
+                    .Add(Restrictions.In("AutoID", list))
+                    .List<Suite>();
+            }
+        }
+
         //public int DeleteSuites(Building building)
         //{
         //    int result;

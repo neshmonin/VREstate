@@ -705,10 +705,17 @@ namespace Vre.Server.BusinessLogic
         #endregion
 
         #region view orders
-        public static void CheckCreateViewOrder(ClientSession session, User targetUser)
+        public static void CheckCreateViewOrder(ClientSession session, User targetUser, Building building)
         {
             // superadmin can make a listing for anyone
             if (session.User.UserRole == User.Role.SuperAdmin) return;
+
+            // developer admin can make a listing for anyone for a building/suite belonging to his estate developer
+            if (session.User.UserRole == User.Role.DeveloperAdmin)
+            {
+                if (null == building) return;
+                if (building.ConstructionSite.AutoID.Equals(session.User.EstateDeveloperID)) return;
+            }
 
             //// selling agent can make a listing for himself
             //if ((session.User.UserRole == User.Role.SellingAgent)
@@ -719,12 +726,12 @@ namespace Vre.Server.BusinessLogic
 
         public static void CheckUpdateViewOrder(ClientSession session, User targetUser)
         {
-            CheckCreateViewOrder(session, targetUser);  // same permissions
+            CheckCreateViewOrder(session, targetUser, null);  // same permissions
         }
 
         public static void CheckDeleteViewOrder(ClientSession session, User targetUser)
         {
-            CheckCreateViewOrder(session, targetUser);  // same permissions
+            CheckCreateViewOrder(session, targetUser, null);  // same permissions
         }
         #endregion
     }
