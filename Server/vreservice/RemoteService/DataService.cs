@@ -837,7 +837,6 @@ namespace Vre.Server.RemoteService
             if (!Guid.TryParseExact(strObjectId, "N", out rqid))
                 throw new ArgumentException();
 
-            List<ViewOrder> viewOrders = new List<ViewOrder>(1);
             ViewOrder viewOrder;
             bool viewOrderValid = false;
 
@@ -848,37 +847,8 @@ namespace Vre.Server.RemoteService
 
                 if ((null == viewOrder) || (viewOrder.Deleted)) throw new FileNotFoundException("Undefined view order");
 
-                viewOrders.Add(viewOrder);
                 viewOrderValid = (viewOrder.Enabled && (viewOrder.ExpiresOn > DateTime.UtcNow));
 
-                //if (!viewOrder.Enabled || (viewOrder.ExpiresOn < DateTime.UtcNow))
-                //{
-                //    if (viewOrder.OwnerId == session.User.AutoID)  // in case of owner viewing disabled order - return something meaningful
-                //    {
-                //        // make up same response data structure
-                //        resp.Data = new ClientData();
-
-                //        ClientData[] vol = new ClientData[1];
-                //        vol[0] = generateDisabledViewOrderData(viewOrder);
-                //        resp.Data.Add("viewOrders", vol);
-
-                //        resp.Data.Add("primaryViewOrderId", viewOrder.AutoID);
-                //        resp.Data.Add("initialView", "");  // TODO
-
-                //        resp.ResponseCode = HttpStatusCode.OK;
-
-                //        viewOrder = null;
-                //    }
-                //    else if (viewOrder.Deleted)
-                //    {
-                //        throw new FileNotFoundException("Undefined or expired view order");
-                //    }
-                //    else
-                //    {
-                //        throw new ExpiredException("Expired view order");
-                //    }
-                //}
-                //else
                 if (viewOrderValid)
                 {
                     viewOrder.Touch();
@@ -890,83 +860,89 @@ namespace Vre.Server.RemoteService
                 }
             }
 
-            //if (viewOrderValid)
+            switch (viewOrder.TargetObjectType)
             {
-                Suite suite = null;
-                Building building = null;
+                case ViewOrder.SubjectType.Suite:
+                    getViewSuiteViewOrder(session, viewOrder, resp);
+                    break;
 
-                switch (viewOrder.TargetObjectType)
-                {
-                    case ViewOrder.SubjectType.Suite:
-                        {
-                            using (SuiteDao dao = new SuiteDao(session.DbSession))
-                                suite = dao.GetById(viewOrder.TargetObjectId);
+                case ViewOrder.SubjectType.Building:
+                    getViewBuildingViewOrder(session, viewOrder, resp);
+                    break;
 
-                            if (null == suite) throw new FileNotFoundException("Unknown object listed");
-
-                            if (viewOrder.Product == ViewOrder.ViewOrderProduct.PublicListing)
-                            {
-                                using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
-                                    viewOrders.AddRange(dao.GetActiveSameBuilding(ViewOrder.ViewOrderProduct.PublicListing, suite));
-                            }
-
-                            building = suite.Building;
-                        }
-                        break;
-
-                    case ViewOrder.SubjectType.Building:
-                        {
-                            using (BuildingDao dao = new BuildingDao(session.DbSession))
-                                building = dao.GetById(viewOrder.TargetObjectId);
-
-                            if (null == building) throw new FileNotFoundException("Unknown object listed");
-                            if (1 == building.Suites.Count) suite = building.Suites[0];
-                        }
-                        break;
-
-                    default:
-                        throw new NotImplementedException("7FD8B0");
-                }
-
-                generateViewResponse(session.DbSession,
-                    new Site[] { building.ConstructionSite },
-                    new Building[] { building },
-                    suite != null ? new SuiteType[] { suite.SuiteType } : building.ConstructionSite.SuiteTypes,
-                    suite != null ? new Suite[] { suite } : building.Suites,
-                    viewOrders, //new ViewOrder[] { viewOrder },
-                    viewOrder.AutoID,
-                    resp, true, true);
+                default:
+                    throw new NotImplementedException("7FD8B0");
             }
-            //else
-            //{
-            //    generateViewResponse(session.DbSession,
-            //        new Site[0], new Building[0], new SuiteType[0], new Suite[0],
-            //        new ViewOrder[] { viewOrder },
-            //        viewOrder.AutoID,
-            //        resp, true /*does not really matter here*/, true);
-            //}
         }
 
-        //private static ClientData generateDisabledViewOrderData(ViewOrder order)
-        //{
-        //    ClientData result = new ClientData();
+        private static void getViewBuildingViewOrder(ClientSession session, ViewOrder viewOrder, IResponseData resp)
+        {
+            IList<ViewOrder> viewOrders;
+            Building building;
 
-        //    result.Add("id", order.AutoID);
+            using (BuildingDao dao = new BuildingDao(session.DbSession))
+                building = dao.GetById(viewOrder.TargetObjectId);
 
-        //    if (order.Deleted) result.Add("reason", "deleted");
-        //    else if (!order.Enabled) result.Add("reason", "disabled");
-        //    else result.Add("reason", "expired");
+            if (null == building) throw new FileNotFoundException("Unknown object listed");
 
-        //    result.Add("recoverUrl", string.Format(_disabledViewOrderRecoverUrl, order.AutoID.ToString("N")));
-        //    return result;
-        //}
+            // TODO
+            //if (viewOrder.Product == ViewOrder.ViewOrderProduct.PublicListing)
+            //{
+            //    using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+            //        viewOrders = dao.GetActiveSameBuilding(ViewOrder.ViewOrderProduct.PublicListing, suite);
+
+            //    List<int> suiteIds = new List<int>(viewOrders.Count);
+            //    foreach (ViewOrder vo in viewOrders) suiteIds.Add(vo.TargetObjectId);
+            //    using (SuiteDao dao = new SuiteDao(session.DbSession))
+            //        suites = dao.GetByIdList(suiteIds);
+            //}
+            viewOrders = new ViewOrder[1];
+            viewOrders[0] = viewOrder;
+
+            generateViewResponse(session.DbSession, building.Suites, viewOrders, viewOrder.AutoID,
+                resp, true, true);
+        }
+
+        private static void getViewSuiteViewOrder(ClientSession session, ViewOrder viewOrder, IResponseData resp)
+        {
+            IList<ViewOrder> viewOrders;
+            IList<Suite> suites = null;
+            Suite suite;
+
+            using (SuiteDao dao = new SuiteDao(session.DbSession))
+                suite = dao.GetById(viewOrder.TargetObjectId);
+
+            if (null == suite) throw new FileNotFoundException("Unknown object listed");
+
+            if (viewOrder.Product == ViewOrder.ViewOrderProduct.PublicListing)
+            {
+                using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                    viewOrders = dao.GetActiveSameBuilding(ViewOrder.ViewOrderProduct.PublicListing, suite);
+
+                List<int> suiteIds = new List<int>(viewOrders.Count);
+                foreach (ViewOrder vo in viewOrders) suiteIds.Add(vo.TargetObjectId);
+                using (SuiteDao dao = new SuiteDao(session.DbSession))
+                    suites = dao.GetByIdList(suiteIds);
+            }
+            else
+            {
+                viewOrders = new ViewOrder[1];
+                viewOrders[0] = viewOrder;
+
+                suites = new Suite[1];
+                suites[0] = suite;
+            }
+
+            generateViewResponse(session.DbSession, suites, viewOrders, viewOrder.AutoID,
+                resp, true, true);
+        }
 
         private static void getViewSite(ClientSession session, ServiceQuery query, IResponseData resp)
         {
             int objectId = query.GetParam("id", -1);
             if (objectId < 0) throw new ArgumentException("Object ID missing.");
 
-            bool showSold = query.GetParam("showSold", "false").Equals("true");
+            //bool showSold = query.GetParam("showSold", "true").Equals("true");
 
             Site site;
             using (SiteDao dao = new SiteDao(session.DbSession))
@@ -977,14 +953,7 @@ namespace Vre.Server.RemoteService
             List<Suite> suites = new List<Suite>();
             foreach (Building b in site.Buildings) suites.AddRange(b.Suites);
 
-            generateViewResponse(session.DbSession,
-                new Site[] { site },
-                site.Buildings.ToArray(),  
-                site.SuiteTypes.ToArray(),
-                suites.ToArray(),
-                new ViewOrder[0],
-                Guid.Empty,
-                resp, showSold, false);
+            generateViewResponse(session.DbSession, suites.ToArray(), resp, true, false);
         }
 
         private static void getViewBuilding(ClientSession session, ServiceQuery query, IResponseData resp)
@@ -992,7 +961,7 @@ namespace Vre.Server.RemoteService
             int objectId = query.GetParam("id", -1);
             if (objectId < 0) throw new ArgumentException("Object ID missing.");
 
-            bool showSold = query.GetParam("showSold", "false").Equals("true");
+            //bool showSold = query.GetParam("showSold", "false").Equals("true");
 
             Building building;
             using (BuildingDao dao = new BuildingDao(session.DbSession))
@@ -1004,14 +973,7 @@ namespace Vre.Server.RemoteService
             foreach (Suite s in building.Suites)
                 if (!suiteTypes.Contains(s.SuiteType) /* TODO: this may be slow! */) suiteTypes.Add(s.SuiteType);
 
-            generateViewResponse(session.DbSession,
-                new Site[] { building.ConstructionSite },
-                new Building[] { building },
-                suiteTypes.ToArray(),
-                building.Suites.ToArray(),
-                new ViewOrder[0],
-                Guid.Empty,
-                resp, showSold, true);
+            generateViewResponse(session.DbSession, building.Suites.ToArray(), resp, true, true);
         }
 
         private static void getViewSuite(ClientSession session, ServiceQuery query, IResponseData resp)
@@ -1025,14 +987,25 @@ namespace Vre.Server.RemoteService
 
             if ((null == suite) || suite.Deleted) throw new FileNotFoundException("Unknown suite");
 
-            generateViewResponse(session.DbSession,
-                new Site[] { suite.Building.ConstructionSite },
-                new Building[] { suite.Building },
-                new SuiteType[] { suite.SuiteType },
-                new Suite[] { suite },
-                new ViewOrder[0],
-                Guid.Empty,
-                resp, true, true);
+            generateViewResponse(session.DbSession, new Suite[] { suite }, resp, true, true);
+        }
+
+        private static void generateViewResponse(ISession dbSession,
+            IEnumerable<Suite> suites,
+            IResponseData resp,
+            bool showSoldProperty, bool minimizeOutput)
+        {
+            generateViewResponse(dbSession, null, null, null, suites, null, Guid.Empty, resp, showSoldProperty, minimizeOutput);
+        }
+
+        private static void generateViewResponse(ISession dbSession,
+            IEnumerable<Suite> suites,
+            IEnumerable<ViewOrder> viewOrders,
+            Guid primaryListingId,
+            IResponseData resp,
+            bool showSoldProperty, bool minimizeOutput)
+        {
+            generateViewResponse(dbSession, null, null, null, suites, viewOrders, primaryListingId, resp, showSoldProperty, minimizeOutput);
         }
 
         private static void generateViewResponse(ISession dbSession,
@@ -1069,75 +1042,117 @@ namespace Vre.Server.RemoteService
             }
             resp.Data.Add("suites", elements.ToArray());
 
-            elements = new List<ClientData>(suiteTypes.Count());
-            foreach (SuiteType st in suiteTypes)
+            if (suiteTypes != null)
             {
-                if (!usedSuiteTypes.Contains(st)) continue;
-                ServiceInstances.ModelCache.FillWithModelInfo(st, false);
-                UrlHelper.ConvertUrlsToAbsolute(st);
-                elements.Add(st.GetClientData());
+                elements = new List<ClientData>(suiteTypes.Count());
+                foreach (SuiteType st in suiteTypes)
+                {
+                    if (!usedSuiteTypes.Contains(st)) continue;
+                    ServiceInstances.ModelCache.FillWithModelInfo(st, false);
+                    UrlHelper.ConvertUrlsToAbsolute(st);
+                    elements.Add(st.GetClientData());
+                }
+            }
+            else
+            {
+                elements = new List<ClientData>(usedSuiteTypes.Count());
+                foreach (SuiteType st in usedSuiteTypes)
+                {
+                    ServiceInstances.ModelCache.FillWithModelInfo(st, false);
+                    UrlHelper.ConvertUrlsToAbsolute(st);
+                    elements.Add(st.GetClientData());
+                }
             }
             resp.Data.Add("suiteTypes", elements.ToArray());
 
-            elements = new List<ClientData>(buildings.Count());
-            foreach (Building b in buildings)
+            if (buildings != null)
             {
-                if (!usedBuildings.Contains(b))
+                elements = new List<ClientData>(buildings.Count());
+                foreach (Building b in buildings)
                 {
-                    if (!showSoldProperty)  // make sure suites in output are always backed
-                    // by building disregarding building status
+                    if (!usedBuildings.Contains(b))
                     {
-                        if (b.Status == Building.BuildingStatus.Sold) continue;
+                        if (!showSoldProperty)  // make sure suites in output are always backed
+                        // by building disregarding building status
+                        {
+                            if (b.Status == Building.BuildingStatus.Sold) continue;
+                        }
+                        if (minimizeOutput) continue;
                     }
-                    if (minimizeOutput) continue;
+                    ServiceInstances.ModelCache.FillWithModelInfo(b, false);
+                    ClientData cd = b.GetClientData();
+                    //if (maskSaleStatus) cd["status"] = "Selected";
+                    cd.Add("address", AddressHelper.ConvertToReadableAddress(b, null));
+                    elements.Add(cd);
+                    usedSites.Add(b.ConstructionSite);
                 }
-                ServiceInstances.ModelCache.FillWithModelInfo(b, false);
-                ClientData cd = b.GetClientData();
-                //if (maskSaleStatus) cd["status"] = "Selected";
-                cd.Add("address", AddressHelper.ConvertToReadableAddress(b, null));
-                elements.Add(cd);
-                usedSites.Add(b.ConstructionSite);
+            }
+            else
+            {
+                elements = new List<ClientData>(usedBuildings.Count());
+                foreach (Building b in usedBuildings)
+                {
+                    ServiceInstances.ModelCache.FillWithModelInfo(b, false);
+                    ClientData cd = b.GetClientData();
+                    //if (maskSaleStatus) cd["status"] = "Selected";
+                    cd.Add("address", AddressHelper.ConvertToReadableAddress(b, null));
+                    elements.Add(cd);
+                    usedSites.Add(b.ConstructionSite);
+                }
             }
             resp.Data.Add("buildings", elements.ToArray());
 
-            elements = new List<ClientData>(sites.Count());
-            foreach (Site s in sites)
+            if (sites != null)
             {
-                if (!usedSites.Contains(s)) continue;
-                ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-                elements.Add(s.GetClientData());
+                elements = new List<ClientData>(sites.Count());
+                foreach (Site s in sites)
+                {
+                    if (!usedSites.Contains(s)) continue;
+                    ServiceInstances.ModelCache.FillWithModelInfo(s, false);
+                    elements.Add(s.GetClientData());
+                }
+            }
+            else
+            {
+                elements = new List<ClientData>(usedSites.Count());
+                foreach (Site s in usedSites)
+                {
+                    ServiceInstances.ModelCache.FillWithModelInfo(s, false);
+                    elements.Add(s.GetClientData());
+                }
             }
             resp.Data.Add("sites", elements.ToArray());
-            
-            // Cannot reuse viewOrder.GetClientData() here as it exposes too much information
-            elements = new List<ClientData>(viewOrders.Count());
-            DateTime now = DateTime.UtcNow;
-            foreach (ViewOrder vo in viewOrders)
+
+            if (viewOrders != null)
             {
-                //if (vo.Deleted || !vo.Enabled || (vo.ExpiresOn < now))
-                //{
-                //    if (vo.AutoID.Equals(primaryListingId)) primaryListingId = Guid.Empty;  // reset primary order id if skipped
-                //    continue;
-                //}
-
-                ClientData cd = new ClientData();
-                cd.Add("id", vo.AutoID);
-                cd.Add("targetObjectType", ClientData.ConvertProperty<ViewOrder.SubjectType>(vo.TargetObjectType));
-                cd.Add("targetObjectId", vo.TargetObjectId);
-                cd.Add("product", ClientData.ConvertProperty<ViewOrder.ViewOrderProduct>(vo.Product));
-                cd.Add("options", ClientData.ConvertProperty<ViewOrder.ViewOrderOptions>(vo.Options));
-                cd.Add("mlsUrl", vo.InfoUrl);
-                cd.Add("productUrl", vo.VTourUrl);
-
-                if (!vo.Enabled || (vo.ExpiresOn < now))
+                elements = new List<ClientData>(viewOrders.Count());
+                DateTime now = DateTime.UtcNow;
+                foreach (ViewOrder vo in viewOrders)
                 {
-                    if (!vo.Enabled) cd.Add("reason", "disabled");
-                    else cd.Add("reason", "expired");
+                    ClientData cd = new ClientData();
+                    // Cannot reuse viewOrder.GetClientData() here as it exposes too much information
+                    cd.Add("id", vo.AutoID);
+                    cd.Add("targetObjectType", ClientData.ConvertProperty<ViewOrder.SubjectType>(vo.TargetObjectType));
+                    cd.Add("targetObjectId", vo.TargetObjectId);
+                    cd.Add("product", ClientData.ConvertProperty<ViewOrder.ViewOrderProduct>(vo.Product));
+                    cd.Add("options", ClientData.ConvertProperty<ViewOrder.ViewOrderOptions>(vo.Options));
+                    cd.Add("infoUrl", vo.InfoUrl);
+                    cd.Add("vTourUrl", vo.VTourUrl);
 
-                    cd.Add("recoverUrl", string.Format(_disabledViewOrderRecoverUrl, vo.AutoID.ToString("N")));
+                    if (!vo.Enabled || (vo.ExpiresOn < now))
+                    {
+                        if (!vo.Enabled) cd.Add("reason", "disabled");
+                        else cd.Add("reason", "expired");
+
+                        cd.Add("recoverUrl", string.Format(_disabledViewOrderRecoverUrl, vo.AutoID.ToString("N")));
+                    }
+
+                    elements.Add(cd);
                 }
-
-                elements.Add(cd);
+            }
+            else
+            {
+                elements = new List<ClientData>(0);
             }
             resp.Data.Add("viewOrders", elements.ToArray());
 

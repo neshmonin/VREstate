@@ -23,9 +23,9 @@
     <property name="Product" column="Product" />
     <property name="Options" column="Options" />
 
-    <property name="VTourUrl" column="ProductUrl" />
+    <property name="VTourUrl" column="VTourUrl" />
     <property name="MlsId" column="MlsId" />
-    <property name="InfoUrl" column="MlsUrl" />
+    <property name="InfoUrl" column="InfoUrl" />
     <property name="TargetObjectType" column="TargetObjectType" />
     <property name="TargetObjectId" column="TargetObjectId" />
 

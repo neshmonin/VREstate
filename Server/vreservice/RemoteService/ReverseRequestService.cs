@@ -575,7 +575,7 @@ namespace Vre.Server.RemoteService
         #endregion
 
         #region ViewOrder
-        public static string CreateViewOrder(IServiceRequest srq, int targetUserId, string note,
+        public static string CreateViewOrder(IServiceRequest srq, User targetUser, string note,
             ViewOrder.ViewOrderProduct product, ViewOrder.ViewOrderOptions options, string mlsId, string mlsUrl,
             ViewOrder.SubjectType type, int targetObjectId, string productUrl, DateTime expiresOn,
             string paymentSystemRefId)
@@ -583,18 +583,10 @@ namespace Vre.Server.RemoteService
             if (!_configured) configure();
 
             string result = null;
-            User targetUser;
             ViewOrder viewOrder;
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(srq.UserInfo.Session.DbSession))
             {
-                using (UserDao dao = new UserDao(srq.UserInfo.Session.DbSession))
-                    targetUser = dao.GetById(targetUserId);
-
-                if (null == targetUser) targetUser = srq.UserInfo.Session.User;  // if unknown/not specified - make a view order for caller
-
-                RolePermissionCheck.CheckCreateViewOrder(srq.UserInfo.Session, targetUser);
-
                 switch (product)
                 {
                     case ViewOrder.ViewOrderProduct.PrivateListing:

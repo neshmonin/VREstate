@@ -211,16 +211,17 @@ namespace Vre.Server.RemoteService
                     streetSuffix = null;
                 }
 
-                if (string.IsNullOrWhiteSpace(building)) throw new ArgumentException("Address: building (house) number is not provided");
-                building = building.Trim().ToUpperInvariant();
+                if (!string.IsNullOrWhiteSpace(building)) // throw new ArgumentException("Address: building (house) number is not provided");
+                    building = building.Trim().ToUpperInvariant();
 
-                freetextAddress.Append(building);
-                freetextAddress.Append(" ");
-                freetextAddress.Append(street);
-                freetextAddress.Append(" ");
-                if (streetSuffix != null) { freetextAddress.Append(streetSuffix); freetextAddress.Append(" "); }
-                if (streetType != null) { freetextAddress.Append(streetType); freetextAddress.Append(" "); }
-                if (streetDirection != null) { freetextAddress.Append(streetDirection); freetextAddress.Append(" "); }
+                if (!string.IsNullOrWhiteSpace(building)) { freetextAddress.Append(building); freetextAddress.Append(" "); }
+                else { freetextAddress.Append("* "); }
+
+                if (!string.IsNullOrWhiteSpace(street)) { freetextAddress.Append(street); freetextAddress.Append(" "); }
+                if (!string.IsNullOrWhiteSpace(streetSuffix)) { freetextAddress.Append(streetSuffix); freetextAddress.Append(" "); }
+                if (!string.IsNullOrWhiteSpace(streetType)) { freetextAddress.Append(streetType); freetextAddress.Append(" "); }
+                if (!string.IsNullOrWhiteSpace(streetDirection)) { freetextAddress.Append(streetDirection); freetextAddress.Append(" "); }
+
                 freetextAddress.Append("*");
             }
 
