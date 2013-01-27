@@ -13,21 +13,36 @@
 	font:200% Arial, Helvetica, sans-serif;
 	color:#03F;
 	position:absolute;
-	top:160px;
+	top:170px;
 	left:220px;
 }
 .suite_string_
 {
 	position:absolute;
-	top:18px;
-	left:185px;
+	color:#DE1A1A;
+	top:7px;
+	left:160px;
+	font:200% Arial, Helvetica, sans-serif;
+}
+.more_info_
+{
+	position:absolute;
+	top:0px;
+	left:430px;
+	font:130% Arial, Helvetica, sans-serif;
+}
+.virtual_tour_
+{
+	position:absolute;
+	top:0px;
+	left:15px;
 	font:130% Arial, Helvetica, sans-serif;
 }
 .label_bedrooms_
 {
 	position:absolute;
 	top:50px;
-	left:200px;
+	left:190px;
 	font:100% Arial, Helvetica, sans-serif;
 }
 .bedrrooms_
@@ -41,7 +56,7 @@
 {
 	position:absolute;
 	top:75px;
-	left:200px;
+	left:190px;
 	font:100% Arial, Helvetica, sans-serif;
 }
 .indoorarea_
@@ -55,7 +70,7 @@
 {
 	position:absolute;
 	top:100px;
-	left:200px;
+	left:190px;
 	font:100% Arial, Helvetica, sans-serif;
 }
 .balcony_
@@ -69,7 +84,7 @@
 {
 	position:absolute;
 	top:125px;
-	left:200px;
+	left:190px;
 	font:100% Arial, Helvetica, sans-serif;
 }
 .celling_
@@ -83,20 +98,13 @@
 {
 	position:absolute;
 	top:50px;
-	left:10px;
+	left:0px;
 }
 .interior_img_
 {
 	position:absolute;
 	top:0px;
 	left:0px;
-}
-.more_info_
-{
-	position:absolute;
-	top:25px;
-	left:50px;
-	font:100% Arial, Helvetica, sans-serif;
 }
 .exterior_button_
 {
@@ -132,6 +140,20 @@ function project(container, json, onExterior, onInterior)
 	  suit.innerHTML = "Suite " + params.suitName + " (Floor " + params.Floor + ")";
 	  suit.className = "suite_string_";
 	  container.appendChild(suit);
+	}
+
+	if (typeof (params.moreInfo) !== 'undefined') {
+		var more_link = document.createElement("div");
+		more_link.innerHTML = "<a href=\"" + params.moreInfo + "\" target=\"_blank\">See MLS info</a>";
+		more_link.className = 'more_info_';
+		container.appendChild(more_link);
+	}
+
+	if (typeof (params.virtualTour) !== 'undefined') {
+		var vt_link = document.createElement("div");
+		vt_link.innerHTML = "<a href=\"" + params.virtualTour + "\" target=\"_blank\">Virtual Tour</a>";
+		vt_link.className = 'virtual_tour_';
+		container.appendChild(vt_link);
 	}
 
 	if (typeof params.bedrooms !== 'undefined') {
@@ -188,9 +210,8 @@ function project(container, json, onExterior, onInterior)
 	  exterior_img.className = 'exterior_button_';
 	  container.appendChild(exterior_img);
 	}
-  else
+    else
 	{
-	
 	  var exterior_img = document.createElement('img');
 	  exterior_img.src = "templates/images/ViewExternalsButton.png";
 	  exterior_img.className = 'exterior_button_';
@@ -198,13 +219,6 @@ function project(container, json, onExterior, onInterior)
 	  container.appendChild(exterior_img);
 	}
 	
-	if (typeof (params.moreInfo) !== 'undefined') {
-		var more_link = document.createElement("div");
-		more_link.innerHTML = "<a href=\"" + params.moreInfo + "\">More info...</a>";
-		more_link.className = 'more_info_';
-		container.appendChild(more_link);
-	}
-
 	if (typeof (params.more) == 'undefined') {
 	  var interior_img = document.createElement('img');
 	  interior_img.src = "templates/images/ViewInternalsButtonDisabled.png";
@@ -212,7 +226,7 @@ function project(container, json, onExterior, onInterior)
 	  container.appendChild(interior_img);
 	}
 	else 
-  {
+    {
 	  var interior_img = document.createElement('img');
 	  interior_img.src = "templates/images/ViewInternalsButton.png";
 	  interior_img.className = 'interior_button_';

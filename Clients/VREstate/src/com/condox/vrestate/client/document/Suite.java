@@ -16,7 +16,7 @@ public class Suite implements I_VRObject {
 		OnHold, 
 		ResaleAvailable,
 		Selected,
-		Layout
+		Layout		
 	}
 	
 	private int id = -1;

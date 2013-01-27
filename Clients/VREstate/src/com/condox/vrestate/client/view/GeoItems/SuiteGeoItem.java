@@ -23,11 +23,11 @@ public class SuiteGeoItem implements IGeoItem {
 
 	public Suite suite = null;
 	
+	String href = null;
 	public SuiteGeoItem(Suite suite){
 		this.suite = suite;
 		
 		KmlStyle style = GE.getPlugin().createStyle("");
-		String href = "";
 		switch (suite.getStatus()) {
 		case Available:
 			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
@@ -36,10 +36,12 @@ public class SuiteGeoItem implements IGeoItem {
 			style.getLineStyle().getColor().set("FF00FF00"); // GREEN
 			break;
 		case Sold:
-			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
-					+ suite.getName()
-					+ "&txtClr=16711680&shdClr=16711680&frame=0";
-			style.getLineStyle().getColor().set("FF0000FF"); // RED
+			if (Options.getShowSold()) {
+				href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
+						+ suite.getName()
+						+ "&txtClr=16711680&shdClr=16711680&frame=0";
+				style.getLineStyle().getColor().set("FF0000FF"); // RED
+			}
 			break;
 		case ResaleAvailable:
 			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
@@ -61,6 +63,8 @@ public class SuiteGeoItem implements IGeoItem {
 			break;
 		}
 	
+		if (href == null) return;
+
 		KmlIcon icon = GE.getPlugin().createIcon("");
 	
 		icon.setHref(href);
@@ -125,6 +129,8 @@ public class SuiteGeoItem implements IGeoItem {
 	}
 	
 	public void onHeadingChanged(double heading_d) {
+		if (href == null) return;
+
 		boolean visible = isFilteredIn && isVisible(heading_d);
 		if (extended_data_label.getVisibility() != visible)
 			extended_data_label.setVisibility(visible);
@@ -132,6 +138,8 @@ public class SuiteGeoItem implements IGeoItem {
 	
 	private boolean isFilteredIn = true;
 	public void applyFilter() {
+		if (href == null) return;
+
 		isFilteredIn = Filter.get().isFileredIn(suite);
 
 		if (extended_data_lines.getVisibility() != isFilteredIn)
@@ -142,6 +150,8 @@ public class SuiteGeoItem implements IGeoItem {
 	}
 
 	private boolean isVisible(double heading_d) {
+		if (href == null) return false;
+
 		heading_d += 180;
 		if (heading_d > 360)
 			heading_d -= 360;
