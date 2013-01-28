@@ -199,7 +199,7 @@ namespace Vre.Server.ModelCache
                             return;
                         }
 
-                        BuildingInfo bi = new BuildingInfo(buildingModelInfo);
+                        BuildingInfo bi = new BuildingInfo(buildingModelInfo, building);
                         _buildingInfo.Add(building.AutoID, bi);
 
                         debug.Append("\r\nSuite type list:");
@@ -257,7 +257,7 @@ namespace Vre.Server.ModelCache
                                 continue;
                             }
 
-                            BuildingInfo bi = new BuildingInfo(buildingModelInfo);
+                            BuildingInfo bi = new BuildingInfo(buildingModelInfo, building);
                             _buildingInfo.Add(building.AutoID, bi);
                         }
 
@@ -396,9 +396,9 @@ namespace Vre.Server.ModelCache
             internal GeoPoint _location, _center;
             private double _maxSuiteAlt;
             internal string _name;
-            internal Dictionary<string, SuiteInfo> _suiteInfo;
+            internal Dictionary<int, SuiteInfo> _suiteInfo;
 
-            public BuildingInfo(Model.Kmz.Building modelInfo)
+            public BuildingInfo(Model.Kmz.Building modelInfo, Building dbBuilding)
             {
                 _name = modelInfo.Name;
                 //Name = modelInfo.Name;
@@ -412,19 +412,30 @@ namespace Vre.Server.ModelCache
                 double mLon = 0.0, mLat = 0.0, mAlt = 0.0;
                 int suiteCnt = 0;
 
-                _suiteInfo = new Dictionary<string, SuiteInfo>(modelInfo.Suites.Count());
+                _suiteInfo = new Dictionary<int, SuiteInfo>(modelInfo.Suites.Count());
                 foreach (Model.Kmz.Suite suiteModelInfo in modelInfo.Suites)
                 {
+                    Suite dbSuite = null;
+                    string suiteName = Utilities.NormalizeSuiteNumber(suiteModelInfo.Name);
+                    foreach (Suite s in dbBuilding.Suites) if (s.SuiteName.Equals(suiteName, StringComparison.InvariantCultureIgnoreCase)) { dbSuite = s; break; }
+
+                    if (null == dbSuite)
+                    {
+                        ServiceInstances.Logger.Error("Model contains suite name '{0}' (building '{1}') which does not exist in database.",
+                            suiteName, modelInfo.Name);
+                        continue;
+                    }
+
                     SuiteInfo si = new SuiteInfo(suiteModelInfo);
 
-                    if (_suiteInfo.ContainsKey(si._name))
+                    if (_suiteInfo.ContainsKey(dbSuite.AutoID))
                     {
-                        ServiceInstances.Logger.Error("Model contains duplicate suite names within building '{0}': '{1}'", 
+                        ServiceInstances.Logger.Error("Model contains duplicate suite names within building '{0}': '{1}'",
                             modelInfo.Name, si._name);
                         continue;
                     }
 
-                    _suiteInfo.Add(si._name, si);
+                    _suiteInfo.Add(dbSuite.AutoID, si);
 
                     vp = suiteModelInfo.LocationCart.AsViewPoint();
                     mLon += vp.Longitude;
@@ -448,13 +459,13 @@ namespace Vre.Server.ModelCache
                 if (withSubObjects)
                 {
                     int toUpdate = target.Suites.Count;
-                    foreach (string suiteName in _suiteInfo.Keys)
+
+                    foreach (Suite s in target.Suites)
                     {
-                        var suites = from st in target.Suites where st.SuiteName == suiteName select st;
-                        if (1 == suites.Count())
+                        SuiteInfo si;
+                        if (_suiteInfo.TryGetValue(s.AutoID, out si))
                         {
-                            Suite suiteBo = suites.First();
-                            _suiteInfo[suiteName].UpdateBo(suiteBo, true);
+                            si.UpdateBo(s, true);
                             toUpdate--;
                         }
                     }
@@ -466,7 +477,7 @@ namespace Vre.Server.ModelCache
             public bool UpdateBo(Suite target, bool withSubObjects)
             {
                 SuiteInfo bi;
-                if (_suiteInfo.TryGetValue(target.SuiteName, out bi))
+                if (_suiteInfo.TryGetValue(target.AutoID, out bi))
                 {
                     bi.UpdateBo(target, withSubObjects);
                     return true;

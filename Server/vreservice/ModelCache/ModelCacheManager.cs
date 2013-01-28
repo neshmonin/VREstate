@@ -43,7 +43,8 @@ namespace Vre.Server.ModelCache
                 _watcher.Renamed += new RenamedEventHandler(_watcher_Renamed);
                 _watcher.Error += new ErrorEventHandler(_watcher_Error);
 
-                ServiceInstances.Logger.Info("MC: Started reading model files.");
+                long origUsedMemoryBytes = GC.GetTotalMemory(true);
+                ServiceInstances.Logger.Info("MC: Started reading model files; memory used: {0} bytes.", origUsedMemoryBytes);
 
                 _cache = new Dictionary<string, ModelCache>();
                 //_cacheByName = new Dictionary<string, ModelCache>();
@@ -94,6 +95,7 @@ namespace Vre.Server.ModelCache
                                             else
                                             {
                                                 _cacheBySite.Add(s.AutoID, mc);
+                                                updateGeoInfo(mc);
                                             }
                                         }
                                     }
@@ -103,7 +105,9 @@ namespace Vre.Server.ModelCache
                     }
                 }
 
-                ServiceInstances.Logger.Info("MC: Reading model files done.");
+                long currUsedMemoryBytes = GC.GetTotalMemory(true);
+                ServiceInstances.Logger.Info("MC: Reading model files done; memory used: {0} bytes (delta={1}), {2} building models, {3} site models, {4} geo-proximity cache entries.", 
+                    currUsedMemoryBytes, currUsedMemoryBytes - origUsedMemoryBytes, _cacheByBuilding.Count, _cacheBySite.Count, _buildingGeoXref.Count);
 
 // TODO: TEMP TESTING!!!
 //new Thread(aaTestThread) { IsBackground = true }.Start();
@@ -354,6 +358,7 @@ namespace Vre.Server.ModelCache
                     ServiceInstances.Logger.Info("Added/replaced model: {0}", path);
                     cl[objectId] = result;
                     _cache[path] = result;
+                    updateGeoInfo(result);
                 }
                 else
                 {
@@ -507,6 +512,57 @@ namespace Vre.Server.ModelCache
                         //result = true;
                     }
                 }
+            }
+
+            return result;
+        }
+        #endregion
+
+        #region geolocation search
+        internal struct BuildingLocation
+        {
+            public double Longitude, Latitude;
+            public int BuildingId;
+            public BuildingLocation(double longitude, double latitude, int buildingId)
+            {
+                Longitude = longitude;
+                Latitude = latitude;
+                BuildingId = buildingId;
+            }
+        }
+
+        private Dictionary<int, BuildingLocation> _buildingGeoXref = new Dictionary<int, BuildingLocation>();
+
+        private void updateGeoInfo(ModelCache mc)
+        {
+            foreach (KeyValuePair<int, ModelCache.BuildingInfo> bi in mc._info._buildingInfo)
+                updateBuildingGeoInfo(bi.Key, bi.Value);
+        }
+
+        private void updateBuildingGeoInfo(int buildingId, ModelCache.BuildingInfo bi)
+        {
+            if (_buildingGeoXref.ContainsKey(buildingId))
+                _buildingGeoXref[buildingId] = new BuildingLocation(bi._location.Longitude, bi._location.Latitude, buildingId);
+            else
+                _buildingGeoXref.Add(buildingId, new BuildingLocation(bi._location.Longitude, bi._location.Latitude, buildingId));
+        }
+
+        public IEnumerable<int> BuildingsByGeoProximity(double longitude, double latitude, double quadradiusM)
+        {
+            List<int> result = new List<int>();
+
+            double dLon = quadradiusM / GeoUtilities.LongitudeDegreeInM(latitude);
+            double dLat = quadradiusM / GeoUtilities.LatitudeDegreeInM(latitude);
+
+            double minLon = longitude - dLon;
+            double maxLon = longitude + dLon;
+            double minLat = latitude - dLat;
+            double maxLat = latitude + dLat;
+
+            foreach (BuildingLocation bl in _buildingGeoXref.Values)
+            {
+                if ((bl.Longitude < maxLon) && (bl.Longitude > minLon)
+                    && (bl.Latitude < maxLat) && (bl.Latitude > minLat)) result.Add(bl.BuildingId);
             }
 
             return result;

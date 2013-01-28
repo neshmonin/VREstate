@@ -91,6 +91,7 @@
     </Compile>
     <Compile Include="Alternative\Building.cs" />
     <Compile Include="Alternative\ConstructionSite.cs" />
+    <Compile Include="Alternative\GeoUtilities.cs" />
     <Compile Include="Alternative\EcefViewPoint.cs" />
     <Compile Include="Alternative\Geometry.cs" />
     <Compile Include="Alternative\GeoPoint.cs" />
