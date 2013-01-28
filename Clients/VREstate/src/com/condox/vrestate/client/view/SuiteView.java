@@ -25,7 +25,7 @@ import com.nitrous.gwt.earth.client.api.KmlObject;
 import com.nitrous.gwt.earth.client.api.event.KmlLoadCallback;
 import com.google.gwt.user.client.Window;
 
-public class SuiteView extends _GEView implements RequestCallback {
+public class SuiteView extends _GEView {
 
 	private static boolean isMoreInfoVisible = false;
 
@@ -207,38 +207,10 @@ public class SuiteView extends _GEView implements RequestCallback {
 	private void ShowMore() throws RequestException {
 		SuiteType type = suiteGeo.suite.getSuiteType();
 		String floorPlanUrl = type.getFloorPlanUrl(); 
-		if (floorPlanUrl != null) {
-			if (!floorPlanUrl.endsWith(".html") &&
-				!floorPlanUrl.endsWith(".htm"))
-				Window.open(floorPlanUrl, "_blank", null);
-			else
-			{
-				RequestBuilder requestBldr = new RequestBuilder(RequestBuilder.GET, URL.encode(floorPlanUrl));
-				requestBldr.setCallback(this);
-				requestBldr.setHeader("Access-Control-Allow-Origin","http://myserver");
-				requestBldr.send();
-				floorPlanHTML = floorPlanUrl;
-			}
-		}
+		if (floorPlanUrl != null)
+			Window.open(floorPlanUrl, "_blank", null);
 	}
 	
-	@Override
-	public void onResponseReceived(Request request, Response response) {
-		String html = URL.decodeQueryString(response.getText());
-		//if (html.endsWith("</html>"))
-		{
-			html = html.replace("images/", floorPlanHTML.substring(0, floorPlanHTML.lastIndexOf("/") + 1) + "images/");
-			Log.write(floorPlanHTML);
-			Log.write(html);
-
-			html = html.replace("_parameter_SuiteNo",suiteGeo.getName());
-			html = html.replace("_parameter_FloorNo",suiteGeo.getFloor_name());
-			html = html.replace("_parameter_CellingHeight",String.valueOf(suiteGeo.getCellingHeight()) + " ft.");
-			html = html.replace("_parameter_Price",String.valueOf(suiteGeo.getPrice()));
-			open(html);
-		}
-	}
-
 	private native void open(String html) /*-{
 		var wnd = window.open("","_blank","");
 		wnd.document.write(html);
@@ -261,12 +233,6 @@ public class SuiteView extends _GEView implements RequestCallback {
 	public void onTransitionStopped() {
 		onHeadingChanged();
 		ShowMoreInfo();
-	}
-
-	@Override
-	public void onError(Request request, Throwable exception) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }
