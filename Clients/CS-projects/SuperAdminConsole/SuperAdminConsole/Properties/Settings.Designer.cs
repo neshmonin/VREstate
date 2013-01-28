@@ -103,7 +103,7 @@ namespace SuperAdminConsole.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://vrt.3dcondox.com/vre/")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://vrt.3dcondox.com/")]
         public string serverEndPoint {
             get {
                 return ((string)(this["serverEndPoint"]));

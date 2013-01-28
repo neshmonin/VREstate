@@ -1,6 +1,5 @@
 package com.condox.vrestate.client.view;
 
-import com.condox.vrestate.client.GET;
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.document.SuiteType;
@@ -11,16 +10,22 @@ import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.nitrous.gwt.earth.client.api.GEHtmlDivBalloon;
 import com.nitrous.gwt.earth.client.api.GEVisibility;
 import com.nitrous.gwt.earth.client.api.KmlFeature;
+import com.nitrous.gwt.earth.client.api.KmlObject;
+import com.nitrous.gwt.earth.client.api.event.KmlLoadCallback;
+import com.google.gwt.user.client.Window;
 
-public class SuiteView extends _GEView {
+public class SuiteView extends _GEView implements RequestCallback {
 
 	private static boolean isMoreInfoVisible = false;
 
@@ -130,20 +135,20 @@ public class SuiteView extends _GEView {
 			obj.put("balcony", new JSONString("none"));
 		//obj.put("ceiling", new JSONNumber(suiteGeo.suite.getCeiling_height_ft()));
 
-		String externalLinkUrl = suiteGeo.suite.getVTourUrl(); 
-		if (externalLinkUrl == null)
-			externalLinkUrl = type.getFloorPlanUrl();
-			
-		if (externalLinkUrl != null)
-			obj.put("more", new JSONString(externalLinkUrl));
+		String vTourUrl = suiteGeo.suite.getVTourUrl(); 
+		if (vTourUrl != null && vTourUrl.length() > 0)
+			obj.put("virtualTour", new JSONString(vTourUrl));
+			 
+		String floorPlanUrl = type.getFloorPlanUrl(); 
+		if (floorPlanUrl != null && floorPlanUrl.length() > 0)
+			obj.put("more", new JSONString(floorPlanUrl));
 			 
 		obj.put("panoramicViewURL", new JSONString(""));
+		
 		if (type.getArea() > 0)
 			obj.put("area", new JSONNumber(type.getArea()));
-		// obj.put("photo", new JSONString("PhotoUrl"));
 
 		String infoUrl = suiteGeo.suite.getInfoUrl();
-		
 		if (infoUrl != null && infoUrl.length() > 0)
 			obj.put("moreInfo", new JSONString(infoUrl));
 		else if (Options.DEBUG_MODE)
@@ -198,48 +203,46 @@ public class SuiteView extends _GEView {
 		_AbstractView.Push(new PanoramicView(suiteGeo));
 	}
 
-	private void ShowMore() {
-		String externalLinkUrl = suiteGeo.suite.getVTourUrl(); 
-		if (externalLinkUrl == null) {
-			SuiteType type = suiteGeo.suite.getSuiteType();
-			externalLinkUrl = type.getFloorPlanUrl();
-		}
-					
-		if (externalLinkUrl != null) {
-			final String link = externalLinkUrl;
-			GET.send(externalLinkUrl, new RequestCallback() {
-
-				@Override
-				public void onResponseReceived(Request request,
-						Response response) {
-					String html = response.getText();
-					html = html.replace("images/", link.substring(0, link.lastIndexOf("/") + 1) + "images/");
-					Log.write(link);
-					Log.write(html);
-					// TODO - доделать
-					html = html.replace("_parameter_SuiteNo",suiteGeo.getName());
-					html = html.replace("_parameter_FloorNo",suiteGeo.getFloor_name());
-					html = html.replace("_parameter_CellingHeight",String.valueOf(suiteGeo.getCellingHeight()) + " ft.");
-					html = html.replace("_parameter_Price",String.valueOf(suiteGeo.getPrice()));
-					open(html);
-				}
-
-				@Override
-				public void onError(Request request, Throwable exception) {
-					// TODO Auto-generated method stub
-					
-				}});
+	String floorPlanHTML = null;
+	private void ShowMore() throws RequestException {
+		SuiteType type = suiteGeo.suite.getSuiteType();
+		String floorPlanUrl = type.getFloorPlanUrl(); 
+		if (floorPlanUrl != null) {
+			if (!floorPlanUrl.endsWith(".html") &&
+				!floorPlanUrl.endsWith(".htm"))
+				Window.open(floorPlanUrl, "_blank", null);
+			else
+			{
+				RequestBuilder requestBldr = new RequestBuilder(RequestBuilder.GET, URL.encode(floorPlanUrl));
+				requestBldr.setCallback(this);
+				requestBldr.setHeader("Access-Control-Allow-Origin","http://myserver");
+				requestBldr.send();
+				floorPlanHTML = floorPlanUrl;
+			}
 		}
 	}
 	
+	@Override
+	public void onResponseReceived(Request request, Response response) {
+		String html = URL.decodeQueryString(response.getText());
+		//if (html.endsWith("</html>"))
+		{
+			html = html.replace("images/", floorPlanHTML.substring(0, floorPlanHTML.lastIndexOf("/") + 1) + "images/");
+			Log.write(floorPlanHTML);
+			Log.write(html);
+
+			html = html.replace("_parameter_SuiteNo",suiteGeo.getName());
+			html = html.replace("_parameter_FloorNo",suiteGeo.getFloor_name());
+			html = html.replace("_parameter_CellingHeight",String.valueOf(suiteGeo.getCellingHeight()) + " ft.");
+			html = html.replace("_parameter_Price",String.valueOf(suiteGeo.getPrice()));
+			open(html);
+		}
+	}
+
 	private native void open(String html) /*-{
 		var wnd = window.open("","_blank","");
 		wnd.document.write(html);
 	}-*/;	
-	
-	
-	
-	
 	
 	public void Update(double speed) {
 	}
@@ -259,4 +262,11 @@ public class SuiteView extends _GEView {
 		onHeadingChanged();
 		ShowMoreInfo();
 	}
+
+	@Override
+	public void onError(Request request, Throwable exception) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

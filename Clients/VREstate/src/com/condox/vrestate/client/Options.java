@@ -8,7 +8,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
 
 public class Options implements RequestCallback{
-	public static final boolean DEBUG_MODE = true;
+	public static final boolean DEBUG_MODE = false;
 
 	public static String URL_VRT = DEBUG_MODE? "https://vrt.3dcondox.com/vre/" : "https://vrt.3dcondox.com/";
 	public static String URL_STATIC = DEBUG_MODE? "https://static.3dcondox.com/vre/" : "https://static.3dcondox.com/";
@@ -142,6 +142,16 @@ public class Options implements RequestCallback{
 		if (params.containsKey("BuildingId"))
 			return params.get("BuildingId").get(0);
 		return null;
+	}
+
+	public static boolean getShowSold() {
+		Map<String, List<String>> params = Window.Location.getParameterMap();
+		if (params.containsKey("ShowSold"))
+		{
+			String flag = params.get("ShowSold").get(0);
+			return flag.equalsIgnoreCase("true");
+		}
+		return false;
 	}
 
 }
