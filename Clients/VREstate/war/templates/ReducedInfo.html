@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -100,40 +100,28 @@
 	top:50px;
 	left:0px;
 }
-.interior_img_
-{
-	position:absolute;
-	top:0px;
-	left:0px;
-}
 .exterior_button_
 {
 	position:absolute;
 	top:50px;
 	left:400px;
 }
-.exterior_img_
-{
-	position:absolute;
-	top:0px;
-	left:0px;
-	border:hidden;
-}
 </style>
 </head>
 <body>
 
 <script>
-function project(container, json, onExterior, onInterior) 
-{
-	var params = eval('(' + json + ')');
 
-	if (typeof params.price !== 'undefined') {
+container = document.body;
+onExterior = function A() {alert('A')};
+onInterior = function B() {alert('B')};
+
+{
 	  var mon = document.createElement("div");
-	  mon.innerHTML = params.price;
+	  mon.innerHTML = '$price';
 	  mon.className = "price_";
 	  container.appendChild(mon);
-	}
+	
 
 	if (typeof params.suitName !== 'undefined' && typeof params.Floor !== 'undefined' ) {
 	  var suit = document.createElement("div");

@@ -8,7 +8,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
 
 public class Options implements RequestCallback{
-	public static final boolean DEBUG_MODE = false;
+	public static final boolean DEBUG_MODE = true;
 
 	public static String URL_VRT = DEBUG_MODE? "https://vrt.3dcondox.com/vre/" : "https://vrt.3dcondox.com/";
 	public static String URL_STATIC = DEBUG_MODE? "https://static.3dcondox.com/vre/" : "https://static.3dcondox.com/";
@@ -75,15 +75,15 @@ public class Options implements RequestCallback{
 		// SUITE_DISTANCE = Integer.valueOf(params.containsKey("Distance")?
 		// params.get("Distance").get(0) : "-1");
 
-		if (DEBUG_MODE) {
-			URL_VRT = "https://vrt.3dcondox.com/vre/";
-			URL_STATIC = "https://static.3dcondox.com/vre/";
-			URL_MODEL = "https://model.3dcondox.com/vre/";
-		} else {
-			URL_VRT = "https://vrt.3dcondox.com/";
-			URL_STATIC = "https://static.3dcondox.com/";
-			URL_MODEL = "https://model.3dcondox.com/";
-		}
+//		if (DEBUG_MODE) {
+//			URL_VRT = "https://vrt.3dcondox.com/vre/";
+//			URL_STATIC = "https://static.3dcondox.com/vre/";
+//			URL_MODEL = "https://model.3dcondox.com/vre/";
+//		} else {
+//			URL_VRT = "https://vrt.3dcondox.com/";
+//			URL_STATIC = "https://static.3dcondox.com/";
+//			URL_MODEL = "https://model.3dcondox.com/";
+//		}
 		
 		HOME_URL = URL_VRT;
 		

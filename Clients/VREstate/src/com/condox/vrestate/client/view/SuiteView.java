@@ -99,6 +99,7 @@ public class SuiteView extends _GEView {
 		if (isMoreInfoVisible)
 			return;
 		isMoreInfoVisible = true;
+		
 		GEHtmlDivBalloon balloon = GE.getPlugin().createHtmlDivBalloon("");
 		balloon.setCloseButtonEnabled(false);
 		balloon.setContentDiv(Options.SUITE_INFO_TEMPLATE);
@@ -107,6 +108,7 @@ public class SuiteView extends _GEView {
 		balloon.setFeature(feature);
 		GE.getPlugin().setBalloon(balloon);
 		addElement(((Element) balloon.getContentDiv()), getJsonParams());
+		
 	};
 
 	public void HideMoreInfo() {
@@ -167,19 +169,38 @@ public class SuiteView extends _GEView {
 		//********************************
 		$doc.getElementsByTagName('body')[0].appendChild(element);
 		element.style.left = "10px";
+		
+		
+		
 		var scripts = element.getElementsByTagName("script");
+		for (i = 0; i < scripts.length; i++)
+			$wnd.eval(scripts[i].innerHTML);
+			
+//			$wnd.alert($doc.getElementsByTagName('head')[0].innerHTML);
+//		var style = $doc.getElementsByTagName('style')[0];
+		var styles = element.getElementsByTagName("style");
+		for (i = 0; i < styles.length; i++)
+			$doc.getElementsByTagName('head')[0].appendChild(styles[i]);
+			
+//			$wnd.alert($doc.innerHTML);
 
-		for (i = 0; i < scripts.length; i++) {
+			
+			
+			
+
+//		for (i = 0; i < scripts.length; i++) {
 			// if src, eval it, otherwise eval the body
-			if (scripts[i].hasAttribute("src")) {
-				var src = scripts[i].getAttribute("src");
-				var script = $doc.createElement('script');
-				script.setAttribute("src", src);
-				$doc.getElementsByTagName('body')[0].appendChild(script);
-			} else {
-				$wnd.eval(scripts[i].innerHTML);
-			}
-		}
+//			if (scripts[i].hasAttribute("src")) {
+//			if (scripts[i]['src'] != null) {
+//				var src = scripts[i].getAttribute("src");
+//				var script = $doc.createElement('script');
+//				script.setAttribute("src", src);
+//				$doc.getElementsByTagName('body')[0].appendChild(script);
+//			} else {
+//				$wnd.eval(scripts[i].innerHTML);
+//			}
+//		}
+
 		//********************************
 		var suite = this;
 		var show_panoramic_view = function() {
@@ -187,11 +208,10 @@ public class SuiteView extends _GEView {
 		}
 		var show_more = function() {
 			suite.@com.condox.vrestate.client.view.SuiteView::ShowMore()();
-			//		return false;
 		}
-//		$wnd.alert(element.innerHTML);
-		$wnd.project(element, json, show_panoramic_view, show_more);
-//		$wnd.alert(element.innerHTML);
+		
+		
+		$doc.project(element, json, show_panoramic_view, show_more);
 	}-*/;
 
 	public native void removeElement(Element element) /*-{
