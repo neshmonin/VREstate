@@ -93,7 +93,7 @@ public class Options implements RequestCallback{
 		URL_BUTTON_EXIT_PANORAMIC_VIEW = HOME_URL + "buttons/Back.png";
 		URL_BUTTON_CENTER_PANORAMIC_VIEW = HOME_URL + "buttons/Center.png";
 		// SUITE_INFO_TEMPLATE = HOME_URL + "templates/SuiteInfo.html";
-		String request = HOME_URL + "templates/ReducedInfo.html";
+		String request = HOME_URL + "ReducedInfo.html";
 		
 //		Log.write(request);
 		theOptions = new Options(vrEstate);
