@@ -16,12 +16,12 @@ public class Options implements RequestCallback{
 	public static String URL_STATIC;
 	public static String URL_MODEL;
 
-	public static String URL_BUTTONS = URL_VRT + "buttons/";
-	public static String URL_BUTTON_UNZOOM = URL_BUTTONS + "Unzoom.png";
-	public static String URL_BUTTON_ZOOM = URL_BUTTONS + "Zoom.png";
-//	public static String URL_BUTTON_PANORAMIC_VIEW = URL_BUTTONS + "PanoramicView.png";
-//	public static String URL_BUTTON_EXIT_PANORAMIC_VIEW = URL_BUTTONS + "Back.png";
-//	public static String URL_BUTTON_CENTER_PANORAMIC_VIEW = URL_BUTTONS + "Center.png";
+	public static String URL_BUTTONS;
+	public static String URL_BUTTON_UNZOOM;
+	public static String URL_BUTTON_ZOOM;
+//	public static String URL_BUTTON_PANORAMIC_VIEW;
+//	public static String URL_BUTTON_EXIT_PANORAMIC_VIEW;
+//	public static String URL_BUTTON_CENTER_PANORAMIC_VIEW;
 	
 	
 	public static int BUILDING_ID;
@@ -94,6 +94,13 @@ public class Options implements RequestCallback{
 			URL_STATIC = "https://static.3dcondox.com/";
 			URL_MODEL = "https://model.3dcondox.com/";
 		}
+
+		URL_BUTTONS = URL_VRT + "buttons/";
+		URL_BUTTON_UNZOOM = URL_BUTTONS + "Unzoom.png";
+		URL_BUTTON_ZOOM = URL_BUTTONS + "Zoom.png";
+//		URL_BUTTON_PANORAMIC_VIEW = URL_BUTTONS + "PanoramicView.png";
+//		URL_BUTTON_EXIT_PANORAMIC_VIEW = URL_BUTTONS + "Back.png";
+//		URL_BUTTON_CENTER_PANORAMIC_VIEW = URL_BUTTONS + "Center.png";
 		
 		HOME_URL = URL_VRT;
 		
