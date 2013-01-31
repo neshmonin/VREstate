@@ -2,17 +2,19 @@ package com.condox.vrestate.client;
 
 import java.util.List;
 import java.util.Map;
+
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
 
 public class Options implements RequestCallback{
-	public static final boolean DEBUG_MODE = true;
+	public static boolean DEBUG_MODE = true;
 
-	public static String URL_VRT = DEBUG_MODE? "https://vrt.3dcondox.com/vre/" : "https://vrt.3dcondox.com/";
-	public static String URL_STATIC = DEBUG_MODE? "https://static.3dcondox.com/vre/" : "https://static.3dcondox.com/";
-	public static String URL_MODEL = DEBUG_MODE? "https://model.3dcondox.com/vre/" : "https://model.3dcondox.com/";
+	public static String URL_VRT;
+	public static String URL_STATIC;
+	public static String URL_MODEL;
 
 	public static String URL_BUTTONS = URL_VRT + "buttons/";
 	public static String URL_BUTTON_UNZOOM = URL_BUTTONS + "Unzoom.png";
@@ -75,15 +77,23 @@ public class Options implements RequestCallback{
 		// SUITE_DISTANCE = Integer.valueOf(params.containsKey("Distance")?
 		// params.get("Distance").get(0) : "-1");
 
-//		if (DEBUG_MODE) {
-//			URL_VRT = "https://vrt.3dcondox.com/vre/";
-//			URL_STATIC = "https://static.3dcondox.com/vre/";
-//			URL_MODEL = "https://model.3dcondox.com/vre/";
-//		} else {
-//			URL_VRT = "https://vrt.3dcondox.com/";
-//			URL_STATIC = "https://static.3dcondox.com/";
-//			URL_MODEL = "https://model.3dcondox.com/";
-//		}
+		if (BUILDING_ID != -1)
+			DEBUG_MODE = params.containsKey("test") ? Boolean.valueOf(params
+					.get("test").get(0)) : false;
+		else
+	    	DEBUG_MODE = (GWT.getModuleBaseURL().contains("/vre/")); 
+
+		Log.write("DEBUG_MODE=" + DEBUG_MODE);
+	    
+		if (DEBUG_MODE) {
+			URL_VRT = "https://vrt.3dcondox.com/vre/";
+			URL_STATIC = "https://static.3dcondox.com/vre/";
+			URL_MODEL = "https://model.3dcondox.com/vre/";
+		} else {
+			URL_VRT = "https://vrt.3dcondox.com/";
+			URL_STATIC = "https://static.3dcondox.com/";
+			URL_MODEL = "https://model.3dcondox.com/";
+		}
 		
 		HOME_URL = URL_VRT;
 		
