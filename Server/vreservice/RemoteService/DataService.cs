@@ -824,7 +824,7 @@ namespace Vre.Server.RemoteService
             else if (type.Equals("site")) getViewSite(session, query, resp);
             else if (type.Equals("building")) getViewBuilding(session, query, resp);
             else if (type.Equals("suite")) getViewSuite(session, query, resp);
-            else if (type.Equals("geo")) throw new NotImplementedException(); //getViewGeo(session, query, resp);
+            else if (type.Equals("geo")) getViewGeo(session, query, resp);
             else throw new NotImplementedException();
         }
 
@@ -875,33 +875,6 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void getViewGeo(ClientSession session, ServiceQuery query, IResponseData resp)
-        {
-            string param;
-            double cLon, cLat, sqRadM;
-
-            param = query["gsq_lon"];
-            if (null == param) throw new ArgumentException("Geo square center longitude missing.");
-            if (!double.TryParse(param, out cLon)) throw new ArgumentException();
-
-            param = query["gsq_lat"];
-            if (null == param) throw new ArgumentException("Geo square center latitude missing.");
-            if (!double.TryParse(param, out cLat)) throw new ArgumentException();
-
-            param = query["gsq_sqrad"];
-            if (null == param) throw new ArgumentException("Geo square squradius missing.");
-            if (!double.TryParse(param, out sqRadM)) throw new ArgumentException();
-
-            List<Building> buildings = new List<Building>();
-            using (BuildingDao dao = new BuildingDao(session.DbSession))
-            {
-                foreach (int id in ServiceInstances.ModelCache.BuildingsByGeoProximity(cLon, cLat, sqRadM))
-                    buildings.Add(dao.GetById(id));
-            }
-
-            // TODO
-        }
-
         private static void getViewBuildingViewOrder(ClientSession session, ViewOrder viewOrder, IResponseData resp)
         {
             IList<ViewOrder> viewOrders;
@@ -926,12 +899,21 @@ namespace Vre.Server.RemoteService
             viewOrders = new ViewOrder[1];
             viewOrders[0] = viewOrder;
 
-            generateViewResponse(session.DbSession, building.Suites, viewOrders, viewOrder.AutoID,
-                resp, ViewResponseSoldPropertyLevel.Building, true);
+            //generateViewResponse(session.DbSession, building.Suites, viewOrders, viewOrder.AutoID,
+            //    resp, ViewResponseSoldPropertyLevel.Building, false);
+
+            generateViewResponse(session.DbSession,
+                null, new Building[] { building }, null, building.Suites, viewOrders, viewOrder.AutoID,
+                resp,
+                ViewResponseSoldPropertyLevel.Suite, false);
         }
 
         private static void getViewSuiteViewOrder(ClientSession session, ViewOrder viewOrder, IResponseData resp)
         {
+            // TODO: make this variable
+            const double defaultProximityQuadradiusM = 1000.0;
+
+            IList<Building> buildings = null;
             IList<ViewOrder> viewOrders;
             IList<Suite> suites = null;
             Suite suite;
@@ -943,8 +925,22 @@ namespace Vre.Server.RemoteService
 
             if (viewOrder.Product == ViewOrder.ViewOrderProduct.PublicListing)
             {
+                int[] buildingIds = ServiceInstances.ModelCache.BuildingsByGeoProximity(suite.Building, defaultProximityQuadradiusM);
+
+                buildings = new List<Building>();
+                using (BuildingDao dao = new BuildingDao(session.DbSession))
+                {
+                    foreach (int id in buildingIds)
+                    {
+                        Building b = dao.GetById(id);
+                        if (!b.Deleted) buildings.Add(b);
+                    }
+                }
+
+                ServiceInstances.Logger.Debug("dSPVO: got {0} live buildings.", buildings.Count);
+
                 using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
-                    viewOrders = dao.GetActiveSameBuilding(ViewOrder.ViewOrderProduct.PublicListing, suite);
+                    viewOrders = dao.GetActiveInBuildings(ViewOrder.ViewOrderProduct.PublicListing, buildingIds);
 
                 List<int> suiteIds = new List<int>(viewOrders.Count);
                 foreach (ViewOrder vo in viewOrders) suiteIds.Add(vo.TargetObjectId);
@@ -960,8 +956,51 @@ namespace Vre.Server.RemoteService
                 suites[0] = suite;
             }
 
-            generateViewResponse(session.DbSession, suites, viewOrders, viewOrder.AutoID,
-                resp, ViewResponseSoldPropertyLevel.Suite, true);
+            //generateViewResponse(session.DbSession, suites, viewOrders, viewOrder.AutoID,
+            //    resp, ViewResponseSoldPropertyLevel.Suite, true);
+
+            generateViewResponse(session.DbSession,
+                null, buildings, null, suites, viewOrders, viewOrder.AutoID,
+                resp,
+                ViewResponseSoldPropertyLevel.Suite, false);
+        }
+
+        private static void getViewGeo(ClientSession session, ServiceQuery query, IResponseData resp)
+        {
+            string param;
+            double cLon, cLat, sqRadM;
+
+            param = query["gsq_lon"];
+            if (null == param) throw new ArgumentException("Geo square center longitude missing.");
+            if (!double.TryParse(param, out cLon)) throw new ArgumentException();
+
+            param = query["gsq_lat"];
+            if (null == param) throw new ArgumentException("Geo square center latitude missing.");
+            if (!double.TryParse(param, out cLat)) throw new ArgumentException();
+
+            param = query["gsq_sqrad"];
+            if (null == param) throw new ArgumentException("Geo square squradius missing.");
+            if (!double.TryParse(param, out sqRadM)) throw new ArgumentException();
+
+            bool showSold = query.GetParam("showSold", "false").Equals("true");
+
+            List<Building> buildings = new List<Building>();
+            using (BuildingDao dao = new BuildingDao(session.DbSession))
+            {
+                foreach (int id in ServiceInstances.ModelCache.BuildingsByGeoProximity(cLon, cLat, sqRadM))
+                {
+                    Building b = dao.GetById(id);
+                    if (!b.Deleted) buildings.Add(b);
+                }
+            }
+
+            List<Suite> suites = new List<Suite>();
+            foreach (Building b in buildings) suites.AddRange(b.Suites);
+
+            generateViewResponse(session.DbSession,
+                null, buildings, null, suites, null, Guid.Empty,
+                resp,
+                showSold ? ViewResponseSoldPropertyLevel.Suite : ViewResponseSoldPropertyLevel.Building, false);
         }
 
         private static void getViewSite(ClientSession session, ServiceQuery query, IResponseData resp)
@@ -981,7 +1020,7 @@ namespace Vre.Server.RemoteService
             foreach (Building b in site.Buildings) suites.AddRange(b.Suites);
 
             generateViewResponse(session.DbSession,
-                new Site[] { site }, site.Buildings, null, suites.ToArray(), null, Guid.Empty, 
+                new Site[] { site }, site.Buildings, null, suites, null, Guid.Empty, 
                 resp, 
                 showSold ? ViewResponseSoldPropertyLevel.Suite : ViewResponseSoldPropertyLevel.Building, false);
         }
@@ -1000,7 +1039,7 @@ namespace Vre.Server.RemoteService
             if ((null == building) || building.Deleted) throw new FileNotFoundException("Unknown building");
 
             generateViewResponse(session.DbSession, 
-                null, new Building[] { building }, null, building.Suites.ToArray(), null, Guid.Empty,
+                null, new Building[] { building }, null, building.Suites, null, Guid.Empty,
                 resp, 
                 showSold ? ViewResponseSoldPropertyLevel.Suite : ViewResponseSoldPropertyLevel.Building, true);
         }
@@ -1104,7 +1143,7 @@ namespace Vre.Server.RemoteService
                 {
                     if (!usedBuildings.Contains(b))
                     {
-                        if (soldPropertyLevel != ViewResponseSoldPropertyLevel.None)  // make sure suites in output are always backed
+                        if (soldPropertyLevel == ViewResponseSoldPropertyLevel.None)  // make sure suites in output are always backed
                         // by building disregarding building status
                         {
                             if (b.Status == Building.BuildingStatus.Sold) continue;

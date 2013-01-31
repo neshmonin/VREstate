@@ -535,19 +535,37 @@ namespace Vre.Server.ModelCache
 
         private void updateGeoInfo(ModelCache mc)
         {
-            foreach (KeyValuePair<int, ModelCache.BuildingInfo> bi in mc._info._buildingInfo)
-                updateBuildingGeoInfo(bi.Key, bi.Value);
+            lock (_buildingGeoXref)
+            {
+                foreach (KeyValuePair<int, ModelCache.BuildingInfo> bi in mc._info._buildingInfo)
+                    updateBuildingGeoInfo(bi.Key, bi.Value);
+            }
         }
 
         private void updateBuildingGeoInfo(int buildingId, ModelCache.BuildingInfo bi)
         {
-            if (_buildingGeoXref.ContainsKey(buildingId))
-                _buildingGeoXref[buildingId] = new BuildingLocation(bi._location.Longitude, bi._location.Latitude, buildingId);
-            else
-                _buildingGeoXref.Add(buildingId, new BuildingLocation(bi._location.Longitude, bi._location.Latitude, buildingId));
+            lock (_buildingGeoXref)
+            {
+                if (_buildingGeoXref.ContainsKey(buildingId))
+                    _buildingGeoXref[buildingId] = new BuildingLocation(bi._location.Longitude, bi._location.Latitude, buildingId);
+                else
+                    _buildingGeoXref.Add(buildingId, new BuildingLocation(bi._location.Longitude, bi._location.Latitude, buildingId));
+            }
         }
 
-        public IEnumerable<int> BuildingsByGeoProximity(double longitude, double latitude, double quadradiusM)
+        public int[] BuildingsByGeoProximity(Building center, double quadradiusM)
+        {
+            lock (_buildingGeoXref)
+            {
+                BuildingLocation blc;
+                if (_buildingGeoXref.TryGetValue(center.AutoID, out blc))
+                    return BuildingsByGeoProximity(blc.Longitude, blc.Latitude, quadradiusM);
+                else
+                    return new int[0];
+            }
+        }
+
+        public int[] BuildingsByGeoProximity(double longitude, double latitude, double quadradiusM)
         {
             List<int> result = new List<int>();
 
@@ -559,13 +577,19 @@ namespace Vre.Server.ModelCache
             double minLat = latitude - dLat;
             double maxLat = latitude + dLat;
 
-            foreach (BuildingLocation bl in _buildingGeoXref.Values)
+            lock (_buildingGeoXref)
             {
-                if ((bl.Longitude < maxLon) && (bl.Longitude > minLon)
-                    && (bl.Latitude < maxLat) && (bl.Latitude > minLat)) result.Add(bl.BuildingId);
+                foreach (BuildingLocation bl in _buildingGeoXref.Values)
+                {
+                    if ((bl.Longitude < maxLon) && (bl.Longitude > minLon)
+                        && (bl.Latitude < maxLat) && (bl.Latitude > minLat)) result.Add(bl.BuildingId);
+                }
             }
 
-            return result;
+            ServiceInstances.Logger.Debug("BbGP: dLon={0}, dLat={1}, lon={2}, lat={3}, cnt={4}.",
+                dLon, dLat, longitude, latitude, result.Count);
+
+            return result.ToArray();
         }
         #endregion
     }
