@@ -9,23 +9,16 @@ import com.condox.vrestate.client.view.Camera.Camera;
 import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
+import com.google.gwt.user.client.Window;
 import com.nitrous.gwt.earth.client.api.GEHtmlDivBalloon;
 import com.nitrous.gwt.earth.client.api.GEVisibility;
 import com.nitrous.gwt.earth.client.api.KmlFeature;
-import com.nitrous.gwt.earth.client.api.KmlObject;
-import com.nitrous.gwt.earth.client.api.event.KmlLoadCallback;
-import com.google.gwt.user.client.Window;
 
-public class SuiteView extends _GEView implements RequestCallback {
+public class SuiteView extends _GEView {
 
 	private static boolean isMoreInfoVisible = false;
 
@@ -99,6 +92,7 @@ public class SuiteView extends _GEView implements RequestCallback {
 		if (isMoreInfoVisible)
 			return;
 		isMoreInfoVisible = true;
+		
 		GEHtmlDivBalloon balloon = GE.getPlugin().createHtmlDivBalloon("");
 		balloon.setCloseButtonEnabled(false);
 		balloon.setContentDiv(Options.SUITE_INFO_TEMPLATE);
@@ -107,6 +101,7 @@ public class SuiteView extends _GEView implements RequestCallback {
 		balloon.setFeature(feature);
 		GE.getPlugin().setBalloon(balloon);
 		addElement(((Element) balloon.getContentDiv()), getJsonParams());
+		
 	};
 
 	public void HideMoreInfo() {
@@ -167,19 +162,38 @@ public class SuiteView extends _GEView implements RequestCallback {
 		//********************************
 		$doc.getElementsByTagName('body')[0].appendChild(element);
 		element.style.left = "10px";
+		
+		
+		
 		var scripts = element.getElementsByTagName("script");
+		for (i = 0; i < scripts.length; i++)
+			$wnd.eval(scripts[i].innerHTML);
+			
+//			$wnd.alert($doc.getElementsByTagName('head')[0].innerHTML);
+//		var style = $doc.getElementsByTagName('style')[0];
+		var styles = element.getElementsByTagName("style");
+		for (i = 0; i < styles.length; i++)
+			$doc.getElementsByTagName('head')[0].appendChild(styles[i]);
+			
+//			$wnd.alert($doc.innerHTML);
 
-		for (i = 0; i < scripts.length; i++) {
+			
+			
+			
+
+//		for (i = 0; i < scripts.length; i++) {
 			// if src, eval it, otherwise eval the body
-			if (scripts[i].hasAttribute("src")) {
-				var src = scripts[i].getAttribute("src");
-				var script = $doc.createElement('script');
-				script.setAttribute("src", src);
-				$doc.getElementsByTagName('body')[0].appendChild(script);
-			} else {
-				$wnd.eval(scripts[i].innerHTML);
-			}
-		}
+//			if (scripts[i].hasAttribute("src")) {
+//			if (scripts[i]['src'] != null) {
+//				var src = scripts[i].getAttribute("src");
+//				var script = $doc.createElement('script');
+//				script.setAttribute("src", src);
+//				$doc.getElementsByTagName('body')[0].appendChild(script);
+//			} else {
+//				$wnd.eval(scripts[i].innerHTML);
+//			}
+//		}
+
 		//********************************
 		var suite = this;
 		var show_panoramic_view = function() {
@@ -187,11 +201,10 @@ public class SuiteView extends _GEView implements RequestCallback {
 		}
 		var show_more = function() {
 			suite.@com.condox.vrestate.client.view.SuiteView::ShowMore()();
-			//		return false;
 		}
-//		$wnd.alert(element.innerHTML);
-		$wnd.project(element, json, show_panoramic_view, show_more);
-//		$wnd.alert(element.innerHTML);
+		
+		
+		$doc.project(element, json, show_panoramic_view, show_more);
 	}-*/;
 
 	public native void removeElement(Element element) /*-{
@@ -207,38 +220,10 @@ public class SuiteView extends _GEView implements RequestCallback {
 	private void ShowMore() throws RequestException {
 		SuiteType type = suiteGeo.suite.getSuiteType();
 		String floorPlanUrl = type.getFloorPlanUrl(); 
-		if (floorPlanUrl != null) {
-			if (!floorPlanUrl.endsWith(".html") &&
-				!floorPlanUrl.endsWith(".htm"))
-				Window.open(floorPlanUrl, "_blank", null);
-			else
-			{
-				RequestBuilder requestBldr = new RequestBuilder(RequestBuilder.GET, URL.encode(floorPlanUrl));
-				requestBldr.setCallback(this);
-				requestBldr.setHeader("Access-Control-Allow-Origin","http://myserver");
-				requestBldr.send();
-				floorPlanHTML = floorPlanUrl;
-			}
-		}
+		if (floorPlanUrl != null)
+			Window.open(floorPlanUrl, "_blank", null);
 	}
 	
-	@Override
-	public void onResponseReceived(Request request, Response response) {
-		String html = URL.decodeQueryString(response.getText());
-		//if (html.endsWith("</html>"))
-		{
-			html = html.replace("images/", floorPlanHTML.substring(0, floorPlanHTML.lastIndexOf("/") + 1) + "images/");
-			Log.write(floorPlanHTML);
-			Log.write(html);
-
-			html = html.replace("_parameter_SuiteNo",suiteGeo.getName());
-			html = html.replace("_parameter_FloorNo",suiteGeo.getFloor_name());
-			html = html.replace("_parameter_CellingHeight",String.valueOf(suiteGeo.getCellingHeight()) + " ft.");
-			html = html.replace("_parameter_Price",String.valueOf(suiteGeo.getPrice()));
-			open(html);
-		}
-	}
-
 	private native void open(String html) /*-{
 		var wnd = window.open("","_blank","");
 		wnd.document.write(html);
@@ -261,12 +246,6 @@ public class SuiteView extends _GEView implements RequestCallback {
 	public void onTransitionStopped() {
 		onHeadingChanged();
 		ShowMoreInfo();
-	}
-
-	@Override
-	public void onError(Request request, Throwable exception) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

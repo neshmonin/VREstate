@@ -58,6 +58,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 					+ Options.getSiteId() + "&SID=" + User.SID;
 //			Window.open(url, "", "");
 		}
+//		Window.alert("Message!");
 		GET.send(url, this);
 	}
 
@@ -73,8 +74,11 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 				if (site.getDisplayModelUrl() != "")
 					GE.getPlugin().fetchKml(Options.HOME_URL + site.getDisplayModelUrl(), this);
 
+//			Window.alert("CreatingAllGeoItems!");
 			_AbstractView.CreateAllGeoItems();
+//			Window.alert("CreatingSite!");
 			final SiteView view = new SiteView(_AbstractView.getSiteGeoItem(site.getId()));
+//			Window.alert("PushingSite!");
 			_AbstractView.Push(view);
 		}
 		//=================================================================

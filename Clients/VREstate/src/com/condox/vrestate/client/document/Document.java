@@ -33,10 +33,12 @@ public class Document implements IDocument {
 	
 	@Override
 	public boolean Parse(String json) {
+//		Window.alert("Document start parsing");
 		progressBar = new ProgressBar();
 		if (json.equals("")) {
 			progressBar.Update(-1.0);
 			progressBar.Update(ProgressBar.ProgressLabel.Error);
+//			Window.alert("Document end parsing");
 			return false;
 		} else {
 			progressBar.Update(ProgressBar.ProgressLabel.Loading);
@@ -84,6 +86,7 @@ public class Document implements IDocument {
 				suite.CalcLineCoords();
 
 			progressBar.Cleanup();
+//			Window.alert("Document end parsing");
 			return true;
 		}
 	}
@@ -155,7 +158,7 @@ public class Document implements IDocument {
 	private void ParseSuites(String json) {
 		JSONObject obj = JSONParser.parseLenient(json).isObject();
 		JSONArray suites = obj.get("suites").isArray();
-		for (int index = 0; index < suites.size()/*10*/; index++) {
+		for (int index = 0; index < suites.size()/*5*/; index++) {
 			Suite suite = new Suite();
 			suite.Parse(suites.get(index));
 			this.suites.put(suite.getId(), suite);
