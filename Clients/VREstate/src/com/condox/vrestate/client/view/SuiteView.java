@@ -147,7 +147,7 @@ public class SuiteView extends _GEView {
 		if (infoUrl != null && infoUrl.length() > 0)
 			obj.put("moreInfo", new JSONString(infoUrl));
 		else if (Options.DEBUG_MODE)
-			obj.put("moreInfo", new JSONString("http://www.google.com"));
+			obj.put("moreInfo", new JSONString("http://02ea89a.netsolhost.com/beyondsea/beachcomber.html"));
 		
 		// obj.put("mail", new JSONString("MailUrl"));
 		// obj.put("phone", new JSONString("123456789"));

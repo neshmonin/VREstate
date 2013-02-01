@@ -29,7 +29,7 @@ document.project = function foo(container, json, onExterior, onInterior)
 
 	if (typeof (params.moreInfo) !== 'undefined') {
 		var more_link = document.createElement("div");
-		more_link.innerHTML = "<a href=\"" + params.moreInfo + "\" target=\"_blank\">See MLS info</a>";
+		more_link.innerHTML = "<a href=\"" + params.moreInfo + "\" target=\"_blank\">More Info...</a>";
 		more_link.className = 'more_info_';
 		container.appendChild(more_link);
 	}
