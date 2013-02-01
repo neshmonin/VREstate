@@ -1,4 +1,4 @@
-ECHO ON
+@ECHO OFF
 
 
 CD /D "%~dp0"
@@ -6,6 +6,7 @@ CD /D "%~dp0"
 
 IF NOT EXIST ready\NUL GOTO noready
 RMDIR /S /Q ready
+IF EXIST ready\NUL GOTO quit
 
 :noready
 MKDIR ready
