@@ -44,7 +44,7 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 		stackPanel.add(instance, "Bathrooms", false);
 		instance.setSize("100%", "150px");
 
-		cbAny = new CheckBox("Any, or");
+		cbAny = new MyCustomCheckBox("Any, or");
 		cbAny.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				instance.isAny = cbAny.getValue().booleanValue();
@@ -303,19 +303,19 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 		SuiteType type = suite.getSuiteType();
 		int bathrooms = type.getBathrooms();
 		int dens = type.getDens();
-		if (cbOneBathroom.getValue() && bathrooms == 1)
+		if (cbOneBathroom.getValue() && bathrooms == 1 && dens == 0)
 			return true;
 		else if (cbOneBathroomDens.getValue() && bathrooms == 1 && dens != 0)
 			return true;
-		else if (cbTwoBathrooms.getValue() && bathrooms == 2)
+		else if (cbTwoBathrooms.getValue() && bathrooms == 2 && dens == 0)
 			return true;
 		else if (cbTwoBathroomsDens.getValue() && bathrooms == 2 && dens != 0)
 			return true;
-		else if (cbThreeBathrooms.getValue() && bathrooms == 3)
+		else if (cbThreeBathrooms.getValue() && bathrooms == 3 && dens == 0)
 			return true;
 		else if (cbThreeBathroomsDens.getValue() && bathrooms == 3 && dens != 0)
 			return true;
-		else if (cbFourBathrooms.getValue() && bathrooms == 4)
+		else if (cbFourBathrooms.getValue() && bathrooms == 4 && dens == 0)
 			return true;
 		else if (cbFourBathroomsDens.getValue() && bathrooms == 4 && dens != 0)
 			return true;
