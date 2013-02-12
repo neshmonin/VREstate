@@ -58,7 +58,7 @@ public class SuiteView extends _GEView {
 
 		if (type.equals("suite"))
 		{
-			IGeoItem suiteGeo = _AbstractView.getSiteGeoItem(id);
+			SuiteGeoItem suiteGeo = _AbstractView.getSuiteGeoItem(id);
 			SuiteView suiteView = new SuiteView(suiteGeo);
 			_AbstractView.Pop_Push(suiteView);
 		}
