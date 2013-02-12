@@ -29,13 +29,14 @@
         private void InitializeComponent()
         {
             this.label1 = new System.Windows.Forms.Label();
-            this.lblServer = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.tbLogin = new System.Windows.Forms.TextBox();
             this.tbPassword = new System.Windows.Forms.TextBox();
             this.buttonLogin = new System.Windows.Forms.Button();
             this.checkBoxIsSuperadmin = new System.Windows.Forms.CheckBox();
+            this.radioButtonMainServer = new System.Windows.Forms.RadioButton();
+            this.radioButtonAlternativeServer = new System.Windows.Forms.RadioButton();
             this.SuspendLayout();
             // 
             // label1
@@ -46,15 +47,6 @@
             this.label1.Size = new System.Drawing.Size(41, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "Server:";
-            // 
-            // lblServer
-            // 
-            this.lblServer.AutoSize = true;
-            this.lblServer.Location = new System.Drawing.Point(96, 13);
-            this.lblServer.Name = "lblServer";
-            this.lblServer.Size = new System.Drawing.Size(128, 13);
-            this.lblServer.TabIndex = 1;
-            this.lblServer.Text = "Server Name Shows here";
             // 
             // label2
             // 
@@ -112,19 +104,42 @@
             this.checkBoxIsSuperadmin.UseVisualStyleBackColor = true;
             this.checkBoxIsSuperadmin.CheckedChanged += new System.EventHandler(this.checkBoxIsSuperadmin_CheckedChanged);
             // 
+            // radioButtonMainServer
+            // 
+            this.radioButtonMainServer.AutoSize = true;
+            this.radioButtonMainServer.Checked = true;
+            this.radioButtonMainServer.Location = new System.Drawing.Point(155, 11);
+            this.radioButtonMainServer.Name = "radioButtonMainServer";
+            this.radioButtonMainServer.Size = new System.Drawing.Size(48, 17);
+            this.radioButtonMainServer.TabIndex = 8;
+            this.radioButtonMainServer.TabStop = true;
+            this.radioButtonMainServer.Text = "Main";
+            this.radioButtonMainServer.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonAlternativeServer
+            // 
+            this.radioButtonAlternativeServer.AutoSize = true;
+            this.radioButtonAlternativeServer.Location = new System.Drawing.Point(234, 11);
+            this.radioButtonAlternativeServer.Name = "radioButtonAlternativeServer";
+            this.radioButtonAlternativeServer.Size = new System.Drawing.Size(75, 17);
+            this.radioButtonAlternativeServer.TabIndex = 9;
+            this.radioButtonAlternativeServer.Text = "Alternative";
+            this.radioButtonAlternativeServer.UseVisualStyleBackColor = true;
+            // 
             // LoginForm
             // 
             this.AcceptButton = this.buttonLogin;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(367, 140);
+            this.Controls.Add(this.radioButtonAlternativeServer);
+            this.Controls.Add(this.radioButtonMainServer);
             this.Controls.Add(this.checkBoxIsSuperadmin);
             this.Controls.Add(this.buttonLogin);
             this.Controls.Add(this.tbPassword);
             this.Controls.Add(this.tbLogin);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.lblServer);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -140,12 +155,13 @@
         #endregion
 
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label lblServer;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         public System.Windows.Forms.TextBox tbLogin;
         public System.Windows.Forms.TextBox tbPassword;
         private System.Windows.Forms.Button buttonLogin;
         private System.Windows.Forms.CheckBox checkBoxIsSuperadmin;
+        private System.Windows.Forms.RadioButton radioButtonMainServer;
+        private System.Windows.Forms.RadioButton radioButtonAlternativeServer;
     }
 }

@@ -149,9 +149,14 @@ namespace SuperAdminConsole
             //    }
             //}
 
-            loginForm = new LoginForm(ServerProxy.ServerEndpoint, login);
+            loginForm = new LoginForm(login);
             while (DialogResult.OK == loginForm.ShowDialog(this))
             {
+                if (loginForm.IsMainServer)
+                    ServerProxy.ServerEndpoint = Properties.Settings.Default.serverEndPoint;
+                else
+                    ServerProxy.ServerEndpoint = Properties.Settings.Default.serverEndPoint + "vre/"; 
+                
                 login = loginForm.tbLogin.Text;
                 password = loginForm.tbPassword.Text;
                 myRole = loginForm.IsSuperAdmin ? "SuperAdmin" : "Admin";

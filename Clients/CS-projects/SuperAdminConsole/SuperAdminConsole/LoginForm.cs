@@ -11,10 +11,9 @@ namespace SuperAdminConsole
 {
     public partial class LoginForm : Form
     {
-        public LoginForm(string server, string login)
+        public LoginForm(string login)
         {
             InitializeComponent();
-            lblServer.Text = server;
             tbLogin.Text = login;
             IsSuperAdmin = checkBoxIsSuperadmin.Checked;
         }
@@ -36,5 +35,11 @@ namespace SuperAdminConsole
         }
 
         public bool IsSuperAdmin { get; private set; }
+
+        public bool IsMainServer 
+        {
+            get { return radioButtonMainServer.Checked; }
+        }
+
     }
 }

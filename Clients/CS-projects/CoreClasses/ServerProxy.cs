@@ -85,7 +85,7 @@ namespace CoreClasses
 
         static public bool Online { get { lock (_this._threadQuit) return (_this._sid != null); } }
         static public string SessionLooseDescription { get; private set; }
-        static public string ServerEndpoint { get; private set; }
+        static public string ServerEndpoint { get; set; }
 
         private void keepaliveThread()
         {
