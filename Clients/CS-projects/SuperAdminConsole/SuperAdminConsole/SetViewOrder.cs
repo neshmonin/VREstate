@@ -214,7 +214,7 @@ namespace SuperAdminConsole
                     buttonPrev.Visible = false;
                     buttonNext.Enabled = true;
                     buttonFinish.Enabled = false;
-
+                    buttonOneMore.Visible = false;
                     break;
                 case "Address":
                     buttonPrev.Visible = true;
@@ -222,6 +222,7 @@ namespace SuperAdminConsole
                     buttonNext.Enabled = addressVerified;
                     buttonCheckAddress.Enabled = !addressVerified;
                     buttonFinish.Enabled = false;
+                    buttonOneMore.Visible = false;
                     break;
                 case "Options":
                     groupBoxListingOptions.Visible = radioButtonPrivateListing.Checked || 
@@ -282,6 +283,7 @@ namespace SuperAdminConsole
 
                     textBoxTotal.Text = ViewOrderPriceWithTax;
                     buttonCancel.Visible = paymentRefId == string.Empty;
+                    buttonOneMore.Visible = false;
                     break;
                 case "Generate":
                     buttonCancel.Visible = paymentSkip && !viewOrderUrlGenerated;
@@ -293,6 +295,8 @@ namespace SuperAdminConsole
                                                 viewOrderUrlGenerated;
                     buttonGenerateURL.Enabled = !viewOrderUrlGenerated;
                     buttonNext.Visible = false;
+                    buttonOneMore.Visible = theReason == ChangeReason.Creation &&
+                                            viewOrderUrlGenerated;
                     break;
             }
         }
@@ -601,7 +605,7 @@ namespace SuperAdminConsole
         {
             if (theReason == ChangeReason.Transfer)
             {
-                DateTime expiresOn = DateTime.Now.AddDays((double)numericUpDownDaysValid.Value+1);
+                DateTime expiresOn = DateTime.Now.AddDays((double)numericUpDownDaysValid.Value + 1);
                 expiresOn = System.TimeZone.CurrentTimeZone.ToUniversalTime(expiresOn.Date);
                 theOrder["expiresOn"] = expiresOn;
                 theOrder["ownerId"] = theUser.AutoID;
@@ -609,7 +613,7 @@ namespace SuperAdminConsole
 
             if (theReason != ChangeReason.Creation)
             {
-                ViewOrder.ViewOrderOptions options = radioButtonFloorplan.Checked ? ViewOrder.ViewOrderOptions.FloorPlan : 
+                ViewOrder.ViewOrderOptions options = radioButtonFloorplan.Checked ? ViewOrder.ViewOrderOptions.FloorPlan :
                                                                                     ViewOrder.ViewOrderOptions.ExternalTour;
                 //bool changed = false;
                 //theOrder.UpdateProperty("options", options, ref changed);
@@ -852,6 +856,23 @@ namespace SuperAdminConsole
 
         private void updateStateEvent(object sender, EventArgs e)
         {
+            UpdateState();
+        }
+
+        private void buttonOneMore_Click(object sender, EventArgs e)
+        {
+            textBoxMLS.Text = string.Empty;
+            textBoxInfoUrl.Text = string.Empty;
+            textBoxNote.Text = string.Empty;
+            textExternalLink.Text = string.Empty;
+            textBoxViewOrderURL.Text = string.Empty;
+            textBox300Chars.Text = string.Empty;
+            radioButtonFloorplan.Checked = true;
+            theOrder = null;
+            viewOrderUrlGenerated = false;
+            validatedUrl = string.Empty;
+
+            tabControlSteps.SelectTab("tabPageCheckAddress");
             UpdateState();
         }
 
