@@ -32,6 +32,7 @@
             this.buttonPrev = new System.Windows.Forms.Button();
             this.buttonNext = new System.Windows.Forms.Button();
             this.buttonFinish = new System.Windows.Forms.Button();
+            this.buttonOneMore = new System.Windows.Forms.Button();
             this.tabControlSteps = new SuperAdminConsole.WizardPages();
             this.tabPagePickProduct = new System.Windows.Forms.TabPage();
             this.label14 = new System.Windows.Forms.Label();
@@ -126,7 +127,7 @@
             // 
             this.buttonPrev.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonPrev.Enabled = false;
-            this.buttonPrev.Location = new System.Drawing.Point(208, 344);
+            this.buttonPrev.Location = new System.Drawing.Point(175, 344);
             this.buttonPrev.Name = "buttonPrev";
             this.buttonPrev.Size = new System.Drawing.Size(70, 24);
             this.buttonPrev.TabIndex = 19;
@@ -137,7 +138,7 @@
             // buttonNext
             // 
             this.buttonNext.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonNext.Location = new System.Drawing.Point(285, 344);
+            this.buttonNext.Location = new System.Drawing.Point(252, 344);
             this.buttonNext.Name = "buttonNext";
             this.buttonNext.Size = new System.Drawing.Size(70, 24);
             this.buttonNext.TabIndex = 20;
@@ -156,6 +157,17 @@
             this.buttonFinish.Text = "Finish";
             this.buttonFinish.UseVisualStyleBackColor = true;
             this.buttonFinish.Click += new System.EventHandler(this.buttonFinish_Click);
+            // 
+            // buttonOneMore
+            // 
+            this.buttonOneMore.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonOneMore.Location = new System.Drawing.Point(344, 344);
+            this.buttonOneMore.Name = "buttonOneMore";
+            this.buttonOneMore.Size = new System.Drawing.Size(70, 24);
+            this.buttonOneMore.TabIndex = 22;
+            this.buttonOneMore.Text = "One more";
+            this.buttonOneMore.UseVisualStyleBackColor = true;
+            this.buttonOneMore.Click += new System.EventHandler(this.buttonOneMore_Click);
             // 
             // tabControlSteps
             // 
@@ -932,6 +944,7 @@
             this.CancelButton = this.buttonCancel;
             this.ClientSize = new System.Drawing.Size(502, 376);
             this.ControlBox = false;
+            this.Controls.Add(this.buttonOneMore);
             this.Controls.Add(this.buttonFinish);
             this.Controls.Add(this.buttonNext);
             this.Controls.Add(this.buttonPrev);
@@ -1035,5 +1048,6 @@
         private System.Windows.Forms.RadioButton radioButtonSharedListing;
         private System.Windows.Forms.RadioButton radioButtonPrivateListing;
         private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Button buttonOneMore;
     }
 }
