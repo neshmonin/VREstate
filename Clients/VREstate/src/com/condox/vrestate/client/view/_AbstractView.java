@@ -2,6 +2,8 @@ package com.condox.vrestate.client.view;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import com.condox.vrestate.client.Log;
@@ -65,6 +67,7 @@ public abstract class _AbstractView implements I_AbstractView {
 				{
 					currentView.setEnabled(true);
 					currentView.onTransitionStopped();
+					NextSelection();
 				}
 			}
 		});
@@ -252,6 +255,24 @@ public abstract class _AbstractView implements I_AbstractView {
 		return isScheduled;
 	}; 
 	public void scheduleSetEnabled(){setEnabledScheduled = true;};
+
+	private static List<IGeoItem> SelectionsQueue = new LinkedList<IGeoItem>(); 
+	public static void AddSelection(IGeoItem geoItemToSelect) {
+		SelectionsQueue.add(geoItemToSelect);
+	}
+
+	public static void NextSelection() {
+		if (SelectionsQueue.size() <= 0)
+			return;
+		
+		IGeoItem geoItem = SelectionsQueue.get(0);
+		if (geoItem == null)
+			return;
+		
+		I_AbstractView currentView = views.peek();
+		currentView.Select(geoItem.getType(), geoItem.getId());
+		SelectionsQueue.remove(0);
+	}
 	
 	/*-----------------------------------------------------------------------*/
 	private static Map<Integer, SiteGeoItem> siteGeoItems = new HashMap<Integer, SiteGeoItem>();

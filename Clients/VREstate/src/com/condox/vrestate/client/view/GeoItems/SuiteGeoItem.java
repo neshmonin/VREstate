@@ -210,4 +210,9 @@ public class SuiteGeoItem implements IGeoItem {
 	public int getPrice() {
 		return suite.getPrice();
 	}
+
+	@Override
+	public String getType() {
+		return "suite";
+	}
 }

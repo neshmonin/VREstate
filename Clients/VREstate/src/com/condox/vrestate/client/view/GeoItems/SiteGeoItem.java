@@ -35,4 +35,9 @@ public class SiteGeoItem implements IGeoItem {
 	public String getCaption() {
 		return site.getName();
 	}
+
+	@Override
+	public String getType() {
+		return "site";
+	}
 }

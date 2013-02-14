@@ -36,4 +36,5 @@ public class BuildingView extends _SB_View {
 			_AbstractView.Push(suiteView);
 		}
 	}
+
 }

@@ -65,12 +65,12 @@ public class BuildingGeoItem implements IGeoItem {
 
 	}
 	
-	public void onSelectionChanged(boolean selected)
+	public void onSelectionChanged(boolean selecting)
 	{
 		String old_href = placemark.getComputedStyle().getIconStyle().getIcon().getHref();
 		String new_href = old_href;
 
-		if (selected)
+		if (selecting)
 			new_href = Options.HOME_URL
 					+ "gen/txt?height=40&shadow=2&text="
 					+ building.getName()
@@ -114,5 +114,10 @@ public class BuildingGeoItem implements IGeoItem {
 	@Override
 	public String getCaption() {
 		return building.getAddress();
+	}
+
+	@Override
+	public String getType() {
+		return "building";
 	}
 }
