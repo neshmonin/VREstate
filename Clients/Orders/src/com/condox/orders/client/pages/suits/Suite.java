@@ -1,10 +1,14 @@
-package com.condox.orders.client.document;
+package com.condox.orders.client.pages.suits;
 
 import java.util.ArrayList;
 
 import com.condox.orders.client.Log;
 import com.condox.orders.client.Options;
 import com.condox.orders.client.Position;
+import com.condox.orders.client.document.Building;
+import com.condox.orders.client.document.I_VRObject;
+import com.condox.orders.client.document.SuiteType;
+import com.condox.orders.client.document.I_VRObject.VRObjectType;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;

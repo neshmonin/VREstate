@@ -1,7 +1,15 @@
-package com.condox.orders.client;
+package com.condox.orders.client.pages.buildings;
 
 import java.util.Comparator;
 
+import com.condox.orders.client.FilteredListDataProvider;
+import com.condox.orders.client.GET;
+import com.condox.orders.client.IFilter;
+import com.condox.orders.client.IPage;
+import com.condox.orders.client.Log;
+import com.condox.orders.client.Options;
+import com.condox.orders.client.Orders;
+import com.condox.orders.client.User;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;

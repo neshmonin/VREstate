@@ -1,6 +1,7 @@
 package com.condox.orders.client;
 
-import com.condox.orders.client.document.Suite;
+import com.condox.orders.client.pages.buildings.Building;
+import com.condox.orders.client.pages.suits.Suite;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;

@@ -1,6 +1,9 @@
 package com.condox.orders.client;
 
-import com.condox.orders.client.document.Suite;
+import com.condox.orders.client.pages.buildings.Building;
+import com.condox.orders.client.pages.buildings.SelectBuilding;
+import com.condox.orders.client.pages.suits.SelectSuite;
+import com.condox.orders.client.pages.suits.Suite;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -23,10 +26,10 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 
 public class Orders implements EntryPoint, ValueChangeHandler<String>  {
 	
+	private DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
+	private TabLayoutPanel containerPanel = new TabLayoutPanel(0.0, Unit.EM);
 	private SelectBuilding page_buildings = /*null;*/new SelectBuilding();
 	private SelectSuite page_suits = /*null;*/new SelectSuite();
-	private TabLayoutPanel containerPanel = new TabLayoutPanel(0.0, Unit.EM);
-	private DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
 	public static Building selectedBuilding = null;
 	public static Suite selectedSuite = null;
 

@@ -1,4 +1,4 @@
-package com.condox.orders.client;
+package com.condox.orders.client.pages.buildings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
