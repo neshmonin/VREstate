@@ -67,7 +67,7 @@ public class PanoramicView extends _GEView {
 	}
 
 	@Override
-    public void setupCamera()
+    public void setupCamera(I_AbstractView poppedView)
     {
 		double METERS_PER_DEGREES = 111111;
 		double lat = theGeoItem.getPosition().getLatitude()

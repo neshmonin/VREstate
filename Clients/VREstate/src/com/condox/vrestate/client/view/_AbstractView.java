@@ -89,7 +89,7 @@ public abstract class _AbstractView implements I_AbstractView {
 
 	public static void Push(I_AbstractView newView) {
 		newView.scheduleSetEnabled();
-		newView.setupCamera();
+		newView.setupCamera(null);
 		
 		if (!views.isEmpty())
 		{
@@ -113,9 +113,9 @@ public abstract class _AbstractView implements I_AbstractView {
 		
 		currView.setEnabled(false);
 
-		views.pop();
+		I_AbstractView poppedView = views.pop();
 		I_AbstractView newView = views.peek(); 
-		newView.setupCamera();
+		newView.setupCamera(poppedView);
 
 		//newView.setEnabled(true);
 		newView.scheduleSetEnabled();
@@ -136,10 +136,10 @@ public abstract class _AbstractView implements I_AbstractView {
 		
 		currView.setEnabled(false);
 
-		views.pop();
+		I_AbstractView poppedView = views.pop();
 
 		newView.scheduleSetEnabled();
-		newView.setupCamera();
+		newView.setupCamera(poppedView);
 		
 		views.push(newView);
 
@@ -217,11 +217,16 @@ public abstract class _AbstractView implements I_AbstractView {
 		return currentView;
 	}
 	
-	protected void setupStandardLookAtCamera()
+	protected void setupStandardLookAtCamera(I_AbstractView poppedView)
 	{
         if (_camera != null)
         {
         	_camera.attributes.SetLonLatAlt(theGeoItem);
+        	if (poppedView != null) {
+        		Camera poppedCamera = poppedView.getCamera();
+        		if (poppedCamera.CameraType == _camera.CameraType)
+        			_camera.attributes.Heading_d = Camera.NormalizeHeading_d(poppedCamera.attributes.Heading_d);
+        	}
         }
         else
         {

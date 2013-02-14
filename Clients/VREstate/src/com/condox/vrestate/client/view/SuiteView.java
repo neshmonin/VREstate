@@ -6,6 +6,7 @@ import com.condox.vrestate.client.document.SuiteType;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.SuiteInteractor;
 import com.condox.vrestate.client.view.Camera.Camera;
+import com.condox.vrestate.client.view.GeoItems.BuildingGeoItem;
 import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.dom.client.Element;
@@ -47,17 +48,25 @@ public class SuiteView extends _GEView {
 
 	@Override
 	public void Select(String type, int id) {
-		if (type == null)
-		{
+		if (type == null || id == theGeoItem.getParent_id()) {
 			_AbstractView.Pop();
 			return;
 		}
 
+		if (type.equals("building")){
+			_AbstractView.Pop();
+			BuildingGeoItem buildingGeo = _AbstractView.getBuildingGeoItem(id);
+			BuildingView bldngView = new BuildingView(buildingGeo);
+			buildingGeo.onSelectionChanged(true);
+			_AbstractView.Pop_Push(bldngView);
+			return;
+		}
+			
+		
 		if (type.equals("suite") && id == theGeoItem.getId())
 			return; // do nothing when they clicked the suite that already opened
 
-		if (type.equals("suite"))
-		{
+		if (type.equals("suite")) {
 			SuiteGeoItem suiteGeo = _AbstractView.getSuiteGeoItem(id);
 			SuiteView suiteView = new SuiteView(suiteGeo);
 			_AbstractView.Pop_Push(suiteView);
@@ -237,8 +246,8 @@ public class SuiteView extends _GEView {
 	}
 
 	@Override
-	public void setupCamera() {
-		setupStandardLookAtCamera();
+	public void setupCamera(I_AbstractView poppedView) {
+		setupStandardLookAtCamera(poppedView);
         _camera.attributes.Heading_d = Camera.NormalizeHeading_d(theGeoItem.getPosition().getHeading() + 180);
 	}
 
@@ -247,5 +256,4 @@ public class SuiteView extends _GEView {
 		onHeadingChanged();
 		ShowMoreInfo();
 	}
-
 }

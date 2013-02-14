@@ -64,8 +64,8 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 	}
 
 	@Override
-	public void setupCamera() {
-		setupStandardLookAtCamera();
+	public void setupCamera(I_AbstractView poppedView) {
+		setupStandardLookAtCamera(poppedView);
     }
 
 	@Override
