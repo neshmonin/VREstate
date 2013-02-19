@@ -40,11 +40,12 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
-public class SelectSuite extends Composite implements IPage{
+public class SelectSuite extends Composite implements IPage {
 
 	private static SelectSuiteUiBinder uiBinder = GWT
 			.create(SelectSuiteUiBinder.class);
-	@UiField(provided=true) DataGrid<Floor> dataGrid = new DataGrid<Floor>();
+	@UiField(provided = true)
+	DataGrid<Floor> dataGrid = new DataGrid<Floor>();
 
 	interface SelectSuiteUiBinder extends UiBinder<Widget, SelectSuite> {
 	}
@@ -64,22 +65,23 @@ public class SelectSuite extends Composite implements IPage{
 		initNativeFuncs();
 		String caption = "";
 		if (Orders.selectedBuilding != null)
-			caption = "Selected building: " + Orders.selectedBuilding.getStreet() + ", " +
-			Orders.selectedBuilding.getName() + ".";
-//		lblCaption.setText(caption + " Please, select suite:");
-		//------------------------
+			caption = "Selected building: "
+					+ Orders.selectedBuilding.getStreet() + ", "
+					+ Orders.selectedBuilding.getName() + ".";
+		// lblCaption.setText(caption + " Please, select suite:");
+		// ------------------------
 	}
-	
+
 	private native void initNativeFuncs()/*-{
-		$wnd.onSelectSuite = function(id) { 
-		@com.condox.orders.client.pages.suits.SelectSuite::onSelectSuite(I)(id);
+		$wnd.onSelectSuite = function(id) {
+			@com.condox.orders.client.pages.suits.SelectSuite::onSelectSuite(I)(id);
 		}
 	}-*/;
-	
+
 	private static SelectSuite instance = null;
-	
+
 	private static void onSelectSuite(int id) {
-//		Window.alert("++" + id);
+		// Window.alert("++" + id);
 		for (Floor floor : instance.dataProvider.getList())
 			for (Suite suite : floor.suites)
 				if (suite.getId() == id) {
@@ -87,17 +89,27 @@ public class SelectSuite extends Composite implements IPage{
 					instance.dialogBox.setGlassEnabled(true);
 					instance.dialogBox.setAnimationEnabled(true);
 					instance.dialogBox.clear();
-					instance.dialogBox.setWidget(new Submit(instance.dialogBox));
+					instance.dialogBox
+							.setWidget(new Submit(instance.dialogBox));
 					instance.dialogBox.center();
-				    instance.dialogBox.setText(Orders.selectedBuilding.getName() + "," + suite.getName());
-				    
-				    instance.dialogBox.show();
-				    return;
+					instance.dialogBox.setText(Orders.selectedBuilding
+							.getName()
+							+ ","
+							+ Orders.selectedBuilding.getStreet()
+							+ "; "
+							+ suite.getName());
+
+					((Submit) instance.dialogBox.getWidget())
+							.setFloorPlanUrl(suite.getFloorplan_url());
+
+					instance.dialogBox.show();
+					return;
 				}
 	}
-@Override
+
+	@Override
 	public void Update() {
-	Log.write("--");
+		Log.write("--");
 		dataProvider.getList().clear();
 		GetSuitesList();
 	}
@@ -109,7 +121,7 @@ public class SelectSuite extends Composite implements IPage{
 		public void add(Suite suite) {
 			suites.add(suite);
 			if (name.isEmpty())
-				name = suite.getFloor_name();
+				name = suite.getFloorName();
 		}
 
 		public void sort() {
@@ -132,17 +144,6 @@ public class SelectSuite extends Composite implements IPage{
 			sort();
 			String result = "";
 			for (Suite suite : suites) {
-				String title = "Suite " + suite.getName() + "\r\n";
-				if(suite.getPrice() > 0)
-					title += ("Price: $" + suite.getPrice() + "\r\n");
-				title += "Bedrooms: " + suite.bedrooms + "\r\n";
-				title += "Bathrooms: " + suite.bathrooms;
-			/*	SuiteType type = suite.getSuiteType();
-				title += "Bedrooms - " + type.getBedrooms() + "Br";
-				title += (type.getDens() == 0)? "\r\n" : "+D\r\n";
-				title += "Bathrooms - " + type.getBathrooms() + "\r\n";
-				title += "Area - " + type.getArea() + " sf\r\n";*/
-				
 				String disabled = "";
 				switch (suite.getStatus()) {
 				case Sold:
@@ -150,16 +151,19 @@ public class SelectSuite extends Composite implements IPage{
 				default:
 					disabled += " disabled=\"true\" ";
 				}
-				
+
 				result += "<button ";
-				result += "type=\"button\"" +
-						"onclick=\"onSelectSuite(" + suite.getId() + ")\"" +
-						"style=\"width:50px\"" +
-						"class=\"btnSelectSuite\"" +
-						disabled +
-						"title=\"" + title + "\">";
+				result += "type=\"button\"" + "onclick=\"onSelectSuite("
+						+ suite.getId() + ")\"" + "style=\"width:50px\""
+						+ "class=\"btnSelectSuite\"" + disabled + "title=\""
+						+ suite.getTooltip() + "\">";
 				result += suite.getName();
 				result += "</button> ";
+
+				// result = "";
+				// result += "<img src=\"floor_but.png\" " +
+				// "title=\"" + suite.getTooltip() + "\" " +
+				// "onclick=\"onSelectSuite(" + suite.getId() + ")\"/>";
 			}
 			return result;
 		}
@@ -195,11 +199,11 @@ public class SelectSuite extends Composite implements IPage{
 		};
 		nameColumn.setSortable(true);
 		sortHandler.setComparator(nameColumn, new Comparator<Floor>() {
-		      @Override
-		      public int compare(Floor A, Floor B) {
-		        return A.getName().compareTo(B.getName());
-		      }
-		    });
+			@Override
+			public int compare(Floor A, Floor B) {
+				return A.getName().compareTo(B.getName());
+			}
+		});
 		dataGrid.setColumnWidth(nameColumn, "100px");
 		dataGrid.addColumn(nameColumn, "Floor name");
 
@@ -210,13 +214,13 @@ public class SelectSuite extends Composite implements IPage{
 			public SafeHtml render(String object) {
 				SafeHtmlBuilder sb = new SafeHtmlBuilder();
 				sb.appendHtmlConstant(object);
-//				for (int j = 0; j < 20; j++) {
-//					sb.appendHtmlConstant(
-//							"<button type=\"submit\" style=\"width:50px\">")
-//							.appendEscaped(
-//									String.valueOf((int) (Math.random() * 1000)))
-//							.appendHtmlConstant("</button>");
-//				}
+				// for (int j = 0; j < 20; j++) {
+				// sb.appendHtmlConstant(
+				// "<button type=\"submit\" style=\"width:50px\">")
+				// .appendEscaped(
+				// String.valueOf((int) (Math.random() * 1000)))
+				// .appendHtmlConstant("</button>");
+				// }
 				return sb.toSafeHtml();
 			}
 		};
@@ -225,31 +229,30 @@ public class SelectSuite extends Composite implements IPage{
 			@Override
 			public String getValue(Floor object) {
 				return object.getValue();
-//				return object.getName();
+				// return object.getName();
 			}
 		};
 		dataColumn.setFieldUpdater(new FieldUpdater<Floor, String>() {
 			@Override
 			public void update(int index, Floor object, String value) {
-				
-//				  	dialogBox.setGlassEnabled(true);
-//				    dialogBox.setAnimationEnabled(true);
-//				    dialogBox.center();
-//				    dialogBox.show();
-//				    History.newItem("submit");
+
+				// dialogBox.setGlassEnabled(true);
+				// dialogBox.setAnimationEnabled(true);
+				// dialogBox.center();
+				// dialogBox.show();
+				// History.newItem("submit");
 			}
 		});
 		// viewSuitesColumn2.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		// dataGrid.setColumnWidth(viewSuitesColumn2, "10em");
-//		dataColumn.setCellStyleNames("header");
+		// dataColumn.setCellStyleNames("header");
 		dataGrid.addColumn(dataColumn, "");
-		
-		
+
 		if (!dataProvider.getDataDisplays().contains(dataGrid)) {
 			dataProvider.addDataDisplay(dataGrid);
 		}
-//		ColumnSortEvent.fire(dataGrid, dataGrid.getColumnSortList());
-//		dataGrid.getColumnSortList().push(nameColumn);
+		// ColumnSortEvent.fire(dataGrid, dataGrid.getColumnSortList());
+		// dataGrid.getColumnSortList().push(nameColumn);
 	}
 
 	private Building parentBuilding = null;
@@ -287,19 +290,19 @@ public class SelectSuite extends Composite implements IPage{
 		// for (int i = 0; i < 100; i++)
 		// dataProvider.getList().add("" + i);
 		// *************************************
-//		Params params = new Params(History.getToken());
+		// Params params = new Params(History.getToken());
 
 		// Map<String, String> params = new HashMap<String, String>();
 		// String token = History.getToken();
 		// token = token.split("?")[1];
 		//
-//		int id = -1;
-//		if (params.containsKey("building"))
-//			id = Integer.valueOf(params.getValue("building"));
-//		else {
-//			// There is no param named "building"
-//		}
-//		Log.write("id:" + id);
+		// int id = -1;
+		// if (params.containsKey("building"))
+		// id = Integer.valueOf(params.getValue("building"));
+		// else {
+		// // There is no param named "building"
+		// }
+		// Log.write("id:" + id);
 		// if (id != -1) {
 		// Iterator<Building> iterator = Document.get().getBuildings()
 		// .iterator();
@@ -314,9 +317,8 @@ public class SelectSuite extends Composite implements IPage{
 
 		Log.write("+");
 		Log.write("" + parentBuilding);
-		String url = Options.URL_VRT + "data/inventory?building=" +
-		Orders.selectedBuilding.getId()
-				+ "&sid=" + User.SID;
+		String url = Options.URL_VRT + "data/inventory?building="
+				+ Orders.selectedBuilding.getId() + "&sid=" + User.SID;
 		Log.write("+");
 		GET.send(url, new RequestCallback() {
 
@@ -329,7 +331,7 @@ public class SelectSuite extends Composite implements IPage{
 				for (int index = 0; index < arr.size(); index++) {
 					Suite newSuite = new Suite();
 					newSuite.Parse(arr.get(index));
-					String floorName = newSuite.getFloor_name();
+					String floorName = newSuite.getFloorName();
 					Iterator<Floor> floors = dataProvider.getList().iterator();
 					while (floors.hasNext()) {
 						Floor floor = floors.next();
@@ -346,16 +348,16 @@ public class SelectSuite extends Composite implements IPage{
 					}
 				}
 				Log.write("Floors count: " + dataProvider.getList().size());
-				 Collections.sort(dataProvider.getList(),
-				 new Comparator<Floor>() {
-				
-				 @Override
-				 public int compare(Floor o1, Floor o2) {
-				 int A = Integer.valueOf(o1.getName());
-				 int B = Integer.valueOf(o2.getName());
-				 return (A > B) ? 1 : -1;
-				 }
-				 });
+				Collections.sort(dataProvider.getList(),
+						new Comparator<Floor>() {
+
+							@Override
+							public int compare(Floor o1, Floor o2) {
+								int A = Integer.valueOf(o1.getName());
+								int B = Integer.valueOf(o2.getName());
+								return (A > B) ? 1 : -1;
+							}
+						});
 				// CreateTable();
 			}
 
@@ -413,38 +415,38 @@ public class SelectSuite extends Composite implements IPage{
 	// return true;
 	// return false;
 	// }
-	
+
 	// SUBMIT
-	
-	 final DialogBox dialogBox = createDialogBox();
-	 
-	 private DialogBox createDialogBox() {
-		    // Create a dialog box and set the caption text
-		    final DialogBox dialogBox = new DialogBox();
-		    dialogBox.setText("caption");
 
-		    // Create a table to layout the content
-//		    VerticalPanel dialogContents = new VerticalPanel();
-//		    dialogContents.setSpacing(4);
-		    dialogBox.setSize("100px", "100px");
-//		    dialogBox.setWidget(new Submit(dialogBox));
+	final DialogBox dialogBox = createDialogBox();
 
-		    // Add some text to the top of the dialog
-//		    HTML details = new HTML("details");
-//		    dialogContents.add(details);
+	private DialogBox createDialogBox() {
+		// Create a dialog box and set the caption text
+		final DialogBox dialogBox = new DialogBox();
+		dialogBox.setText("caption");
 
-		    // Return the dialog box
-//		    dialogBox.center();
-		    return dialogBox;
-		  }
-//	@UiHandler("inlineHyperlink")
-//	void onInlineHyperlinkClick(ClickEvent event) {
-//		History.back();
-//	}
-//
-//	@Override
-//	public void Update(String json) {
-//		// TODO Auto-generated method stub
-//		
-//	}
+		// Create a table to layout the content
+		// VerticalPanel dialogContents = new VerticalPanel();
+		// dialogContents.setSpacing(4);
+		dialogBox.setSize("100px", "100px");
+		// dialogBox.setWidget(new Submit(dialogBox));
+
+		// Add some text to the top of the dialog
+		// HTML details = new HTML("details");
+		// dialogContents.add(details);
+
+		// Return the dialog box
+		// dialogBox.center();
+		return dialogBox;
+	}
+	// @UiHandler("inlineHyperlink")
+	// void onInlineHyperlinkClick(ClickEvent event) {
+	// History.back();
+	// }
+	//
+	// @Override
+	// public void Update(String json) {
+	// // TODO Auto-generated method stub
+	//
+	// }
 }

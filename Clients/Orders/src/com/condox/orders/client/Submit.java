@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sun.org.apache.xerces.internal.util.URI;
+import com.google.gwt.user.client.ui.HTML;
 
 public class Submit extends Composite {
 
@@ -34,6 +35,7 @@ public class Submit extends Composite {
 	@UiField TextBox txtPhone;
 	@UiField RadioButton rbPrivateListing;
 	@UiField RadioButton rbSharedListing;
+	@UiField HTML urlFloorplan;
 
 	interface SubmitUiBinder extends UiBinder<Widget, Submit> {
 	}
@@ -56,7 +58,7 @@ public class Submit extends Composite {
     	if (selectedSuite == null)
     		return;
     	
-    	String str = selectedSuite.getName() + " - " +selectedSuite.getFloor_name();
+    	String str = selectedSuite.getName() + " - " +selectedSuite.getFloorName();
     	str += selectedBuilding.getStreet() + ", ";
     	str += selectedBuilding.getCity() + ", ";
     	str += selectedBuilding.getPostal();
@@ -70,7 +72,7 @@ public class Submit extends Composite {
 		boolean isValid = true;
 		isValid &= name.matches(".+");
 		isValid &= mail.matches("\\S+@\\S+");
-		isValid &= phone.matches("\\d+");
+		isValid &= phone.matches("\\d{10,}");
 		btnSubmit.setEnabled(isValid);
 	}
 
@@ -116,17 +118,17 @@ public class Submit extends Composite {
 		Building selectedBuilding = Orders.selectedBuilding;
     	Suite selectedSuite = Orders.selectedSuite;
 		obj.put("BuildingName", new JSONString(selectedBuilding.getName()));
-		obj.put("BuildingAddress", new JSONString(selectedBuilding.getAddress()));
+		obj.put("BuildingAddress", new JSONString(selectedBuilding.getStreet()));	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		obj.put("SuiteNum", new JSONString(selectedSuite.getName()));
-//		Window.alert(obj.toString());
+		Log.write(obj.toString());
 		sendMail("subject", obj.toString());
 		box.hide();
 	}
 	
 	private void sendMail(String subject, String body) {
 		String url = Options.HOME_URL + "program?q=salesMessage";
-		url += "&subject=" + URL.encodeQueryString(subject);
-		url += "&testMode=true";
+//		url += "&subject=" + URL.encodeQueryString(subject);
+//		url += "&testMode=true";
 //		url += "&sid=" + User.SID;
 		PUT.send(url, body, new RequestCallback(){
 
@@ -141,5 +143,15 @@ public class Submit extends Composite {
 				// TODO Auto-generated method stub
 				
 			}});
+	}
+	
+	public void setFloorPlanUrl(String url) {
+		if (!url.isEmpty())
+			urlFloorplan.setHTML("Do you want to check the floorplan for this suite?<br>" +
+					"<a href=\"" + url + "\" target=\"_blank\">Show me...</a>");
+		else
+			urlFloorplan.setHTML("");
+//		Do you want to check the floorplan for this suite?
+//				Show me...
 	}
 }

@@ -11,15 +11,23 @@ import com.condox.orders.client.Options;
 import com.condox.orders.client.Orders;
 import com.condox.orders.client.User;
 import com.google.gwt.cell.client.ButtonCell;
+import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
+import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -33,6 +41,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.TextBox;
 
 public class SelectBuilding extends Composite implements IFilter<Building>,
 		IPage {
@@ -41,6 +50,7 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 			.create(SelectBuildingUiBinder.class);
 	@UiField(provided = true)
 	DataGrid<Building> dataGrid = new DataGrid<Building>();
+	@UiField TextBox textFilter;
 
 	interface SelectBuildingUiBinder extends UiBinder<Widget, SelectBuilding> {
 	}
@@ -120,13 +130,30 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 		});
 		dataGrid.addColumn(postalColumn, "Postal");
 
-		// Add a button column to pick a suite.
-		Column<Building, String> viewSuitesColumn = new Column<Building, String>(
-				new ButtonCell()) {
-			@Override
+		
+		
+		
+		
+		 // View friends.
+	    SafeHtmlRenderer<String> anchorRenderer = new AbstractSafeHtmlRenderer<String>() {
+	    	
+	    	@Override
+			public SafeHtml render(String object) {
+				// TODO Auto-generated method stub
+	    		 SafeHtmlBuilder sb = new SafeHtmlBuilder();
+	    		 sb.appendHtmlConstant("<img src=\"Select_but.png\"/>");
+	    		 return sb.toSafeHtml();
+			}
+	    };
+	    
+	    // Add a button column to pick a suite.
+	    Column<Building, String> viewSuitesColumn = new Column<Building, String>(new ClickableTextCell(anchorRenderer)) {
+	      @Override
 			public String getValue(Building object) {
 				return "Pick a Suite...";
 			}
+
+			
 		};
 		viewSuitesColumn.setFieldUpdater(new FieldUpdater<Building, String>() {
 
@@ -140,6 +167,10 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 
 		if (!dataProvider.getDataDisplays().contains(dataGrid))
 			dataProvider.addDataDisplay(dataGrid);
+		
+		dataGrid.setColumnWidth(nameColumn, "200px");
+		dataGrid.setColumnWidth(streetColumn, "200px");
+		dataGrid.setColumnWidth(postalColumn, "100px");
 	}
 
 	private void GetBuildingsList() {
@@ -188,8 +219,8 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 			return true;
 		return false;
 	}
-	// @UiHandler("textFilter")
-	// void onTextFilterKeyUp(KeyUpEvent event) {
-	// dataProvider.setFilter(textFilter.getText());
-	// }
+	 @UiHandler("textFilter")
+	 void onTextFilterKeyUp(KeyUpEvent event) {
+	 dataProvider.setFilter(textFilter.getText());
+	 }
 }

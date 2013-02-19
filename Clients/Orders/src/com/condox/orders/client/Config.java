@@ -4,7 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 
 public class Config {
-	private static boolean DEBUG_MODE = 
+	public final static boolean DEBUG_MODE = 
 		(Window.Location.getParameter("test") != null)?
 				Boolean.valueOf(Window.Location.getParameter("test")):
 					GWT.getModuleBaseURL().contains("/vre/");

@@ -6,10 +6,17 @@
 			font-weight: bold;
 		}
 	</ui:style>
-	<g:HTMLPanel>
-		<p1:DataGrid width="100%" height="100%" ui:field="dataGrid"/>
-		
-		Hello,
-		
-	</g:HTMLPanel>
+		<g:DockLayoutPanel unit="PX" width="">
+			<g:north size="50.0">
+				<g:HorizontalPanel width="100%" height="100%" verticalAlignment="ALIGN_MIDDLE" spacing="10" styleName="my-header">
+					<g:Label text="City" width="100%" horizontalAlignment="ALIGN_RIGHT"/>
+					<g:ListBox visibleItemCount="1" width="100px" selectedIndex="0"/>
+					<g:Label text="Street or Building" width="100%" horizontalAlignment="ALIGN_RIGHT"/>
+					<g:TextBox ui:field="textFilter"/>
+				</g:HorizontalPanel>
+			</g:north>
+			<g:center>
+				<p1:DataGrid width="100%" height="100%" ui:field="dataGrid"/>
+			</g:center>
+		</g:DockLayoutPanel>
 </ui:UiBinder> 
