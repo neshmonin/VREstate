@@ -77,16 +77,12 @@ public class Suite implements I_VRObject {
 			double latitude = position.get("lat").isNumber().doubleValue();
 			double altitude = position.get("alt").isNumber().doubleValue();
 			double heading = position.get("hdg").isNumber().doubleValue();
-			double tilt = 45;
-			double range = 100;
 
 			this.position.setLongitude(longitude);
 			this.position.setLatitude(latitude);
 			this.position.setAltitude(altitude);
 
 			this.position.setHeading(heading);
-			this.position.setTilt(tilt);
-			this.position.setRange(range);
 		}
 		
 		for (Building item : Document.get().getBuildings())

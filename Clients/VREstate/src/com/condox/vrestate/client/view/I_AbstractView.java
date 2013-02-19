@@ -7,7 +7,7 @@ public interface I_AbstractView extends I_UpdatableView {
 	public void Select(String type, int id);
 	public void onHeadingChanged();
 	abstract void setEnabled(boolean value);
-	abstract void setupCamera(); // first time must create a camera and assign it to _camera
+	abstract void setupCamera(I_AbstractView poppedView); // first time must create a camera and assign it to _camera
 	IGeoItem getGeoItem(); // access function, implemented in _AbstractView
 	double getTransitionSpeed(); // access function, implemented in _AbstractView
 	double getRegularSpeed(); // access function, implemented in _AbstractView

@@ -12,5 +12,7 @@ public interface IGeoItem {
 
 	public abstract int getId();
 
+	public abstract String getType();
+
 	public abstract String getCaption();
 }

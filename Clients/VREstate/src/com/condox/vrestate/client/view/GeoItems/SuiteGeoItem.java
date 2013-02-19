@@ -20,11 +20,14 @@ import com.nitrous.gwt.earth.client.api.KmlPoint;
 import com.nitrous.gwt.earth.client.api.KmlStyle;
 
 public class SuiteGeoItem implements IGeoItem {
+	private final double initialRange_m = 40;
+	private final double initialTilt_d = 75;
 
 	public Suite suite = null;
 	
 	String href = null;
 	public SuiteGeoItem(Suite suite){
+
 		this.suite = suite;
 		
 		KmlStyle style = GE.getPlugin().createStyle("");
@@ -87,7 +90,10 @@ public class SuiteGeoItem implements IGeoItem {
 		KmlMultiGeometry geometry1 = GE.getPlugin().createMultiGeometry("");
 		
 		KmlPoint point = GE.getPlugin().createPoint("");
+
 		Position position = suite.getPosition();
+		position.setTilt(initialTilt_d);
+		position.setRange(initialRange_m);
 		
 		point.setLatitude(position.getLatitude());
 		point.setLongitude(position.getLongitude());
@@ -209,5 +215,10 @@ public class SuiteGeoItem implements IGeoItem {
 	
 	public int getPrice() {
 		return suite.getPrice();
+	}
+
+	@Override
+	public String getType() {
+		return "suite";
 	}
 }

@@ -34,15 +34,12 @@ public class Building implements I_VRObject {
 			double latitude = position.get("lat").isNumber().doubleValue();
 			double altitude = position.get("alt").isNumber().doubleValue();
 			double heading = 0;
-			double tilt = 45;
-			double range = 200;
+
 			this.position = new Position();
 			this.position.setLongitude(longitude);
 			this.position.setLatitude(latitude);
 			this.position.setAltitude(altitude);
 			this.position.setHeading(heading);
-			this.position.setTilt(tilt);
-			this.position.setRange(range);
 		}
 		max_suite_altitude = obj.get("maxSuiteAltitude").isNumber().doubleValue();
 		address = obj.get("address").isString().stringValue();
