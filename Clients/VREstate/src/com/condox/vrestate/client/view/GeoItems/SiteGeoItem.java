@@ -1,11 +1,12 @@
 package com.condox.vrestate.client.view.GeoItems;
 
+import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.Position;
 import com.condox.vrestate.client.document.Site;
 
 public class SiteGeoItem implements IGeoItem {
 	private final double initialRange_m = 600;
-	private final double initialTilt_d = 45;
+	private final double initialTilt_d = 60;
 
 	private Site site = null;
 
@@ -40,7 +41,10 @@ public class SiteGeoItem implements IGeoItem {
 
 	@Override
 	public String getCaption() {
-		return site.getName();
+		if (!Options.isViewOrder())
+			return site.getName();
+
+		return "";
 	}
 
 	@Override

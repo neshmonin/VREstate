@@ -21,7 +21,7 @@ import com.nitrous.gwt.earth.client.api.KmlStyle;
 
 public class SuiteGeoItem implements IGeoItem {
 	private final double initialRange_m = 40;
-	private final double initialTilt_d = 60;
+	private final double initialTilt_d = 75;
 
 	public Suite suite = null;
 	
