@@ -77,10 +77,10 @@ public class Options implements RequestCallback{
 		// SUITE_DISTANCE = Integer.valueOf(params.containsKey("Distance")?
 		// params.get("Distance").get(0) : "-1");
 
-		if (BUILDING_ID != -1)
-			DEBUG_MODE = params.containsKey("test") ? Boolean.valueOf(params
-					.get("test").get(0)) : false;
-		else
+//		if (BUILDING_ID != -1)
+//			DEBUG_MODE = params.containsKey("test") ? Boolean.valueOf(params
+//					.get("test").get(0)) : false;
+//		else
 	    	DEBUG_MODE = (GWT.getModuleBaseURL().contains("/vre/")); 
 
 		Log.write("DEBUG_MODE=" + DEBUG_MODE);

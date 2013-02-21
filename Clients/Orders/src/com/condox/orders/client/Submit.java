@@ -1,6 +1,7 @@
 package com.condox.orders.client;
 
 import com.condox.orders.client.pages.buildings.Building;
+import com.condox.orders.client.pages.submit.successfull.SubmitSuccessfull;
 import com.condox.orders.client.pages.suits.Suite;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -8,21 +9,18 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sun.org.apache.xerces.internal.util.URI;
-import com.google.gwt.user.client.ui.HTML;
 
 public class Submit extends Composite {
 
@@ -102,9 +100,12 @@ public class Submit extends Composite {
 	
 	enum Type {PRIVATE, SHARED};
 	
+	private String CustomerName = "";
+	private String CustomerEmail = "";
+	
 	private void SubmitOrder() {
-		String CustomerName = txtName.getText();
-		String CustomerEmail = txtMail.getText();
+		CustomerName = txtName.getText();
+		CustomerEmail = txtMail.getText();
 		String CustomerPhone = txtPhone.getText();
 		Type ListingType = rbPrivateListing.getValue()? Type.PRIVATE : Type.SHARED;
 //		String BuildingName = "Not implemented yet";
@@ -121,11 +122,40 @@ public class Submit extends Composite {
 		obj.put("BuildingAddress", new JSONString(selectedBuilding.getStreet()));	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		obj.put("SuiteNum", new JSONString(selectedSuite.getName()));
 		Log.write(obj.toString());
-		sendMail("subject", obj.toString());
+		sendMail2("subject", obj.toString());
+		//**********************************
+		String mail = "" +
+		"Dear " + CustomerName + ",\r\n" +
+		"\r\n" +
+		"Thank you for submitting a request for ";
+		switch (ListingType) {
+		case PRIVATE:
+			mail += "Private";
+			break;
+		case SHARED:
+			mail += "Shared";
+			break;
+		}
+		mail += " Interactive 3D Listing " +
+		"on the following property:\r\n" +
+		"\r\n" +
+		"\t" + box.getText() + "\r\n" + 
+		"\r\n" +
+		"You'll be contacted with one of our sales representatives shortly.\r\n" +
+		"\r\n" +
+		"If you did not order any products from 3D Condo Explorer, " +
+		"please reply to this message and inform us about this.\r\n" +
+		"\r\n" +
+		"Thanks for your business,\r\n" +
+		"\r\n" +
+		"3D Condo Explorer sales team.\r\n" +
+		"order.3dcondox.com\r\n" +
+		"1-855-332-6630 ext.2";
+//		sendMail2("subject", mail);
 		box.hide();
 	}
 	
-	private void sendMail(String subject, String body) {
+	private void sendMail2(String subject, String body) {
 		String url = Options.HOME_URL + "program?q=salesMessage";
 //		url += "&subject=" + URL.encodeQueryString(subject);
 //		url += "&testMode=true";
@@ -135,9 +165,33 @@ public class Submit extends Composite {
 			@Override
 			public void onResponseReceived(Request request, Response response) {
 				// TODO Auto-generated method stub
-				
+				DialogBox box = new DialogBox();
+				SubmitSuccessfull message = new SubmitSuccessfull(box);
+				message.setCustomerEmail(CustomerEmail);
+				box.setWidget(message);
+				box.center();
+				box.show();
 			}
 
+			@Override
+			public void onError(Request request, Throwable exception) {
+				// TODO Auto-generated method stub
+				
+			}});
+	}
+	private void sendMail(String subject, String body) {
+		String url = Options.HOME_URL + "program?q=salesMessage";
+//		url += "&subject=" + URL.encodeQueryString(subject);
+//		url += "&testMode=true";
+//		url += "&sid=" + User.SID;
+		PUT.send(url, body, new RequestCallback(){
+			
+			@Override
+			public void onResponseReceived(Request request, Response response) {
+				// TODO Auto-generated method stub
+				
+			}
+			
 			@Override
 			public void onError(Request request, Throwable exception) {
 				// TODO Auto-generated method stub

@@ -6,14 +6,22 @@
 			font-weight: bold;
 		}
 	</ui:style>
-		<g:DockLayoutPanel unit="PX" width="">
+		<g:DockLayoutPanel unit="PX">
 			<g:north size="50.0">
-				<g:HorizontalPanel width="100%" height="100%" verticalAlignment="ALIGN_MIDDLE" spacing="10" styleName="my-header">
-					<g:Label text="City" width="100%" horizontalAlignment="ALIGN_RIGHT"/>
-					<g:ListBox visibleItemCount="1" width="100px" selectedIndex="0"/>
-					<g:Label text="Street or Building" width="100%" horizontalAlignment="ALIGN_RIGHT"/>
-					<g:TextBox ui:field="textFilter"/>
-				</g:HorizontalPanel>
+				<g:LayoutPanel width="100%" height="50px" styleName="my-test">
+					<g:layer left="10px" width="150px">
+						<g:Label text="Street or Building Name" horizontalAlignment="ALIGN_LEFT"/>
+					</g:layer>
+					<g:layer left="160px" width="159px" top="11px" bottom="11px">
+						<g:TextBox ui:field="textFilter"/>
+					</g:layer>
+					<g:layer left="360px" width="25px">
+						<g:Label text="City" width="100%" horizontalAlignment="ALIGN_LEFT"/>
+					</g:layer>
+					<g:layer left="400px" width="100px" top="14px" bottom="14px">
+						<g:ListBox visibleItemCount="1" width="100px" selectedIndex="0" ui:field="boxCity"/>
+					</g:layer>
+				</g:LayoutPanel>
 			</g:north>
 			<g:center>
 				<p1:DataGrid width="100%" height="100%" ui:field="dataGrid"/>

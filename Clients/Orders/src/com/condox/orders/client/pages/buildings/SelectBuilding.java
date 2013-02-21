@@ -2,6 +2,7 @@ package com.condox.orders.client.pages.buildings;
 
 import java.util.Comparator;
 
+import com.condox.orders.client.Config;
 import com.condox.orders.client.FilteredListDataProvider;
 import com.condox.orders.client.GET;
 import com.condox.orders.client.IFilter;
@@ -10,17 +11,16 @@ import com.condox.orders.client.Log;
 import com.condox.orders.client.Options;
 import com.condox.orders.client.Orders;
 import com.condox.orders.client.User;
-import com.google.gwt.cell.client.ButtonCell;
-import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
+import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -31,17 +31,16 @@ import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
 public class SelectBuilding extends Composite implements IFilter<Building>,
 		IPage {
@@ -51,16 +50,25 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 	@UiField(provided = true)
 	DataGrid<Building> dataGrid = new DataGrid<Building>();
 	@UiField TextBox textFilter;
+	@UiField ListBox boxCity;
 
 	interface SelectBuildingUiBinder extends UiBinder<Widget, SelectBuilding> {
 	}
 
 	public SelectBuilding() {
 		initWidget(uiBinder.createAndBindUi(this));
+		setup();
 	}
 
 	public SelectBuilding(String firstName) {
 		initWidget(uiBinder.createAndBindUi(this));
+		setup();
+	}
+	
+	private void setup() {
+		boxCity.addItem("Toronto");
+		boxCity.setEnabled(true);
+		textFilter.setText(Config.TXT_START_TYPING);
 	}
 
 	@Override
@@ -97,7 +105,7 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 				return A.getName().compareTo(B.getName());
 			}
 		});
-		dataGrid.addColumn(nameColumn, "Name");
+		dataGrid.addColumn(nameColumn, "Building Name");
 		// Add a text column to show the street.
 		TextColumn<Building> streetColumn = new TextColumn<Building>() {
 			@Override
@@ -160,10 +168,32 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 			@Override
 			public void update(int index, Building object, String value) {
 				Orders.selectedBuilding = object;
+				//***************************************
+//				UrlBuilder builder = Window.Location.createUrlBuilder();
+//				builder.setParameter("BuildingId", String.valueOf(object.getId()));
+//				Window.Location.replace(builder.buildString().replaceAll("buildings", "suits"));
+				//***************************************
 				History.newItem("suits");
 			}
 		});
 		dataGrid.addColumn(viewSuitesColumn, "");
+		
+		// Add a column to fit free space.
+		TextColumn<Building> freeSpaceColumn = new TextColumn<Building>() {
+			@Override
+			public String getValue(Building object) {
+				return /*object.getPostal()*/null;
+			}
+		};
+		postalColumn.setSortable(true);
+		sortHandler.setComparator(postalColumn, new Comparator<Building>() {
+			@Override
+			public int compare(Building A, Building B) {
+				return A.getPostal().compareTo(B.getPostal());
+			}
+		});
+		dataGrid.addColumn(freeSpaceColumn, "");
+
 
 		if (!dataProvider.getDataDisplays().contains(dataGrid))
 			dataProvider.addDataDisplay(dataGrid);
@@ -171,6 +201,7 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 		dataGrid.setColumnWidth(nameColumn, "200px");
 		dataGrid.setColumnWidth(streetColumn, "200px");
 		dataGrid.setColumnWidth(postalColumn, "100px");
+		dataGrid.setColumnWidth(viewSuitesColumn, "150px");
 	}
 
 	private void GetBuildingsList() {
@@ -223,4 +254,16 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 	 void onTextFilterKeyUp(KeyUpEvent event) {
 	 dataProvider.setFilter(textFilter.getText());
 	 }
+	@UiHandler("textFilter")
+	void onTextFilterFocus(FocusEvent event) {
+		if (textFilter.getText().equals(Config.TXT_START_TYPING))
+			textFilter.setText("");
+		else
+			textFilter.selectAll();
+	}
+	@UiHandler("textFilter")
+	void onTextFilterBlur(BlurEvent event) {
+		if (textFilter.getText().isEmpty())
+			textFilter.setText(Config.TXT_START_TYPING);
+	}
 }

@@ -12,4 +12,5 @@ public class Config {
 			"https://vrt.3dcondox.com/vre/":
 				"https://vrt.3dcondox.com/";
 
+	public static String TXT_START_TYPING = "Start typing...";
 }

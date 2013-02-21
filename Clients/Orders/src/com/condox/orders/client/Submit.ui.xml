@@ -10,7 +10,7 @@
 		<g:VerticalPanel width="300px" height="300px" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_TOP">
 			<g:Cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 				<g:VerticalPanel horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" width="320px" height="300px">
-					<g:Label text="If you want to order this listing, please submit this form" horizontalAlignment="ALIGN_CENTER"/>
+					<g:HTML wordWrap="true" width="100%" horizontalAlignment="ALIGN_CENTER">If you want to order this listing, please submit this form <br></br> and we'll contact you shortly</g:HTML>
 					<g:HorizontalPanel width="100%" spacing="10">
 				<g:Cell width="50%">
 					<g:VerticalPanel width="100%" horizontalAlignment="ALIGN_CENTER" spacing="10" height="100%" verticalAlignment="ALIGN_MIDDLE">
@@ -34,9 +34,11 @@
 						<g:RadioButton name="new name" text="Shared Interactive 3D Listing" ui:field="rbSharedListing" checked="true"/>
 					</g:VerticalPanel>
 					</g:Cell>
-					<g:Cell verticalAlignment="ALIGN_MIDDLE" height="">
-						<g:HTML wordWrap="true" height="50px" width="100%" horizontalAlignment="ALIGN_CENTER" ui:field="urlFloorplan"><a href="www.google.com">Floor plan</a></g:HTML>
+					<g:Label height="1em"/>
+					<g:Cell verticalAlignment="ALIGN_BOTTOM" height="">
+						<g:HTML wordWrap="true" height="50px" width="100%" horizontalAlignment="ALIGN_CENTER" ui:field="urlFloorplan"><A href="www.google.com">Floor plan</A></g:HTML>
 					</g:Cell>
+					<g:Label text="All orders are free if submitted before April 15th 2013. &#10;Then it&apos;ll be just $49.99!" horizontalAlignment="ALIGN_CENTER" width="100%" styleName="my-action"/>
 					<g:Label horizontalAlignment="ALIGN_LEFT" height="36px"/>
 					<g:HorizontalPanel width="100%" verticalAlignment="ALIGN_BOTTOM">
 				<g:Button width="100px" text="Cancel" ui:field="btnCancel" styleName="submit-btnCancel" height="32px"/>

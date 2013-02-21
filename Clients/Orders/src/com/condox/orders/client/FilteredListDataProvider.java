@@ -3,7 +3,6 @@ package com.condox.orders.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.condox.orders.client.Log;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.Range;

@@ -34,7 +34,6 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -92,12 +91,14 @@ public class SelectSuite extends Composite implements IPage {
 					instance.dialogBox
 							.setWidget(new Submit(instance.dialogBox));
 					instance.dialogBox.center();
-					instance.dialogBox.setText(Orders.selectedBuilding
-							.getName()
-							+ ","
-							+ Orders.selectedBuilding.getStreet()
-							+ "; "
-							+ suite.getName());
+					
+					Building selectedBuilding = Orders.selectedBuilding;
+					Suite selectedSuite = Orders.selectedSuite;
+					String caption = selectedSuite.getName() + " - " +
+							selectedBuilding.getStreet() + 
+							"  (" + selectedBuilding.getName() + ")"; 
+					
+					instance.dialogBox.setText(caption);
 
 					((Submit) instance.dialogBox.getWidget())
 							.setFloorPlanUrl(suite.getFloorplan_url());
