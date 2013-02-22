@@ -1,4 +1,4 @@
-package com.condox.orders.client.pages.submit.successfull;
+package com.condox.orders.client.page.submit;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -39,8 +39,8 @@ public class SubmitSuccessfull extends Composite {
 	private DialogBox box = null;
 	
 	public void setCustomerEmail(String email) {
-		txtMessage.setHTML("Your request submitted successfully."/* +
-				"<BR>A confirmation email has been sent to " + email*/);
+		txtMessage.setHTML("Your request submitted successfully." +
+				"<BR>A confirmation email has been sent to " + email);
 	}
 	@UiHandler("button")
 	void onButtonClick(ClickEvent event) {

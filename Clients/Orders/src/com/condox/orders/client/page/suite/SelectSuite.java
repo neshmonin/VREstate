@@ -1,4 +1,4 @@
-package com.condox.orders.client.pages.suits;
+package com.condox.orders.client.page.suite;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,9 +12,9 @@ import com.condox.orders.client.IPage;
 import com.condox.orders.client.Log;
 import com.condox.orders.client.Options;
 import com.condox.orders.client.Orders;
-import com.condox.orders.client.Submit;
 import com.condox.orders.client.User;
-import com.condox.orders.client.pages.buildings.Building;
+import com.condox.orders.client.page.building.Building;
+import com.condox.orders.client.page.submit.Submit;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
@@ -73,7 +73,7 @@ public class SelectSuite extends Composite implements IPage {
 
 	private native void initNativeFuncs()/*-{
 		$wnd.onSelectSuite = function(id) {
-			@com.condox.orders.client.pages.suits.SelectSuite::onSelectSuite(I)(id);
+			@com.condox.orders.client.page.suite.SelectSuite::onSelectSuite(I)(id);
 		}
 	}-*/;
 

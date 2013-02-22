@@ -1,4 +1,4 @@
-package com.condox.orders.client.pages.buildings;
+package com.condox.orders.client.page.building;
 
 import java.util.Comparator;
 

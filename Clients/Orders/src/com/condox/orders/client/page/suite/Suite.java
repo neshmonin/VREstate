@@ -1,4 +1,4 @@
-package com.condox.orders.client.pages.suits;
+package com.condox.orders.client.page.suite;
 
 import com.condox.orders.client.Options;
 import com.google.gwt.json.client.JSONObject;

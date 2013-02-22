@@ -1,10 +1,10 @@
 package com.condox.orders.client;
 
 import com.condox.orders.client.page.LoginPanel;
-import com.condox.orders.client.pages.buildings.Building;
-import com.condox.orders.client.pages.buildings.SelectBuilding;
-import com.condox.orders.client.pages.suits.SelectSuite;
-import com.condox.orders.client.pages.suits.Suite;
+import com.condox.orders.client.page.building.Building;
+import com.condox.orders.client.page.building.SelectBuilding;
+import com.condox.orders.client.page.suite.SelectSuite;
+import com.condox.orders.client.page.suite.Suite;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;

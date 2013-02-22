@@ -1,14 +1,18 @@
-package com.condox.orders.client;
+package com.condox.orders.client.page.submit;
 
-import com.condox.orders.client.pages.buildings.Building;
-import com.condox.orders.client.pages.submit.successfull.SubmitSuccessfull;
-import com.condox.orders.client.pages.suits.Suite;
+import com.condox.orders.client.Log;
+import com.condox.orders.client.Options;
+import com.condox.orders.client.Orders;
+import com.condox.orders.client.PUT;
+import com.condox.orders.client.page.building.Building;
+import com.condox.orders.client.page.suite.Suite;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -103,7 +107,10 @@ public class Submit extends Composite {
 	private String CustomerName = "";
 	private String CustomerEmail = "";
 	
+	private int countEmail = 0;
+	
 	private void SubmitOrder() {
+		countEmail = 2;
 		CustomerName = txtName.getText();
 		CustomerEmail = txtMail.getText();
 		String CustomerPhone = txtPhone.getText();
@@ -122,7 +129,7 @@ public class Submit extends Composite {
 		obj.put("BuildingAddress", new JSONString(selectedBuilding.getStreet()));	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		obj.put("SuiteNum", new JSONString(selectedSuite.getName()));
 		Log.write(obj.toString());
-		sendMail2("subject", obj.toString());
+		sendMail("submit", obj.toString(),"sales@3dcondox.com");
 		//**********************************
 		String mail = "" +
 		"Dear " + CustomerName + ",\r\n" +
@@ -151,51 +158,35 @@ public class Submit extends Composite {
 		"3D Condo Explorer sales team.\r\n" +
 		"order.3dcondox.com\r\n" +
 		"1-855-332-6630 ext.2";
-//		sendMail2("subject", mail);
+		sendMail("notification", mail, CustomerEmail);
 		box.hide();
 	}
 	
-	private void sendMail2(String subject, String body) {
+	private void sendMail(String subject, String body, String receiver) {
 		String url = Options.HOME_URL + "program?q=salesMessage";
-//		url += "&subject=" + URL.encodeQueryString(subject);
+		url += "&subject=" + URL.encodeQueryString(subject);
+		url += "&receiver=" + receiver;
 //		url += "&testMode=true";
-//		url += "&sid=" + User.SID;
 		PUT.send(url, body, new RequestCallback(){
 
 			@Override
 			public void onResponseReceived(Request request, Response response) {
 				// TODO Auto-generated method stub
-				DialogBox box = new DialogBox();
-				SubmitSuccessfull message = new SubmitSuccessfull(box);
-				message.setCustomerEmail(CustomerEmail);
-				box.setWidget(message);
-				box.center();
-				box.show();
+				countEmail--;
+				if (countEmail == 0) {
+					DialogBox box = new DialogBox();
+					SubmitSuccessfull message = new SubmitSuccessfull(box);
+					message.setCustomerEmail(CustomerEmail);
+					box.setWidget(message);
+					box.center();
+					box.show();
+				}
 			}
 
 			@Override
 			public void onError(Request request, Throwable exception) {
 				// TODO Auto-generated method stub
-				
-			}});
-	}
-	private void sendMail(String subject, String body) {
-		String url = Options.HOME_URL + "program?q=salesMessage";
-//		url += "&subject=" + URL.encodeQueryString(subject);
-//		url += "&testMode=true";
-//		url += "&sid=" + User.SID;
-		PUT.send(url, body, new RequestCallback(){
-			
-			@Override
-			public void onResponseReceived(Request request, Response response) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void onError(Request request, Throwable exception) {
-				// TODO Auto-generated method stub
-				
+				countEmail--;
 			}});
 	}
 	
