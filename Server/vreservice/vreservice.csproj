@@ -183,7 +183,6 @@
     <Compile Include="Managers\RolePermissionCheck.cs" />
     <Compile Include="ModelCache\ModelCache.cs" />
     <Compile Include="ModelCache\ModelCacheManager.cs" />
-    <Compile Include="Spikes\SalesMessageSender.cs" />
     <Compile Include="Tasks\BaseTask.cs" />
     <Compile Include="Tasks\RemoveStaleReverseRequests.cs" />
     <Compile Include="Tasks\NotifyExpiringViewOrders.cs" />
