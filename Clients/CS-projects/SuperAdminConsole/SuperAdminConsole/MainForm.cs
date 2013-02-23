@@ -149,9 +149,14 @@ namespace SuperAdminConsole
             //    }
             //}
 
-            loginForm = new LoginForm(ServerProxy.ServerEndpoint, login);
+            loginForm = new LoginForm(login);
             while (DialogResult.OK == loginForm.ShowDialog(this))
             {
+                if (loginForm.IsMainServer)
+                    ServerProxy.ServerEndpoint = Properties.Settings.Default.serverEndPoint;
+                else
+                    ServerProxy.ServerEndpoint = Properties.Settings.Default.serverEndPoint + "vre/"; 
+                
                 login = loginForm.tbLogin.Text;
                 password = loginForm.tbPassword.Text;
                 myRole = loginForm.IsSuperAdmin ? "SuperAdmin" : "Admin";
@@ -222,7 +227,7 @@ namespace SuperAdminConsole
 
         private void AddAccount_Click(object sender, EventArgs e)
         {
-            Form newAccount = new NewAccount();
+            Form newAccount = new NewAccount(myRole == "SuperAdmin");
             if (newAccount.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 refreshUserAccounts();
@@ -262,9 +267,39 @@ namespace SuperAdminConsole
             TreeNode[] ch = new TreeNode[2] { new TreeNode("ViewOrders"),
                                               new TreeNode("Logs") };
 
-            TreeNode superAdminNode = new TreeNode(string.Format("SELF ({0})", myRole), ch);
-            superAdminNode.Tag = admin;
-            treeViewAccounts.Nodes.Add(superAdminNode);
+            TreeNode topNode = new TreeNode(string.Format("SELF ({0})", myRole), ch);
+            topNode.Tag = admin;
+            treeViewAccounts.Nodes.Add(topNode);
+
+            if (myRole == "SuperAdmin")
+            {
+                ///data/user?sid=<SID>[&genval=<generation>][&withdeleted={true|false}][&<hints>]
+                resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
+                                                                  "user",
+                                                                  "role=DeveloperAdmin&ed=Resale", null);
+                if (HttpStatusCode.OK != resp.ResponseCode)
+                {
+                    MessageBox.Show("Failed querying the list of customers");
+                    return;
+                }
+
+                ClientData adminsJASON = resp.Data;
+                ClientData[] admins = adminsJASON.GetNextLevelDataArray("users");
+
+                foreach (ClientData cd in admins)
+                {
+                    User user = new User(cd);
+                    string nodeName = string.Format("ADMIN <{0}>", user.AutoID);
+                    //TreeNode[] children = new TreeNode[3] { new TreeNode("ViewOrders"),
+                    //                                        new TreeNode("Banners"),
+                    //                                        new TreeNode("Logs") };
+                    TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
+                                                        new TreeNode("Logs") };
+                    TreeNode treeNode = new TreeNode(nodeName, children);
+                    treeNode.Tag = user;
+                    treeViewAccounts.Nodes.Add(treeNode);
+                }
+            }
 
             ///data/user?sid=<SID>[&genval=<generation>][&withdeleted={true|false}][&<hints>]
             resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
@@ -276,8 +311,8 @@ namespace SuperAdminConsole
                 return;
             }
 
-            ClientData suiteTypeist = resp.Data;
-            ClientData[] users = suiteTypeist.GetNextLevelDataArray("users");
+            ClientData usersJSON = resp.Data;
+            ClientData[] users = usersJSON.GetNextLevelDataArray("users");
 
             foreach (ClientData cd in users)
             {

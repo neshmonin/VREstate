@@ -16,6 +16,8 @@ import com.nitrous.gwt.earth.client.api.KmlPoint;
 import com.nitrous.gwt.earth.client.api.KmlStyle;
 
 public class BuildingGeoItem implements IGeoItem {
+	private final double initialRange_m = 100;
+	private final double initialTilt_d = 45;
 
 	private Building building = null;
 	private KmlPlacemark placemark = null;
@@ -48,8 +50,9 @@ public class BuildingGeoItem implements IGeoItem {
 		point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND);
 		point.setExtrude(true);
 		Position position = building.getPosition();
-		// TODO - Проблемы с position
 		if (position != null) {
+			position.setTilt(initialTilt_d);
+			position.setRange(initialRange_m);
 			KmlMultiGeometry geometry = GE.getPlugin().createMultiGeometry(
 					"");
 
@@ -65,12 +68,12 @@ public class BuildingGeoItem implements IGeoItem {
 
 	}
 	
-	public void onSelectionChanged(boolean selected)
+	public void onSelectionChanged(boolean selecting)
 	{
 		String old_href = placemark.getComputedStyle().getIconStyle().getIcon().getHref();
 		String new_href = old_href;
 
-		if (selected)
+		if (selecting)
 			new_href = Options.HOME_URL
 					+ "gen/txt?height=40&shadow=2&text="
 					+ building.getName()
@@ -114,5 +117,10 @@ public class BuildingGeoItem implements IGeoItem {
 	@Override
 	public String getCaption() {
 		return building.getAddress();
+	}
+
+	@Override
+	public String getType() {
+		return "building";
 	}
 }

@@ -1,14 +1,22 @@
 package com.condox.vrestate.client.view.GeoItems;
 
+import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.Position;
 import com.condox.vrestate.client.document.Site;
 
 public class SiteGeoItem implements IGeoItem {
+	private final double initialRange_m = 600;
+	private final double initialTilt_d = 60;
 
 	private Site site = null;
 
 	public SiteGeoItem(Site site){
 		this.site = site;
+		Position position = site.getPosition();
+		if (position != null) {
+			position.setTilt(initialTilt_d);
+			position.setRange(initialRange_m);
+		}
 	}
 	
 	@Override
@@ -33,6 +41,14 @@ public class SiteGeoItem implements IGeoItem {
 
 	@Override
 	public String getCaption() {
-		return site.getName();
+		if (!Options.isViewOrder())
+			return site.getName();
+
+		return "";
+	}
+
+	@Override
+	public String getType() {
+		return "site";
 	}
 }

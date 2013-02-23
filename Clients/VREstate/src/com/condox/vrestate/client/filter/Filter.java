@@ -11,6 +11,9 @@ import com.condox.vrestate.client.view._AbstractView;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.IFrameElement;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Position;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -172,28 +175,30 @@ public class Filter extends StackPanel implements I_FilterSection {
 
 			@Override
 			public void execute() {
-				if (dpFilter.isVisible()) 
-					frame.setAttribute(
-							"style",
-							"z-index: " + (Integer.MAX_VALUE - 1) + ";"
-							+ " width: " + dpFilter.getOffsetWidth()
-							+ "px;" + " height: "
-							+ dpFilter.getOffsetHeight() + "px;"
-							+ " position: absolute;" + " left: "
-							+ dpFilter.getAbsoluteLeft() + "px;" + " top: "
-							+ dpFilter.getAbsoluteTop() + "px;"
-							+ " background: white;");
-				else
-					frame.setAttribute(
-							"style",
-							"z-index: " + (Integer.MAX_VALUE - 1) + ";"
-							+ " width: 0px;" 
-							+ " height: 0px;"
-							+ " position: absolute;" 
-							+ " left: "
-							+ dpFilter.getAbsoluteLeft() + "px;" + " top: "
-							+ dpFilter.getAbsoluteTop() + "px;"
-							+ " background: white;");
+				Style style = frame.getStyle();
+				style.setZIndex(Integer.MAX_VALUE - 1);
+				style.setPosition(Position.ABSOLUTE);
+				style.setLeft(dpFilter.getAbsoluteLeft(), Unit.PX);
+				style.setTop(dpFilter.getAbsoluteTop(), Unit.PX);
+				/*String style = "";
+				style += "z-index: " + (Integer.MAX_VALUE - 1) + ";";
+				style += " position: absolute;";
+				style += " left: " + dpFilter.getAbsoluteLeft() + "px;";
+				style += " top: " + dpFilter.getAbsoluteTop() + "px;";*/
+				if (dpFilter.isVisible()) { 
+					style.setWidth(dpFilter.getOffsetWidth(), Unit.PX);
+					style.setHeight(dpFilter.getOffsetHeight(), Unit.PX);
+					/*style += " width: " + dpFilter.getOffsetWidth()	+ "px;";
+					style += " height: " + dpFilter.getOffsetHeight() + "px;";*/
+				} else {
+					style.setWidth(0, Unit.PX);
+					style.setHeight(0, Unit.PX);
+					/*style += " width: 0px;";
+					style += " height: 0px;";*/
+				}
+				style.setBackgroundColor("white");
+//				style += " background: white;";
+//				frame.setAttribute( "style",style);
 			}
 		});
 	}

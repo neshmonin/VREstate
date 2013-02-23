@@ -2,6 +2,8 @@ package com.condox.vrestate.client.view;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import com.condox.vrestate.client.Log;
@@ -65,6 +67,7 @@ public abstract class _AbstractView implements I_AbstractView {
 				{
 					currentView.setEnabled(true);
 					currentView.onTransitionStopped();
+					NextSelection();
 				}
 			}
 		});
@@ -86,7 +89,7 @@ public abstract class _AbstractView implements I_AbstractView {
 
 	public static void Push(I_AbstractView newView) {
 		newView.scheduleSetEnabled();
-		newView.setupCamera();
+		newView.setupCamera(null);
 		
 		if (!views.isEmpty())
 		{
@@ -110,9 +113,9 @@ public abstract class _AbstractView implements I_AbstractView {
 		
 		currView.setEnabled(false);
 
-		views.pop();
+		I_AbstractView poppedView = views.pop();
 		I_AbstractView newView = views.peek(); 
-		newView.setupCamera();
+		newView.setupCamera(poppedView);
 
 		//newView.setEnabled(true);
 		newView.scheduleSetEnabled();
@@ -133,10 +136,10 @@ public abstract class _AbstractView implements I_AbstractView {
 		
 		currView.setEnabled(false);
 
-		views.pop();
+		I_AbstractView poppedView = views.pop();
 
 		newView.scheduleSetEnabled();
-		newView.setupCamera();
+		newView.setupCamera(poppedView);
 		
 		views.push(newView);
 
@@ -214,11 +217,16 @@ public abstract class _AbstractView implements I_AbstractView {
 		return currentView;
 	}
 	
-	protected void setupStandardLookAtCamera()
+	protected void setupStandardLookAtCamera(I_AbstractView poppedView)
 	{
         if (_camera != null)
         {
         	_camera.attributes.SetLonLatAlt(theGeoItem);
+        	if (poppedView != null) {
+        		Camera poppedCamera = poppedView.getCamera();
+        		if (poppedCamera.CameraType == _camera.CameraType)
+        			_camera.attributes.Heading_d = Camera.NormalizeHeading_d(poppedCamera.attributes.Heading_d);
+        	}
         }
         else
         {
@@ -252,6 +260,24 @@ public abstract class _AbstractView implements I_AbstractView {
 		return isScheduled;
 	}; 
 	public void scheduleSetEnabled(){setEnabledScheduled = true;};
+
+	private static List<IGeoItem> SelectionsQueue = new LinkedList<IGeoItem>(); 
+	public static void AddSelection(IGeoItem geoItemToSelect) {
+		SelectionsQueue.add(geoItemToSelect);
+	}
+
+	public static void NextSelection() {
+		if (SelectionsQueue.size() <= 0)
+			return;
+		
+		IGeoItem geoItem = SelectionsQueue.get(0);
+		if (geoItem == null)
+			return;
+		
+		I_AbstractView currentView = views.peek();
+		currentView.Select(geoItem.getType(), geoItem.getId());
+		SelectionsQueue.remove(0);
+	}
 	
 	/*-----------------------------------------------------------------------*/
 	private static Map<Integer, SiteGeoItem> siteGeoItems = new HashMap<Integer, SiteGeoItem>();

@@ -26,12 +26,12 @@ public class SiteView extends _SB_View {
 		{
 			SuiteGeoItem suiteGeo = _AbstractView.getSuiteGeoItem(id);
 			BuildingGeoItem buildingGeo = _AbstractView.getBuildingGeoItem(suiteGeo.getParent_id());
-
+			
 			BuildingView bldngView = new BuildingView(buildingGeo);
+			buildingGeo.onSelectionChanged(true);
 			_AbstractView.Push(bldngView);					
 
-			SuiteView suiteView = new SuiteView(suiteGeo);
-			_AbstractView.Push(suiteView);					
+			_AbstractView.AddSelection(suiteGeo);
 		}
 	}
 }

@@ -52,15 +52,12 @@ public class Site implements I_VRObject {
 		lon /= count;
 		alt /= count;
 		double heading = 0;
-		double tilt = 45;
-		double range = 1000;
 
 		position.setLongitude(lon);
 		position.setLatitude(lat);
 		position.setAltitude(alt);
 		position.setHeading(heading);
-		position.setTilt(tilt);
-		position.setRange(range);
+
 		if (obj.get("displayModelUrl") != null)
 		displayModelUrl = obj.get("displayModelUrl").isString()
 				.stringValue();

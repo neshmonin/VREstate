@@ -1,0 +1,22 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		.important {
+			font-weight: bold;
+		}
+	</ui:style>
+	<g:HTMLPanel>
+		<g:VerticalPanel width="100%" spacing="20">
+			<g:Label text="Your name:"/>
+			<g:TextBox/>
+			<g:Cell height="" verticalAlignment="ALIGN_BOTTOM">
+				<g:Label text="Your password:"/>
+			</g:Cell>
+			<g:TextBox ui:field="textPassword"/>
+			<g:Cell horizontalAlignment="ALIGN_CENTER">
+				<g:Button width="100px" text="Login" ui:field="button"/>
+			</g:Cell>
+		</g:VerticalPanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 

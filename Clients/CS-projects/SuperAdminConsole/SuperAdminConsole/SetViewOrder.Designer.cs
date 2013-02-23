@@ -32,6 +32,7 @@
             this.buttonPrev = new System.Windows.Forms.Button();
             this.buttonNext = new System.Windows.Forms.Button();
             this.buttonFinish = new System.Windows.Forms.Button();
+            this.buttonOneMore = new System.Windows.Forms.Button();
             this.tabControlSteps = new SuperAdminConsole.WizardPages();
             this.tabPagePickProduct = new System.Windows.Forms.TabPage();
             this.label14 = new System.Windows.Forms.Label();
@@ -70,12 +71,12 @@
             this.textStreet = new System.Windows.Forms.TextBox();
             this.tabPageViewOrderOptions = new System.Windows.Forms.TabPage();
             this.textBoxNote = new System.Windows.Forms.RichTextBox();
+            this.textBoxInfoUrl = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.buttonPayment = new System.Windows.Forms.Button();
             this.groupBoxListingOptions = new System.Windows.Forms.GroupBox();
             this.textBoxMLS = new System.Windows.Forms.RichTextBox();
-            this.textBoxInfoUrl = new System.Windows.Forms.TextBox();
-            this.label12 = new System.Windows.Forms.Label();
             this.labelPercent = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.labelTax = new System.Windows.Forms.Label();
@@ -126,7 +127,7 @@
             // 
             this.buttonPrev.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonPrev.Enabled = false;
-            this.buttonPrev.Location = new System.Drawing.Point(208, 344);
+            this.buttonPrev.Location = new System.Drawing.Point(175, 344);
             this.buttonPrev.Name = "buttonPrev";
             this.buttonPrev.Size = new System.Drawing.Size(70, 24);
             this.buttonPrev.TabIndex = 19;
@@ -137,7 +138,7 @@
             // buttonNext
             // 
             this.buttonNext.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonNext.Location = new System.Drawing.Point(285, 344);
+            this.buttonNext.Location = new System.Drawing.Point(252, 344);
             this.buttonNext.Name = "buttonNext";
             this.buttonNext.Size = new System.Drawing.Size(70, 24);
             this.buttonNext.TabIndex = 20;
@@ -156,6 +157,17 @@
             this.buttonFinish.Text = "Finish";
             this.buttonFinish.UseVisualStyleBackColor = true;
             this.buttonFinish.Click += new System.EventHandler(this.buttonFinish_Click);
+            // 
+            // buttonOneMore
+            // 
+            this.buttonOneMore.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonOneMore.Location = new System.Drawing.Point(344, 344);
+            this.buttonOneMore.Name = "buttonOneMore";
+            this.buttonOneMore.Size = new System.Drawing.Size(70, 24);
+            this.buttonOneMore.TabIndex = 22;
+            this.buttonOneMore.Text = "One more";
+            this.buttonOneMore.UseVisualStyleBackColor = true;
+            this.buttonOneMore.Click += new System.EventHandler(this.buttonOneMore_Click);
             // 
             // tabControlSteps
             // 
@@ -207,10 +219,12 @@
             // 
             // radioButtonSharedListing
             // 
+            this.radioButtonSharedListing.Checked = true;
             this.radioButtonSharedListing.Location = new System.Drawing.Point(40, 127);
             this.radioButtonSharedListing.Name = "radioButtonSharedListing";
             this.radioButtonSharedListing.Size = new System.Drawing.Size(419, 47);
             this.radioButtonSharedListing.TabIndex = 1;
+            this.radioButtonSharedListing.TabStop = true;
             this.radioButtonSharedListing.Text = "Public (or Shared) Listing - will be also visible by the users who initially came" +
     " to see one of the neighboring Public Listings";
             this.radioButtonSharedListing.UseVisualStyleBackColor = true;
@@ -219,12 +233,10 @@
             // radioButtonPrivateListing
             // 
             this.radioButtonPrivateListing.AutoSize = true;
-            this.radioButtonPrivateListing.Checked = true;
             this.radioButtonPrivateListing.Location = new System.Drawing.Point(40, 75);
             this.radioButtonPrivateListing.Name = "radioButtonPrivateListing";
             this.radioButtonPrivateListing.Size = new System.Drawing.Size(291, 17);
             this.radioButtonPrivateListing.TabIndex = 0;
-            this.radioButtonPrivateListing.TabStop = true;
             this.radioButtonPrivateListing.Text = "Private Listing - the only listing  user can see and explore";
             this.radioButtonPrivateListing.UseVisualStyleBackColor = true;
             this.radioButtonPrivateListing.CheckedChanged += new System.EventHandler(this.updateStateEvent);
@@ -602,6 +614,25 @@
             this.textBoxNote.Text = "";
             this.textBoxNote.TextChanged += new System.EventHandler(this.updateStateEvent);
             // 
+            // textBoxInfoUrl
+            // 
+            this.textBoxInfoUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxInfoUrl.Location = new System.Drawing.Point(71, 167);
+            this.textBoxInfoUrl.Name = "textBoxInfoUrl";
+            this.textBoxInfoUrl.Size = new System.Drawing.Size(405, 20);
+            this.textBoxInfoUrl.TabIndex = 5;
+            this.textBoxInfoUrl.TextChanged += new System.EventHandler(this.updateStateEvent);
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(13, 172);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(58, 13);
+            this.label12.TabIndex = 4;
+            this.label12.Text = "Web Page";
+            // 
             // label11
             // 
             this.label11.AutoSize = true;
@@ -660,25 +691,6 @@
             this.textBoxMLS.TabIndex = 24;
             this.textBoxMLS.Text = "";
             this.textBoxMLS.TextChanged += new System.EventHandler(this.updateStateEvent);
-            // 
-            // textBoxInfoUrl
-            // 
-            this.textBoxInfoUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxInfoUrl.Location = new System.Drawing.Point(71, 167);
-            this.textBoxInfoUrl.Name = "textBoxInfoUrl";
-            this.textBoxInfoUrl.Size = new System.Drawing.Size(405, 20);
-            this.textBoxInfoUrl.TabIndex = 5;
-            this.textBoxInfoUrl.TextChanged += new System.EventHandler(this.updateStateEvent);
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(13, 172);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(58, 13);
-            this.label12.TabIndex = 4;
-            this.label12.Text = "Web Page";
             // 
             // labelPercent
             // 
@@ -932,6 +944,7 @@
             this.CancelButton = this.buttonCancel;
             this.ClientSize = new System.Drawing.Size(502, 376);
             this.ControlBox = false;
+            this.Controls.Add(this.buttonOneMore);
             this.Controls.Add(this.buttonFinish);
             this.Controls.Add(this.buttonNext);
             this.Controls.Add(this.buttonPrev);
@@ -1035,5 +1048,6 @@
         private System.Windows.Forms.RadioButton radioButtonSharedListing;
         private System.Windows.Forms.RadioButton radioButtonPrivateListing;
         private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Button buttonOneMore;
     }
 }
