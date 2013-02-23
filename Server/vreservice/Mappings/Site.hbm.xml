@@ -15,6 +15,7 @@
     <bag name="Buildings">
       <key column="SiteID" />
       <one-to-many class="Building" />
+      <loader query-ref="buildingsInSite"/>
     </bag>
 
     <bag name="SuiteTypes">

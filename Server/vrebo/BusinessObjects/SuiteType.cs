@@ -131,5 +131,47 @@ namespace Vre.Server.BusinessLogic
 
             return result;
         }
+
+        public virtual ClientData GetInventoryClientData(ClientData result, bool supplement)
+        {
+            if (null == result) result = new ClientData();
+            if (!supplement)
+            {
+                result.Add("id", AutoID);
+                result.Add("name", Name);
+            }
+
+            if (!string.IsNullOrEmpty(FloorPlanUrl))
+                result.Add("floorPlanUrl", FloorPlanUrl);
+
+            if (FloorArea != null)
+            {
+                switch (FloorArea.StoredAs)
+                {
+                    case ValueWithUM.Unit.SqFeet:
+                        result.Add("area", FloorArea.ValueAs(FloorArea.StoredAs));
+                        result.Add("areaUm", "sqFt");
+                        break;
+
+                    case ValueWithUM.Unit.SqMeters:
+                        result.Add("area", FloorArea.ValueAs(FloorArea.StoredAs));
+                        result.Add("areaUm", "sqM");
+                        break;
+                }
+            }
+
+            result.Add("bedrooms", BedroomCount);
+            result.Add("dens", DenCount);
+            result.Add("otherRooms", OtherRoomCount);
+            result.Add("showerBathrooms", ShowerBathroomCount);
+            result.Add("noShowerBathrooms", NoShowerBathroomCount);
+            result.Add("bathrooms", (NoShowerBathroomCount <= 1)
+                ? ((float)ShowerBathroomCount + 0.5f * (float)NoShowerBathroomCount)
+                : (float)(ShowerBathroomCount + NoShowerBathroomCount - 1) + 0.5f);
+            result.Add("balconies", BalconyCount);
+            result.Add("terraces", TerraceCount);
+
+            return result;
+        }
     }
 }

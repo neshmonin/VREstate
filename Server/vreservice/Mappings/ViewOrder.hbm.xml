@@ -19,7 +19,8 @@
 
     <property name="RequestCounter" column="RequestCounter" />
     <property name="LastRequestTime" column="LastRequestTime" />
-    
+    <property name="NotificationsSent" column="NotificationsSent" />
+
     <property name="Product" column="Product" />
     <property name="Options" column="Options" />
 

@@ -132,12 +132,28 @@ namespace Vre.Server
                 {
                     bool startService = true;
 
-                    if (args.Length == 1)
+                    if (args.Length > 0)
                     {
+                        bool knownCommand = false;
+
                         if (args[0].ToLower().Equals("restart"))
                         {
                             new VrService(ServiceName).ServiceControl(VrService.ServiceCommand.Restart);
+                            knownCommand = true;
                         }
+
+                        if (!knownCommand) knownCommand = Command.CommandHandler.HandleCommand(args);
+
+                        if (!knownCommand)
+                        {
+                            EventLog el = new EventLog("Application", ".", ServiceName);
+
+                            el.WriteEntry(
+                                "Unknown command line parameters: " + Environment.CommandLine,
+                                System.Diagnostics.EventLogEntryType.Error, 1012);
+                            return 5;
+                        }
+
                         startService = false;
                     }
 

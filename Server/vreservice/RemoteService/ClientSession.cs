@@ -139,6 +139,7 @@ namespace Vre.Server.RemoteService
 
         private void staleSessionDropThread()
         {
+            Thread.CurrentThread.Name = "StaleSessionDropper#" + Thread.CurrentThread.ManagedThreadId.ToString();
             while (!_staleSessionDropThreadExit.WaitOne(60000))
             {
                 Dictionary<string, ClientSession> toremove = new Dictionary<string, ClientSession>();

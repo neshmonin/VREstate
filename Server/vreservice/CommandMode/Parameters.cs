@@ -12,37 +12,36 @@ namespace Vre.Server.Command
             _kvp = parseOptions(args);
         }
 
+        public bool RemoveKey(string key)
+        {
+            bool result = false;
+            if (_kvp.ContainsKey(key))
+            {
+                _kvp.Remove(key);
+                result = true;
+            }
+            return result;
+        }
+
         public string GetOption(string key)
         {
             string result = null;
-            _kvp.TryGetValue(key, out result);
+            if (!_kvp.TryGetValue(key, out result)) return null;
             return result;
         }
 
         public bool ContainsOption(string key)
         {
-            string result = null;
-            _kvp.TryGetValue(key, out result);
+            string result;
+            if (!_kvp.TryGetValue(key, out result)) return false;
             return (result != null);
         }
 
         public bool ContainsParameter(string key)
         {
-            string result = null;
-            _kvp.TryGetValue(key, out result);
+            string result;
+            if (!_kvp.TryGetValue(key, out result)) return false;
             return (null == result);
-        }
-
-        public string FilenameByExtension(string extension)
-        {
-            string result = null;
-            if (!extension.StartsWith(".")) extension = "." + extension;
-            foreach (string key in _kvp.Keys)
-            {
-                if (_kvp[key] != null) continue;
-                if (key.EndsWith(extension)) { result = key; break; }
-            }
-            return result;
         }
 
         private static Dictionary<string, string> parseOptions(string[] elements)

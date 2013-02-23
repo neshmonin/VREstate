@@ -62,6 +62,8 @@ namespace Vre.Client
 
         private void keepaliveThread()
         {
+            Thread.CurrentThread.Name = "SessionKeepalive#" + Thread.CurrentThread.ManagedThreadId.ToString();
+
             while (!_threadQuit.WaitOne(_keepalivePeriodSec * 1000))
             {
                 if (null == _sid) break;  // if SID was disposed (logout etc.) exit immediately

@@ -138,11 +138,14 @@
     <Compile Include="BusinessLogic\ExpiredException.cs" />
     <Compile Include="BusinessLogic\ObjectExistsException.cs" />
     <Compile Include="BusinessObjects\FinancialTransactionExt.cs" />
+    <Compile Include="BusinessObjects\Localization.cs" />
     <Compile Include="BusinessObjects\ReverseRequest.cs" />
     <Compile Include="ChangeLog\ChangeLog.cs" />
     <Compile Include="CommandMode\CommandHandler.cs" />
+    <Compile Include="CommandMode\ICommand.cs" />
     <Compile Include="CommandMode\ModelImport.cs" />
     <Compile Include="CommandMode\Parameters.cs" />
+    <Compile Include="CommandMode\TaskRunner.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Dao\AccountDao.cs" />
     <Compile Include="Dao\BuildingDao.cs" />
@@ -180,6 +183,11 @@
     <Compile Include="Managers\RolePermissionCheck.cs" />
     <Compile Include="ModelCache\ModelCache.cs" />
     <Compile Include="ModelCache\ModelCacheManager.cs" />
+    <Compile Include="Spikes\SalesMessageSender.cs" />
+    <Compile Include="Tasks\BaseTask.cs" />
+    <Compile Include="Tasks\RemoveStaleReverseRequests.cs" />
+    <Compile Include="Tasks\NotifyExpiringViewOrders.cs" />
+    <Compile Include="UserMessaging\EmailUserMessaging.cs" />
     <Compile Include="RemoteService\AddressHelper.cs" />
     <Compile Include="RemoteService\ClientSession.cs" />
     <Compile Include="RemoteService\GenerationService.cs" />
@@ -200,11 +208,14 @@
     <Compile Include="ServiceInstances.cs" />
     <Compile Include="Spikes\PullUpdateService.cs" />
     <Compile Include="StartupShutdown.cs" />
+    <Compile Include="Tasks\UpdateViewOrderTargets.cs" />
+    <Compile Include="Tasks\ITask.cs" />
     <Compile Include="UnitTest\BuildingSuite.cs" />
     <Compile Include="UnitTest\JSON.cs" />
     <Compile Include="UnitTest\RandomUpdater.cs" />
     <Compile Include="UnitTest\UserManagement.cs" />
-    <Compile Include="Utilities.cs" />
+    <Compile Include="UserMessaging\IUserMessaging.cs" />
+    <Compile Include="UserMessaging\MessageGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mappings\DatabaseSettings.hbm.xml" />
@@ -301,6 +312,14 @@
     <Folder Include="InterfaceImpl\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{C579EB0B-5B93-4E2B-ABC5-F0B5B1798702}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MlsParsing\MlsParsing.csproj">
+      <Project>{92172DFA-8935-430E-AF21-E709101C0C57}</Project>
+      <Name>MlsParsing</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ModelParsing\ModelParsing.csproj">
       <Project>{C0DEDA10-3530-447A-8123-6FCED0A1B7BE}</Project>
       <Name>ModelParsing</Name>

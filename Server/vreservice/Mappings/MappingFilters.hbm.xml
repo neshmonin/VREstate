@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vrebo" namespace="Vre.Server.BusinessLogic">
 
+  <sql-query name="buildingsInSite">
+    <load-collection alias="b" role="Site.Buildings"/>
+    SELECT {b.*}
+    FROM Buildings b
+    WHERE b.SiteId = :id AND b.Deleted=0
+  </sql-query>
+
   <sql-query name="suitesInBuilding">
     <load-collection alias="s" role="Building.Suites"/>
       SELECT {s.*}

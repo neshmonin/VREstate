@@ -225,6 +225,9 @@ namespace Vre.Server.BusinessLogic
             if (includeDeleted && (_session.User.UserRole != User.Role.SuperAdmin))
                 includeDeleted = false;  // only superadmins can see deleted records!
 
+            if (User.IsEstateDeveloperTied(role) && (estateDeveloperId < 0))
+                throw new ArgumentException("Estate developer argument required");
+
             using (UserDao dao = new UserDao(_session.DbSession))
             {
                 IList<User> result = dao.ListUsers(role, ((estateDeveloperId >= 0) ? (int?)estateDeveloperId : null),

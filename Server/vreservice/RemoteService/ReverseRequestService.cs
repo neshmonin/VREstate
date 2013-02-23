@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Net.Mail;
 using System.Text;
 using NHibernate;
 using Vre.Server.BusinessLogic;
@@ -17,18 +16,13 @@ namespace Vre.Server.RemoteService
         
         private static TimeSpan _linkExpirationTime;
 
-        private static string _smtpServerHost;
-        private static int _smtpServerPort;
-        private static bool _smtpUseSsl;
-        private static string _smtpLogin;
-        private static string _smtpPassword;
-        private static string _viewOrderUrlTemplate;
+        private static string _staticLinkUrlTemplate;
 
         private static Dictionary<string, string> _messageTemplates = new Dictionary<string, string>();
 
         private const string _servicePathPrefix = _servicePathElement0 + "/";
         private const string _servicePathElement0 = "go";
-        private const int _maxRequestLinkLength = 64;  // the link is currently a GUID
+        private const int _maxRequestLinkLength = 64;  // the link is currently a UID (see UniversalId) or GUID (legacy)
 
         public string ServicePathPrefix { get { return _servicePathPrefix; } }
 
@@ -38,17 +32,11 @@ namespace Vre.Server.RemoteService
         {
             _allowUnsecureService = ServiceInstances.Configuration.GetValue("AllowSensitiveDataOverNonSecureConnection", false);
 
-            _smtpServerHost = ServiceInstances.Configuration.GetValue("SmtpServerHost", string.Empty);
-            _smtpServerPort = ServiceInstances.Configuration.GetValue("SmtpServerPort", 25);
-            _smtpLogin = ServiceInstances.Configuration.GetValue("SmtpServerLogin", string.Empty);
-            _smtpPassword = ServiceInstances.Configuration.GetValue("SmtpServerPassword", string.Empty);
-            _smtpUseSsl = ServiceInstances.Configuration.GetValue("SmtpServerUseSsl", false);
-
             _linkExpirationTime = new TimeSpan(0, 0, ServiceInstances.Configuration.GetValue("ReversRequestLinkExpirationSec", 3600));
 
-            _viewOrderUrlTemplate = ServiceInstances.Configuration.GetValue("ViewOrderUrlTemplate", "http://ref.3dcondox.com/go?id={0}");
+            _staticLinkUrlTemplate = ServiceInstances.Configuration.GetValue("StaticLinkUrlTemplate", "http://ref.3dcondox.com/go?id={0}");
 
-            scanTemplates(ServiceInstances.Configuration.GetValue("MessageTemplateRoot", "."));
+            //scanTemplates(ServiceInstances.Configuration.GetValue("MessageTemplateRoot", "."));
 
             _configured = true;
         }
@@ -85,13 +73,26 @@ namespace Vre.Server.RemoteService
                 throw new ArgumentException();
 
             Guid rqid;
-            if (!Guid.TryParseExact(path, "N", out rqid))
-                throw new ArgumentException();
+            switch (UniversalId.TypeInUrlId(path))
+            {
+                default:
+                    throw new ArgumentException();
+
+                case UniversalId.IdType.Unknown:  // legacy
+                    if (!Guid.TryParseExact(path, "N", out rqid))
+                        throw new ArgumentException();
+                    break;
+
+                case UniversalId.IdType.ReverseRequest:
+                    rqid = UniversalId.ExtractAsGuid(path);
+                    break;
+            }
 
             using (ISession session = NHibernateHelper.GetSession())
             {
                 using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session))
                 {
+                    bool dataChanged = false;
                     ReverseRequest rq;
                     using (ReverseRequestDao dao = new ReverseRequestDao(session))
                         rq = dao.GetById(rqid);
@@ -113,11 +114,15 @@ namespace Vre.Server.RemoteService
                         switch (rq.Request)
                         {
                             case ReverseRequest.RequestType.AccountRegistration:
-                                processAccountRegister(request, rq, session);
+                                dataChanged = processAccountRegister(request, rq, session);
                                 break;
 
                             case ReverseRequest.RequestType.LoginChange:
-                                processLoginChange(request, rq, session);
+                                dataChanged = processLoginChange(request, rq, session);
+                                break;
+
+                            case ReverseRequest.RequestType.ViewOrderControl:
+                                dataChanged = processViewOrderControl(request, rq, session);
                                 break;
 
                             //case ReverseRequest.RequestType.Listing:
@@ -135,81 +140,16 @@ namespace Vre.Server.RemoteService
                         }
                     }
 
-                    tran.Commit();
+                    if (dataChanged) tran.Commit();
                 }
             }
         }
 
         #region utility methods
-        #region message sending
-        private static void sendMessage(User user, string templateName, params object[] parameters)
+        private static string generateUrl(ReverseRequest rq)
         {
-            string template = getTemplate(templateName, user);
-
-            sendMessageInt(user.PrimaryEmailAddress, template, parameters);
-
-            ServiceInstances.Logger.Info("{0} message sent to {1} ({2})", templateName, user.PrimaryEmailAddress, user.AutoID);
+            return string.Format(_staticLinkUrlTemplate, UniversalId.GenerateUrlId(UniversalId.IdType.ReverseRequest, rq.Id));
         }
-
-        private static void sendMessage(User user, string recipient, string templateName, params object[] parameters)
-        {
-            string template = getTemplate(templateName, user);
-
-            sendMessageInt(recipient, template, parameters);
-
-            ServiceInstances.Logger.Info("{0} message sent to {1} ({2})", 
-                templateName, recipient, (user != null) ? user.AutoID : -1);
-        }
-
-        private static void sendMessage(string recipient, string templateName, params object[] parameters)
-        {
-            string template = getTemplate(templateName, null);
-
-            sendMessageInt(recipient, template, parameters);
-
-            ServiceInstances.Logger.Info("{0} message sent to {1}", templateName, recipient);
-        }
-
-        private static void sendMessageInt(string recipient, string template, params object[] parameters)
-        {
-            string message;
-
-            // Process placeholders
-            //
-            message = string.Format(template, parameters);
-
-            // Detach subject from body: subject is first line
-            //
-            int pos1 = message.IndexOf('\r');
-            int pos2 = pos1;
-            if ((pos1 < 0) || (pos1 >= message.Length)) { pos1 = message.IndexOf('\n'); pos2 = pos1; }
-            else if ((pos2 < (message.Length - 1)) && (message[pos2 + 1] == '\n')) { pos2++; }
-
-            string subject = VersionGen.ProductName;  // default, should never appear though! :)
-
-            if ((pos1 >= 0) && (pos1 < message.Length))
-            {
-                subject = message.Substring(0, pos1);
-                message = message.Substring(pos2 + 1);
-            }
-
-            // Send ready message
-            //
-            try
-            {
-                using (SmtpClient client = new SmtpClient(_smtpServerHost, _smtpServerPort))
-                {
-                    client.Credentials = new NetworkCredential(_smtpLogin, _smtpPassword);
-                    client.EnableSsl = _smtpUseSsl;
-                    client.Send(_smtpLogin, recipient, subject, message);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Cannot send message to recipient: " + ex.Message, ex);
-            }
-        }
-        #endregion
 
         private static readonly string[] _refParamNameVariations = new string[] { "email1", "email2" };
 
@@ -224,74 +164,12 @@ namespace Vre.Server.RemoteService
             return Guid.NewGuid().ToString("N");
         }
 
-        #region template management
-        private static void scanTemplates(string rootPath)
-        {
-            foreach (string file in 
-                Directory.GetFiles(Path.Combine(rootPath, "en"), "*.*", SearchOption.TopDirectoryOnly))
-            {
-                if (!Path.GetExtension(file).Equals(".txt", StringComparison.InvariantCultureIgnoreCase)) continue;
-
-                string name = Path.GetFileNameWithoutExtension(file);
-                string value;
-                using (StreamReader sr = File.OpenText(file))
-                    value = sr.ReadToEnd();
-
-                _messageTemplates.Add(name.ToUpperInvariant(), processTemplate(value));
-            }
-
-            // TODO: Hardcoded!
-            // Non-localized text templates
-            _messageTemplates.Add("TXT_ACCOUNT_CREATED", "Account has been successfully created.");
-            _messageTemplates.Add("TXT_PASSWORD_UPDATED", "Password has been successfully updated.");
-            _messageTemplates.Add("TXT_LOGIN_CHANGED", "Login has been successfully changed.");
-        }
-
-        private static readonly char[] _formatEscape = new char[] { '{', '}' };
-        private static string processTemplate(string template)
-        {
-            Stack<bool> decisions = new Stack<bool>();
-            int pos = 0;
-            do
-            {
-                pos = template.IndexOfAny(_formatEscape, pos);
-                if (pos < 0) break;
-                bool escape;
-                if (template[pos] == '{')
-                {
-                    if (pos < (template.Length - 1)) escape = !char.IsDigit(template, pos + 1);// char.IsWhiteSpace(template, pos + 1);
-                    else escape = true;
-
-                    decisions.Push(escape);
-                    if (escape) template = template.Insert(pos++, "{");
-                }
-                else
-                {
-                    if (decisions.Pop()) template = template.Insert(pos++, "}");
-                }
-                pos++;
-            }
-            while (true);
-            return template;
-        }
-
-        private static string getTemplate(string name, User relatedUser)
-        {
-            string result;
-
-            if (!_messageTemplates.TryGetValue(name, out result))
-                throw new ApplicationException("Template name is unknown: " + name);
-
-            return result;
-        }
-        #endregion
-
         private static void makeHttpResponse(IServiceRequest request, User user, string templateName, params object[] parameters)
         {
-            string template = getTemplate(templateName, user);
+            string html = templateName;
             try
             {
-                string html = string.Format(template, parameters);
+                html = ServiceInstances.MessageGen.GetMessage(user, templateName, parameters);
 
                 request.Response.ResponseCode = HttpStatusCode.OK;
                 request.Response.DataStreamContentType = "html";
@@ -300,9 +178,9 @@ namespace Vre.Server.RemoteService
                 byte[] binary = Encoding.UTF8.GetBytes(html);
                 request.Response.DataStream.Write(binary, 0, binary.Length);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                ServiceInstances.Logger.Fatal(template);
+                ServiceInstances.Logger.Fatal(html);
                 throw;
             }
         }
@@ -313,13 +191,14 @@ namespace Vre.Server.RemoteService
             request.Response.DataStreamContentType = "txt";
 
             // cannot use a StreamWriter here as it disposes off the stream after use!
-            byte[] binary = Encoding.UTF8.GetBytes(string.Format("{0}|{1}", refNum, getTemplate(textTemplateName, relatedUser)));
+            byte[] binary = Encoding.UTF8.GetBytes(string.Format("{0}|{1}", 
+                refNum, ServiceInstances.MessageGen.GetMessage(relatedUser, textTemplateName)));
             request.Response.DataStream.Write(binary, 0, binary.Length);
         }
         #endregion
 
         #region Account registration
-        public static void InitiateUserRegistration(IRequestData srq, ClientSession session, string login)
+        public static void InitiateUserRegistration(string login)
         {
             if (!_configured) configure();
 
@@ -338,7 +217,7 @@ namespace Vre.Server.RemoteService
 
                     using (ReverseRequestDao dao = new ReverseRequestDao(dbSession))
                     {
-                        request = dao.Get(login, ReverseRequest.RequestType.AccountRegistration);
+                        request = dao.GetByLoginAndType(login, ReverseRequest.RequestType.AccountRegistration);
 
                         if (null == request)
                         {
@@ -355,8 +234,8 @@ namespace Vre.Server.RemoteService
                         }
                     }
 
-                    sendMessage(null, login, "MSG_ACCOUNT_CREATE",
-                        srq.ConstructClientRootUri() + _servicePathPrefix + request.Id.ToString("N"), request.ExpiresOn);
+                    ServiceInstances.MessageGen.SendMessage(null, login, "MSG_ACCOUNT_CREATE",
+                        generateUrl(request), request.ExpiresOn);
 
                     //session.DbSession.Flush();
                     tran.Commit();
@@ -364,8 +243,9 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void processAccountRegister(IServiceRequest request, ReverseRequest dbRequest, ISession session)
+        private static bool processAccountRegister(IServiceRequest request, ReverseRequest dbRequest, ISession session)
         {
+            bool dataChanged = false;
             string testValue = request.Request.Query.GetParam(dbRequest.ReferenceParamName, string.Empty);
             string refValue = request.Request.Query.GetParam("rid", string.Empty);
             string password = request.Request.Query.GetParam("pwd", string.Empty);
@@ -376,7 +256,7 @@ namespace Vre.Server.RemoteService
                 // a link from email is accessed: generate password entry page
                 //
                 makeHttpResponse(request, null, "HTML_PASSWORD_ENTRY",
-                    dbRequest.Id.ToString("N"),
+                    UniversalId.GenerateUrlId(UniversalId.IdType.ReverseRequest, dbRequest.Id),
                     dbRequest.ReferenceParamName,
                     "rid", dbRequest.ReferenceParamValue,
                     dbRequest.Login);
@@ -433,6 +313,8 @@ namespace Vre.Server.RemoteService
                         // prepare plaintext response to be parsed by javascript on page
                         //
                         makeJavascriptResponse(request, rn, "TXT_ACCOUNT_CREATED", user);
+
+                        dataChanged = true;
                     }
                     else
                     {
@@ -442,6 +324,7 @@ namespace Vre.Server.RemoteService
                     }
                 }
             }
+            return dataChanged;
         }
         #endregion
 
@@ -464,7 +347,7 @@ namespace Vre.Server.RemoteService
 
                 using (ReverseRequestDao dao = new ReverseRequestDao(session.DbSession))
                 {
-                    request = dao.Get(newLogin, ReverseRequest.RequestType.LoginChange);
+                    request = dao.GetByLoginAndType(newLogin, ReverseRequest.RequestType.LoginChange);
 
                     if (null == request)
                     {
@@ -481,16 +364,17 @@ namespace Vre.Server.RemoteService
                     }
                 }
 
-                sendMessage(session.User, newLogin, "MSG_LOGIN_CHANGE",
-                    srq.ConstructClientRootUri() + _servicePathPrefix + request.Id.ToString("N"), request.ExpiresOn);
+                ServiceInstances.MessageGen.SendMessage(null, session.User, newLogin, "MSG_LOGIN_CHANGE",
+                    generateUrl(request), request.ExpiresOn);
 
                 //session.DbSession.Flush();  // TODO: dunno why this is required!
                 tran.Commit();
             }
         }
 
-        private static void processLoginChange(IServiceRequest request, ReverseRequest dbRequest, ISession session)
+        private static bool processLoginChange(IServiceRequest request, ReverseRequest dbRequest, ISession session)
         {
+            bool dataChanged = false;
             string testValue = request.Request.Query.GetParam(dbRequest.ReferenceParamName, string.Empty);
             string refValue = request.Request.Query.GetParam("rid", string.Empty);
             string password = request.Request.Query.GetParam("pwd", string.Empty);
@@ -514,7 +398,7 @@ namespace Vre.Server.RemoteService
                 // a link from email is accessed: generate account confirmation page
                 //
                 makeHttpResponse(request, user, "HTML_PASSWORD_CONFIRM",
-                    dbRequest.Id.ToString("N"),
+                    UniversalId.GenerateUrlId(UniversalId.IdType.ReverseRequest, dbRequest.Id),
                     dbRequest.ReferenceParamName,
                     "rid", dbRequest.ReferenceParamValue,
                     login);
@@ -562,6 +446,8 @@ namespace Vre.Server.RemoteService
                         // prepare plaintext response to be parsed by javascript on page
                         //
                         makeJavascriptResponse(request, rn, "TXT_LOGIN_CHANGED", user);
+
+                        dataChanged = true;
                     }
                     else
                     {
@@ -571,6 +457,8 @@ namespace Vre.Server.RemoteService
                     }
                 }
             }
+
+            return dataChanged;
         }
         #endregion
 
@@ -654,7 +542,7 @@ namespace Vre.Server.RemoteService
             }
 
             ServiceInstances.Logger.Info(
-                "User {0} created a view order for user {1}: ({2}) for {3} id={4}, reference URL={5}, expires on {6}, RID={7}, STRN={8}",
+                "User {0} created a view order for user {1}: ({2}) for {3} id={4}, reference URL={5}, expires on {6} UTC, RID={7}, STRN={8}",
                 srq.UserInfo.Session.User, targetUser, product, type, targetObjectId, productUrl, expiresOn, viewOrder.AutoID, result);
 
             return result;
@@ -664,7 +552,7 @@ namespace Vre.Server.RemoteService
         {
             if (!_configured) configure();
 
-            return string.Format(_viewOrderUrlTemplate, viewOrder.AutoID.ToString("N"));
+            return string.Format(_staticLinkUrlTemplate, UniversalId.GenerateUrlId(UniversalId.IdType.ViewOrder, viewOrder.AutoID));
         }
 
         //public static void DecodeListing(ClientSession session, string listingId,
@@ -695,6 +583,146 @@ namespace Vre.Server.RemoteService
         //            target = dao.GetById(listing.TargetObjectId);
         //    }
         //}
+        #endregion
+
+        #region vieworder control
+        public static string CreateViewOrderControlUrl(ViewOrder vo)
+        {
+            if (!_configured) configure();
+
+            bool created = false;
+            ReverseRequest request;
+
+            using (ISession session = NHibernateHelper.GetSession())
+            {
+                using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session))
+                {
+                    using (ReverseRequestDao dao = new ReverseRequestDao(session))
+                    {
+                        request = dao.GetBySubjectAndType(vo.AutoID.ToString(), ReverseRequest.RequestType.ViewOrderControl);
+                        if (null == request)
+                        {
+                            request = ReverseRequest.CreateViewOrderControl(vo.OwnerId, vo,
+                                vo.ExpiresOn.AddYears(1),  // TODO: INTERMEDIATE SOLUTION
+                                generateReferenceParameterName(), generateReferenceParameterValue());
+                            dao.Create(request);
+                            created = true;
+                        }
+                    }
+
+                    if (created) tran.Commit();
+                }
+            }
+
+            return generateUrl(request);
+        }
+
+        private static bool processViewOrderControl(IServiceRequest request, ReverseRequest dbRequest, ISession session)
+        {
+            bool dataChanged = false;
+            string testValue = request.Request.Query.GetParam(dbRequest.ReferenceParamName, string.Empty);
+            string refValue = request.Request.Query.GetParam("rid", string.Empty);
+            string control = request.Request.Query.GetParam("ctl", string.Empty);
+            User user;
+            ViewOrder vo;
+
+            using (UserDao dao = new UserDao(session)) user = dao.GetById(dbRequest.UserId.Value);
+            using (ViewOrderDao dao = new ViewOrderDao(session)) vo = dao.GetById(new Guid(dbRequest.Subject));
+
+            DateTime newExpiry = DateTime.MinValue;
+
+            if (vo != null)
+            {
+                newExpiry = DateTime.UtcNow.AddDays(10);  // TODO: INTERMEDIATE SOLUTION
+            }
+
+            if ((0 == refValue.Length) || (0 == control.Length))
+            {
+                // a link from email is accessed...
+                //
+                if ((null == vo) || (vo.Deleted))
+                {
+                    // ... generate error page
+                    //
+                    makeHttpResponse(request, user, "HTML_GENERIC_ERROR", "@TXT_VIEWORDER_ABSENT", "---");
+                }
+                else
+                {
+                    // ... generate control page
+                    //
+                    makeHttpResponse(request, user, "HTML_VIEWORDER_CONTROL",
+                        UniversalId.GenerateUrlId(UniversalId.IdType.ReverseRequest, dbRequest.Id),
+                        dbRequest.ReferenceParamName,
+                        "rid", dbRequest.ReferenceParamValue,
+                        vo.ExpiresOn.ToLocalTime(), vo.Product, vo.Options,  // LEGACY: SERVER LOCAL TIME HERE!
+                        Task.NotifyExpiringViewOrders.GetSubjectAddress(session, vo),
+                        newExpiry.ToLocalTime());  // LEGACY: SERVER LOCAL TIME HERE!
+                }
+            }
+            else
+            {
+                if ((testValue.Length > 0) || !dbRequest.ReferenceParamValue.Equals(refValue)) // TODO: robot action detected!
+                {
+                    ServiceInstances.Logger.Error(
+                        "Robot activity detected (ViewOrder control).\r\nURL: {0}",
+                        request.UserInfo);
+                    makeHttpResponse(request, user, "HTML_GENERIC_ERROR", string.Empty, string.Empty);
+                }
+                else
+                {
+                    if (control.Equals("cancel"))
+                    {
+                        // remove reverse request record
+                        using (ReverseRequestDao dao = new ReverseRequestDao(session))
+                            dao.Delete(dbRequest);
+
+                        // remove view order
+                        vo.MarkDeleted();
+                        using (ViewOrderDao dao = new ViewOrderDao(session))
+                            dao.Update(vo);
+
+                        // successful change callback: generate confirmation confirmation page
+                        //
+                        string rn = Utilities.GenerateReferenceNumber();
+                        ServiceInstances.Logger.Info("{0} User {1} successfully deleted VOID={2}.",
+                            rn, user, vo.AutoID);
+
+                        // prepare plaintext response to be parsed by javascript on page
+                        //
+                        makeJavascriptResponse(request, rn, "TXT_VIEWORDER_CANCELLED", user);
+
+                        dataChanged = true;
+                    }
+                    else if (control.Equals("prolong"))
+                    {
+                        // update reverse request record
+                        dbRequest.ExpiresOn = newExpiry.AddYears(1);  // TODO: INTERMEDIATE SOLUTION
+                        using (ReverseRequestDao dao = new ReverseRequestDao(session))
+                            dao.Update(dbRequest);
+
+                        // update view order
+                        vo.Enabled = true;
+                        vo.Prolong(newExpiry);
+                        using (ViewOrderDao dao = new ViewOrderDao(session))
+                            dao.Update(vo);
+
+                        // successful change callback: generate confirmation confirmation page
+                        //
+                        string rn = Utilities.GenerateReferenceNumber();
+                        ServiceInstances.Logger.Info("{0} User {1} successfully prolonged VOID={2} until {3}.",
+                            rn, user, vo.AutoID, vo.ExpiresOn);
+
+                        // prepare plaintext response to be parsed by javascript on page
+                        //
+                        makeJavascriptResponse(request, rn, "TXT_VIEWORDER_PROLONGED", user);
+
+                        dataChanged = true;
+                    }
+                }
+            }
+
+            return dataChanged;
+        }
         #endregion
     }
 }

@@ -108,6 +108,29 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
+        public virtual ClientData GetInventoryClientData(ClientData result, bool supplement)
+        {
+            if (null == result) result = new ClientData();
+            if (!supplement)
+            {
+                result.Add("id", AutoID);
+                result.Add("name", SuiteName);
+            }
+
+            result.Add("levelNumber", PhysicalLevelNumber);
+            result.Add("floorName", FloorName);
+
+            result.Add("status", ClientData.ConvertProperty<SalesStatus>(Status));
+
+            if (SuiteType != null)
+                SuiteType.GetInventoryClientData(result, true);
+
+            if (!string.IsNullOrEmpty(BubbleTemplateUrl))
+                result.Add("bubbleTemplateUrl", BubbleTemplateUrl);
+
+            return result;
+        }
+
         public override bool UpdateFromClient(ClientData data)
         {
             bool changed = base.UpdateFromClient(data);

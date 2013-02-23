@@ -119,13 +119,17 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="cloudservice.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Common.csproj">
+      <Project>{C579EB0B-5B93-4E2B-ABC5-F0B5B1798702}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ModelParsing\ModelParsing.csproj">
       <Project>{C0DEDA10-3530-447A-8123-6FCED0A1B7BE}</Project>
       <Name>ModelParsing</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="cloudservice.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

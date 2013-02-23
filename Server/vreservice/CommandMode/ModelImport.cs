@@ -11,7 +11,7 @@ using Vre.Server.RemoteService;
 
 namespace Vre.Server.Command
 {
-    internal class ModelImport
+    internal class ModelImport : ICommand
     {
         private CsvSuiteTypeInfo _extraSuiteInfo;
         private StringBuilder _log;
@@ -21,44 +21,49 @@ namespace Vre.Server.Command
         private List<string> _filesSaved = new List<string>();
         //private ISession _session;
 
-        public static void ImportModel(string estateDeveloperName, string infoModelFileName, Parameters param)
+        public string Name { get { return "importmodel"; } }
+
+        public void Execute(Parameters param)
         {
+            string infoModelFileName = param.GetOption("infomodel");
+            string estateDeveloper = param.GetOption("ed");
+
+            if (string.IsNullOrWhiteSpace(infoModelFileName)) throw new ArgumentException("Required parameter missing: infomodel");
+            if (string.IsNullOrWhiteSpace(estateDeveloper)) throw new ArgumentException("Required parameter missing: ed");
+
             string extraSuiteInfoFileName = param.GetOption("sti");
             string siteName = param.GetOption("site");
             bool dryRun = CommandHandler.str2bool(param.GetOption("dryrun"), true);
 
-            StringBuilder log = new StringBuilder();
+            _log = new StringBuilder();
             string logFileName = Path.Combine(
-                    Path.GetDirectoryName(infoModelFileName), 
-                    Path.GetFileNameWithoutExtension(infoModelFileName)) 
+                    Path.GetDirectoryName(infoModelFileName),
+                    Path.GetFileNameWithoutExtension(infoModelFileName))
                 + ".import.log.txt";
             FileStream logFile = File.Open(logFileName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
 
-            log.AppendLine("=========================================================");
-            log.AppendLine(Environment.CommandLine);
-            log.AppendLine("---------------------------------------------------------");
+            _log.AppendLine("=========================================================");
+            _log.AppendLine(Environment.CommandLine);
+            _log.AppendLine("---------------------------------------------------------");
 
             Exception importError = null;
-            
+
             try
             {
                 DatabaseSettingsDao.VerifyDatabase();
 
-                ModelImport instance = new ModelImport();
-                instance._log = log;
-                instance.doImport(estateDeveloperName, siteName, 
+                doImport(estateDeveloper, siteName,
                     infoModelFileName, extraSuiteInfoFileName, dryRun, param);
                 //instance.generateSqlScript(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName);
             }
             catch (Exception e)
             {
                 importError = e;
-                log.AppendFormat("Error importing model: {0}\r\n{1}\r\n", e.Message, e.StackTrace);
-                while ((e = e.InnerException) != null) log.AppendFormat("  {0}\r\n{1}\r\n", e.Message, e.StackTrace);
+                _log.AppendFormat("Error importing model: {0}", Utilities.ExplodeException(e));
             }
 
             logFile.Seek(0, SeekOrigin.End);
-            using (StreamWriter sw = new StreamWriter(logFile)) sw.Write(log);
+            using (StreamWriter sw = new StreamWriter(logFile)) sw.Write(_log);
 
             if (importError != null) throw importError;
         }

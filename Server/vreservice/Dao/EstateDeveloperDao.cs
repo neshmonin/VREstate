@@ -20,6 +20,7 @@ namespace Vre.Server.Dao
                 return _session.CreateCriteria<EstateDeveloper>()
                     .Add(Restrictions.Eq("Name", id))
                     .Add(Restrictions.Eq("Deleted", false))
+                    .SetMaxResults(1)
                     .UniqueResult<EstateDeveloper>();
             }
         }

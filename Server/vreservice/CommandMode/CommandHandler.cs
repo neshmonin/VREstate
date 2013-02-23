@@ -1,25 +1,31 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace Vre.Server.Command
 {
     public class CommandHandler
     {
+        private static Dictionary<string, ICommand> _commands;
+
+        static CommandHandler()
+        {
+            _commands = new Dictionary<string, ICommand>();
+            addCommand(new ModelImport());
+            addCommand(new TaskRunner());
+        }
+
+        private static void addCommand(ICommand cmd) { _commands.Add(cmd.Name, cmd); }
+
         public static bool HandleCommand(string[] args)
         {
             bool result = false;
             Parameters par = new Parameters(args);
 
-            if (par.ContainsParameter("importmodel"))
+            foreach (string cmdKey in _commands.Keys)
             {
-                string infoModelFileName = par.GetOption("infomodel");
-                string estateDeveloper = par.GetOption("ed");
-
-                if ((null == infoModelFileName) || (null == estateDeveloper))
+                if (par.ContainsParameter(cmdKey))
                 {
-                    // TODO: Print usage
-                }
-                else
-                {
-                    ModelImport.ImportModel(estateDeveloper, infoModelFileName, par);
+                    par.RemoveKey(cmdKey);
+                    _commands[cmdKey].Execute(par);
                     result = true;
                 }
             }
