@@ -175,7 +175,7 @@ public class Submit extends Composite {
 				countEmail--;
 				if (countEmail == 0) {
 					DialogBox box = new DialogBox();
-					SubmitSuccessfull message = new SubmitSuccessfull(box);
+					SubmitOK message = new SubmitOK(box);
 					message.setCustomerEmail(CustomerEmail);
 					box.setWidget(message);
 					box.center();

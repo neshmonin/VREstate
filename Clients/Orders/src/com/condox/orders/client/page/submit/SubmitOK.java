@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 
-public class SubmitSuccessfull extends Composite {
+public class SubmitOK extends Composite {
 
 	private static SubmitSuccessfullUiBinder uiBinder = GWT
 			.create(SubmitSuccessfullUiBinder.class);
@@ -20,18 +20,18 @@ public class SubmitSuccessfull extends Composite {
 	@UiField Button button;
 
 	interface SubmitSuccessfullUiBinder extends
-			UiBinder<Widget, SubmitSuccessfull> {
+			UiBinder<Widget, SubmitOK> {
 	}
 
-	public SubmitSuccessfull() {
+	public SubmitOK() {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 
-	public SubmitSuccessfull(String firstName) {
+	public SubmitOK(String firstName) {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 
-	public SubmitSuccessfull(DialogBox box) {
+	public SubmitOK(DialogBox box) {
 		this.box = box;
 		initWidget(uiBinder.createAndBindUi(this));
 	}

@@ -11,6 +11,8 @@ import com.condox.orders.client.Log;
 import com.condox.orders.client.Options;
 import com.condox.orders.client.Orders;
 import com.condox.orders.client.User;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
@@ -34,13 +36,18 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.cellview.client.DataGrid.Resources;
+import com.google.gwt.user.cellview.client.DataGrid.Style;
+import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.cellview.client.Header;
 
 public class SelectBuilding extends Composite implements IFilter<Building>,
 		IPage {
@@ -51,9 +58,25 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 	DataGrid<Building> dataGrid = new DataGrid<Building>();
 	@UiField TextBox textFilter;
 	@UiField ListBox boxCity;
-
+	
 	interface SelectBuildingUiBinder extends UiBinder<Widget, SelectBuilding> {
 	}
+	
+	//**************************************************************************
+	private class CustomHeaderBuilder extends Header<Building> {
+
+		public CustomHeaderBuilder(Cell<Building> cell) {
+			super(cell);
+		}
+
+		@Override
+		public Building getValue() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+	}
+	//**************************************************************************
 
 	public SelectBuilding() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -69,6 +92,9 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 		boxCity.addItem("Toronto");
 		boxCity.setEnabled(true);
 		textFilter.setText(Config.TXT_START_TYPING);
+		
+//	    resources = GWT.create(Resources.class);
+//	    resources.styles().ensureInjected();
 	}
 
 	@Override

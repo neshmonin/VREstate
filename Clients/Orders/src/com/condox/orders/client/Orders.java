@@ -5,12 +5,16 @@ import com.condox.orders.client.page.building.Building;
 import com.condox.orders.client.page.building.SelectBuilding;
 import com.condox.orders.client.page.suite.SelectSuite;
 import com.condox.orders.client.page.suite.Suite;
+import com.condox.orders.client.styles.DataGridResources;
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -34,12 +38,19 @@ public class Orders implements EntryPoint, ValueChangeHandler<String>  {
 	private TabLayoutPanel containerPanel = new TabLayoutPanel(0.0, Unit.EM);
 	public static Building selectedBuilding = null;
 	public static Suite selectedSuite = null;
+	
 
 	/**
 	 * @wbp.parser.entryPoint
 	 */
+	
 	@Override
 	public void onModuleLoad() {
+//		MyResources.INSTANCE.css().ensureInjected();
+		final DataGridResources dataGridResources = GWT.create(DataGridResources.class);
+		dataGridResources.dataGrid().ensureInjected();
+
+		
 		Log.write("DEBUG_MODE: " + Config.DEBUG_MODE);
 		RootLayoutPanel rootLayoutPanel = RootLayoutPanel.get();
 		rootLayoutPanel.setStyleName("my-body");

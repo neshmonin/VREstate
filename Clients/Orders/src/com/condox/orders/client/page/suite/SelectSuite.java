@@ -195,7 +195,7 @@ public class SelectSuite extends Composite implements IPage {
 		TextColumn<Floor> nameColumn = new TextColumn<Floor>() {
 			@Override
 			public String getValue(Floor object) {
-				return object.getName();
+				return "Floor " + object.getName();
 			}
 		};
 		nameColumn.setSortable(true);
@@ -205,8 +205,10 @@ public class SelectSuite extends Composite implements IPage {
 				return A.getName().compareTo(B.getName());
 			}
 		});
-		dataGrid.setColumnWidth(nameColumn, "100px");
-		dataGrid.addColumn(nameColumn, "Floor name");
+		dataGrid.setColumnWidth(nameColumn, "200px");
+		Building selectedBuilding = Orders.selectedBuilding;
+		dataGrid.addColumn(nameColumn, selectedBuilding.getStreet());
+//		dataGrid.addColumn(nameColumn, "Floor name");
 
 		// -------------------------
 		// Show names.
