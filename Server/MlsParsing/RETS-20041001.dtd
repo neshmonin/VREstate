@@ -1,0 +1,40 @@
+﻿<!-- edited with XML Spy v4.4 U (http://www.xmlspy.com) by Jeff Brush (Avantia, Inc.) -->
+<!-- <!DOCTYPE RETS SYSTEM "RETS-20021015.dtd"> -->
+<!-- <!DOCTYPE RETS [ -->
+<!--   Real Estate Transaction Specification (RETS) DTD  -->
+<!--   Real Estate Transaction Markup Language (RETML)  -->
+<!--
+        submitted by:
+        Leendert Bijnagte
+        Fidelity National Information Solutions, Inc.
+        Version 1.x  11/20/2001
+        
+        Revision 1.5: Leendert Bijnagte, Michael Del Gaudio
+                              Edited by Bruce Toback
+-->
+<!-- BASIC ELEMENTS -->
+<!--DATE/TIME ELEMENTS -->
+<!--see ISO 8601 for acceptable values for Format -->
+<!ENTITY % REData SYSTEM "REData-20041001.dtd">
+%REData;
+<!ATTLIST RETS
+        ReplyCode CDATA #REQUIRED
+        ReplyText CDATA #REQUIRED
+>
+<!ELEMENT COUNT EMPTY>
+<!ATTLIST COUNT
+        Records CDATA #REQUIRED
+>
+<!ELEMENT MAXROWS EMPTY>
+<!ATTLIST MAXROWS
+        value CDATA #IMPLIED
+>
+<!ELEMENT RETS-STATUS EMPTY>
+<!ATTLIST RETS-STATUS
+        ReplyCode CDATA #IMPLIED
+        ReplyText CDATA #IMPLIED
+>
+<!-- COMPOUND ELEMENTS -->
+<!-- PACKAGING ELEMENTS -->
+<!ELEMENT RETS (COUNT?, REData?, MAXROWS?, RETS-STATUS?)>
+<!-- ]> -->

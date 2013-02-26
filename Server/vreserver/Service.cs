@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ServiceProcess;
+using System.Threading;
 
 namespace Vre.Server
 {
@@ -35,6 +36,7 @@ namespace Vre.Server
         {
             try
             {
+                Thread.CurrentThread.Name = "ServiceMain";
                 ServiceRunner.Start();
                 base.OnStart(args);
             }

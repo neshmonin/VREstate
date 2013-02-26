@@ -16,7 +16,7 @@ namespace Vre.Server
             while (result.StartsWith("0")) result = result.Substring(1);
             return result;
         }
-
+        
         public static string ExplodeException(Exception ex)
         {
             return ExplodeException(ex, string.Empty);
@@ -116,9 +116,12 @@ namespace Vre.Server
             return (Size);
         }
 
+        //private static readonly char[] _radixXX = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+        //    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 
+        //    'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
         private static readonly char[] _radixXX = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 
-            'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+            'A', 'C', 'E', 'F', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'R', 
+            'S', 'T', 'U', 'W', 'X', 'Y', 'Z' };
         private static readonly int _radixBase = _radixXX.Length;
         private static readonly long _refBase = new DateTime(2012, 1, 1).Ticks;
 

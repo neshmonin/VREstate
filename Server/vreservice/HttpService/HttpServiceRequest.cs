@@ -37,7 +37,7 @@ namespace Vre.Server.HttpService
         {
             private static string _serverRootPath = null;
             private Uri _rawRequest;
-            public RequestData(HttpListenerRequest request, string path, ServiceQuery query)
+            public RequestData(HttpListenerRequest request, string path, ServiceQuery query, long bodySizeLimit)
             {
                 string type = request.HttpMethod;
 
@@ -55,13 +55,30 @@ namespace Vre.Server.HttpService
                 // either HTTPS (SSL) or local connection is required to qualify as secure
                 IsSecureConnection = request.IsSecureConnection | IsCallerSecure(request.RemoteEndPoint.Address);
 
-                if (request.ContentLength64 > 0) Data = JavaScriptHelper.JsonToClientData(request.InputStream);
-                else Data = null;
+                Data = null;
+                RawData = null;
+                if ((request.ContentLength64 > 0) && (request.ContentLength64 <= bodySizeLimit))
+                {
+                    if (request.ContentType.Equals("application/json"))
+                    {
+                        try
+                        {
+                            Data = JavaScriptHelper.JsonToClientData(request.InputStream);
+                        }
+                        catch { }
+                    }
+                    if (null == Data)
+                    {
+                        RawData = new byte[request.ContentLength64];
+                        request.InputStream.Read(RawData, 0, RawData.Length);
+                    }
+                }
             }
             public RequestType Type { get; private set; }
             public string Path { get; private set; }
             public ServiceQuery Query { get; private set; }
             public ClientData Data { get; private set; }
+            public byte[] RawData { get; private set; }
             public bool IsSecureConnection { get; private set; }
             public string ConstructClientRootUri()
             {
@@ -142,7 +159,7 @@ namespace Vre.Server.HttpService
         public IRequestData Request { get; private set; }
         public IResponseData Response { get; private set; }
 
-        public HttpServiceRequest(HttpListenerContext ctx, string servicePath)
+        public HttpServiceRequest(HttpListenerContext ctx, string servicePath, long requestBodySizeLimit)
         {
             // TODO: verify this is valid:
             // ctx.Request.ContentEncoding
@@ -156,7 +173,7 @@ namespace Vre.Server.HttpService
             if (file.StartsWith(servicePath)) file = file.Remove(0, servicePath.Length);
 
             UserInfo = new RemoteUserInfo(ctx.Request.RemoteEndPoint, ctx.Request.Headers, query);
-            Request = new RequestData(ctx.Request, file, query);
+            Request = new RequestData(ctx.Request, file, query, requestBodySizeLimit);
             Response = new ResponseData(new MemoryStream());
 
             // update trusted value for this request: managers do not get request object!
@@ -169,7 +186,7 @@ namespace Vre.Server.HttpService
                 ctx.Response.StatusDescription = "Session ID is invalid or dropped by timeout.";
 
                 ServiceInstances.Logger.Error(string.Format(
-                    "HTTP request referred to unknows session ID from {0}.",
+                    "HTTP request referred to unknow session ID from {0}.",
                     ctx.Request.RemoteEndPoint));
                 //else
                 //    ServiceInstances.Logger.Error("HTTP request referred to unknows session ID.");

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using NHibernate;
 using Vre.Server.BusinessLogic;
+using NHibernate.Transform;
+using System.Collections;
 
 namespace Vre.Server.Dao
 {
@@ -96,13 +98,52 @@ AND s.BuildingID IN (:bids)").AddEntity(typeof(ViewOrder))
             q.SetTime("ex", DateTime.UtcNow);
             return q.List<ViewOrder>();
         }
+        
+        public IList<ViewOrder> GetExpiringBeforeNotNotified(DateTime utcTimeLimit, int notificationLevel)
+        {
+            IQuery q;
+            if (notificationLevel >= 0)
+            {
+                q = _session.CreateQuery("FROM Vre.Server.BusinessLogic.ViewOrder"
+                    + " WHERE Deleted=0 AND Enabled=1"
+                    + " AND ExpiresOn<:ex AND NotificationsSent=:nl");
+            }
+            else
+            {
+                q = _session.CreateQuery("FROM Vre.Server.BusinessLogic.ViewOrder"
+                    + " WHERE Deleted=0 AND Enabled=1"
+                    + " AND ExpiresOn<:ex AND NotificationsSent<:nl");
+                notificationLevel = -notificationLevel;
+            }
+            //q.SetTime("nex", DateTime.UtcNow);
+            q.SetTime("ex", utcTimeLimit);
+            q.SetInt32("nl", notificationLevel);
+            return q.List<ViewOrder>();
+        }
 
-        //public IList<ViewOrder> GetActive(User owner)
-        //{
-        //    IQuery q = _session.CreateQuery("FROM Vre.Server.BusinessLogic.ViewOrder"
-        //        + " WHERE OwnerId=:oid AND Deleted=0");
-        //    q.SetInt32("oid", owner.AutoID);
-        //    return q.List<ViewOrder>();
-        //}
+        public IList<ViewOrder> GetAllActive()
+        {
+            return _session.CreateQuery(
+                "FROM Vre.Server.BusinessLogic.ViewOrder "
+                + "WHERE Deleted=0 AND Enabled=1").List<ViewOrder>();
+        }
+
+        public IList<KeyValuePair<Guid, string>> GetAllActiveIdsAndMlsId()
+        {
+            return _session.CreateSQLQuery("SELECT vo.[AutoID], vo.[MlsId] FROM [ViewOrders] vo WHERE vo.[Deleted]=0 AND vo.[Enabled]=1")
+                .SetResultTransformer(new GuidStringTupleTransformer())
+                //.AddEntity(typeof(string))
+                .List<KeyValuePair<Guid, string>>();
+        }
+
+        class GuidStringTupleTransformer : IResultTransformer
+        {
+            public IList TransformList(IList collection) { return collection; }
+
+            public object TransformTuple(object[] tuple, string[] aliases)
+            {
+                return new KeyValuePair<Guid, string>((Guid)tuple[0]/*Guid.Parse(tuple[0] as string)*/, tuple[1] as string);
+            }
+        }
     }
 }

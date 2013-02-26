@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Text;
+using System.Threading;
 using NHibernate;
 using Vre.Server.BusinessLogic;
 using Vre.Server.RemoteService;
-using System.Reflection;
-using System.Globalization;
 
 namespace Vre.Server.HttpService
 {
@@ -28,6 +29,7 @@ namespace Vre.Server.HttpService
         public string[] Listeners { get { lock (_listeners) return _listeners.ToArray(); } }
 
         private HttpListener _httpListener;
+        private string _listenerHostName;
 
         protected string _path;
         protected int _fileBufferSize = 16384;
@@ -47,6 +49,8 @@ namespace Vre.Server.HttpService
             if (0 == ContentTypeByExtension.Count) initializeContentType();
             _fileBufferSize = ServiceInstances.Configuration.GetValue("FileStreamingBufferSize", 16384);
             _allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
+
+            //_listenerHostName = ServiceInstances.Configuration.GetValue(
 
             _filesRootFolder = ServiceInstances.Configuration.GetValue("FilesRoot",
                 Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
@@ -121,6 +125,9 @@ namespace Vre.Server.HttpService
                 if (null == _httpListener) return;  // shutdown case
                 if (!_httpListener.IsListening) return;  // shutdown case
 
+                if (string.IsNullOrEmpty(Thread.CurrentThread.Name))
+                    Thread.CurrentThread.Name = "HTTPproc#" + Thread.CurrentThread.ManagedThreadId.ToString();
+
                 HttpListenerContext ctx = null;
 
                 try { ctx = _httpListener.EndGetContext(ar); }
@@ -131,6 +138,8 @@ namespace Vre.Server.HttpService
                 if (null == ctx) return;  // error case; just give up the request
                 try
                 {
+                    string hostName = ctx.Request.Headers["Host"];
+
                     string browserKey = Statistics.GetBrowserId(ctx);
 
                     IResponseData r = process(browserKey, ctx);
@@ -219,60 +228,135 @@ namespace Vre.Server.HttpService
             if (e is ObjectExistsException)
             {
                 response.StatusCode = (int)HttpStatusCode.Conflict;
-                response.StatusDescription = "Entity already exists.";
-                ServiceInstances.Logger.Error("Entity already exists: {0}", e.Message);
+                if (_allowExtendedLogging)
+                {
+                    response.StatusDescription = "Entity already exists: " + e.Message;
+                    ServiceInstances.Logger.Error("Entity already exists: {0}", e);
+                }
+                else
+                {
+                    response.StatusDescription = "Entity already exists.";
+                    ServiceInstances.Logger.Error("Entity already exists: {0}", e.Message);
+                }
             }
             else if (e is ExpiredException)
             {
                 response.StatusCode = (int)HttpStatusCode.Gone;
-                response.StatusDescription = e.Message != null ? e.Message : "Content expired.";
-                ServiceInstances.Logger.Error("Requested entity is expired: {0}", e.Message);
+                if (_allowExtendedLogging)
+                {
+                    response.StatusDescription = e.Message != null ? e.Message : "Content expired.";
+                    ServiceInstances.Logger.Error("Requested entity is expired: {0}", e);
+                }
+                else
+                {
+                    response.StatusDescription = "Content expired.";
+                    ServiceInstances.Logger.Error("Requested entity is expired: {0}", e.Message);
+                }
             }
             else if (e is FileNotFoundException)
             {
                 response.StatusCode = (int)HttpStatusCode.NotFound;
-                response.StatusDescription = "Content does not exist.";
-                ServiceInstances.Logger.Error("HTTP request for unknown entity: {0}", e.Message);
+                if (_allowExtendedLogging)
+                {
+                    response.StatusDescription = "Content does not exist: " + e.Message;
+                    ServiceInstances.Logger.Error("HTTP request for unknown entity: {0}", e);
+                }
+                else
+                {
+                    response.StatusDescription = "Content does not exist.";
+                    ServiceInstances.Logger.Error("HTTP request for unknown entity: {0}", e.Message);
+                }
             }
             else if (e is PermissionException)
             {
                 response.StatusCode = (int)HttpStatusCode.Forbidden;
                 response.StatusDescription = e.Message;// "Current user has no permission to view this object.";
-                ServiceInstances.Logger.Error("Attempt to retrieve object not granted: {0}", e.Message);
+                if (_allowExtendedLogging)
+                {
+                    ServiceInstances.Logger.Error("Attempt to retrieve object not granted: {0}", e);
+                }
+                else
+                {
+                    ServiceInstances.Logger.Error("Attempt to retrieve object not granted: {0}", e.Message);
+                }
             }
             else if (e is InvalidOperationException)
             {
                 response.StatusCode = (int)HttpStatusCode.PreconditionFailed;
                 response.StatusDescription = e.Message;
-                ServiceInstances.Logger.Error("Cannot perform operation: {0}", e.Message);
+                if (_allowExtendedLogging)
+                {
+                    ServiceInstances.Logger.Error("Cannot perform operation: {0}", e);
+                }
+                else
+                {
+                    ServiceInstances.Logger.Error("Cannot perform operation: {0}", e.Message);
+                }
             }
             else if (e is StaleObjectStateException)
             {
                 response.StatusCode = (int)HttpStatusCode.Conflict;
                 response.StatusDescription = e.Message;
-                ServiceInstances.Logger.Error("Stale object: {0}", e.Message);
+                if (_allowExtendedLogging)
+                {
+                    ServiceInstances.Logger.Error("Stale object: {0}", e);
+                }
+                else
+                {
+                    ServiceInstances.Logger.Error("Stale object: {0}", e.Message);
+                }
             }
             else if (e is ArgumentException)
             {
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
-                response.StatusDescription = "Argument error.";
-                ServiceInstances.Logger.Error("{0}", e.Message);
+                if (_allowExtendedLogging)
+                {
+                    response.StatusDescription = "Argument error: " + e.Message;
+                    ServiceInstances.Logger.Error("{0}", e);
+                }
+                else
+                {
+                    response.StatusDescription = "Argument error.";
+                    ServiceInstances.Logger.Error("{0}", e.Message);
+                }
             }
             else if (e is NotImplementedException)
             {
                 response.StatusCode = (int)HttpStatusCode.NotImplemented;
                 response.StatusDescription = "Service not implemented.";
-                ServiceInstances.Logger.Error("Service not implemented: {0}", e.Message);
+                if (_allowExtendedLogging)
+                {
+                    ServiceInstances.Logger.Error("Service not implemented: {0}", e);
+                }
+                else
+                {
+                    ServiceInstances.Logger.Error("Service not implemented: {0}", e.Message);
+                }
             }
             else if (e is InvalidDataException)
             {
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
-                response.StatusDescription = "The data passed to server is not valid.";
-                ServiceInstances.Logger.Error("Request processing fauled: {0}", e.Message);
+                if (_allowExtendedLogging)
+                {
+                    response.StatusDescription = "The data passed to server is not valid: " + e.Message;
+                    ServiceInstances.Logger.Error("Request processing fauled: {0}", e);
+                }
+                else
+                {
+                    response.StatusDescription = "The data passed to server is not valid.";
+                    ServiceInstances.Logger.Error("Request processing fauled: {0}", e.Message);
+                }
             }
             else if (e is HttpListenerException)
             {
-                ServiceInstances.Logger.Error("HTTP request processing failed: {0}", e.Message);
+                if (_allowExtendedLogging)
+                {
+                    ServiceInstances.Logger.Error("HTTP request processing failed: {0}", e);
+                }
+                else
+                {
+                    ServiceInstances.Logger.Error("HTTP request processing failed: {0}", e.Message);
+                }
                 // no need to set status here as connection is no longer workable
             }
             else

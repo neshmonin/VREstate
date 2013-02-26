@@ -69,8 +69,15 @@ namespace Vre.Server.BusinessLogic
             /// <para>TODO: ???</para>
             /// <para>The notification owner is in <see cref="ReverseRequest.UserId"/>; this can be used to list user's view orders.</para>
             /// </remarks>
-            NotificationCancel = 5
-
+            NotificationCancel = 5,
+            /// <summary>
+            /// Control View Order
+            /// <para>PERMANENT while target exists</para>
+            /// </summary>
+            /// <remarks>
+            /// <para>ViewOrder ID is in <see cref="ReverseRequest.Subject"/></para>
+            /// </remarks>
+            ViewOrderControl = 6,
         }
 
         public virtual Guid Id { get; private set; }
@@ -154,6 +161,23 @@ namespace Vre.Server.BusinessLogic
             result.UserId = userId;
             result.Login = null;
             result.Subject = null;
+            result.ReferenceParamName = refParamName;
+            result.ReferenceParamValue = refParamValue;
+            return result;
+        }
+
+        public static ReverseRequest CreateViewOrderControl(int userId, ViewOrder vo, DateTime expiresOn,
+            string refParamName, string refParamValue)
+        {
+            ReverseRequest result = new ReverseRequest();
+            result.Id = Guid.NewGuid();
+            result.Request = RequestType.ViewOrderControl;
+            result.ExpiresOn = expiresOn;
+            result.RequestCounter = 0;
+            result.LastRequestTime = _minimalTime;
+            result.UserId = userId;
+            result.Login = null;
+            result.Subject = vo.AutoID.ToString();
             result.ReferenceParamName = refParamName;
             result.ReferenceParamValue = refParamValue;
             return result;

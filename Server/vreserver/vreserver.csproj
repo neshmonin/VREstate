@@ -94,6 +94,7 @@
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
@@ -129,6 +130,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{C579EB0B-5B93-4E2B-ABC5-F0B5B1798702}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\vreservice\vreservice.csproj">
       <Project>{A84320F8-DC92-48D7-8AA6-2010786AA7C1}</Project>
       <Name>vreservice</Name>

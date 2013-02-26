@@ -162,7 +162,7 @@ namespace Vre.Server.BusinessLogic
             ClientData result = base.GetClientData();
 
             result.Add("estateDeveloperId", EstateDeveloperID);  // informational only
-            result.Add("role", UserRole);  // informational only
+            result.Add("role", ClientData.ConvertProperty<Role>(UserRole));  // informational only
 
             result.Add("nickName", NickName);
             result.Add("primaryEmail", PrimaryEmailAddress);

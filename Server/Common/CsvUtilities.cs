@@ -54,9 +54,10 @@ namespace Vre.Server
                 }
                 else if ((',' == line[idx]) && !escape)
                 {
-                    if (escaped) result[cnt] = line.Substring(idx0 + 1, idx - idx0 - 2);
+                    if (escaped) result[cnt] = line.Substring(idx0 + 1, idx - idx0 - 2).Replace("\"\"", "\"");
                     else result[cnt] = line.Substring(idx0, idx - idx0);
                     idx0 = idx + 1;
+                    escaped = false;
                     cnt++;
                 }
 

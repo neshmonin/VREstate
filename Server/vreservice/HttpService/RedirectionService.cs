@@ -19,7 +19,8 @@ namespace Vre.Server.HttpService
         private AliasMap _map, _testMap;
         private ButtonStoreFsNameCache _imagePathCache;
         private bool _allowReallyExtendedLogging;
-        private string _clientViewOrderTemplate, _testViewOrderListingTemplate;
+        private string _clientViewOrderTemplate, _testViewOrderTemplate;
+        private string _clientRRTemplate, _testRRTemplate;
 
         public RedirectionService() : base("HTTP Redirection")
         {
@@ -44,7 +45,10 @@ namespace Vre.Server.HttpService
             _testMap = new AliasMap(ServiceInstances.Configuration.GetValue("RedirectionTestAliasMapFile", "aliases.test.config"));
 
             _clientViewOrderTemplate = ServiceInstances.Configuration.GetValue("RedirectionClientViewOrderTemplate", "https://vrt.3dcondox.com/VREstate.html?viewOrderId={0}");
-            _testViewOrderListingTemplate = ServiceInstances.Configuration.GetValue("RedirectionTestClientViewOrderTemplate", "https://vrt.3dcondox.com/vre/VREstate.html?viewOrderId={0}");
+            _testViewOrderTemplate = ServiceInstances.Configuration.GetValue("RedirectionTestClientViewOrderTemplate", "https://vrt.3dcondox.com/vre/VREstate.html?viewOrderId={0}");
+
+            _clientRRTemplate = ServiceInstances.Configuration.GetValue("RedirectionRevReqTemplate", "https://vrt.3dcondox.com/go/{0}");
+            _testRRTemplate = ServiceInstances.Configuration.GetValue("RedirectionTestRevReqTemplate", "https://vrt.3dcondox.com/vre/go/{0}");
         }
 
         protected override IResponseData process(string browserKey, HttpListenerContext ctx)
@@ -179,7 +183,17 @@ namespace Vre.Server.HttpService
             }
             else
             {
-                finalUri = string.Format(testMode ? _testViewOrderListingTemplate : _clientViewOrderTemplate, id);
+                switch (UniversalId.TypeInUrlId(id))
+                {
+                    default:  // legacy
+                    case UniversalId.IdType.ViewOrder:
+                        finalUri = string.Format(testMode ? _testViewOrderTemplate : _clientViewOrderTemplate, id);
+                        break;
+
+                    case UniversalId.IdType.ReverseRequest:
+                        finalUri = string.Format(testMode ? _testRRTemplate : _clientRRTemplate, id);
+                        break;
+                }
             }
 
             //ctx.Request.UrlReferrer;
