@@ -89,7 +89,7 @@ Ref#{1}", ecnt, refVal));
                                     out subj, out body,
                                     // LEGACY: SERVER LOCAL TIME HERE!
                                     vo.AutoID, vo.ExpiresOn.ToLocalTime(), vo.Product, vo.Options, subject,
-                                    ReverseRequestService.CreateViewOrderControlUrl(vo));
+                                    ReverseRequestService.CreateViewOrderControlUrl(session, vo));
                                 SendAdministrativeAlert(subj, body);
                             }
                             else
@@ -97,7 +97,7 @@ Ref#{1}", ecnt, refVal));
                                 ServiceInstances.MessageGen.SendMessage(null, owner, messageTemplate,
                                     // LEGACY: SERVER LOCAL TIME HERE!
                                     vo.AutoID, vo.ExpiresOn.ToLocalTime(), vo.Product, vo.Options, subject,
-                                    ReverseRequestService.CreateViewOrderControlUrl(vo));
+                                    ReverseRequestService.CreateViewOrderControlUrl(session, vo));
                             }
                             ccnt++;
                         }

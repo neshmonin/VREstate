@@ -38,10 +38,15 @@ namespace Vre.Server.HttpService
                         {
                             rq.UserInfo.Session.Resume();
                             _rsp.ProcessRequest(this, rq);
+                            rq.UserInfo.Session.Disconnect(false);
                         }
-                        finally
+                        catch (NHibernate.HibernateException)
                         {
-                            rq.UserInfo.Session.Disconnect();
+                            rq.UserInfo.Session.Disconnect(true);
+                        }
+                        catch
+                        {
+                            rq.UserInfo.Session.Disconnect(false);
                         }
                     }
                 }

@@ -586,14 +586,14 @@ namespace Vre.Server.RemoteService
         #endregion
 
         #region vieworder control
-        public static string CreateViewOrderControlUrl(ViewOrder vo)
+        public static string CreateViewOrderControlUrl(ISession session, ViewOrder vo)
         {
             if (!_configured) configure();
 
             bool created = false;
             ReverseRequest request;
 
-            using (ISession session = NHibernateHelper.GetSession())
+            //using (ISession session = NHibernateHelper.GetSession())
             {
                 using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session))
                 {
@@ -695,10 +695,9 @@ namespace Vre.Server.RemoteService
                     }
                     else if (control.Equals("prolong"))
                     {
-                        // update reverse request record
-                        dbRequest.ExpiresOn = newExpiry.AddYears(1);  // TODO: INTERMEDIATE SOLUTION
+                        // remove reverse request record
                         using (ReverseRequestDao dao = new ReverseRequestDao(session))
-                            dao.Update(dbRequest);
+                            dao.Delete(dbRequest);
 
                         // update view order
                         vo.Enabled = true;

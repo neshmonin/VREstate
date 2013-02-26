@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ServiceModel;
+using System.Reflection;
+using System.Threading;
 using Vre.Server.BusinessLogic;
 using Vre.Server.Dao;
 using Vre.Server.HttpService;
 using Vre.Server.RemoteService;
-using System.Threading;
 
 namespace Vre.Server
 {
@@ -26,6 +26,7 @@ namespace Vre.Server
         public static void PerformStartup(bool startAsService)
         {
             ServiceInstances.Logger.Info("Starting server.");
+            ServiceInstances.Logger.Info("Version {0}.{1}", Assembly.GetExecutingAssembly().GetName().Version, VersionGen.VersionStamp);
             Status = "Starting...";
 
             if (!Enum.TryParse<ServerRole>(ServiceInstances.Configuration.GetValue("ServerRole", "VRT"),

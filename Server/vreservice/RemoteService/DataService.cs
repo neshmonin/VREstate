@@ -650,16 +650,12 @@ namespace Vre.Server.RemoteService
 
             if (query.GetParam("sellerMode", "false").Equals("true"))
             {
-                session.Resume();
-
                 User[] list = session.User.CanView.ToArray();
 
                 int cnt = list.Length;
                 result = new ClientData[cnt];
                 for (int idx = 0; idx < cnt; idx++)
                     result[idx] = list[idx].GetClientData();
-
-                session.Disconnect();
             }
             else
             {

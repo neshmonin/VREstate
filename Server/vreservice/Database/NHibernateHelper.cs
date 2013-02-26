@@ -207,7 +207,7 @@ namespace Vre.Server
             {
                 if (!_committed && _tran.IsActive) _tran.Dispose();
                 if (_session != null) _session.Dispose();
-                if (_clientSession != null) _clientSession.Disconnect();
+                if (_clientSession != null) _clientSession.Disconnect(false);
             }
         }
     }

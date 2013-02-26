@@ -40,24 +40,27 @@ namespace Vre.Server.Mls
 
         public IList<string> GetCurrentActiveItems()
         {
-            Process proc = new Process();
-            proc.StartInfo.FileName = _executable;
-            proc.StartInfo.Arguments = _arguments;
-            if (_uid != null)
+            if (_executable != null)
             {
-                proc.StartInfo.Domain = _domain;
-                proc.StartInfo.UserName = _uid;
-                proc.StartInfo.Password = _pwd;
+                Process proc = new Process();
+                proc.StartInfo.FileName = _executable;
+                proc.StartInfo.Arguments = _arguments;
+                if (_uid != null)
+                {
+                    proc.StartInfo.Domain = _domain;
+                    proc.StartInfo.UserName = _uid;
+                    proc.StartInfo.Password = _pwd;
+                }
+
+                proc.Start();
+                if (!proc.WaitForExit(_timeoutSec * 1000))
+                    throw new TimeoutException("Failed running MLS Connector (timeout of " +
+                        _timeoutSec.ToString() + "): " + _executable + " " + _arguments);
+
+                if (proc.ExitCode != 0)
+                    throw new ApplicationException("Failed running MLS Connector (error " +
+                        proc.ExitCode.ToString() + "): " + _executable + " " + _arguments);
             }
-
-            proc.Start();
-            if (!proc.WaitForExit(_timeoutSec * 1000))
-                throw new TimeoutException("Failed running MLS Connector (timeout of " + 
-                    _timeoutSec.ToString() + "): " + _executable + " " + _arguments);
-
-            if (proc.ExitCode != 0)
-                throw new ApplicationException("Failed running MLS Connector (error " +
-                    proc.ExitCode.ToString() + "): " + _executable + " " + _arguments);
 
             string selectedFile = null;
             DateTime selectedFileCT = DateTime.MinValue;
