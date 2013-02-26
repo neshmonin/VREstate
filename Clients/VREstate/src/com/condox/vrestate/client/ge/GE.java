@@ -2,6 +2,8 @@ package com.condox.vrestate.client.ge;
 
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.VREstate;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.nitrous.gwt.earth.client.api.GEHtmlStringBalloon;
@@ -22,6 +24,48 @@ public class GE extends GoogleEarthWidget{
 	public static GoogleEarthWidget getEarth() {
 		return earth;
 	};
+	//********************************************************
+//	private static int width = 0;
+//	private static int height = 0;
+//	private static int factor = 1;
+	
+//	private static native int getFactor() /*-{
+//        // always return 1, except at non-default zoom levels in IE before version 8
+////        function GetZoomFactor () {
+//            var factor = 1;
+////            if ($doc.body.getBoundingClientRect) {
+////                    // rect is only in physical pixel size in IE before version 8 
+////                var rect = $doc.body.getBoundingClientRect ();
+////                var physicalW = rect.right - rect.left;
+//////                alert(physicalW);
+////                var logicalW = $doc.body.offsetWidth;
+//////                alert(logicalW);
+////                    // the zoom level is always an integer percent value
+////                factor = Math.round ((physicalW / logicalW) * 100) / 100;
+////            }
+//            return factor;
+////        }
+//        
+//	}-*/;
+//	
+//	private static int width = 0;
+//	private static int height = 0;
+//	private static double factor = 1.0;
+	
+	//	public static int getEarthWidth() {
+//		if (origWidth == 0) {
+//			earth.getOffsetWidth()
+//		}
+//		return earth.getOffsetWidth() * getFactor();
+//	};
+//	
+//	public static int getEarthHeight() {
+////		Log.write("Factor: " + getFactor());
+//		return earth.getOffsetHeight() * getFactor();
+//	};
+	
+	
+	//********************************************************
 
 	public static GEPlugin getPlugin() {
 		return earth.getGEPlugin();
@@ -118,7 +162,10 @@ public class GE extends GoogleEarthWidget{
 
 		//earth.setStyleName("map3d");
 		//earth.setSize("100%", "100%");
+		
 		RootLayoutPanel.get().add(earth);
+//		width = earth.getOffsetWidth();
+//		height = earth.getOffsetHeight();
 		earth.init();
 		Log.write("onApiLoaded -> earth.init();");
 	};
