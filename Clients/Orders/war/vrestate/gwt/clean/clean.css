@@ -29,12 +29,12 @@ body {
   direction: ltr;
 }
 a, a:visited {
-  color: #0066cc;
+  color: darkturquoise;
   text-decoration:none;
 }
 
 a:hover {
-  color: #0066cc;
+  color: darkturquoise;
   text-decoration:underline;
 }
 

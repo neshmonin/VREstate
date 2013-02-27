@@ -73,9 +73,6 @@ h1 {
     .my-body {
     	background-color: #2E3337;
     }
-    .my-menu-item {
-    	background-color: #66BEE9;
-    }
     .my-menu-item:hover {
 	background-color: #ccc;
 	color: #1b1464;
@@ -83,13 +80,13 @@ h1 {
     }
     
     body {
-	margin-bottom: 0px;
-	background-color: #2E3337;
-	font-family: arial;
-	font-size:0.8em;
-	color: #FFFFFF;
-	font-weight: normal;
-	padding: 0.2em;
+    	color: lightseagreen;
+    	margin-bottom: 0px;
+    	padding: 0.2em;
+    	font-size: 0.8em;
+    	font-family: arial;
+    	font-weight: normal;
+    	background-color: #2E3337;
 }
 
 .container {
@@ -139,7 +136,7 @@ padding:0;
 height: 20px;
 	padding: 5px 0px;
 }
-.menu-item {
+.my-menu-item {
 height: 20px;
 display:block;
 width:150px;
@@ -153,10 +150,45 @@ width:150px;
 	text-transform: uppercase;
 	text-decoration: none;
 	background-color: #1b1464;
+	cursor: pointer;
 }
 #maincontainer {
 width: 800px;
 height:800px;
 float: left;
 background: #a7b5bc;}
+.my-header {
+	color: darkturquoise;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 5px;
+	background-color: #000033;
+}
+a, a:visited {
+	color: aqua;
+}
+a : hover {
+	color: aqua;
+	text-decoration: underline;
+}
+.my-container {
+}
+.my-hyperlink {
+	color: aqua;
+}
+.my-hyperlink a:hover {
+	color: aqua;
+}
+.my-hyperlink a:visited {
+	color: aqua;
+}
+.my-action {
+	color: red;
+	font-weight: bold;
+}
+.my-test {
+line-height: 50px;
+	color: darkturquoise;
+	background-color: #000033;
+}
 	

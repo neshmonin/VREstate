@@ -4,14 +4,18 @@ import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.I_SB_View;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlMouseEvent;
 import com.nitrous.gwt.earth.client.api.KmlPlacemark;
 import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
+import com.nitrous.gwt.earth.client.api.event.MouseClickListener;
 import com.nitrous.gwt.earth.client.api.event.MouseListener;
 
 public class SB_Interactor extends OverlayHelpers
@@ -37,6 +41,8 @@ public class SB_Interactor extends OverlayHelpers
 		zoomRect = new OvlRectangle(
 						new OvlPoint(new OvlDimension(0.07f), 
 									 new OvlDimension(0.3f)),
+//						new OvlPoint(new OvlDimension(100), 
+//									 new OvlDimension(200)),
 						new OvlDimension(buttonDimention),
 						new OvlDimension(buttonDimention)
 					);
@@ -44,6 +50,8 @@ public class SB_Interactor extends OverlayHelpers
 		unzoomRect = new OvlRectangle(
 						new OvlPoint(new OvlDimension(0.07f), 
 									 new OvlDimension(0.15f)),
+//						new OvlPoint(new OvlDimension(100), 
+//									 new OvlDimension(100)),
 						new OvlDimension(buttonDimention),
 						new OvlDimension(buttonDimention)
 					);
@@ -108,6 +116,15 @@ public class SB_Interactor extends OverlayHelpers
 				GE.getPlugin().getFeatures().appendChild(unzoom_overlay);
 			}
 			unzoom_overlay.setVisibility(enabling);
+			
+//			Window.addResizeHandler(new ResizeHandler() {
+//
+//				@Override
+//				public void onResize(ResizeEvent event) {
+//					Log.write("Resize: " + event.getWidth() + "x" + event.getHeight());
+//					zoomRect.InitScreenOverlay(zoom_overlay);
+//					unzoomRect.InitScreenOverlay(unzoom_overlay);
+//				}});
 		}
 		else // disabling 
 		{
@@ -195,6 +212,11 @@ public class SB_Interactor extends OverlayHelpers
 		event.preventDefault();
 		x = event.getClientX();
 		y = event.getClientY();
+	    int WinW = GE.getEarth().getOffsetWidth();
+	    int WinH = GE.getEarth().getOffsetHeight();
+    	WinW = Integer.valueOf(GE.getEarth().getElement().getAttribute("width"));
+		Log.write("WinW: " + WinW + ", WinH: " + WinH);
+		Log.write("X: " + x + ", Y: " + y);
 
 		switch (HitTest(x, y))
 		{

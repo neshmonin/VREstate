@@ -139,6 +139,7 @@ namespace Vre.Server.RemoteService
 
         private void staleSessionDropThread()
         {
+            Thread.CurrentThread.Name = "StaleSessionDropper#" + Thread.CurrentThread.ManagedThreadId.ToString();
             while (!_staleSessionDropThreadExit.WaitOne(60000))
             {
                 Dictionary<string, ClientSession> toremove = new Dictionary<string, ClientSession>();
@@ -267,13 +268,21 @@ namespace Vre.Server.RemoteService
         /// <summary>
         /// Shuts down existing user session.
         /// </summary>
-        public void Disconnect()
+        public void Disconnect(bool emergency)
         {
             lock (this)
             {
                 if (DbSession != null)
                 {
-                    if (--_dbSessionUseCount < 1) DbSession.Disconnect();
+                    if (emergency)
+                    {
+                        DbSession.Dispose();
+                        DbSession = null;
+                    }
+                    else
+                    {
+                        if (--_dbSessionUseCount < 1) DbSession.Disconnect();
+                    }
                 }
             }
         }
@@ -282,7 +291,7 @@ namespace Vre.Server.RemoteService
         {
             lock (this)
             {
-                try { Disconnect(); } catch (NHibernate.HibernateException) {}  // SHOULD NOT OCCUR!!!
+                try { Disconnect(false); } catch (NHibernate.HibernateException) {}  // SHOULD NOT OCCUR!!!
                 if (DbSession != null)
                 {
                     //try { DbSession.Flush(); }

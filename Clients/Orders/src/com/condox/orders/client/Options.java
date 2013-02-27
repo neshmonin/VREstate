@@ -10,7 +10,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
 
 public class Options implements RequestCallback{
-	public static boolean DEBUG_MODE = true;
+	public static boolean DEBUG_MODE = false;
 
 	public static String URL_VRT;
 	public static String URL_STATIC;
@@ -77,14 +77,14 @@ public class Options implements RequestCallback{
 		// SUITE_DISTANCE = Integer.valueOf(params.containsKey("Distance")?
 		// params.get("Distance").get(0) : "-1");
 
-		if (BUILDING_ID != -1)
-			DEBUG_MODE = params.containsKey("test") ? Boolean.valueOf(params
-					.get("test").get(0)) : false;
-		else
+//		if (BUILDING_ID != -1)
+//			DEBUG_MODE = params.containsKey("test") ? Boolean.valueOf(params
+//					.get("test").get(0)) : false;
+//		else
 	    	DEBUG_MODE = (GWT.getModuleBaseURL().contains("/vre/")); 
 
 		Log.write("DEBUG_MODE=" + DEBUG_MODE);
-	    DEBUG_MODE = true;
+//	    DEBUG_MODE = true;
 		if (DEBUG_MODE) {
 			URL_VRT = "https://vrt.3dcondox.com/vre/";
 			URL_STATIC = "https://static.3dcondox.com/vre/";

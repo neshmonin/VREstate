@@ -21,11 +21,11 @@ public class PUT implements RequestCallback {
 	}
 
 	public static void send(String url, String requestData, RequestCallback cb) {
-		RequestBuilder request = new RequestBuilder(RequestBuilder.PUT,
+		RequestBuilder request = new RequestBuilder(RequestBuilder.POST,
 				URL.encode(url));
 		thePUT = new PUT(cb);
-		request.setCallback(thePUT);
 		request.setRequestData(requestData);
+		request.setCallback(thePUT);
 
 		if (request != null)
 			requests.add(request);
@@ -41,7 +41,7 @@ public class PUT implements RequestCallback {
 		if (currRequest == null || !currRequest.isPending()) {
 			RequestBuilder requestBuilder = requests.get(0);
 			RequestCallback original = requestBuilder.getCallback();
-//			requestBuilder.setHeader("Content-type", "application/json");
+//			requestBuilder.setHeader("Content-type", "text/html;");
 			if (original != null)
 				requestBuilder.setCallback(original);
 			else
@@ -55,8 +55,6 @@ public class PUT implements RequestCallback {
 			}
 
 		}
-		;
-
 	};
 
 	@Override
@@ -66,6 +64,7 @@ public class PUT implements RequestCallback {
 			received = "<empty>";
 		Log.write("RespondStatus=" + response.getStatusCode() + "; Received: "
 				+ received);
+		Log.write("" + response.getHeadersAsString());
 		if (original != null)
 			original.onResponseReceived(request, response);
 		Update();

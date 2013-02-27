@@ -6,15 +6,17 @@ namespace Vre.Server.HttpService
     internal class HttpServiceMain : HttpServiceBase
     {
         private RemoteServiceProvider _rsp;
+        private long _maxRequestBodyLength;
 
         public HttpServiceMain() : base("HTTP Listener")
         {
             _rsp = new RemoteServiceProvider();
+            _maxRequestBodyLength = ServiceInstances.Configuration.GetValue("MaxHttpRequestBodyLengthBytes", 10240);
         }
 
         protected override IResponseData process(string browserKey, HttpListenerContext ctx)
         {
-            HttpServiceRequest rq = new HttpServiceRequest(ctx, _path);
+            HttpServiceRequest rq = new HttpServiceRequest(ctx, _path, _maxRequestBodyLength);
 
             if (_allowExtendedLogging)
             {
@@ -36,10 +38,15 @@ namespace Vre.Server.HttpService
                         {
                             rq.UserInfo.Session.Resume();
                             _rsp.ProcessRequest(this, rq);
+                            rq.UserInfo.Session.Disconnect(false);
                         }
-                        finally
+                        catch (NHibernate.HibernateException)
                         {
-                            rq.UserInfo.Session.Disconnect();
+                            rq.UserInfo.Session.Disconnect(true);
+                        }
+                        catch
+                        {
+                            rq.UserInfo.Session.Disconnect(false);
                         }
                     }
                 }

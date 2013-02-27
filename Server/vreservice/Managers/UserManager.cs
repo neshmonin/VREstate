@@ -225,6 +225,9 @@ namespace Vre.Server.BusinessLogic
             if (includeDeleted && (_session.User.UserRole != User.Role.SuperAdmin))
                 includeDeleted = false;  // only superadmins can see deleted records!
 
+            if (User.IsEstateDeveloperTied(role) && (estateDeveloperId < 0))
+                throw new ArgumentException("Estate developer argument required");
+
             using (UserDao dao = new UserDao(_session.DbSession))
             {
                 IList<User> result = dao.ListUsers(role, ((estateDeveloperId >= 0) ? (int?)estateDeveloperId : null),
@@ -430,8 +433,6 @@ namespace Vre.Server.BusinessLogic
             {
                 using (UserDao dao = new UserDao(_session.DbSession))
                 {
-                    _session.Resume();
-
                     User requester = /*_session.User;*/ dao.GetById(_session.User.AutoID);
                     User accessGainer = /*user;*/ dao.GetById(user.AutoID);
                     bool changed = false;
@@ -466,8 +467,6 @@ namespace Vre.Server.BusinessLogic
                         ServiceInstances.Logger.Info("User {0} (ID={1}) {2} profile access to ID={3}.",
                             _session, _session.User.AutoID, revoke ? "revoked" : "granted", user.AutoID);
                     }
-
-                    _session.Disconnect();
                 }  // DAO
             }  // TRAN
         }

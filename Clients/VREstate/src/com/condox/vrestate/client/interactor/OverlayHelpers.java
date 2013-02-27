@@ -1,5 +1,6 @@
 package com.condox.vrestate.client.interactor;
 
+import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.ge.GE;
 import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
 import com.nitrous.gwt.earth.client.api.KmlUnits;
@@ -69,8 +70,10 @@ public class OverlayHelpers {
         
         public boolean ContainsPixel(int x, int y)
         {
-		    int WinW = GE.getEarth().getOffsetWidth();
-		    int WinH = GE.getEarth().getOffsetHeight();
+        	int WinW = GE.getEarth().getOffsetWidth();
+        	int WinH = GE.getEarth().getOffsetHeight();
+        	WinW = Integer.valueOf(GE.getEarth().getElement().getAttribute("width"));
+		    
             int pixX = (origin.x.Units == KmlUnits.UNITS_PIXELS) ? origin.x.iVal : (int)(WinW * origin.x.fVal);
             int pixY = (origin.y.Units == KmlUnits.UNITS_PIXELS) ? origin.y.iVal : (int)(WinH * (1f-origin.y.fVal));
             
@@ -79,7 +82,7 @@ public class OverlayHelpers {
 
             pixX -= pixWidth / 2;
             pixY -= pixHeight / 2;
-
+            
         	return (x > pixX && x < pixX + pixWidth) &&
         		   (y > pixY && y < pixY + pixHeight);
         }

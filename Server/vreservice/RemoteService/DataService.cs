@@ -21,7 +21,7 @@ namespace Vre.Server.RemoteService
         public const string ServicePathPrefix = ServicePathElement0 + "/";
         private const string ServicePathElement0 = "data";
 
-        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction }
+        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction, Inventory }
 
         private static void configure()
         {
@@ -68,7 +68,7 @@ namespace Vre.Server.RemoteService
                 case ModelObject.Site:
                     if (-1 == objectId)
                     {
-                        int estateDeveloperId = request.Request.Query.GetParam("ed", -1);
+                        int estateDeveloperId = ResolveDeveloperId(request.UserInfo.Session.DbSession, request.Request.Query["ed"]);
                         if (-1 == estateDeveloperId) throw new ArgumentException("Developer ID is missing.");
                         getSiteList(request.UserInfo.Session, estateDeveloperId, request.Response, generation, includeDeleted);
                     }
@@ -159,6 +159,20 @@ namespace Vre.Server.RemoteService
                     if (-1 == objectId)
                     {
                         getFinancialTransactionList(request.UserInfo.Session, request.Request.Query, request.Response);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+                    return;
+
+                case ModelObject.Inventory:
+                    if (-1 == objectId)
+                    {
+                        int buildingId = request.Request.Query.GetParam("building", -1);
+                        if (-1 == buildingId) throw new ArgumentException("Building ID is missing.");
+
+                        getInventoryList(request.UserInfo.Session, buildingId, request.Response);
                     }
                     else
                     {
@@ -277,6 +291,7 @@ namespace Vre.Server.RemoteService
             else if (elements[1].Equals("viewOrder")) mo = ModelObject.ViewOrder;
             else if (elements[1].Equals("view")) mo = ModelObject.View;
             else if (elements[1].Equals("ft")) mo = ModelObject.FinancialTransaction;
+            else if (elements[1].Equals("inventory")) mo = ModelObject.Inventory;
             else throw new ArgumentException("Object path is invalid (2).");
 
             strId = null;
@@ -635,22 +650,18 @@ namespace Vre.Server.RemoteService
 
             if (query.GetParam("sellerMode", "false").Equals("true"))
             {
-                session.Resume();
-
                 User[] list = session.User.CanView.ToArray();
 
                 int cnt = list.Length;
                 result = new ClientData[cnt];
                 for (int idx = 0; idx < cnt; idx++)
                     result[idx] = list[idx].GetClientData();
-
-                session.Disconnect();
             }
             else
             {
                 User.Role role;
                 if (!Enum.TryParse<User.Role>(query.GetParam("role", "buyer"), true, out role)) role = User.Role.Buyer;
-                int estateDeveloperId = query.GetParam("ed", -1);// data.GetProperty("ed", -1);
+                int estateDeveloperId = ResolveDeveloperId(session.DbSession, query["ed"]);// data.GetProperty("ed", -1);
                 string nameLookup = query.GetParam("nameFilter", string.Empty);// data.GetProperty("nameFilter", string.Empty);
                 User[] list;
 
@@ -687,6 +698,37 @@ namespace Vre.Server.RemoteService
                 result.Add("loginType", lt);
                 result.Add("login", login);
             }
+        }
+
+        private static void getInventoryList(ClientSession session, int buildingId, IResponseData resp)
+        {
+            Building b;
+
+            using (BuildingDao dao = new BuildingDao(session.DbSession))
+                b = dao.GetById(buildingId);
+            if (null == b) throw new FileNotFoundException("Building does not exist");
+
+            List<ClientData> result = new List<ClientData>(b.Suites.Count);
+            using (SiteManager manager = new SiteManager(session))
+            {
+                foreach (Suite s in b.Suites)
+                {
+                    if ((s.SuiteType != null)
+                        // a bit of too deep inspection to avoid unnecessary calls; maybe not required
+                        //&& (!string.IsNullOrWhiteSpace(s.SuiteType.FloorPlanUrl)) && (!s.SuiteType.FloorPlanUrl.StartsWith("http://"))
+                        )
+                        UrlHelper.ConvertUrlsToAbsolute(s.SuiteType);
+                    
+                    ClientData cd = s.GetInventoryClientData(null, false);
+                    cd.Add("currentPrice", manager.GetCurrentSuitePrice(s));
+
+                    result.Add(cd);
+                }
+            }
+
+            resp.Data = new ClientData();
+            resp.Data.Add("inventory", result);
+            resp.ResponseCode = HttpStatusCode.OK;
         }
 
         private static void getFinancialTransactionList(ClientSession session, ServiceQuery query, IResponseData resp)
@@ -727,8 +769,20 @@ namespace Vre.Server.RemoteService
         private static void getViewOrder(ClientSession session, ServiceQuery query, string strObjectId, IResponseData resp)
         {
             Guid rqid;
-            if (!Guid.TryParseExact(strObjectId, "N", out rqid))
-                throw new ArgumentException();
+            switch (UniversalId.TypeInUrlId(strObjectId))
+            {
+                default:
+                    throw new ArgumentException();
+
+                case UniversalId.IdType.Unknown:  // legacy
+                    if (!Guid.TryParseExact(strObjectId, "N", out rqid))
+                        throw new ArgumentException();
+                    break;
+
+                case UniversalId.IdType.ViewOrder:
+                    rqid = UniversalId.ExtractAsGuid(strObjectId);
+                    break;
+            }
 
             ViewOrder viewOrder;
             using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
@@ -834,8 +888,20 @@ namespace Vre.Server.RemoteService
             if (null == strObjectId) throw new ArgumentException("Object ID missing.");
 
             Guid rqid;
-            if (!Guid.TryParseExact(strObjectId, "N", out rqid))
-                throw new ArgumentException();
+            switch (UniversalId.TypeInUrlId(strObjectId))
+            {
+                case UniversalId.IdType.ViewOrder:
+                    rqid = UniversalId.ExtractAsGuid(strObjectId);
+                    break;
+
+                case UniversalId.IdType.Unknown:
+                    if (!Guid.TryParseExact(strObjectId, "N", out rqid))
+                        throw new ArgumentException();
+                    break;
+
+                default:
+                    throw new ArgumentException();
+            }
 
             ViewOrder viewOrder;
             bool viewOrderValid = false;
@@ -933,7 +999,7 @@ namespace Vre.Server.RemoteService
                     foreach (int id in buildingIds)
                     {
                         Building b = dao.GetById(id);
-                        if (!b.Deleted) buildings.Add(b);
+                        if (b != null) buildings.Add(b);  // should never happen?
                     }
                 }
 
@@ -1462,7 +1528,7 @@ namespace Vre.Server.RemoteService
         {
             User.Role role = data.GetProperty<User.Role>("role", User.Role.Visitor);
             LoginType type = data.GetProperty<LoginType>("type", LoginType.Plain);
-            int estateDeveloperId = data.GetProperty("ed", -1);
+            int estateDeveloperId = ResolveDeveloperId(session.DbSession, data.GetProperty("ed", string.Empty));
             string login = data.GetProperty("uid", string.Empty);
             string password = data.GetProperty("pwd", string.Empty);
 
@@ -1655,6 +1721,23 @@ namespace Vre.Server.RemoteService
 
             if (ccnt > 0)
                 ServiceInstances.Logger.Info("On-the-fly ViewOrder reconcile adjusted {0} suite states.", ccnt);
+        }
+
+        internal static int ResolveDeveloperId(ISession session, string id)
+        {
+            int result = -1;
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                if (!int.TryParse(id, out result))
+                {
+                    using (EstateDeveloperDao dao = new EstateDeveloperDao(session))
+                    {
+                        EstateDeveloper ed = dao.GetById(id);
+                        if (ed != null) result = ed.AutoID;
+                    }
+                }
+            }
+            return result;
         }
         #endregion
     }

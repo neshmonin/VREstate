@@ -60,6 +60,7 @@ namespace Vre.Server
 
         private void cleanupThread()
         {
+            Thread.CurrentThread.Name = "FloodPreventor#" + Thread.CurrentThread.ManagedThreadId.ToString();
             while (!_cleanupThreadExit.WaitOne(60000))
             {
                 //Thread.Sleep(60000);

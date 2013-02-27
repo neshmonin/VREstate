@@ -3,6 +3,7 @@ using NLog;
 using Vre.Server.RemoteService;
 using Vre.Server.ModelCache;
 using Vre.Server.FileStorage;
+using Vre.Server.Messaging;
 
 namespace Vre.Server
 {
@@ -118,6 +119,32 @@ namespace Vre.Server
             }
         }
 
+        private static IUserMessaging _emailSender = null;
+        public static IUserMessaging EmailSender
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    if (null == _emailSender) _emailSender = new EmailUserMessaging();
+                }
+                return _emailSender;
+            }
+        }
+
+        private static MessageGenerator _messageGen = null;
+        public static MessageGenerator MessageGen
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    if (null == _messageGen) _messageGen = new MessageGenerator();
+                }
+                return _messageGen;
+            }
+        }
+
         public static void Dispose()
         {
             lock (_lock)
@@ -126,6 +153,7 @@ namespace Vre.Server
                 if (null != _clientSessionStore) { _clientSessionStore.Dispose(); _clientSessionStore = null; }
                 if (null != _fileStorageManager) { _fileStorageManager.Dispose(); _fileStorageManager = null; }
                 if (null != _internalFileStorageManager) { _internalFileStorageManager.Dispose(); _internalFileStorageManager = null; }
+                if (null != _emailSender) { _emailSender.Dispose(); _emailSender = null; }
             }
         }
     }

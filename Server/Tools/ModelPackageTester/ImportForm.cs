@@ -33,7 +33,7 @@ namespace ModelPackageTester
                 Path.GetDirectoryName(_modelFileName),
                 Path.GetFileNameWithoutExtension(_modelFileName) + ".import.log.txt");
 
-            StringBuilder commandLine = new StringBuilder("-importmodel");
+            StringBuilder commandLine = new StringBuilder("importmodel");
 
             commandLine.Append(" infomodel=");
             insertPath(_modelFileName, ref commandLine);

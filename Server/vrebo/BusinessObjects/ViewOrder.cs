@@ -31,6 +31,7 @@ namespace Vre.Server.BusinessLogic
 
         public int RequestCounter { get; private set; }
         public DateTime LastRequestTime { get; private set; }
+        public int NotificationsSent { get; set; }
 
         public ViewOrderProduct Product { get; private set; }
         public ViewOrderOptions Options { get; private set; }
@@ -88,7 +89,14 @@ namespace Vre.Server.BusinessLogic
             LastRequestTime = DateTime.UtcNow;
         }
 
-        public ViewOrder(ClientData data) : base(data)
+        public void Prolong(DateTime expiresOn)
+        {
+            ExpiresOn = expiresOn;
+            MarkUpdated();
+        }
+
+        public ViewOrder(ClientData data)
+            : base(data)
         {
             TargetObjectType = data.GetProperty<SubjectType>("targetObjectType", SubjectType.Suite);
             TargetObjectId = data.GetProperty("targetObjectId", -1);

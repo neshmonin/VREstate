@@ -9,13 +9,25 @@ namespace Vre.Server.Dao
     {
         public ReverseRequestDao(ISession session) : base(session) { }
 
-        public ReverseRequest Get(string login, ReverseRequest.RequestType type)
+        public ReverseRequest GetByLoginAndType(string login, ReverseRequest.RequestType type)
         {
             lock (_session)
             {
-                NHibernate.IQuery oQuery = _session.CreateQuery(
+                IQuery oQuery = _session.CreateQuery(
                     "FROM Vre.Server.BusinessLogic.ReverseRequest WHERE Login = :login AND Request = :request");
                 oQuery = oQuery.SetString("login", login);
+                oQuery = oQuery.SetEnum("request", type);
+                return oQuery.UniqueResult<ReverseRequest>();
+            }
+        }
+
+        public ReverseRequest GetBySubjectAndType(string subject, ReverseRequest.RequestType type)
+        {
+            lock (_session)
+            {
+                IQuery oQuery = _session.CreateQuery(
+                    "FROM Vre.Server.BusinessLogic.ReverseRequest WHERE Subject = :subject AND Request = :request");
+                oQuery = oQuery.SetString("subject", subject);
                 oQuery = oQuery.SetEnum("request", type);
                 return oQuery.UniqueResult<ReverseRequest>();
             }
@@ -25,7 +37,7 @@ namespace Vre.Server.Dao
         {
             lock (_session)
             {
-                NHibernate.IQuery oQuery = _session.CreateQuery(
+                IQuery oQuery = _session.CreateQuery(
                     "DELETE FROM Vre.Server.BusinessLogic.ReverseRequest WHERE UserId = :id AND Request = :request");
                 oQuery = oQuery.SetInt32("id", userId);
                 oQuery = oQuery.SetEnum("request", type);
@@ -37,11 +49,21 @@ namespace Vre.Server.Dao
         {
             lock (_session)
             {
-                NHibernate.IQuery oQuery = _session.CreateQuery(
+                IQuery oQuery = _session.CreateQuery(
                     "DELETE FROM Vre.Server.BusinessLogic.ReverseRequest WHERE Login = :login AND Request = :request");
                 oQuery = oQuery.SetString("login", login);
                 oQuery = oQuery.SetEnum("request", type);
                 oQuery.ExecuteUpdate();
+            }
+        }
+
+        public int DeleteStale()
+        {
+            lock (_session)
+            {
+                IQuery oQuery = _session.CreateQuery(
+                    "DELETE FROM Vre.Server.BusinessLogic.ReverseRequest WHERE ExpiresOn < GETUTCDATE()");
+                return oQuery.ExecuteUpdate();
             }
         }
     }

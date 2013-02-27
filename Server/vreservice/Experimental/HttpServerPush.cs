@@ -16,6 +16,7 @@ namespace Vre.Server.Experimental
             HttpListenerContext ctx = param as HttpListenerContext;
             if (null == ctx) return;
 
+            Thread.CurrentThread.Name = "HttpPush#" + Thread.CurrentThread.ManagedThreadId.ToString();
             int status = 0;
 
             do

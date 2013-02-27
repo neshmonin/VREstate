@@ -1,43 +1,57 @@
 package com.condox.orders.client;
 
-import com.condox.orders.client.pages.buildings.Building;
-import com.condox.orders.client.pages.buildings.SelectBuilding;
-import com.condox.orders.client.pages.suits.SelectSuite;
-import com.condox.orders.client.pages.suits.Suite;
+import com.condox.orders.client.page.LoginPanel;
+import com.condox.orders.client.page.building.Building;
+import com.condox.orders.client.page.building.SelectBuilding;
+import com.condox.orders.client.page.suite.SelectSuite;
+import com.condox.orders.client.page.suite.Suite;
+import com.condox.orders.client.styles.DataGridResources;
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.LayoutPanel;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.MenuBar;
-import com.google.gwt.user.client.ui.MenuItem;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.LayoutPanel;
 
 public class Orders implements EntryPoint, ValueChangeHandler<String>  {
 	
+	private TabLayoutPanel panels = new TabLayoutPanel(1.5, Unit.EM);
+	private SelectBuilding selectBuildingPage = new SelectBuilding();
+	private SelectSuite selectSuitePage = new SelectSuite();
+	
 	private DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
 	private TabLayoutPanel containerPanel = new TabLayoutPanel(0.0, Unit.EM);
-	private SelectBuilding page_buildings = /*null;*/new SelectBuilding();
-	private SelectSuite page_suits = /*null;*/new SelectSuite();
 	public static Building selectedBuilding = null;
 	public static Suite selectedSuite = null;
+	
 
 	/**
 	 * @wbp.parser.entryPoint
 	 */
+	
 	@Override
 	public void onModuleLoad() {
+//		MyResources.INSTANCE.css().ensureInjected();
+		final DataGridResources dataGridResources = GWT.create(DataGridResources.class);
+		dataGridResources.dataGrid().ensureInjected();
+
+		
+		Log.write("DEBUG_MODE: " + Config.DEBUG_MODE);
 		RootLayoutPanel rootLayoutPanel = RootLayoutPanel.get();
 		rootLayoutPanel.setStyleName("my-body");
 		rootLayoutPanel.add(mainPanel);
@@ -47,46 +61,83 @@ public class Orders implements EntryPoint, ValueChangeHandler<String>  {
 		Options.Init(this);
 		
 		LayoutPanel layoutPanel = new LayoutPanel();
-		mainPanel.addNorth(layoutPanel, 50.0);
+		layoutPanel.setStyleName("my-header");
+		mainPanel.addNorth(layoutPanel, 116.0);
 		
-		FlowPanel flowPanel = new FlowPanel();
-		flowPanel.setStyleName("my-menu");
-		mainPanel.addWest(flowPanel, 250.0);
+		Image image = new Image("templates/cube.jpg");
+		layoutPanel.add(image);
+		layoutPanel.setWidgetLeftWidth(image, 0.0, Unit.PX, 200.0, Unit.PX);
+		layoutPanel.setWidgetTopHeight(image, 0.0, Unit.PX, 116.0, Unit.PX);
 		
-		Button btnNewButton = new Button("3d products");
-		btnNewButton.setStyleName("menu-item");
-		flowPanel.add(btnNewButton);
-		btnNewButton.setSize("100%", "35px");
+		Image image_1 = new Image("templates/mainheader.jpg");
+		layoutPanel.add(image_1);
+		layoutPanel.setWidgetTopHeight(image_1, 0.0, Unit.PX, 116.0, Unit.PX);
+		layoutPanel.setWidgetLeftWidth(image_1, 200.0, Unit.PX, 800.0, Unit.PX);
 		
-		Button btndCondoExplorer = new Button("3d condo explorer");
-		btndCondoExplorer.setStyleName("menu-item");
-		flowPanel.add(btndCondoExplorer);
-		btndCondoExplorer.setSize("100%", "35px");
+		LayoutPanel layoutPanel_1 = new LayoutPanel();
+		layoutPanel_1.setStyleName("my-menu");
+		mainPanel.addWest(layoutPanel_1, 200.0);
 		
-		Button btnFuturePage = new Button("future page");
-		btnFuturePage.setStyleName("menu-item");
-		flowPanel.add(btnFuturePage);
-		btnFuturePage.setSize("100%", "35px");
+		PushButton menu1 = new PushButton("3d condo explorer");
+		menu1.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				Window.open("http://www.3dcondox.com/", "_blank", "");
+			}
+		});
+		menu1.setStyleName("my-menu-item");
+		layoutPanel_1.add(menu1);
+		layoutPanel_1.setWidgetLeftWidth(menu1, 10.0, Unit.PX, 178.0, Unit.PX);
+		layoutPanel_1.setWidgetTopHeight(menu1, 10.0, Unit.PX, 45.0, Unit.PX);
 		
-		Button btnFuturePage_1 = new Button("future page");
-		btnFuturePage_1.setStyleName("menu-item");
-		flowPanel.add(btnFuturePage_1);
-		btnFuturePage_1.setSize("100%", "35px");
+		PushButton menu2 = new PushButton("future page");
+		menu2.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				Window.open("http://www.3dcondox.com/contact1.html", "_blank", "");
+			}
+		});
+		menu2.setHTML("contact us");
+		menu2.setStyleName("my-menu-item");
+		layoutPanel_1.add(menu2);
+		layoutPanel_1.setWidgetLeftWidth(menu2, 10.0, Unit.PX, 178.0, Unit.PX);
+		layoutPanel_1.setWidgetTopHeight(menu2, 55.0, Unit.PX, 45.0, Unit.PX);
+
+		PushButton menu0 = new PushButton("future page");
+		menu0.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+//				Window.open("http://www.3dcondox.com/contact1.html", "_blank", "");
+				LoginPanel login = new LoginPanel();
+				login.Show();
+			}
+		});
+		menu0.setHTML("login");
+		menu0.setStyleName("my-menu-item");
+		menu0.setVisible(false);
+		menu0.setEnabled(false);
+		layoutPanel_1.add(menu0);
+		layoutPanel_1.setWidgetLeftWidth(menu0, 10.0, Unit.PX, 178.0, Unit.PX);
+		layoutPanel_1.setWidgetTopHeight(menu0, 100.0, Unit.PX, 45.0, Unit.PX);
 		
-		Button btnFuturePage_2 = new Button("future page");
-		btnFuturePage_2.setStyleName("menu-item");
-		flowPanel.add(btnFuturePage_2);
-		btnFuturePage_2.setSize("100%", "35px");
+		panels.setAnimationDuration(1000);
 		
-		Button btnFuturePage_3 = new Button("future page");
-		btnFuturePage_3.setStyleName("menu-item");
-		flowPanel.add(btnFuturePage_3);
-		btnFuturePage_3.setSize("100%", "35px");
+		LayoutPanel selectSuitePanel = new LayoutPanel();
+		panels.add(selectSuitePanel, "New Widget", false);
 		
-		Button btnContactUs = new Button("contact us");
-		btnContactUs.setStyleName("menu-item");
-		flowPanel.add(btnContactUs);
-		btnContactUs.setSize("100%", "35px");
+		Button btnNewButton_2 = new Button("New button");
+		btnNewButton_2.setText("suite");
+		selectSuitePanel.add(btnNewButton_2);
+		selectSuitePanel.setWidgetLeftWidth(btnNewButton_2, 138.0, Unit.PX, 220.0, Unit.PX);
+		selectSuitePanel.setWidgetTopHeight(btnNewButton_2, 111.0, Unit.PX, 32.0, Unit.PX);
+		
+		LayoutPanel loginPanel = new LayoutPanel();
+		panels.add(loginPanel, "Login", false);
+		
+		Button btnNewButton = new Button("New button");
+		btnNewButton.setText("login");
+		loginPanel.add(btnNewButton);
+		loginPanel.setWidgetLeftWidth(btnNewButton, 160.0, Unit.PX, 167.0, Unit.PX);
+		loginPanel.setWidgetTopHeight(btnNewButton, 53.0, Unit.PX, 76.0, Unit.PX);
+		mainPanel.addSouth(panels, 0.0);
+		containerPanel.setStyleName("my-container");
 		mainPanel.add(containerPanel);
 	}
 
@@ -96,12 +147,23 @@ public class Orders implements EntryPoint, ValueChangeHandler<String>  {
 	};
 
 	public void StartGE() {
-//		RootLayoutPanel.get().add(containerPanel);
-		containerPanel.add(page_buildings);
+		containerPanel.add(selectBuildingPage);
 		containerPanel.setTabText(0, "Buildings");
-		containerPanel.add(page_suits);
+		containerPanel.add(selectSuitePage);
 		containerPanel.setTabText(1, "Suits");
 		
+		
+		// **************************
+//		panels.add(selectBuildingPage);
+//		panels.add(selectSuitePage);
+//		panels.setTabText(panels.getWidgetIndex(selectBuildingPage), "Building");
+//		panels.setTabText(panels.getWidgetIndex(selectSuitePage), "Suite");
+//		panels.selectTab(selectBuildingPage);
+		// **************************
+		
+		
+//		LoginPanel login = new LoginPanel();
+//		login.Show();
 		if (History.getToken().isEmpty())
 			History.fireCurrentHistoryState();
 		else
@@ -121,13 +183,14 @@ public class Orders implements EntryPoint, ValueChangeHandler<String>  {
 
 	private void changePage(String token) {
 		if (token.isEmpty()) {
-			page_buildings.Update();
+			selectBuildingPage.Update();
 			History.newItem("buildings");
 		} else if (token.equals("buildings")) {
-			Show(page_buildings);
+			Show(selectBuildingPage);
 		} else if (token.equals("suits")) {
-			page_suits.Update();
-			Show(page_suits);
+//			Window.alert(token);
+			selectSuitePage.Update();
+			Show(selectSuitePage);
 		}
 	}
 }

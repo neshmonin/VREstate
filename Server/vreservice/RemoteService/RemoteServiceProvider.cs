@@ -35,6 +35,12 @@ namespace Vre.Server.RemoteService
 
         private void processWriteRequest(IServiceRequest request)
         {
+            if (request.Request.Path.Equals(ProgramService.ServicePathPrefix))  // special programmatic requests
+            {
+                ProgramService.ProcessClientRequest(request);
+                return;
+            }
+
             // Write request always:
             // - has a sid query parameter (or passed in HTTP header)
             // - refers to a valid active session
