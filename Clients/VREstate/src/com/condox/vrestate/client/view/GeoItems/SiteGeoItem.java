@@ -51,4 +51,10 @@ public class SiteGeoItem implements IGeoItem {
 	public String getType() {
 		return "site";
 	}
+
+	@Override
+	public String getInitialViewKml() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

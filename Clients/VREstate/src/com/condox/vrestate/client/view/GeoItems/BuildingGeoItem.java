@@ -123,4 +123,9 @@ public class BuildingGeoItem implements IGeoItem {
 	public String getType() {
 		return "building";
 	}
+
+	@Override
+	public String getInitialViewKml() {
+		return null;
+	}
 }
