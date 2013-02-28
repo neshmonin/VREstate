@@ -142,6 +142,7 @@ public class PanoramicInteractor extends OverlayHelpers
 
 	@Override
 	public void onMouseDown(KmlMouseEvent event) {
+		_AbstractView.ResetTimeOut();
 		event.preventDefault();
 		x = event.getClientX();
 		y = event.getClientY();
@@ -150,6 +151,7 @@ public class PanoramicInteractor extends OverlayHelpers
 
 	@Override
 	public void onMouseUp(KmlMouseEvent event) {
+		_AbstractView.ResetTimeOut();
 		event.preventDefault();
 		moving = false;
 	}

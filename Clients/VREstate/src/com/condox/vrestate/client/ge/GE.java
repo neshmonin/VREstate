@@ -2,8 +2,6 @@ package com.condox.vrestate.client.ge;
 
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.VREstate;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.nitrous.gwt.earth.client.api.GEHtmlStringBalloon;

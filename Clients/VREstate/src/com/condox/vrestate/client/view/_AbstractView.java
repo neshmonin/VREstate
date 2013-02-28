@@ -20,6 +20,7 @@ import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SiteGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Timer;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
 import com.nitrous.gwt.earth.client.api.KmlUnits;
@@ -35,6 +36,29 @@ public abstract class _AbstractView implements I_AbstractView {
     protected double _transitionSpeed;
     protected double _regularSpeed;
     protected String _title;
+    private static boolean m_timeoutTimerDisabled = false;
+    protected static int TIMEOUTINTERVAL = 2*60*1000;
+    static protected Timer m_timeoutTimer = new Timer(){
+
+		@Override
+		public void run() {
+			_AbstractView.ResetTimeOut();
+			_AbstractView.PopToTheBottom();
+		}
+	};
+
+    // Timer to return to the first FullScreenView (Helicopter or Video) after a timeout
+    public static void ResetTimeOut()
+    {
+        m_timeoutTimer.cancel();
+
+        if (!m_timeoutTimerDisabled) {
+        	if (Options.DEBUG_MODE)
+        		m_timeoutTimer.schedule(30*1000);
+        	else
+        		m_timeoutTimer.schedule(TIMEOUTINTERVAL);
+        }
+    }
 
 	/*==========================================================*/
 	// A single point of handling view-changing events
@@ -127,6 +151,25 @@ public abstract class _AbstractView implements I_AbstractView {
         GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
 
         return newView;
+	}
+
+	public static void PopToTheBottom() {
+		while (views.size() > 1) {
+			I_AbstractView currView = views.peek();
+			currView.setEnabled(false);
+	
+			I_AbstractView poppedView = views.pop();
+			I_AbstractView newView = views.peek(); 
+			newView.setupCamera(poppedView);
+	
+			newView.setEnabled(true);
+			
+			Log.write(getPrintableViews("PopToTheBottom"));
+	
+	        GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
+	        newView.getCamera().Apply();
+	        GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
+		}
 	}
 
 	public static void Pop_Push(I_AbstractView newView) {
@@ -335,4 +378,12 @@ public abstract class _AbstractView implements I_AbstractView {
     public static Collection<SuiteGeoItem> getSuiteGeoItems() {
     	return suiteGeoItems.values();
     }
+
+    public static void enableTimeout(boolean enable) {
+		_AbstractView.m_timeoutTimerDisabled = !enable;
+	}
+
+    public static boolean isTimeoutEnabled() {
+		return !m_timeoutTimerDisabled;
+	}
 }

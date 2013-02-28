@@ -5,6 +5,5 @@
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/GwtEarth3-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jsonwrapper-0.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gwt-servlet.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

@@ -3,6 +3,7 @@ package com.condox.vrestate.client.interactor;
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.SuiteView;
+import com.condox.vrestate.client.view._AbstractView;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -65,6 +66,7 @@ public class SuiteInteractor extends OverlayHelpers
 
 	@Override
 	public void onMouseDown(KmlMouseEvent event) {
+		_AbstractView.ResetTimeOut();
 		event.preventDefault();
 		x = event.getClientX();
 		y = event.getClientY();
@@ -74,6 +76,7 @@ public class SuiteInteractor extends OverlayHelpers
 
 	@Override
 	public void onMouseUp(KmlMouseEvent event) {
+		_AbstractView.ResetTimeOut();
 		event.preventDefault();
 		action = false;
 	}
