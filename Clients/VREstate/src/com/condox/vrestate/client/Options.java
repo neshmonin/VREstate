@@ -2,8 +2,6 @@ package com.condox.vrestate.client;
 
 import java.util.List;
 import java.util.Map;
-
-import com.condox.vrestate.client.view._AbstractView;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -117,12 +115,7 @@ public class Options implements RequestCallback{
 		theOptions = new Options(vrEstate);
 		GET.send(request, theOptions);
 //		 isReady = true;
-		
-		// TODO: this must be set only if this client in Kiosk mode
-		// if (KIOSK_MODE)
-		//    _AbstractView.enableTimeout(true);
-		// else
-		_AbstractView.enableTimeout(false);
+	
 	};
 
 	@Override

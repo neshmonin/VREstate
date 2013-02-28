@@ -76,6 +76,12 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 
 //			Window.alert("CreatingAllGeoItems!");
 			_AbstractView.CreateAllGeoItems();
+			// TODO: this must be set only if this client in Kiosk mode
+			// if (KIOSK_MODE)
+			//    _AbstractView.enableTimeout(true);
+			// else
+			_AbstractView.enableTimeout(false);
+			
 //			Window.alert("CreatingSite!");
 			final SiteView view = new SiteView(_AbstractView.getSiteGeoItem(site.getId()));
 //			Window.alert("PushingSite!");
