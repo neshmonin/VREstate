@@ -131,7 +131,7 @@ public class ProgressBar extends OverlayHelpers implements I_UpdatableView {
 		}
 	}
 
-	@Override
+    @Override
 	public void onViewChanged() {
 
 		String hrefLabel = getLabelHref(label);

@@ -4,6 +4,8 @@ import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.Site;
 import com.condox.vrestate.client.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.ge.GE;
+import com.condox.vrestate.client.view.HelicopterView;
+import com.condox.vrestate.client.view.I_AbstractView;
 import com.condox.vrestate.client.view.SiteView;
 import com.condox.vrestate.client.view._AbstractView;
 import com.google.gwt.core.client.EntryPoint;
@@ -62,6 +64,8 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 		GET.send(url, this);
 	}
 
+	I_AbstractView firstView = null;
+
 	@Override
 	public void onResponseReceived(Request request,
 			Response response) {
@@ -74,18 +78,18 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 				if (site.getDisplayModelUrl() != "")
 					GE.getPlugin().fetchKml(Options.HOME_URL + site.getDisplayModelUrl(), this);
 
-//			Window.alert("CreatingAllGeoItems!");
 			_AbstractView.CreateAllGeoItems();
-			// TODO: this must be set only if this client in Kiosk mode
-			// if (KIOSK_MODE)
-			//    _AbstractView.enableTimeout(true);
-			// else
-			_AbstractView.enableTimeout(false);
+
+			if (Options.KIOSK) {
+			    _AbstractView.enableTimeout(true);
+			    firstView = new HelicopterView(_AbstractView.getSiteGeoItem(site.getId()));
+			}
+			else {
+			    _AbstractView.enableTimeout(false);
+			    firstView = new SiteView(_AbstractView.getSiteGeoItem(site.getId()));
+			}
 			
-//			Window.alert("CreatingSite!");
-			final SiteView view = new SiteView(_AbstractView.getSiteGeoItem(site.getId()));
-//			Window.alert("PushingSite!");
-			_AbstractView.Push(view);
+			_AbstractView.Push(firstView);
 		}
 		//=================================================================
 //		KmlIcon icon = GE.getPlugin().createIcon("");

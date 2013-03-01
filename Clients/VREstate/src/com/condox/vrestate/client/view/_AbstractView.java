@@ -24,6 +24,7 @@ import com.google.gwt.user.client.Timer;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
 import com.nitrous.gwt.earth.client.api.KmlUnits;
+import com.nitrous.gwt.earth.client.api.event.FrameEndListener;
 import com.nitrous.gwt.earth.client.api.event.ViewChangeListener;
 
 public abstract class _AbstractView implements I_AbstractView {
@@ -62,6 +63,29 @@ public abstract class _AbstractView implements I_AbstractView {
 
 	/*==========================================================*/
 	// A single point of handling view-changing events
+    protected boolean isViewChangedInProgress = false;
+
+    @Override
+    public void doViewChanged() {
+		if(!isViewChangedInProgress) {
+			isViewChangedInProgress = true;
+			onViewChanged();
+			isViewChangedInProgress = false;
+		}
+    }
+    
+    @SuppressWarnings("unused")
+	private static HandlerRegistration frameend_listener = 
+		GE.getPlugin().addFrameEndListener(new FrameEndListener(){
+
+			@Override
+			public void onFrameEnd() {
+				if (views.isEmpty())
+					return;
+				
+				_AbstractView currentView = (_AbstractView) views.peek();
+			}			
+		});
 	
 	@SuppressWarnings("unused")
 	private static HandlerRegistration view_listener = 
@@ -72,11 +96,16 @@ public abstract class _AbstractView implements I_AbstractView {
 			// As onViewChange fired, we redirect it to the onViewChanged virtual function
 			// of the current view.
 			@Override public void onViewChange() {
-				if (views.isEmpty())
-					return;
-				
-				I_UpdatableView currentView = views.peek();
-				currentView.onViewChanged();
+//				if (views.isEmpty())
+//					return;
+//				
+//				_AbstractView currentView = (_AbstractView) views.peek();
+//				if(!currentView.isViewChangedInProgress())
+//				{
+//					currentView.setViewChangedInProgress(true);
+//					currentView.onViewChanged();
+//					currentView.setViewChangedInProgress(false);
+//				}
 			}
 
 			// As onViewChangeEnd fired, we redirect it to the onTransitionStopped
@@ -111,6 +140,8 @@ public abstract class _AbstractView implements I_AbstractView {
 		return stackMsg + "<none>)";
 	}
 
+	@Override public void onDestroy() {}
+	
 	public static void Push(I_AbstractView newView) {
 		newView.scheduleSetEnabled();
 		newView.setupCamera(null);
@@ -136,6 +167,7 @@ public abstract class _AbstractView implements I_AbstractView {
 			return currView;
 		
 		currView.setEnabled(false);
+		currView.onDestroy();
 
 		I_AbstractView poppedView = views.pop();
 		I_AbstractView newView = views.peek(); 
@@ -157,6 +189,7 @@ public abstract class _AbstractView implements I_AbstractView {
 		while (views.size() > 1) {
 			I_AbstractView currView = views.peek();
 			currView.setEnabled(false);
+			currView.onDestroy();
 	
 			I_AbstractView poppedView = views.pop();
 			I_AbstractView newView = views.peek(); 
@@ -178,6 +211,7 @@ public abstract class _AbstractView implements I_AbstractView {
 			return;
 		
 		currView.setEnabled(false);
+		currView.onDestroy();
 
 		I_AbstractView poppedView = views.pop();
 

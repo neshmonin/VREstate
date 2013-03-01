@@ -12,6 +12,12 @@ public class BuildingView extends _SB_View {
 		super( buildingGeo );
 	}
 
+	@Override public void onDestroy() {
+		BuildingGeoItem theBuilding = (BuildingGeoItem)this.theGeoItem;
+		if (theBuilding != null)
+			theBuilding.onSelectionChanged(false);
+	}
+	
 	@Override
 	public void Select(String type, int id) {
 		if (type.equals("building")) {

@@ -11,6 +11,10 @@ import com.google.gwt.user.client.Window;
 public class Options implements RequestCallback{
 	public static boolean DEBUG_MODE = true;
 
+	// TODO: this must be set only if this client in Kiosk mode
+	public static boolean KIOSK = false;
+	//public static boolean KIOSK = true;
+
 	public static String URL_VRT;
 	public static String URL_STATIC;
 	public static String URL_MODEL;
