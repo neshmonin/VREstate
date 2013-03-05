@@ -16,9 +16,6 @@ h1 {
 }
 
 /** Most GWT widgets already have a style name defined */
-.gwt-DialogBox {
-  width: 400px;
-}
 
 .dialogVPanel {
   margin: 5px;
@@ -190,5 +187,9 @@ a : hover {
 line-height: 50px;
 	color: darkturquoise;
 	background-color: #000033;
+}
+.myTextBox {
+	margin: 0px;
+	padding: 0px;
 }
 	

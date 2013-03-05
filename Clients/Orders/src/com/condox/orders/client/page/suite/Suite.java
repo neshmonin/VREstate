@@ -148,12 +148,24 @@ public class Suite {
 		
 		if(getPrice() > 0)
 			tooltip += ("Price: $" + getPrice() + "\r\n");
-		tooltip += "Bedrooms: " + getBedrooms() + "\r\n";
+		
+		if ((getBedrooms() == 0) && (int)getBathrooms() != 0) 
+			tooltip += "Bedrooms: Studio \r\n";
+		else
+			tooltip += "Bedrooms: " + getBedrooms() + "\r\n";
+		
+		if ((getBedrooms() == 0) && (int)getBathrooms() == 0) {
+			tooltip = "";
+			return tooltip;
+		}
+		
 		if ((int)getBathrooms() == getBathrooms())
 			tooltip += "Bathrooms: " + (int)getBathrooms() + "\r\n";
 		else
 			tooltip += "Bathrooms: " + getBathrooms() + "\r\n";
-		tooltip += "Area: " + getArea() + " Sq.Ft.\r\n";
+		
+		if (getArea() > 0)
+			tooltip += "Area: " + getArea() + " Sq.Ft.\r\n";
 //		tooltip += "Floorplan: " + getFloorplan_url() + "\r\n";
 		return tooltip;
 	}

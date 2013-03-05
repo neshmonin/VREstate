@@ -431,7 +431,7 @@ public class SelectSuite extends Composite implements IPage {
 		// Create a table to layout the content
 		// VerticalPanel dialogContents = new VerticalPanel();
 		// dialogContents.setSpacing(4);
-		dialogBox.setSize("100px", "100px");
+//		dialogBox.setSize("360px", "410px");
 		// dialogBox.setWidget(new Submit(dialogBox));
 
 		// Add some text to the top of the dialog

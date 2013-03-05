@@ -38,6 +38,7 @@ public class Submit extends Composite {
 	@UiField RadioButton rbPrivateListing;
 	@UiField RadioButton rbSharedListing;
 	@UiField HTML urlFloorplan;
+	@UiField TextBox txtExtPhone;
 
 	interface SubmitUiBinder extends UiBinder<Widget, Submit> {
 	}
@@ -71,10 +72,18 @@ public class Submit extends Composite {
 		String name = txtName.getText();
 		String mail = txtMail.getText();
 		String phone = txtPhone.getText();
+		String ext_phone = txtExtPhone.getText();
+		
+		phone = phone.replaceAll("\\s", "");
+		phone = phone.replaceAll("-", "");
+		phone = phone.replaceAll("\\(", "");
+		phone = phone.replaceAll("\\)", "");
 		boolean isValid = true;
 		isValid &= name.matches(".+");
 		isValid &= mail.matches("\\S+@\\S+");
 		isValid &= phone.matches("\\d{10,}");
+		if (!ext_phone.isEmpty())
+			isValid &= ext_phone.matches("\\d{0,4}");
 		btnSubmit.setEnabled(isValid);
 	}
 
@@ -114,6 +123,7 @@ public class Submit extends Composite {
 		CustomerName = txtName.getText();
 		CustomerEmail = txtMail.getText();
 		String CustomerPhone = txtPhone.getText();
+		String CustomerExtPhone = txtExtPhone.getText();
 		Type ListingType = rbPrivateListing.getValue()? Type.PRIVATE : Type.SHARED;
 //		String BuildingName = "Not implemented yet";
 //		String BuildingAddress = "Not implemented yet";
@@ -122,6 +132,8 @@ public class Submit extends Composite {
 		obj.put("CustomerName", new JSONString(CustomerName));
 		obj.put("CustomerEmail", new JSONString(CustomerEmail));
 		obj.put("CustomerPhone", new JSONString(CustomerPhone));
+		if (!CustomerExtPhone.isEmpty())
+			obj.put("Ext", new JSONString(CustomerExtPhone));
 		obj.put("ListingType", new JSONString(ListingType.toString()));
 		Building selectedBuilding = Orders.selectedBuilding;
     	Suite selectedSuite = Orders.selectedSuite;
@@ -198,5 +210,9 @@ public class Submit extends Composite {
 			urlFloorplan.setHTML("");
 //		Do you want to check the floorplan for this suite?
 //				Show me...
+	}
+	@UiHandler("txtExtPhone")
+	void onTxtExtPhoneKeyUp(KeyUpEvent event) {
+		ValidateInput();
 	}
 }

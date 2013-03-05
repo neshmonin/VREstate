@@ -232,7 +232,7 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 
 	private void GetBuildingsList() {
 		String url = Options.URL_VRT
-				+ "/data/building?scopeType=address&ad_mu=Toronto&sid="
+				+ "/data/building?scopeType=address&ad_mu=Toronto" + "&ed=Resale" + "&sid="
 				+ User.SID;
 		GET.send(url, new RequestCallback() {
 
