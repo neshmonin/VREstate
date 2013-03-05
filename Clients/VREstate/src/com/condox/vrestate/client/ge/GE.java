@@ -2,6 +2,7 @@ package com.condox.vrestate.client.ge;
 
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.VREstate;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
@@ -52,17 +53,21 @@ public class GE extends GoogleEarthWidget{
 //	private static int height = 0;
 //	private static double factor = 1.0;
 	
-	//	public static int getEarthWidth() {
-//		if (origWidth == 0) {
-//			earth.getOffsetWidth()
-//		}
-//		return earth.getOffsetWidth() * getFactor();
-//	};
-//	
-//	public static int getEarthHeight() {
-////		Log.write("Factor: " + getFactor());
-//		return earth.getOffsetHeight() * getFactor();
-//	};
+	private native static float getZoomLevel() /*-{
+//		alert($wnd["ZOOM_LEVEL"]);
+		return $wnd["ZOOM_LEVEL"];
+	}-*/;
+	
+	public static int getEarthWidth() {
+//		Log.write("earth.getOffsetWidth: " + earth.getOffsetWidth());
+//		Log.write("ZoomLevel: " + getZoomLevel());
+		return (int) (earth.getOffsetWidth() * getZoomLevel());
+	};
+	
+	public static int getEarthHeight() {
+//		Log.write("Factor: " + getFactor());
+		return (int) (earth.getOffsetHeight() * getZoomLevel());
+	};
 	
 	
 	//********************************************************

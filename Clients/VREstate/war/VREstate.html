@@ -8,6 +8,21 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<!-----------------------------------------------------------------------------
+ <script language="JavaScript">
+
+window.captureEvents(Event.CLICK);
+
+window.onclick= handle;
+
+function handle(e) {
+alert("Объект window перехватывает это событие!");
+return true; // т.е. проследить ссылку
+}
+
+</script>
+
+----------------------------------------------------------------------------->
 
 <!--                                                               -->
 <!-- Consider inlining CSS to reduce the number of requested files -->
@@ -100,6 +115,21 @@
 			</html>
 		</iframe>
 	</div>
+
+
+  <script type="text/javascript" src="swfobject.js"></script>
+		<script type="text/javascript" src="swfZoomDetection.js"></script>
+   	<script type="text/javascript">
+   	ZOOM_LEVEL = 1.0;
+		swfZoomDetection.init({
+			'onZoomChange': function(obj){ window["ZOOM_LEVEL"] = obj.scale },
+			'getInitIfOne': true,
+			'initCallOnly': false,
+			'frameRate': 25
+		});
+	</script>
+
+
 
 
 </body>

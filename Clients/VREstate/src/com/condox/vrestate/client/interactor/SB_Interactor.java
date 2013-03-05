@@ -4,6 +4,8 @@ import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.I_SB_View;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -34,8 +36,10 @@ public class SB_Interactor extends OverlayHelpers
 	public SB_Interactor(I_SB_View view) {
 		this.view = view;
 
-		int WinW = GE.getEarth().getOffsetWidth();
-	    int WinH = GE.getEarth().getOffsetHeight();
+//		int WinW = GE.getEarth().getOffsetWidth();
+//	    int WinH = GE.getEarth().getOffsetHeight();
+		int WinW = GE.getEarthWidth();
+	    int WinH = GE.getEarthHeight();
 	    int buttonDimention = Math.min(WinW, WinH) / 10;
 		
 		zoomRect = new OvlRectangle(
@@ -77,6 +81,9 @@ public class SB_Interactor extends OverlayHelpers
 	@Override
 	public void setEnabled(boolean enabling) {
 		Log.write("SB_Interactor: setEnabled = " + enabling);
+//		if (enabling)
+//			setupZoom();
+		
 		if (enabling) {
 			if (mouse_listener == null)
 				mouse_listener = GE.getPlugin().getWindow()
@@ -155,6 +162,9 @@ public class SB_Interactor extends OverlayHelpers
 	/*==================================================*/
 	private int x = 0;
 	private int y = 0;
+	
+	private float myX = 0;
+	private float myY = 0;
 
 	boolean action = false;
 	boolean cameraPositionChanged = false;
@@ -212,11 +222,20 @@ public class SB_Interactor extends OverlayHelpers
 		event.preventDefault();
 		x = event.getClientX();
 		y = event.getClientY();
-	    int WinW = GE.getEarth().getOffsetWidth();
-	    int WinH = GE.getEarth().getOffsetHeight();
-    	WinW = Integer.valueOf(GE.getEarth().getElement().getAttribute("width"));
-		Log.write("WinW: " + WinW + ", WinH: " + WinH);
-		Log.write("X: " + x + ", Y: " + y);
+//		myX = (float)event.getClientX() / (float)Window.getClientWidth();
+//		myY = event.getClientY() / Window.getClientHeight();
+		//*********************
+		//*********************
+		
+		
+	    int WinW = GE.getEarthWidth();
+	    int WinH = GE.getEarthHeight();
+//		int WinW = Document.get(). 
+//		int WinH = Window.getClientHeight();
+//    	WinW = Integer.valueOf(GE.getEarth().getElement().getAttribute("width"));
+//		Log.write("WinW: " + WinW + ", WinH: " + WinH);
+//		Log.write("x: " + x + ", y: " + y);
+//		Log.write("X: " + myX + ", Y: " + myY);
 
 		switch (HitTest(x, y))
 		{
@@ -264,6 +283,7 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onMouseMove(KmlMouseEvent event) {
+//		Log.write("onMouseMove");
 		event.preventDefault();
 		int newX = event.getClientX();
 		int newY = event.getClientY();
@@ -274,6 +294,8 @@ public class SB_Interactor extends OverlayHelpers
 		if (action) {
 			switch (event.getButton()) {
 			case 0: // LEFT
+//				Log.write("newX: " + newX);
+//				Log.write("newY: " + newY);
 				double dX = newX - x;
 				double dY = newY - y;
 				cameraPositionChanged = true;
@@ -290,4 +312,16 @@ public class SB_Interactor extends OverlayHelpers
 			}
 		}
 	}
+	
+	//--------------------------------------------------------------------------
+//	private native void setupZoom()/*-{
+//		$doc.onclick = function () {
+////			alert('abc');
+////			var xpos;
+////			var ypos;
+////  			ypos=event.y+document.body.scrollTop;
+////  			xpos=event.x+document.body.scrollLeft;
+////  			alert(xpos);
+//  			}
+//	}-*/;
 }
