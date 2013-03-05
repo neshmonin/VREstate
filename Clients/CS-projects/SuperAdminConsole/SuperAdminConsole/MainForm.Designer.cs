@@ -54,6 +54,9 @@
             this.showDetailsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripAccountProperty = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.changePropertyValueToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.textBoxFilter = new System.Windows.Forms.TextBox();
+            this.labelStreetName = new System.Windows.Forms.Label();
+            this.comboBoxEstateDeveloper = new System.Windows.Forms.ComboBox();
             this.tabControlAccountProperty = new SuperAdminConsole.WizardPages();
             this.tabPageInfo = new System.Windows.Forms.TabPage();
             this.label2 = new System.Windows.Forms.Label();
@@ -81,8 +84,6 @@
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.textBoxFilter = new System.Windows.Forms.TextBox();
-            this.labelStreetName = new System.Windows.Forms.Label();
             this.contextMenuStripViewOrder.SuspendLayout();
             this.pnlStartupShutdown.SuspendLayout();
             this.contextMenuStripUserAccount.SuspendLayout();
@@ -98,7 +99,7 @@
             // 
             // AddAccount
             // 
-            this.AddAccount.Location = new System.Drawing.Point(12, 12);
+            this.AddAccount.Location = new System.Drawing.Point(12, 38);
             this.AddAccount.Name = "AddAccount";
             this.AddAccount.Size = new System.Drawing.Size(118, 27);
             this.AddAccount.TabIndex = 2;
@@ -204,7 +205,7 @@
             // buttonRefresh
             // 
             this.buttonRefresh.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.buttonRefresh.Location = new System.Drawing.Point(136, 14);
+            this.buttonRefresh.Location = new System.Drawing.Point(136, 40);
             this.buttonRefresh.Name = "buttonRefresh";
             this.buttonRefresh.Size = new System.Drawing.Size(96, 25);
             this.buttonRefresh.TabIndex = 5;
@@ -243,9 +244,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.treeViewAccounts.ContextMenuStrip = this.contextMenuStripUserAccount;
             this.treeViewAccounts.HideSelection = false;
-            this.treeViewAccounts.Location = new System.Drawing.Point(12, 45);
+            this.treeViewAccounts.Location = new System.Drawing.Point(12, 71);
             this.treeViewAccounts.Name = "treeViewAccounts";
-            this.treeViewAccounts.Size = new System.Drawing.Size(220, 574);
+            this.treeViewAccounts.Size = new System.Drawing.Size(220, 555);
             this.treeViewAccounts.TabIndex = 7;
             this.treeViewAccounts.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewAccounts_AfterSelect);
             this.treeViewAccounts.DragDrop += new System.Windows.Forms.DragEventHandler(this.treeViewAccounts_DragDrop);
@@ -257,7 +258,7 @@
             this.contextMenuStripUserAccount.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.deleteThisAccountToolStripMenuItem});
             this.contextMenuStripUserAccount.Name = "contextMenuStripUserAccount";
-            this.contextMenuStripUserAccount.Size = new System.Drawing.Size(176, 48);
+            this.contextMenuStripUserAccount.Size = new System.Drawing.Size(176, 26);
             this.contextMenuStripUserAccount.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripUserAccount_Opening);
             // 
             // deleteThisAccountToolStripMenuItem
@@ -296,6 +297,35 @@
             this.changePropertyValueToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
             this.changePropertyValueToolStripMenuItem.Text = "Change Property Value...";
             this.changePropertyValueToolStripMenuItem.Click += new System.EventHandler(this.changePropertyValueToolStripMenuItem_Click);
+            // 
+            // textBoxFilter
+            // 
+            this.textBoxFilter.Location = new System.Drawing.Point(518, 12);
+            this.textBoxFilter.Name = "textBoxFilter";
+            this.textBoxFilter.Size = new System.Drawing.Size(152, 20);
+            this.textBoxFilter.TabIndex = 10;
+            this.textBoxFilter.Visible = false;
+            this.textBoxFilter.TextChanged += new System.EventHandler(this.textBoxFilter_TextChanged);
+            // 
+            // labelStreetName
+            // 
+            this.labelStreetName.AutoSize = true;
+            this.labelStreetName.Location = new System.Drawing.Point(400, 15);
+            this.labelStreetName.Name = "labelStreetName";
+            this.labelStreetName.Size = new System.Drawing.Size(102, 13);
+            this.labelStreetName.TabIndex = 9;
+            this.labelStreetName.Text = "Type string to filter...";
+            this.labelStreetName.Visible = false;
+            // 
+            // comboBoxEstateDeveloper
+            // 
+            this.comboBoxEstateDeveloper.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxEstateDeveloper.FormattingEnabled = true;
+            this.comboBoxEstateDeveloper.Location = new System.Drawing.Point(12, 7);
+            this.comboBoxEstateDeveloper.Name = "comboBoxEstateDeveloper";
+            this.comboBoxEstateDeveloper.Size = new System.Drawing.Size(220, 21);
+            this.comboBoxEstateDeveloper.TabIndex = 11;
+            this.comboBoxEstateDeveloper.SelectedIndexChanged += new System.EventHandler(this.comboBoxEstateDeveloper_SelectedIndexChanged);
             // 
             // tabControlAccountProperty
             // 
@@ -543,30 +573,12 @@
             // 
             this.columnHeader7.Text = "targetId";
             // 
-            // textBoxFilter
-            // 
-            this.textBoxFilter.Location = new System.Drawing.Point(518, 12);
-            this.textBoxFilter.Name = "textBoxFilter";
-            this.textBoxFilter.Size = new System.Drawing.Size(152, 20);
-            this.textBoxFilter.TabIndex = 10;
-            this.textBoxFilter.Visible = false;
-            this.textBoxFilter.TextChanged += new System.EventHandler(this.textBoxFilter_TextChanged);
-            // 
-            // labelStreetName
-            // 
-            this.labelStreetName.AutoSize = true;
-            this.labelStreetName.Location = new System.Drawing.Point(400, 15);
-            this.labelStreetName.Name = "labelStreetName";
-            this.labelStreetName.Size = new System.Drawing.Size(102, 13);
-            this.labelStreetName.TabIndex = 9;
-            this.labelStreetName.Text = "Type string to filter...";
-            this.labelStreetName.Visible = false;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(683, 633);
+            this.Controls.Add(this.comboBoxEstateDeveloper);
             this.Controls.Add(this.textBoxFilter);
             this.Controls.Add(this.labelStreetName);
             this.Controls.Add(this.tabControlAccountProperty);
@@ -656,6 +668,7 @@
         private System.Windows.Forms.Label labelStreetName;
         private System.Windows.Forms.ContextMenuStrip contextMenuStripUserAccount;
         private System.Windows.Forms.ToolStripMenuItem deleteThisAccountToolStripMenuItem;
+        private System.Windows.Forms.ComboBox comboBoxEstateDeveloper;
     }
 }
 

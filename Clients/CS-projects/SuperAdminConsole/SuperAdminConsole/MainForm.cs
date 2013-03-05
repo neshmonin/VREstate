@@ -20,6 +20,7 @@ namespace SuperAdminConsole
     {
         private ListViewColumnSorter lvwColumnSorter;
         private SuperServer m_superServer = null;
+        private Developer m_currentDeveloper = null;
         string m_nickname = string.Empty;
         string m_email = string.Empty;
 
@@ -170,12 +171,21 @@ namespace SuperAdminConsole
                                         ", Login=" + login +
                                         ", SID=" + ServerProxy.SID, "Info");
                         Trace.Flush();
+                        comboBoxEstateDeveloper.Items.Clear();
+                        if (SuperServer.Developers.Count > 0)
+                        {
+                            foreach (var developer in SuperServer.Developers.Values)
+                                comboBoxEstateDeveloper.Items.Add(developer);
+
+                            comboBoxEstateDeveloper.SelectedItem = SuperServer.Developers["Resale"];
+                        }
+
                         return true;
                     }
                 }
                 else
                 {
-                    string developerId = "6"; // Must be "Resale"
+                    string developerId = loginForm.textBoxEstateDeveloper.Text;
                     if (m_superServer.Login(login, password, "developeradmin", developerId))
                     {
                         Trace.WriteLine(DateTime.Now.ToString() + "> Connected to server " +
@@ -185,6 +195,8 @@ namespace SuperAdminConsole
                                         ", developerId=" + developerId +
                                         ", SID=" + ServerProxy.SID, "Info");
                         Trace.Flush();
+                        comboBoxEstateDeveloper.Items.Add(SuperServer.Developers[developerId]);
+                        comboBoxEstateDeveloper.SelectedIndex = 0;
                         return true;
                     }
                 }
@@ -236,7 +248,10 @@ namespace SuperAdminConsole
 
         private void buttonAddNewViewOrder_Click(object sender, EventArgs e)
         {
-            SetViewOrder newViewOrder = new SetViewOrder(m_agent, null, SetViewOrder.ChangeReason.Creation);
+            SetViewOrder newViewOrder = new SetViewOrder(m_agent, 
+                                                        null, 
+                                                        SetViewOrder.ChangeReason.Creation,
+                                                        m_currentDeveloper);
             newViewOrder.ShowDialog(this);
             refreshOrders();
 
@@ -274,9 +289,12 @@ namespace SuperAdminConsole
             if (myRole == "SuperAdmin")
             {
                 ///data/user?sid=<SID>[&genval=<generation>][&withdeleted={true|false}][&<hints>]
+                
                 resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
-                                                                  "user",
-                                                                  "role=DeveloperAdmin&ed=Resale", null);
+                                                    "user",
+                                                    "role=DeveloperAdmin&ed=" +
+                                                    m_currentDeveloper.Name, 
+                                                    null);
                 if (HttpStatusCode.OK != resp.ResponseCode)
                 {
                     MessageBox.Show("Failed querying the list of customers");
@@ -600,6 +618,8 @@ namespace SuperAdminConsole
             ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
                                                                 "viewOrder",
                                                                 "userId=" + m_agent.AutoID +
+                                                                "&ed=" +
+                                                                m_currentDeveloper.Name +
                                                                 "&verbose=true", null);
             if (HttpStatusCode.OK != resp.ResponseCode)
             {
@@ -786,7 +806,10 @@ namespace SuperAdminConsole
                 return;
             }
 
-            SetViewOrder updateViewOrder = new SetViewOrder(m_agent, viewOrderToMove, SetViewOrder.ChangeReason.Transfer);
+            SetViewOrder updateViewOrder = new SetViewOrder(m_agent, 
+                                                            viewOrderToMove, 
+                                                            SetViewOrder.ChangeReason.Transfer,
+                                                            m_currentDeveloper);
             if (updateViewOrder.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
                 e.Effect = DragDropEffects.None;
@@ -874,7 +897,8 @@ namespace SuperAdminConsole
             ClientData viewOrderToUpdate = ListViewOrders.SelectedItems[0].Tag as ClientData;
             SetViewOrder updateViewOrder = new SetViewOrder(m_agent, 
                                                             viewOrderToUpdate, 
-                                                            SetViewOrder.ChangeReason.Update);
+                                                            SetViewOrder.ChangeReason.Update,
+                                                            m_currentDeveloper);
             if (updateViewOrder.ShowDialog(this) == DialogResult.OK)
             {
                 string viewOrderId = viewOrderToUpdate.GetProperty("id", string.Empty);
@@ -1065,6 +1089,12 @@ namespace SuperAdminConsole
                 e.Cancel = true;
                 return;
             }
+        }
+
+        private void comboBoxEstateDeveloper_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            m_currentDeveloper = comboBoxEstateDeveloper.SelectedItem as Developer;
+            refreshUserAccounts();
         }
 
     }
