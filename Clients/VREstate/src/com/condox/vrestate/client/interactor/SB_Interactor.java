@@ -4,10 +4,6 @@ import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.I_SB_View;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.condox.vrestate.client.view._AbstractView;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONObject;
@@ -160,9 +156,6 @@ public class SB_Interactor extends OverlayHelpers
 	private int x = 0;
 	private int y = 0;
 	
-	private float myX = 0;
-	private float myY = 0;
-
 	boolean action = false;
 	boolean cameraPositionChanged = false;
 	boolean autoZoomUnzoom = false;
