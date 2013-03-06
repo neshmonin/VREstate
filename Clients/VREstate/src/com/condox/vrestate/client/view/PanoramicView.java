@@ -31,13 +31,15 @@ public class PanoramicView extends _GEView {
 		return false;
 	}
 
+	protected double dH = 0;
+	protected double dT = 0;
 
 	public void Move(double dH, double dT) {
-		//this.dH -= dH;
-		//this.dT += dT;
-		//onViewChanged();
+		this.dH -= dH;
+		this.dT += dT;
+		doViewChanged();
 
-		_camera.MoveCamera(-dH / 10, dT / 10);
+		//_camera.MoveCamera(-dH / 10, dT / 10);
 	}
 	
 	public void Center() {
@@ -55,7 +57,7 @@ public class PanoramicView extends _GEView {
 
 	@Override
 	public void onViewChanged() {
-		/*double deltaHeading = dH / 10;
+		double deltaHeading = dH / 10;
 		double deltaTilt = dT / 10;
 		if (deltaHeading == 0.0 && deltaTilt == 0.0)
 			return;
@@ -63,7 +65,7 @@ public class PanoramicView extends _GEView {
 		dH *= 1 / 10; 
 		dT *= 1 / 10;
 
-		_camera.MoveCamera(deltaHeading, deltaTilt);*/
+		_camera.MoveCamera(deltaHeading, deltaTilt);
 	}
 
 	@Override

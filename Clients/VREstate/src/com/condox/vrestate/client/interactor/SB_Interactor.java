@@ -8,16 +8,15 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.condox.vrestate.client.view._AbstractView;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlMouseEvent;
 import com.nitrous.gwt.earth.client.api.KmlPlacemark;
 import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
-import com.nitrous.gwt.earth.client.api.event.MouseClickListener;
 import com.nitrous.gwt.earth.client.api.event.MouseListener;
 
 public class SB_Interactor extends OverlayHelpers
@@ -89,10 +88,8 @@ public class SB_Interactor extends OverlayHelpers
 				mouse_listener = GE.getPlugin().getWindow()
 						.addMouseListener(this);
 		} else {
-			// Log.write("1");
 			mouse_listener.removeHandler();
 			mouse_listener = null;
-			// Log.write("2");
 		}
 
 		if (enabling) {
@@ -189,8 +186,6 @@ public class SB_Interactor extends OverlayHelpers
 	public void onClick(KmlMouseEvent event) {
 		event.preventDefault();
 
-		// Log.write("SiteInteractor::onClick()");
-
 		if (cameraPositionChanged || autoZoomUnzoom)
 			return;
 		
@@ -219,23 +214,10 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onMouseDown(KmlMouseEvent event) {
+		_AbstractView.ResetTimeOut();
 		event.preventDefault();
 		x = event.getClientX();
 		y = event.getClientY();
-//		myX = (float)event.getClientX() / (float)Window.getClientWidth();
-//		myY = event.getClientY() / Window.getClientHeight();
-		//*********************
-		//*********************
-		
-		
-	    int WinW = GE.getEarthWidth();
-	    int WinH = GE.getEarthHeight();
-//		int WinW = Document.get(). 
-//		int WinH = Window.getClientHeight();
-//    	WinW = Integer.valueOf(GE.getEarth().getElement().getAttribute("width"));
-//		Log.write("WinW: " + WinW + ", WinH: " + WinH);
-//		Log.write("x: " + x + ", y: " + y);
-//		Log.write("X: " + myX + ", Y: " + myY);
 
 		switch (HitTest(x, y))
 		{
@@ -256,6 +238,7 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onMouseUp(KmlMouseEvent event) {
+		_AbstractView.ResetTimeOut();
 		event.preventDefault();
 		if (cameraPositionChanged)
 		{

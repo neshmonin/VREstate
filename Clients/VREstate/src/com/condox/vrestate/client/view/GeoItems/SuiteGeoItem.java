@@ -221,4 +221,10 @@ public class SuiteGeoItem implements IGeoItem {
 	public String getType() {
 		return "suite";
 	}
+
+	@Override
+	public String getInitialViewKml() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

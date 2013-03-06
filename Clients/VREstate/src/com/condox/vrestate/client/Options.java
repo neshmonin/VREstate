@@ -2,7 +2,6 @@ package com.condox.vrestate.client;
 
 import java.util.List;
 import java.util.Map;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -11,6 +10,10 @@ import com.google.gwt.user.client.Window;
 
 public class Options implements RequestCallback{
 	public static boolean DEBUG_MODE = true;
+
+	// TODO: this must be set only if this client in Kiosk mode
+	public static boolean KIOSK = false;
+	//public static boolean KIOSK = true;
 
 	public static String URL_VRT;
 	public static String URL_STATIC;
@@ -116,11 +119,11 @@ public class Options implements RequestCallback{
 		theOptions = new Options(vrEstate);
 		GET.send(request, theOptions);
 //		 isReady = true;
+	
 	};
 
 	@Override
 	public void onResponseReceived(Request request, Response response) {
-		// TODO Auto-generated method stub
 		SUITE_INFO_TEMPLATE = response.getText();
 //		Log.write(SUITE_INFO_TEMPLATE);
 		vrEstate.LoginUser();
@@ -128,7 +131,6 @@ public class Options implements RequestCallback{
 
 	@Override
 	public void onError(Request request, Throwable exception) {
-		// TODO Auto-generated method stub
 	}
 	
 //	public boolean isUrlReadable() {

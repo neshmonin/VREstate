@@ -15,7 +15,7 @@ namespace SuperAdminConsole
         {
             InitializeComponent();
             tbLogin.Text = login;
-            IsSuperAdmin = checkBoxIsSuperadmin.Checked;
+            update();
         }
 
         private void LoginForm_Shown(object sender, EventArgs e)
@@ -31,7 +31,7 @@ namespace SuperAdminConsole
 
         private void checkBoxIsSuperadmin_CheckedChanged(object sender, EventArgs e)
         {
-            IsSuperAdmin = checkBoxIsSuperadmin.Checked;
+            update();
         }
 
         public bool IsSuperAdmin { get; private set; }
@@ -41,5 +41,29 @@ namespace SuperAdminConsole
             get { return radioButtonMainServer.Checked; }
         }
 
+        private void update()
+        {
+            IsSuperAdmin = !checkBoxIsSuperadmin.Checked;
+            labelEstateDeveloper.Enabled = !IsSuperAdmin;
+            textBoxEstateDeveloper.Enabled = !IsSuperAdmin;
+            buttonLogin.Enabled = IsSuperAdmin ?
+                tbLogin.Text.Length > 0 && tbPassword.Text.Length > 0 :
+                tbLogin.Text.Length > 0 && tbPassword.Text.Length > 0 && textBoxEstateDeveloper.Text.Length > 0;
+        }
+
+        private void tbLogin_TextChanged(object sender, EventArgs e)
+        {
+            update();
+        }
+
+        private void tbPassword_TextChanged(object sender, EventArgs e)
+        {
+            update();
+        }
+
+        private void textBoxEstateDeveloper_TextChanged(object sender, EventArgs e)
+        {
+            update();
+        }
     }
 }

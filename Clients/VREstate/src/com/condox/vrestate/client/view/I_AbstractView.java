@@ -13,7 +13,11 @@ public interface I_AbstractView extends I_UpdatableView {
 	double getRegularSpeed(); // access function, implemented in _AbstractView
 	Camera getCamera(); // access function, implemented in _AbstractView
 
-	// the following two are implemented in _AbstractView
+	abstract void onDestroy();
+	
+	// the following three are implemented in _AbstractView
 	public boolean isSetEnabledScheduled(); 
 	public void scheduleSetEnabled();
+
+	public abstract void doViewChanged(); // call this to force onViewChanged() in a tread-safe manner
 }

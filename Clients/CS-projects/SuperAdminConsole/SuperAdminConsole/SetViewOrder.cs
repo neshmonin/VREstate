@@ -74,11 +74,13 @@ namespace SuperAdminConsole
 
         ClientData theOrder = null;
         ChangeReason theReason;
+        Developer m_developer = null;
 
-        public SetViewOrder(User user, ClientData order, ChangeReason reason)
+        public SetViewOrder(User user, ClientData order, ChangeReason reason, Developer developer)
         {
             InitializeComponent();
             theReason = reason;
+            m_developer = developer;
 
             textExternalLink.Text = DEFAULT;
             textExternalLink.GotFocus += (sender, e) =>
@@ -672,9 +674,10 @@ namespace SuperAdminConsole
 
         private void initListViewAddresses(string scopeType)
         {
-            string scopeParam = string.Format("scopeType={0}&ad_mu={1}",
+            string scopeParam = string.Format("scopeType={0}&ad_mu={1}&ed={2}",
                                               scopeType,
-                                              comboBoxCity.SelectedItem);
+                                              comboBoxCity.SelectedItem,
+                                              m_developer.Name);
             ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
                                                                 "building",
                                                                 scopeParam, null);

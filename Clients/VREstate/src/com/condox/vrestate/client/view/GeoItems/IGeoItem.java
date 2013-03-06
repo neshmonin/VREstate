@@ -15,4 +15,6 @@ public interface IGeoItem {
 	public abstract String getType();
 
 	public abstract String getCaption();
+	
+	public abstract String getInitialViewKml();
 }

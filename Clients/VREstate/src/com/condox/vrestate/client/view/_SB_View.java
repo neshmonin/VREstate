@@ -10,14 +10,14 @@ import com.nitrous.gwt.earth.client.api.GEVisibility;
 
 public abstract class _SB_View extends _GEView implements I_SB_View {
 
-	private double dH = 0;
-	private double dT = 0;
-	private double dR = 0;
+	protected double dH = 0;
+	protected double dT = 0;
+	protected double dR = 0;
 	
 	protected _SB_View(IGeoItem geoItem) {
 		super( geoItem );
 	}
-	
+
 	@Override
 	public void setEnabled(boolean enabling) {
 		super.setEnabled(enabling);
@@ -45,7 +45,7 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 		this.dH += dH;
 		this.dT += dT;
 		this.dR += dR;
-		onViewChanged();
+		doViewChanged();
 	}
 
 	@Override
