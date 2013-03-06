@@ -16,19 +16,19 @@
 					<g:HorizontalPanel spacing="10" width="100%">
 						<g:VerticalPanel spacing="10" width="100%" horizontalAlignment="ALIGN_LEFT">
 							<g:Label text="Your Name*" width="100%" horizontalAlignment="ALIGN_LEFT"/>
-							<g:TextBox alignment="LEFT" ui:field="txtName" visibleLength="1" width="150px"/>
+							<g:TextBox alignment="LEFT" ui:field="txtName" visibleLength="1" width="125px"/>
 							<g:Cell horizontalAlignment="ALIGN_RIGHT">
-								<g:HTML wordWrap="true" width="150px" horizontalAlignment="ALIGN_RIGHT">Contact phone* <br></br> (including area code)</g:HTML>
+								<g:HTML wordWrap="true" width="125px" horizontalAlignment="ALIGN_RIGHT">Contact phone* <br></br> (including area code)</g:HTML>
 							</g:Cell>
 						</g:VerticalPanel>
 						<g:VerticalPanel width="100%" spacing="10">
 							<g:Label text="Email*" horizontalAlignment="ALIGN_LEFT" width="100%"/>
-							<g:TextBox ui:field="txtMail" visibleLength="1" width="150px"/>
+							<g:TextBox ui:field="txtMail" visibleLength="1" width="175px"/>
 							<g:HorizontalPanel width="100%" verticalAlignment="ALIGN_MIDDLE">
-								<g:TextBox ui:field="txtPhone" visibleLength="1" width="75px"/>
+								<g:TextBox ui:field="txtPhone" visibleLength="1" width="100px"/>
 								<g:Label text="Ext." horizontalAlignment="ALIGN_RIGHT" width="100%"/>
 								<g:Cell horizontalAlignment="ALIGN_RIGHT">
-									<g:TextBox ui:field="txtExtPhone" visibleLength="1" width="25px"/>
+									<g:TextBox ui:field="txtExtPhone" visibleLength="1" width="30px"/>
 								</g:Cell>
 						</g:HorizontalPanel>
 						</g:VerticalPanel>

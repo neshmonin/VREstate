@@ -11,8 +11,6 @@ import com.condox.orders.client.Log;
 import com.condox.orders.client.Options;
 import com.condox.orders.client.Orders;
 import com.condox.orders.client.User;
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
@@ -22,7 +20,6 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -36,18 +33,12 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.cellview.client.DataGrid.Resources;
-import com.google.gwt.user.cellview.client.DataGrid.Style;
-import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.cellview.client.Header;
 
 public class SelectBuilding extends Composite implements IFilter<Building>,
 		IPage {
@@ -63,19 +54,19 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 	}
 	
 	//**************************************************************************
-	private class CustomHeaderBuilder extends Header<Building> {
-
-		public CustomHeaderBuilder(Cell<Building> cell) {
-			super(cell);
-		}
-
-		@Override
-		public Building getValue() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
-	}
+//	private class CustomHeaderBuilder extends Header<Building> {
+//
+//		public CustomHeaderBuilder(Cell<Building> cell) {
+//			super(cell);
+//		}
+//
+//		@Override
+//		public Building getValue() {
+//			// TODO Auto-generated method stub
+//			return null;
+//		}
+//		
+//	}
 	//**************************************************************************
 
 	public SelectBuilding() {

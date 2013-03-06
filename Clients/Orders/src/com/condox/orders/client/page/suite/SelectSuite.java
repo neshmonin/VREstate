@@ -62,11 +62,11 @@ public class SelectSuite extends Composite implements IPage {
 	private void Init() {
 		initWidget(uiBinder.createAndBindUi(this));
 		initNativeFuncs();
-		String caption = "";
-		if (Orders.selectedBuilding != null)
-			caption = "Selected building: "
-					+ Orders.selectedBuilding.getStreet() + ", "
-					+ Orders.selectedBuilding.getName() + ".";
+//		String caption = "";
+//		if (Orders.selectedBuilding != null)
+//			caption = "Selected building: "
+//					+ Orders.selectedBuilding.getStreet() + ", "
+//					+ Orders.selectedBuilding.getName() + ".";
 		// lblCaption.setText(caption + " Please, select suite:");
 		// ------------------------
 	}
