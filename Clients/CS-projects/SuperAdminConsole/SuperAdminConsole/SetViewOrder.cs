@@ -79,6 +79,8 @@ namespace SuperAdminConsole
         public SetViewOrder(User user, ClientData order, ChangeReason reason, Developer developer)
         {
             InitializeComponent();
+
+
             theReason = reason;
             m_developer = developer;
 
@@ -155,6 +157,8 @@ namespace SuperAdminConsole
                 labelPrice.Visible = false;
                 numericUpDownPrice.Visible = false;
             }
+
+            cleanUp();
 
             theUser = user;
             comboBoxCountry.SelectedIndex = 0;
@@ -864,6 +868,14 @@ namespace SuperAdminConsole
 
         private void buttonOneMore_Click(object sender, EventArgs e)
         {
+            cleanUp();
+
+            tabControlSteps.SelectTab("tabPageCheckAddress");
+            UpdateState();
+        }
+
+        private void cleanUp()
+        {
             textBoxMLS.Text = string.Empty;
             textBoxInfoUrl.Text = string.Empty;
             textBoxNote.Text = string.Empty;
@@ -874,9 +886,15 @@ namespace SuperAdminConsole
             theOrder = null;
             viewOrderUrlGenerated = false;
             validatedUrl = string.Empty;
-
-            tabControlSteps.SelectTab("tabPageCheckAddress");
-            UpdateState();
+            if (m_developer.Name == "Demo")
+            {
+                radioButtonExternalLink.Checked = true;
+                textExternalLink.Text = "https://vrt.3dcondox.com/templates/images/Demo-VIRTUALTOUR.png";
+                textBoxInfoUrl.Text = "https://vrt.3dcondox.com/templates/images/Demo-REALTOR_CA.png";
+                numericUpDownDaysValid.Maximum = 3651;
+                numericUpDownDaysValid.Value = 3650;
+                numericUpDownPrice.Value = 0;
+            }
         }
 
     }
