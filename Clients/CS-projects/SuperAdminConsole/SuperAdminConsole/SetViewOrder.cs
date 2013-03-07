@@ -752,7 +752,7 @@ namespace SuperAdminConsole
 
         SuitesTableForm suitesTableForm = null;
 
-        private void listViewAddresses_SelectedIndexChanged(object sender, EventArgs e)
+        private void listViewAddresses_MouseClicked(object sender, MouseEventArgs e)
         {
             if (listViewAddresses.SelectedItems == null || listViewAddresses.SelectedItems.Count == 0)
             {

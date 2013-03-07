@@ -385,7 +385,7 @@
             this.listViewAddresses.UseCompatibleStateImageBehavior = false;
             this.listViewAddresses.View = System.Windows.Forms.View.Details;
             this.listViewAddresses.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listViewAddresses_ColumnClick);
-            this.listViewAddresses.SelectedIndexChanged += new System.EventHandler(this.listViewAddresses_SelectedIndexChanged);
+            this.listViewAddresses.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listViewAddresses_MouseClicked);
             // 
             // columnHeader2
             // 
