@@ -30,6 +30,7 @@ public class SuiteGeoItem implements IGeoItem {
 
 		this.suite = suite;
 		
+		float scale = 1.0F;
 		KmlStyle style = GE.getPlugin().createStyle("");
 		switch (suite.getStatus()) {
 		case Available:
@@ -37,32 +38,38 @@ public class SuiteGeoItem implements IGeoItem {
 					+ suite.getName()
 					+ "&txtClr=65280&shdClr=65280&frame=0";
 			style.getLineStyle().getColor().set("FF00FF00"); // GREEN
+			style.getLineStyle().setWidth(2.0F);
 			break;
 		case Sold:
 			if (Options.getShowSold()) {
 				href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
 						+ suite.getName()
-						+ "&txtClr=16711680&shdClr=16711680&frame=0";
+						+ "&txtClr=16711680&shdClr=0&frame=0";
 				style.getLineStyle().getColor().set("FF0000FF"); // RED
+				style.getLineStyle().setWidth(2.0F);
 			}
 			break;
 		case ResaleAvailable:
 			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
 					+ suite.getName()
-					+ "&txtClr=1048575&shdClr=1048575&frame=0";
+					+ "&txtClr=1048575&shdClr=0&frame=0";
 			style.getLineStyle().getColor().set("FFFFFF00"); // BLUE ??
+			style.getLineStyle().setWidth(2.0F);
 			break;
 		case Selected:
-			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
+			href = Options.HOME_URL + "gen/txt?height=30&shadow=2&text="
 					+ suite.getName()
-					+ "&txtClr=16777215&shdClr=1048575&frame=0";
-			style.getLineStyle().getColor().set("FFFFFFFF"); // WHITE ??
+					+ "&txtClr=16764108&shdClr=0&frame=0";
+			style.getLineStyle().getColor().set("FFCCCCFF"); // LIGHT-RED
+			style.getLineStyle().setWidth(4.0F);
+			scale = 1.0F;
 			break;
 		case Layout:
 			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
 					+ suite.getName()
-					+ "&txtClr=16777215&shdClr=1048575&frame=0";
-			style.getLineStyle().getColor().set("FFCCCCCC"); // LIGHT GRAY
+					+ "&txtClr=16777215&shdClr=0&frame=0";
+			style.getLineStyle().getColor().set("FFFFFFFF"); // WHITE
+			style.getLineStyle().setWidth(3.0F);
 			break;
 		}
 	
@@ -72,8 +79,7 @@ public class SuiteGeoItem implements IGeoItem {
 	
 		icon.setHref(href);
 		style.getIconStyle().setIcon(icon);
-		style.getIconStyle().setScale(1);
-		style.getLineStyle().setWidth(2);
+		style.getIconStyle().setScale(scale);
 
 		extended_data_label = GE.getPlugin().createPlacemark("");
 		// Snippet

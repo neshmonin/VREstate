@@ -18,8 +18,6 @@ public class HelicopterView extends SiteView {
 					tickCounter = 0;
 					onHeadingChanged();
 				}
-					
-				updateViewTimer.schedule(200);
 			}
 			else
 				updateViewTimer.cancel();
@@ -46,6 +44,12 @@ public class HelicopterView extends SiteView {
 			_interactor = null;
 			isFlying = false;
 		}
+	}
+
+	@Override
+	public void onViewChanged() {
+		super.onViewChanged();
+		updateViewTimer.schedule(200);
 	}
 
 	public void pushNextView() {
