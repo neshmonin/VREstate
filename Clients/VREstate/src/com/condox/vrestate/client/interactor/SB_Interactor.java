@@ -31,8 +31,10 @@ public class SB_Interactor extends OverlayHelpers
 	public SB_Interactor(I_SB_View view) {
 		this.view = view;
 
-		int WinW = GE.getEarth().getOffsetWidth();
-	    int WinH = GE.getEarth().getOffsetHeight();
+//		int WinW = GE.getEarth().getOffsetWidth();
+//	    int WinH = GE.getEarth().getOffsetHeight();
+		int WinW = GE.getEarthWidth();
+	    int WinH = GE.getEarthHeight();
 	    int buttonDimention = Math.min(WinW, WinH) / 10;
 		
 		zoomRect = new OvlRectangle(
@@ -74,6 +76,9 @@ public class SB_Interactor extends OverlayHelpers
 	@Override
 	public void setEnabled(boolean enabling) {
 		Log.write("SB_Interactor: setEnabled = " + enabling);
+//		if (enabling)
+//			setupZoom();
+		
 		if (enabling) {
 			if (mouse_listener == null)
 				mouse_listener = GE.getPlugin().getWindow()
@@ -150,7 +155,7 @@ public class SB_Interactor extends OverlayHelpers
 	/*==================================================*/
 	private int x = 0;
 	private int y = 0;
-
+	
 	boolean action = false;
 	boolean cameraPositionChanged = false;
 	boolean autoZoomUnzoom = false;
@@ -254,6 +259,7 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onMouseMove(KmlMouseEvent event) {
+//		Log.write("onMouseMove");
 		event.preventDefault();
 		int newX = event.getClientX();
 		int newY = event.getClientY();
@@ -264,6 +270,8 @@ public class SB_Interactor extends OverlayHelpers
 		if (action) {
 			switch (event.getButton()) {
 			case 0: // LEFT
+//				Log.write("newX: " + newX);
+//				Log.write("newY: " + newY);
 				double dX = newX - x;
 				double dY = newY - y;
 				cameraPositionChanged = true;
@@ -280,4 +288,16 @@ public class SB_Interactor extends OverlayHelpers
 			}
 		}
 	}
+	
+	//--------------------------------------------------------------------------
+//	private native void setupZoom()/*-{
+//		$doc.onclick = function () {
+////			alert('abc');
+////			var xpos;
+////			var ypos;
+////  			ypos=event.y+document.body.scrollTop;
+////  			xpos=event.x+document.body.scrollLeft;
+////  			alert(xpos);
+//  			}
+//	}-*/;
 }

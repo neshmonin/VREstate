@@ -69,8 +69,8 @@ public class OverlayHelpers {
         
         public boolean ContainsPixel(int x, int y)
         {
-        	int WinW = GE.getEarth().getOffsetWidth();
-        	int WinH = GE.getEarth().getOffsetHeight();
+        	int WinW = GE.getEarthWidth();
+        	int WinH = GE.getEarthHeight();
 		    
             int pixX = (origin.x.Units == KmlUnits.UNITS_PIXELS) ? origin.x.iVal : (int)(WinW * origin.x.fVal);
             int pixY = (origin.y.Units == KmlUnits.UNITS_PIXELS) ? origin.y.iVal : (int)(WinH * (1f-origin.y.fVal));

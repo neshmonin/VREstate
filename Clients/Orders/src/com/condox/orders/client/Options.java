@@ -3,7 +3,6 @@ package com.condox.orders.client;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
@@ -81,11 +80,11 @@ public class Options implements RequestCallback{
 //			DEBUG_MODE = params.containsKey("test") ? Boolean.valueOf(params
 //					.get("test").get(0)) : false;
 //		else
-	    	DEBUG_MODE = (GWT.getModuleBaseURL().contains("/vre/")); 
+//	    	DEBUG_MODE = (GWT.getModuleBaseURL().contains("/vre/")); 
 
-		Log.write("DEBUG_MODE=" + DEBUG_MODE);
+//		Log.write("DEBUG_MODE=" + DEBUG_MODE);
 //	    DEBUG_MODE = true;
-		if (DEBUG_MODE) {
+		if (Config.DEBUG_MODE) {
 			URL_VRT = "https://vrt.3dcondox.com/vre/";
 			URL_STATIC = "https://static.3dcondox.com/vre/";
 			URL_MODEL = "https://model.3dcondox.com/vre/";
