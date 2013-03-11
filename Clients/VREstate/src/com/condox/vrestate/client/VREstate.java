@@ -46,22 +46,32 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 		ge.Init(this);
 	};
 
+	private static int counter = 0;
+
+	public static void RenewCheckChangesThread() {
+		Log.write("-- RenewCheckChangesThread --");
+
+		counter++;
+		String request = Options.HOME_URL + "ev?sid=" + User.SID + "&generation=" + counter;
+		GET.send(request, Document.getCallback());
+	}
+	public static int checkChangesPeriodSec;
+
 	public void LoadView() {
 		Log.write("LoadView");
 		String url;
 		if (Options.isViewOrder()) {
 			url = Options.HOME_URL
 					+ "data/view?type=viewOrder&id="
-					+ Options.getViewOrderId() + "&SID=" + User.SID;
-//			Window.open(url, "", "")
+					+ Options.getViewOrderId() + "&track=true&SID=" + User.SID;
 		} else {
 			url = Options.HOME_URL
 					+ "data/view?type=site&id="
-					+ Options.getSiteId() + "&SID=" + User.SID;
-//			Window.open(url, "", "");
+					+ Options.getSiteId() + "&track=true&SID=" + User.SID;
 		}
-//		Window.alert("Message!");
 		GET.send(url, this);
+
+		VREstate.RenewCheckChangesThread();
 	}
 
 	I_AbstractView firstView = null;

@@ -3,23 +3,36 @@ package com.condox.vrestate.client.document;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import com.condox.vrestate.client.Log;
+import com.condox.vrestate.client.User;
+import com.condox.vrestate.client.VREstate;
 import com.condox.vrestate.client.document.Suite.Status;
 import com.condox.vrestate.client.view.ProgressBar;
+import com.condox.vrestate.client.view._AbstractView;
+import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 
-public class Document implements IDocument {
+public class Document implements IDocument,
+								 RequestCallback {
 
-	private static IDocument instance = new Document();
+	private static Document instance = new Document();
 	public static ProgressBar progressBar;
 
 	private Document() {
 	};
 
 	public static IDocument get() {
+		return instance;
+	}
+
+	public static RequestCallback getCallback() {
 		return instance;
 	}
 
@@ -87,6 +100,7 @@ public class Document implements IDocument {
 
 			progressBar.Cleanup();
 //			Window.alert("Document end parsing");
+			
 			return true;
 		}
 	}
@@ -245,6 +259,7 @@ public class Document implements IDocument {
 				Suite targetSuite = this.suites.get(viewOrder.getTargetObjectId());
 				viewOrder.setTargetObject(targetSuite);
 				targetSuite.setInfoUrl(viewOrder.getInfoUrl());
+				targetSuite.setVTourUrl(viewOrder.getVTourUrl());
 
 				if (viewOrder.getProductType() == ViewOrder.ProductType.Building3DLayout)
 					targetSuite.setStatus(Suite.Status.Layout);
@@ -285,6 +300,47 @@ public class Document implements IDocument {
 	@Override
 	public Collection<ViewOrder> getViewOrders() {
 		return this.viewOrders.values();
+	}
+
+	public static String SID;
+	public static User theUser = null;
+
+	
+	@Override
+	public void onResponseReceived(Request request, Response response) {
+		String received = response.getText();
+		JSONObject obj = JSONParser.parseLenient(received).isObject();
+		JSONArray JSONsuites = obj.get("suites").isArray();
+		if (JSONsuites.size() != 0) {
+			Log.write("DATA CHANGED NOTIFICATION: RespondStatus="+response.getStatusCode()+"; Received: " + received);
+	
+			progressBar = new ProgressBar();
+			progressBar.Update(ProgressBar.ProgressLabel.Loading);
+			progressBar.Update(0.0);
+
+			for (int index = 0; index < JSONsuites.size()/*5*/; index++) {
+				JSONObject JSONsuite = JSONsuites.get(index).isObject();
+				int id = (int) JSONsuite.get("id").isNumber().doubleValue();
+				// 	private Map<Integer, Suite> suites = new HashMap<Integer, Suite>();
+				Suite theSuite = this.suites.get(id);
+				theSuite.ParseDynamic(JSONsuite);
+				SuiteGeoItem suiteGeo = (SuiteGeoItem)_AbstractView.getSuiteGeoItem(id);
+				suiteGeo.Init(theSuite);
+				suiteGeo.Redraw();
+				
+				progressBar.Update((double)(index*100)/(double)suites.size());
+			}
+
+			progressBar.Cleanup();
+			progressBar = null;
+		}
+		VREstate.RenewCheckChangesThread();
+	}
+
+	@Override
+	public void onError(Request request, Throwable exception) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

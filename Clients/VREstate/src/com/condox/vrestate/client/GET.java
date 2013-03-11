@@ -32,6 +32,8 @@ public class GET implements RequestCallback{
 			else if (url.contains("?"))
 				url += "&ShowSold=true";
 		
+		//url += "&track=true";
+		
 		RequestBuilder request = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
 		theGET = new GET(cb);
 		request.setCallback(theGET);

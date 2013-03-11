@@ -254,7 +254,7 @@ public abstract class _AbstractView implements I_AbstractView {
 	
 	public static void ApplyFilter() {
 		for(SuiteGeoItem suiteGeo : getSuiteGeoItems())
-			suiteGeo.applyFilter();
+			suiteGeo.Redraw();
 	}
 
 	@Override

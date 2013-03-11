@@ -27,7 +27,7 @@ public class Suite implements I_VRObject {
 	private String floor_name = "";
 	private String name = "";
 	private int ceiling_height_ft = 0;
-	//private boolean show_panoramic_view = false;
+	//private boolean show_panoramic_view = true;
 	private Status status = null;
 	private Position position = new Position();
 	private SuiteType suite_type = null;
@@ -35,12 +35,38 @@ public class Suite implements I_VRObject {
 	private ArrayList<Double> points = new ArrayList<Double>();
 	private String vTourUrl = null;
 	private String infoUrl = null;
+
+	void ParseDynamic(JSONObject obj) {
+		JSONString _name = obj.get("name").isString();
+		name = _name.stringValue();
+
+		if (obj.get("status").isString() != null) {
+			String status = obj.get("status").isString().stringValue();
+			if (status.equals("Available")) this.status = Status.Available;
+			else if (status.equals("ResaleAvailable")) this.status = Status.ResaleAvailable;
+			else if (status.equals("Sold")) this.status = Status.Sold;
+			else if (status.equals("OnHold")) this.status = Status.OnHold;
+			else this.status = Status.Selected;
+		} else
+			this.status = Status.Selected;
+		
+		price = -1;
+		if ((obj.get("currentPrice") != null)&&
+			(obj.get("currentPrice").isNumber() != null) &&
+			obj.get("currentPrice").isNumber().doubleValue() != 0)
+			price = (int) obj.get("currentPrice").isNumber().doubleValue();
+		
+		// TODO show_panoramic_view
+	
+	}
 	
 	void Parse(JSONValue value) {
 //		Log.write(value.toString());
 		JSONObject obj = value.isObject();
 		id = (int) obj.get("id").isNumber().doubleValue();
 		// TODO version
+		
+		ParseDynamic(obj);		
 
 		parent_id = (int) obj.get("buildingId").isNumber().doubleValue();
 		//JSONNumber _level_number = obj.get("levelNumber").isNumber();
@@ -52,24 +78,9 @@ public class Suite implements I_VRObject {
 		else
 			Log.write("!floorname is null." + obj.toString());
 
-		JSONString _name = obj.get("name").isString();
-		name = _name.stringValue();
-
 		if (obj.containsKey("ceilingHeightFt"))
 			ceiling_height_ft = (int) obj.get("ceilingHeightFt")
 					.isNumber().doubleValue();
-		// TODO show_panoramic_view
-	
-		if (obj.get("status").isString() != null) {
-			String status = obj.get("status").isString().stringValue();
-			if (status.equals("Available")) this.status = Status.Available;
-			else if (status.equals("ResaleAvailable")) this.status = Status.ResaleAvailable;
-			else if (status.equals("Sold")) this.status = Status.Sold;
-			else if (status.equals("OnHold")) this.status = Status.OnHold;
-			else this.status = Status.Selected;
-		} else
-			this.status = Status.Selected;
-		
 		// TODO position		
 		if (obj.containsKey("position")) {
 			JSONObject position = obj.get("position").isObject();
@@ -108,12 +119,6 @@ public class Suite implements I_VRObject {
 //		if (suite_type == null)
 //			Log.write("suiteTypeId:" + type_id);
 		
-		price = -1;
-		if ((obj.get("currentPrice") != null)&&
-			(obj.get("currentPrice").isNumber() != null) &&
-			obj.get("currentPrice").isNumber().doubleValue() != 0)
-			price = (int) obj.get("currentPrice").isNumber().doubleValue();
-		
 		if (Options.DEBUG_MODE)
 		{
 			 // Workaround for prices	
@@ -125,8 +130,6 @@ public class Suite implements I_VRObject {
 	public void CalcLineCoords() {
 		double METERS_PER_DEGREES = 111111;
 		int i = 0;
-		// TODO Всю эту возню с типами квартир надо будет переделать. Но не
-		// сейчас.
 		SuiteType suite_type = this.getSuiteType();
 		// Log.write("SuiteType: " + suite_type);
 		// Log.write("getPoints().size(): " +

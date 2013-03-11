@@ -27,6 +27,9 @@ public class SuiteGeoItem implements IGeoItem {
 	
 	String href = null;
 	public SuiteGeoItem(Suite suite){
+		Init(suite);
+	}
+	public void Init(Suite suite){
 
 		this.suite = suite;
 		
@@ -43,9 +46,15 @@ public class SuiteGeoItem implements IGeoItem {
 		case Sold:
 			if (Options.getShowSold()) {
 				href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
-						+ suite.getName()
-						+ "&txtClr=16711680&shdClr=0&frame=0";
+				+ suite.getName()
+				+ "&txtClr=16711680&shdClr=0&frame=0";
 				style.getLineStyle().getColor().set("FF0000FF"); // RED
+				style.getLineStyle().setWidth(2.0F);
+			}
+			else
+			{
+				href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text=.&txtClr=0&shdClr=0&frame=0";
+				style.getLineStyle().getColor().set("00000000"); // transparent
 				style.getLineStyle().setWidth(2.0F);
 			}
 			break;
@@ -81,63 +90,73 @@ public class SuiteGeoItem implements IGeoItem {
 		style.getIconStyle().setIcon(icon);
 		style.getIconStyle().setScale(scale);
 
-		extended_data_label = GE.getPlugin().createPlacemark("");
-		// Snippet
-		JSONObject obj = new JSONObject();
-		JSONValue type = new JSONString("suite");
-		JSONValue id = new JSONNumber(suite.getId());
-		obj.put("type", type);
-		obj.put("id", id);
-		extended_data_label.setSnippet(obj.toString());
-
-		extended_data_label.setVisibility(false);
-		extended_data_label.setStyleSelector(style);
+		if (extended_data_label == null)
+		{
+			extended_data_label = GE.getPlugin().createPlacemark("");
+			// Snippet
+			JSONObject obj = new JSONObject();
+			JSONValue type = new JSONString("suite");
+			JSONValue id = new JSONNumber(suite.getId());
+			obj.put("type", type);
+			obj.put("id", id);
+			extended_data_label.setSnippet(obj.toString());
+	
+			extended_data_label.setVisibility(false);
 		
-		KmlMultiGeometry geometry1 = GE.getPlugin().createMultiGeometry("");
+			KmlMultiGeometry geometry1 = GE.getPlugin().createMultiGeometry("");
+			
+			KmlPoint point = GE.getPlugin().createPoint("");
+	
+			Position position = suite.getPosition();
+			position.setTilt(initialTilt_d);
+			position.setRange(initialRange_m);
+			
+			point.setLatitude(position.getLatitude());
+			point.setLongitude(position.getLongitude());
+			
+			Building parent = suite.getParent();
+			if ((parent != null) && (parent.hasAltitudeAdjustment())) {
+				point.setAltitude(position.getAltitude()
+						+ parent.getAltitudeAdjustment());
+				point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_ABSOLUTE);
+			} else {
+				point.setAltitude(position.getAltitude());
+				point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND);
+			}
+			
+			geometry1.getGeometries().appendChild(point);
+			extended_data_label.setGeometry(geometry1);
+			GE.getPlugin().getFeatures().appendChild(extended_data_label);
 		
-		KmlPoint point = GE.getPlugin().createPoint("");
-
-		Position position = suite.getPosition();
-		position.setTilt(initialTilt_d);
-		position.setRange(initialRange_m);
-		
-		point.setLatitude(position.getLatitude());
-		point.setLongitude(position.getLongitude());
-		
-		Building parent = suite.getParent();
-		if ((parent != null) && (parent.hasAltitudeAdjustment())) {
-			point.setAltitude(position.getAltitude()
-					+ parent.getAltitudeAdjustment());
-			point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_ABSOLUTE);
-		} else {
-			point.setAltitude(position.getAltitude());
-			point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND);
-		}
-		
-		geometry1.getGeometries().appendChild(point);
-		extended_data_label.setGeometry(geometry1);
-		GE.getPlugin().getFeatures().appendChild(extended_data_label);
-		
-		extended_data_lines = GE.getPlugin().createPlacemark("");
-		extended_data_lines.setStyleSelector(style);
-		
-		KmlMultiGeometry geometry2 = GE.getPlugin().createMultiGeometry("");
-		for (int j = 0; j < suite.getPoints().size(); j += 6) {
-			KmlLineString line_string = GE.getPlugin().createLineString("");
-			line_string
-					.setAltitudeMode(KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND);
-			if ((parent != null) && (parent.hasAltitudeAdjustment()))
+			extended_data_lines = GE.getPlugin().createPlacemark("");
+			
+			KmlMultiGeometry geometry2 = GE.getPlugin().createMultiGeometry("");
+			for (int j = 0; j < suite.getPoints().size(); j += 6) {
+				KmlLineString line_string = GE.getPlugin().createLineString("");
 				line_string
-						.setAltitudeMode(KmlAltitudeMode.ALTITUDE_ABSOLUTE);
-
-			line_string.getCoordinates().pushLatLngAlt(suite.getPoints().get(j + 0),
-					suite.getPoints().get(j + 1), suite.getPoints().get(j + 2));
-			line_string.getCoordinates().pushLatLngAlt(suite.getPoints().get(j + 3),
-					suite.getPoints().get(j + 4), suite.getPoints().get(j + 5));
-			geometry2.getGeometries().appendChild(line_string);
+						.setAltitudeMode(KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND);
+				if ((parent != null) && (parent.hasAltitudeAdjustment()))
+					line_string
+							.setAltitudeMode(KmlAltitudeMode.ALTITUDE_ABSOLUTE);
+		
+				line_string.getCoordinates().pushLatLngAlt(suite.getPoints().get(j + 0),
+						suite.getPoints().get(j + 1), suite.getPoints().get(j + 2));
+				line_string.getCoordinates().pushLatLngAlt(suite.getPoints().get(j + 3),
+						suite.getPoints().get(j + 4), suite.getPoints().get(j + 5));
+				geometry2.getGeometries().appendChild(line_string);
+			}
+			extended_data_lines.setGeometry(geometry2);
+			extended_data_lines.setStyleSelector(style);
+			extended_data_label.setStyleSelector(style);
+			GE.getPlugin().getFeatures().appendChild(extended_data_lines);
 		}
-		extended_data_lines.setGeometry(geometry2);
-		GE.getPlugin().getFeatures().appendChild(extended_data_lines);
+		else
+		{
+			extended_data_lines.setStyleSelector(style);
+			extended_data_label.setStyleSelector(style);
+		}
+			
+
 	}
 	
 	public void onHeadingChanged(double heading_d) {
@@ -149,7 +168,7 @@ public class SuiteGeoItem implements IGeoItem {
 	}
 	
 	private boolean isFilteredIn = true;
-	public void applyFilter() {
+	public void Redraw() {
 		if (href == null) return;
 
 		isFilteredIn = Filter.get().isFileredIn(suite);
