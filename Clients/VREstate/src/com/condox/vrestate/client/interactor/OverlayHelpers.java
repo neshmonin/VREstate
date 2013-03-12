@@ -85,6 +85,24 @@ public class OverlayHelpers {
         		   (y > pixY && y < pixY + pixHeight);
         }
         
+        public boolean PixelWithinLowerHalf(int x, int y)
+        {
+        	int WinW = GE.getEarthWidth();
+        	int WinH = GE.getEarthHeight();
+		    
+            int pixX = (origin.x.Units == KmlUnits.UNITS_PIXELS) ? origin.x.iVal : (int)(WinW * origin.x.fVal);
+            int pixY = (origin.y.Units == KmlUnits.UNITS_PIXELS) ? origin.y.iVal : (int)(WinH * (1f-origin.y.fVal));
+            
+            int pixWidth = (width.Units == KmlUnits.UNITS_PIXELS) ? width.iVal : (int)(WinW * width.fVal);
+            int pixHeight = (height.Units == KmlUnits.UNITS_PIXELS) ? height.iVal : (int)(WinH * height.fVal);
+
+            pixX -= pixWidth / 2;
+            pixY -= pixHeight / 2;
+            
+        	return (x > pixX && x < pixX + pixWidth) &&
+        		   (y > pixY && y < pixY + pixHeight/2);
+        }
+        
         // Setting the ScreenOverlay's position and size
         public void InitScreenOverlay(KmlScreenOverlay overlay)
         {

@@ -20,8 +20,6 @@ public class Options implements RequestCallback{
 	public static String URL_MODEL;
 
 	public static String URL_BUTTONS;
-	public static String URL_BUTTON_UNZOOM;
-	public static String URL_BUTTON_ZOOM;
 //	public static String URL_BUTTON_PANORAMIC_VIEW;
 //	public static String URL_BUTTON_EXIT_PANORAMIC_VIEW;
 //	public static String URL_BUTTON_CENTER_PANORAMIC_VIEW;
@@ -30,8 +28,7 @@ public class Options implements RequestCallback{
 	public static int BUILDING_ID;
 	public static int SUITE_ID;
 	public static String HOME_URL;
-	public static String ZOOM_IN_URL;
-	public static String ZOOM_OUT_URL;
+	public static String ZOOM_UNZOOM_URL;
 	public static String URL_BUTTON_PANORAMIC_VIEW;
 	public static String URL_BUTTON_EXIT_PANORAMIC_VIEW;
 	public static String URL_BUTTON_CENTER_PANORAMIC_VIEW;
@@ -99,19 +96,12 @@ public class Options implements RequestCallback{
 		}
 
 		URL_BUTTONS = URL_VRT + "buttons/";
-		URL_BUTTON_UNZOOM = URL_BUTTONS + "Unzoom.png";
-		URL_BUTTON_ZOOM = URL_BUTTONS + "Zoom.png";
-//		URL_BUTTON_PANORAMIC_VIEW = URL_BUTTONS + "PanoramicView.png";
-//		URL_BUTTON_EXIT_PANORAMIC_VIEW = URL_BUTTONS + "Back.png";
-//		URL_BUTTON_CENTER_PANORAMIC_VIEW = URL_BUTTONS + "Center.png";
-		
 		HOME_URL = URL_VRT;
 		
-		ZOOM_IN_URL = HOME_URL + "buttons/Unzoom.png";
-		ZOOM_OUT_URL = HOME_URL + "buttons/Zoom.png";
-		URL_BUTTON_PANORAMIC_VIEW = HOME_URL + "buttons/PanoramicView.png";
-		URL_BUTTON_EXIT_PANORAMIC_VIEW = HOME_URL + "buttons/Back.png";
-		URL_BUTTON_CENTER_PANORAMIC_VIEW = HOME_URL + "buttons/Center.png";
+		ZOOM_UNZOOM_URL = URL_BUTTONS + "ZoomUnzoomBar.png";
+		URL_BUTTON_PANORAMIC_VIEW = URL_BUTTONS + "PanoramicView.png";
+		URL_BUTTON_EXIT_PANORAMIC_VIEW = URL_BUTTONS + "Back.png";
+		URL_BUTTON_CENTER_PANORAMIC_VIEW = URL_BUTTONS + "Center.png";
 		// SUITE_INFO_TEMPLATE = HOME_URL + "templates/SuiteInfo.html";
 		String request = HOME_URL + "ReducedInfo.html";
 		
