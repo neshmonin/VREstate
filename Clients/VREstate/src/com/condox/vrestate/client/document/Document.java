@@ -144,9 +144,14 @@ public class Document implements IDocument,
 		JSONObject obj = JSONParser.parseLenient(json).isObject();
 		JSONArray suite_types = obj.get("suiteTypes").isArray();
 		for (int index = 0; index < suite_types.size(); index++) {
-			SuiteType suite_type = new SuiteType();
-			suite_type.Parse(suite_types.get(index));
-			this.suite_types.put(suite_type.getId(), suite_type);
+			JSONObject JSONsuite_type = suite_types.get(index).isObject();
+			int id = (int) JSONsuite_type.get("id").isNumber().doubleValue();
+			SuiteType suite_type = this.suite_types.get(id);
+			if (suite_type == null) {
+				suite_type = new SuiteType();
+				suite_type.Parse(suite_types.get(index));
+				this.suite_types.put(suite_type.getId(), suite_type);
+			}
 		}
 	}
 
@@ -171,11 +176,23 @@ public class Document implements IDocument,
 	---------- JSON-Suite -----------*/
 	private void ParseSuites(String json) {
 		JSONObject obj = JSONParser.parseLenient(json).isObject();
-		JSONArray suites = obj.get("suites").isArray();
-		for (int index = 0; index < suites.size()/*5*/; index++) {
-			Suite suite = new Suite();
-			suite.Parse(suites.get(index));
-			this.suites.put(suite.getId(), suite);
+		JSONArray JSONsuites = obj.get("suites").isArray();
+		for (int index = 0; index < JSONsuites.size(); index++) {
+			JSONObject JSONsuite = JSONsuites.get(index).isObject();
+			int id = (int) JSONsuite.get("id").isNumber().doubleValue();
+
+			Suite theSuite = this.suites.get(id);
+			if (theSuite == null) {
+				theSuite = new Suite();
+				theSuite.Parse(JSONsuites.get(index));
+				this.suites.put(theSuite.getId(), theSuite);
+			}
+			else {
+				theSuite.ParseDynamic(JSONsuite);
+				SuiteGeoItem suiteGeo = (SuiteGeoItem)_AbstractView.getSuiteGeoItem(id);
+				suiteGeo.Init(theSuite);
+				suiteGeo.Redraw();
+			}					
 		}
 	}
 
@@ -208,11 +225,16 @@ public class Document implements IDocument,
 	---------- JSON-Building -----------*/
 	private void ParseBuildings(String json) {
 		JSONObject obj = JSONParser.parseLenient(json).isObject();
-		JSONArray buildings = obj.get("buildings").isArray();
-		for (int index = 0; index < buildings.size(); index++) {
-			Building building = new Building();
-			building.Parse(buildings.get(index));
-			this.buildings.put(building.getId(), building);
+		JSONArray JSONbuildings = obj.get("buildings").isArray();
+		for (int index = 0; index < JSONbuildings.size(); index++) {
+			JSONObject JSONbuilding = JSONbuildings.get(index).isObject();
+			int id = (int) JSONbuilding.get("id").isNumber().doubleValue();
+			Building building = this.buildings.get(id);
+			if (building == null) {
+				building = new Building();
+				building.Parse(JSONbuildings.get(index));
+				this.buildings.put(building.getId(), building);
+			}
 		}
 	}
 
@@ -227,11 +249,16 @@ public class Document implements IDocument,
 	---------- JSON-Site -----------*/
 	private void ParseSites(String json) {
 		JSONObject obj = JSONParser.parseLenient(json).isObject();
-		JSONArray sites = obj.get("sites").isArray();
-		for (int index = 0; index < sites.size(); index++) {
-			Site site = new Site();
-			site.Parse(sites.get(index));
-			this.sites.put(site.getId(), site);
+		JSONArray JSONsites = obj.get("sites").isArray();
+		for (int index = 0; index < JSONsites.size(); index++) {
+			JSONObject JSONsite = JSONsites.get(index).isObject();
+			int id = (int) JSONsite.get("id").isNumber().doubleValue();
+			Site site = this.sites.get(id);
+			if (site == null) {
+				site = new Site();
+				site.Parse(JSONsites.get(index));
+				this.sites.put(site.getId(), site);
+			}
 		}
 	}
 
@@ -248,31 +275,36 @@ public class Document implements IDocument,
 	---------- JSON-ViewOrder -----------*/
 	private void ParseViewOrders(String json) {
 		JSONObject obj = JSONParser.parseLenient(json).isObject();
-		JSONArray viewOrders = obj.get("viewOrders").isArray();
-		for (int index = 0; index < viewOrders.size(); index++) {
-			ViewOrder viewOrder = new ViewOrder();
-			viewOrder.Parse(viewOrders.get(index));
-			this.viewOrders.put(viewOrder.getId(), viewOrder);
-			switch (viewOrder.getTargetObjectType())
-			{
-			case Suite:
-				Suite targetSuite = this.suites.get(viewOrder.getTargetObjectId());
-				viewOrder.setTargetObject(targetSuite);
-				targetSuite.setInfoUrl(viewOrder.getInfoUrl());
-				targetSuite.setVTourUrl(viewOrder.getVTourUrl());
-
-				if (viewOrder.getProductType() == ViewOrder.ProductType.Building3DLayout)
-					targetSuite.setStatus(Suite.Status.Layout);
-				break;
-			case Building:
-				Building targetBuilding = this.buildings.get(viewOrder.getTargetObjectId());
-				viewOrder.setTargetObject(targetBuilding);
-				targetBuilding.setInfoUrl(viewOrder.getInfoUrl());
-				break;
-			case Site:
-				Site targetSite = this.sites.get(viewOrder.getTargetObjectId());
-				viewOrder.setTargetObject(targetSite);
-				break;
+		JSONArray JSONviewOrders = obj.get("viewOrders").isArray();
+		for (int index = 0; index < JSONviewOrders.size(); index++) {
+			JSONObject JSONviewOrder = JSONviewOrders.get(index).isObject();
+			String id = JSONviewOrder.get("id").isString().toString();
+			ViewOrder viewOrder = this.viewOrders.get(id);
+			if (viewOrder == null) {
+				viewOrder = new ViewOrder();
+				viewOrder.Parse(JSONviewOrders.get(index));
+				this.viewOrders.put(viewOrder.getId(), viewOrder);
+				switch (viewOrder.getTargetObjectType())
+				{
+				case Suite:
+					Suite targetSuite = this.suites.get(viewOrder.getTargetObjectId());
+					viewOrder.setTargetObject(targetSuite);
+					targetSuite.setInfoUrl(viewOrder.getInfoUrl());
+					targetSuite.setVTourUrl(viewOrder.getVTourUrl());
+	
+					if (viewOrder.getProductType() == ViewOrder.ProductType.Building3DLayout)
+						targetSuite.setStatus(Suite.Status.Layout);
+					break;
+				case Building:
+					Building targetBuilding = this.buildings.get(viewOrder.getTargetObjectId());
+					viewOrder.setTargetObject(targetBuilding);
+					targetBuilding.setInfoUrl(viewOrder.getInfoUrl());
+					break;
+				case Site:
+					Site targetSite = this.sites.get(viewOrder.getTargetObjectId());
+					viewOrder.setTargetObject(targetSite);
+					break;
+				}
 			}
 		}
 	}
@@ -318,15 +350,22 @@ public class Document implements IDocument,
 			progressBar.Update(ProgressBar.ProgressLabel.Loading);
 			progressBar.Update(0.0);
 
-			for (int index = 0; index < JSONsuites.size()/*5*/; index++) {
+			for (int index = 0; index < JSONsuites.size(); index++) {
 				JSONObject JSONsuite = JSONsuites.get(index).isObject();
 				int id = (int) JSONsuite.get("id").isNumber().doubleValue();
-				// 	private Map<Integer, Suite> suites = new HashMap<Integer, Suite>();
+
 				Suite theSuite = this.suites.get(id);
-				theSuite.ParseDynamic(JSONsuite);
-				SuiteGeoItem suiteGeo = (SuiteGeoItem)_AbstractView.getSuiteGeoItem(id);
-				suiteGeo.Init(theSuite);
-				suiteGeo.Redraw();
+				if (theSuite != null) {
+					theSuite.ParseDynamic(JSONsuite);
+					SuiteGeoItem suiteGeo = (SuiteGeoItem)_AbstractView.getSuiteGeoItem(id);
+					suiteGeo.Init(theSuite);
+					suiteGeo.Redraw();
+				}
+				else {
+					theSuite = new Suite();
+					theSuite.Parse(JSONsuites.get(index));
+					this.suites.put(theSuite.getId(), theSuite);
+				}					
 				
 				progressBar.Update((double)(index*100)/(double)suites.size());
 			}
