@@ -94,8 +94,9 @@ public class Options implements RequestCallback{
 			URL_STATIC = "https://static.3dcondox.com/";
 			URL_MODEL = "https://model.3dcondox.com/";
 		}
-
-		URL_BUTTONS = URL_VRT + "buttons/";
+		
+		URL_BUTTONS = params.containsKey("SchemaPath") ? params.get("SchemaPath").get(0) : 
+														 URL_VRT + "buttons/";
 		HOME_URL = URL_VRT;
 		
 		ZOOM_UNZOOM_URL = URL_BUTTONS + "ZoomUnzoomBar.png";
