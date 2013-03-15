@@ -33,13 +33,15 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 		double min_area = Integer.MAX_VALUE;
 		double max_area = Integer.MIN_VALUE;
 		for (SuiteType suite_type : Document.get().getSuiteTypes()) {
-			min_area = Math.min(min_area, suite_type.getArea());
-			max_area = Math.max(max_area, suite_type.getArea());
+			double area = suite_type.getArea(); 
+			if (area <= 0)
+				continue;
+			min_area = Math.min(min_area, area);
+			max_area = Math.max(max_area, area);
 		}
-		if (min_area <= 0)
+		if (min_area == Integer.MAX_VALUE || max_area == Integer.MIN_VALUE)
 			return null;
-		if (max_area <= 0)
-			return null;
+		
 		if (max_area <= min_area)
 			return null;
 		//==============
@@ -114,29 +116,36 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 		double min_area = Integer.MAX_VALUE;
 		double max_area = Integer.MIN_VALUE;
 		for (SuiteType suite_type : Document.get().getSuiteTypes()) {
-			min_area = Math.min(min_area, suite_type.getArea());
-			max_area = Math.max(max_area, suite_type.getArea());
+			double area = suite_type.getArea(); 
+			if (area <= 0)
+				continue;
+			min_area = Math.min(min_area, area);
+			max_area = Math.max(max_area, area);
 		}
 
 		int diff = (int) (max_area - min_area);
 		diff /= 10;
 
-		int a = 1;
-		while (diff > a)
-			a *= 10;
+		int grid = 1;
+		while (diff > grid)
+			grid *= 10;
 
-		int i = 0;
-		while (a * (i + 1) < min_area)
-			i++;
+		int numOfEntries = 0;
+		while (grid * (numOfEntries + 1) < min_area)
+			numOfEntries++;
+
+		if (numOfEntries == 0)
+			grid /= 4;
 
 		areas.clear();
 
-		while (a * i < max_area) {
-			areas.add((double) (a * i));
-			i++;
+		
+		while (grid * numOfEntries < max_area) {
+			areas.add((double) (grid * numOfEntries));
+			numOfEntries++;
 		}
-		;
-		areas.add((double) (a * i));
+
+		areas.add((double) (grid * numOfEntries));
 
 		lbMinArea.clear();
 		lbMaxArea.clear();
@@ -152,12 +161,7 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 				lbMinArea.addItem(area + " Sq.Ft", item.toString());
 				lbMaxArea.addItem(area + " Sq.Ft", item.toString());
 			}
-			
-			
-			
-			// lbMinArea.addItem("Min: " + item, item.toString() + " Sq.Ft.");
-			// lbMaxArea.addItem("Max: " + item, item.toString() + " Sq.Ft.");
-		}		// TODO Auto-generated method stub
+		}
 
 		isAny = true;
 	}

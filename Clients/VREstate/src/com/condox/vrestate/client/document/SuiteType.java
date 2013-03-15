@@ -101,7 +101,6 @@ public class SuiteType {
 		area = (area > 100)? area : 100;
 		
 		floorPlanUrl = params.getString("floorPlanUrl");
-//		Log.write("Parsed!");
 	}
 	//====================================
 

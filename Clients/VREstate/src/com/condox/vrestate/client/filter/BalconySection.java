@@ -39,7 +39,7 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 		rbBalconyAny.setValue(true, true);
 		instance.add(rbBalconyAny);
 
-		rbBalconyYes = new RadioButton("new name", "Yes");
+		rbBalconyYes = new RadioButton("new name", "With Balcony");
 		rbBalconyYes.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -49,7 +49,7 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 		rbBalconyYes.addStyleDependentName("margined");
 		instance.add(rbBalconyYes);
 
-		rbBalconyNo = new RadioButton("new name", "No");
+		rbBalconyNo = new RadioButton("new name", "Without Balcony");
 		rbBalconyNo.addStyleDependentName("margined");
 		rbBalconyNo.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
 			@Override

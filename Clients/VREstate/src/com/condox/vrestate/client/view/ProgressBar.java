@@ -135,7 +135,6 @@ public class ProgressBar extends OverlayHelpers implements I_UpdatableView {
 		String hrefLabel = getLabelHref(label);
 		if (hrefLabel != null) {
 			hrefLabel = Options.URL_BUTTONS + hrefLabel;
-			//Log.write(hrefLabel);
 			KmlIcon iconLabel = GE.getPlugin().createIcon("");
 			iconLabel.setHref(hrefLabel);
 

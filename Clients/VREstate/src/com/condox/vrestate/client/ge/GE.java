@@ -45,24 +45,16 @@ public class GE extends GoogleEarthWidget{
 ////        }
 //        
 //	}-*/;
-//	
-//	private static int width = 0;
-//	private static int height = 0;
-//	private static double factor = 1.0;
 	
 	private native static float getZoomLevel() /*-{
-//		alert($wnd["ZOOM_LEVEL"]);
 		return $wnd["ZOOM_LEVEL"];
 	}-*/;
 	
 	public static int getEarthWidth() {
-//		Log.write("earth.getOffsetWidth: " + earth.getOffsetWidth());
-//		Log.write("ZoomLevel: " + getZoomLevel());
 		return (int) (earth.getOffsetWidth() * getZoomLevel());
 	};
 	
 	public static int getEarthHeight() {
-//		Log.write("Factor: " + getFactor());
 		return (int) (earth.getOffsetHeight() * getZoomLevel());
 	};
 	
@@ -91,7 +83,7 @@ public class GE extends GoogleEarthWidget{
 		try {
 			return LookAt.getRange();
 		} catch (Exception e) {
-			Log.write("getRange failed: " + e.getMessage());
+			Log.write("Exception! GE->getRange failed: " + e.getMessage());
 			return getRange(LookAt); // try again
 		}
 	};
@@ -100,7 +92,7 @@ public class GE extends GoogleEarthWidget{
 		try {
 			return LookAt.getTilt();
 		} catch (Exception e) {
-			Log.write("getTilt failed: " + e.getMessage());
+			Log.write("Exception! GE->getTilt failed: " + e.getMessage());
 			return getTilt(LookAt); // try again
 		}
 	};
@@ -109,7 +101,7 @@ public class GE extends GoogleEarthWidget{
 		try {
 			return LookAt.getHeading();
 		} catch (Exception e) {
-			Log.write("getHeading failed: " + e.getMessage());
+			Log.write("Exception! GE->getHeading failed: " + e.getMessage());
 			return getHeading(LookAt); // try again
 		}
 	};
@@ -118,7 +110,7 @@ public class GE extends GoogleEarthWidget{
 		try {
 			getPlugin().getFeatures().appendChild(object);
 		} catch (Exception e) {
-			Log.write("appendChild failed: " + e.getMessage());
+			Log.write("Exception! GE->appendChild failed: " + e.getMessage());
 			appendChild(object); // try again
 		}
 	};
@@ -127,7 +119,7 @@ public class GE extends GoogleEarthWidget{
 		try {
 			getPlugin().getFeatures().replaceChild(newChild, oldChild);
 		} catch (Exception e) {
-			Log.write("replaceChild failed: " + e.getMessage());
+			Log.write("Exception! GE->replaceChild failed: " + e.getMessage());
 			replaceChild(newChild, oldChild); // try again
 		}
 	};
@@ -150,7 +142,6 @@ public class GE extends GoogleEarthWidget{
 	};
 
 	public void onApiLoaded() {
-		Log.write("onApiLoaded");
 		earth = this;
 		addPluginReadyListener(new GEPluginReadyListener() {
             public void pluginReady(GEPlugin ge) {
@@ -161,20 +152,13 @@ public class GE extends GoogleEarthWidget{
                 Window.alert("Failed to initialize Google Earth Plug-in");
             }
         });
-
-		//earth.setStyleName("map3d");
-		//earth.setSize("100%", "100%");
 		
 		RootLayoutPanel.get().add(earth);
-//		width = earth.getOffsetWidth();
-//		height = earth.getOffsetHeight();
 		earth.init();
-		Log.write("onApiLoaded -> earth.init();");
 	};
 	
 	public void loadEarthContent() {
 		// show map content once the plug-in has loaded
-		Log.write("loadEarthContent");
 		GEPlugin plgn = getGEPlugin();
 		plgn.getWindow().setVisibility(true);
 
@@ -190,42 +174,6 @@ public class GE extends GoogleEarthWidget{
 
 		vrEstate.LoadView();
 	}
-
-/*	public void ShowSuiteInfo(Suite suite) {
-		Log.write("Interactor: ShowSuiteInfo()");
-		long time = System.currentTimeMillis();
-		GEPlugin plugin = earth.getGEPlugin();
-
-		// Оригинальный баббл
-		 GEHtmlStringBalloon balloon = plugin.createHtmlStringBalloon("");
-//		 balloon.setFeature((KmlFeature)plugin.getElementById(suite.getId())); // optional
-//		 Log.write("feature: " + balloon.getFeature().getKml());
-		 String content = suite.getContent();
-//		 balloon.setContentString(suite.getContent());
-//		 Window.alert(content);
-		 balloon.setContentString(content);
-		 balloon.setCloseButtonEnabled(false);
-
-		// Опасный баббл
-//		GEHtmlDivBalloon balloon = plugin.createHtmlDivBalloon("");
-//		
-//		Frame frame = new Frame();
-//		frame.setSize("1000px", "1000px");
-//		frame.setUrl("http://unity3d.com/gallery/demos/live-demos#butterfly");
-//		balloon.setContentDiv("");
-//		((Element)balloon.getContentDiv()).appendChild(frame.getElement());
-//		balloon.setMinHeight(1000);
-//		balloon.setMinWidth(1000);
-		plugin.setBalloon(balloon);
-	};
-
-	public void HideSuiteInfo() {
-		long time = System.currentTimeMillis();
-		GEPlugin plugin = earth.getGEPlugin();
-		plugin.setBalloon(null);
-		time = System.currentTimeMillis() - time;
-		// Log.write("Hide suite info in "+time+" ms.");
-	};*/
 
 	//private boolean HelpVisible = false;
 

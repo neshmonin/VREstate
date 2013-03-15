@@ -1,6 +1,5 @@
 package com.condox.vrestate.client.interactor;
 
-import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
@@ -36,15 +35,15 @@ public class SuiteInteractor extends OverlayHelpers
 		if (Filter.get().howManyFilteredIn() > 1)
 		{
 		    rectNextSuite = new OvlRectangle(
-					new OvlPoint(new OvlDimension(0.93f), 
-								 new OvlDimension(0.20f)),
-					new OvlDimension(0.1f),
+					new OvlPoint(new OvlDimension(0.94f), 
+								 new OvlDimension(0.12f)),
+					new OvlDimension(0.07f),
 					new OvlDimension(0.1f)
 				);
 		    rectPrevSuite = new OvlRectangle(
-					new OvlPoint(new OvlDimension(0.07f), 
-								 new OvlDimension(0.20f)),
-					new OvlDimension(0.1f),
+					new OvlPoint(new OvlDimension(0.06f), 
+								 new OvlDimension(0.12f)),
+					new OvlDimension(0.07f),
 					new OvlDimension(0.1f)
 				);
 		}
@@ -116,7 +115,7 @@ public class SuiteInteractor extends OverlayHelpers
 	
 	@Override
 	public void setEnabled(boolean enabling) {
-		Log.write("SuiteInteractor: setEnabled = " + enabling);
+		//Log.write("SuiteInteractor: setEnabled = " + enabling);
 		SuiteGeoItem suiteGeo = (SuiteGeoItem)view.getGeoItem();
 		if (enabling) {
 			if (mouse_listener == null)
@@ -152,7 +151,6 @@ public class SuiteInteractor extends OverlayHelpers
 			if (event.getTarget().getType().equals("KmlPlacemark")) {
 				KmlPlacemark placemark = (KmlPlacemark) event.getTarget();
 				String json = placemark.getSnippet();
-				//Log.write(json);
 				JSONObject obj = JSONParser.parseLenient(json).isObject();
 				String type = obj.get("type").isString().stringValue();
 				int id = (int) obj.get("id").isNumber().doubleValue();

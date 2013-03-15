@@ -140,7 +140,6 @@ public class Document implements IDocument,
     }
 	---------- JSON-SuiteType -----------*/
 	private void ParseSuiteTypes(String json) {
-		Log.write(json);
 		JSONObject obj = JSONParser.parseLenient(json).isObject();
 		JSONArray suite_types = obj.get("suiteTypes").isArray();
 		for (int index = 0; index < suite_types.size(); index++) {

@@ -1,7 +1,6 @@
 package com.condox.vrestate.client.document;
 
 import java.util.ArrayList;
-import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.Position;
 import com.google.gwt.json.client.JSONObject;
@@ -61,13 +60,11 @@ public class Suite implements I_VRObject {
 	}
 	
 	void Parse(JSONValue value) {
-//		Log.write(value.toString());
 		JSONObject obj = value.isObject();
 		id = (int) obj.get("id").isNumber().doubleValue();
 		// TODO version
 		
 		ParseDynamic(obj);		
-
 		parent_id = (int) obj.get("buildingId").isNumber().doubleValue();
 		//JSONNumber _level_number = obj.get("levelNumber").isNumber();
 		//level_number = (int) _level_number.doubleValue();
@@ -75,13 +72,11 @@ public class Suite implements I_VRObject {
 		JSONString str = obj.get("floorName").isString();
 		if (str != null)
 			floor_name = str.stringValue();
-		else
-			Log.write("!floorname is null." + obj.toString());
 
 		if (obj.containsKey("ceilingHeightFt"))
 			ceiling_height_ft = (int) obj.get("ceilingHeightFt")
 					.isNumber().doubleValue();
-		// TODO position		
+
 		if (obj.containsKey("position")) {
 			JSONObject position = obj.get("position").isObject();
 			double longitude = position.get("lon").isNumber().doubleValue();
@@ -122,14 +117,11 @@ public class Suite implements I_VRObject {
 		double METERS_PER_DEGREES = 111111;
 		int i = 0;
 		SuiteType suite_type = this.getSuiteType();
-		// Log.write("SuiteType: " + suite_type);
-		// Log.write("getPoints().size(): " +
 
 		if (suite_type == null)
 			return;
 		
 		while (i < suite_type.getPoints().size()) {
-			// Log.write("i: " + i);
 			// X
 			double lat = this.getPosition().getLatitude()
 					+ (suite_type.getPoints().get(i) + 10 / 2.54)

@@ -1,6 +1,5 @@
 package com.condox.vrestate.client.interactor;
 
-import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.PanoramicView;
@@ -61,16 +60,14 @@ public class PanoramicInteractor extends OverlayHelpers
 
 	@Override
 	public void setEnabled(boolean enabling) {
-		Log.write("PanoramicInteractor: setEnabled = " + enabling);
+		//Log.write("PanoramicInteractor: setEnabled = " + enabling);
 		if (enabling) {
 			if (mouse_listener == null)
 				mouse_listener = GE.getPlugin().getWindow()
 						.addMouseListener(this);
 		} else {
-			// Log.write("1");
 			mouse_listener.removeHandler();
 			mouse_listener = null;
-			// Log.write("2");
 		}
 
 		if (enabling) {

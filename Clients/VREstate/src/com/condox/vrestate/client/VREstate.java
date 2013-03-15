@@ -22,26 +22,15 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 	 */
 	@Override
 	public void onModuleLoad() {
-//		LayoutPanel panel = RootLayoutPanel.get();
-//		MainPage page = new MainPage();
-//		page.Load(page);
-		
-		
-		
-		
-		
-		Log.write("onModuleLoad -> Options.Init(this);");
 		Options.Init(this);
 	}
 
 	public void LoginUser() {
-		Log.write("LoginUser -> User.Login(this);");
 		User.Login(this);
 	};
 
 	private GE ge = null;
 	public void StartGE() {
-		Log.write("StartGE -> ge.Init(vrEstate);");
 		ge = new GE();
 		ge.Init(this);
 	};
@@ -49,8 +38,6 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 	private static int counter = 0;
 
 	public static void RenewCheckChangesThread() {
-		Log.write("-- RenewCheckChangesThread --");
-
 		counter++;
 		String request = Options.HOME_URL + "ev?sid=" + User.SID + "&generation=" + counter;
 		GET.send(request, Document.getCallback());
@@ -58,7 +45,6 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 	public static int checkChangesPeriodSec;
 
 	public void LoadView() {
-		Log.write("LoadView");
 		String url;
 		if (Options.isViewOrder()) {
 			url = Options.HOME_URL

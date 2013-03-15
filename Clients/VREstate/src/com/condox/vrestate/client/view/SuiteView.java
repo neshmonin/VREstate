@@ -126,7 +126,6 @@ public class SuiteView extends _GEView {
 		balloon.setCloseButtonEnabled(false);
 		balloon.setContentDiv(Options.SUITE_INFO_TEMPLATE);
 		KmlFeature feature = (KmlFeature) suiteGeo.getExtendedDataLabel();
-		//Log.write("KML: " + feature.getKml());
 		balloon.setFeature(feature);
 		GE.getPlugin().setBalloon(balloon);
 		addElement(((Element) balloon.getContentDiv()), getJsonParams());
@@ -180,10 +179,6 @@ public class SuiteView extends _GEView {
 		
 		// obj.put("mail", new JSONString("MailUrl"));
 		// obj.put("phone", new JSONString("123456789"));
-		// Log.write("json:" + obj.toString());
-		// Log.write("balconies: " + suite_type.balconies);
-		// Log.write("suite_type: " + suite_type.name);
-		//Log.write(obj.toString());
 		return obj.toString();
 	};
 

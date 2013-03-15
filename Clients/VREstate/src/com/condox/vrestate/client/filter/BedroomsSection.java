@@ -318,7 +318,7 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 
 		SuiteType type = suite.getSuiteType();
 		if (type == null)
-			Log.write("!!");
+			Log.write("Filter->isFilteredIn: suite.getSuiteType() returned null");
 		int bedrooms = type.getBedrooms();
 		int dens = type.getDens();
 		if (cbStudio.getValue() && bedrooms == 0 && dens == 0)

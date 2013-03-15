@@ -37,11 +37,7 @@ public class User implements RequestCallback {
 	
 	@Override
 	public void onResponseReceived(Request request, Response response) {
-//		Log.write("" + response.getStatusCode());
 		String json = response.getText();
-//		Log.write(json);
-//		Log.write(response.getStatusText());
-//		Log.write(response.getStatusText());
 		JSONParams params = JSONParams.parse(json);
 		SID = params.getString("sid");
 		keepAlivePeriodSec = params.getInteger("keepalivePeriodSec");
@@ -55,15 +51,13 @@ public class User implements RequestCallback {
 		};
 		keepAliveThread.scheduleRepeating(keepAlivePeriodSec*1000);
 		
-//		Log.write(SID);
-//		Log.write("" + keepAlivePeriodSec);
 		vrEstate.StartGE();
 	
 	}
 
 	@Override
 	public void onError(Request request, Throwable exception) {
-//		Log.write("Failed to Login");
+		Log.write("Failed to Login");
 	}
 	
 }

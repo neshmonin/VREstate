@@ -1,6 +1,5 @@
 package com.condox.vrestate.client.interactor;
 
-import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.I_SB_View;
@@ -57,7 +56,7 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void setEnabled(boolean enabling) {
-		Log.write("SB_Interactor: setEnabled = " + enabling);
+		//Log.write("SB_Interactor: setEnabled = " + enabling);
 		if (enabling) {
 			if (mouse_listener == null)
 				mouse_listener = GE.getPlugin().getWindow()
@@ -125,8 +124,6 @@ public class SB_Interactor extends OverlayHelpers
 
 			String type = obj.get("type").isString().stringValue();
 			int id = (int) obj.get("id").isNumber().doubleValue();
-
-			//Log.write("" + obj.toString());
 			this.view.Select(type, id);
 		}
 		else
@@ -179,7 +176,6 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onMouseMove(KmlMouseEvent event) {
-//		Log.write("onMouseMove");
 		event.preventDefault();
 		int newX = event.getClientX();
 		int newY = event.getClientY();

@@ -125,12 +125,16 @@ public class Filter extends StackPanel implements I_FilterSection {
 		frame = com.google.gwt.dom.client.Document.get().createIFrameElement();
 		com.google.gwt.dom.client.Document.get().getBody().appendChild(frame);
 
-		
-		sections.add(PriceSection.CreateSectionPanel("Price", stackPanel));
-		sections.add(BedroomsSection.CreateSectionPanel("Bedrooms", stackPanel));
-		sections.add(BathroomSection.CreateSectionPanel("Bathrooms", stackPanel));
-		sections.add(AreaSection.CreateSectionPanel("Area", stackPanel));
-		sections.add(BalconySection.CreateSectionPanel("Balconies", stackPanel));
+		PriceSection priceSection = PriceSection.CreateSectionPanel("Price", stackPanel);
+		if (priceSection != null) sections.add(priceSection);
+		BedroomsSection bedroomsSection = BedroomsSection.CreateSectionPanel("Bedrooms", stackPanel);
+		if (bedroomsSection != null) sections.add(bedroomsSection);
+		BathroomSection bathroomSection = BathroomSection.CreateSectionPanel("Bathrooms", stackPanel);
+		if (bathroomSection != null) sections.add(bathroomSection);
+		AreaSection areaSection = AreaSection.CreateSectionPanel("Area", stackPanel);
+		if (areaSection != null) sections.add(areaSection);
+		BalconySection balconySection = BalconySection.CreateSectionPanel("Balconies", stackPanel);
+		if (balconySection != null) sections.add(balconySection);
 			
 		Iterator<I_FilterSection> iterator = sections.iterator();
 		while (iterator.hasNext())
@@ -261,7 +265,6 @@ public class Filter extends StackPanel implements I_FilterSection {
 	}
 	
 	public void onChanged() {
-		Log.write("onChanged");
 		if (isChanged()) {
 			if (btnApply != null)
 				btnApply.setEnabled(true);

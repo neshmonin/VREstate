@@ -1,8 +1,5 @@
 package com.condox.vrestate.client.view;
 
-import com.condox.vrestate.client.document.Document;
-import com.condox.vrestate.client.document.ViewOrder.ProductType;
-import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;

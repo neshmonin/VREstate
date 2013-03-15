@@ -106,7 +106,6 @@ public class Options implements RequestCallback{
 		// SUITE_INFO_TEMPLATE = HOME_URL + "templates/SuiteInfo.html";
 		String request = HOME_URL + "ReducedInfo.html";
 		
-//		Log.write(request);
 		theOptions = new Options(vrEstate);
 		GET.send(request, theOptions);
 //		 isReady = true;
@@ -116,7 +115,6 @@ public class Options implements RequestCallback{
 	@Override
 	public void onResponseReceived(Request request, Response response) {
 		SUITE_INFO_TEMPLATE = response.getText();
-//		Log.write(SUITE_INFO_TEMPLATE);
 		vrEstate.LoginUser();
 	}
 
