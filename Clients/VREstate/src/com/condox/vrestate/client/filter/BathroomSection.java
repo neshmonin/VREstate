@@ -16,13 +16,13 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 	private static BathroomSection instance = null;
 	private static CheckBox cbAny = null;
 	private static CheckBox cbOneBathroom = null;
-	private static CheckBox cbOneBathroomDens = null;
+	private static CheckBox cbOneAndHalfBathroom = null;
 	private static CheckBox cbTwoBathrooms = null;
-	private static CheckBox cbTwoBathroomsDens = null;
+	private static CheckBox cbTwoAndHalfBathrooms = null;
 	private static CheckBox cbThreeBathrooms = null;
-	private static CheckBox cbThreeBathroomsDens = null;
+	private static CheckBox cbThreeAndHalfBathrooms = null;
 	private static CheckBox cbFourBathrooms = null;
-	private static CheckBox cbFourBathroomsDens = null;
+	private static CheckBox cbFourAndHalfBathrooms = null;
 	private static CheckBox cbFiveBathrooms = null;
 
 	private BathroomSection() {
@@ -50,9 +50,13 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 				instance.isAny = cbAny.getValue().booleanValue();
 				if (instance.isAny) {
 					cbOneBathroom.setValue(true, false);
+					cbOneAndHalfBathroom.setValue(true, false);
 					cbTwoBathrooms.setValue(true, false);
+					cbTwoAndHalfBathrooms.setValue(true, false);
 					cbThreeBathrooms.setValue(true, false);
+					cbThreeAndHalfBathrooms.setValue(true, false);
 					cbFourBathrooms.setValue(true, false);
+					cbFourAndHalfBathrooms.setValue(true, false);
 					cbFiveBathrooms.setValue(true, false);
 				}
 				instance.UpdateCaption();
@@ -60,7 +64,7 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 		});
 		instance.add(cbAny);
 
-		cbOneBathroom = new CheckBox("One Bathroom");
+		cbOneBathroom = new CheckBox("1 Bathroom");
 		cbOneBathroom.addStyleDependentName("margined");
 		cbOneBathroom.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -71,9 +75,9 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 		});
 		instance.add(cbOneBathroom);
 
-		cbOneBathroomDens = new CheckBox("One Bathroom + Den");
-		cbOneBathroomDens.addStyleDependentName("margined");
-		cbOneBathroomDens
+		cbOneAndHalfBathroom = new CheckBox("1.5 Bathroom");
+		cbOneAndHalfBathroom.addStyleDependentName("margined");
+		cbOneAndHalfBathroom
 				.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 					public void onValueChange(ValueChangeEvent<Boolean> event) {
 						if (isAllBathroomsUnchecked())
@@ -81,9 +85,9 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 						cbAny.setValue(!isAtLeastOneUnchecked(), true);
 					}
 				});
-		instance.add(cbOneBathroomDens);
+		instance.add(cbOneAndHalfBathroom);
 
-		cbTwoBathrooms = new CheckBox("Two Bathrooms");
+		cbTwoBathrooms = new CheckBox("2 Bathrooms");
 		cbTwoBathrooms.addStyleDependentName("margined");
 		cbTwoBathrooms.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -94,9 +98,9 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 		});
 		instance.add(cbTwoBathrooms);
 
-		cbTwoBathroomsDens = new CheckBox("Two Bathrooms + Den");
-		cbTwoBathroomsDens.addStyleDependentName("margined");
-		cbTwoBathroomsDens
+		cbTwoAndHalfBathrooms = new CheckBox("2.5 Bathrooms");
+		cbTwoAndHalfBathrooms.addStyleDependentName("margined");
+		cbTwoAndHalfBathrooms
 				.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 					public void onValueChange(ValueChangeEvent<Boolean> event) {
 						if (isAllBathroomsUnchecked())
@@ -104,9 +108,9 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 						cbAny.setValue(!isAtLeastOneUnchecked(), true);
 					}
 				});
-		instance.add(cbTwoBathroomsDens);
+		instance.add(cbTwoAndHalfBathrooms);
 
-		cbThreeBathrooms = new CheckBox("Three Bathrooms");
+		cbThreeBathrooms = new CheckBox("3 Bathrooms");
 		cbThreeBathrooms.addStyleDependentName("margined");
 		cbThreeBathrooms
 				.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -119,9 +123,9 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 				});
 		instance.add(cbThreeBathrooms);
 
-		cbThreeBathroomsDens = new CheckBox("Three Bathrooms + Den");
-		cbThreeBathroomsDens.addStyleDependentName("margined");
-		cbThreeBathroomsDens
+		cbThreeAndHalfBathrooms = new CheckBox("3.5 Bathrooms");
+		cbThreeAndHalfBathrooms.addStyleDependentName("margined");
+		cbThreeAndHalfBathrooms
 				.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 					public void onValueChange(ValueChangeEvent<Boolean> event) {
 						if (isAllBathroomsUnchecked())
@@ -130,9 +134,9 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 						cbAny.setValue(!isAtLeastOneUnchecked(), true);
 					}
 				});
-		instance.add(cbThreeBathroomsDens);
+		instance.add(cbThreeAndHalfBathrooms);
 
-		cbFourBathrooms = new CheckBox("Four Bathrooms");
+		cbFourBathrooms = new CheckBox("4 Bathrooms");
 		cbFourBathrooms.addStyleDependentName("margined");
 		cbFourBathrooms
 				.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -145,9 +149,9 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 				});
 		instance.add(cbFourBathrooms);
 
-		cbFourBathroomsDens = new CheckBox("Four Bathrooms + Den");
-		cbFourBathroomsDens.addStyleDependentName("margined");
-		cbFourBathroomsDens
+		cbFourAndHalfBathrooms = new CheckBox("4.5 Bathrooms");
+		cbFourAndHalfBathrooms.addStyleDependentName("margined");
+		cbFourAndHalfBathrooms
 				.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 					public void onValueChange(ValueChangeEvent<Boolean> event) {
 						if (isAllBathroomsUnchecked())
@@ -156,7 +160,7 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 						cbAny.setValue(!isAtLeastOneUnchecked(), true);
 					}
 				});
-		instance.add(cbFourBathroomsDens);
+		instance.add(cbFourAndHalfBathrooms);
 
 		cbFiveBathrooms = new CheckBox("More");
 		cbFiveBathrooms.addStyleDependentName("margined");
@@ -177,20 +181,19 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 	private static boolean isAllBathroomsUnchecked() {
 		if (cbOneBathroom.getValue() && (cbOneBathroom.isEnabled()))
 			return false;
-		if (cbOneBathroomDens.getValue() && (cbOneBathroomDens.isEnabled()))
+		if (cbOneAndHalfBathroom.getValue() && (cbOneAndHalfBathroom.isEnabled()))
 			return false;
 		if (cbTwoBathrooms.getValue() && (cbTwoBathrooms.isEnabled()))
 			return false;
-		if (cbTwoBathroomsDens.getValue() && (cbTwoBathroomsDens.isEnabled()))
+		if (cbTwoAndHalfBathrooms.getValue() && (cbTwoAndHalfBathrooms.isEnabled()))
 			return false;
 		if (cbThreeBathrooms.getValue() && (cbThreeBathrooms.isEnabled()))
 			return false;
-		if (cbThreeBathroomsDens.getValue()
-				&& (cbThreeBathroomsDens.isEnabled()))
+		if (cbThreeAndHalfBathrooms.getValue() && (cbThreeAndHalfBathrooms.isEnabled()))
 			return false;
 		if (cbFourBathrooms.getValue() && (cbFourBathrooms.isEnabled()))
 			return false;
-		if (cbFourBathroomsDens.getValue() && (cbFourBathroomsDens.isEnabled()))
+		if (cbFourAndHalfBathrooms.getValue() && (cbFourAndHalfBathrooms.isEnabled()))
 			return false;
 		if (cbFiveBathrooms.getValue() && (cbFiveBathrooms.isEnabled()))
 			return false;
@@ -201,21 +204,19 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 		instance.isAny = false;
 		if (!cbOneBathroom.getValue() && (cbOneBathroom.isEnabled()))
 			return true;
-		if (!cbOneBathroomDens.getValue() && (cbOneBathroomDens.isEnabled()))
+		if (!cbOneAndHalfBathroom.getValue() && (cbOneAndHalfBathroom.isEnabled()))
 			return true;
 		if (!cbTwoBathrooms.getValue() && (cbTwoBathrooms.isEnabled()))
 			return true;
-		if (!cbTwoBathroomsDens.getValue() && (cbTwoBathroomsDens.isEnabled()))
+		if (!cbTwoAndHalfBathrooms.getValue() && (cbTwoAndHalfBathrooms.isEnabled()))
 			return true;
 		if (!cbThreeBathrooms.getValue() && (cbThreeBathrooms.isEnabled()))
 			return true;
-		if (!cbThreeBathroomsDens.getValue()
-				&& (cbThreeBathroomsDens.isEnabled()))
+		if (!cbThreeAndHalfBathrooms.getValue() && (cbThreeAndHalfBathrooms.isEnabled()))
 			return true;
 		if (!cbFourBathrooms.getValue() && (cbFourBathrooms.isEnabled()))
 			return true;
-		if (!cbFourBathroomsDens.getValue()
-				&& (cbFourBathroomsDens.isEnabled()))
+		if (!cbFourAndHalfBathrooms.getValue() && (cbFourAndHalfBathrooms.isEnabled()))
 			return true;
 		if (!cbFiveBathrooms.getValue() && (cbFiveBathrooms.isEnabled()))
 			return true;
@@ -227,65 +228,55 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 	@Override
 	public void Init() {
 		boolean one = false;
-		boolean one_dens = false;
+		boolean one_half = false;
 		boolean two = false;
-		boolean two_dens = false;
+		boolean two_half = false;
 		boolean three = false;
-		boolean three_dens = false;
+		boolean three_half = false;
 		boolean four = false;
-		boolean four_dens = false;
+		boolean four_half = false;
 		boolean five = false;
 		for (SuiteType suite_type : Document.get().getSuiteTypes()) {
-			switch (suite_type.getBathrooms()) {
-			case 0:
+			double bathrooms = suite_type.getBathrooms(); 
+			if (bathrooms == 0.0)
 				break;
-			case 1:
-				if (suite_type.get__Bathrooms() == 0)
-					one = true;
-				else
-					one_dens = true;
-				break;
-			case 2:
-				if (suite_type.get__Bathrooms() == 0)
-					two = true;
-				else
-					two_dens = true;
-				break;
-			case 3:
-				if (suite_type.get__Bathrooms() == 0)
-					three = true;
-				else
-					three_dens = true;
-				break;
-			case 4:
-				if (suite_type.get__Bathrooms() == 0)
-					four = true;
-				else
-					four_dens = true;
-				break;
-			default:
+			else if (bathrooms == 1.0)
+				one = true;
+			else if (bathrooms == 1.5)
+				one_half = true;
+			else if (bathrooms == 2.0)
+				two = true;
+			else if (bathrooms == 2.5)
+				two_half = true;
+			else if (bathrooms == 3.0)
+				three = true;
+			else if (bathrooms == 3.5)
+				three_half = true;
+			else if (bathrooms == 4.0)
+				four = true;
+			else if (bathrooms == 4.5)
+				four_half = true;
+			else
 				five = true;
-				break;
-			}
 		}
 		cbOneBathroom.setVisible(one);
-		cbOneBathroomDens.setVisible(one_dens);
+		cbOneAndHalfBathroom.setVisible(one_half);
 		cbTwoBathrooms.setVisible(two);
-		cbTwoBathroomsDens.setVisible(two_dens);
+		cbTwoAndHalfBathrooms.setVisible(two_half);
 		cbThreeBathrooms.setVisible(three);
-		cbThreeBathroomsDens.setVisible(three_dens);
+		cbThreeAndHalfBathrooms.setVisible(three_half);
 		cbFourBathrooms.setVisible(four);
-		cbFourBathroomsDens.setVisible(four_dens);
+		cbFourAndHalfBathrooms.setVisible(four_half);
 		cbFiveBathrooms.setVisible(five);
 
 		cbOneBathroom.setEnabled(one);
-		cbOneBathroomDens.setEnabled(one_dens);
+		cbOneAndHalfBathroom.setEnabled(one_half);
 		cbTwoBathrooms.setEnabled(two);
-		cbTwoBathroomsDens.setEnabled(two_dens);
+		cbTwoAndHalfBathrooms.setEnabled(two_half);
 		cbThreeBathrooms.setEnabled(three);
-		cbThreeBathroomsDens.setEnabled(three_dens);
+		cbThreeAndHalfBathrooms.setEnabled(three_half);
 		cbFourBathrooms.setEnabled(four);
-		cbFourBathroomsDens.setEnabled(four_dens);
+		cbFourAndHalfBathrooms.setEnabled(four_half);
 		cbFiveBathrooms.setEnabled(five);
 		isAny = true;
 	}
@@ -301,26 +292,17 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 			return true;
 
 		SuiteType type = suite.getSuiteType();
-		int bathrooms = type.getBathrooms();
-		int dens = type.getDens();
-		if (cbOneBathroom.getValue() && bathrooms == 1 && dens == 0)
-			return true;
-		else if (cbOneBathroomDens.getValue() && bathrooms == 1 && dens != 0)
-			return true;
-		else if (cbTwoBathrooms.getValue() && bathrooms == 2 && dens == 0)
-			return true;
-		else if (cbTwoBathroomsDens.getValue() && bathrooms == 2 && dens != 0)
-			return true;
-		else if (cbThreeBathrooms.getValue() && bathrooms == 3 && dens == 0)
-			return true;
-		else if (cbThreeBathroomsDens.getValue() && bathrooms == 3 && dens != 0)
-			return true;
-		else if (cbFourBathrooms.getValue() && bathrooms == 4 && dens == 0)
-			return true;
-		else if (cbFourBathroomsDens.getValue() && bathrooms == 4 && dens != 0)
-			return true;
-		else if (cbFiveBathrooms.getValue() && bathrooms > 4)
-			return true;
+		double bathrooms = type.getBathrooms();
+		if (cbOneBathroom.getValue() && bathrooms == 1.0) return true;
+		else if (cbOneAndHalfBathroom.getValue() && bathrooms == 1.5) return true;
+		else if (cbTwoBathrooms.getValue() && bathrooms == 2.0) return true;
+		else if (cbTwoAndHalfBathrooms.getValue() && bathrooms == 2.5) return true;
+		else if (cbThreeBathrooms.getValue() && bathrooms == 3.0) return true;
+		else if (cbThreeAndHalfBathrooms.getValue() && bathrooms == 3.5) return true;
+		else if (cbFourBathrooms.getValue() && bathrooms == 4.0) return true;
+		else if (cbFourAndHalfBathrooms.getValue() && bathrooms == 4.5) return true;
+		else if (cbFiveBathrooms.getValue() && bathrooms > 4.5) return true;
+		
 		return false;
 	}
 
@@ -342,7 +324,6 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 	private boolean isChanged = false;
 	@Override
 	public boolean isChanged() {
-		// TODO Auto-generated method stub
 		return isChanged;
 	}
 

@@ -2,12 +2,15 @@ package com.condox.vrestate.client.filter;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.Suite;
+import com.condox.vrestate.client.view.I_AbstractView;
 import com.condox.vrestate.client.view._AbstractView;
+import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.IFrameElement;
@@ -32,7 +35,7 @@ import com.google.gwt.user.client.ui.StackPanel;
 public class Filter extends StackPanel implements I_FilterSection {
 	public static boolean initialized = false;
 	private static Filter instance = new Filter();
-	private static int filteredIn_suites = 0;
+	private List<Suite> filteredIn_suites = null;
 
 	ArrayList<I_FilterSection> sections = new ArrayList<I_FilterSection>();
 
@@ -62,11 +65,6 @@ public class Filter extends StackPanel implements I_FilterSection {
 		dpFilter = new DisclosurePanel("Filtered:");
 		panel.add(dpFilter, 50, 50);
 		dpFilter.setSize("250px", "23px");
-		// rootLayoutPanel.add(dpFilter);
-		// rootLayoutPanel.setWidgetLeftWidth(dpFilter, 50.0, Unit.PX, 200.0,
-		// Unit.PX);
-		// rootLayoutPanel.setWidgetTopHeight(dpFilter, 50.0, Unit.PX, 25.0,
-		// Unit.PX);
 
 		DockPanel dockPanel = new DockPanel();
 		dpFilter.setContent(dockPanel);
@@ -138,11 +136,14 @@ public class Filter extends StackPanel implements I_FilterSection {
 		while (iterator.hasNext())
 			if (iterator.next() == null)
 				iterator.remove();
-		
+
+		filteredIn_suites = new ArrayList<Suite>();
+		this.filteredIn_suites.addAll(Document.get().getSuites());
 		Init();
 
 		Reset();
 		UpdateSize();
+		setVisible(false);
 		initialized = true;
 	}
 
@@ -155,7 +156,6 @@ public class Filter extends StackPanel implements I_FilterSection {
 	private boolean isOpened = false;
 
 	public void setVisible(boolean visible) {
-		Log.write("Filter->setVisible:" + visible);
 		if (visible && Options.USE_FILTER) {
 			dpFilter.setOpen(isOpened);
 			dpFilter.setVisible(true);
@@ -164,9 +164,6 @@ public class Filter extends StackPanel implements I_FilterSection {
 			isOpened = dpFilter.isOpen();
 			dpFilter.setVisible(false);
 			UpdateSize();
-			// dpFilter.setOpen(false);
-			// frame.getStyle().setHeight(0, Unit.PX);
-			// frame.getStyle().setWidth(0, Unit.PX);
 		}
 	}
 
@@ -206,16 +203,23 @@ public class Filter extends StackPanel implements I_FilterSection {
 	public void Apply() {
 		for (I_FilterSection section : sections)
 			section.Apply();
-		filteredIn_suites = 0;
+		this.filteredIn_suites.clear();
 		_AbstractView.ApplyFilter();
-		if (Filter.filteredIn_suites == Document.get().getSuites().size())
+		if (this.filteredIn_suites.size() == Document.get().getSuites().size())
 			dpFilter.getHeaderTextAccessor().setText(
 					"Selection Filter (" + Document.get().getSuites().size()
 							+ " units available)");
 		else
 			dpFilter.getHeaderTextAccessor().setText(
-					"Selection Filter (" + Filter.filteredIn_suites + " out of "
+					"Selection Filter (" + this.filteredIn_suites.size() + " out of "
 							+ Document.get().getSuites().size() + ")");
+
+		IGeoItem suiteGeo = Filter.get().getNextGeoItem();
+		if (suiteGeo != null) {
+			I_AbstractView currView = _AbstractView.getCurrentView();
+			if (currView.getGeoItem().getType() != "suite")
+				currView.Select(suiteGeo.getType(), suiteGeo.getId());
+		}
 	}
 
 	@Override
@@ -223,7 +227,8 @@ public class Filter extends StackPanel implements I_FilterSection {
 		for (I_FilterSection section : sections)
 			section.Reset();
 
-		filteredIn_suites = Document.get().getSuites().size();
+		this.filteredIn_suites.clear();
+		this.filteredIn_suites.addAll(Document.get().getSuites());
 		dpFilter.getHeaderTextAccessor().setText(
 				"Selection Filter (" + Document.get().getSuites().size()
 						+ " units available)");
@@ -235,7 +240,7 @@ public class Filter extends StackPanel implements I_FilterSection {
 			if (!section.isFileredIn(suite))
 				return false;
 
-		filteredIn_suites ++;
+		this.filteredIn_suites.add(suite);
 		return true;
 	}
 
@@ -263,5 +268,59 @@ public class Filter extends StackPanel implements I_FilterSection {
 			if (btnReset != null)
 				btnReset.setEnabled(true);
 		}
+	}
+	
+	public int howManyFilteredIn() {
+		return this.filteredIn_suites.size();
+	}	
+	
+	public IGeoItem getNextGeoItem() {
+		int currId = _AbstractView.getCurrentGeoItem().getId();
+		if (this.filteredIn_suites == null) {
+			this.filteredIn_suites = new ArrayList<Suite>();
+			this.filteredIn_suites.addAll(Document.get().getSuites());
+		}
+			
+		int size = this.filteredIn_suites.size();
+		if (size == 0) return null;
+		
+		for (int i=0; i< size; i++) {
+			Suite suite = this.filteredIn_suites.get(i);
+			if (suite.getId() == currId) {
+				Suite next = i+1 < size? this.filteredIn_suites.get(i+1) : 
+										 this.filteredIn_suites.get(0);
+				IGeoItem nextGeo = _AbstractView.getSuiteGeoItem(next.getId());
+				return nextGeo;
+			}				
+		}
+
+		Suite first = this.filteredIn_suites.get(0);
+		IGeoItem firstGeo = _AbstractView.getSuiteGeoItem(first.getId());
+		return firstGeo;
+	}
+
+	public IGeoItem getPrevGeoItem() {
+		int currId = _AbstractView.getCurrentGeoItem().getId();
+		if (this.filteredIn_suites == null) {
+			this.filteredIn_suites = new ArrayList<Suite>();
+			this.filteredIn_suites.addAll(Document.get().getSuites());
+		}
+			
+		int size = this.filteredIn_suites.size();
+		if (size == 0) return null;
+		
+		for (int i=0; i< size; i++) {
+			Suite suite = this.filteredIn_suites.get(i);
+			if (suite.getId() == currId) {
+				Suite prev = i > 1 ? this.filteredIn_suites.get(i-1) : 
+									 this.filteredIn_suites.get(size-1);
+				IGeoItem nextGeo = _AbstractView.getSuiteGeoItem(prev.getId());
+				return nextGeo;
+			}				
+		}
+
+		Suite first = this.filteredIn_suites.get(0);
+		IGeoItem firstGeo = _AbstractView.getSuiteGeoItem(first.getId());
+		return firstGeo;
 	}
 }

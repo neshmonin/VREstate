@@ -228,6 +228,32 @@ public abstract class _AbstractView implements I_AbstractView {
         
 	}
 	
+	public static void Pop_Pop_Push(I_AbstractView newView) {
+		I_AbstractView currView = views.peek();
+		if (views.size() < 3)
+			return;
+		
+		currView.setEnabled(false);
+		currView.onDestroy();
+
+		views.pop();
+		I_AbstractView interimView = views.peek();
+		interimView.onDestroy();
+		I_AbstractView poppedView = views.pop();
+
+		newView.scheduleSetEnabled();
+		newView.setupCamera(poppedView);
+		
+		views.push(newView);
+
+		Log.write(getPrintableViews("Pop-Pop-Push"));
+
+        GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
+        newView.getCamera().Apply();
+        GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
+        
+	}
+	
 	public String getTitleText() {
 		return theGeoItem.getCaption();
 	}

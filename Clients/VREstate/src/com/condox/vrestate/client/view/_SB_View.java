@@ -21,6 +21,12 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 	@Override
 	public void setEnabled(boolean enabling) {
 		super.setEnabled(enabling);
+		if(Document.targetViewOrder == null) 
+			Filter.get().setVisible(enabling);
+		else if (Document.targetViewOrder.getProductType() == ProductType.PublicListing ||
+				 Document.targetViewOrder.getProductType() == ProductType.Building3DLayout)
+			Filter.get().setVisible(enabling);
+
 		if (enabling) {
 			GE.getPlugin().getNavigationControl().setVisibility(GEVisibility.VISIBILITY_AUTO);
 			if (_interactor == null)
@@ -29,15 +35,12 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 		}
 		else
 		{
-			_interactor.setEnabled(false);
-			_interactor = null;
+			if (_interactor != null)
+			{
+				_interactor.setEnabled(false);
+				_interactor = null;
+			}
 		}
-
-		if(Document.targetViewOrder == null) 
-			Filter.get().setVisible(enabling);
-		else if (Document.targetViewOrder.getProductType() == ProductType.PublicListing ||
-				 Document.targetViewOrder.getProductType() == ProductType.Building3DLayout)
-			Filter.get().setVisible(enabling);
 	}
 
 	@Override

@@ -33,8 +33,7 @@ public class SuiteType {
 	private int bedrooms = 0;
 	private int dens = 0;
 	private int otherRooms = 0;
-	private int bathrooms = 0;
-	private int __bathrooms = 0;
+	private double bathrooms = 0;
 	private int balconies = 0;
 	private double area = 0;
 	private String roomsStr = "";
@@ -96,12 +95,8 @@ public class SuiteType {
 		else if  (dens > 1)
 			roomsStr += "+" + dens + "D";
 			
-//		bathrooms = params.getInteger("bathrooms");
-		bathrooms = params.getDouble("bathrooms").intValue();
-		__bathrooms = (int) (2*(params.getDouble("bathrooms").doubleValue() - bathrooms));
-		
+		bathrooms = params.getDouble("bathrooms").doubleValue();
 		balconies = params.getInteger("balconies");
-		
 		area = params.getDouble("area");
 		area = (area > 100)? area : 100;
 		
@@ -126,14 +121,10 @@ public class SuiteType {
 		return dens;
 	}
 
-	public int getBathrooms() {
+	public double getBathrooms() {
 		return bathrooms;
 	}
 	
-	public int get__Bathrooms() {
-		return __bathrooms;
-	}
-
 	public double getArea() {
 		return area;
 	}

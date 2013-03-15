@@ -58,9 +58,6 @@ public class SB_Interactor extends OverlayHelpers
 	@Override
 	public void setEnabled(boolean enabling) {
 		Log.write("SB_Interactor: setEnabled = " + enabling);
-//		if (enabling)
-//			setupZoom();
-		
 		if (enabling) {
 			if (mouse_listener == null)
 				mouse_listener = GE.getPlugin().getWindow()
@@ -91,6 +88,7 @@ public class SB_Interactor extends OverlayHelpers
 			if (overlayZoomUnzoom != null) {
 				overlayZoomUnzoom.setVisibility(enabling);
 				GE.getPlugin().getFeatures().removeChild(overlayZoomUnzoom);
+				overlayZoomUnzoom = null;
 			}
 		}
 	}

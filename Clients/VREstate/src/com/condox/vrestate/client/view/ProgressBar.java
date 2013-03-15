@@ -1,6 +1,5 @@
 package com.condox.vrestate.client.view;
 
-import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.OverlayHelpers;
@@ -133,11 +132,10 @@ public class ProgressBar extends OverlayHelpers implements I_UpdatableView {
 
     @Override
 	public void onViewChanged() {
-
 		String hrefLabel = getLabelHref(label);
 		if (hrefLabel != null) {
 			hrefLabel = Options.URL_BUTTONS + hrefLabel;
-			Log.write(hrefLabel);
+			//Log.write(hrefLabel);
 			KmlIcon iconLabel = GE.getPlugin().createIcon("");
 			iconLabel.setHref(hrefLabel);
 

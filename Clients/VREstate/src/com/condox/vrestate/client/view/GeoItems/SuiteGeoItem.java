@@ -172,6 +172,8 @@ public class SuiteGeoItem implements IGeoItem {
 		if (href == null) return;
 
 		isFilteredIn = Filter.get().isFileredIn(suite);
+		if (!isFilteredIn && filteredOutNotificationHandler != null)
+			filteredOutNotificationHandler.onFilteredOut();
 
 		if (extended_data_lines.getVisibility() != isFilteredIn)
 		{
@@ -179,7 +181,16 @@ public class SuiteGeoItem implements IGeoItem {
 			extended_data_label.setVisibility(isFilteredIn);
 		}
 	}
-
+	
+	private FilteredOutNotification filteredOutNotificationHandler = null;
+	public void registerForFilteredOutNotification(FilteredOutNotification handler) {
+		filteredOutNotificationHandler = handler;
+	}
+	
+	public void unregisterForFilteredOutNotification() {
+		filteredOutNotificationHandler = null;
+	}
+	
 	private boolean isVisible(double heading_d) {
 		if (href == null) return false;
 

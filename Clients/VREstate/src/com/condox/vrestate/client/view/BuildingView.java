@@ -23,6 +23,7 @@ public class BuildingView extends _SB_View {
 		if (type.equals("building")) {
 			BuildingGeoItem buildingGeoItem = _AbstractView.getBuildingGeoItem(id);
 			if (theGeoItem.getId() == id) {
+				// They are deselecting current building and go to the site mode
 				if (!Options.isViewOrder() ||
 					Document.targetViewOrder.getProductType() == ProductType.PublicListing ||
 					Document.targetViewOrder.getProductType() == ProductType.Building3DLayout)
@@ -31,6 +32,7 @@ public class BuildingView extends _SB_View {
 					_AbstractView.Pop();
 				}
 			} else {
+				// they are selecting a different building
 				buildingGeoItem.onSelectionChanged(true);
 				BuildingGeoItem currGeoItem = (BuildingGeoItem)theGeoItem;
 				currGeoItem.onSelectionChanged(false);

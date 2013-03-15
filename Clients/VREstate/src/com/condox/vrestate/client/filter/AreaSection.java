@@ -1,8 +1,6 @@
 package com.condox.vrestate.client.filter;
 
 import java.util.ArrayList;
-
-import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.Suite;
 import com.condox.vrestate.client.document.SuiteType;
@@ -38,8 +36,6 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 			min_area = Math.min(min_area, suite_type.getArea());
 			max_area = Math.max(max_area, suite_type.getArea());
 		}
-		Log.write("minArea: " + min_area);
-		Log.write("maxArea: " + max_area);
 		if (min_area <= 0)
 			return null;
 		if (max_area <= 0)

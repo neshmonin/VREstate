@@ -1,8 +1,10 @@
 package com.condox.vrestate.client.view;
 
-import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
+import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.SuiteType;
+import com.condox.vrestate.client.document.ViewOrder.ProductType;
+import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.SuiteInteractor;
 import com.condox.vrestate.client.view.Camera.Camera;
@@ -34,6 +36,12 @@ public class SuiteView extends _GEView {
 	@Override
 	public void setEnabled(boolean enabling) {
 		super.setEnabled(enabling);
+		if(Document.targetViewOrder == null) 
+			Filter.get().setVisible(enabling);
+		else if (Document.targetViewOrder.getProductType() == ProductType.PublicListing ||
+				 Document.targetViewOrder.getProductType() == ProductType.Building3DLayout)
+			Filter.get().setVisible(enabling);
+
 		if (enabling) {
 			GE.getPlugin().getNavigationControl().setVisibility(GEVisibility.VISIBILITY_HIDE);
 			if (_interactor == null)
@@ -48,28 +56,40 @@ public class SuiteView extends _GEView {
 
 	@Override
 	public void Select(String type, int id) {
-		if (type == null || id == theGeoItem.getParent_id()) {
+		int parentId = theGeoItem.getParent_id();
+		
+		if (type == null) {
+			// they clicked outside of anything - want to exit
 			_AbstractView.Pop();
 			return;
 		}
 
+		int suiteId = theGeoItem.getId();
+		if (id == suiteId) return; // they clicked the same suite
+		
 		if (type.equals("building")){
-			_AbstractView.Pop();
-			BuildingGeoItem buildingGeo = _AbstractView.getBuildingGeoItem(id);
-			BuildingView bldngView = new BuildingView(buildingGeo);
-			buildingGeo.onSelectionChanged(true);
-			_AbstractView.Pop_Push(bldngView);
+			// they clicked placemark of a building
+			BuildingGeoItem buildingGeoItem = _AbstractView.getBuildingGeoItem(parentId);
+			buildingGeoItem.onSelectionChanged(false);
+			BuildingGeoItem newBuildingGeoItem = _AbstractView.getBuildingGeoItem(id);
+			newBuildingGeoItem.onSelectionChanged(true);
+			_AbstractView.Pop_Pop_Push(new BuildingView(newBuildingGeoItem));
 			return;
 		}
-			
-		
-		if (type.equals("suite") && id == theGeoItem.getId())
-			return; // do nothing when they clicked the suite that already opened
 
 		if (type.equals("suite")) {
-			SuiteGeoItem suiteGeo = _AbstractView.getSuiteGeoItem(id);
-			SuiteView suiteView = new SuiteView(suiteGeo);
-			_AbstractView.Pop_Push(suiteView);
+			// they clicked placemark of a different suite
+			// 1. check if this suite is still within tha same building?
+			SuiteGeoItem newSuiteGeo = _AbstractView.getSuiteGeoItem(id);
+			int newParentId = newSuiteGeo.getParent_id();
+			if (newParentId == parentId) {
+				SuiteView suiteView = new SuiteView(newSuiteGeo);
+				_AbstractView.Pop_Push(suiteView);
+			}
+			else {
+				Select("building", newParentId);
+				_AbstractView.AddSelection(newSuiteGeo);
+			}
 		}
 	}
 
@@ -106,7 +126,7 @@ public class SuiteView extends _GEView {
 		balloon.setCloseButtonEnabled(false);
 		balloon.setContentDiv(Options.SUITE_INFO_TEMPLATE);
 		KmlFeature feature = (KmlFeature) suiteGeo.getExtendedDataLabel();
-		Log.write("KML: " + feature.getKml());
+		//Log.write("KML: " + feature.getKml());
 		balloon.setFeature(feature);
 		GE.getPlugin().setBalloon(balloon);
 		addElement(((Element) balloon.getContentDiv()), getJsonParams());
@@ -163,7 +183,7 @@ public class SuiteView extends _GEView {
 		// Log.write("json:" + obj.toString());
 		// Log.write("balconies: " + suite_type.balconies);
 		// Log.write("suite_type: " + suite_type.name);
-		Log.write(obj.toString());
+		//Log.write(obj.toString());
 		return obj.toString();
 	};
 
@@ -255,5 +275,28 @@ public class SuiteView extends _GEView {
 	public void onTransitionStopped() {
 		onHeadingChanged();
 		ShowMoreInfo();
+	}
+
+	public boolean selectNextSuite() {
+		IGeoItem suiteGeo = Filter.get().getNextGeoItem();
+		if (suiteGeo != null) {
+			Select(suiteGeo.getType(), suiteGeo.getId());
+			return true;
+		}
+		return false;
+	}
+
+	public boolean selectPrevSuite() {
+		IGeoItem suiteGeo = Filter.get().getPrevGeoItem();
+		if (suiteGeo != null) {
+			Select(suiteGeo.getType(), suiteGeo.getId());
+			return true;
+		}
+		return false;
+	}
+	
+	public void ThisSuiteIsFilteredOut() {
+		if (!selectNextSuite())
+			_AbstractView.Pop();
 	}
 }
