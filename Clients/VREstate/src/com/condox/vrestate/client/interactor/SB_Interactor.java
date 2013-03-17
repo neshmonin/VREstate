@@ -19,6 +19,7 @@ public class SB_Interactor extends OverlayHelpers
 
 	private HandlerRegistration mouse_listener = null;
 	KmlScreenOverlay overlayZoomUnzoom = null;
+	private OvlRectangle rectCentralBar = null;
 	private OvlRectangle rectZoomUnzoom = null;
 
 	private I_SB_View view = null;
@@ -38,11 +39,18 @@ public class SB_Interactor extends OverlayHelpers
 				new OvlDimension(buttonWidthPixels),
 				new OvlDimension(buttonHeightPixels)
 			);
+	    rectCentralBar = new OvlRectangle(
+				new OvlPoint(new OvlDimension(0.5f), 
+							 new OvlDimension(0.5f)),
+				new OvlDimension(0.15f),
+				new OvlDimension(1f)
+			);
 	}
 	
 	private enum WhereIsMouse
 	{
 	   OnZoomUnzoomBar,
+	   OnCentralBar,
 	   AnywhereElse
 	}
 	
@@ -50,6 +58,8 @@ public class SB_Interactor extends OverlayHelpers
 	{
 		if (rectZoomUnzoom.ContainsPixel(x, y))
 			return WhereIsMouse.OnZoomUnzoomBar;
+		else if (rectCentralBar.ContainsPixel(x, y))
+			return WhereIsMouse.OnCentralBar;
 		
 		return WhereIsMouse.AnywhereElse;
 	}
@@ -149,6 +159,8 @@ public class SB_Interactor extends OverlayHelpers
 		{
 		case OnZoomUnzoomBar:
 			break;
+		case OnCentralBar:
+			break;
 		case AnywhereElse:
 			break;
 		}
@@ -189,6 +201,16 @@ public class SB_Interactor extends OverlayHelpers
 				y += dZ;
 			}
 			break;
+		case OnCentralBar:
+			if (view.getGeoItem().getType() == "building" &&
+				Options.SUPPORT_PAN) {
+				if (event.getButton() == 0) {
+					dZ = newY - y;
+					this.view.Pan(dZ);
+					y += dZ;
+				}
+				break;
+			}
 		case AnywhereElse:
 			switch (event.getButton()) {
 			case 0: // LEFT

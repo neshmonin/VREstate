@@ -13,6 +13,7 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 	protected double dH = 0;
 	protected double dT = 0;
 	protected double dR = 0;
+	protected double dP = 0;
 	
 	protected _SB_View(IGeoItem geoItem) {
 		super( geoItem );
@@ -43,6 +44,12 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 		}
 	}
 
+	@Override
+	public void Pan(double dP) {
+        _camera.attributes.Alt_m += dP/10;
+		_camera.MoveLookAt(0, 0, 0);
+	}
+	
 	@Override
 	public void Move(double dH, double dT, double dR) {
 		this.dH += dH;

@@ -9,6 +9,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
 
 public class Options implements RequestCallback{
+
 	public static boolean DEBUG_MODE = true;
 
 	// TODO: this must be set only if this client in Kiosk mode
@@ -36,6 +37,8 @@ public class Options implements RequestCallback{
 	public static Integer SUITE_DISTANCE;
 	public static boolean SHOW_SOLD = false;
 	public static boolean USE_FILTER = true;
+	// If SUPPORT_PAN is true, user can pan up and down a building
+	public static boolean SUPPORT_PAN = false;
 
 	private static Options theOptions = null;
 	private VREstate vrEstate = null;
