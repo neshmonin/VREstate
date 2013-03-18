@@ -38,7 +38,13 @@ namespace Vre.Server.BusinessLogic
                         int idx = suba.Length;
                         if (idx > 0)
                         {
-                            Type t = suba[0].GetType();
+                            // in an array of doubles some elements can be integers, so we run
+                            // check on all elements of the array
+                            Type t = typeof(int);
+                            for (int i=0; i<idx; i++)
+                                if (suba[i].GetType() != typeof(int))
+                                    t = typeof(double);
+
                             if (t.Equals(typeof(int)))
                             {
                                 int[] items = new int[idx];
