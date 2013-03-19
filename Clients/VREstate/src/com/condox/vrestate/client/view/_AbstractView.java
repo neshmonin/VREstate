@@ -405,14 +405,20 @@ public abstract class _AbstractView implements I_AbstractView {
     	int count = 0;
     	int howMany = Document.get().getSuites().size();
 		for (Suite suite : Document.get().getSuites()) {
-			SuiteGeoItem suiteGeo = new SuiteGeoItem(suite);
-			suiteGeoItems.put(suite.getId(), suiteGeo);
+			addSiteGeoItem(suite, false);
 			
 			count++;
 			Document.progressBar.Update(count*100.0/howMany);
 		}
 
 		Document.progressBar.Cleanup();
+    }
+
+    public static void addSiteGeoItem(Suite suite, boolean redraw) {
+		SuiteGeoItem suiteGeo = new SuiteGeoItem(suite);
+		suiteGeoItems.put(suite.getId(), suiteGeo);
+		if (redraw)
+			suiteGeo.Redraw();
     }
 
     public static SiteGeoItem getSiteGeoItem(int id) {

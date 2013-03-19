@@ -176,10 +176,9 @@ public class SuiteGeoItem implements IGeoItem {
 			filteredOutNotificationHandler.onFilteredOut();
 
 		if (extended_data_lines.getVisibility() != isFilteredIn)
-		{
 			extended_data_lines.setVisibility(isFilteredIn);
+		if (extended_data_label.getVisibility() != isFilteredIn)
 			extended_data_label.setVisibility(isFilteredIn);
-		}
 	}
 	
 	private FilteredOutNotification filteredOutNotificationHandler = null;

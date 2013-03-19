@@ -60,7 +60,7 @@ public class Document implements IDocument,
 			progressBar.Update(10.0);
 			ParseBuildings(json);
 			progressBar.Update(70.0);
-			ParseSuites(json);
+			ParseSuites(json, false);
 			progressBar.Update(80.0);
 			ParseSites(json);
 			progressBar.Update(90.0);
@@ -141,14 +141,14 @@ public class Document implements IDocument,
 	---------- JSON-SuiteType -----------*/
 	private void ParseSuiteTypes(String json) {
 		JSONObject obj = JSONParser.parseLenient(json).isObject();
-		JSONArray suite_types = obj.get("suiteTypes").isArray();
-		for (int index = 0; index < suite_types.size(); index++) {
-			JSONObject JSONsuite_type = suite_types.get(index).isObject();
+		JSONArray JSONsuite_types = obj.get("suiteTypes").isArray();
+		for (int index = 0; index < JSONsuite_types.size(); index++) {
+			JSONObject JSONsuite_type = JSONsuite_types.get(index).isObject();
 			int id = (int) JSONsuite_type.get("id").isNumber().doubleValue();
 			SuiteType suite_type = this.suite_types.get(id);
 			if (suite_type == null) {
 				suite_type = new SuiteType();
-				suite_type.Parse(suite_types.get(index));
+				suite_type.Parse(JSONsuite_types.get(index));
 				this.suite_types.put(suite_type.getId(), suite_type);
 			}
 		}
@@ -173,7 +173,7 @@ public class Document implements IDocument,
       "suiteTypeId": 2663
     }
 	---------- JSON-Suite -----------*/
-	private void ParseSuites(String json) {
+	private void ParseSuites(String json, boolean redraw) {
 		JSONObject obj = JSONParser.parseLenient(json).isObject();
 		JSONArray JSONsuites = obj.get("suites").isArray();
 		for (int index = 0; index < JSONsuites.size(); index++) {
@@ -185,6 +185,10 @@ public class Document implements IDocument,
 				theSuite = new Suite();
 				theSuite.Parse(JSONsuites.get(index));
 				this.suites.put(theSuite.getId(), theSuite);
+				if (redraw) {
+					theSuite.CalcLineCoords();
+					_AbstractView.addSiteGeoItem(theSuite, true);
+				}
 			}
 			else {
 				theSuite.ParseDynamic(JSONsuite);
@@ -349,25 +353,10 @@ public class Document implements IDocument,
 			progressBar.Update(ProgressBar.ProgressLabel.Loading);
 			progressBar.Update(0.0);
 
-			for (int index = 0; index < JSONsuites.size(); index++) {
-				JSONObject JSONsuite = JSONsuites.get(index).isObject();
-				int id = (int) JSONsuite.get("id").isNumber().doubleValue();
-
-				Suite theSuite = this.suites.get(id);
-				if (theSuite != null) {
-					theSuite.ParseDynamic(JSONsuite);
-					SuiteGeoItem suiteGeo = (SuiteGeoItem)_AbstractView.getSuiteGeoItem(id);
-					suiteGeo.Init(theSuite);
-					suiteGeo.Redraw();
-				}
-				else {
-					theSuite = new Suite();
-					theSuite.Parse(JSONsuites.get(index));
-					this.suites.put(theSuite.getId(), theSuite);
-				}					
-				
-				progressBar.Update((double)(index*100)/(double)suites.size());
-			}
+			ParseSuiteTypes(received);
+			progressBar.Update(70.0);
+			ParseSuites(received, true);
+			_AbstractView.getCurrentView().onHeadingChanged();
 
 			progressBar.Cleanup();
 			progressBar = null;
