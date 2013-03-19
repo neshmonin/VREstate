@@ -76,7 +76,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 
 			_AbstractView.CreateAllGeoItems();
 
-			if (Options.KIOSK) {
+			if (Options.KIOSK_MODE) {
 			    _AbstractView.enableTimeout(true);
 			    firstView = new HelicopterView(_AbstractView.getSiteGeoItem(site.getId()));
 			}

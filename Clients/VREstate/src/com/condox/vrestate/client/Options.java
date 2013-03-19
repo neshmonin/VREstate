@@ -8,24 +8,23 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
 
-public class Options implements RequestCallback{
+public class Options implements RequestCallback {
 
 	public static boolean DEBUG_MODE = true;
 
 	// TODO: this must be set only if this client in Kiosk mode
-	public static boolean KIOSK = false;
-	//public static boolean KIOSK = true;
+	public static boolean KIOSK_MODE = false;
+	// public static boolean KIOSK = true;
 
 	public static String URL_VRT;
 	public static String URL_STATIC;
 	public static String URL_MODEL;
 
 	public static String URL_BUTTONS;
-//	public static String URL_BUTTON_PANORAMIC_VIEW;
-//	public static String URL_BUTTON_EXIT_PANORAMIC_VIEW;
-//	public static String URL_BUTTON_CENTER_PANORAMIC_VIEW;
-	
-	
+	// public static String URL_BUTTON_PANORAMIC_VIEW;
+	// public static String URL_BUTTON_EXIT_PANORAMIC_VIEW;
+	// public static String URL_BUTTON_CENTER_PANORAMIC_VIEW;
+
 	public static int BUILDING_ID;
 	public static int SUITE_ID;
 	public static String HOME_URL;
@@ -43,30 +42,28 @@ public class Options implements RequestCallback{
 	private static Options theOptions = null;
 	private VREstate vrEstate = null;
 
-	private Options(VREstate vrEstate)
-	{
+	private Options(VREstate vrEstate) {
 		this.vrEstate = vrEstate;
 	}
-	
-	public static boolean isViewOrder()
-	{
+
+	public static boolean isViewOrder() {
 		return Options.getViewOrderId() != null;
 	}
-	 
-	
+
 	public static void Init(VREstate vrEstate) {
 		Map<String, List<String>> params = Window.Location.getParameterMap();
 		// DEVELOPER_ID = params.containsKey("DeveloperId") ? "Developer#"
 		// + params.get("DeveloperId").get(0) : "-1";
 
-//		SITE_ID = params.containsKey("SiteId") ? Integer.valueOf(params.get(
-//				"SiteId").get(0)) : -1;
+		// SITE_ID = params.containsKey("SiteId") ? Integer.valueOf(params.get(
+		// "SiteId").get(0)) : -1;
 
 		BUILDING_ID = params.containsKey("BuildingId") ? Integer.valueOf(params
 				.get("BuildingId").get(0)) : -1;
 
-//		SUITE_ID = params.containsKey("SuiteId") ? Integer.valueOf(params.get(
-//				"SuiteId").get(0)) : -1;
+		// SUITE_ID = params.containsKey("SuiteId") ?
+		// Integer.valueOf(params.get(
+		// "SuiteId").get(0)) : -1;
 
 		SHOW_SOLD = params.containsKey("ShowSold") ? Boolean.valueOf(params
 				.get("ShowSold").get(0)) : false;
@@ -84,10 +81,11 @@ public class Options implements RequestCallback{
 			DEBUG_MODE = params.containsKey("test") ? Boolean.valueOf(params
 					.get("test").get(0)) : false;
 		else
-	    	DEBUG_MODE = (GWT.getModuleBaseURL().contains("/vre/")); 
+			DEBUG_MODE = (GWT.getModuleBaseURL().contains("/vre/"));
 
 		Log.write("DEBUG_MODE=" + DEBUG_MODE);
-	    
+//		DEBUG_MODE = true;
+
 		if (DEBUG_MODE) {
 			URL_VRT = "https://vrt.3dcondox.com/vre/";
 			URL_STATIC = "https://static.3dcondox.com/vre/";
@@ -97,22 +95,25 @@ public class Options implements RequestCallback{
 			URL_STATIC = "https://static.3dcondox.com/";
 			URL_MODEL = "https://model.3dcondox.com/";
 		}
-		
-		URL_BUTTONS = params.containsKey("SchemaPath") ? params.get("SchemaPath").get(0) : 
-														 URL_VRT + "buttons/";
+
+		KIOSK_MODE = params.containsKey("kiosk") ? Boolean.valueOf(params.get(
+				"kiosk").get(0)) : false;
+
+		URL_BUTTONS = params.containsKey("SchemaPath") ? params.get(
+				"SchemaPath").get(0) : URL_VRT + "buttons/";
 		HOME_URL = URL_VRT;
-		
+
 		ZOOM_UNZOOM_URL = URL_BUTTONS + "ZoomUnzoomBar.png";
 		URL_BUTTON_PANORAMIC_VIEW = URL_BUTTONS + "PanoramicView.png";
 		URL_BUTTON_EXIT_PANORAMIC_VIEW = URL_BUTTONS + "Back.png";
 		URL_BUTTON_CENTER_PANORAMIC_VIEW = URL_BUTTONS + "Center.png";
 		// SUITE_INFO_TEMPLATE = HOME_URL + "templates/SuiteInfo.html";
-		String request = HOME_URL + "ReducedInfo.html";
-		
+		String request = KIOSK_MODE ? (HOME_URL + "ReducedInfoKiosk.html") : (HOME_URL + "ReducedInfoWeb.html");
+
 		theOptions = new Options(vrEstate);
 		GET.send(request, theOptions);
-//		 isReady = true;
-	
+		// isReady = true;
+
 	};
 
 	@Override
@@ -124,20 +125,20 @@ public class Options implements RequestCallback{
 	@Override
 	public void onError(Request request, Throwable exception) {
 	}
-	
-//	public boolean isUrlReadable() {
-//		if (params.containsKey("type")&&params.containsKey("id"))
-//			return true;
-//		return false;
-//	}
-	
+
+	// public boolean isUrlReadable() {
+	// if (params.containsKey("type")&&params.containsKey("id"))
+	// return true;
+	// return false;
+	// }
+
 	public static String getViewOrderId() {
 		Map<String, List<String>> params = Window.Location.getParameterMap();
 		if (params.containsKey("viewOrderId"))
 			return params.get("viewOrderId").get(0);
 		return null;
 	}
-	
+
 	public static String getSiteId() {
 		Map<String, List<String>> params = Window.Location.getParameterMap();
 		if (params.containsKey("SiteId"))
@@ -145,9 +146,10 @@ public class Options implements RequestCallback{
 		if (params.containsKey("type"))
 			if (params.get("type").get(0).equals("site"))
 				return params.get("id").get(0);
-			
+
 		return null;
 	}
+
 	public static String getBuildingId() {
 		Map<String, List<String>> params = Window.Location.getParameterMap();
 		if (params.containsKey("BuildingId"))
@@ -157,8 +159,7 @@ public class Options implements RequestCallback{
 
 	public static boolean getShowSold() {
 		Map<String, List<String>> params = Window.Location.getParameterMap();
-		if (params.containsKey("ShowSold"))
-		{
+		if (params.containsKey("ShowSold")) {
 			String flag = params.get("ShowSold").get(0);
 			return flag.equalsIgnoreCase("true");
 		}

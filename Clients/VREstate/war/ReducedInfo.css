@@ -94,6 +94,15 @@
 	top:50px;
 	left:0px;
 }
+.interior_floorplan_
+{
+	position:absolute;
+	top:300px;
+	left:0px;
+	width:500px;
+	height:500px;
+}
+
 .exterior_button_
 {
 	position:absolute;
