@@ -1,0 +1,39 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ConsoleSales.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="StartOnSecondaryMonitor" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="ImportFromPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">\\KEYWEST-SRV\Users\sales4\Desktop\ConsoleSales</Value>
+    </Setting>
+    <Setting Name="ExportToPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">\\KEYWEST-SRV\Users\sales4\Desktop\ConsoleSales</Value>
+    </Setting>
+    <Setting Name="UseOnScreenKeyboard" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="serverRequestTimeoutSec" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">15</Value>
+    </Setting>
+    <Setting Name="clientLogin" Type="System.String" Scope="User">
+      <Value Profile="(Default)">admin</Value>
+    </Setting>
+    <Setting Name="clientPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">admin</Value>
+    </Setting>
+    <Setting Name="serverEndPoint" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://vrt.3dcondox.com/</Value>
+    </Setting>
+    <Setting Name="DeveloperName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Times Group</Value>
+    </Setting>
+    <Setting Name="DeveloperId" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="role" Type="System.String" Scope="User">
+      <Value Profile="(Default)">superadmin</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

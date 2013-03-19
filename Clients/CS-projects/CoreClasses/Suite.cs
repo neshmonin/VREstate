@@ -61,7 +61,7 @@ namespace CoreClasses
         {
             get
             {
-                return _suite.SuiteType.Name.Split('.', '_')[0];
+                return _suite.SuiteType.Name;
             }
         }
 
