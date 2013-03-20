@@ -19,6 +19,7 @@ public class Building implements I_VRObject {
 	private String address = "";
 	private Position position = null;
 	private Double altitude_adjustment = null;
+	private String displayModelUrl = "";
 	private String infoUrl = null;
 	
 	void Parse(JSONValue value) {
@@ -46,11 +47,12 @@ public class Building implements I_VRObject {
 		for (int i = 0; i < 3; i++)
 			if (address.contains(","))
 				address = address.substring(0, address.lastIndexOf(","));
+
+		if (obj.containsKey("displayModelUrl"))
+			displayModelUrl = obj.get("displayModelUrl").isString().stringValue();
 		
-		if (obj.containsKey("AltitudeAdjustment")) {
+		if (obj.containsKey("AltitudeAdjustment"))
 			altitude_adjustment = obj.get("altitudeAdjustment").isNumber().doubleValue();
-		}
-			
 	}
 	
 	public boolean hasAltitudeAdjustment() {
@@ -132,6 +134,10 @@ public class Building implements I_VRObject {
 	@Override
 	public String getInfoUrl() {
 		return infoUrl;
+	}
+
+	public String getDisplayModelUrl() {
+		return displayModelUrl;
 	}
 
 }

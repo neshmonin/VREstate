@@ -9,6 +9,7 @@ import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.Suite;
 import com.condox.vrestate.client.view.I_AbstractView;
+import com.condox.vrestate.client.view.ProgressBar;
 import com.condox.vrestate.client.view._AbstractView;
 import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.google.gwt.core.client.Scheduler;
@@ -207,6 +208,7 @@ public class Filter extends StackPanel implements I_FilterSection {
 	public void Apply() {
 		for (I_FilterSection section : sections)
 			section.Apply();
+
 		this.filteredIn_suites.clear();
 		_AbstractView.ApplyFilter();
 		if (this.filteredIn_suites.size() == Document.get().getSuites().size())

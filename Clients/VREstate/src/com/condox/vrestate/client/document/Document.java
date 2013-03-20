@@ -18,6 +18,7 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 
 public class Document implements IDocument,
 								 RequestCallback {
@@ -344,7 +345,12 @@ public class Document implements IDocument,
 	@Override
 	public void onResponseReceived(Request request, Response response) {
 		String received = response.getText();
-		JSONObject obj = JSONParser.parseLenient(received).isObject();
+		if (received == null || received == "") return;
+		
+		JSONValue JSONreceived = JSONParser.parseLenient(received);
+		if (JSONreceived == null) return;
+		
+		JSONObject obj = JSONreceived.isObject();
 		JSONArray JSONsuites = obj.get("suites").isArray();
 		if (JSONsuites.size() != 0) {
 			Log.write("DATA CHANGED NOTIFICATION: RespondStatus="+response.getStatusCode()+"; Received: " + received);

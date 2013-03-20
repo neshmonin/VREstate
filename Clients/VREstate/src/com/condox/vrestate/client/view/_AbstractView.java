@@ -279,8 +279,18 @@ public abstract class _AbstractView implements I_AbstractView {
 	};
 	
 	public static void ApplyFilter() {
-		for(SuiteGeoItem suiteGeo : getSuiteGeoItems())
+		Document.progressBar = new ProgressBar();
+		Document.progressBar.Update(ProgressBar.ProgressLabel.Executing);
+
+		int howMany = getSuiteGeoItems().size();
+		int count = 0;
+		for(SuiteGeoItem suiteGeo : getSuiteGeoItems()) {
+			Document.progressBar.Update(count * 100 / howMany);
 			suiteGeo.Redraw();
+			count++;
+		}
+		Document.progressBar.Cleanup();
+		Document.progressBar = null;
 	}
 
 	@Override

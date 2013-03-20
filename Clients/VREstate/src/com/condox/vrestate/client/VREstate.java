@@ -1,5 +1,6 @@
 package com.condox.vrestate.client;
 
+import com.condox.vrestate.client.document.Building;
 import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.Site;
 import com.condox.vrestate.client.document.ViewOrder.ProductType;
@@ -70,9 +71,15 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 			Site site = (Site) Document.get().getSites().toArray()[0];
 			if (!Options.isViewOrder() ||
 					Document.targetViewOrder.getProductType() == ProductType.PublicListing ||
-					Document.targetViewOrder.getProductType() == ProductType.Building3DLayout)
+					Document.targetViewOrder.getProductType() == ProductType.Building3DLayout) {
 				if (site.getDisplayModelUrl() != "")
 					GE.getPlugin().fetchKml(Options.HOME_URL + site.getDisplayModelUrl(), this);
+				
+				for (Building bldng : Document.get().getBuildings()) {
+					if (bldng.getDisplayModelUrl() != "")
+						GE.getPlugin().fetchKml(bldng.getDisplayModelUrl(), this);
+				}
+			}
 
 			_AbstractView.CreateAllGeoItems();
 

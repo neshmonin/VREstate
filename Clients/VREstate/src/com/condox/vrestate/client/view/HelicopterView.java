@@ -1,12 +1,8 @@
 package com.condox.vrestate.client.view;
 
-import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.SingleTouchInteractor;
-import com.condox.vrestate.client.login.Login;
 import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.google.gwt.user.client.Timer;
-import com.nitrous.gwt.earth.client.api.GEHtmlBalloon;
-import com.nitrous.gwt.earth.client.api.GEHtmlStringBalloon;
 
 public class HelicopterView extends SiteView {
 	protected int tickCounter = 0; 
