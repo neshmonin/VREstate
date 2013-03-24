@@ -35,6 +35,7 @@ public class SuiteType {
 	private int otherRooms = 0;
 	private double bathrooms = 0;
 	private int balconies = 0;
+	private int terraces = 0;
 	private double area = 0;
 	private String roomsStr = "";
 	private String floorPlanUrl = null;
@@ -97,6 +98,7 @@ public class SuiteType {
 			
 		bathrooms = params.getDouble("bathrooms").doubleValue();
 		balconies = params.getInteger("balconies");
+		terraces = params.getInteger("terraces");
 		area = params.getDouble("area");
 		area = (area > 100)? area : 100;
 		
@@ -134,6 +136,10 @@ public class SuiteType {
 
 	public int getBalconies() {
 		return balconies;
+	}
+
+	public int getTerraces() {
+		return terraces;
 	}
 
 	public int getId() {
