@@ -72,8 +72,16 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 			if (!Options.isViewOrder() ||
 					Document.targetViewOrder.getProductType() == ProductType.PublicListing ||
 					Document.targetViewOrder.getProductType() == ProductType.Building3DLayout) {
-				if (site.getDisplayModelUrl() != "")
-					GE.getPlugin().fetchKml(Options.HOME_URL + site.getDisplayModelUrl(), this);
+				String siteDisplayModelUrl = site.getDisplayModelUrl();
+				if (siteDisplayModelUrl != "") {
+					//-------------- Compatibility worjaround: --------------
+					// An old version of the server sends no URL Path for Site
+					if (!siteDisplayModelUrl.contains("https:"))
+						siteDisplayModelUrl = Options.HOME_URL + siteDisplayModelUrl;
+					//-------------- Compatibility worjaround --------------
+
+					GE.getPlugin().fetchKml(siteDisplayModelUrl, this);
+				}
 				
 				for (Building bldng : Document.get().getBuildings()) {
 					if (bldng.getDisplayModelUrl() != "")

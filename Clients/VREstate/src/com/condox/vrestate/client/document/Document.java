@@ -185,13 +185,6 @@ public class Document implements IDocument,
 			if (theSuite == null) {
 				theSuite = new Suite();
 				theSuite.Parse(JSONsuites.get(index));
-//				////////
-//				if (!(theSuite.getName().contains("gf") || 
-//					theSuite.getName().contains("ph") ||
-//					theSuite.getName().contains("lph") ||
-//					theSuite.getName().contains("10")))
-//					continue;
-//				////////
 				this.suites.put(theSuite.getId(), theSuite);
 				if (redraw) {
 					theSuite.CalcLineCoords();
