@@ -287,7 +287,7 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 	}
 
 	@Override
-	public boolean isFilteredIn(Suite suite) {
+	public boolean isFileredIn(Suite suite) {
 		if (isAny)
 			return true;
 

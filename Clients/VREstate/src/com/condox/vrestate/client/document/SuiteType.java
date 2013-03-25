@@ -27,7 +27,7 @@ public class SuiteType {
 	private int id = -1;
 	// private version
 	private int parent_id = -1;
-	//private String name = "";
+	private String name = "";
 	private ArrayList<Double> points = new ArrayList<Double>();
 	
 	private int bedrooms = 0;
@@ -35,8 +35,8 @@ public class SuiteType {
 	private int otherRooms = 0;
 	private double bathrooms = 0;
 	private int balconies = 0;
-	private int terraces = 0;
 	private double area = 0;
+	private String areaUm = "";
 	private String roomsStr = "";
 	private String floorPlanUrl = null;
 
@@ -75,6 +75,7 @@ public class SuiteType {
 		parent_id = (int) obj.get("siteId").isNumber().doubleValue();
 		//name = obj.get("name").isString().stringValue();
 		JSONParams params = JSONParams.parse(obj.toString());
+		name = params.getString("name");
 		JsArray<JSONParams> geometries = params.getArray("geometries");
 		if (geometries != null)
 			for (int i = 0; i < geometries.length(); i++) {
@@ -98,9 +99,9 @@ public class SuiteType {
 			
 		bathrooms = params.getDouble("bathrooms").doubleValue();
 		balconies = params.getInteger("balconies");
-		terraces = params.getInteger("terraces");
 		area = params.getDouble("area");
 		area = (area > 100)? area : 100;
+		areaUm = params.getString("areaUm");
 		
 		floorPlanUrl = params.getString("floorPlanUrl");
 	}
@@ -138,12 +139,12 @@ public class SuiteType {
 		return balconies;
 	}
 
-	public int getTerraces() {
-		return terraces;
-	}
-
 	public int getId() {
 		return id;
+	}
+	
+	public String getName() {
+		return name;
 	}
 
 	public int getParent_id() {
@@ -156,6 +157,9 @@ public class SuiteType {
 
 	public String getFloorPlanUrl() {
 		return floorPlanUrl;
+	}
+	public String getAreaUm() {
+		return areaUm;
 	}
 
 	

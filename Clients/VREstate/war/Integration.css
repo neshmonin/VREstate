@@ -1,0 +1,27 @@
+@CHARSET "ISO-8859-1";
+
+.vrVisible {
+	width: 100%;
+	height: 600px;
+	background: #fc0;
+	border: solid 1px black;
+	display: block;
+}
+
+.vrHidden {
+	width: 1px;
+	height: 1px;
+	display: block;
+}
+
+.viewerVisible {
+	width: 100%;
+	height: 600px;
+	background: #fc0;
+	border: solid 1px black;
+	display: block;
+}
+
+.viewerHidden {
+	display: none;
+}

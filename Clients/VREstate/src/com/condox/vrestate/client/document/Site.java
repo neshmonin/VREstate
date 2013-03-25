@@ -22,6 +22,7 @@ public class Site implements I_VRObject {
 	private String name = "";
 	private String displayModelUrl = "";
 	private String infoUrl = null;
+	private String moreInfoUrl = null;
 	private Position position = new Position();
 
 	// private double max_suite_altitude = 0;

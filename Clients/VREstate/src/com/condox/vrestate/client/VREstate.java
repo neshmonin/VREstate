@@ -9,6 +9,7 @@ import com.condox.vrestate.client.view.HelicopterView;
 import com.condox.vrestate.client.view.I_AbstractView;
 import com.condox.vrestate.client.view.SiteView;
 import com.condox.vrestate.client.view._AbstractView;
+import com.condox.vrestate.client.view.GeoItems.SiteGeoItem;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -72,38 +73,34 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 			if (!Options.isViewOrder() ||
 					Document.targetViewOrder.getProductType() == ProductType.PublicListing ||
 					Document.targetViewOrder.getProductType() == ProductType.Building3DLayout) {
-				String siteDisplayModelUrl = site.getDisplayModelUrl();
-				if (siteDisplayModelUrl != "") {
-					//-------------- Compatibility worjaround: --------------
-					// An old version of the server sends no URL Path for Site
-					if (!siteDisplayModelUrl.contains("https:"))
-						siteDisplayModelUrl = Options.HOME_URL + siteDisplayModelUrl;
-					//-------------- Compatibility worjaround --------------
-
-					GE.getPlugin().fetchKml(siteDisplayModelUrl, this);
-				}
+				if (site.getDisplayModelUrl() != "")
+					GE.getPlugin().fetchKml(Options.HOME_URL + site.getDisplayModelUrl(), this);
 				
 				for (Building bldng : Document.get().getBuildings()) {
 					if (bldng.getDisplayModelUrl() != "")
 						GE.getPlugin().fetchKml(bldng.getDisplayModelUrl(), this);
-					if (bldng.getOverlayUrl() != "")
-						GE.getPlugin().fetchKml(bldng.getOverlayUrl(), this);
-					if (bldng.getPOIUrl() != "")
-						GE.getPlugin().fetchKml(bldng.getPOIUrl(), this);
 				}
 			}
 
 			_AbstractView.CreateAllGeoItems();
-
-			if (Options.KIOSK_MODE) {
-			    _AbstractView.enableTimeout(true);
-			    firstView = new HelicopterView(_AbstractView.getSiteGeoItem(site.getId()));
-			}
-			else {
-			    _AbstractView.enableTimeout(false);
-			    firstView = new SiteView(_AbstractView.getSiteGeoItem(site.getId()));
-			}
 			
+			switch (Options.ROLE) {
+			case KIOSK: {
+				_AbstractView.enableTimeout(true);
+				int id = site.getId();
+				SiteGeoItem geoItem = _AbstractView.getSiteGeoItem(id);
+				firstView = new HelicopterView(geoItem);
+				break;
+			}
+			case VISITOR: {
+				_AbstractView.enableTimeout(false);
+				int id = site.getId();
+				SiteGeoItem geoItem = _AbstractView.getSiteGeoItem(id);
+				firstView = new SiteView(geoItem);
+				break;
+			}
+			}
+
 			_AbstractView.Push(firstView);
 		}
 		//=================================================================

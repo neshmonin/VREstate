@@ -3,17 +3,25 @@ package com.condox.vrestate.client;
 import java.util.List;
 import java.util.Map;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.RootPanel;
 
 public class Options implements RequestCallback {
+	protected enum ROLES {KIOSK, VISITOR};
+	public static ROLES ROLE = ROLES.VISITOR;
 
 	public static boolean DEBUG_MODE = true;
 
 	// TODO: this must be set only if this client in Kiosk mode
-	public static boolean KIOSK_MODE = false;
+//	public static boolean KIOSK_MODE = false;
 	// public static boolean KIOSK = true;
 
 	public static String URL_VRT;
@@ -33,6 +41,7 @@ public class Options implements RequestCallback {
 	public static String URL_BUTTON_EXIT_PANORAMIC_VIEW;
 	public static String URL_BUTTON_CENTER_PANORAMIC_VIEW;
 	public static String SUITE_INFO_TEMPLATE;
+	public static Element SUITE_INFO;
 	public static Integer SUITE_DISTANCE;
 	public static boolean SHOW_SOLD = false;
 	public static boolean USE_FILTER = true;
@@ -96,8 +105,6 @@ public class Options implements RequestCallback {
 			URL_MODEL = "https://model.3dcondox.com/";
 		}
 
-		KIOSK_MODE = params.containsKey("kiosk") ? Boolean.valueOf(params.get(
-				"kiosk").get(0)) : false;
 
 		URL_BUTTONS = params.containsKey("SchemaPath") ? params.get(
 				"SchemaPath").get(0) : URL_VRT + "buttons/";
@@ -107,8 +114,20 @@ public class Options implements RequestCallback {
 		URL_BUTTON_PANORAMIC_VIEW = URL_BUTTONS + "PanoramicView.png";
 		URL_BUTTON_EXIT_PANORAMIC_VIEW = URL_BUTTONS + "Back.png";
 		URL_BUTTON_CENTER_PANORAMIC_VIEW = URL_BUTTONS + "Center.png";
+
+		if (params.containsKey("role")&&params.get("role").get(0).equals(ROLE.KIOSK))
+			ROLE = ROLES.KIOSK;
 		// SUITE_INFO_TEMPLATE = HOME_URL + "templates/SuiteInfo.html";
-		String request = KIOSK_MODE ? (HOME_URL + "ReducedInfoKiosk.html") : (HOME_URL + "ReducedInfoWeb.html");
+//		String request = KIOSK_MODE ? (HOME_URL + "ReducedInfoKiosk.html") : (HOME_URL + "ReducedInfoWeb.html");
+		String request = /*HOME_URL + */"template.html";
+//		String request = "test.html";
+		
+		SUITE_INFO = DOM.createIFrame();
+		SUITE_INFO.setAttribute("frameBorder", "0");
+		SUITE_INFO.setAttribute("src", "template.html");
+		SUITE_INFO.setAttribute("id", "SuiteInfo");
+		SUITE_INFO.getStyle().setVisibility(Visibility.HIDDEN);
+		RootPanel.getBodyElement().appendChild(SUITE_INFO);
 
 		theOptions = new Options(vrEstate);
 		GET.send(request, theOptions);
@@ -119,6 +138,7 @@ public class Options implements RequestCallback {
 	@Override
 	public void onResponseReceived(Request request, Response response) {
 		SUITE_INFO_TEMPLATE = response.getText();
+//		SUITE_INFO= response.getText();
 		vrEstate.LoginUser();
 	}
 

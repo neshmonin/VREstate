@@ -18,6 +18,8 @@
 <!--                                           -->
 <title></title>
 
+<script src="Integration.js"></script>
+
 <script
 	src="https://www.google.com/jsapi?key=ABQIAAAAm7LIvLNR-PkJLewH4qmS7hREGtQZq9OFJfHndXhPP8gxXzlLARQtA_EfZjc9zs77WO25FrLcaZ4ZVA"></script>
 <script>
@@ -41,6 +43,22 @@ src="vrestate/vrestate.nocache.js"></script>
 	vertical-align: middle;
 }
 </style>
+    <script type="text/javascript">
+	window.addEventListener("message", receiveMessage, false);
+	function receiveMessage(event) {
+		if (event.data == 'reset') {
+			alert('Timer in BasePage reseted');
+			// Reset here your's timer.
+			// CAUTION: don't call function TimersReset from here!!
+		}
+		if (event.data == 'timeout') {
+			alert('Timer in BasePage outed');
+			// Out here your's timer.
+			// CAUTION: don't call function TimersOut from here!!
+		}
+			
+	}
+    </script>
 </head>
 
 <!--                                           -->
@@ -49,6 +67,7 @@ src="vrestate/vrestate.nocache.js"></script>
 <!-- to create a completely dynamic UI.        -->
 <!--                                           -->
 <body>
+<script>
 	<!-- OPTIONAL: include this if you want history support -->
 	<iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1'
 		style="position: absolute; width: 0; height: 0; border: 0"></iframe>

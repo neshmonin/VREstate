@@ -20,13 +20,12 @@ public class Building implements I_VRObject {
 	private Position position = null;
 	private Double altitude_adjustment = null;
 	private String displayModelUrl = "";
-	private String poiModelUrl = "";
-	private String overlayModelUrl = "";
 	private String infoUrl = null;
 	
 	void Parse(JSONValue value) {
 		JSONObject obj = value.isObject();
 		id = (int) obj.get("id").isNumber().doubleValue();
+		// TODO version
 		parent_id = (int) obj.get("siteId").isNumber().doubleValue();
 		name = obj.get("name").isString().stringValue();
 		
@@ -51,12 +50,6 @@ public class Building implements I_VRObject {
 
 		if (obj.containsKey("displayModelUrl"))
 			displayModelUrl = obj.get("displayModelUrl").isString().stringValue();
-		
-		if (obj.containsKey("poiModelUrl"))
-			poiModelUrl = obj.get("poiModelUrl").isString().stringValue();
-		
-		if (obj.containsKey("overlayModelUrl"))
-			overlayModelUrl = obj.get("overlayModelUrl").isString().stringValue();
 		
 		if (obj.containsKey("AltitudeAdjustment"))
 			altitude_adjustment = obj.get("altitudeAdjustment").isNumber().doubleValue();
@@ -145,14 +138,6 @@ public class Building implements I_VRObject {
 
 	public String getDisplayModelUrl() {
 		return displayModelUrl;
-	}
-
-	public String getPOIUrl() {
-		return poiModelUrl;
-	}
-
-	public String getOverlayUrl() {
-		return overlayModelUrl;
 	}
 
 }
