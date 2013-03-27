@@ -1,6 +1,7 @@
 package com.condox.vrestate.client.interactor;
 
 import com.condox.vrestate.client.ge.GE;
+import com.google.gwt.user.client.Window;
 import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
 import com.nitrous.gwt.earth.client.api.KmlUnits;
 
@@ -71,9 +72,11 @@ public class OverlayHelpers {
         {
         	int WinW = GE.getEarthWidth();
         	int WinH = GE.getEarthHeight();
-		    
+        	
             int pixX = (origin.x.Units == KmlUnits.UNITS_PIXELS) ? origin.x.iVal : (int)(WinW * origin.x.fVal);
             int pixY = (origin.y.Units == KmlUnits.UNITS_PIXELS) ? origin.y.iVal : (int)(WinH * (1f-origin.y.fVal));
+            
+//            Window.alert("WinW:" + WinW + " WinH:" + WinH + " pixX" + pixX + " pixY:" + pixY);
             
             int pixWidth = (width.Units == KmlUnits.UNITS_PIXELS) ? width.iVal : (int)(WinW * width.fVal);
             int pixHeight = (height.Units == KmlUnits.UNITS_PIXELS) ? height.iVal : (int)(WinH * height.fVal);

@@ -24,14 +24,26 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 	 */
 	@Override
 	public void onModuleLoad() {
+		// _AbstractView.init();
+		init();
 		Options.Init(this);
 	}
+
+	private native void init() /*-{
+		$wnd.onTimerExpire = function(expired) {
+			if (expired)
+				@com.condox.vrestate.client.view._AbstractView::onTimerTimeout()();
+			else
+				@com.condox.vrestate.client.view._AbstractView::onTimerReset()();
+		}
+	}-*/;
 
 	public void LoginUser() {
 		User.Login(this);
 	};
 
 	private GE ge = null;
+
 	public void StartGE() {
 		ge = new GE();
 		ge.Init(this);
@@ -41,20 +53,20 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 
 	public static void RenewCheckChangesThread() {
 		counter++;
-		String request = Options.HOME_URL + "ev?sid=" + User.SID + "&generation=" + counter;
+		String request = Options.HOME_URL + "ev?sid=" + User.SID
+				+ "&generation=" + counter;
 		GET.send(request, Document.getCallback());
 	}
+
 	public static int checkChangesPeriodSec;
 
 	public void LoadView() {
 		String url;
 		if (Options.isViewOrder()) {
-			url = Options.HOME_URL
-					+ "data/view?type=viewOrder&id="
+			url = Options.HOME_URL + "data/view?type=viewOrder&id="
 					+ Options.getViewOrderId() + "&track=true&SID=" + User.SID;
 		} else {
-			url = Options.HOME_URL
-					+ "data/view?type=site&id="
+			url = Options.HOME_URL + "data/view?type=site&id="
 					+ Options.getSiteId() + "&track=true&SID=" + User.SID;
 		}
 		GET.send(url, this);
@@ -65,25 +77,26 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 	I_AbstractView firstView = null;
 
 	@Override
-	public void onResponseReceived(Request request,
-			Response response) {
+	public void onResponseReceived(Request request, Response response) {
 		String json = response.getText();
 		if (Document.get().Parse(json)) {
 			Site site = (Site) Document.get().getSites().toArray()[0];
-			if (!Options.isViewOrder() ||
-					Document.targetViewOrder.getProductType() == ProductType.PublicListing ||
-					Document.targetViewOrder.getProductType() == ProductType.Building3DLayout) {
+			if (!Options.isViewOrder()
+					|| Document.targetViewOrder.getProductType() == ProductType.PublicListing
+					|| Document.targetViewOrder.getProductType() == ProductType.Building3DLayout) {
 				if (site.getDisplayModelUrl() != "")
-					GE.getPlugin().fetchKml(Options.HOME_URL + site.getDisplayModelUrl(), this);
-				
+					GE.getPlugin().fetchKml(
+							Options.HOME_URL + site.getDisplayModelUrl(), this);
+
 				for (Building bldng : Document.get().getBuildings()) {
 					if (bldng.getDisplayModelUrl() != "")
-						GE.getPlugin().fetchKml(bldng.getDisplayModelUrl(), this);
+						GE.getPlugin().fetchKml(bldng.getDisplayModelUrl(),
+								this);
 				}
 			}
 
 			_AbstractView.CreateAllGeoItems();
-			
+
 			switch (Options.ROLE) {
 			case KIOSK: {
 				_AbstractView.enableTimeout(true);
@@ -103,27 +116,29 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 
 			_AbstractView.Push(firstView);
 		}
-		//=================================================================
-//		KmlIcon icon = GE.getPlugin().createIcon("");
-//		KmlScreenOverlay overlay = GE.getPlugin().createScreenOverlay("");
-//		overlay.setIcon(icon);
-//		overlay.getOverlayXY().set(50, KmlUnits.UNITS_PIXELS, 100,KmlUnits.UNITS_INSET_PIXELS);
-//		overlay.getScreenXY().set(0, KmlUnits.UNITS_PIXELS, 0,KmlUnits.UNITS_INSET_PIXELS);
-//		GE.getPlugin().getFeatures().appendChild(overlay);
-//		String href = "Filtered 100 suites out of 200 (Prices from $1000,000 to $1000,000; Bathrooms:1,2(dens),3,4(dens); Bedrooms:1,2(dens),3,4(dens); Area: from $1000,000 to $1000,000;";
-//		href = Options.HOME_URL + "gen/txt?height=15&shadow=2&text="
-//				+ href + "&txtClr=16777215&shdClr=0&frame=0";
-//		icon.setHref(href);
-//		overlay.setVisibility(true);
-//		overlay.setOpacity(0.5f);
-		//=================================================================
+		// =================================================================
+		// KmlIcon icon = GE.getPlugin().createIcon("");
+		// KmlScreenOverlay overlay = GE.getPlugin().createScreenOverlay("");
+		// overlay.setIcon(icon);
+		// overlay.getOverlayXY().set(50, KmlUnits.UNITS_PIXELS,
+		// 100,KmlUnits.UNITS_INSET_PIXELS);
+		// overlay.getScreenXY().set(0, KmlUnits.UNITS_PIXELS,
+		// 0,KmlUnits.UNITS_INSET_PIXELS);
+		// GE.getPlugin().getFeatures().appendChild(overlay);
+		// String href =
+		// "Filtered 100 suites out of 200 (Prices from $1000,000 to $1000,000; Bathrooms:1,2(dens),3,4(dens); Bedrooms:1,2(dens),3,4(dens); Area: from $1000,000 to $1000,000;";
+		// href = Options.HOME_URL + "gen/txt?height=15&shadow=2&text="
+		// + href + "&txtClr=16777215&shdClr=0&frame=0";
+		// icon.setHref(href);
+		// overlay.setVisibility(true);
+		// overlay.setOpacity(0.5f);
+		// =================================================================
 	}
 
 	@Override
-	public void onError(Request request,
-			Throwable exception) {
+	public void onError(Request request, Throwable exception) {
 	}
-	
+
 	@Override
 	public void onLoaded(KmlObject feature) {
 		if (feature != null)

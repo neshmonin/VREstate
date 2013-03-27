@@ -137,8 +137,8 @@ public class SuiteView extends _GEView {
 		};
 		$wnd.showMoreInfo = function() {
 //			view.@com.condox.vrestate.client.view.SuiteView::ShowMoreInfo()();
-			if (typeof (parent.parent.parent.onMoreInfo) == "function")
-				parent.parent.parent.onMoreInfo();
+			if (typeof (parent.parent.parent.VRT_ShowMoreInfo) == "function")
+				parent.parent.parent.VRT_ShowMoreInfo('Musee','PH03','3-F','550000');
 			else
 				view.@com.condox.vrestate.client.view.SuiteView::ShowFloorPlan()();
 //			parent.parent.parent.HideVR();

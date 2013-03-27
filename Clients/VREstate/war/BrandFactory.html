@@ -2,39 +2,71 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title></title>
-<script src="Integration.js"></script>
-<link type="text/css" rel="stylesheet" href="Integration.css">
+<title>Brand Factory integration</title>
+<style type="text/css">
+/* Customizing VRT_Frame position & sizing */
+.VRT_Visible {
+	width: 600px;
+	height: 600px;
+	border: solid 1px black;
+	display: block;
+}
+
+.VRT_Hidden {
+	width: 1px;
+	height: 1px;
+	border: none;
+	frameborder: 0;
+	display: block;
+}
+</style>
+
+<script type="text/javascript">
+	// 	Helper function for using upper CSS
+	var VRT_FrameId = 'VRT_Content';
+	VRT_SetVisibility = function(visible) {
+		if (visible)
+			document.getElementById(VRT_FrameId).className = 'VRT_Visible';
+		else
+			document.getElementById(VRT_FrameId).className = 'VRT_Hidden';
+	}
+	// 	Replace this function with your one or comment it at all
+	VRT_ShowMoreInfo = function(buildingName, suiteName, suiteType, suitePrice) {
+		alert(buildingName + '/' + suiteName + '(' + suiteType + ')' + ':'
+				+ suitePrice);
+	}
+	
+	VRT_TimerExpire = function(expired) {
+		if (expired) {
+// 			Don't call HOST_TimerExpire() from here!
+// 			Create and call something as onTimeout().
+			document.getElementById('vrtTimeout').style.background = 'red';
+			document.getElementById('vrtActivity').style.background = 'none';
+		} else {
+			document.getElementById('vrtTimeout').style.background = 'none';
+			document.getElementById('vrtActivity').style.background = 'red';
+		}
+	}
+</script>
+<script type="text/javascript" src="Integration.js"></script>
+
 </head>
 <body>
-	<a href="#" onclick="ShowVR()">ShowVR</a>
-	<a href="#" onclick="HideVR()">HideVR</a>
-	<div id="viewer" class="viewerHidden">
-		This is container for viewer<br> <a href="#"
-			onclick="HideViewer();ShowVR()">Back to the Virtual Reality</a>
-	</div>
-	<div id="vrContent" class="vrHidden">
-		<iframe id="vrFrame"
-			src="https://vrt.3dcondox.com/vre/VREstate.html?DeveloperId=1&SiteId=7&role=kiosk&test=true"
-			width="100%" height="100%" frameborder="0"> </iframe>
-	</div>
-	<!-- 	This is the base template.<br> -->
-	<a href="#" onclick="TimerReset()">TimerReset() - there is an
-		action</a>
-	<br>
-	<a href="#" onclick="TimerTimeout()">TimerTimeout() - no action's
-		for a long time</a>
-	<br>
-	<script>
-		onTimerReset = function() {
-			alert('Virtual Reality timer resets.');
-			// Here must reset yours.
-		}
-		
-		onTimerTimeout = function() {
-			alert('Virtual Reality timer timeouts.');
-			// Here must timeout yours.
-		}
-	</script>
+	Menu imitation:
+	<a href="#" onclick="VRT_SetVisibility(true);">ShowVRT</a>,
+	<a href="#" onclick="VRT_SetVisibility(false);">HideVRT</a>
+
+	<iframe id="VRT_Content"
+		src="https://vrt.3dcondox.com/vre/VREstate.html?DeveloperId=1&SiteId=7&role=kiosk&test=true"
+		class="VRT_Hidden"></iframe>
+
+	Timer imitation:
+	<a href="#" onclick="HOST_TimerExpire(false)">Reset</a>,
+	<a href="#" onclick="HOST_TimerExpire(true)">Timeout</a>
+
+	<br> Logging:
+	<span id="vrtActivity">Activity in VRT side</span>
+	<span id="vrtTimeout">VRT timeout expired</span>
+
 </body>
 </html>

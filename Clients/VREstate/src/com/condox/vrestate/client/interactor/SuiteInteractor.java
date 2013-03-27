@@ -10,10 +10,12 @@ import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.user.client.Window;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlMouseEvent;
 import com.nitrous.gwt.earth.client.api.KmlPlacemark;
 import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
+import com.nitrous.gwt.earth.client.api.KmlUnits;
 import com.nitrous.gwt.earth.client.api.event.MouseListener;
 
 public class SuiteInteractor extends OverlayHelpers
@@ -58,6 +60,7 @@ public class SuiteInteractor extends OverlayHelpers
 	
 	private WhereIsMouse HitTest(int x, int y)
 	{
+//		Window.alert("X:" + x + ", Y:" + y);
 		if (rectNextSuite != null && rectNextSuite.ContainsPixel(x, y))
 			return WhereIsMouse.OnNext;
 		else
@@ -139,15 +142,49 @@ public class SuiteInteractor extends OverlayHelpers
 	public void onClick(KmlMouseEvent event) {
 		_AbstractView.ResetTimeOut();
 		event.preventDefault();
+//		==================================================
+//		String msg = "";
+//		int x = event.getClientX();
+//		int y = event.getClientY();
+//		msg += "mouseX:" + x + "\r\n";
+//		msg += "mouseY:" + y + "\r\n";
+//		
+//		int WinW = GE.getEarthWidth();
+//    	int WinH = GE.getEarthHeight();
+//    	
+//        int pixX = (rectPrevSuite.origin.x.Units == KmlUnits.UNITS_PIXELS) ? rectPrevSuite.origin.x.iVal : (int)(WinW * rectPrevSuite.origin.x.fVal);
+//        int pixY = (rectPrevSuite.origin.y.Units == KmlUnits.UNITS_PIXELS) ? rectPrevSuite.origin.y.iVal : (int)(WinH * (1f-rectPrevSuite.origin.y.fVal));
+//        
+//        int pixWidth = (rectPrevSuite.width.Units == KmlUnits.UNITS_PIXELS) ? rectPrevSuite.width.iVal : (int)(WinW * rectPrevSuite.width.fVal);
+//        int pixHeight = (rectPrevSuite.height.Units == KmlUnits.UNITS_PIXELS) ? rectPrevSuite.height.iVal : (int)(WinH * rectPrevSuite.height.fVal);
+//
+//        msg += "rectX:" + pixX + "\r\n";
+//		msg += "rectY:" + pixY + "\r\n";
+//		msg += "rectW:" + pixWidth + "\r\n";
+//		msg += "rectH:" + pixHeight + "\r\n";
+//		
+//		float fval = rectPrevSuite.origin.y.fVal;
+//		msg += "WinH:" + WinH + "\r\n";
+//		msg += "fval:" + fval + "\r\n";
+//		msg += "1f - fval:" + (1f - fval) + "\r\n";
+//		msg += "WinH * (1f - fval):" + (WinH * (1f - fval)) + "\r\n";
+//		msg += "(int)(WinH * (1f - fval)):" + ((int)(WinH * (1f - fval))) + "\r\n";
+//		
+//		Window.alert(msg);
+//		==================================================
+		
 		switch (HitTest(event.getClientX(), event.getClientY()))
 		{
 		case OnNext:
+//			Window.alert("Next");
 			view.selectNextSuite();
 			break;
 		case OnPrev:
+//			Window.alert("Prev");
 			view.selectPrevSuite();
 			break;
 		case AnywhereElse:
+//			Window.alert("Else");
 			if (event.getTarget().getType().equals("KmlPlacemark")) {
 				KmlPlacemark placemark = (KmlPlacemark) event.getTarget();
 				String json = placemark.getSnippet();

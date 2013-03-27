@@ -14,6 +14,7 @@ import com.condox.vrestate.client.document.Site;
 import com.condox.vrestate.client.document.Suite;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.I_AbstractInteractor;
+import com.condox.vrestate.client.screensaver.ScreenSaver;
 import com.condox.vrestate.client.view.Camera.Camera;
 import com.condox.vrestate.client.view.GeoItems.BuildingGeoItem;
 import com.condox.vrestate.client.view.GeoItems.IGeoItem;
@@ -21,6 +22,7 @@ import com.condox.vrestate.client.view.GeoItems.SiteGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
 import com.nitrous.gwt.earth.client.api.KmlUnits;
@@ -33,122 +35,156 @@ public abstract class _AbstractView implements I_AbstractView {
 
 	protected I_AbstractInteractor _interactor = null;
 	protected IGeoItem theGeoItem = null;
-    public Camera _camera;
-    protected double _transitionSpeed;
-    protected double _regularSpeed;
-    protected String _title;
-    private static boolean m_timeoutTimerDisabled = false;
-    protected static int TIMEOUTINTERVAL = 2*60*1000;
-    static protected Timer m_timeoutTimer = new Timer(){
+	public Camera _camera;
+	protected double _transitionSpeed;
+	protected double _regularSpeed;
+	protected String _title;
+	private static boolean m_timeoutTimerDisabled = false;
+	protected static int TIMEOUTINTERVAL = 2 * 60 * 1000;
+//	static protected Timer m_timeoutTimer = new Timer() {
+//
+//		@Override
+//		public void run() {
+//			_AbstractView.ResetTimeOut();
+//			_AbstractView.PopToTheBottom();
+//		}
+//	};
 
-		@Override
-		public void run() {
-			_AbstractView.ResetTimeOut();
-			_AbstractView.PopToTheBottom();
-		}
-	};
+	// Timer to return to the first FullScreenView (Helicopter or Video) after a
+	// timeout
+	public static void ResetTimeOut() {
+		ScreenSaver.get().reset();
+//		m_timeoutTimer.cancel();
+//
+//		if (!m_timeoutTimerDisabled) {
+//			if (Options.ROLE.equals(Options.ROLES.KIOSK))
+//				HostTimerReset();
+//			if (Options.DEBUG_MODE)
+//				m_timeoutTimer.schedule(20 * 1000);
+//			else
+//				m_timeoutTimer.schedule(TIMEOUTINTERVAL);
+//		}
+	}
 
-    // Timer to return to the first FullScreenView (Helicopter or Video) after a timeout
-    public static void ResetTimeOut()
-    {
-        m_timeoutTimer.cancel();
+//	public static native void HostTimerReset() /*-{
+//		$wnd.parent.parent.postMessage('reset', '*');
+//	}-*/;
+//
+//	public static native void HostTimerTimeout() /*-{
+//		$wnd.parent.parent.postMessage('timeout', '*');
+//	}-*/;
 
-        if (!m_timeoutTimerDisabled) {
-        	if (Options.DEBUG_MODE)
-        		m_timeoutTimer.schedule(30*1000);
-        	else
-        		m_timeoutTimer.schedule(TIMEOUTINTERVAL);
-        }
-    }
+	public static void onTimerReset() {
+		_AbstractView.ResetTimeOut();
+		// Window.alert("VR:onTimerReset");
+	}
 
-	/*==========================================================*/
+	public static void onTimerTimeout() {
+		_AbstractView.PopToTheBottom();
+		// Window.alert("VR:onTimerTimeout");
+	}
+
+	// public static native void init() /*-{
+	// $wnd.onTimerReset = function() {
+	// @com.condox.vrestate.client.view._AbstractView::onTimerReset()();
+	// }
+	// $wnd.onTimerTimeout = function() {
+	// @com.condox.vrestate.client.view._AbstractView::onTimerTimeout()();
+	// }
+	// }-*/;
+
+	/* ========================================================== */
 	// A single point of handling view-changing events
-    protected boolean isViewChangedInProgress = false;
+	protected boolean isViewChangedInProgress = false;
 
-    @Override
-    public void doViewChanged() {
-		if(!isViewChangedInProgress) {
+	@Override
+	public void doViewChanged() {
+		if (!isViewChangedInProgress) {
 			isViewChangedInProgress = true;
 			onViewChanged();
 			isViewChangedInProgress = false;
 		}
-    }
-    
-    @SuppressWarnings("unused")
-	private static HandlerRegistration frameend_listener = 
-		GE.getPlugin().addFrameEndListener(new FrameEndListener(){
+	}
 
-			@Override
-			public void onFrameEnd() {
-				if (views.isEmpty())
-					return;
-				
-				_AbstractView currentView = (_AbstractView) views.peek();
-			}			
-		});
-	
 	@SuppressWarnings("unused")
-	private static HandlerRegistration view_listener = 
-		GE.getPlugin().getView().addViewChangeListener(new ViewChangeListener(){
+	private static HandlerRegistration frameend_listener = GE.getPlugin()
+			.addFrameEndListener(new FrameEndListener() {
 
-			@Override public void onViewChangeBegin() { }
+				@Override
+				public void onFrameEnd() {
+					if (views.isEmpty())
+						return;
 
-			// As onViewChange fired, we redirect it to the onViewChanged virtual function
-			// of the current view.
-			@Override public void onViewChange() {
-//				if (views.isEmpty())
-//					return;
-//				
-//				_AbstractView currentView = (_AbstractView) views.peek();
-//				if(!currentView.isViewChangedInProgress())
-//				{
-//					currentView.setViewChangedInProgress(true);
-//					currentView.onViewChanged();
-//					currentView.setViewChangedInProgress(false);
-//				}
-			}
-
-			// As onViewChangeEnd fired, we redirect it to the onTransitionStopped
-			// virtual function of the current view.
-			@Override
-			public void onViewChangeEnd() {
-				if (views.isEmpty())
-					return;
-				
-				I_AbstractView currentView = views.peek();
-				if (currentView.isSetEnabledScheduled())
-				{
-					currentView.setEnabled(true);
-					currentView.onTransitionStopped();
-					NextSelection();
+					_AbstractView currentView = (_AbstractView) views.peek();
 				}
-			}
-		});
-	
-	/*==========================================================*/
-	
+			});
+
+	@SuppressWarnings("unused")
+	private static HandlerRegistration view_listener = GE.getPlugin().getView()
+			.addViewChangeListener(new ViewChangeListener() {
+
+				@Override
+				public void onViewChangeBegin() {
+				}
+
+				// As onViewChange fired, we redirect it to the onViewChanged
+				// virtual function
+				// of the current view.
+				@Override
+				public void onViewChange() {
+					// if (views.isEmpty())
+					// return;
+					//
+					// _AbstractView currentView = (_AbstractView) views.peek();
+					// if(!currentView.isViewChangedInProgress())
+					// {
+					// currentView.setViewChangedInProgress(true);
+					// currentView.onViewChanged();
+					// currentView.setViewChangedInProgress(false);
+					// }
+				}
+
+				// As onViewChangeEnd fired, we redirect it to the
+				// onTransitionStopped
+				// virtual function of the current view.
+				@Override
+				public void onViewChangeEnd() {
+					if (views.isEmpty())
+						return;
+
+					I_AbstractView currentView = views.peek();
+					if (currentView.isSetEnabledScheduled()) {
+						currentView.setEnabled(true);
+						currentView.onTransitionStopped();
+						NextSelection();
+					}
+				}
+			});
+
+	/* ========================================================== */
+
 	protected _AbstractView() {
 		_regularSpeed = GE.getPlugin().getFlyToSpeedTeleport();
 		_transitionSpeed = 0.5;
 	}
 
-	private static String getPrintableViews(String title)
-	{
+	private static String getPrintableViews(String title) {
 		String stackMsg = title + ": the views (";
 		for (I_UpdatableView item : views)
-			stackMsg += item.getClass().getName() + "->"; 
+			stackMsg += item.getClass().getName() + "->";
 		return stackMsg + "<none>)";
 	}
 
-	@Override public void onDestroy() {}
-	
+	@Override
+	public void onDestroy() {
+	}
+
 	public static void Push(I_AbstractView newView) {
 		newView.scheduleSetEnabled();
 		newView.setupCamera(null);
-		
-		if (!views.isEmpty())
-		{
-			I_AbstractView oldView = views.peek(); 
+
+		if (!views.isEmpty()) {
+			I_AbstractView oldView = views.peek();
 			oldView.setEnabled(false);
 		}
 
@@ -156,33 +192,33 @@ public abstract class _AbstractView implements I_AbstractView {
 
 		Log.write(getPrintableViews("Push"));
 
-        GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
-        newView.getCamera().Apply();
-        GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
+		GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
+		newView.getCamera().Apply();
+		GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
 	}
-	
+
 	public static I_AbstractView Pop() {
 		I_AbstractView currView = views.peek();
 		if (views.size() < 2)
 			return currView;
-		
+
 		currView.setEnabled(false);
 		currView.onDestroy();
 
 		I_AbstractView poppedView = views.pop();
-		I_AbstractView newView = views.peek(); 
+		I_AbstractView newView = views.peek();
 		newView.setupCamera(poppedView);
 
-		//newView.setEnabled(true);
+		// newView.setEnabled(true);
 		newView.scheduleSetEnabled();
-		
+
 		Log.write(getPrintableViews("Pop"));
 
-        GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
-        newView.getCamera().Apply();
-        GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
+		GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
+		newView.getCamera().Apply();
+		GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
 
-        return newView;
+		return newView;
 	}
 
 	public static void PopToTheBottom() {
@@ -190,18 +226,20 @@ public abstract class _AbstractView implements I_AbstractView {
 			I_AbstractView currView = views.peek();
 			currView.setEnabled(false);
 			currView.onDestroy();
-	
+
 			I_AbstractView poppedView = views.pop();
-			I_AbstractView newView = views.peek(); 
+			I_AbstractView newView = views.peek();
 			newView.setupCamera(poppedView);
-	
+
 			newView.setEnabled(true);
-			
+
 			Log.write(getPrintableViews("PopToTheBottom"));
-	
-	        GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
-	        newView.getCamera().Apply();
-	        GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
+
+			GE.getPlugin().getOptions()
+					.setFlyToSpeed(newView.getTransitionSpeed());
+			newView.getCamera().Apply();
+			GE.getPlugin().getOptions()
+					.setFlyToSpeed(newView.getRegularSpeed());
 		}
 	}
 
@@ -209,7 +247,7 @@ public abstract class _AbstractView implements I_AbstractView {
 		I_AbstractView currView = views.peek();
 		if (views.size() < 2)
 			return;
-		
+
 		currView.setEnabled(false);
 		currView.onDestroy();
 
@@ -217,22 +255,22 @@ public abstract class _AbstractView implements I_AbstractView {
 
 		newView.scheduleSetEnabled();
 		newView.setupCamera(poppedView);
-		
+
 		views.push(newView);
 
 		Log.write(getPrintableViews("Pop-Push"));
 
-        GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
-        newView.getCamera().Apply();
-        GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
-        
+		GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
+		newView.getCamera().Apply();
+		GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
+
 	}
-	
+
 	public static void Pop_Pop_Push(I_AbstractView newView) {
 		I_AbstractView currView = views.peek();
 		if (views.size() < 3)
 			return;
-		
+
 		currView.setEnabled(false);
 		currView.onDestroy();
 
@@ -243,24 +281,24 @@ public abstract class _AbstractView implements I_AbstractView {
 
 		newView.scheduleSetEnabled();
 		newView.setupCamera(poppedView);
-		
+
 		views.push(newView);
 
 		Log.write(getPrintableViews("Pop-Pop-Push"));
 
-        GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
-        newView.getCamera().Apply();
-        GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
-        
+		GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
+		newView.getCamera().Apply();
+		GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
+
 	}
-	
+
 	public String getTitleText() {
 		return theGeoItem.getCaption();
 	}
 
 	KmlScreenOverlay info_overlay = null;
 	KmlIcon icon = null;
-	
+
 	public void setEnabled(boolean value) {
 		if (info_overlay == null) {
 			icon = GE.getPlugin().createIcon("");
@@ -277,14 +315,14 @@ public abstract class _AbstractView implements I_AbstractView {
 		icon.setHref(href);
 		info_overlay.setVisibility(value);
 	};
-	
+
 	public static void ApplyFilter() {
 		Document.progressBar = new ProgressBar();
 		Document.progressBar.Update(ProgressBar.ProgressLabel.Executing);
 
 		int howMany = getSuiteGeoItems().size();
 		int count = 0;
-		for(SuiteGeoItem suiteGeo : getSuiteGeoItems()) {
+		for (SuiteGeoItem suiteGeo : getSuiteGeoItems()) {
 			Document.progressBar.Update(count * 100 / howMany);
 			suiteGeo.Redraw();
 			count++;
@@ -299,82 +337,81 @@ public abstract class _AbstractView implements I_AbstractView {
 	}
 
 	@Override
-	public double getTransitionSpeed(){
+	public double getTransitionSpeed() {
 		return _transitionSpeed;
 	}
+
 	@Override
-	public double getRegularSpeed(){
+	public double getRegularSpeed() {
 		return _regularSpeed;
 	}
+
 	@Override
 	public Camera getCamera() {
 		return _camera;
 	}
-	
+
 	@Override
 	public abstract void onViewChanged();
-	
+
 	public static IGeoItem getCurrentGeoItem() {
 		if (views.isEmpty())
 			return null;
-		
+
 		I_AbstractView currentView = views.peek();
 		return currentView.getGeoItem();
 	}
-	
+
 	public static I_AbstractView getCurrentView() {
 		if (views.isEmpty())
 			return null;
-		
+
 		I_AbstractView currentView = views.peek();
 		return currentView;
 	}
-	
-	protected void setupStandardLookAtCamera(I_AbstractView poppedView)
-	{
-        if (_camera != null)
-        {
-        	_camera.attributes.SetLonLatAlt(theGeoItem);
-        	if (poppedView != null) {
-        		Camera poppedCamera = poppedView.getCamera();
-        		if (poppedCamera.CameraType == _camera.CameraType)
-        			_camera.attributes.Heading_d = Camera.NormalizeHeading_d(poppedCamera.attributes.Heading_d);
-        	}
-        }
-        else
-        {
-	        I_AbstractView curView = _AbstractView.getCurrentView();
-	        if (curView != null)
-	        {
-	        	_camera = new Camera(curView.getCamera());
-		        _camera.attributes.SetLonLatAlt(theGeoItem);
-		        _camera.attributes.Tilt_d = theGeoItem.getPosition().getTilt();
-		        _camera.attributes.Range_m = theGeoItem.getPosition().getRange();
-	        }
-	        else
-	        {
-	        	_camera = new Camera(Camera.Type.LookAt,
-	        			theGeoItem.getPosition().getHeading(),
-	        			theGeoItem.getPosition().getTilt(),
-	        			0,
-	                    theGeoItem.getPosition().getLatitude(),
-	                    theGeoItem.getPosition().getLongitude(),
-	                    theGeoItem.getPosition().getAltitude(),
-	                    theGeoItem.getPosition().getRange());
-	        }
-        }
+
+	protected void setupStandardLookAtCamera(I_AbstractView poppedView) {
+		if (_camera != null) {
+			_camera.attributes.SetLonLatAlt(theGeoItem);
+			if (poppedView != null) {
+				Camera poppedCamera = poppedView.getCamera();
+				if (poppedCamera.CameraType == _camera.CameraType)
+					_camera.attributes.Heading_d = Camera
+							.NormalizeHeading_d(poppedCamera.attributes.Heading_d);
+			}
+		} else {
+			I_AbstractView curView = _AbstractView.getCurrentView();
+			if (curView != null) {
+				_camera = new Camera(curView.getCamera());
+				_camera.attributes.SetLonLatAlt(theGeoItem);
+				_camera.attributes.Tilt_d = theGeoItem.getPosition().getTilt();
+				_camera.attributes.Range_m = theGeoItem.getPosition()
+						.getRange();
+			} else {
+				_camera = new Camera(Camera.Type.LookAt, theGeoItem
+						.getPosition().getHeading(), theGeoItem.getPosition()
+						.getTilt(), 0, theGeoItem.getPosition().getLatitude(),
+						theGeoItem.getPosition().getLongitude(), theGeoItem
+								.getPosition().getAltitude(), theGeoItem
+								.getPosition().getRange());
+			}
+		}
 	}
 
 	boolean setEnabledScheduled = false;
-	public boolean isSetEnabledScheduled()
-	{
-		boolean isScheduled = setEnabledScheduled; 
+
+	public boolean isSetEnabledScheduled() {
+		boolean isScheduled = setEnabledScheduled;
 		setEnabledScheduled = false;
 		return isScheduled;
-	}; 
-	public void scheduleSetEnabled(){setEnabledScheduled = true;};
+	};
 
-	private static List<IGeoItem> SelectionsQueue = new LinkedList<IGeoItem>(); 
+	public void scheduleSetEnabled() {
+		setEnabledScheduled = true;
+	};
+
+	private static List<IGeoItem> SelectionsQueue = new LinkedList<IGeoItem>();
+
 	public static void AddSelection(IGeoItem geoItemToSelect) {
 		SelectionsQueue.add(geoItemToSelect);
 	}
@@ -382,84 +419,84 @@ public abstract class _AbstractView implements I_AbstractView {
 	public static void NextSelection() {
 		if (SelectionsQueue.size() <= 0)
 			return;
-		
+
 		IGeoItem geoItem = SelectionsQueue.get(0);
 		if (geoItem == null)
 			return;
-		
+
 		I_AbstractView currentView = views.peek();
 		currentView.Select(geoItem.getType(), geoItem.getId());
 		SelectionsQueue.remove(0);
 	}
-	
+
 	/*-----------------------------------------------------------------------*/
 	private static Map<Integer, SiteGeoItem> siteGeoItems = new HashMap<Integer, SiteGeoItem>();
 	private static Map<Integer, BuildingGeoItem> buildingGeoItems = new HashMap<Integer, BuildingGeoItem>();
 	private static Map<Integer, SuiteGeoItem> suiteGeoItems = new HashMap<Integer, SuiteGeoItem>();
 
 	// This static function creates all the GeoItems for the given
-    // Site and all obtained hierarchy of elements (BuildingGeo-s, SuiteGeo-s, etc.)
-    public static void CreateAllGeoItems()
-    {
-    	Document.progressBar.Update(ProgressBar.ProgressLabel.Processing);
-    	for (Site site : Document.get().getSites()) {
-    		SiteGeoItem siteGeo = new SiteGeoItem(site);
-    		siteGeoItems.put(site.getId(), siteGeo);
+	// Site and all obtained hierarchy of elements (BuildingGeo-s, SuiteGeo-s,
+	// etc.)
+	public static void CreateAllGeoItems() {
+		Document.progressBar.Update(ProgressBar.ProgressLabel.Processing);
+		for (Site site : Document.get().getSites()) {
+			SiteGeoItem siteGeo = new SiteGeoItem(site);
+			siteGeoItems.put(site.getId(), siteGeo);
 		}
 
-    	for (Building building : Document.get().getBuildings()) {
+		for (Building building : Document.get().getBuildings()) {
 			BuildingGeoItem buildingGeo = new BuildingGeoItem(building);
 			buildingGeoItems.put(building.getId(), buildingGeo);
 		}
 
-    	int count = 0;
-    	int howMany = Document.get().getSuites().size();
+		int count = 0;
+		int howMany = Document.get().getSuites().size();
 		for (Suite suite : Document.get().getSuites()) {
 			addSiteGeoItem(suite, false);
-			
+
 			count++;
-			Document.progressBar.Update(count*100.0/howMany);
+			Document.progressBar.Update(count * 100.0 / howMany);
 		}
 
 		Document.progressBar.Cleanup();
-    }
+	}
 
-    public static void addSiteGeoItem(Suite suite, boolean redraw) {
+	public static void addSiteGeoItem(Suite suite, boolean redraw) {
 		SuiteGeoItem suiteGeo = new SuiteGeoItem(suite);
 		suiteGeoItems.put(suite.getId(), suiteGeo);
 		if (redraw)
 			suiteGeo.Redraw();
-    }
+	}
 
-    public static SiteGeoItem getSiteGeoItem(int id) {
-    	return siteGeoItems.get(id);
-    }
+	public static SiteGeoItem getSiteGeoItem(int id) {
+		return siteGeoItems.get(id);
+	}
 
-    public static BuildingGeoItem getBuildingGeoItem(int id) {
-    	return buildingGeoItems.get(id);
-    }
+	public static BuildingGeoItem getBuildingGeoItem(int id) {
+		return buildingGeoItems.get(id);
+	}
 
-    public static SuiteGeoItem getSuiteGeoItem(int id) {
-    	return suiteGeoItems.get(id);
-    }
+	public static SuiteGeoItem getSuiteGeoItem(int id) {
+		return suiteGeoItems.get(id);
+	}
 
-    public static Collection<SiteGeoItem> getSiteGeoItems() {
-    	return siteGeoItems.values();
-    }
+	public static Collection<SiteGeoItem> getSiteGeoItems() {
+		return siteGeoItems.values();
+	}
 
-    public static Collection<BuildingGeoItem> getBuildingGeoItems() {
-    	return buildingGeoItems.values();
-    }
+	public static Collection<BuildingGeoItem> getBuildingGeoItems() {
+		return buildingGeoItems.values();
+	}
 
-    public static Collection<SuiteGeoItem> getSuiteGeoItems() {
-    	return suiteGeoItems.values();
-    }
+	public static Collection<SuiteGeoItem> getSuiteGeoItems() {
+		return suiteGeoItems.values();
+	}
 
-    public static void enableTimeout(boolean enable) {
+	public static void enableTimeout(boolean enable) {
 		_AbstractView.m_timeoutTimerDisabled = !enable;
 	}
 
-    public static boolean isTimeoutEnabled() {
+	public static boolean isTimeoutEnabled() {
 		return !m_timeoutTimerDisabled;
 	}
 }

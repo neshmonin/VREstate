@@ -15,7 +15,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 
 public class Options implements RequestCallback {
-	protected enum ROLES {KIOSK, VISITOR};
+	public enum ROLES {KIOSK, VISITOR};
 	public static ROLES ROLE = ROLES.VISITOR;
 
 	public static boolean DEBUG_MODE = true;
@@ -115,8 +115,11 @@ public class Options implements RequestCallback {
 		URL_BUTTON_EXIT_PANORAMIC_VIEW = URL_BUTTONS + "Back.png";
 		URL_BUTTON_CENTER_PANORAMIC_VIEW = URL_BUTTONS + "Center.png";
 
-		if (params.containsKey("role")&&params.get("role").get(0).equals(ROLE.KIOSK))
+		if (params.containsKey("role")&&params.get("role").get(0).equals("kiosk"))
 			ROLE = ROLES.KIOSK;
+		Log.write(params.toString());
+		Log.write("ROLE:" + ROLE);
+		
 		// SUITE_INFO_TEMPLATE = HOME_URL + "templates/SuiteInfo.html";
 //		String request = KIOSK_MODE ? (HOME_URL + "ReducedInfoKiosk.html") : (HOME_URL + "ReducedInfoWeb.html");
 		String request = /*HOME_URL + */"template.html";

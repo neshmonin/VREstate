@@ -1,27 +1,28 @@
 @CHARSET "ISO-8859-1";
-
-.vrVisible {
+/* VRT setup (coords, size, etc.)*/
+.VRT_Visible {
 	width: 100%;
-	height: 600px;
-	background: #fc0;
+	height: 800px;
 	border: solid 1px black;
 	display: block;
 }
-
-.vrHidden {
+/* Don't edit width, height, border, frameborder.  */
+.VRT_Hidden {
 	width: 1px;
 	height: 1px;
+	border: none;
+	frameborder: 0;
 	display: block;
 }
 
-.viewerVisible {
-	width: 100%;
-	height: 600px;
-	background: #fc0;
-	border: solid 1px black;
-	display: block;
+
+/* Only for demo page */
+.FALSE {
+	background-color: green; 
+	width: 150px;
 }
 
-.viewerHidden {
-	display: none;
+.TRUE {
+	background-color: red; 
+	width: 150px;
 }

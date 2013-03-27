@@ -7,7 +7,7 @@
 
 <html>
 <head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <!--                                                               -->
 <!-- Consider inlining CSS to reduce the number of requested files -->
 <!--                                                               -->
@@ -17,8 +17,6 @@
 <!-- Any title is fine                         -->
 <!--                                           -->
 <title></title>
-
-<script src="Integration.js"></script>
 
 <script
 	src="https://www.google.com/jsapi?key=ABQIAAAAm7LIvLNR-PkJLewH4qmS7hREGtQZq9OFJfHndXhPP8gxXzlLARQtA_EfZjc9zs77WO25FrLcaZ4ZVA"></script>
@@ -43,22 +41,6 @@ src="vrestate/vrestate.nocache.js"></script>
 	vertical-align: middle;
 }
 </style>
-    <script type="text/javascript">
-	window.addEventListener("message", receiveMessage, false);
-	function receiveMessage(event) {
-		if (event.data == 'reset') {
-			alert('Timer in BasePage reseted');
-			// Reset here your's timer.
-			// CAUTION: don't call function TimersReset from here!!
-		}
-		if (event.data == 'timeout') {
-			alert('Timer in BasePage outed');
-			// Out here your's timer.
-			// CAUTION: don't call function TimersOut from here!!
-		}
-			
-	}
-    </script>
 </head>
 
 <!--                                           -->
@@ -67,9 +49,29 @@ src="vrestate/vrestate.nocache.js"></script>
 <!-- to create a completely dynamic UI.        -->
 <!--                                           -->
 <body>
-<script>
+    <script type="text/javascript">
+	OnMessage = function(event) {
+    	if (typeof (onTimerExpire == 'function')) {
+    		if (event.data == 'reset')
+    			onTimerExpire(false);
+    		if (event.data == 'timeout')
+    			onTimerExpire(true);
+    	}
+	}
+
+    window.onload = function () {
+        if (window.addEventListener) {  // all browsers except IE before version 9
+            window.addEventListener ("message", OnMessage, false);
+        }
+        else {
+            if (window.attachEvent) {   // IE before version 9
+                window.attachEvent("onmessage", OnMessage);
+            }
+        }
+    }
+    </script>
 	<!-- OPTIONAL: include this if you want history support -->
-	<iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1'
+	<iframe src="#" id="__gwt_historyFrame" tabIndex='-1'
 		style="position: absolute; width: 0; height: 0; border: 0"></iframe>
 
 	<!-- RECOMMENDED if your web app will not function without JavaScript enabled -->

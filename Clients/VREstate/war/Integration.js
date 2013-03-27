@@ -1,47 +1,37 @@
+window.onload = function() {
+	HOST_TimerExpire = function(expired) {
+		// var data = {};
+		// data.name = "TimerExpire";
+		// data.value = expired;
+		// var message = JSON.stringify(data);
+		var message = '';
+		if (expired)
+			message = 'timeout';
+		else
+			message = 'reset';
+		document.getElementById(VRT_FrameId).contentWindow.postMessage(message,
+				'*');
+	}
 
-onMoreInfo = function () {
-	alert('Function onMoreInfo exists, calling it.');
-	HideVR();
-	ShowViewer();
-}
-
-window.onload = function () {
-	// Show/Hide VirtualReality and BrandFactory window's
-	ShowVR = function () {
-		document.getElementById("vrContent").className = "vrVisible";
-	}
-	
-	HideVR = function () {
-		document.getElementById("vrContent").className = "vrHidden";
-	}
-	
-	ShowViewer = function () {
-		document.getElementById("viewerContent").className = "viewerVisible";
-	}
-	
-	HideViewer = function () {
-		document.getElementById("viewerContent").className = "viewerHidden";
-	}
-	// Reset and timeout VirualReality timer
-	TimerReset = function () {
-		window.frames['vrFrame'].contentWindow.postMessage('reset', '*');
-	}
-	
-	TimerTimeout = function () {
-		window.frames['vrFrame'].contentWindow.postMessage('timeout', '*');
-	}
-	
-	function receiveMessage(event) {
-		if (event.data == 'reset') {
-			if (typeof(onTimerReset == 'function'))
-				onTimerReset();
-		}
-		if (event.data == 'timeout') {
-			if (typeof(onTimerTimeout == 'function'))
-				onTimerTimeout();
+	OnMessage = function(event) {
+		if (typeof (VRT_TimerExpire) == 'function') {
+			if (event.data == 'reset')
+				VRT_TimerExpire(false);
+			if (event.data == 'timeout')
+				VRT_TimerExpire(true);
 		}
 	}
-		
-	window.addEventListener("message", receiveMessage, false);
-	alert('BrandFactory onload');
+
+    function Init () {
+        if (window.addEventListener) {  // all browsers except IE before version 9
+            window.addEventListener ("message", OnMessage, false);
+        }
+        else {
+            if (window.attachEvent) {   // IE before version 9
+                window.attachEvent("onmessage", OnMessage);
+            }
+        }
+    }
+    Init();
+//	alert('BrandFactory onload');
 }
