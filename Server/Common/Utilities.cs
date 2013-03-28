@@ -8,13 +8,53 @@ namespace Vre.Server
     public class Utilities
     {
         /// <summary>
-        /// Makes suite number normalized for DB storage and search.
+        /// Makes suite number normalized for DB storage, display and search.
         /// </summary>
         public static string NormalizeSuiteNumber(string suiteNumber)
         {
-            string result = suiteNumber.Trim().ToLowerInvariant();
-            while (result.StartsWith("0")) result = result.Substring(1);
+            StringBuilder result = new StringBuilder(suiteNumber.Length);
+
+            bool hasDigit = false;
+            bool isNonZero = false;
+            foreach (char c in suiteNumber)
+            {
+                if (char.IsWhiteSpace(c)) continue;
+                if (char.IsDigit(c)) 
+                {
+                    if (('0' == c) && !isNonZero) continue;
+                    isNonZero = true;
+                    result.Append(c); 
+                    hasDigit = true; continue; 
+                }
+                if (hasDigit) result.Append(char.ToLowerInvariant(c));
+                else result.Append(char.ToUpperInvariant(c));
+                isNonZero = true;
+            }
+
+            //string result = suiteNumber.Trim().ToLowerInvariant();
+            //while (result.StartsWith("0")) result = result.Substring(1);
+            return result.ToString();
+        }
+
+        public static bool TestSuiteFloorNumber(string number)
+        {
+            bool result = true;
+            foreach (char c in number)
+            {
+                if (char.IsWhiteSpace(c)) continue;
+                if (char.IsLetterOrDigit(c)) continue;
+                if (char.IsPunctuation(c)) continue;
+                result = false;
+            }
             return result;
+        }
+
+        /// <summary>
+        /// Makes floor number normalized for DB storage and display.
+        /// </summary>
+        public static string NormalizeFloorNumber(string floorNumber)
+        {
+            return floorNumber.Trim().ToUpperInvariant();
         }
         
         public static string ExplodeException(Exception ex)

@@ -32,7 +32,7 @@ namespace Vre.Server.RemoteService
         {
             _allowUnsecureService = ServiceInstances.Configuration.GetValue("AllowSensitiveDataOverNonSecureConnection", false);
 
-            _linkExpirationTime = new TimeSpan(0, 0, ServiceInstances.Configuration.GetValue("ReversRequestLinkExpirationSec", 3600));
+            _linkExpirationTime = new TimeSpan(0, 0, ServiceInstances.Configuration.GetValue("ReverseRequestLinkExpirationSec", 3600));
 
             _staticLinkUrlTemplate = ServiceInstances.Configuration.GetValue("StaticLinkUrlTemplate", "http://ref.3dcondox.com/go?id={0}");
 

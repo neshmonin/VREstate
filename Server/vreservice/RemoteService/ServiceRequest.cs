@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -88,6 +89,14 @@ namespace Vre.Server.RemoteService
         /// Takes precedense over all other response modes.
         /// </summary>
         string RedirectionUrl { get; set; }
+        /// <summary>
+        /// Alternative approach to process response imediately.
+        /// </summary>
+        void ProcessResponse();
+        /// <summary>
+        /// Alternative approach to process response imediately in faulty way.
+        /// </summary>
+        void ProcessResponse(Exception ex);
     }
 
     internal interface IServiceRequest

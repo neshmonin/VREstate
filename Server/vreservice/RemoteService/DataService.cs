@@ -36,8 +36,8 @@ namespace Vre.Server.RemoteService
             ModelObject mo;
             int objectId;
             string strObjectId;
-            long generation;
             bool includeDeleted;
+            ChangeSubscriptionRequest csrq;
 
             if (!_configured) configure();
 
@@ -46,7 +46,7 @@ namespace Vre.Server.RemoteService
 
             getPathElements(request.Request.Path, out mo, out objectId, out strObjectId);
 
-            if (!long.TryParse(request.Request.Query.GetParam("genval", "0"), out generation)) generation = 0;
+            csrq = retrieveChangeSubscriptionRequest(request.Request.Query);
             includeDeleted = request.Request.Query.GetParam("withdeleted", "false").Equals("true");
 
             if (includeDeleted) RolePermissionCheck.CheckReadDeletedObjects(request.UserInfo.Session);
@@ -70,22 +70,22 @@ namespace Vre.Server.RemoteService
                     {
                         int estateDeveloperId = ResolveDeveloperId(request.UserInfo.Session.DbSession, request.Request.Query["ed"]);
                         if (-1 == estateDeveloperId) throw new ArgumentException("Developer ID is missing.");
-                        getSiteList(request.UserInfo.Session, estateDeveloperId, request.Response, generation, includeDeleted);
+                        getSiteList(request.UserInfo.Session, estateDeveloperId, request.Response, includeDeleted);
                     }
                     else
                     {
-                        getBuilding(request.UserInfo.Session, objectId, request.Response, generation);
+                        getBuilding(request.UserInfo.Session, objectId, request.Response, csrq);
                     }
                     return;
 
                 case ModelObject.Building:
                     if (-1 == objectId)
                     {
-                        getBuildingList(request.UserInfo.Session, request.Request.Query, request.Response, generation, includeDeleted);
+                        getBuildingList(request.UserInfo.Session, request.Request.Query, request.Response, csrq, includeDeleted);
                     }
                     else
                     {
-                        getBuilding(request.UserInfo.Session, objectId, request.Response, generation);
+                        getBuilding(request.UserInfo.Session, objectId, request.Response, csrq);
                     }
                     return;
 
@@ -98,13 +98,13 @@ namespace Vre.Server.RemoteService
                         Suite.SalesStatus filter;
                         string filterStr = request.Request.Query.GetParam("statusFilter", "");
                         if (Enum.TryParse<Suite.SalesStatus>(filterStr, true, out filter))
-                            getSuiteList(request.UserInfo.Session, buildingId, request.Response, generation, filter);
+                            getSuiteList(request.UserInfo.Session, buildingId, request.Response, csrq, filter);
                         else
-                            getSuiteList(request.UserInfo.Session, buildingId, request.Response, generation, null);
+                            getSuiteList(request.UserInfo.Session, buildingId, request.Response, csrq, null);
                     }
                     else
                     {
-                        getSuite(request.UserInfo.Session, objectId, request.Response, generation);
+                        getSuite(request.UserInfo.Session, objectId, request.Response, csrq);
                     }
                     return;
 
@@ -152,7 +152,7 @@ namespace Vre.Server.RemoteService
                     return;
 
                 case ModelObject.View:
-                    getView(request.UserInfo.Session, request.Request.Query, request.Response);
+                    getView(request.UserInfo.Session, request.Request.Query, csrq, request.Response);
                     return;
 
                 case ModelObject.FinancialTransaction:
@@ -172,7 +172,7 @@ namespace Vre.Server.RemoteService
                         int buildingId = request.Request.Query.GetParam("building", -1);
                         if (-1 == buildingId) throw new ArgumentException("Building ID is missing.");
 
-                        getInventoryList(request.UserInfo.Session, buildingId, request.Response);
+                        getInventoryList(request.UserInfo.Session, buildingId, csrq, request.Response);
                     }
                     else
                     {
@@ -340,42 +340,22 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getSiteList(ClientSession session, int developerId, IResponseData resp, 
-            long generation, bool includeDeleted)
+        private static void getSiteList(ClientSession session, int developerId, IResponseData resp, bool includeDeleted)
         {
             ClientData[] result = null;
-
-            Spikes.PullUpdateService.UpdateInfo updateInfo =
-                ServiceInstances.UpdateService.GetUpdate(Spikes.PullUpdateService.EntityLevel.Developer, developerId, generation);
 
             using (SiteManager manager = new SiteManager(session))
             {
                 Site[] siteList = manager.List(developerId, includeDeleted);
 
-                if (0 == generation)  // full request
+                int cnt = siteList.Length;
+                result = new ClientData[cnt];
+                for (int idx = 0; idx < cnt; idx++)
                 {
-                    int cnt = siteList.Length;
-                    result = new ClientData[cnt];
-                    for (int idx = 0; idx < cnt; idx++)
-                    {
-                        Site s = siteList[idx];
-                        ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-                        result[idx] = s.GetClientData();
-                    }
-                }
-                else if (updateInfo.Sites != null)  // changed item list
-                {
-                    int cnt = updateInfo.Sites.Count;
-                    List<ClientData> siteDataList = new List<ClientData>(cnt);
-                    foreach (Site s in siteList)
-                    {
-                        if (updateInfo.Sites.Contains(s.AutoID))
-                        {
-                            ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-                            siteDataList.Add(s.GetClientData());
-                        }
-                    }
-                    result = siteDataList.ToArray();
+                    Site s = siteList[idx];
+                    ServiceInstances.ModelCache.FillWithModelInfo(s, false);
+                    UrlHelper.ConvertUrlsToAbsolute(s);
+                    result[idx] = s.GetClientData();
                 }
             }
 
@@ -383,26 +363,33 @@ namespace Vre.Server.RemoteService
             //
             resp.Data = new ClientData();
             if (result != null) resp.Data.Add("sites", result);
-            resp.Data.Add("generation", updateInfo.Generation);
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
         private static void getBuildingList(ClientSession session, ServiceQuery query, IResponseData resp, 
-            long generation, bool includeDeleted)
+            ChangeSubscriptionRequest csrq, bool includeDeleted)
         {
-            List<Building> toReturn = null;
+            IList<Building> toReturn = null;
             ClientData[] result = null;
-            long resGeneration = -1;
 
             string scopeType = query.GetParam("scopeType", "site");
 
             if (scopeType.Equals("address"))
             {
+                int devLock = -1;
+                string edId = query["ed"];
+                if (edId != null)
+                {
+                    devLock = ResolveDeveloperId(session.DbSession, edId);
+                    if (devLock < 0) throw new ArgumentException("Estate Developer ID is invalid");
+                }
+
                 toReturn = new List<Building>();
                 foreach (UpdateableBase u in AddressHelper.ParseGeographicalAddressToModel(query, session.DbSession, true))
                 {
                     Building b = u as Building;
-                    if (b != null) toReturn.Add(b);
+                    if ((b != null) && ((devLock < 0) || (b.ConstructionSite.Developer.AutoID.Equals(devLock)))) 
+                        toReturn.Add(b);
                 }
             }
             else if (scopeType.Equals("site"))
@@ -410,28 +397,8 @@ namespace Vre.Server.RemoteService
                 int siteId = query.GetParam("site", -1);
                 if (-1 == siteId) throw new ArgumentException("Site ID is missing.");
 
-                Spikes.PullUpdateService.UpdateInfo updateInfo =
-                    ServiceInstances.UpdateService.GetUpdate(Spikes.PullUpdateService.EntityLevel.Site, siteId, generation);
-
                 using (SiteManager manager = new SiteManager(session))
-                {
-                    Building[] buildingList = manager.ListBuildings(siteId, includeDeleted);
-
-                    if (0 == generation)  // full request
-                    {
-                        toReturn = new List<Building>(buildingList);
-                    }
-                    else if (updateInfo.Buildings != null)  // changed item list
-                    {
-                        toReturn = new List<Building>(updateInfo.Buildings.Count);
-                        foreach (Building b in buildingList)
-                        {
-                            if (updateInfo.Buildings.Contains(b.AutoID)) toReturn.Add(b);
-                        }
-                    }
-                }
-
-                resGeneration = updateInfo.Generation;
+                    toReturn = manager.ListBuildings(siteId, includeDeleted);
             }
             else throw new NotImplementedException("Unknown scope type");
 
@@ -443,91 +410,67 @@ namespace Vre.Server.RemoteService
                 {
                     Building b = toReturn[idx];
                     ServiceInstances.ModelCache.FillWithModelInfo(b, false);
+                    UrlHelper.ConvertUrlsToAbsolute(b);
                     result[idx] = b.GetClientData();
                 }
+
+                if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, toReturn, new Suite[0], csrq);
             }
 
             // produce output
             //
             resp.Data = new ClientData();
             if (result != null) resp.Data.Add("buildings", result);
-            if (resGeneration >= 0) resp.Data.Add("generation", resGeneration);
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getBuilding(ClientSession session, int buildingId, IResponseData resp, long generation)
+        private static void getBuilding(ClientSession session, int buildingId, IResponseData resp, ChangeSubscriptionRequest csrq)
         {
             ClientData result = null;
-
-            Spikes.PullUpdateService.UpdateInfo updateInfo =
-                ServiceInstances.UpdateService.GetUpdate(Spikes.PullUpdateService.EntityLevel.Building, buildingId, generation);
 
             using (SiteManager manager = new SiteManager(session))
             {
                 Building building = manager.GetBuildingById(buildingId);
 
-                if (0 == generation)  // full request
-                {
-                    ServiceInstances.ModelCache.FillWithModelInfo(building, false);
-                    result = building.GetClientData();
-                }
-                else if (updateInfo.Buildings != null)  // changed item list
-                {
-                    if (updateInfo.Buildings.Contains(building.AutoID))
-                    {
-                        ServiceInstances.ModelCache.FillWithModelInfo(building, false);
-                        result = building.GetClientData();
-                    }
-                }
-            }            
+                ServiceInstances.ModelCache.FillWithModelInfo(building, false);
+                UrlHelper.ConvertUrlsToAbsolute(building);
+                result = building.GetClientData();
+
+                if (csrq != ChangeSubscriptionRequest.None)
+                    setChangeSubscription(session, building, csrq);
+            }
 
             // produce output
             //
             resp.Data = new ClientData();
             if (result != null) resp.Data.Merge(result);
-            resp.Data.Add("generation", updateInfo.Generation);
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getSuiteList(ClientSession session, int buildingId, IResponseData resp, long generation,
-            Suite.SalesStatus? statusFilter)
+        private static void getSuiteList(ClientSession session, int buildingId, IResponseData resp, 
+            ChangeSubscriptionRequest csrq, Suite.SalesStatus? statusFilter)
         {
             List<ClientData> result = null;
-
-            Spikes.PullUpdateService.UpdateInfo updateInfo =
-                ServiceInstances.UpdateService.GetUpdate(Spikes.PullUpdateService.EntityLevel.Building, buildingId, generation);
 
             using (SiteManager manager = new SiteManager(session))
             {
                 Suite[] suiteList = manager.ListSuitesByBuiding(buildingId);
 
-                if (0 == generation)  // full request
+                int cnt = suiteList.Length;
+                result = new List<ClientData>(cnt);
+                for (int idx = 0; idx < cnt; idx++)
                 {
-                    int cnt = suiteList.Length;
-                    result = new List<ClientData>(cnt);
-                    for (int idx = 0; idx < cnt; idx++)
-                    {
-                        Suite s = suiteList[idx];
-                        insertSuiteIntoResult(statusFilter, result, manager, s);
-                    }
+                    Suite s = suiteList[idx];
+                    insertSuiteIntoResult(statusFilter, result, manager, s);
                 }
-                else if (updateInfo.Suites != null)  // changed item list
-                {
-                    int cnt = updateInfo.Suites.Count;
-                    result = new List<ClientData>(cnt);
-                    foreach (Suite s in suiteList)
-                    {
-                        if (updateInfo.Suites.Contains(s.AutoID))
-                            insertSuiteIntoResult(statusFilter, result, manager, s);
-                    }
-                }
+
+                if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, suiteList, csrq);
             }
 
             // produce output
             //
             resp.Data = new ClientData();
             if (result != null) resp.Data.Add("suites", NHibernateHelper.IListToArray<ClientData>(result));
-            resp.Data.Add("generation", updateInfo.Generation);
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
@@ -550,37 +493,25 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void getSuite(ClientSession session, int suiteId, IResponseData resp, long generation)
+        private static void getSuite(ClientSession session, int suiteId, IResponseData resp, ChangeSubscriptionRequest csrq)
         {
             ClientData result = null;
-
-            Spikes.PullUpdateService.UpdateInfo updateInfo =
-                ServiceInstances.UpdateService.GetUpdate(Spikes.PullUpdateService.EntityLevel.Suite, suiteId, generation);
 
             using (SiteManager manager = new SiteManager(session))
             {
                 Suite suite = manager.GetSuiteById(suiteId);
 
-                if (0 == generation)  // full request
-                {
-                    ServiceInstances.ModelCache.FillWithModelInfo(suite, false);
-                    result = SuiteEx.GetClientData(suite, manager.GetCurrentSuitePrice(suite));
-                }
-                else if (updateInfo.Suites != null)  // changed item list
-                {
-                    if (updateInfo.Suites.Contains(suite.AutoID))
-                    {
-                        ServiceInstances.ModelCache.FillWithModelInfo(suite, false);
-                        result = SuiteEx.GetClientData(suite, manager.GetCurrentSuitePrice(suite));
-                    }
-                }
+                ServiceInstances.ModelCache.FillWithModelInfo(suite, false);
+                result = SuiteEx.GetClientData(suite, manager.GetCurrentSuitePrice(suite));
+
+                if (csrq != ChangeSubscriptionRequest.None)
+                    setChangeSubscription(session, suite, csrq);
             }
 
             // produce output
             //
             resp.Data = new ClientData();
             if (result != null) resp.Data.Merge(result);
-            resp.Data.Add("generation", updateInfo.Generation);
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
@@ -700,7 +631,7 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void getInventoryList(ClientSession session, int buildingId, IResponseData resp)
+        private static void getInventoryList(ClientSession session, int buildingId, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             Building b;
 
@@ -724,7 +655,10 @@ namespace Vre.Server.RemoteService
 
                     result.Add(cd);
                 }
+
             }
+
+            if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, b.Suites, csrq);
 
             resp.Data = new ClientData();
             resp.Data.Add("inventory", result);
@@ -768,27 +702,7 @@ namespace Vre.Server.RemoteService
 
         private static void getViewOrder(ClientSession session, ServiceQuery query, string strObjectId, IResponseData resp)
         {
-            Guid rqid;
-            switch (UniversalId.TypeInUrlId(strObjectId))
-            {
-                default:
-                    throw new ArgumentException();
-
-                case UniversalId.IdType.Unknown:  // legacy
-                    if (!Guid.TryParseExact(strObjectId, "N", out rqid))
-                        throw new ArgumentException();
-                    break;
-
-                case UniversalId.IdType.ViewOrder:
-                    rqid = UniversalId.ExtractAsGuid(strObjectId);
-                    break;
-            }
-
-            ViewOrder viewOrder;
-            using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
-                viewOrder = dao.GetById(rqid);
-
-            if (null == viewOrder) throw new FileNotFoundException("Listing does not exist");
+            ViewOrder viewOrder = RetrieveViewOrder(session.DbSession, strObjectId, true);
 
             resp.Data = convertViewOrderdata(session, viewOrder, "true".Equals(query["verbose"]));
 
@@ -840,6 +754,14 @@ namespace Vre.Server.RemoteService
 
             if (null == user) throw new FileNotFoundException("User does not exist");
 
+            int devLock = -1;
+            string edId = query["ed"];
+            if (edId != null)
+            {
+                devLock = ResolveDeveloperId(session.DbSession, edId);
+                if (devLock < 0) throw new ArgumentException("Estate Developer ID is invalid");
+            }
+
             RolePermissionCheck.CheckUserAccess(session, user, RolePermissionCheck.UserInfoAccessLevel.Transactional);
 
             using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
@@ -862,7 +784,10 @@ namespace Vre.Server.RemoteService
             {
                 ViewOrder vo = list[idx];
                 if (vo.ExpiresOn < timeLim)
+                {
+                    if ((devLock >= 0) && (extractDeveloperFromViewOrder(session, vo).AutoID != devLock)) continue;
                     result.Add(convertViewOrderdata(session, vo, verbose));
+                }
             }
 
             resp.Data = new ClientData();
@@ -870,48 +795,26 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getView(ClientSession session, ServiceQuery query, IResponseData resp)
+        private static void getView(ClientSession session, ServiceQuery query, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             string type = query.GetParam("type", "viewOrder");
 
-            if (type.Equals("viewOrder")) getViewViewOrder(session, query, resp);
-            else if (type.Equals("site")) getViewSite(session, query, resp);
-            else if (type.Equals("building")) getViewBuilding(session, query, resp);
-            else if (type.Equals("suite")) getViewSuite(session, query, resp);
-            else if (type.Equals("geo")) getViewGeo(session, query, resp);
+            if (type.Equals("viewOrder")) getViewViewOrder(session, query, csrq, resp);
+            else if (type.Equals("site")) getViewSite(session, query, csrq, resp);
+            else if (type.Equals("building")) getViewBuilding(session, query, csrq, resp);
+            else if (type.Equals("suite")) getViewSuite(session, query, csrq, resp);
+            else if (type.Equals("geo")) getViewGeo(session, query, csrq, resp);
             else throw new NotImplementedException();
         }
 
-        private static void getViewViewOrder(ClientSession session, ServiceQuery query, IResponseData resp)
+        private static void getViewViewOrder(ClientSession session, ServiceQuery query, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
-            string strObjectId = query["id"];
-            if (null == strObjectId) throw new ArgumentException("Object ID missing.");
-
-            Guid rqid;
-            switch (UniversalId.TypeInUrlId(strObjectId))
-            {
-                case UniversalId.IdType.ViewOrder:
-                    rqid = UniversalId.ExtractAsGuid(strObjectId);
-                    break;
-
-                case UniversalId.IdType.Unknown:
-                    if (!Guid.TryParseExact(strObjectId, "N", out rqid))
-                        throw new ArgumentException();
-                    break;
-
-                default:
-                    throw new ArgumentException();
-            }
-
             ViewOrder viewOrder;
             bool viewOrderValid = false;
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
-                using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
-                    viewOrder = dao.GetById(rqid);
-
-                if ((null == viewOrder) || (viewOrder.Deleted)) throw new FileNotFoundException("Undefined view order");
+                viewOrder = RetrieveViewOrder(session.DbSession, query["id"], false);
 
                 viewOrderValid = (viewOrder.Enabled && (viewOrder.ExpiresOn > DateTime.UtcNow));
 
@@ -929,11 +832,11 @@ namespace Vre.Server.RemoteService
             switch (viewOrder.TargetObjectType)
             {
                 case ViewOrder.SubjectType.Suite:
-                    getViewSuiteViewOrder(session, viewOrder, resp);
+                    getViewSuiteViewOrder(session, viewOrder, csrq, resp);
                     break;
 
                 case ViewOrder.SubjectType.Building:
-                    getViewBuildingViewOrder(session, viewOrder, resp);
+                    getViewBuildingViewOrder(session, viewOrder, csrq, resp);
                     break;
 
                 default:
@@ -941,7 +844,7 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void getViewBuildingViewOrder(ClientSession session, ViewOrder viewOrder, IResponseData resp)
+        private static void getViewBuildingViewOrder(ClientSession session, ViewOrder viewOrder, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             IList<ViewOrder> viewOrders;
             Building building;
@@ -968,13 +871,15 @@ namespace Vre.Server.RemoteService
             //generateViewResponse(session.DbSession, building.Suites, viewOrders, viewOrder.AutoID,
             //    resp, ViewResponseSoldPropertyLevel.Building, false);
 
+            if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, building, csrq);
+
             generateViewResponse(session.DbSession,
                 null, new Building[] { building }, null, building.Suites, viewOrders, viewOrder.AutoID,
                 resp,
                 ViewResponseSoldPropertyLevel.Suite, false);
         }
 
-        private static void getViewSuiteViewOrder(ClientSession session, ViewOrder viewOrder, IResponseData resp)
+        private static void getViewSuiteViewOrder(ClientSession session, ViewOrder viewOrder, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             // TODO: make this variable
             const double defaultProximityQuadradiusM = 1000.0;
@@ -993,25 +898,32 @@ namespace Vre.Server.RemoteService
             {
                 int[] buildingIds = ServiceInstances.ModelCache.BuildingsByGeoProximity(suite.Building, defaultProximityQuadradiusM);
 
+                ServiceInstances.Logger.Debug("dSPVO: got {0} buildings in proximity.", buildingIds.Length);
+
+                EstateDeveloper devLock = suite.Building.ConstructionSite.Developer;
                 buildings = new List<Building>();
                 using (BuildingDao dao = new BuildingDao(session.DbSession))
                 {
                     foreach (int id in buildingIds)
                     {
                         Building b = dao.GetById(id);
-                        if (b != null) buildings.Add(b);  // should never happen?
+                        if (b != null)  // should never happen?
+                            if (b.ConstructionSite.Developer.Equals(devLock))
+                                buildings.Add(b);
                     }
                 }
 
                 ServiceInstances.Logger.Debug("dSPVO: got {0} live buildings.", buildings.Count);
 
                 using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
-                    viewOrders = dao.GetActiveInBuildings(ViewOrder.ViewOrderProduct.PublicListing, buildingIds);
+                    viewOrders = dao.GetActiveInBuildings(ViewOrder.ViewOrderProduct.PublicListing, buildings.ConvertTo(b => b.AutoID).ToArray());
 
                 List<int> suiteIds = new List<int>(viewOrders.Count);
                 foreach (ViewOrder vo in viewOrders) suiteIds.Add(vo.TargetObjectId);
                 using (SuiteDao dao = new SuiteDao(session.DbSession))
                     suites = dao.GetByIdList(suiteIds);
+
+                if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, buildings, csrq);
             }
             else
             {
@@ -1020,6 +932,8 @@ namespace Vre.Server.RemoteService
 
                 suites = new Suite[1];
                 suites[0] = suite;
+
+                if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, suites, csrq);
             }
 
             //generateViewResponse(session.DbSession, suites, viewOrders, viewOrder.AutoID,
@@ -1031,7 +945,7 @@ namespace Vre.Server.RemoteService
                 ViewResponseSoldPropertyLevel.Suite, false);
         }
 
-        private static void getViewGeo(ClientSession session, ServiceQuery query, IResponseData resp)
+        private static void getViewGeo(ClientSession session, ServiceQuery query, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             string param;
             double cLon, cLat, sqRadM;
@@ -1050,18 +964,30 @@ namespace Vre.Server.RemoteService
 
             bool showSold = query.GetParam("showSold", "false").Equals("true");
 
+            EstateDeveloper devLock = null;
+            string voId = query["relatedVoId"];
+            if (voId != null)
+            {
+                ViewOrder vo = RetrieveViewOrder(session.DbSession, voId, false);
+                if (vo.Enabled && (vo.ExpiresOn > DateTime.UtcNow))
+                    devLock = extractDeveloperFromViewOrder(session, vo);
+            }
+
             List<Building> buildings = new List<Building>();
             using (BuildingDao dao = new BuildingDao(session.DbSession))
             {
                 foreach (int id in ServiceInstances.ModelCache.BuildingsByGeoProximity(cLon, cLat, sqRadM))
                 {
                     Building b = dao.GetById(id);
-                    if (!b.Deleted) buildings.Add(b);
+                    if (!b.Deleted && ((null == devLock) || (b.ConstructionSite.Developer.Equals(devLock))))
+                        buildings.Add(b);
                 }
             }
 
             List<Suite> suites = new List<Suite>();
             foreach (Building b in buildings) suites.AddRange(b.Suites);
+
+            if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, buildings, suites, csrq);
 
             generateViewResponse(session.DbSession,
                 null, buildings, null, suites, null, Guid.Empty,
@@ -1069,7 +995,7 @@ namespace Vre.Server.RemoteService
                 showSold ? ViewResponseSoldPropertyLevel.Suite : ViewResponseSoldPropertyLevel.Building, false);
         }
 
-        private static void getViewSite(ClientSession session, ServiceQuery query, IResponseData resp)
+        private static void getViewSite(ClientSession session, ServiceQuery query, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             int objectId = query.GetParam("id", -1);
             if (objectId < 0) throw new ArgumentException("Object ID missing.");
@@ -1085,13 +1011,15 @@ namespace Vre.Server.RemoteService
             List<Suite> suites = new List<Suite>();
             foreach (Building b in site.Buildings) suites.AddRange(b.Suites);
 
+            if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, site.Buildings, suites, csrq);
+
             generateViewResponse(session.DbSession,
                 new Site[] { site }, site.Buildings, null, suites, null, Guid.Empty, 
                 resp, 
                 showSold ? ViewResponseSoldPropertyLevel.Suite : ViewResponseSoldPropertyLevel.Building, false);
         }
 
-        private static void getViewBuilding(ClientSession session, ServiceQuery query, IResponseData resp)
+        private static void getViewBuilding(ClientSession session, ServiceQuery query, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             int objectId = query.GetParam("id", -1);
             if (objectId < 0) throw new ArgumentException("Object ID missing.");
@@ -1104,13 +1032,15 @@ namespace Vre.Server.RemoteService
 
             if ((null == building) || building.Deleted) throw new FileNotFoundException("Unknown building");
 
+            if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, building, csrq);
+
             generateViewResponse(session.DbSession, 
                 null, new Building[] { building }, null, building.Suites, null, Guid.Empty,
                 resp, 
                 showSold ? ViewResponseSoldPropertyLevel.Suite : ViewResponseSoldPropertyLevel.Building, true);
         }
 
-        private static void getViewSuite(ClientSession session, ServiceQuery query, IResponseData resp)
+        private static void getViewSuite(ClientSession session, ServiceQuery query, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             int objectId = query.GetParam("id", -1);
             if (objectId < 0) throw new ArgumentException("Object ID missing.");
@@ -1120,6 +1050,8 @@ namespace Vre.Server.RemoteService
                 suite = dao.GetById(objectId);
 
             if ((null == suite) || suite.Deleted) throw new FileNotFoundException("Unknown suite");
+
+            if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, suite, csrq);
 
             generateViewResponse(session.DbSession, new Suite[] { suite }, resp, ViewResponseSoldPropertyLevel.Suite, true);
         }
@@ -1142,7 +1074,33 @@ namespace Vre.Server.RemoteService
             generateViewResponse(dbSession, null, null, null, suites, viewOrders, primaryListingId, resp, soldPropertyLevel, minimizeOutput);
         }
 
-        private enum ViewResponseSoldPropertyLevel { None, Building, Suite }
+        private enum ViewResponseSoldPropertyLevel 
+        { 
+            /// <summary>
+            /// No sold property in output
+            /// </summary>
+            None, 
+            /// <summary>
+            /// Sold buildings in output; no sold suites
+            /// </summary>
+            Building, 
+            /// <summary>
+            /// All sold property in output
+            /// </summary>
+            Suite 
+        }
+
+        private static void generateViewResponse(ISession dbSession,
+            IEnumerable<Site> sites, IEnumerable<Building> buildings,
+            IEnumerable<SuiteType> suiteTypes, IEnumerable<Suite> suites,
+            IEnumerable<ViewOrder> viewOrders,
+            Guid primaryListingId,
+            IResponseData resp,
+            ViewResponseSoldPropertyLevel soldPropertyLevel, bool minimizeOutput)
+        {
+            generateViewResponse(dbSession, sites, buildings, suiteTypes, suites, viewOrders, primaryListingId, resp, soldPropertyLevel, minimizeOutput,
+                false);
+        }
 
         private static void generateViewResponse(ISession dbSession,
             IEnumerable<Site> sites, IEnumerable<Building> buildings, 
@@ -1150,7 +1108,8 @@ namespace Vre.Server.RemoteService
             IEnumerable<ViewOrder> viewOrders,
             Guid primaryListingId,
             IResponseData resp,
-            ViewResponseSoldPropertyLevel soldPropertyLevel, bool minimizeOutput)
+            ViewResponseSoldPropertyLevel soldPropertyLevel, bool minimizeOutput,
+            bool tempEventMode)
         {
             resp.Data = new ClientData();
 
@@ -1217,6 +1176,7 @@ namespace Vre.Server.RemoteService
                         if (minimizeOutput) continue;
                     }
                     ServiceInstances.ModelCache.FillWithModelInfo(b, false);
+                    UrlHelper.ConvertUrlsToAbsolute(b);
                     ClientData cd = b.GetClientData();
                     //if (maskSaleStatus) cd["status"] = "Selected";
                     cd.Add("address", AddressHelper.ConvertToReadableAddress(b, null));
@@ -1230,6 +1190,7 @@ namespace Vre.Server.RemoteService
                 foreach (Building b in usedBuildings)
                 {
                     ServiceInstances.ModelCache.FillWithModelInfo(b, false);
+                    UrlHelper.ConvertUrlsToAbsolute(b);
                     ClientData cd = b.GetClientData();
                     //if (maskSaleStatus) cd["status"] = "Selected";
                     cd.Add("address", AddressHelper.ConvertToReadableAddress(b, null));
@@ -1239,64 +1200,77 @@ namespace Vre.Server.RemoteService
             }
             resp.Data.Add("buildings", elements.ToArray());
 
-            if (sites != null)
+            if (!tempEventMode)
             {
-                elements = new List<ClientData>(sites.Count());
-                foreach (Site s in sites)
+                if (sites != null)
                 {
-                    if (!usedSites.Contains(s)) continue;
-                    ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-                    elements.Add(s.GetClientData());
-                }
-            }
-            else
-            {
-                elements = new List<ClientData>(usedSites.Count());
-                foreach (Site s in usedSites)
-                {
-                    ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-                    elements.Add(s.GetClientData());
-                }
-            }
-            resp.Data.Add("sites", elements.ToArray());
-
-            if (viewOrders != null)
-            {
-                elements = new List<ClientData>(viewOrders.Count());
-                DateTime now = DateTime.UtcNow;
-                foreach (ViewOrder vo in viewOrders)
-                {
-                    ClientData cd = new ClientData();
-                    // Cannot reuse viewOrder.GetClientData() here as it exposes too much information
-                    cd.Add("id", vo.AutoID);
-                    cd.Add("targetObjectType", ClientData.ConvertProperty<ViewOrder.SubjectType>(vo.TargetObjectType));
-                    cd.Add("targetObjectId", vo.TargetObjectId);
-                    cd.Add("product", ClientData.ConvertProperty<ViewOrder.ViewOrderProduct>(vo.Product));
-                    cd.Add("options", ClientData.ConvertProperty<ViewOrder.ViewOrderOptions>(vo.Options));
-                    cd.Add("infoUrl", vo.InfoUrl);
-                    cd.Add("vTourUrl", vo.VTourUrl);
-
-                    if (!vo.Enabled || (vo.ExpiresOn < now))
+                    elements = new List<ClientData>(sites.Count());
+                    foreach (Site s in sites)
                     {
-                        if (!vo.Enabled) cd.Add("reason", "disabled");
-                        else cd.Add("reason", "expired");
-
-                        cd.Add("recoverUrl", string.Format(_disabledViewOrderRecoverUrl, vo.AutoID.ToString("N")));
+                        if (!usedSites.Contains(s)) continue;
+                        ServiceInstances.ModelCache.FillWithModelInfo(s, false);
+                        UrlHelper.ConvertUrlsToAbsolute(s);
+                        elements.Add(s.GetClientData());
                     }
-
-                    elements.Add(cd);
                 }
-            }
-            else
-            {
-                elements = new List<ClientData>(0);
-            }
-            resp.Data.Add("viewOrders", elements.ToArray());
+                else
+                {
+                    elements = new List<ClientData>(usedSites.Count());
+                    foreach (Site s in usedSites)
+                    {
+                        ServiceInstances.ModelCache.FillWithModelInfo(s, false);
+                        UrlHelper.ConvertUrlsToAbsolute(s);
+                        elements.Add(s.GetClientData());
+                    }
+                }
+                resp.Data.Add("sites", elements.ToArray());
 
-            if (!primaryListingId.Equals(Guid.Empty)) resp.Data.Add("primaryViewOrderId", primaryListingId);
-            resp.Data.Add("initialView", "");  // TODO
+                if (viewOrders != null)
+                {
+                    elements = new List<ClientData>(viewOrders.Count());
+                    DateTime now = DateTime.UtcNow;
+                    foreach (ViewOrder vo in viewOrders)
+                    {
+                        ClientData cd = new ClientData();
+                        // Cannot reuse viewOrder.GetClientData() here as it exposes too much information
+                        cd.Add("id", vo.AutoID);
+                        cd.Add("targetObjectType", ClientData.ConvertProperty<ViewOrder.SubjectType>(vo.TargetObjectType));
+                        cd.Add("targetObjectId", vo.TargetObjectId);
+                        cd.Add("product", ClientData.ConvertProperty<ViewOrder.ViewOrderProduct>(vo.Product));
+                        cd.Add("options", ClientData.ConvertProperty<ViewOrder.ViewOrderOptions>(vo.Options));
+                        cd.Add("infoUrl", vo.InfoUrl);
+                        cd.Add("vTourUrl", vo.VTourUrl);
+
+                        if (!vo.Enabled || (vo.ExpiresOn < now))
+                        {
+                            if (!vo.Enabled) cd.Add("reason", "disabled");
+                            else cd.Add("reason", "expired");
+
+                            cd.Add("recoverUrl", string.Format(_disabledViewOrderRecoverUrl, vo.AutoID.ToString("N")));
+                        }
+
+                        elements.Add(cd);
+                    }
+                }
+                else
+                {
+                    elements = new List<ClientData>(0);
+                }
+                resp.Data.Add("viewOrders", elements.ToArray());
+
+                if (!primaryListingId.Equals(Guid.Empty)) resp.Data.Add("primaryViewOrderId", primaryListingId);
+                resp.Data.Add("initialView", "");  // TODO
+            }  // !tempEventMode
 
             resp.ResponseCode = HttpStatusCode.OK;
+        }
+
+        public static void GenerateEventDataResponse(
+            ISession session, ref IResponseData response,
+            ref IList<Building> buildings, ref IList<Suite> suites)
+        {
+            generateViewResponse(session, null, null, null, suites, null, Guid.Empty, response,
+                ViewResponseSoldPropertyLevel.Suite, true, true);
         }
         #endregion
 
@@ -1453,19 +1427,11 @@ namespace Vre.Server.RemoteService
 
         private static void updateViewOrder(ClientSession session, ServiceQuery query, string strObjectId, ClientData data, IResponseData resp)
         {
-            Guid rqid;
-            if (!Guid.TryParseExact(strObjectId, "N", out rqid))
-                throw new ArgumentException();
-
             string paymentSystemRefId = query["pr"];
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
-                ViewOrder viewOrder;
-                using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
-                    viewOrder = dao.GetById(rqid);
-
-                if (null == viewOrder) throw new FileNotFoundException("Undefined view order");
+                ViewOrder viewOrder = RetrieveViewOrder(session.DbSession, strObjectId, true);
 
                 User owner;
                 using (UserDao dao = new UserDao(session.DbSession))
@@ -1614,15 +1580,9 @@ namespace Vre.Server.RemoteService
 
         private static void deleteViewOrder(ClientSession session, string strObjectId, IResponseData resp)
         {
-            Guid rqid;
-            if (!Guid.TryParseExact(strObjectId, "N", out rqid))
-                throw new ArgumentException();
-
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
-                ViewOrder viewOrder;
-                using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
-                    viewOrder = dao.GetById(rqid);
+                ViewOrder viewOrder = RetrieveViewOrder(session.DbSession, strObjectId, true);
 
                 if (null == viewOrder) throw new FileNotFoundException("Undefined view order");
 
@@ -1648,6 +1608,64 @@ namespace Vre.Server.RemoteService
         #endregion
 
         #region extra methods which should go to manager class (?)
+        private static EstateDeveloper extractDeveloperFromViewOrder(ClientSession session, ViewOrder vo)
+        {
+            EstateDeveloper result = null;
+
+            switch (vo.TargetObjectType)
+            {
+                case ViewOrder.SubjectType.Building:
+                    {
+                        Building b;
+                        using (BuildingDao dao = new BuildingDao(session.DbSession))
+                            b = dao.GetById(vo.TargetObjectId);
+                        result = b.ConstructionSite.Developer;
+                    }
+                    break;
+
+                case ViewOrder.SubjectType.Suite:
+                    {
+                        Suite s;
+                        using (SuiteDao dao = new SuiteDao(session.DbSession))
+                            s = dao.GetById(vo.TargetObjectId);
+                        result = s.Building.ConstructionSite.Developer;
+                    }
+                    break;
+            }
+
+            return result;
+        }
+
+        internal static ViewOrder RetrieveViewOrder(ISession session, string id, bool canBeDeleted)
+        {
+            if (null == id) throw new ArgumentException("Object ID missing.");
+
+            Guid rqid;
+            switch (UniversalId.TypeInUrlId(id))
+            {
+                case UniversalId.IdType.ViewOrder:
+                    rqid = UniversalId.ExtractAsGuid(id);
+                    break;
+
+                case UniversalId.IdType.Unknown:
+                    if (!Guid.TryParseExact(id, "N", out rqid))
+                        throw new ArgumentException();
+                    break;
+
+                default:
+                    throw new ArgumentException();
+            }
+
+            ViewOrder viewOrder;
+
+            using (ViewOrderDao dao = new ViewOrderDao(session))
+                viewOrder = dao.GetById(rqid);
+
+            if ((null == viewOrder) || (viewOrder.Deleted && !canBeDeleted)) throw new FileNotFoundException("Undefined view order");
+
+            return viewOrder;
+        }
+
         internal static bool ReflectViewOrderStatusInTarget(ViewOrder viewOrder, ISession dbSession)
         {
             bool result = false;
@@ -1738,6 +1756,93 @@ namespace Vre.Server.RemoteService
                 }
             }
             return result;
+        }
+        #endregion
+
+        #region change subscription
+        enum ChangeSubscriptionRequest { None, Reset, Set }
+
+        private static ChangeSubscriptionRequest retrieveChangeSubscriptionRequest(ServiceQuery query)
+        {
+            string raw = query.GetParam("track", string.Empty);
+            if (string.IsNullOrEmpty(raw))
+            {
+                return ChangeSubscriptionRequest.None;
+            }
+            else
+            {
+                if ("false".Equals(raw)) return ChangeSubscriptionRequest.Reset;
+                else if ("true".Equals(raw)) return ChangeSubscriptionRequest.Set;
+                else throw new ArgumentException("Change tracking argument invalid");
+            }
+        }
+
+        private static void setChangeSubscription(ClientSession cs, Building b, ChangeSubscriptionRequest csrq)
+        {
+            switch (csrq)
+            {
+                case ChangeSubscriptionRequest.Set:
+                    cs.Subscribe(new [] { b });
+                    break;
+
+                case ChangeSubscriptionRequest.Reset:
+                    cs.UnsubscribeAll();
+                    break;
+            }
+        }
+
+        private static void setChangeSubscription(ClientSession cs, Suite s, ChangeSubscriptionRequest csrq)
+        {
+            switch (csrq)
+            {
+                case ChangeSubscriptionRequest.Set:
+                    cs.Subscribe(new[] { s });
+                    break;
+
+                case ChangeSubscriptionRequest.Reset:
+                    cs.UnsubscribeAll();
+                    break;
+            }
+        }
+
+        private static void setChangeSubscription(ClientSession cs, IEnumerable<Building> bl, ChangeSubscriptionRequest csrq)
+        {
+            setChangeSubscription(cs, bl, null, csrq);
+        }
+
+        private static void setChangeSubscription(ClientSession cs, IEnumerable<Building> bl, IEnumerable<Suite> sl, ChangeSubscriptionRequest csrq)
+        {
+            switch (csrq)
+            {
+                case ChangeSubscriptionRequest.Set:
+                    cs.Subscribe(bl);
+                    if (null == sl)
+                    {
+                        List<Suite> sll = new List<Suite>();
+                        foreach (Building b in bl) sll.AddRange(b.Suites);
+                        sl = sll;
+                    }
+                    cs.Subscribe(sl);
+                    break;
+
+                case ChangeSubscriptionRequest.Reset:
+                    cs.UnsubscribeAll();
+                    break;
+            }
+        }
+
+        private static void setChangeSubscription(ClientSession cs, IEnumerable<Suite> sl, ChangeSubscriptionRequest csrq)
+        {
+            switch (csrq)
+            {
+                case ChangeSubscriptionRequest.Set:
+                    cs.Subscribe(sl);
+                    break;
+
+                case ChangeSubscriptionRequest.Reset:
+                    cs.UnsubscribeAll();
+                    break;
+            }
         }
         #endregion
     }

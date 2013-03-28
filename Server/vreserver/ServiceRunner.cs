@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace Vre.Server
 {
@@ -26,6 +27,8 @@ namespace Vre.Server
         {
             try
             {
+                if (string.IsNullOrEmpty(Thread.CurrentThread.Name))
+                    Thread.CurrentThread.Name = "SvcDown#" + Thread.CurrentThread.ManagedThreadId.ToString();
                 StartupShutdown.PerformShutdown();
             }
             catch (Exception ex)

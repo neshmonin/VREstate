@@ -4,6 +4,7 @@ using Vre.Server.RemoteService;
 using Vre.Server.ModelCache;
 using Vre.Server.FileStorage;
 using Vre.Server.Messaging;
+using Vre.Server.UpdateTracking;
 
 namespace Vre.Server
 {
@@ -80,19 +81,6 @@ namespace Vre.Server
             }
         }
 
-        private static Spikes.PullUpdateService _pullUpdateService = null;
-        public static Spikes.PullUpdateService UpdateService
-        {
-            get
-            {
-                lock (_lock)
-                {
-                    if (null == _pullUpdateService) _pullUpdateService = new Spikes.PullUpdateService();
-                }
-                return _pullUpdateService;
-            }
-        }
-
         private static IFileStorageManager _fileStorageManager = null;
         public static IFileStorageManager FileStorageManager
         {
@@ -142,6 +130,19 @@ namespace Vre.Server
                     if (null == _messageGen) _messageGen = new MessageGenerator();
                 }
                 return _messageGen;
+            }
+        }
+
+        private static TrackerDirectory _entityUpdateTracker = null;
+        public static TrackerDirectory EntityUpdateTracker 
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    if (null == _entityUpdateTracker) _entityUpdateTracker = new TrackerDirectory();
+                }
+                return _entityUpdateTracker;
             }
         }
 

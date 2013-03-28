@@ -559,9 +559,14 @@ namespace Vre.Server.ModelCache
             {
                 BuildingLocation blc;
                 if (_buildingGeoXref.TryGetValue(center.AutoID, out blc))
+                {
                     return BuildingsByGeoProximity(blc.Longitude, blc.Latitude, quadradiusM);
+                }
                 else
+                {
+                    ServiceInstances.Logger.Debug("dSPVO: Building ID={0} has no known cached location.", center.AutoID);
                     return new int[0];
+                }
             }
         }
 

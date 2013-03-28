@@ -22,7 +22,7 @@ namespace Vre.Server
         public static readonly DateTime DateTimeMaxValue = new DateTime(9999, 12, 31);
 
         private static readonly object _lock = new object();
-        private static ISessionFactory _sessionFactory;
+        private static readonly Lazy<ISessionFactory> _sessionFactory = new Lazy<ISessionFactory>(() => getSessionFactory());
         private static System.Data.IsolationLevel _transactionIsolationLevel = System.Data.IsolationLevel.Unspecified;
 
         private static string connectionString
@@ -73,42 +73,32 @@ namespace Vre.Server
             }
         }
 
-        private static ISessionFactory factory
+        private static ISessionFactory getSessionFactory()
         {
-            get
+            Configuration nHconfiguration = new Configuration();
+            string nHibernateConfigPath = Path.Combine(
+                Path.GetDirectoryName(ServiceInstances.Configuration.FilePath), 
+                NHibernateConfigurationFileName);
+            if (System.IO.File.Exists(nHibernateConfigPath) == false)
             {
-                lock (_lock)
-                {
-                    if (_sessionFactory == null) 
-                    {
-                        Configuration nHconfiguration = new Configuration();
-                        string nHibernateConfigPath = Path.Combine(
-                            Path.GetDirectoryName(ServiceInstances.Configuration.FilePath), 
-                            NHibernateConfigurationFileName);
-                        if (System.IO.File.Exists(nHibernateConfigPath) == false)
-                        {
-                            throw new ApplicationException(
-                                string.Format("NHibernate configuration file {0} does not exist.",
-                                nHibernateConfigPath));
-                        }
-
-                        nHconfiguration.Configure(nHibernateConfigPath);
-                        nHconfiguration.SetProperty("connection.connection_string", connectionString);
-
-                        nHconfiguration.AddAssembly(typeof(DatabaseSettings).Assembly);
-                        //nHconfiguration.AddAssembly(typeof(Vre.Server.BusinessLogic.User).Assembly);
-                        // TODO: Add more asssemblies here as required.
-
-                        _sessionFactory = nHconfiguration.BuildSessionFactory();
-                    }
-                }
-                return _sessionFactory;
+                throw new ApplicationException(
+                    string.Format("NHibernate configuration file {0} does not exist.",
+                    nHibernateConfigPath));
             }
+
+            nHconfiguration.Configure(nHibernateConfigPath);
+            nHconfiguration.SetProperty("connection.connection_string", connectionString);
+
+            nHconfiguration.AddAssembly(typeof(DatabaseSettings).Assembly);
+            //nHconfiguration.AddAssembly(typeof(Vre.Server.BusinessLogic.User).Assembly);
+            // TODO: Add more asssemblies here as required.
+
+            return nHconfiguration.BuildSessionFactory();
         }
 
         public static ISession GetSession()
         {
-            return factory.OpenSession();
+            return _sessionFactory.Value.OpenSession(new ObjectChangeInterceptor());
         }
 
         public static DateTime DateTimeToDb(DateTime value)
@@ -155,15 +145,14 @@ namespace Vre.Server
 
         public static INonNestedTransaction OpenNonNestedTransaction(ClientSession session)
         {
-            ISession adHocSession = null;
-            if (session.Resume()) adHocSession = session.DbSession;
+            session.Resume();
 
             ITransaction tran = session.DbSession.Transaction;
 
             if ((null == tran) || (!tran.IsActive))
-                return new NonNestedTransaction(adHocSession, session.DbSession.BeginTransaction(transactionIsolationLevel), false);
+                return new NonNestedTransaction(session, session.DbSession.BeginTransaction(transactionIsolationLevel), false);
             else
-                return new NonNestedTransaction(adHocSession, tran, true);
+                return new NonNestedTransaction(session, tran, true);
         }
 
         private class NonNestedTransaction : INonNestedTransaction

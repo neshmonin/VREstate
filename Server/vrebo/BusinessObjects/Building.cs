@@ -29,6 +29,7 @@ namespace Vre.Server.BusinessLogic
         public virtual BuildingStatus Status { get; set; }
         public virtual string DisplayModelUrl { get; set; }
         public virtual string OverlayModelUrl { get; set; }
+        public virtual string PoiModelUrl { get; set; }
         public virtual string BubbleTemplateUrl { get; set; }
         public virtual GeoPoint Location { get; set; }
         public virtual double AltitudeAdjustment { get; set; }
@@ -70,6 +71,7 @@ namespace Vre.Server.BusinessLogic
 
             DisplayModelUrl = fromServer.GetProperty("displayModelUrl", string.Empty);
             OverlayModelUrl = fromServer.GetProperty("overlayModelUrl", string.Empty);
+            PoiModelUrl = fromServer.GetProperty("poiModelUrl", string.Empty);
             BubbleTemplateUrl = fromServer.GetProperty("bubbleTemplateUrl", string.Empty);
 
             AddressLine1 = fromServer.GetProperty("addressLine1", string.Empty);
@@ -106,6 +108,8 @@ namespace Vre.Server.BusinessLogic
                 result.Add("displayModelUrl", DisplayModelUrl);
             if (!string.IsNullOrEmpty(OverlayModelUrl))
                 result.Add("overlayModelUrl", OverlayModelUrl);
+            if (!string.IsNullOrEmpty(PoiModelUrl))
+                result.Add("poiModelUrl", PoiModelUrl);
             if (!string.IsNullOrEmpty(BubbleTemplateUrl))
                 result.Add("bubbleTemplateUrl", BubbleTemplateUrl);
 

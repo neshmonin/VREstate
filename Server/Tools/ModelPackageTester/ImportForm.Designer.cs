@@ -30,7 +30,6 @@
         {
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.tbDeveloper = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.tbSite = new System.Windows.Forms.TextBox();
@@ -38,25 +37,37 @@
             this.lblDisplayModelFile = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.tbResults = new System.Windows.Forms.TextBox();
-            this.btnBrowse = new System.Windows.Forms.Button();
+            this.btnDisplayModelBrowse = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnImport = new System.Windows.Forms.Button();
             this.cbDryRun = new System.Windows.Forms.CheckBox();
             this.cbxNewSuiteStatus = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.cbxBuildings = new System.Windows.Forms.ComboBox();
-            this.cbSingleBuilding = new System.Windows.Forms.CheckBox();
-            this.label8 = new System.Windows.Forms.Label();
-            this.tbStreetAddress = new System.Windows.Forms.TextBox();
-            this.tbMunicipality = new System.Windows.Forms.TextBox();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.tbStateProvince = new System.Windows.Forms.TextBox();
-            this.label11 = new System.Windows.Forms.Label();
-            this.label12 = new System.Windows.Forms.Label();
-            this.tbPostalCode = new System.Windows.Forms.TextBox();
             this.tbCountry = new System.Windows.Forms.TextBox();
+            this.tbStateProvince = new System.Windows.Forms.TextBox();
+            this.tbPostalCode = new System.Windows.Forms.TextBox();
+            this.tbMunicipality = new System.Windows.Forms.TextBox();
+            this.tbStreetAddress = new System.Windows.Forms.TextBox();
+            this.cbxBuildings = new System.Windows.Forms.ComboBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.cbSingleBuilding = new System.Windows.Forms.CheckBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.cbxDeveloper = new System.Windows.Forms.ComboBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.lblOverlayModelFile = new System.Windows.Forms.Label();
+            this.btnOverlayModelBrowse = new System.Windows.Forms.Button();
+            this.label15 = new System.Windows.Forms.Label();
+            this.lblPoiModelFile = new System.Windows.Forms.Label();
+            this.btnPoiModelBrowse = new System.Windows.Forms.Button();
+            this.label14 = new System.Windows.Forms.Label();
+            this.cbxNewBuildingStatus = new System.Windows.Forms.ComboBox();
+            this.label16 = new System.Windows.Forms.Label();
+            this.lblBubbleTemplateFile = new System.Windows.Forms.Label();
+            this.btnBubbleTemplateBrowse = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
@@ -74,21 +85,11 @@
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(478, 9);
+            this.label2.Location = new System.Drawing.Point(418, 9);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(100, 13);
             this.label2.TabIndex = 0;
             this.label2.Text = "(unique name or ID)";
-            // 
-            // tbDeveloper
-            // 
-            this.tbDeveloper.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbDeveloper.Location = new System.Drawing.Point(154, 6);
-            this.tbDeveloper.Name = "tbDeveloper";
-            this.tbDeveloper.Size = new System.Drawing.Size(318, 20);
-            this.tbDeveloper.TabIndex = 0;
-            this.tbDeveloper.TextChanged += new System.EventHandler(this.tbDeveloper_TextChanged);
             // 
             // label3
             // 
@@ -103,7 +104,7 @@
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(478, 35);
+            this.label4.Location = new System.Drawing.Point(418, 35);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(180, 13);
             this.label4.TabIndex = 0;
@@ -115,14 +116,14 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.tbSite.Location = new System.Drawing.Point(154, 32);
             this.tbSite.Name = "tbSite";
-            this.tbSite.Size = new System.Drawing.Size(318, 20);
+            this.tbSite.Size = new System.Drawing.Size(258, 20);
             this.tbSite.TabIndex = 1;
             this.tbSite.TextChanged += new System.EventHandler(this.tbSite_TextChanged);
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(9, 184);
+            this.label5.Location = new System.Drawing.Point(12, 184);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(75, 13);
             this.label5.TabIndex = 3;
@@ -130,20 +131,23 @@
             // 
             // lblDisplayModelFile
             // 
+            this.lblDisplayModelFile.AllowDrop = true;
             this.lblDisplayModelFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.lblDisplayModelFile.AutoEllipsis = true;
             this.lblDisplayModelFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.lblDisplayModelFile.Location = new System.Drawing.Point(148, 184);
+            this.lblDisplayModelFile.Location = new System.Drawing.Point(151, 184);
             this.lblDisplayModelFile.Name = "lblDisplayModelFile";
-            this.lblDisplayModelFile.Size = new System.Drawing.Size(319, 13);
+            this.lblDisplayModelFile.Size = new System.Drawing.Size(259, 13);
             this.lblDisplayModelFile.TabIndex = 0;
             this.lblDisplayModelFile.Text = "drop file here or press Browse -->";
+            this.lblDisplayModelFile.DragDrop += new System.Windows.Forms.DragEventHandler(this.ImportForm_DragDrop);
+            this.lblDisplayModelFile.DragEnter += new System.Windows.Forms.DragEventHandler(this.ImportForm_DragEnter);
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(9, 197);
+            this.label7.Location = new System.Drawing.Point(12, 195);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(163, 13);
             this.label7.TabIndex = 0;
@@ -155,23 +159,23 @@
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.tbResults.Enabled = false;
-            this.tbResults.Location = new System.Drawing.Point(15, 296);
+            this.tbResults.Location = new System.Drawing.Point(15, 385);
             this.tbResults.Multiline = true;
             this.tbResults.Name = "tbResults";
             this.tbResults.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.tbResults.Size = new System.Drawing.Size(638, 111);
+            this.tbResults.Size = new System.Drawing.Size(578, 155);
             this.tbResults.TabIndex = 4;
             // 
-            // btnBrowse
+            // btnDisplayModelBrowse
             // 
-            this.btnBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnBrowse.Location = new System.Drawing.Point(478, 179);
-            this.btnBrowse.Name = "btnBrowse";
-            this.btnBrowse.Size = new System.Drawing.Size(75, 23);
-            this.btnBrowse.TabIndex = 2;
-            this.btnBrowse.Text = "Browse";
-            this.btnBrowse.UseVisualStyleBackColor = true;
-            this.btnBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
+            this.btnDisplayModelBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnDisplayModelBrowse.Location = new System.Drawing.Point(418, 179);
+            this.btnDisplayModelBrowse.Name = "btnDisplayModelBrowse";
+            this.btnDisplayModelBrowse.Size = new System.Drawing.Size(75, 23);
+            this.btnDisplayModelBrowse.TabIndex = 2;
+            this.btnDisplayModelBrowse.Text = "Browse";
+            this.btnDisplayModelBrowse.UseVisualStyleBackColor = true;
+            this.btnDisplayModelBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
             // 
             // panel1
             // 
@@ -180,9 +184,9 @@
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.panel1.Controls.Add(this.btnImport);
             this.panel1.Controls.Add(this.cbDryRun);
-            this.panel1.Location = new System.Drawing.Point(12, 249);
+            this.panel1.Location = new System.Drawing.Point(15, 348);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(638, 31);
+            this.panel1.Size = new System.Drawing.Size(578, 31);
             this.panel1.TabIndex = 8;
             // 
             // btnImport
@@ -212,19 +216,19 @@
             // 
             this.cbxNewSuiteStatus.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbxNewSuiteStatus.FormattingEnabled = true;
-            this.cbxNewSuiteStatus.Location = new System.Drawing.Point(151, 219);
+            this.cbxNewSuiteStatus.Location = new System.Drawing.Point(154, 321);
             this.cbxNewSuiteStatus.Name = "cbxNewSuiteStatus";
-            this.cbxNewSuiteStatus.Size = new System.Drawing.Size(121, 21);
+            this.cbxNewSuiteStatus.Size = new System.Drawing.Size(162, 21);
             this.cbxNewSuiteStatus.TabIndex = 3;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(9, 222);
+            this.label6.Location = new System.Drawing.Point(12, 324);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(110, 13);
+            this.label6.Size = new System.Drawing.Size(88, 13);
             this.label6.TabIndex = 3;
-            this.label6.Text = "New suite sale status:";
+            this.label6.Text = "New suite status:";
             // 
             // panel2
             // 
@@ -245,8 +249,55 @@
             this.panel2.Controls.Add(this.label8);
             this.panel2.Location = new System.Drawing.Point(12, 60);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(641, 114);
+            this.panel2.Size = new System.Drawing.Size(581, 114);
             this.panel2.TabIndex = 10;
+            // 
+            // tbCountry
+            // 
+            this.tbCountry.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbCountry.Enabled = false;
+            this.tbCountry.Location = new System.Drawing.Point(316, 85);
+            this.tbCountry.Name = "tbCountry";
+            this.tbCountry.Size = new System.Drawing.Size(82, 20);
+            this.tbCountry.TabIndex = 6;
+            // 
+            // tbStateProvince
+            // 
+            this.tbStateProvince.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbStateProvince.Enabled = false;
+            this.tbStateProvince.Location = new System.Drawing.Point(356, 59);
+            this.tbStateProvince.Name = "tbStateProvince";
+            this.tbStateProvince.Size = new System.Drawing.Size(42, 20);
+            this.tbStateProvince.TabIndex = 4;
+            // 
+            // tbPostalCode
+            // 
+            this.tbPostalCode.Enabled = false;
+            this.tbPostalCode.Location = new System.Drawing.Point(140, 85);
+            this.tbPostalCode.Name = "tbPostalCode";
+            this.tbPostalCode.Size = new System.Drawing.Size(118, 20);
+            this.tbPostalCode.TabIndex = 5;
+            // 
+            // tbMunicipality
+            // 
+            this.tbMunicipality.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbMunicipality.Enabled = false;
+            this.tbMunicipality.Location = new System.Drawing.Point(140, 59);
+            this.tbMunicipality.Name = "tbMunicipality";
+            this.tbMunicipality.Size = new System.Drawing.Size(73, 20);
+            this.tbMunicipality.TabIndex = 3;
+            // 
+            // tbStreetAddress
+            // 
+            this.tbStreetAddress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbStreetAddress.Enabled = false;
+            this.tbStreetAddress.Location = new System.Drawing.Point(140, 33);
+            this.tbStreetAddress.Name = "tbStreetAddress";
+            this.tbStreetAddress.Size = new System.Drawing.Size(258, 20);
+            this.tbStreetAddress.TabIndex = 2;
             // 
             // cbxBuildings
             // 
@@ -257,8 +308,17 @@
             this.cbxBuildings.FormattingEnabled = true;
             this.cbxBuildings.Location = new System.Drawing.Point(140, 6);
             this.cbxBuildings.Name = "cbxBuildings";
-            this.cbxBuildings.Size = new System.Drawing.Size(318, 21);
+            this.cbxBuildings.Size = new System.Drawing.Size(258, 21);
             this.cbxBuildings.TabIndex = 1;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(264, 88);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(46, 13);
+            this.label12.TabIndex = 3;
+            this.label12.Text = "Country:";
             // 
             // cbSingleBuilding
             // 
@@ -271,34 +331,24 @@
             this.cbSingleBuilding.UseVisualStyleBackColor = true;
             this.cbSingleBuilding.CheckedChanged += new System.EventHandler(this.cbSingleBuilding_CheckedChanged);
             // 
-            // label8
+            // label11
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(0, 36);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(116, 13);
-            this.label8.TabIndex = 3;
-            this.label8.Text = "Building street address:";
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(0, 88);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(66, 13);
+            this.label11.TabIndex = 3;
+            this.label11.Text = "Postal code:";
             // 
-            // tbStreetAddress
+            // label10
             // 
-            this.tbStreetAddress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbStreetAddress.Enabled = false;
-            this.tbStreetAddress.Location = new System.Drawing.Point(140, 33);
-            this.tbStreetAddress.Name = "tbStreetAddress";
-            this.tbStreetAddress.Size = new System.Drawing.Size(318, 20);
-            this.tbStreetAddress.TabIndex = 2;
-            // 
-            // tbMunicipality
-            // 
-            this.tbMunicipality.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbMunicipality.Enabled = false;
-            this.tbMunicipality.Location = new System.Drawing.Point(140, 59);
-            this.tbMunicipality.Name = "tbMunicipality";
-            this.tbMunicipality.Size = new System.Drawing.Size(133, 20);
-            this.tbMunicipality.TabIndex = 3;
+            this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(219, 62);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(131, 13);
+            this.label10.TabIndex = 3;
+            this.label10.Text = "State/province (two-char):";
             // 
             // label9
             // 
@@ -309,74 +359,176 @@
             this.label9.TabIndex = 3;
             this.label9.Text = "Municipality (town/city):";
             // 
-            // label10
+            // label8
             // 
-            this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(279, 62);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(131, 13);
-            this.label10.TabIndex = 3;
-            this.label10.Text = "State/province (two-char):";
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(0, 36);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(116, 13);
+            this.label8.TabIndex = 3;
+            this.label8.Text = "Building street address:";
             // 
-            // tbStateProvince
+            // cbxDeveloper
             // 
-            this.tbStateProvince.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbStateProvince.Enabled = false;
-            this.tbStateProvince.Location = new System.Drawing.Point(416, 59);
-            this.tbStateProvince.Name = "tbStateProvince";
-            this.tbStateProvince.Size = new System.Drawing.Size(42, 20);
-            this.tbStateProvince.TabIndex = 4;
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(0, 88);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(66, 13);
-            this.label11.TabIndex = 3;
-            this.label11.Text = "Postal code:";
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(264, 88);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(46, 13);
-            this.label12.TabIndex = 3;
-            this.label12.Text = "Country:";
-            // 
-            // tbPostalCode
-            // 
-            this.tbPostalCode.Enabled = false;
-            this.tbPostalCode.Location = new System.Drawing.Point(140, 85);
-            this.tbPostalCode.Name = "tbPostalCode";
-            this.tbPostalCode.Size = new System.Drawing.Size(118, 20);
-            this.tbPostalCode.TabIndex = 5;
-            // 
-            // tbCountry
-            // 
-            this.tbCountry.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.cbxDeveloper.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbCountry.Enabled = false;
-            this.tbCountry.Location = new System.Drawing.Point(316, 85);
-            this.tbCountry.Name = "tbCountry";
-            this.tbCountry.Size = new System.Drawing.Size(142, 20);
-            this.tbCountry.TabIndex = 6;
+            this.cbxDeveloper.FormattingEnabled = true;
+            this.cbxDeveloper.Location = new System.Drawing.Point(154, 5);
+            this.cbxDeveloper.Name = "cbxDeveloper";
+            this.cbxDeveloper.Size = new System.Drawing.Size(258, 21);
+            this.cbxDeveloper.TabIndex = 11;
+            this.cbxDeveloper.SelectedIndexChanged += new System.EventHandler(this.cbxDeveloper_TextChanged);
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(12, 213);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(77, 13);
+            this.label13.TabIndex = 3;
+            this.label13.Text = "Overlay model:";
+            // 
+            // lblOverlayModelFile
+            // 
+            this.lblOverlayModelFile.AllowDrop = true;
+            this.lblOverlayModelFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblOverlayModelFile.AutoEllipsis = true;
+            this.lblOverlayModelFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lblOverlayModelFile.Location = new System.Drawing.Point(151, 213);
+            this.lblOverlayModelFile.Name = "lblOverlayModelFile";
+            this.lblOverlayModelFile.Size = new System.Drawing.Size(259, 13);
+            this.lblOverlayModelFile.TabIndex = 0;
+            this.lblOverlayModelFile.Text = "drop file here or press Browse -->";
+            this.lblOverlayModelFile.DragDrop += new System.Windows.Forms.DragEventHandler(this.ImportForm_DragDrop);
+            this.lblOverlayModelFile.DragEnter += new System.Windows.Forms.DragEventHandler(this.ImportForm_DragEnter);
+            // 
+            // btnOverlayModelBrowse
+            // 
+            this.btnOverlayModelBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnOverlayModelBrowse.Location = new System.Drawing.Point(418, 208);
+            this.btnOverlayModelBrowse.Name = "btnOverlayModelBrowse";
+            this.btnOverlayModelBrowse.Size = new System.Drawing.Size(75, 23);
+            this.btnOverlayModelBrowse.TabIndex = 2;
+            this.btnOverlayModelBrowse.Text = "Browse";
+            this.btnOverlayModelBrowse.UseVisualStyleBackColor = true;
+            this.btnOverlayModelBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(12, 242);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(59, 13);
+            this.label15.TabIndex = 3;
+            this.label15.Text = "POI model:";
+            // 
+            // lblPoiModelFile
+            // 
+            this.lblPoiModelFile.AllowDrop = true;
+            this.lblPoiModelFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblPoiModelFile.AutoEllipsis = true;
+            this.lblPoiModelFile.Enabled = false;
+            this.lblPoiModelFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lblPoiModelFile.Location = new System.Drawing.Point(151, 242);
+            this.lblPoiModelFile.Name = "lblPoiModelFile";
+            this.lblPoiModelFile.Size = new System.Drawing.Size(259, 13);
+            this.lblPoiModelFile.TabIndex = 0;
+            this.lblPoiModelFile.Text = "drop file here or press Browse -->";
+            this.lblPoiModelFile.DragDrop += new System.Windows.Forms.DragEventHandler(this.ImportForm_DragDrop);
+            this.lblPoiModelFile.DragEnter += new System.Windows.Forms.DragEventHandler(this.ImportForm_DragEnter);
+            // 
+            // btnPoiModelBrowse
+            // 
+            this.btnPoiModelBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnPoiModelBrowse.Enabled = false;
+            this.btnPoiModelBrowse.Location = new System.Drawing.Point(418, 237);
+            this.btnPoiModelBrowse.Name = "btnPoiModelBrowse";
+            this.btnPoiModelBrowse.Size = new System.Drawing.Size(75, 23);
+            this.btnPoiModelBrowse.TabIndex = 2;
+            this.btnPoiModelBrowse.Text = "Browse";
+            this.btnPoiModelBrowse.UseVisualStyleBackColor = true;
+            this.btnPoiModelBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(12, 297);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(102, 13);
+            this.label14.TabIndex = 3;
+            this.label14.Text = "New building status:";
+            // 
+            // cbxNewBuildingStatus
+            // 
+            this.cbxNewBuildingStatus.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxNewBuildingStatus.FormattingEnabled = true;
+            this.cbxNewBuildingStatus.Location = new System.Drawing.Point(154, 294);
+            this.cbxNewBuildingStatus.Name = "cbxNewBuildingStatus";
+            this.cbxNewBuildingStatus.Size = new System.Drawing.Size(162, 21);
+            this.cbxNewBuildingStatus.TabIndex = 3;
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(12, 271);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(86, 13);
+            this.label16.TabIndex = 3;
+            this.label16.Text = "Bubble template:";
+            // 
+            // lblBubbleTemplateFile
+            // 
+            this.lblBubbleTemplateFile.AllowDrop = true;
+            this.lblBubbleTemplateFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblBubbleTemplateFile.AutoEllipsis = true;
+            this.lblBubbleTemplateFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lblBubbleTemplateFile.Location = new System.Drawing.Point(151, 271);
+            this.lblBubbleTemplateFile.Name = "lblBubbleTemplateFile";
+            this.lblBubbleTemplateFile.Size = new System.Drawing.Size(259, 13);
+            this.lblBubbleTemplateFile.TabIndex = 0;
+            this.lblBubbleTemplateFile.Text = "drop file here or press Browse -->";
+            this.lblBubbleTemplateFile.DragDrop += new System.Windows.Forms.DragEventHandler(this.ImportForm2_DragDrop);
+            this.lblBubbleTemplateFile.DragEnter += new System.Windows.Forms.DragEventHandler(this.ImportForm_DragEnter);
+            // 
+            // btnBubbleTemplateBrowse
+            // 
+            this.btnBubbleTemplateBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnBubbleTemplateBrowse.Location = new System.Drawing.Point(418, 266);
+            this.btnBubbleTemplateBrowse.Name = "btnBubbleTemplateBrowse";
+            this.btnBubbleTemplateBrowse.Size = new System.Drawing.Size(75, 23);
+            this.btnBubbleTemplateBrowse.TabIndex = 2;
+            this.btnBubbleTemplateBrowse.Text = "Browse";
+            this.btnBubbleTemplateBrowse.UseVisualStyleBackColor = true;
+            this.btnBubbleTemplateBrowse.Click += new System.EventHandler(this.btnBrowse2_Click);
             // 
             // ImportForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(665, 419);
+            this.BackColor = System.Drawing.SystemColors.Control;
+            this.ClientSize = new System.Drawing.Size(605, 552);
+            this.Controls.Add(this.cbxDeveloper);
+            this.Controls.Add(this.cbxNewBuildingStatus);
             this.Controls.Add(this.cbxNewSuiteStatus);
-            this.Controls.Add(this.btnBrowse);
+            this.Controls.Add(this.btnPoiModelBrowse);
+            this.Controls.Add(this.btnBubbleTemplateBrowse);
+            this.Controls.Add(this.btnOverlayModelBrowse);
+            this.Controls.Add(this.btnDisplayModelBrowse);
             this.Controls.Add(this.tbResults);
             this.Controls.Add(this.tbSite);
+            this.Controls.Add(this.lblPoiModelFile);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.tbDeveloper);
+            this.Controls.Add(this.lblBubbleTemplateFile);
+            this.Controls.Add(this.lblOverlayModelFile);
             this.Controls.Add(this.label7);
+            this.Controls.Add(this.label16);
+            this.Controls.Add(this.label15);
             this.Controls.Add(this.lblDisplayModelFile);
+            this.Controls.Add(this.label14);
+            this.Controls.Add(this.label13);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label3);
@@ -402,7 +554,6 @@
 
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox tbDeveloper;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox tbSite;
@@ -410,7 +561,7 @@
         private System.Windows.Forms.Label lblDisplayModelFile;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox tbResults;
-        private System.Windows.Forms.Button btnBrowse;
+        private System.Windows.Forms.Button btnDisplayModelBrowse;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button btnImport;
         private System.Windows.Forms.CheckBox cbDryRun;
@@ -429,5 +580,17 @@
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.ComboBox cbxDeveloper;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label lblOverlayModelFile;
+        private System.Windows.Forms.Button btnOverlayModelBrowse;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label lblPoiModelFile;
+        private System.Windows.Forms.Button btnPoiModelBrowse;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.ComboBox cbxNewBuildingStatus;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label lblBubbleTemplateFile;
+        private System.Windows.Forms.Button btnBubbleTemplateBrowse;
     }
 }

@@ -48,7 +48,6 @@ namespace Vre.Server.Dao
                 entity.MarkUpdated();
                 base.Create(entity);
                 //_session.Refresh(entity);
-                ServiceInstances.UpdateService.Update(entity);
             }
         }
 
@@ -65,7 +64,6 @@ namespace Vre.Server.Dao
                 {
                     base.Update(entity);
                     //_session.Refresh(entity);
-                    ServiceInstances.UpdateService.Update(entity);
                     return true;
                 }
                 catch (StaleObjectStateException)
@@ -89,7 +87,6 @@ namespace Vre.Server.Dao
                 {
                     base.CreateOrUpdate(entity);
                     //_session.Refresh(entity);
-                    ServiceInstances.UpdateService.Update(entity);
                     return true;
                 }
                 catch (StaleObjectStateException)
@@ -112,7 +109,6 @@ namespace Vre.Server.Dao
                 {
                     base.Update(entity);
                     //_session.Refresh(entity);
-                    ServiceInstances.UpdateService.Update(entity);
                     return true;
                 }
                 catch (StaleObjectStateException)

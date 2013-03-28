@@ -51,9 +51,9 @@ namespace Vre.Server.HttpService
             _testRRTemplate = ServiceInstances.Configuration.GetValue("RedirectionTestRevReqTemplate", "https://vrt.3dcondox.com/vre/go/{0}");
         }
 
-        protected override IResponseData process(string browserKey, HttpListenerContext ctx)
+        protected override IResponseData process(string browserKey, HttpListenerContext ctx, HttpServiceRequest.ProcessResponse proc)
         {
-            IResponseData result = new HttpServiceRequest.ResponseData(new MemoryStream(0));
+            IResponseData result = new HttpServiceRequest.ResponseData(new MemoryStream(0), ctx.Response, proc);
 
             if (ctx.Request.HttpMethod.Equals("GET", StringComparison.InvariantCultureIgnoreCase))
             {

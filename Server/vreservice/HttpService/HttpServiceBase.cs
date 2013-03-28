@@ -142,13 +142,12 @@ namespace Vre.Server.HttpService
 
                     string browserKey = Statistics.GetBrowserId(ctx);
 
-                    IResponseData r = process(browserKey, ctx);
-                    updateResponse(ctx.Response, r);
-
-                    if (r.HoldResponseForServerPush)
-                        Experimental.HttpServerPush.StartServerPushThread(ctx);
-                    else
+                    IResponseData r = process(browserKey, ctx, processResponse);
+                    if (!r.HoldResponseForServerPush)
+                    {
+                        processResponse(ctx.Response, r, null);
                         ctx.Response.Close();
+                    }
                 }
                 catch (HttpListenerException ex)  // these stack traces seem to be useless; just flooding logs
                 {
@@ -158,7 +157,7 @@ namespace Vre.Server.HttpService
                 {
                     try
                     {
-                        updateResponse(ctx.Response, ex);
+                        processResponse(ctx.Response, null, ex);
                         ctx.Response.Close();
                     }
                     catch { }  // make sure this does not break server with unhandled exception
@@ -166,7 +165,24 @@ namespace Vre.Server.HttpService
             }
         }
 
-        protected abstract IResponseData process(string browserKey, HttpListenerContext ctx);
+        protected abstract IResponseData process(string browserKey, HttpListenerContext ctx, HttpServiceRequest.ProcessResponse proc);
+
+        private void processResponse(object respImpl, IResponseData resp, Exception ex)
+        {
+            HttpListenerResponse ctx = respImpl as HttpListenerResponse;
+            try
+            {
+                if (ctx != null)
+                {
+                    if (ex != null) updateResponse(ctx, ex);
+                    else if (resp != null) updateResponse(ctx, resp);
+                }
+            }
+            finally
+            {
+                if (ctx != null) try { ctx.Close(); } catch {}
+            }
+        }
 
         private void updateResponse(HttpListenerResponse response, IResponseData data)
         {
@@ -374,7 +390,7 @@ namespace Vre.Server.HttpService
         public void ProcessFileRequest(string file, IResponseData response)
         {
             if (file.Equals("version")) rq_version(response);
-            else if (file.Equals("test")) rq_version(response);
+            else if (file.Equals("test")) rq_test(response);
             else if (file.Equals("humans.txt")) rq_text(1, response);
             else if (file.Equals("robots.txt")) rq_text(0, response);
             else if (file.Equals("base")) rq_redirect(0, response);
@@ -400,26 +416,49 @@ namespace Vre.Server.HttpService
 
         private static void initializeContentType()
         {
-            // http://www.iana.org/assignments/media-types/
+            string mimeFile = Path.Combine(Path.GetDirectoryName(ServiceInstances.Configuration.FilePath), "mimetypes.csv");
 
-            ContentTypeByExtension.Add("html", "text/html");
-            ContentTypeByExtension.Add("htm", "text/html");
-            ContentTypeByExtension.Add("txt", "text/plain");
-            ContentTypeByExtension.Add("xml", "text/xml");
-            ContentTypeByExtension.Add("css", "text/css");
+            try
+            {
+                if (File.Exists(mimeFile))
+                {
+                    using (var r = new StreamReader(mimeFile))
+                    {
+                        while (!r.EndOfStream)
+                        {
+                            string[] parts = CsvUtilities.Split(r.ReadLine());
+                            if (2 == parts.Length)
+                                ContentTypeByExtension.Add(parts[0], parts[1]);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                ServiceInstances.Logger.Error("Error reading MIME types file; using defaults. {0}", e);
 
-            ContentTypeByExtension.Add("gif", "image/gif");
-            ContentTypeByExtension.Add("jpeg", "image/jpeg");
-            ContentTypeByExtension.Add("jpg", "image/jpeg");
-            ContentTypeByExtension.Add("png", "image/png");
-            ContentTypeByExtension.Add("ico", "image/vnd.microsoft.icon");
+                ContentTypeByExtension.Clear();
+                // http://www.iana.org/assignments/media-types/
 
-            ContentTypeByExtension.Add("js", "application/javascript");
-            ContentTypeByExtension.Add("json", "application/json");
-            ContentTypeByExtension.Add("kml", "application/vnd.google-earth.kml+xml");
-            ContentTypeByExtension.Add("kmz", "application/vnd.google-earth.kmz");
+                ContentTypeByExtension.Add("html", "text/html");
+                ContentTypeByExtension.Add("htm", "text/html");
+                ContentTypeByExtension.Add("txt", "text/plain");
+                ContentTypeByExtension.Add("xml", "text/xml");
+                ContentTypeByExtension.Add("css", "text/css");
 
-            ContentTypeByExtension.Add("pdf", "application/pdf");
+                ContentTypeByExtension.Add("gif", "image/gif");
+                ContentTypeByExtension.Add("jpeg", "image/jpeg");
+                ContentTypeByExtension.Add("jpg", "image/jpeg");
+                ContentTypeByExtension.Add("png", "image/png");
+                ContentTypeByExtension.Add("ico", "image/vnd.microsoft.icon");
+
+                ContentTypeByExtension.Add("js", "application/javascript");
+                ContentTypeByExtension.Add("json", "application/json");
+                ContentTypeByExtension.Add("kml", "application/vnd.google-earth.kml+xml");
+                ContentTypeByExtension.Add("kmz", "application/vnd.google-earth.kmz");
+
+                ContentTypeByExtension.Add("pdf", "application/pdf");
+            }
         }
 
         public static bool IsPathValid(string path, bool allowSubfolder)

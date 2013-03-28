@@ -196,7 +196,8 @@ namespace Vre.Server.BusinessLogic
                     if (dao.IsSuiteOption(opt.OpType))
                     {
                         emitNewPrice(opt, price);
-                        ServiceInstances.UpdateService.Update(suite);
+                        //ServiceInstances.EntityUpdateTracker.NotifyModifiedSuite(suite.AutoID);
+                        ServiceInstances.EntityUpdateTracker.NotifyModified(new Suite[] { suite });
 
                         result = true;
                         break;

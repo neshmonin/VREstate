@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using NHibernate;
@@ -10,16 +12,13 @@ namespace Vre.Server.RemoteService
 {
     internal class ClientSessionStore : IDisposable
     {
-        private Dictionary<string, ClientSession> _sessionList;
+        private ConcurrentDictionary<string, ClientSession> _sessionList;
         private ManualResetEvent _staleSessionDropThreadExit;
         private int _cleanupTimeoutSec;
-        private int _dbSessionTimeoutSec;
 
         public ClientSessionStore()
         {
-            _sessionList = new Dictionary<string, ClientSession>();
-
-            _dbSessionTimeoutSec = 10;
+            _sessionList = new ConcurrentDictionary<string, ClientSession>();
 
             _cleanupTimeoutSec = 600; // ten minutes
             _cleanupTimeoutSec = ServiceInstances.Configuration.GetValue("ClientSessionTimeoutSec", _cleanupTimeoutSec);
@@ -74,26 +73,26 @@ namespace Vre.Server.RemoteService
 
                 if (dropOffConcurrentSessions)
                 {
-                    Dictionary<string, ClientSession> toremove = new Dictionary<string, ClientSession>();
-                    lock (_sessionList)
+                    int cnt = 0;
+                    foreach (KeyValuePair<string, ClientSession> kvp in _sessionList)
                     {
-                        foreach (KeyValuePair<string, ClientSession> kvp in _sessionList)
-                        {
-                            if ((kvp.Value.AuthLoginType == loginType) && (kvp.Value.AuthLogin.Equals(login)))
-                                toremove.Add(kvp.Key, kvp.Value);
-                        }
-                        foreach (string key in toremove.Keys) _sessionList.Remove(key);
+                        ClientSession cs;
+                        if ((kvp.Value.AuthLoginType == loginType) && (kvp.Value.AuthLogin.Equals(login)))
+                            if (_sessionList.TryRemove(kvp.Key, out cs))
+                            {
+                                cs.Dispose();
+                                cnt++;
+                            }
                     }
-                    foreach (ClientSession cs in toremove.Values) cs.Dispose();
 
-                    if (toremove.Count > 0)
-                        ServiceInstances.Logger.Warn("Removed {0} stale session for this login.", toremove.Count);
+                    if (cnt > 0)
+                        ServiceInstances.Logger.Warn("Removed {0} stale session for this login.", cnt);
                 }
 
                 string sessionId = Guid.NewGuid().ToString();
 
-                lock (_sessionList)
-                    _sessionList.Add(sessionId, new ClientSession(loginType, login, user));
+                // shall never fail as we've just made up a random unique key
+                _sessionList.TryAdd(sessionId, new ClientSession(loginType, login, user));
                                 
                 return sessionId;
             }
@@ -111,15 +110,11 @@ namespace Vre.Server.RemoteService
             get
             {
                 ClientSession result;
-                lock (_sessionList)
-                    if (sessionId != null)
-                    {
-                        if (_sessionList.TryGetValue(sessionId, out result))
-                        {
-                            result.Touch();
-                            return result;
-                        }
-                    }
+                if (_sessionList.TryGetValue(sessionId, out result))
+                {
+                    result.Touch();
+                    return result;
+                }
                 return null;
             }
         }
@@ -127,14 +122,8 @@ namespace Vre.Server.RemoteService
         public void DropSession(string sessionId)
         {
             ClientSession cs;
-
-            lock (_sessionList)
-            {
-                if (!_sessionList.TryGetValue(sessionId, out cs)) cs = null;
-                else _sessionList.Remove(sessionId);
-            }
-
-            if (cs != null) cs.Dispose();
+            if (_sessionList.TryRemove(sessionId, out cs))
+                cs.Dispose();
         }
 
         private void staleSessionDropThread()
@@ -142,23 +131,16 @@ namespace Vre.Server.RemoteService
             Thread.CurrentThread.Name = "StaleSessionDropper#" + Thread.CurrentThread.ManagedThreadId.ToString();
             while (!_staleSessionDropThreadExit.WaitOne(60000))
             {
-                Dictionary<string, ClientSession> toremove = new Dictionary<string, ClientSession>();
+                ClientSession cs;
                 DateTime now = DateTime.UtcNow;
 
-                lock (_sessionList)
-                {
-                    foreach (KeyValuePair<string, ClientSession> kvp in _sessionList)
-                        if (now.Subtract(kvp.Value.LastUsed).TotalSeconds > _cleanupTimeoutSec) 
-                            toremove.Add(kvp.Key, kvp.Value);
-
-                    foreach (string sid in toremove.Keys) _sessionList.Remove(sid);
-                }
-
-                foreach (ClientSession cs in toremove.Values)
-                {
-                    cs.Dispose();
-                    ServiceInstances.Logger.Info("Removed stale session for {0}", cs);
-                }
+                foreach (KeyValuePair<string, ClientSession> kvp in _sessionList)
+                    if (now.Subtract(kvp.Value.LastUsed).TotalSeconds > _cleanupTimeoutSec) 
+                        if (_sessionList.TryRemove(kvp.Key, out cs))
+                        {
+                            cs.Dispose();
+                            ServiceInstances.Logger.Info("Removed stale session for {0}", cs);
+                        }
             }
         }
 
@@ -166,32 +148,29 @@ namespace Vre.Server.RemoteService
         {
             while (!_staleSessionDropThreadExit.WaitOne(1000))
             {
-                Dictionary<string, ClientSession> toremove = new Dictionary<string, ClientSession>();
                 DateTime now = DateTime.UtcNow;
 
-                lock (_sessionList)
-                {
-                    foreach (KeyValuePair<string, ClientSession> kvp in _sessionList)
+                foreach (KeyValuePair<string, ClientSession> kvp in _sessionList)
+                    // TODO: Detect kvp.Value.DbSession is stale
+                    if (now.Subtract(kvp.Value.LastUsed).TotalSeconds > _cleanupTimeoutSec)
                     {
-                        // TODO: Detect kvp.Value.DbSession is stale
-                        //if (now.Subtract(kvp.Value.LastUsed).TotalSeconds > _cleanupTimeoutSec)
-                        //    toremove.Add(kvp.Key, kvp.Value);
+                        //kvp.Value.Disconnect(true);
                     }
-
-                    foreach (string sid in toremove.Keys) _sessionList.Remove(sid);
-                }
-
-                foreach (ClientSession cs in toremove.Values) cs.Dispose();
             }
         }
     }
 
     internal class ClientSession : IDisposable
     {
+        private readonly object _dbSessionLock = new object();
+        private readonly object _subscriptionMgmtLock = new object();
+        private readonly object _eventThreadLock = new object();
+
         public LoginType AuthLoginType { get; private set; }
         public string AuthLogin { get; private set; }
         public User User { get; private set; }
         public ISession DbSession { get; private set; }
+        private readonly Mutex _dbSessionMutex = new Mutex();
         private int _dbSessionUseCount;
         public DateTime LastUsed { get; private set; }
         /// <summary>
@@ -248,21 +227,16 @@ namespace Vre.Server.RemoteService
         /// <returns>true if session was started</returns>
         public bool Resume()
         {
-            lock (this)
+            _dbSessionMutex.WaitOne();
+            lock (_dbSessionLock)
             {
-                if (null == DbSession) 
-                { 
-                    DbSession = NHibernateHelper.GetSession();
-                    _dbSessionUseCount = 1;
-                    return true; 
-                }
-                else 
+                if (0 == _dbSessionUseCount++)
                 {
-                    if (!DbSession.IsConnected) { DbSession.Reconnect(); _dbSessionUseCount = 1; }
-                    else _dbSessionUseCount++;
-                    return false; 
+                    if (null == DbSession) DbSession = NHibernateHelper.GetSession();
+                    else if (!DbSession.IsConnected) DbSession.Reconnect();
                 }
             }
+            return false;
         }
 
         /// <summary>
@@ -270,35 +244,37 @@ namespace Vre.Server.RemoteService
         /// </summary>
         public void Disconnect(bool emergency)
         {
-            lock (this)
+            lock (_dbSessionLock)
             {
-                if (DbSession != null)
+                if (emergency)
                 {
-                    if (emergency)
+                    if (DbSession != null)
                     {
                         DbSession.Dispose();
                         DbSession = null;
-                    }
-                    else
-                    {
-                        if (--_dbSessionUseCount < 1) DbSession.Disconnect();
+                        _dbSessionUseCount = 0;
                     }
                 }
+                else if (_dbSessionUseCount > 0)
+                {
+                    if ((_dbSessionUseCount-- < 1) && (DbSession != null))
+                        DbSession.Disconnect();
+                }
             }
+            _dbSessionMutex.ReleaseMutex();
         }
 
         public void Dispose()
         {
-            lock (this)
+            killEventThread();
+            UnsubscribeAll();
+            lock (_dbSessionLock)
             {
-                try { Disconnect(false); } catch (NHibernate.HibernateException) {}  // SHOULD NOT OCCUR!!!
                 if (DbSession != null)
                 {
-                    //try { DbSession.Flush(); }
-                    //catch (Exception e) { e.Equals(this); }
-                    DbSession.Close();
                     DbSession.Dispose();
                     DbSession = null;
+                    _dbSessionUseCount = 0;
                 }
             }
         }
@@ -341,5 +317,263 @@ namespace Vre.Server.RemoteService
                     return "?";
             }
         }
+
+        private readonly HashSet<int> _subscribedBuildings = new HashSet<int>();
+        private readonly HashSet<int> _subscribedSuites = new HashSet<int>();
+        private readonly HashSet<int> _modifiedBuildings = new HashSet<int>();
+        private readonly HashSet<int> _modifiedSuites = new HashSet<int>();
+        private readonly AutoResetEvent _subscribedItemModified = new AutoResetEvent(false);
+
+        public void Subscribe(IEnumerable<Building> buildings)
+        {
+            ICollection<int> toRemove, toAdd;
+            ICollection<int> newItems = new List<int>(buildings.ConvertTo(b => b.AutoID));
+
+            lock (_subscriptionMgmtLock)
+            {
+                CollectionExtensions.Intersect<int>(_subscribedBuildings, newItems, out toRemove, out toAdd);
+
+                ServiceInstances.EntityUpdateTracker.UnsubscribeFromBuildings(this, toRemove);
+                ServiceInstances.EntityUpdateTracker.SubscribeToBuildings(this, toAdd);
+
+                foreach (int id in toRemove) _modifiedBuildings.Remove(id);
+                _subscribedBuildings.Clear();
+                foreach (int id in newItems) _subscribedBuildings.Add(id);
+            }
+        }
+
+        public void Subscribe(IEnumerable<Suite> suites)
+        {
+            ICollection<int> toRemove, toAdd;
+            ICollection<int> newItems = new List<int>(suites.ConvertTo(b => b.AutoID));
+
+            lock (_subscriptionMgmtLock)
+            {
+                CollectionExtensions.Intersect<int>(_subscribedSuites, newItems, out toRemove, out toAdd);
+
+                ServiceInstances.EntityUpdateTracker.UnsubscribeFromSuites(this, toRemove);
+                ServiceInstances.EntityUpdateTracker.SubscribeToSuites(this, toAdd);
+
+                foreach (int id in toRemove) _modifiedSuites.Remove(id);
+                _subscribedSuites.Clear();
+                foreach (int id in newItems) _subscribedSuites.Add(id);
+            }
+        }
+
+        public void UnsubscribeAll()
+        {
+            lock (_subscriptionMgmtLock)
+            {
+                if (_subscribedBuildings.Count > 0)
+                {
+                    ServiceInstances.EntityUpdateTracker.UnsubscribeFromBuildings(this, _subscribedBuildings);
+                    _subscribedBuildings.Clear();
+                }
+                if (_subscribedSuites.Count > 0)
+                {
+                    ServiceInstances.EntityUpdateTracker.UnsubscribeFromSuites(this, _subscribedSuites);
+                    _subscribedSuites.Clear();
+                }
+                _modifiedBuildings.Clear();
+                _modifiedSuites.Clear();
+            }
+        }
+
+        //public void NotifyModifiedBuilding(int id)
+        //{
+        //    bool changed = false;
+        //    lock (_subscriptionMgmtLock)
+        //    {
+        //        if (!_modifiedBuildings.Contains(id))
+        //        {
+        //            _modifiedBuildings.Add(id);
+        //            changed = true;
+        //        }
+        //    }
+        //    if (changed) _subscribedItemModified.Set();
+        //}
+
+        //public void NotifyModifiedSuite(int id)
+        //{
+        //    bool changed = false;
+        //    lock (_subscriptionMgmtLock)
+        //    {
+        //        if (!_modifiedSuites.Contains(id))
+        //        {
+        //            _modifiedSuites.Add(id);
+        //            changed = true;
+        //        }
+        //    }
+        //    if (changed) _subscribedItemModified.Set();
+        //}
+
+        public void NotifyModified(IEnumerable<int> buildingIds, IEnumerable<int> suiteIds)
+        {
+            bool changed = false;
+            lock (_subscriptionMgmtLock)
+            {
+                foreach (int id in buildingIds)
+                    if (_subscribedBuildings.Contains(id) && !_modifiedBuildings.Contains(id))
+                    {
+                        _modifiedBuildings.Add(id);
+                        changed = true;
+                    }
+
+                foreach (int id in suiteIds)
+                    if (_subscribedSuites.Contains(id) && !_modifiedSuites.Contains(id))
+                    {
+                        _modifiedSuites.Add(id);
+                        changed = true;
+                    }
+            }
+            if (changed) _subscribedItemModified.Set();
+        }
+
+        private void buildModifiedResponse(out IList<Building> buildings, out IList<Suite> suites)
+        {
+            try
+            {
+                int[] buildingIds, suiteIds;
+
+                lock (_subscriptionMgmtLock)
+                {
+                    buildingIds = _modifiedBuildings.ToArray();
+                    suiteIds = _modifiedSuites.ToArray();
+                    _modifiedBuildings.Clear();
+                    _modifiedSuites.Clear();
+                }
+
+                Building[] bresult = new Building[buildingIds.Length];
+                Suite[] sresult = new Suite[suiteIds.Length];
+
+                using (BuildingDao dao = new BuildingDao(DbSession))
+                {
+                    for (int idx = buildingIds.Length - 1; idx >= 0; idx--)
+                    {
+                        DbSession.Evict(DbSession.Load<Building>(buildingIds[idx]));  // for sure we do have it cached!
+                        bresult[idx] = dao.GetById(buildingIds[idx]);
+                    }
+                }
+                using (SuiteDao dao = new SuiteDao(DbSession))
+                {
+                    for (int idx = suiteIds.Length - 1; idx >= 0; idx--)
+                    {
+                        DbSession.Evict(DbSession.Load<Suite>(suiteIds[idx]));  // for sure we do have it cached!
+                        sresult[idx] = dao.GetById(suiteIds[idx]);
+                    }
+                }
+
+                buildings = bresult;
+                suites = sresult;
+            }
+            catch
+            {
+                buildings = new Building[0];
+                suites = new Suite[0];
+            }
+        }
+
+        public IEnumerable<int> GetModifiedBuildingIds()
+        {
+            lock (_subscriptionMgmtLock) return _modifiedBuildings.ToArray();
+        }
+
+        public IEnumerable<int> GetModifiedSuiteIds()
+        {
+            lock (_subscriptionMgmtLock) return _modifiedSuites.ToArray();
+        }
+
+        private Thread _eventThread;
+        private string _eventThreadName = null;
+        private readonly ManualResetEvent _exitEventThread = new ManualResetEvent(false);
+        private int _eventThreadCounter = 0;
+
+        public void StartEventThread(IResponseData response)
+        {
+            int status = Interlocked.Increment(ref _eventThreadCounter);
+            if (status > 1)
+            {
+                _exitEventThread.Set();
+                if (!_eventThread.Join(100))
+                    ServiceInstances.Logger.Error("Event thread {0} timed out quitting and is orphaned.", _eventThreadName ?? "<unknown>");
+            }
+            lock (_eventThreadLock)
+            {
+                _exitEventThread.Reset();
+                _eventThread = new Thread(eventThread);
+                _eventThread.IsBackground = true;
+                _eventThread.Start(response);
+            }
+        }
+
+        private void killEventThread()
+        {
+            if (_eventThreadCounter > 0)
+            {
+                _exitEventThread.Set();
+                if (!_eventThread.Join(100))
+                    ServiceInstances.Logger.Error("Event thread {0} timed out quitting and is orphaned.", _eventThreadName ?? "<unknown>");
+            }
+        }
+
+        private void eventThread(object param)
+        {
+            IResponseData ctx = param as IResponseData;
+            bool dbSessionResumed = false;
+            if (null == ctx) return;
+
+            try
+            {
+                Thread.CurrentThread.Name = "HttpPush#" + Thread.CurrentThread.ManagedThreadId.ToString();
+                _eventThreadName = Thread.CurrentThread.Name;
+
+                IList<Building> buildings = null;
+                IList<Suite> suites = null;
+
+                WaitHandle[] events = new WaitHandle[] { _subscribedItemModified, _exitEventThread };
+                switch (WaitHandle.WaitAny(events, ServiceInstances.SessionStore.ClientKeepalivePeriodSec * 1000))
+                {
+                    case WaitHandle.WaitTimeout:  // provide an empty response
+                        dbSessionResumed = true;
+                        Resume();  // TODO: Response builder currently NEEDS session; find a way to avoid this.
+                        buildings = new Building[0];
+                        suites = new Suite[0];
+                        break;
+
+                    case 0:  // provide a response
+                        buildings = new List<Building>();
+                        suites = new List<Suite>();
+                        dbSessionResumed = true;
+                        Resume();
+                        buildModifiedResponse(out buildings, out suites);
+                        break;
+
+                    case 1:  // abort connection immediately
+                        break;
+                }
+
+                if ((buildings != null) && (suites != null))
+                    DataService.GenerateEventDataResponse(this.DbSession, ref ctx, ref buildings, ref suites);
+
+                if (dbSessionResumed) { Disconnect(false); dbSessionResumed = false; }
+
+                // close
+                ctx.ProcessResponse();
+            }
+            catch (NHibernate.HibernateException ex)
+            {
+                Disconnect(true);  // no need for check; if we get this exception - session WAS resumed.
+                ctx.ProcessResponse(ex);
+            }
+            catch (Exception ex)
+            {
+                if (dbSessionResumed) Disconnect(false);
+                ctx.ProcessResponse(ex);
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _eventThreadCounter);
+            }
+        }     
     }
 }

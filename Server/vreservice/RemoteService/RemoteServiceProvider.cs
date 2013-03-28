@@ -11,6 +11,7 @@ namespace Vre.Server.RemoteService
     internal class RemoteServiceProvider : MarshalByRefObject
     {
         private IHttpService _reverseRequestService = new ReverseRequestService();
+        private IHttpService _eventService = new EventService();
 
         public void ProcessRequest(HttpServiceBase server, IServiceRequest request)
         {
@@ -71,7 +72,7 @@ namespace Vre.Server.RemoteService
                 _reverseRequestService.ProcessGetRequest(request);
                 return;
             }
-            if (request.Request.Path.Equals(ProgramService.ServicePathPrefix))  // programmatic requests, such as login
+            else if (request.Request.Path.Equals(ProgramService.ServicePathPrefix))  // programmatic requests, such as login
             {
                 ProgramService.ProcessClientRequest(request);
                 return;
@@ -113,6 +114,14 @@ namespace Vre.Server.RemoteService
                 if (null == request.UserInfo.Session) throw new ArgumentException("Need a valid session to perform this operation.");
 
                 DataService.ProcessGetRequest(request);
+                return;
+            }
+            else if (request.Request.Path.StartsWith(_eventService.ServicePathPrefix))  // push events
+            {
+                if (_eventService.RequiresSession && (null == request.UserInfo.Session)) 
+                    throw new ArgumentException("Need a valid session to perform this operation.");
+
+                _eventService.ProcessGetRequest(request);
                 return;
             }
             else //if (0 == request.Request.Query.Count)  // FS file reading

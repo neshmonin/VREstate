@@ -26,6 +26,7 @@ IF ERRORLEVEL 1 GOTO versionFailed
 
 
 ECHO Building binaries...
+DEL _build\build.log
 %devenv% vreserver.sln /Rebuild Release /Out _build\build.log
 IF ERRORLEVEL 1 GOTO devenvFailed
 

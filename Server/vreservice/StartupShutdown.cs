@@ -26,7 +26,13 @@ namespace Vre.Server
         public static void PerformStartup(bool startAsService)
         {
             ServiceInstances.Logger.Info("Starting server.");
-            ServiceInstances.Logger.Info("Version {0}.{1}", Assembly.GetExecutingAssembly().GetName().Version, VersionGen.VersionStamp);
+            ServiceInstances.Logger.Info("Version {0}.{1}{2}", 
+                Assembly.GetExecutingAssembly().GetName().Version, VersionGen.VersionStamp,
+                (VersionGen.IsAlpha) ? 
+                    string.Format(" ALPHA {0:yyyyMMddHHmmss}",
+                        System.IO.File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location)) : 
+                    string.Empty
+            );
             Status = "Starting...";
 
             if (!Enum.TryParse<ServerRole>(ServiceInstances.Configuration.GetValue("ServerRole", "VRT"),

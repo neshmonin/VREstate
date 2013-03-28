@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Principal;
 using System.Text;
 using System.Windows.Forms;
+using Vre.Server;
 using Vre.Server.Model;
 using Vre.Server.Model.Kmz;
-using System.Globalization;
-using System.Diagnostics;
-using System.Net;
 
 namespace ModelPackageTester
 {
@@ -19,6 +20,7 @@ namespace ModelPackageTester
         private Kmz _lastModel = null;
         private string _stiFileName = null;
         private string _floorPlanPath = null;
+        private bool _isProduction = false;
 
         private string doTest()
         {
@@ -48,6 +50,9 @@ namespace ModelPackageTester
                 readWarnings.Append("\r\n\r\nTEST NOT PASSED.");
                 return readWarnings.ToString();
             }
+
+            readWarnings.AppendFormat("\r\n    BUILDING LIST: {0}",
+                CsvUtilities.ToString(_lastModel.Model.Site.Buildings.ConvertTo(b => b.Name)));
 
             readWarnings.Append("\r\nStep 2: =========== Reading in and parsing the CSV =============");
             // Read in CSV
@@ -93,7 +98,6 @@ namespace ModelPackageTester
 
             // Test common cross-reference issues
             //
-            List<string> missingTypes = new List<string>();
             List<string> passedTypes = new List<string>();
 
             foreach (Building b in _lastModel.Model.Site.Buildings)
@@ -101,6 +105,20 @@ namespace ModelPackageTester
                 List<string> suiteNames = new List<string>();
                 foreach (Suite s in b.Suites)
                 {
+                    if (!Utilities.TestSuiteFloorNumber(s.Name))
+                    {
+                        readWarnings.AppendFormat("\r\nMDMD03: Building '{0}' contains suite with invalid name '{1}'",
+                            b.Name, s.Name);
+                        canImport = false;
+                    }
+
+                    if (!Utilities.TestSuiteFloorNumber(s.Floor))
+                    {
+                        readWarnings.AppendFormat("\r\nMDMD04: Building '{0}' contains suite '{1}' with invalid floor name '{2}'",
+                            b.Name, s.Name, s.Floor);
+                        canImport = false;
+                    }
+
                     if (suiteNames.Contains(s.Name))
                     {
                         readWarnings.AppendFormat("\r\nMDMD01: Building '{0}' contains multiple suites with same name '{1}'",
@@ -119,15 +137,8 @@ namespace ModelPackageTester
                     string testingType = /*b.Type + "/" + */s.ClassName;
                     if (!info.HasType(testingType))
                     {
-                        if (missingTypes.Contains(testingType))
-                        {
-                            readWarnings.AppendFormat("\r\nSTMD01: Suite type \'{0}\' in KMZ has no related entry in CSV.", testingType);
-                            canImport = false;
-                        }
-                        else
-                        {
-                            missingTypes.Add(testingType);
-                        }
+                        readWarnings.AppendFormat("\r\nSTMD01: Suite type \'{0}\' in KMZ has no related entry in CSV.", testingType);
+                        canImport = false;
                     }
                     else if (!passedTypes.Contains(testingType))
                     {
@@ -137,22 +148,31 @@ namespace ModelPackageTester
                                 testingType);
                             canImport = false;
                         }
-                        else
-                        {
-                            Geometry[] gl = _lastModel.Model.Site.Geometries[testingType];
-                            foreach (Geometry geom in gl)
-                            {
-                                // This is a known problem.
-                                // Model may have a geometry node in non-lines format.
-                                if ((null == geom.Points) || (null == geom.Lines))
-                                {
-                                    readWarnings.AppendFormat("\r\nMDER00: Suite type \'{0}\' uses unknown format of geometry (Geometry ID={1}). Points and lines are not read.",
-                                        testingType, geom.Id);
-                                }
-                            }
-                        }
+                        // Below shall never happen: geometry building code in ConstructionSite skips unknown data
+                        //else
+                        //{
+                        //    Geometry[] gl = _lastModel.Model.Site.Geometries[testingType];
+                        //    foreach (Geometry geom in gl)
+                        //    {
+                        //        // This is a known problem.
+                        //        // Model may have a geometry node in non-lines format.
+                        //        if ((null == geom.Points) || (null == geom.Lines))
+                        //        {
+                        //            readWarnings.AppendFormat("\r\nMDER00: Suite type \'{0}\' uses unknown format of geometry (Geometry ID={1}). Points and lines are not read.",
+                        //                testingType, geom.Id);
+                        //        }
+                        //    }
+                        //}
                         passedTypes.Add(testingType);
                     }
+                }
+            }
+            foreach (string stype in info.TypeInfoList)
+            {
+                if (!passedTypes.Contains(stype))
+                {
+                    readWarnings.AppendFormat("\r\nSTMD07: Suite type \'{0}\' in CSV is never used in model.", stype);
+                    canImport = false;
                 }
             }
 
@@ -188,6 +208,22 @@ namespace ModelPackageTester
         {
             InitializeComponent();
 
+            Version osver = Environment.OSVersion.Version;
+            if ((6 == osver.Major) && (osver.Minor > 0))
+            {
+                WindowsIdentity wi = WindowsIdentity.GetCurrent();
+                WindowsPrincipal wp = new WindowsPrincipal(wi);
+                if (wp.IsInRole(WindowsBuiltInRole.Administrator))  // running elevated; disable drag-n-drop
+                // as it does not work anyways:
+                // http://stackoverflow.com/questions/3794462/enable-dragdrop-from-explorer-to-run-as-administrator-application
+                {
+                    AllowDrop = false;
+                    lblModelPath.Text = string.Empty;
+                    lblSuiteTypeInfoPath.Text = string.Empty;
+                    lblFloorPlansPath.Text = string.Empty;
+                }
+            }
+
             Text = Text + " - v" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             Icon = Properties.Resources.cloudservice;
@@ -195,8 +231,37 @@ namespace ModelPackageTester
             toolTip1.SetToolTip(btnGuessSuiteTypeInfo, "Try guessing Suite Type Info file");
             toolTip1.SetToolTip(btnGuessFloorPlanFolder, "Try guessing Floor Plan folder");
 
-            btnImport.Visible = File.Exists(getImportExecutablePath());
-            if (btnImport.Visible) Text = Text.Replace("Tester", "Tester/Importer");
+            string exeFile = getImportExecutablePath();
+            bool canImport = File.Exists(exeFile);
+            btnImport.Visible = canImport;
+            if (canImport)
+            {
+                Text = Text.Replace("Tester", "Tester/Importer");
+
+                try
+                {
+                    using (StreamReader rdr = File.OpenText(exeFile + ".config"))
+                    {
+                        while (!rdr.EndOfStream)
+                        {
+                            string line = rdr.ReadLine().Trim();
+                            if (line.Contains("\"HttpListenerUri\"") && line.Contains(":443/\""))
+                            {
+                                _isProduction = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                catch { }
+
+                if (_isProduction)
+                {
+                    Text = Text + " - PRODUCTION";
+                    ForeColor = SystemColors.HighlightText;
+                    BackColor = SystemColors.Highlight;
+                }
+            }
         }
 
         private void onNewModelFileName(string filename)
@@ -423,7 +488,7 @@ namespace ModelPackageTester
         private void btnImport_Click(object sender, EventArgs e)
         {
             ImportForm iform = new ImportForm();
-            iform.Init(_modelFileName, _stiFileName, _floorPlanPath, _lastModel, getImportExecutablePath());
+            iform.Init(_modelFileName, _stiFileName, _floorPlanPath, _lastModel, getImportExecutablePath(), AllowDrop, _isProduction);
             iform.ShowDialog();
         }
     }

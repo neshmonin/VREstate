@@ -508,7 +508,7 @@ namespace Vre.Server.ModelCache
                 //if (vp.Heading >= 180.0) vp.Heading -= 360.0;
 
                 _location = new ViewPoint(vp.Longitude, vp.Latitude, vp.Altitude, vp.Heading);
-                _floor = modelInfo.Floor;
+                _floor = Utilities.NormalizeFloorNumber(modelInfo.Floor);
 
                 //modelInfo.Id;  // "ID<five-digit-int>"
             }

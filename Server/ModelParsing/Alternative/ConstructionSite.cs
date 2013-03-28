@@ -151,14 +151,15 @@ namespace Vre.Server.Model.Kmz
                     Geometry geom = Geometry.Create(gna.Value, gn);
                     if (geom != null)
                     {
-                        geometries.Add(gna.Value, geom);
+                        if ((geom.Points != null) || (geom.Lines != null))  // skip unknown data
+                            geometries.Add(gna.Value, geom);
                     }
-                    else
-                    {
-                        if (readWarnings != null)
-                            readWarnings.AppendFormat(
-                                "\r\nMDSC06: Suite Class Name \'{0}\': Wire geometry contains no lines", gna.Value);
-                    }
+                    //else
+                    //{
+                    //    if (readWarnings != null)
+                    //        readWarnings.AppendFormat(
+                    //            "\r\nMDSC06: Suite Class Name \'{0}\': Wire geometry contains no lines", gna.Value);
+                    //}
                 }
             }
 

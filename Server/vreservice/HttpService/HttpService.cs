@@ -14,9 +14,9 @@ namespace Vre.Server.HttpService
             _maxRequestBodyLength = ServiceInstances.Configuration.GetValue("MaxHttpRequestBodyLengthBytes", 10240);
         }
 
-        protected override IResponseData process(string browserKey, HttpListenerContext ctx)
+        protected override IResponseData process(string browserKey, HttpListenerContext ctx, HttpServiceRequest.ProcessResponse proc)
         {
-            HttpServiceRequest rq = new HttpServiceRequest(ctx, _path, _maxRequestBodyLength);
+            HttpServiceRequest rq = new HttpServiceRequest(ctx, _path, _maxRequestBodyLength, proc);
 
             if (_allowExtendedLogging)
             {

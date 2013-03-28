@@ -238,8 +238,15 @@ namespace Vre.Server.Command
             string infoModelFileName, Parameters extras)
         {
             string displayModelFileName = extras.GetOption("displaymodel");
+            string overlayModelFileName = extras.GetOption("overlaymodel");
+            string poiModelFileName = extras.GetOption("poimodel");
+            string bubbleTemplateFileName = extras.GetOption("bubbletemplate");
             bool isSiteModel = !CommandHandler.str2bool(extras.GetOption("asbuilding"), false);
             string singleBuildingName = extras.GetOption("building");
+
+            Building.BuildingStatus newBuildingStatus;
+            if (!Enum.TryParse<Building.BuildingStatus>(extras.GetOption("buildingStatus"), out newBuildingStatus))
+                newBuildingStatus = Building.BuildingStatus.Sold;
 
             List<string> missingBuildings = new List<string>(dbSite.Buildings.Count);
             foreach (Building b in dbSite.Buildings) missingBuildings.Add(b.Name);
@@ -264,6 +271,7 @@ namespace Vre.Server.Command
                 if (null == dbb)
                 {
                     dbb = new Building(dbSite, mb.Name);
+                    dbb.Status = newBuildingStatus;
                     _clientSession.DbSession.Save(dbb);
                     created = true;
                     _log.AppendFormat("Created new building ID={0}, Name={1}\r\n", dbb.AutoID, dbb.Name);
@@ -288,6 +296,9 @@ namespace Vre.Server.Command
                 importBuilding(mb, dbb, created,
                     isSiteModel ? null : infoModelFileName,
                     isSiteModel ? null : displayModelFileName,
+                    isSiteModel ? null : overlayModelFileName,
+                    isSiteModel ? null : poiModelFileName,
+                    isSiteModel ? null : bubbleTemplateFileName,
                     extras);
             }
 
@@ -342,13 +353,25 @@ namespace Vre.Server.Command
                 if (displayModelFileName != null)
                 {
                     // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbSite.GenericInfoModel))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbSite.GenericInfoModel);
+                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
+                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
+                    dbSite.DisplayModelUrl = storeModelFile(dbSite, displayModelFileName, "s");
+                }
 
-                    using (FileStream fs = File.OpenRead(displayModelFileName))
-                        dbSite.DisplayModelUrl = ServiceInstances.FileStorageManager.StoreFile(
-                            "models", "s", Path.GetExtension(displayModelFileName), dbSite.AutoID.ToString(), fs);
-                    _filesSaved.Add(dbSite.DisplayModelUrl);
+                if (overlayModelFileName != null)
+                {
+                    // TODO: Always remove previous file versions?
+                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
+                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
+                    dbSite.OverlayModelUrl = storeModelFile(dbSite, overlayModelFileName, "so");
+                }
+
+                if (bubbleTemplateFileName != null)
+                {
+                    // TODO: Always remove previous file versions?
+                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
+                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
+                    dbSite.BubbleTemplateUrl = storeModelFile(dbSite, bubbleTemplateFileName, "sbt");
                 }
 
                 _clientSession.DbSession.Update(dbSite);
@@ -356,7 +379,9 @@ namespace Vre.Server.Command
         }
 
         private void importBuilding(Vre.Server.Model.Kmz.Building modelBuilding, Building dbBuilding, bool isCreated,
-            string infoModelFileName, string displayModelFileName, Parameters extras)
+            string infoModelFileName, string displayModelFileName, string overlayModelFileName, string poiModelFileName,
+            string bubbleTemplateFileName,
+            Parameters extras)
         {
             List<string> missingSuites = new List<string>(dbBuilding.Suites.Count);
             bool modified = false;
@@ -383,7 +408,7 @@ namespace Vre.Server.Command
 
                 if (null == dbs)
                 {
-                    dbs = new Suite(dbBuilding, -1, ms.Floor, modelSuiteName);
+                    dbs = new Suite(dbBuilding, -1, Utilities.NormalizeFloorNumber(ms.Floor), modelSuiteName);
                     dbs.Status = newSuiteStatus;
                     _clientSession.DbSession.Save(dbs);
                     created = true;
@@ -442,11 +467,31 @@ namespace Vre.Server.Command
                     // TODO: Always remove previous file versions?
                     //if (!string.IsNullOrEmpty(dbBuilding.Model))
                     //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
+                    dbBuilding.DisplayModelUrl = storeModelFile(dbBuilding, displayModelFileName, "b");
+                }
 
-                    using (FileStream fs = File.OpenRead(displayModelFileName))
-                        dbBuilding.DisplayModelUrl = ServiceInstances.FileStorageManager.StoreFile(
-                            "models", "b", Path.GetExtension(displayModelFileName), dbBuilding.AutoID.ToString(), fs);
-                    _filesSaved.Add(dbBuilding.DisplayModelUrl);
+                if (overlayModelFileName != null)
+                {
+                    // TODO: Always remove previous file versions?
+                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
+                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
+                    dbBuilding.OverlayModelUrl = storeModelFile(dbBuilding, overlayModelFileName, "bo");
+                }
+
+                if (poiModelFileName != null)
+                {
+                    // TODO: Always remove previous file versions?
+                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
+                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
+                    dbBuilding.PoiModelUrl = storeModelFile(dbBuilding, poiModelFileName, "bp");
+                }
+
+                if (bubbleTemplateFileName != null)
+                {
+                    // TODO: Always remove previous file versions?
+                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
+                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
+                    dbBuilding.BubbleTemplateUrl = storeModelFile(dbBuilding, bubbleTemplateFileName, "bbt");
                 }
 
                 modified = true;                
@@ -542,6 +587,16 @@ namespace Vre.Server.Command
             }
 
             if (modified) _clientSession.DbSession.Update(dbBuilding);
+        }
+
+        private string storeModelFile(UpdateableBase dbObject, string modelFileName, string storePrefix)
+        {
+            string result;
+            using (FileStream fs = File.OpenRead(modelFileName))
+                result = ServiceInstances.FileStorageManager.StoreFile(
+                    "models", storePrefix, Path.GetExtension(modelFileName), dbObject.AutoID.ToString(), fs);
+            _filesSaved.Add(result);
+            return result;
         }
 
         private static string conditionString(string input, int maxlen)

@@ -34,12 +34,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\_version\version.cs">
@@ -48,6 +42,7 @@
     <Compile Include="..\_version\versiongen.cs">
       <Link>Properties\versiongen.cs</Link>
     </Compile>
+    <Compile Include="CollectionExtensions.cs" />
     <Compile Include="CsvUtilities.cs" />
     <Compile Include="Mls\IMlsInfoProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

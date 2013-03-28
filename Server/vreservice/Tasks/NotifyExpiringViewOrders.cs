@@ -20,29 +20,44 @@ namespace Vre.Server.Task
             if (!bool.TryParse(param.GetOption("testMode"), out testMode)) testMode = false;
             //if (string.IsNullOrWhiteSpace(salesAdminAddress)) salesAdminAddress = "sales@3dcondox.com";
 
-            using (ISession session = NHibernateHelper.GetSession())
+            bool error = true;
+            do
             {
-                DatabaseSettingsDao.VerifyDatabase();
-
-                using (ViewOrderDao vodao = new ViewOrderDao(session))
+                try
                 {
-                    foreach (ViewOrder vo in vodao.GetExpiringBeforeNotNotified(getcutOffTime(param), 0))
+                    using (ISession session = NHibernateHelper.GetSession())
                     {
-                        notifyViewOrderStatus(ref ccnt, ref ecnt, refVal, testMode,
-                            session, vodao, vo, "MSG_VIEWORDER_EXPIRING");
-                    }  // view order loop
+                        DatabaseSettingsDao.VerifyDatabase();
 
-                    DateTime cutOff = DateTime.UtcNow;
-                    foreach (ViewOrder vo in vodao.GetExpiringBeforeNotNotified(cutOff, -2))
-                    {
-                        if ((int)cutOff.Subtract(vo.ExpiresOn).TotalDays == vo.NotificationsSent)
+                        using (ViewOrderDao vodao = new ViewOrderDao(session))
                         {
-                            notifyViewOrderStatus(ref ccnt, ref ecnt, refVal, testMode,
-                                session, vodao, vo, "MSG_VIEWORDER_EXPIRED");
-                        }
-                    }  // view order loop
-                }  // view order dao
-            }  // session
+                            foreach (ViewOrder vo in vodao.GetExpiringBeforeNotNotified(getcutOffTime(param), 0))
+                            {
+                                notifyViewOrderStatus(ref ccnt, ref ecnt, refVal, testMode,
+                                    session, vodao, vo, "MSG_VIEWORDER_EXPIRING");
+                            }  // view order loop
+
+                            DateTime cutOff = DateTime.UtcNow;
+                            foreach (ViewOrder vo in vodao.GetExpiringBeforeNotNotified(cutOff, -2))
+                            {
+                                if ((int)cutOff.Subtract(vo.ExpiresOn).TotalDays == vo.NotificationsSent)
+                                {
+                                    notifyViewOrderStatus(ref ccnt, ref ecnt, refVal, testMode,
+                                        session, vodao, vo, "MSG_VIEWORDER_EXPIRED");
+                                }
+                            }  // view order loop
+
+                            error = false;
+                        }  // view order dao
+                    }  // session
+                }
+                catch (HibernateException ex)
+                {
+                    ServiceInstances.Logger.Error("Database error: {0}", ex);
+                    ecnt++;
+                }
+            } 
+            while (error);
 
             if (ccnt > 0) ServiceInstances.Logger.Info("{0} notifications sent.", ccnt);
 

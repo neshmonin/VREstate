@@ -9,6 +9,8 @@ namespace Vre.Server.HttpService
 {
     internal class HttpServiceRequest : IServiceRequest
     {
+        public delegate void ProcessResponse(object respImpl, IResponseData resp, Exception ex);
+                
         class RemoteUserInfo : IRemoteUserInfo
         {
             public RemoteUserInfo(IPEndPoint ep, NameValueCollection headers, ServiceQuery query)
@@ -110,7 +112,9 @@ namespace Vre.Server.HttpService
 
         public class ResponseData : IResponseData
         {
-            public ResponseData(Stream httpResponseStream)
+            private ProcessResponse _responseProc;
+            private object _respImpl;
+            public ResponseData(Stream httpResponseStream, object respImpl, ProcessResponse proc)
             {
                 ResponseCode = HttpStatusCode.Unused;
                 ResponseCodeDescription = string.Empty;
@@ -119,6 +123,8 @@ namespace Vre.Server.HttpService
                 DataStreamContentType = null;
                 DataPhysicalLocation = null;
                 RedirectionUrl = null;
+                _respImpl = respImpl;
+                _responseProc = proc;
             }
             public HttpStatusCode ResponseCode { get; set; }
             public string ResponseCodeDescription { get; set; }
@@ -128,38 +134,15 @@ namespace Vre.Server.HttpService
             public string DataPhysicalLocation { get; set; }
             public bool HoldResponseForServerPush { get; set; }
             public string RedirectionUrl { get; set; }
+            public void ProcessResponse() { _responseProc(_respImpl, this, null); }
+            public void ProcessResponse(Exception ex) { _responseProc(_respImpl, this, ex); }
         }
-
-        //private static void initialize()
-        //{
-        //    // http://www.iana.org/assignments/media-types/
-
-        //    ContentTypeByExtension.Add("html", "text/html");
-        //    ContentTypeByExtension.Add("htm", "text/html");
-        //    ContentTypeByExtension.Add("txt", "text/plain");
-        //    ContentTypeByExtension.Add("xml", "text/xml");
-        //    ContentTypeByExtension.Add("css", "text/css");
-
-        //    ContentTypeByExtension.Add("gif", "image/gif");
-        //    ContentTypeByExtension.Add("jpeg", "image/jpeg");
-        //    ContentTypeByExtension.Add("jpg", "image/jpeg");
-        //    ContentTypeByExtension.Add("png", "image/png");
-
-        //    ContentTypeByExtension.Add("js", "application/javascript");
-        //    ContentTypeByExtension.Add("json", "application/json");
-        //    ContentTypeByExtension.Add("kml", "application/vnd.google-earth.kml+xml");
-        //    ContentTypeByExtension.Add("kmz", "application/vnd.google-earth.kmz");
-
-        //    _allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
-
-        //    _fileBufferSize = ServiceInstances.Configuration.GetValue("FileStreamingBufferSize", 16384);
-        //}
 
         public IRemoteUserInfo UserInfo { get; private set; }
         public IRequestData Request { get; private set; }
         public IResponseData Response { get; private set; }
 
-        public HttpServiceRequest(HttpListenerContext ctx, string servicePath, long requestBodySizeLimit)
+        public HttpServiceRequest(HttpListenerContext ctx, string servicePath, long requestBodySizeLimit, ProcessResponse proc)
         {
             // TODO: verify this is valid:
             // ctx.Request.ContentEncoding
@@ -174,7 +157,7 @@ namespace Vre.Server.HttpService
 
             UserInfo = new RemoteUserInfo(ctx.Request.RemoteEndPoint, ctx.Request.Headers, query);
             Request = new RequestData(ctx.Request, file, query, requestBodySizeLimit);
-            Response = new ResponseData(new MemoryStream());
+            Response = new ResponseData(new MemoryStream(), ctx.Response, proc);
 
             // update trusted value for this request: managers do not get request object!
             if (UserInfo.Session != null)
@@ -186,10 +169,10 @@ namespace Vre.Server.HttpService
                 ctx.Response.StatusDescription = "Session ID is invalid or dropped by timeout.";
 
                 ServiceInstances.Logger.Error(string.Format(
-                    "HTTP request referred to unknow session ID from {0}.",
+                    "HTTP request referred to unknown session ID from {0}.",
                     ctx.Request.RemoteEndPoint));
                 //else
-                //    ServiceInstances.Logger.Error("HTTP request referred to unknows session ID.");
+                //    ServiceInstances.Logger.Error("HTTP request referred to unknown session ID.");
             }
         }
     }

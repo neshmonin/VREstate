@@ -13,13 +13,13 @@ namespace Vre.Server.BusinessLogic
 
         public GenericManager(ClientSession clientSession)
         {
-            _initiatedSession = clientSession.Resume();
+            //_initiatedSession = clientSession.Resume();
             _session = clientSession;
         }
 
         public void Dispose()
         {
-            if (_initiatedSession) { _session.Disconnect(false); _initiatedSession = false; }
+            //if (_initiatedSession) { _session.Disconnect(false); _initiatedSession = false; }
         }
     }
 }
