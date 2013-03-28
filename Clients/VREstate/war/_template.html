@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+<!-- 
+	Шаблон должен содержать елементы со следующими идентификаторами:
+	1. елементы данных - в них загружается соотв. информация
+		SuiteName
+		SuiteTypeName
+		SuiteBedroomsCount
+		SuiteBathroomsCount
+		SuiteArea
+		SuiteAreaMeas
+		SuiteFloorName
+		SuiteBalconyTerrace
+		SuitePrice
+		SuiteFloorPlanImg
+	2. елементы обработки событий - на них вешается обработчик onclick():
+		onShowFloorPlan
+		onShowMoreInfo
+	Ниже описан простой пример
+ -->
+</head>
+<body>
+	Suite name: <span id="SuiteName">unknown</span><br>
+	Suite type name: <span id="SuiteTypeName">unknown</span><br>
+	Bedrooms count: <span id="SuiteBedroomsCount">unknown</span><br>
+	Bathrooms count: <span id="SuiteBathroomsCount">unknown</span><br>
+	Suite area: <span id="SuiteArea">unknown</span>
+	<span id="SuiteAreaMeas"></span><br>
+	Suite floor name: <span id="SuiteFloorName">unknown</span><br>
+	Balcony / Terrace: <span id="SuiteBalconyTerrace">unknown</span><br>
+	Suite price: <span id="SuitePrice">unknown</span><br>
+	
+	<a href="#" id="onShowPanoramicView">Panoramic View</a><br>
+	<a href="#" id="onShowMoreInfo">
+	<img id = "SuiteFloorPlanImg" width = "200px" height = "200px">
+	</a>
+</body>
+</html>

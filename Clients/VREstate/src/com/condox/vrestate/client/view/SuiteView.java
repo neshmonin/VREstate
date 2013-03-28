@@ -14,6 +14,8 @@ import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -137,12 +139,15 @@ public class SuiteView extends _GEView {
 		};
 		$wnd.showMoreInfo = function() {
 //			view.@com.condox.vrestate.client.view.SuiteView::ShowMoreInfo()();
-			if (typeof (parent.parent.parent.VRT_ShowMoreInfo) == "function")
-				parent.parent.parent.VRT_ShowMoreInfo('Musee','PH03','3-F','550000');
-			else
+			if (typeof (parent.parent.parent.VRT_ShowMoreInfo) == "function") {
+				buildingName = view.@com.condox.vrestate.client.view.SuiteView::getBuildingName()();
+				suiteName = view.@com.condox.vrestate.client.view.SuiteView::getSuiteName()();
+				suiteTypeName = view.@com.condox.vrestate.client.view.SuiteView::getSuiteTypeName()();
+				suitePrice = view.@com.condox.vrestate.client.view.SuiteView::getSuitePrice()();
+				parent.parent.parent.VRT_ShowMoreInfo(buildingName,suiteName,suiteTypeName,suitePrice);
+			} else
+//				alert(view.@com.condox.vrestate.client.view.SuiteView::getSuiteName()());
 				view.@com.condox.vrestate.client.view.SuiteView::ShowFloorPlan()();
-//			parent.parent.parent.HideVR();
-//			parent.parent.parent.ShowElement("viewer");
 			return false;
 		};
 		//		$wnd.A();
@@ -151,6 +156,23 @@ public class SuiteView extends _GEView {
 		//			suite.@com.condox.vrestate.client.view.SuiteView::ShowMore()();
 		//		}
 	}-*/;
+	
+	private String getBuildingName() {
+		return suiteGeo.suite.getParent().getName();
+	}
+	
+	private String getSuiteName() {
+		return suiteGeo.suite.getName();
+	}
+	
+	private String getSuiteTypeName() {
+		return suiteGeo.suite.getSuiteType().getName();
+	}
+	
+	private String getSuitePrice() {
+		return "" + suiteGeo.suite.getPrice();
+	}
+	
 
 	public void ShowBalloon() {
 		F();
@@ -166,7 +188,10 @@ public class SuiteView extends _GEView {
 		com.google.gwt.dom.client.FrameElement frameElement = (com.google.gwt.dom.client.FrameElement) Options.SUITE_INFO;
 		com.google.gwt.dom.client.Document doc = frameElement
 				.getContentDocument();
-
+		NodeList<Element> styles = doc.getElementsByTagName("style");
+//		Window.alert("" + styles.getLength());
+//		doc.getElementsByTagName("head").getItem(0).appendChild(styles.getItem(0));
+		doc.getBody().appendChild(styles.getItem(0));
 		SuiteType type = suiteGeo.suite.getSuiteType();
 		// NAME
 		Element name = doc.getElementById("SuiteName");
@@ -232,14 +257,17 @@ public class SuiteView extends _GEView {
 		// bathrooms.setInnerText("" + (int) (Math.random() * 10));
 
 		Element panoramic = doc.getElementById("onShowPanoramicView");
-		panoramic.setAttribute("onclick", "showPanoramicView();");
+		if (panoramic != null)
+			panoramic.setAttribute("onclick", "showPanoramicView();");
 		
 //		floorplan = doc.getElementById("onShowFloorPlan");
 //		floorplan.setAttribute("onclick", "showFloorPlan();");
 		
 		Element moreinfo = doc.getElementById("onShowMoreInfo");
-		moreinfo.setAttribute("onclick", "showMoreInfo();");
+		if (moreinfo != null)
+			moreinfo.setAttribute("onclick", "showMoreInfo();");
 
+//		balloon.setContentDiv(frameElement.getInnerHTML());
 		balloon.setContentDiv(doc.getBody().getInnerHTML());
 		balloon.setFeature(suiteGeo.getExtendedDataLabel());
 		GE.getPlugin().setBalloon(balloon);
