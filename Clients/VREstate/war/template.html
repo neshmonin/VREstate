@@ -7,7 +7,7 @@
 html,body {
 	margin: 0;
 	padding: 0;
-	height: 100%; /* needed for container min-height */
+ 	height: 100%; /* needed for container min-height */ */
 	background-color: #ffffff;
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 12px;
@@ -15,30 +15,31 @@ html,body {
 }
 
 .container {
-	width: 1920px;
-	height: 1080px;
+	width: 1500px;
+	height: 890px;
 }
 
-.header {
+.header-div {
 	height: 148px;
-	width: 1850px;
+	width: 1480px;
 	border-bottom: 1px solid #9DA6AB;
-	margin-bottom: 100px;
 }
 
 .logo {
 	padding: 36px 0px 0px 85px;
 }
 
-.suitetxt {
-	padding-bottom: 22px;
-	margin-left: 1150px;
+.panoramicview{
+	margin-top: 20px;
+	padding: px 0px 0px 0px;
+	margin-left: 680px;
 }
 
 .detail {
 	float: left;
-	width: 420px;
+	width: 300px;
 	padding-left: 86px;
+	margin-top: 150px;
 	font-size: 28px;
 	color: #9DA6AB;
 	line-height: 48px;
@@ -54,14 +55,20 @@ html,body {
 	float: left;
 	text-align: center;
 }
+
+a img {
+    border: 0;
+}
 </style>
 </head>
 
 <body>
 	<div class="container">
-		<div class="header">
+		<div class="header-div">
 			<img class="logo" src="img/logo-musee.png" />
-			<img class="suitetxt" src="img/luxsuites.png" />
+			<a href="#" id="onShowPanoramicView">
+				<img class="panoramicview" src="img/PanoramicView.png" />
+			</a>
 		</div>
 		<br style="clear: both" />
 		<div class="detail">
@@ -75,11 +82,13 @@ html,body {
 			Price: <span id="SuitePrice">$0,000,000</span><br />
 		</div>
 		<div class="flplan">
-			<img id="SuiteFloorPlanImg" width="100%" height="100%" />
+			<img id="SuiteFloorPlanImg"/>
 		</div>
 		<!--<img class="flplate"  src="img/sampleplate.png" /><br>-->
 	</div>
 	<!-- end of container -->
 </body>
 </html>
+
+
 

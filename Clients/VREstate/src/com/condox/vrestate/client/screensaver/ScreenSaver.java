@@ -17,7 +17,7 @@ public class ScreenSaver extends Timer {
 		return instance;
 	}
 
-	private int TimeoutInterval = 30 * 1000;
+	private int TimeoutInterval =  2 * 60 * 1000;
 
 	@Override
 	public void run() {
@@ -34,11 +34,13 @@ public class ScreenSaver extends Timer {
 	}
 	
 	private native void notifyTimeout() /*-{
-		$wnd.parent.parent.postMessage('timeout', '*');
+		if (typeof($wnd.parent.parent.postMessage) == 'function')
+			$wnd.parent.parent.postMessage('timeout', '*');
 	}-*/;
 	
 	private native void notifyReset() /*-{
-		$wnd.parent.parent.postMessage('reset', '*');
+		if (typeof($wnd.parent.parent.postMessage) == 'function')
+			$wnd.parent.parent.postMessage('reset', '*');
 	}-*/;
 
 }
