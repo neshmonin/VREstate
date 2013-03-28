@@ -92,6 +92,10 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 					if (bldng.getDisplayModelUrl() != "")
 						GE.getPlugin().fetchKml(bldng.getDisplayModelUrl(),
 								this);
+										if (bldng.getOverlayUrl() != "")
+												GE.getPlugin().fetchKml(bldng.getOverlayUrl(), this);
+											if (bldng.getPOIUrl() != "")
+												GE.getPlugin().fetchKml(bldng.getPOIUrl(), this);
 				}
 			}
 
