@@ -43,6 +43,7 @@ public class BuildingGeoItem implements IGeoItem {
 				+ building.getName() + "&txtClr=16777215&shdClr=0&frame=0";
 		KmlIcon icon = GE.getPlugin().createIcon("");
 		icon.setHref(href);
+//		style.getIconStyle().setScale(2.0F);
 		style.getIconStyle().setIcon(icon);
 		placemark.setStyleSelector(style);
 

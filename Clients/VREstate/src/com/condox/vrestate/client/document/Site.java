@@ -4,9 +4,12 @@ package com.condox.vrestate.client.document;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.Position;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.Window;
 
 public class Site implements I_VRObject {
 
@@ -24,6 +27,7 @@ public class Site implements I_VRObject {
 	private String infoUrl = null;
 	private String moreInfoUrl = null;
 	private Position position = new Position();
+	private String bubbleTemplateUrl = new String();
 
 	// private double max_suite_altitude = 0;
 
@@ -62,6 +66,20 @@ public class Site implements I_VRObject {
 		if (obj.get("displayModelUrl") != null)
 		displayModelUrl = obj.get("displayModelUrl").isString()
 				.stringValue();
+		
+		if (obj.get("bubbleTemplateUrl") != null)
+			if (obj.get("bubbleTemplateUrl").isString() != null)
+				bubbleTemplateUrl = obj.get("bubbleTemplateUrl").isString()
+			.stringValue();
+		// KIOSK
+//		bubbleTemplateUrl = "template(musee).html";
+//		if (bubbleTemplateUrl.isEmpty())
+//			bubbleTemplateUrl = "template.html";
+//		
+//		if (!bubbleTemplateUrl.isEmpty()) {
+//			Window.alert("Using " + bubbleTemplateUrl);
+//			Options.SUITE_INFO.setSrc(bubbleTemplateUrl);
+//		}
 	}
 
 	public String getName() {
@@ -71,6 +89,11 @@ public class Site implements I_VRObject {
 	public String getDisplayModelUrl() {
 		return displayModelUrl;
 	}
+	
+	public String getBubbleTemplateUrl() {
+		return bubbleTemplateUrl;
+	}
+	
 
 	public int getId() {
 		return id;

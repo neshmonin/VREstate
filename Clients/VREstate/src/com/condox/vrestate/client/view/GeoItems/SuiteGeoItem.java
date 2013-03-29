@@ -20,7 +20,7 @@ import com.nitrous.gwt.earth.client.api.KmlPoint;
 import com.nitrous.gwt.earth.client.api.KmlStyle;
 
 public class SuiteGeoItem implements IGeoItem {
-	private final double initialRange_m = 40;
+	private final double initialRange_m = 30;
 	private final double initialTilt_d = 75;
 
 	public Suite suite = null;
@@ -171,7 +171,7 @@ public class SuiteGeoItem implements IGeoItem {
 	public void Redraw() {
 		if (href == null) return;
 
-		isFilteredIn = Filter.get().isFileredIn(suite);
+		isFilteredIn = Filter.get().isFilteredIn(suite);
 		if (!isFilteredIn && filteredOutNotificationHandler != null)
 			filteredOutNotificationHandler.onFilteredOut();
 
