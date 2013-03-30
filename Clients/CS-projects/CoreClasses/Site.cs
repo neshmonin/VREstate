@@ -39,7 +39,7 @@ namespace CoreClasses
 
                 foreach (Vre.Server.BusinessLogic.ClientData cd in suiteTypeist.GetNextLevelDataArray("suiteTypes"))
                 {
-                    SuiteClass suiteClass = SuiteClass.Create(new Vre.Server.BusinessLogic.SuiteType(cd));
+                    SuiteClass suiteClass = SuiteClass.Create(new Vre.Server.BusinessLogic.SuiteType(cd, site));
                 }
             }
 

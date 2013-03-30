@@ -45,6 +45,17 @@ namespace Vre.Server.BusinessLogic
             if (constructionSite != null) constructionSite.SuiteTypes.Add(this);
         }
 
+        public SuiteType(ClientData data, Site constructionSite) : base(data)
+        {
+            ConstructionSite = constructionSite;
+            Levels = new List<SuiteLevel>();
+            WireframeModel = null;
+            SuitesInvolved = new List<Suite>();
+            UpdateFromClient(data);
+            if (constructionSite != null)
+                constructionSite.SuiteTypes.Add(this);
+        }
+
         public SuiteType(ClientData data) : base(data) { }
 
         public virtual void debug_addSuite(Suite s)
