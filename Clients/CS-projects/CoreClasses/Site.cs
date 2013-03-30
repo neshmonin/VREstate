@@ -10,7 +10,7 @@ namespace CoreClasses
 {
     public class Site : CoreClasses.ICountable
     {
-        private Vre.Server.BusinessLogic.Site _site;
+        protected Vre.Server.BusinessLogic.Site _site;
 
         public const double i2m = 0.0254;
 
@@ -75,8 +75,9 @@ namespace CoreClasses
 
         protected virtual Building CreateBuilding(Vre.Server.BusinessLogic.ClientData cd)
         {
-            Building newBuilding = new Building(new Vre.Server.BusinessLogic.Building(cd));
-            return newBuilding.Create(new Vre.Server.BusinessLogic.Building(cd));
+            Vre.Server.BusinessLogic.Building vre_building = new Vre.Server.BusinessLogic.Building(cd, _site);
+            Building newBuilding = new Building(vre_building);
+            return newBuilding.Create(vre_building);
         }
 
         public Suite FindSuiteByName(string suiteName)

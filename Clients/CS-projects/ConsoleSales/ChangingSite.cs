@@ -12,8 +12,9 @@ namespace ConsoleSales
 
         protected override Building CreateBuilding(Vre.Server.BusinessLogic.ClientData cd)
         {
-            ChangingBuilding newBuilding = new ChangingBuilding(new Vre.Server.BusinessLogic.Building(cd));
-            return newBuilding.Create(new Vre.Server.BusinessLogic.Building(cd));
+            Vre.Server.BusinessLogic.Building vre_building = new Vre.Server.BusinessLogic.Building(cd, _site);
+            ChangingBuilding newBuilding = new ChangingBuilding(vre_building);
+            return newBuilding.Create(vre_building);
         }
     }
 }

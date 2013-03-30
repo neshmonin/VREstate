@@ -51,7 +51,7 @@ namespace CoreClasses
             foreach (Vre.Server.BusinessLogic.ClientData cd in siteList.GetNextLevelDataArray("sites"))
             {
                 //Vre.Server.BusinessLogic.Site _site = new Vre.Server.BusinessLogic.Site(_estateDeveloper, cd);
-                Vre.Server.BusinessLogic.Site _site = new Vre.Server.BusinessLogic.Site(cd);
+                Vre.Server.BusinessLogic.Site _site = new Vre.Server.BusinessLogic.Site(cd, _estateDeveloper);
                 Site site = CreateSite(_site);
                 m_sites.Add(site);
             }

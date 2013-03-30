@@ -53,7 +53,7 @@ namespace CoreClasses
 
             foreach (Vre.Server.BusinessLogic.ClientData cd in suiteList.GetNextLevelDataArray("suites"))
             {
-                Vre.Server.BusinessLogic.Client.SuiteEx suite = new Vre.Server.BusinessLogic.Client.SuiteEx(cd);
+                Vre.Server.BusinessLogic.Client.SuiteEx suite = new Vre.Server.BusinessLogic.Client.SuiteEx(cd, _building);
                 Suite newSuite = CreateSuite(suite);
                 m_Lon_d += suite.Location.Longitude;
                 m_Lat_d += suite.Location.Latitude;

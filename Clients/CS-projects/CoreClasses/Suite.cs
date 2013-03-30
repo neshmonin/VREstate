@@ -75,10 +75,6 @@ namespace CoreClasses
             saleStatuses.Add(SaleStatus.Sold);
 
             m_heading = _suite.Location.HorizontalHeading;
-            //if (_suite.SuiteType.Name.StartsWith("WT"))
-            //{
-            //    stop = 1;
-            //}
         }
 
         public Suite MakeClone()
