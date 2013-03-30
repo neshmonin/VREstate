@@ -318,7 +318,7 @@ public abstract class _AbstractView implements I_AbstractView {
 
 	public static void ApplyFilter() {
 		Document.progressBar = new ProgressBar();
-		Document.progressBar.Update(ProgressBar.ProgressLabel.Executing);
+		Document.progressBar.Update(ProgressBar.ProgressLabel.Processing);
 
 		int howMany = getSuiteGeoItems().size();
 		int count = 0;

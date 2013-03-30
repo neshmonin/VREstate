@@ -90,6 +90,12 @@ public class Building implements I_VRObject {
 		return parent_id;
 	}
 	
+	public Site getParent() {
+		for (Site item : Document.get().getSites())
+			if (item.getId() == getParent_id())
+				return item;
+		return null;
+	}
 	public static ArrayList<Building> get() {
 		ArrayList<Building> result = new ArrayList<Building>();
 		result.addAll(ids.values());
