@@ -75,9 +75,25 @@ namespace Vre.Server.BusinessLogic
         {
             AutoID = fromServer.GetProperty("id", -1);
 
-            SuiteType = new BusinessLogic.SuiteType(null, fromServer.GetProperty("suiteTypeName", string.Empty));  // informational only
+            int suiteTypeId = fromServer.GetProperty("suiteTypeId", 0);
+            Boolean found = false;            
+            foreach (SuiteType suiteType in building.ConstructionSite.SuiteTypes)
+            {
+                if (suiteType.AutoID == suiteTypeId)
+                {
+                    SuiteType = suiteType;  // informational only
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+                SuiteType = new BusinessLogic.SuiteType(building.ConstructionSite, "<unknown>");
 
-            UpdateFromClient(fromServer);
+            bool changed = UpdateFromClient(fromServer);
+
+            FloorName = fromServer.UpdateProperty("floorName", FloorName, ref changed);
+            if (CeilingHeight != null)
+                CeilingHeight.SetValue(fromServer.UpdateProperty("ceilingHeightFt", CeilingHeight.ValueAs(ValueWithUM.Unit.Feet), ref changed), ValueWithUM.Unit.Feet);
         }
 
         public Suite(ClientData fromServer) : this(fromServer, null) {}
