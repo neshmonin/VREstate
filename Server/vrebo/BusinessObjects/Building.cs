@@ -62,7 +62,8 @@ namespace Vre.Server.BusinessLogic
             InitialView = string.Empty;
         }
 
-        public Building(ClientData fromServer) : this(null, string.Empty)
+        public Building(ClientData fromServer, Site site)
+            : this(site, string.Empty)
         {
             AutoID = fromServer.GetProperty("id", -1);
 
@@ -83,6 +84,8 @@ namespace Vre.Server.BusinessLogic
 
             UpdateFromClient(fromServer);
         }
+
+        public Building(ClientData fromServer) : this(fromServer, null) { }
 
         public override ClientData GetClientData()
         {

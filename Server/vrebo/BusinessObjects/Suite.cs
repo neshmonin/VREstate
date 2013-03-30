@@ -22,7 +22,7 @@ namespace Vre.Server.BusinessLogic
         public virtual IList<Option> OptionsPossible { get; protected set; }
         //public IList<VRTour> VRTours { get; protected set; }
 
-        public virtual Building Building { get; protected set; }
+        public virtual Building Building { get; set; }
         public virtual SuiteType SuiteType { get; set; }
         public virtual ViewPoint Location { get; set; }
         public virtual ValueWithUM CeilingHeight { get; set; }
@@ -70,7 +70,8 @@ namespace Vre.Server.BusinessLogic
             if (Building != null) Building.Suites.Add(this);
         }
 
-        public Suite(ClientData fromServer) : this(null, 0, string.Empty, string.Empty)
+        public Suite(ClientData fromServer, Building building)
+            : this(building, 0, string.Empty, string.Empty)
         {
             AutoID = fromServer.GetProperty("id", -1);
 
@@ -78,6 +79,8 @@ namespace Vre.Server.BusinessLogic
 
             UpdateFromClient(fromServer);
         }
+
+        public Suite(ClientData fromServer) : this(fromServer, null) {}
 
         public override ClientData GetClientData()
         {

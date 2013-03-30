@@ -23,7 +23,13 @@ namespace Vre.Server.BusinessLogic.Client
         /// <summary>
         /// C'tor for client side: restore from data sent by server.
         /// </summary>
-        public SuiteEx(ClientData fromServer) : base(fromServer)
+        public SuiteEx(ClientData fromServer) : this(fromServer, null) {}
+
+        /// <summary>
+        /// C'tor for client side: restore from data sent by server.
+        /// </summary>
+        public SuiteEx(ClientData fromServer, Building building)
+            : base(fromServer, building)
         {
             //Changed = false;
             CurrentPrice = fromServer.GetProperty("currentPrice", -1.0);

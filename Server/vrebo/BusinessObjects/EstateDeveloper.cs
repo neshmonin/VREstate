@@ -24,9 +24,14 @@ namespace Vre.Server.BusinessLogic
         {
             InitializeNew();
             VREConfiguration = vreConfiguration;
+            Sites = new List<Site>();
         }
 
-        public EstateDeveloper(ClientData data) : base(data) { }
+        public EstateDeveloper(ClientData data) : base(data) 
+        {
+            Sites = new List<Site>();
+            UpdateFromClient(data);
+        }
 
         public override bool UpdateFromClient(ClientData data)
         {

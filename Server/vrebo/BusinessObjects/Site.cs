@@ -35,7 +35,14 @@ namespace Vre.Server.BusinessLogic
             InitialView = string.Empty;
         }
 
-        public Site(ClientData data) : base(data) { }
+        public Site(ClientData data, EstateDeveloper developer)
+            : this(developer, null)
+        {
+            AutoID = data.GetProperty("id", -1);
+            UpdateFromClient(data);
+        }
+
+        public Site(ClientData data) : this(data, null) { }
 
         public override bool UpdateFromClient(ClientData data)
         {
