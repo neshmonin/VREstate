@@ -31,7 +31,6 @@
             this.components = new System.ComponentModel.Container();
             this.labelModelFile = new System.Windows.Forms.Label();
             this.comboBuildings = new System.Windows.Forms.ComboBox();
-            this.labelSuitesTitle = new System.Windows.Forms.Label();
             this.labelSuiteType = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.groupSuiteInfo = new System.Windows.Forms.GroupBox();
@@ -47,13 +46,16 @@
             this.textSuiteName = new System.Windows.Forms.TextBox();
             this.labelSuiteNumber = new System.Windows.Forms.Label();
             this.buttonCancel = new System.Windows.Forms.Button();
-            this.listBoxSuites = new System.Windows.Forms.ListBox();
+            this.listViewSuites = new System.Windows.Forms.ListView();
+            this.columnEditingState = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnSuiteName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnSuiteType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnCealing = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnPrice = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnShowPanoramicView = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.contextMenuUnit = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.restoreOriginalValueToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.radioButtonSortByStatus = new System.Windows.Forms.RadioButton();
-            this.radioButtonSortByFloor = new System.Windows.Forms.RadioButton();
-            this.radioButtonSortByType = new System.Windows.Forms.RadioButton();
             this.buttonUpdateFromCSV = new System.Windows.Forms.Button();
             this.buttonExportToCSV = new System.Windows.Forms.Button();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
@@ -70,7 +72,6 @@
             this.buttonRefresh = new System.Windows.Forms.Button();
             this.groupSuiteInfo.SuspendLayout();
             this.contextMenuUnit.SuspendLayout();
-            this.groupBox2.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.pnlStartupShutdown.SuspendLayout();
             this.SuspendLayout();
@@ -78,7 +79,7 @@
             // labelModelFile
             // 
             this.labelModelFile.AutoSize = true;
-            this.labelModelFile.Location = new System.Drawing.Point(17, 77);
+            this.labelModelFile.Location = new System.Drawing.Point(486, 17);
             this.labelModelFile.Name = "labelModelFile";
             this.labelModelFile.Size = new System.Drawing.Size(85, 19);
             this.labelModelFile.TabIndex = 1;
@@ -90,22 +91,12 @@
             this.comboBuildings.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBuildings.Enabled = false;
             this.comboBuildings.FormattingEnabled = true;
-            this.comboBuildings.Location = new System.Drawing.Point(17, 96);
+            this.comboBuildings.Location = new System.Drawing.Point(486, 36);
             this.comboBuildings.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.comboBuildings.Name = "comboBuildings";
             this.comboBuildings.Size = new System.Drawing.Size(152, 23);
             this.comboBuildings.TabIndex = 2;
             this.comboBuildings.SelectedIndexChanged += new System.EventHandler(this.comboBuildings_SelectedIndexChanged);
-            // 
-            // labelSuitesTitle
-            // 
-            this.labelSuitesTitle.AutoSize = true;
-            this.labelSuitesTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.labelSuitesTitle.Location = new System.Drawing.Point(15, 143);
-            this.labelSuitesTitle.Name = "labelSuitesTitle";
-            this.labelSuitesTitle.Size = new System.Drawing.Size(61, 24);
-            this.labelSuitesTitle.TabIndex = 3;
-            this.labelSuitesTitle.Text = "Suites";
             // 
             // labelSuiteType
             // 
@@ -284,20 +275,69 @@
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
-            // listBoxSuites
+            // listViewSuites
             // 
-            this.listBoxSuites.ContextMenuStrip = this.contextMenuUnit;
-            this.listBoxSuites.Enabled = false;
-            this.listBoxSuites.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.listBoxSuites.FormattingEnabled = true;
-            this.listBoxSuites.ItemHeight = 24;
-            this.listBoxSuites.Location = new System.Drawing.Point(17, 176);
-            this.listBoxSuites.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.listBoxSuites.Name = "listBoxSuites";
-            this.listBoxSuites.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.listBoxSuites.Size = new System.Drawing.Size(627, 580);
-            this.listBoxSuites.TabIndex = 4;
-            this.listBoxSuites.SelectedIndexChanged += new System.EventHandler(this.listBoxSuites_SelectedIndexChanged);
+            this.listViewSuites.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.listViewSuites.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnEditingState,
+            this.columnSuiteName,
+            this.columnSuiteType,
+            this.columnCealing,
+            this.columnPrice,
+            this.columnStatus,
+            this.columnShowPanoramicView});
+            this.listViewSuites.ContextMenuStrip = this.contextMenuUnit;
+            this.listViewSuites.Enabled = false;
+            this.listViewSuites.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.listViewSuites.FullRowSelect = true;
+            this.listViewSuites.GridLines = true;
+            this.listViewSuites.HideSelection = false;
+            this.listViewSuites.Location = new System.Drawing.Point(17, 67);
+            this.listViewSuites.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.listViewSuites.Name = "listViewSuites";
+            this.listViewSuites.ShowGroups = false;
+            this.listViewSuites.Size = new System.Drawing.Size(639, 689);
+            this.listViewSuites.TabIndex = 4;
+            this.listViewSuites.UseCompatibleStateImageBehavior = false;
+            this.listViewSuites.View = System.Windows.Forms.View.Details;
+            this.listViewSuites.SelectedIndexChanged += new System.EventHandler(this.listViewSuites_SelectedIndexChanged);
+            // 
+            // columnEditingState
+            // 
+            this.columnEditingState.Text = " *";
+            this.columnEditingState.Width = 40;
+            // 
+            // columnSuiteName
+            // 
+            this.columnSuiteName.Text = "Suite";
+            this.columnSuiteName.Width = 75;
+            // 
+            // columnSuiteType
+            // 
+            this.columnSuiteType.Text = "Type";
+            this.columnSuiteType.Width = 154;
+            // 
+            // columnCealing
+            // 
+            this.columnCealing.DisplayIndex = 4;
+            this.columnCealing.Text = "Hght";
+            this.columnCealing.Width = 57;
+            // 
+            // columnPrice
+            // 
+            this.columnPrice.DisplayIndex = 3;
+            this.columnPrice.Text = "Price";
+            this.columnPrice.Width = 122;
+            // 
+            // columnStatus
+            // 
+            this.columnStatus.Text = "Status";
+            this.columnStatus.Width = 105;
+            // 
+            // columnShowPanoramicView
+            // 
+            this.columnShowPanoramicView.Text = "Show";
+            this.columnShowPanoramicView.Width = 63;
             // 
             // contextMenuUnit
             // 
@@ -313,59 +353,6 @@
             this.restoreOriginalValueToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.restoreOriginalValueToolStripMenuItem.Text = "Restore Original Value";
             this.restoreOriginalValueToolStripMenuItem.Click += new System.EventHandler(this.restoreOriginalValueToolStripMenuItem_Click);
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.radioButtonSortByStatus);
-            this.groupBox2.Controls.Add(this.radioButtonSortByFloor);
-            this.groupBox2.Controls.Add(this.radioButtonSortByType);
-            this.groupBox2.Enabled = false;
-            this.groupBox2.Location = new System.Drawing.Point(345, 71);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox2.Size = new System.Drawing.Size(250, 62);
-            this.groupBox2.TabIndex = 7;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Sort the Suites by:";
-            // 
-            // radioButtonSortByStatus
-            // 
-            this.radioButtonSortByStatus.AutoSize = true;
-            this.radioButtonSortByStatus.Location = new System.Drawing.Point(174, 30);
-            this.radioButtonSortByStatus.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.radioButtonSortByStatus.Name = "radioButtonSortByStatus";
-            this.radioButtonSortByStatus.Size = new System.Drawing.Size(55, 17);
-            this.radioButtonSortByStatus.TabIndex = 2;
-            this.radioButtonSortByStatus.Text = "Status";
-            this.radioButtonSortByStatus.UseVisualStyleBackColor = true;
-            this.radioButtonSortByStatus.CheckedChanged += new System.EventHandler(this.radioButtonSortByStatus_CheckedChanged);
-            // 
-            // radioButtonSortByFloor
-            // 
-            this.radioButtonSortByFloor.AutoSize = true;
-            this.radioButtonSortByFloor.Checked = true;
-            this.radioButtonSortByFloor.Location = new System.Drawing.Point(16, 30);
-            this.radioButtonSortByFloor.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.radioButtonSortByFloor.Name = "radioButtonSortByFloor";
-            this.radioButtonSortByFloor.Size = new System.Drawing.Size(48, 17);
-            this.radioButtonSortByFloor.TabIndex = 0;
-            this.radioButtonSortByFloor.TabStop = true;
-            this.radioButtonSortByFloor.Text = "Floor";
-            this.radioButtonSortByFloor.UseVisualStyleBackColor = true;
-            this.radioButtonSortByFloor.CheckedChanged += new System.EventHandler(this.radioButtonSortByFloor_CheckedChanged);
-            // 
-            // radioButtonSortByType
-            // 
-            this.radioButtonSortByType.AutoSize = true;
-            this.radioButtonSortByType.Location = new System.Drawing.Point(95, 30);
-            this.radioButtonSortByType.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.radioButtonSortByType.Name = "radioButtonSortByType";
-            this.radioButtonSortByType.Size = new System.Drawing.Size(49, 17);
-            this.radioButtonSortByType.TabIndex = 1;
-            this.radioButtonSortByType.Text = "Type";
-            this.radioButtonSortByType.UseVisualStyleBackColor = true;
-            this.radioButtonSortByType.CheckedChanged += new System.EventHandler(this.radioButtonSortByType_CheckedChanged);
             // 
             // buttonUpdateFromCSV
             // 
@@ -414,7 +401,7 @@
             this.comboDevelopers.Location = new System.Drawing.Point(17, 36);
             this.comboDevelopers.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.comboDevelopers.Name = "comboDevelopers";
-            this.comboDevelopers.Size = new System.Drawing.Size(301, 23);
+            this.comboDevelopers.Size = new System.Drawing.Size(214, 23);
             this.comboDevelopers.TabIndex = 18;
             this.comboDevelopers.SelectedIndexChanged += new System.EventHandler(this.comboDevelopers_SelectedIndexChanged);
             // 
@@ -423,10 +410,10 @@
             this.comboSites.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboSites.Enabled = false;
             this.comboSites.FormattingEnabled = true;
-            this.comboSites.Location = new System.Drawing.Point(345, 36);
+            this.comboSites.Location = new System.Drawing.Point(261, 36);
             this.comboSites.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.comboSites.Name = "comboSites";
-            this.comboSites.Size = new System.Drawing.Size(251, 23);
+            this.comboSites.Size = new System.Drawing.Size(198, 23);
             this.comboSites.TabIndex = 19;
             this.comboSites.SelectedIndexChanged += new System.EventHandler(this.comboSites_SelectedIndexChanged);
             // 
@@ -442,7 +429,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(345, 17);
+            this.label6.Location = new System.Drawing.Point(261, 17);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(82, 15);
             this.label6.TabIndex = 21;
@@ -514,8 +501,7 @@
             this.Controls.Add(this.comboDevelopers);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.groupBox4);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.listBoxSuites);
+            this.Controls.Add(this.listViewSuites);
             this.Controls.Add(this.labelSuiteType);
             this.Controls.Add(this.textFloorName);
             this.Controls.Add(this.label4);
@@ -524,10 +510,9 @@
             this.Controls.Add(this.labelSuiteNumber);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.groupSuiteInfo);
-            this.Controls.Add(this.labelSuitesTitle);
             this.Controls.Add(this.comboBuildings);
-            this.Controls.Add(this.labelModelFile);
             this.Controls.Add(this.pnlStartupShutdown);
+            this.Controls.Add(this.labelModelFile);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -538,8 +523,6 @@
             this.groupSuiteInfo.ResumeLayout(false);
             this.groupSuiteInfo.PerformLayout();
             this.contextMenuUnit.ResumeLayout(false);
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.pnlStartupShutdown.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -551,7 +534,6 @@
 
         private System.Windows.Forms.Label labelModelFile;
         private System.Windows.Forms.ComboBox comboBuildings;
-        private System.Windows.Forms.Label labelSuitesTitle;
         private System.Windows.Forms.Label labelSuiteType;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.GroupBox groupSuiteInfo;
@@ -566,11 +548,7 @@
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.ComboBox comboSaleStatus;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.ListBox listBoxSuites;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.RadioButton radioButtonSortByStatus;
-        private System.Windows.Forms.RadioButton radioButtonSortByFloor;
-        private System.Windows.Forms.RadioButton radioButtonSortByType;
+        private System.Windows.Forms.ListView listViewSuites;
         private System.Windows.Forms.CheckBox checkBoxShowPanoramicView;
         private System.Windows.Forms.Button buttonUpdateFromCSV;
         private System.Windows.Forms.Button buttonExportToCSV;
@@ -588,6 +566,13 @@
         private System.Windows.Forms.Button buttonRefresh;
         private System.Windows.Forms.ContextMenuStrip contextMenuUnit;
         private System.Windows.Forms.ToolStripMenuItem restoreOriginalValueToolStripMenuItem;
+        private System.Windows.Forms.ColumnHeader columnEditingState;
+        private System.Windows.Forms.ColumnHeader columnSuiteName;
+        private System.Windows.Forms.ColumnHeader columnSuiteType;
+        private System.Windows.Forms.ColumnHeader columnPrice;
+        private System.Windows.Forms.ColumnHeader columnCealing;
+        private System.Windows.Forms.ColumnHeader columnStatus;
+        private System.Windows.Forms.ColumnHeader columnShowPanoramicView;
     }
 }
 

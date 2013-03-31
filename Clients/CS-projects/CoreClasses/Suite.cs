@@ -26,19 +26,9 @@ namespace CoreClasses
             None
         }
 
-        public enum ToStringStyle
-        {
-            SortByType,
-            SortByFloor,
-            SortByStatus,
-            SortByPrice
-        }
-
         private List<SaleStatus> saleStatuses = new List<SaleStatus>(3);
 
         public List<SaleStatus> SaleStatuses { get { return saleStatuses; } }
-
-        private static ToStringStyle m_toStringStyle = ToStringStyle.SortByType;
 
         public string getPriceString()
         {
@@ -126,8 +116,8 @@ namespace CoreClasses
             string name = split[1].Trim();
             int suiteNum = -1;
             try { suiteNum = int.Parse(name); } catch (System.FormatException) { }
-            if (suiteNum != -1)
-                name = string.Format("{0:D4}", suiteNum);
+            //if (suiteNum != -1)
+            //    name = string.Format("{0:D4}", suiteNum);
 
             if (name != Name) return false;
 
@@ -271,57 +261,46 @@ namespace CoreClasses
             set { _suite.ShowPanoramicView = value; }
         }
 
-        public static ToStringStyle ToStringSort
-        {
-            get { return m_toStringStyle; }
-            set { m_toStringStyle = value; }
-        }
-
         public string UniqueKey
         {
             get
             {
-                string uniqueKey = string.Format("_{0}_{1}_{2}",
-                                                 Name,
-                                                 _suite.FloorName,
-                                                 ClassId);
+                string uniqueKey = string.Format("_{0}_{1}", Name, ClassId);
                 return uniqueKey;
             }
         }
 
+        public static string UniqueKeyFromCSVline(string csvLine)
+        {
+            string[] split = csvLine.Split(new char[] { ',', ';', '\t' });
+            if (split.Length != 7) return "";
+            string uniqueKey = string.Format("_{0}_{1}", split[1], split[2]);
+            return uniqueKey;
+        }
+
         public override string ToString()
         {
-            switch (m_toStringStyle)
-            {
-                case ToStringStyle.SortByType:
-                    return string.Format("{0}\t{2}\t{1}\t{3}\t{4}\t{5}\t{6}",
-                                        ClassId, Name, _suite.FloorName,
-                                        CellingHeight, _suite.CurrentPrice, Status,
-                                        _suite.ShowPanoramicView ? "Show" : "Hide");
-                case ToStringStyle.SortByFloor:
-                    return string.Format("{2}\t{1}\t{0}\t{3}\t{4}\t{5}\t{6}",
-                                        ClassId, Name, _suite.FloorName,
-                                        CellingHeight, _suite.CurrentPrice, Status,
-                                        _suite.ShowPanoramicView ? "Show" : "Hide");
-                case ToStringStyle.SortByStatus:
-                    String stat = Status.ToString();
-                    if (Status == SaleStatus.Available)
-                        stat = Status.ToString().Substring(0, 5);
-                    else
-                    if (Status == SaleStatus.OnHold)
-                        stat = Status.ToString().Substring(0, 3);
-                    return string.Format("{5}\t{0}\t{1}\t{2}\t{3}\t{4}\t{6}",
-                                        ClassId, Name, _suite.FloorName,
-                                        CellingHeight, _suite.CurrentPrice, stat,
-                                        _suite.ShowPanoramicView ? "Show" : "Hide");
-                case ToStringStyle.SortByPrice:
-                    return string.Format("{4}\t{2}\t{0}\t{1}\t{3}\t{4}\t{6}",
-                                        ClassId, Name, _suite.FloorName,
-                                        CellingHeight, _suite.CurrentPrice, Status,
-                                        _suite.ShowPanoramicView ? "Show" : "Hide");
-                default:
-                    return UniqueKey;
-            }
+            return string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}",
+                                _suite.FloorName, Name, ClassId, 
+                                CellingHeight, _suite.CurrentPrice, Status,
+                                _suite.ShowPanoramicView ? "Show" : "Hide");
+        }
+
+        public virtual string[] ToStringArray()
+        {
+            int sepIndx = ClassId.LastIndexOf('/');
+            string SuiteTypeOnly = ClassId.Substring(sepIndx + 1);
+            string[] retArray = new string[6]
+                                    {
+                                        Name,
+                                        SuiteTypeOnly,
+                                        CellingHeight.ToString(),
+                                        String.Format("{0:N2}", _suite.CurrentPrice),
+                                        Status.ToString(),
+                                        _suite.ShowPanoramicView ? "Show" : "Hide"
+                                    };
+
+            return retArray;                                    
         }
 
         // Returns:
@@ -335,6 +314,9 @@ namespace CoreClasses
             Suite that = obj as Suite;
             string meStr = ToString().ToLower().TrimStart(' ','+','>');
             string thatStr = that.ToString().ToLower().TrimStart(' ','+','>');
+            if (meStr.StartsWith("gf")) meStr.Replace("gf","01");
+            if (thatStr.StartsWith("gf")) thatStr.Replace("gf", "01"); ;
+
             if (meStr.StartsWith("ph") && thatStr.StartsWith("rg"))
                 return 1;
             if (meStr.StartsWith("rg") && thatStr.StartsWith("ph"))

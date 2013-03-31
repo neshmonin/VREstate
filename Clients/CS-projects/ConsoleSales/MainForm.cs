@@ -167,8 +167,6 @@ namespace ConsoleSales
                              secondMonitor.Height, 0);
             }
 
-            Suite.ToStringSort = Suite.ToStringStyle.SortByFloor;
-
             InitializeComponent();
             this.Text += " (" + Properties.Settings.Default.serverEndPoint + ")";
             TextWriterTraceListener log = null;
@@ -217,51 +215,12 @@ namespace ConsoleSales
                 "> Console " + Properties.Settings.Default.DeveloperName + " started", "Info");
             Trace.Flush();
 
-            labelSuitesTitle.Text = getListBoxTitle();
-
             Cursor.Current = Cursors.WaitCursor;
             lblStartupShutdown.Text = "Please wait: connecting to server...";
             pnlStartupShutdown.BringToFront();
             pnlStartupShutdown.Dock = DockStyle.Fill;
             pnlStartupShutdown.Visible = true;
             tmrStartup.Enabled = true;
-        }
-
-        private string getListBoxTitle()
-        {
-            string ClassId = "Model";
-            string Name = "Unit";
-            string FloorName = "Floor";
-            string CellingHeight = "Height";
-            string CurrentPrice = "Price ($)";
-            string Status = "Availability";
-            string ShowPanoramicView = "View";
-
-            switch (Suite.ToStringSort)
-            {
-                case Suite.ToStringStyle.SortByFloor:
-                    return string.Format("{2}         {1}          {0}        {3}      {4}    {5}  {6}",
-                                        ClassId, Name, FloorName,
-                                        CellingHeight, CurrentPrice, Status,
-                                        ShowPanoramicView);
-                case Suite.ToStringStyle.SortByType:
-                    return string.Format("{0}       {2}         {1}         {3}        {4}    {5}  {6}",
-                                        ClassId, Name, FloorName,
-                                        CellingHeight, CurrentPrice, Status,
-                                        ShowPanoramicView);
-                case Suite.ToStringStyle.SortByStatus:
-                    return string.Format("{5}  {0}       {1}         {2}     {3}          {4}     {6}",
-                                        ClassId, Name, FloorName,
-                                        CellingHeight, CurrentPrice, Status,
-                                        ShowPanoramicView);
-                case Suite.ToStringStyle.SortByPrice:
-                    return string.Format("{4}       {2}       {0}       {1}       {3}      {4}       {6}",
-                                        ClassId, Name, FloorName,
-                                        CellingHeight, CurrentPrice, Status,
-                                        ShowPanoramicView);
-                default:
-                    return string.Empty;
-            }
         }
 
         private void tmrStartup_Tick(object sender, EventArgs e)
@@ -499,10 +458,9 @@ namespace ConsoleSales
             comboSites.Items.Clear();
             m_currDeveloper = (Developer)comboDevelopers.SelectedItem;
             m_currDeveloper.PopulateSiteList();
-            listBoxSuites.Items.Clear();
+            listViewSuites.Items.Clear();
             comboBuildings.Items.Clear();
-            listBoxSuites.Enabled = false;
-            groupBox2.Enabled = false;
+            listViewSuites.Enabled = false;
             groupBox4.Enabled = false;
             groupSuiteInfo.Enabled = false;
             foreach (Site site in m_currDeveloper.Sites)
@@ -537,10 +495,9 @@ namespace ConsoleSales
 
             comboBuildings.Enabled = true;
             m_currSite = (Site)comboSites.SelectedItem;
-            listBoxSuites.Items.Clear(); 
+            listViewSuites.Items.Clear(); 
             comboBuildings.Items.Clear();
-            listBoxSuites.Enabled = false;
-            groupBox2.Enabled = false;
+            listViewSuites.Enabled = false;
             groupBox4.Enabled = false;
             groupSuiteInfo.Enabled = false;
             foreach (Building building in m_currSite.Buildings.Values)
@@ -577,8 +534,7 @@ namespace ConsoleSales
 
             updateApplyButton();
 
-            listBoxSuites.Enabled = true;
-            groupBox2.Enabled = true;
+            listViewSuites.Enabled = true;
             groupBox4.Enabled = true;
             groupSuiteInfo.Enabled = true;
             ChangingSuite.Clear();
@@ -598,8 +554,8 @@ namespace ConsoleSales
 
         private void populateBuilding()
         {
-            listBoxSuites.Items.Clear();
-            listBoxSuites.SelectedIndex = -1;
+            listViewSuites.Items.Clear();
+            listViewSuites.SelectedItems.Clear();
             m_currBldng = (Building)comboBuildings.SelectedItem;
 
             List<ChangingSuite> suitesList = new List<ChangingSuite>();
@@ -612,10 +568,43 @@ namespace ConsoleSales
 
             suitesList.Sort();
             foreach (ChangingSuite cs in suitesList)
-                listBoxSuites.Items.Add(cs as ChangingSuite);
+            {
+                ListViewItem lvItem = new ListViewItem(cs.ToStringArray());
+                lvItem.Tag = cs;
+                lvItem.UseItemStyleForSubItems = false;
+
+                for (int i = 0; i < lvItem.SubItems.Count; i++)
+                {
+                    switch (i)
+                    {
+                        case 3: // CellingHeight
+                            lvItem.SubItems[i].BackColor = cs.CellingHeightChanged ?
+                                Color.LightSalmon:
+                                Color.White;
+                            break;
+                        case 4: // CurrentPrice
+                            lvItem.SubItems[i].BackColor = cs.PriceChanged ?
+                                Color.LightSalmon :
+                                Color.White;
+                            break;
+                        case 5: // Status
+                            lvItem.SubItems[i].BackColor = cs.StatusChanged ?
+                                Color.LightSalmon :
+                                Color.White;
+                            break;
+                        case 6: // ShowPanoramicView
+                            lvItem.SubItems[i].BackColor = cs.ShowPanoramicViewChanged ?
+                                Color.LightSalmon :
+                                Color.White;
+                            break;
+                    }
+                }
+                
+                listViewSuites.Items.Add(lvItem);
+            }
         }
 
-        private void listBoxSuites_SelectedIndexChanged(object sender, EventArgs e)
+        private void listViewSuites_SelectedIndexChanged(object sender, EventArgs e)
         {
             PopulateMultSuiteSelection();
         }
@@ -652,7 +641,8 @@ namespace ConsoleSales
         {
             bool guiChanged = false;
             m_selectedSuites = new List<ChangingSuite>();
-            foreach (ChangingSuite s in listBoxSuites.SelectedItems) m_selectedSuites.Add(s);
+            foreach (ListViewItem s in listViewSuites.SelectedItems)
+                m_selectedSuites.Add(s.Tag as ChangingSuite);
             foreach (var suite in m_selectedSuites)
             {
                 if (textSuiteName.Text != string.Empty)
@@ -710,29 +700,45 @@ namespace ConsoleSales
         private void reflectInGUI(ChangingSuite suite)
         {
             m_ignoreSelChange = true;
-            //listBoxSuites.Refresh();
-            int index = listBoxSuites.Items.IndexOf(suite);
-            if (index != -1)
+            listViewSuites.BeginUpdate();
+            foreach (ListViewItem lvi in listViewSuites.Items)
             {
-                listBoxSuites.BeginUpdate();
-                try
+                string[] texts = suite.ToStringArray();
+                ChangingSuite item = lvi.Tag as ChangingSuite;
+                if (item.Equals(suite))
                 {
-                    listBoxSuites.ClearSelected();
-                    listBoxSuites.Items[index] = suite;
-                    listBoxSuites.SelectedIndex = index;
-                }
-                finally
-                {
-                    listBoxSuites.EndUpdate();
+                    for (int i = 0; i < lvi.SubItems.Count; i++)
+                    {
+                        switch (i)
+                        {
+                            case 3: // CellingHeight
+                                lvi.SubItems[i].BackColor = suite.CellingHeightChanged ?
+                                    Color.LightSalmon :
+                                    Color.White;
+                                break;
+                            case 4: // CurrentPrice
+                                lvi.SubItems[i].BackColor = suite.PriceChanged ?
+                                    Color.LightSalmon :
+                                    Color.White;
+                                break;
+                            case 5: // Status
+                                lvi.SubItems[i].BackColor = suite.StatusChanged ?
+                                    Color.LightSalmon :
+                                    Color.White;
+                                break;
+                            case 6: // ShowPanoramicView
+                                lvi.SubItems[i].BackColor = suite.ShowPanoramicViewChanged ?
+                                    Color.LightSalmon :
+                                    Color.White;
+                                break;
+                        }
+                        lvi.SubItems[i].Text = texts[i];
+                    }
+
+                    break;
                 }
             }
-
-            //if (index != -1)
-            //{
-            //    listBoxSuites.Items.Remove(suite);
-            //    listBoxSuites.Items.Insert(index, suite);
-            //    listBoxSuites.SetSelected(index, true);
-            //}
+            listViewSuites.EndUpdate();
             m_ignoreSelChange = false;
         }
 
@@ -741,7 +747,7 @@ namespace ConsoleSales
             if (m_ignoreSelChange)
                 return;
 
-            if (listBoxSuites.SelectedItems.Count == 0)
+            if (listViewSuites.SelectedItems.Count == 0)
             {
                 comboSaleStatus.Items.Clear();
                 labelSuiteType.Text = string.Empty;
@@ -757,7 +763,8 @@ namespace ConsoleSales
 
             comboSaleStatus.Items.Clear();
             m_selectedSuites = new List<ChangingSuite>();
-            foreach (ChangingSuite s in listBoxSuites.SelectedItems) m_selectedSuites.Add(s);
+            foreach (ListViewItem s in listViewSuites.SelectedItems) 
+                m_selectedSuites.Add(s.Tag as ChangingSuite);
 
             string groupSuiteType = labelSuiteType.Text = m_selectedSuites.ElementAt(0).suite.ClassId;
             string groupSuiteName = textSuiteName.Text = m_selectedSuites.ElementAt(0).suite.Name;
@@ -912,7 +919,7 @@ namespace ConsoleSales
                 report, "Info");
             Trace.Flush();
 
-            listBoxSuites.SelectedIndex = -1;
+            listViewSuites.SelectedItems.Clear();
             updateApplyButton();
             Cursor.Current = Cursors.Default;
         }
@@ -982,7 +989,7 @@ namespace ConsoleSales
             if (lastSaleStatus != comboSaleStatus.SelectedIndex)
             {
                 applySuiteChanges();
-                listBoxSuites.Focus();
+                listViewSuites.Focus();
             }
         }
 
@@ -995,37 +1002,11 @@ namespace ConsoleSales
                 applySuiteChanges();
         }
 
-        private void radioButtonSortByType_CheckedChanged(object sender, EventArgs e)
-        {
-            if (Suite.ToStringSort == Suite.ToStringStyle.SortByType) return;
-
-            Suite.ToStringSort = Suite.ToStringStyle.SortByType;
-            labelSuitesTitle.Text = getListBoxTitle();
-            populateBuilding();
-        }
-
-        private void radioButtonSortByFloor_CheckedChanged(object sender, EventArgs e)
-        {
-            if (Suite.ToStringSort == Suite.ToStringStyle.SortByFloor) return;
-
-            Suite.ToStringSort = Suite.ToStringStyle.SortByFloor;
-            labelSuitesTitle.Text = getListBoxTitle();
-            populateBuilding();
-        }
-
-        private void radioButtonSortByStatus_CheckedChanged(object sender, EventArgs e)
-        {
-            if (Suite.ToStringSort == Suite.ToStringStyle.SortByStatus) return;
-
-            Suite.ToStringSort = Suite.ToStringStyle.SortByStatus;
-            labelSuitesTitle.Text = getListBoxTitle();
-            populateBuilding();
-        }
-
         public void OnTimerEvent(object source, EventArgs e)
         {
             m_vrEstateAppIsRunning = getProcess("vrestate") != null;
         }
+
         private static System.Diagnostics.Process getProcess(string exeName)
         {
             System.Diagnostics.Process[] pArry = System.Diagnostics.Process.GetProcesses();

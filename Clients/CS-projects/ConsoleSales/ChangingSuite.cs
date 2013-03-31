@@ -84,10 +84,10 @@ namespace ConsoleSales
         {
             get
             {
-                return base.Price != _changed.Price ||
-                       base.Status != _changed.Status ||
-                       base.ShowPanoramicView != _changed.ShowPanoramicView ||
-                       base.CellingHeight != _changed.CellingHeight;
+                return PriceChanged ||
+                       StatusChanged ||
+                       ShowPanoramicViewChanged ||
+                       CellingHeightChanged;
             }
         }
         protected bool promoted { get { return _promoted; } }
@@ -124,21 +124,26 @@ namespace ConsoleSales
             return ret;
         }
 
+        public bool PriceChanged { get { return base.Price != _changed.Price; } }
+        public bool StatusChanged { get { return base.Status != _changed.Status; } }
+        public bool ShowPanoramicViewChanged { get { return base.ShowPanoramicView != _changed.ShowPanoramicView; } }
+        public bool CellingHeightChanged { get { return base.CellingHeight != _changed.CellingHeight; } }
+
         public string WhatChanged
         {
             get
                 {
                     List<string> diffs = new List<string>();
-                    if (base.Price != _changed.Price)
+                    if (PriceChanged)
                         diffs.Add("Price: (" + base.getPriceString() + "->" + _changed.getPriceString() + ")");
 
-                    if (base.Status != _changed.Status)
+                    if (StatusChanged)
                         diffs.Add("Status: (" + base.Status + "->" + _changed.Status + ")");
 
-                    if (base.ShowPanoramicView != _changed.ShowPanoramicView)
+                    if (ShowPanoramicViewChanged)
                         diffs.Add("View: (" + base.ShowPanoramicView + "->" + _changed.ShowPanoramicView + ")");
 
-                    if (base.CellingHeight != _changed.CellingHeight)
+                    if (CellingHeightChanged)
                         diffs.Add("Height: (" + base.CellingHeight + "->" + _changed.CellingHeight + ")");
 
                     if (diffs.Count == 0)
@@ -216,6 +221,28 @@ namespace ConsoleSales
                 prefix += "   ";
 
             return prefix + suite.ToString();
+        }
+
+        public override string[] ToStringArray()
+        {
+            int baseLength = suite.ToStringArray().Length;
+            string[] baseArray = suite.ToStringArray();
+            string[] retArray = new string[baseLength + 1];
+            string prefix = string.Empty;
+            if (this.changed)
+                prefix += "+";
+            else
+                prefix += "  ";
+
+            if (this.promoted)
+                prefix += "> ";
+            else
+                prefix += "   ";
+            retArray[0] = prefix;
+            for (int i = 0; i < baseLength; i++)
+                retArray[i + 1] = baseArray[i];
+
+            return retArray;
         }
 
         public int CompareTo(object obj)
