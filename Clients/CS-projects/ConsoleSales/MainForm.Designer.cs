@@ -111,16 +111,16 @@
             // 
             this.labelSuiteType.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.labelSuiteType.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.labelSuiteType.Location = new System.Drawing.Point(778, 119);
+            this.labelSuiteType.Location = new System.Drawing.Point(672, 119);
             this.labelSuiteType.Name = "labelSuiteType";
-            this.labelSuiteType.Size = new System.Drawing.Size(170, 36);
+            this.labelSuiteType.Size = new System.Drawing.Size(276, 36);
             this.labelSuiteType.TabIndex = 10;
             this.labelSuiteType.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(674, 130);
+            this.label4.Location = new System.Drawing.Point(674, 98);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(64, 15);
             this.label4.TabIndex = 9;
