@@ -141,6 +141,7 @@ namespace ConsoleSales
         static extern bool SetForegroundWindow(IntPtr hWnd);
         #endregion
 
+        private ListViewColumnSorter lvwColumnSorter;
         private Dictionary<string, Building> m_buildings = new Dictionary<string, Building>();
         private bool startOnSecondary = Properties.Settings.Default.StartOnSecondaryMonitor;
         private string importFromPath = Properties.Settings.Default.ImportFromPath;
@@ -178,6 +179,9 @@ namespace ConsoleSales
                 Trace.Listeners.Add(log);
             }
             catch (DirectoryNotFoundException) { }
+
+            lvwColumnSorter = new ListViewColumnSorter();
+            listViewSuites.ListViewItemSorter = lvwColumnSorter;
 
             if (log == null)
             {
@@ -645,16 +649,6 @@ namespace ConsoleSales
                 m_selectedSuites.Add(s.Tag as ChangingSuite);
             foreach (var suite in m_selectedSuites)
             {
-                if (textSuiteName.Text != string.Empty)
-                {
-                    guiChanged = true;
-                    suite.suite.Name = textSuiteName.Text;
-                }
-                if (textFloorName.Text != string.Empty)
-                {
-                    guiChanged = true;
-                    suite.suite.FloorNumber = textFloorName.Text;
-                }
                 if (checkBoxShowPanoramicView.CheckState != CheckState.Indeterminate)
                 {
                     guiChanged = true;
@@ -751,8 +745,11 @@ namespace ConsoleSales
             {
                 comboSaleStatus.Items.Clear();
                 labelSuiteType.Text = string.Empty;
-                textSuiteName.Text = string.Empty;
-                textFloorName.Text = string.Empty;
+                textBoxBedrooms.Text = string.Empty;
+                textBoxBathrooms.Text = string.Empty;
+                textBoxBalcony.Text = string.Empty;
+                textBoxTerrace.Text = string.Empty;
+                textBoxArea.Text = string.Empty;
                 textCellingHeight.Text = string.Empty;
                 textPrice.Text = string.Empty;
                 m_ignoreShowViewChange = true;
@@ -767,8 +764,12 @@ namespace ConsoleSales
                 m_selectedSuites.Add(s.Tag as ChangingSuite);
 
             string groupSuiteType = labelSuiteType.Text = m_selectedSuites.ElementAt(0).suite.ClassId;
-            string groupSuiteName = textSuiteName.Text = m_selectedSuites.ElementAt(0).suite.Name;
-            string groupFloorName = textFloorName.Text = m_selectedSuites.ElementAt(0).suite.FloorNumber;
+            string groupBedroomse = textBoxBedrooms.Text = m_selectedSuites.ElementAt(0).suite.SuiteClass.Bedrooms;
+            string groupBathrooms = textBoxBathrooms.Text = m_selectedSuites.ElementAt(0).suite.SuiteClass.Bathrooms;
+            string groupBalcony = textBoxBalcony.Text = m_selectedSuites.ElementAt(0).suite.SuiteClass.Balcony;
+            string groupTerrace = textBoxTerrace.Text = m_selectedSuites.ElementAt(0).suite.SuiteClass.Terrace;
+            string groupArea = textBoxArea.Text = m_selectedSuites.ElementAt(0).suite.SuiteClass.Area;
+            
             string groupCellingHeight = textCellingHeight.Text = m_selectedSuites.ElementAt(0).suite.CellingHeight.ToString();
             m_ignoreShowViewChange = true;
             string groupPrice = textPrice.Text = m_selectedSuites.ElementAt(0).suite.Price.ToString();
@@ -788,8 +789,12 @@ namespace ConsoleSales
             foreach (var suite in m_selectedSuites)
             {
                 if (groupSuiteType != suite.suite.ClassId) groupSuiteType = string.Empty;
-                if (groupSuiteName != suite.suite.Name) groupSuiteName = string.Empty;
-                if (groupFloorName != suite.suite.FloorNumber) groupFloorName = string.Empty;
+                if (groupBedroomse != suite.suite.SuiteClass.Bedrooms) groupBedroomse = string.Empty;
+                if (groupBathrooms != suite.suite.SuiteClass.Bathrooms) groupBathrooms = string.Empty;
+                if (groupBalcony != suite.suite.SuiteClass.Balcony) groupBalcony = string.Empty;
+                if (groupTerrace != suite.suite.SuiteClass.Terrace) groupTerrace = string.Empty;
+                if (groupArea != suite.suite.SuiteClass.Area) groupArea = string.Empty;
+
                 int groupCellingHeightD = 0;
                 try
                 {
@@ -835,8 +840,11 @@ namespace ConsoleSales
 
             labelSuiteType.Text = groupSuiteType;
 
-            textSuiteName.Text = groupSuiteName;
-            textFloorName.Text = groupFloorName;
+            textBoxBedrooms.Text = groupBedroomse;
+            textBoxBathrooms.Text = groupBathrooms;
+            textBoxBalcony.Text = groupBalcony;
+            textBoxTerrace.Text = groupTerrace;
+            textBoxArea.Text = groupArea;
             textCellingHeight.Text = groupCellingHeight;
             textPrice.Text = groupPrice;
 
@@ -966,19 +974,7 @@ namespace ConsoleSales
             }
         }
         private string lastFloorName;
-        private void textFloorName_Enter(object sender, EventArgs e) { lastFloorName = textFloorName.Text; }
-        private void textFloorName_Leave(object sender, EventArgs e)
-        {
-            if (lastFloorName != textFloorName.Text)
-                applySuiteChanges();
-        }
         private string lastSuiteName;
-        private void textSuiteName_Enter(object sender, EventArgs e) { lastSuiteName = textSuiteName.Text; }
-        private void textSuiteName_Leave(object sender, EventArgs e)
-        {
-            if (lastSuiteName != textSuiteName.Text)
-                applySuiteChanges();
-        }
         private int lastSaleStatus;
         private void comboSaleStatus_Enter(object sender, EventArgs e) { lastSaleStatus = comboSaleStatus.SelectedIndex; }
         private void comboSaleStatus_SelectedIndexChanged(object sender, EventArgs e)
@@ -1158,6 +1154,32 @@ namespace ConsoleSales
 
             e.Cancel = cancel;
             Cursor.Current = Cursors.Default;
+        }
+
+        private void listViewSuites_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            // Determine if clicked column is already the column that is being sorted.
+            if ( e.Column == lvwColumnSorter.SortColumn )
+            {
+	            // Reverse the current sort direction for this column.
+	            if (lvwColumnSorter.Order == SortOrder.Ascending)
+	            {
+		            lvwColumnSorter.Order = SortOrder.Descending;
+	            }
+	            else
+	            {
+		            lvwColumnSorter.Order = SortOrder.Ascending;
+	            }
+            }
+            else
+            {
+	            // Set the column number that is to be sorted; default to ascending.
+	            lvwColumnSorter.SortColumn = e.Column;
+	            lvwColumnSorter.Order = SortOrder.Ascending;
+            }
+
+            // Perform the sort with these new sort options.
+            listViewSuites.Sort();
         }
     }
 }

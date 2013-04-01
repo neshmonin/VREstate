@@ -103,6 +103,7 @@
     <Compile Include="ConsoleSalesInstaller.Designer.cs">
       <DependentUpon>ConsoleSalesInstaller.cs</DependentUpon>
     </Compile>
+    <Compile Include="ListViewColumnSorter.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

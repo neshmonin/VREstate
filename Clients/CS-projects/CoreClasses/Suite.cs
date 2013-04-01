@@ -303,6 +303,12 @@ namespace CoreClasses
             return retArray;                                    
         }
 
+        char[] chars = new char[56]{'a','b','c','d','e','f','g','h','i','j',
+                                    'k','l','m','n','o','p','q','r','s','t',
+                                    'u','v','w','x','y','z','&','$','#','@',
+                                    'A','B','C','D','E','F','G','H','I','J',
+                                    'K','L','M','N','O','P','Q','R','S','T',
+                                    'U','V','W','X','Y','Z'};
         // Returns:
         //     A value that indicates the relative order of the objects being compared.
         //     The return value has the following meanings:
@@ -312,14 +318,77 @@ namespace CoreClasses
         public int CompareTo(object obj)
         {
             Suite that = obj as Suite;
-            string meStr = ToString().ToLower().TrimStart(' ','+','>');
-            string thatStr = that.ToString().ToLower().TrimStart(' ','+','>');
-            if (meStr.StartsWith("gf")) meStr.Replace("gf","01");
-            if (thatStr.StartsWith("gf")) thatStr.Replace("gf", "01"); ;
+            string meStr = ToString().ToLower().TrimStart(' ', '+', '>');
+            string thatStr = that.ToString().ToLower().TrimStart(' ', '+', '>');
 
-            if (meStr.StartsWith("ph") && thatStr.StartsWith("rg"))
+            string thatFloorStr = "";
+            int thatFloor = -1;
+            int thatApt = -1;
+            int thatAptIndx = that.FloorNumber.LastIndexOfAny(chars);
+            if (thatAptIndx == -1)
+            {
+                int fullNum = int.Parse(that.Name);
+                thatFloor = fullNum / 100;
+                thatApt = fullNum % 100;
+            }
+            else
+            {
+                string aptStr = that.Name.Substring(that.Name.Length - 2);
+                thatFloorStr = that.Name.Substring(0, thatAptIndx).ToLower();
+                thatApt = int.Parse(aptStr);
+                if (thatStr.StartsWith("gf")) thatFloor = 1;
+            }
+
+            string myFloorStr = "";
+            int myFloor = -1;
+            int myApt = -1;
+            int myAptIndx = FloorNumber.LastIndexOfAny(chars);
+            if (myAptIndx == -1)
+            {
+                int fullNum = int.Parse(Name);
+                myFloor = fullNum / 100;
+                myApt = fullNum % 100;
+            }
+            else
+            {
+                string aptStr = Name.Substring(Name.Length - 2);
+                myFloorStr = Name.Substring(0, myAptIndx).ToLower();
+                myApt = int.Parse(aptStr);
+                if (meStr.StartsWith("gf")) myFloor = 1;
+            }
+
+            if (thatFloor != -1 && myFloor != -1)
+            {
+                if (myFloor < thatFloor)
+                    return -1;
+                else if (myFloor > thatFloor)
+                    return 1;
+
+                if (myApt < thatApt)
+                    return -1;
+                else if (myApt > thatApt)
+                    return 1;
+                else
+                    return 0;
+            }
+
+            if (myFloorStr == thatFloorStr)
+            {
+                if (myApt < thatApt)
+                    return -1;
+                else if (myApt > thatApt)
+                    return 1;
+                else
+                    return 0;
+            }
+
+            if (myFloorStr == "ph" && thatFloorStr == "rg")
                 return 1;
-            if (meStr.StartsWith("rg") && thatStr.StartsWith("ph"))
+            if (myFloorStr == "rg" && thatFloorStr == "ph")
+                return -1;
+            if (myFloorStr == "lph" && thatFloorStr == "rg")
+                return 1;
+            if (myFloorStr == "rg" && thatFloorStr == "lph")
                 return -1;
 
             return meStr.CompareTo(thatStr);
