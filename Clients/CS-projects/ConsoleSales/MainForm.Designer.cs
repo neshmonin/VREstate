@@ -276,7 +276,6 @@
             // 
             // columnCealing
             // 
-            this.columnCealing.DisplayIndex = 4;
             this.columnCealing.Text = "Hght";
             this.columnCealing.Width = 57;
             // 
