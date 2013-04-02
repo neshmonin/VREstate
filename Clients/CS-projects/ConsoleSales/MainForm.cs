@@ -468,11 +468,10 @@ namespace ConsoleSales
             groupBox4.Enabled = false;
             groupSuiteInfo.Enabled = false;
             foreach (Site site in m_currDeveloper.Sites)
-            {
                 comboSites.Items.Add(site);
-            }
 
-            //comboSites.SelectedIndex = 0;
+            if (comboSites.Items.Count == 1)
+                comboSites.SelectedIndex = 0;
         }
 
         private void comboSites_SelectedIndexChanged(object sender, EventArgs e)
@@ -512,7 +511,8 @@ namespace ConsoleSales
                 "> Site " + m_currSite.Name + " selected", "Info");
             Trace.Flush();
 
-            comboBuildings.SelectedIndex = 0;
+            if (comboBuildings.Items.Count == 1)
+                comboBuildings.SelectedIndex = 0;
         }
 
 
@@ -581,22 +581,17 @@ namespace ConsoleSales
                 {
                     switch (i)
                     {
-                        case 3: // CellingHeight
-                            lvItem.SubItems[i].BackColor = cs.CellingHeightChanged ?
-                                Color.LightSalmon:
-                                Color.White;
-                            break;
-                        case 4: // CurrentPrice
+                        case 3: // CurrentPrice
                             lvItem.SubItems[i].BackColor = cs.PriceChanged ?
                                 Color.LightSalmon :
                                 Color.White;
                             break;
-                        case 5: // Status
+                        case 4: // Status
                             lvItem.SubItems[i].BackColor = cs.StatusChanged ?
                                 Color.LightSalmon :
                                 Color.White;
                             break;
-                        case 6: // ShowPanoramicView
+                        case 5: // ShowPanoramicView
                             lvItem.SubItems[i].BackColor = cs.ShowPanoramicViewChanged ?
                                 Color.LightSalmon :
                                 Color.White;
@@ -657,16 +652,6 @@ namespace ConsoleSales
 
                 try
                 {
-                    if (textCellingHeight.Text != string.Empty)
-                    {
-                        guiChanged = true;
-                        suite.suite.CellingHeight = int.Parse(textCellingHeight.Text);
-                    }
-                }
-                catch (System.FormatException) { }
-
-                try
-                {
                     if (textPrice.Text != string.Empty/* &&
                         textPrice.Text != "0"*/)
                     {
@@ -705,22 +690,17 @@ namespace ConsoleSales
                     {
                         switch (i)
                         {
-                            case 3: // CellingHeight
-                                lvi.SubItems[i].BackColor = suite.CellingHeightChanged ?
-                                    Color.LightSalmon :
-                                    Color.White;
-                                break;
-                            case 4: // CurrentPrice
+                            case 3: // CurrentPrice
                                 lvi.SubItems[i].BackColor = suite.PriceChanged ?
                                     Color.LightSalmon :
                                     Color.White;
                                 break;
-                            case 5: // Status
+                            case 4: // Status
                                 lvi.SubItems[i].BackColor = suite.StatusChanged ?
                                     Color.LightSalmon :
                                     Color.White;
                                 break;
-                            case 6: // ShowPanoramicView
+                            case 5: // ShowPanoramicView
                                 lvi.SubItems[i].BackColor = suite.ShowPanoramicViewChanged ?
                                     Color.LightSalmon :
                                     Color.White;
@@ -963,7 +943,7 @@ namespace ConsoleSales
             ChangingSuite.PromoteChanges(delegate(ChangingSuite s)
             {
                 reflectInGUI(s);
-                m_currBldng.Suites[s.suite.UniqueKey] = s.suite;
+                m_currBldng.Suites[s.suite.UniqueKey] = s;
             });
             Trace.WriteLine(DateTime.Now.ToString() + "> Changes sent to server:\n" +
                 report, "Info");
@@ -999,24 +979,6 @@ namespace ConsoleSales
                 textPrice.Text = "0";
             applySuiteChanges();
         }
-        private string lastCellingHeight;
-        private void textCellingHeight_Enter(object sender, EventArgs e)
-        {
-            LoadOnScreenKeyboard();
-            lastCellingHeight = textCellingHeight.Text;
-            textCellingHeight.SelectAll();
-        }
-        private void textCellingHeight_Leave(object sender, EventArgs e)
-        {
-            if (lastCellingHeight != textCellingHeight.Text)
-            {
-                if (string.IsNullOrWhiteSpace(textCellingHeight.Text))
-                    textCellingHeight.Text = "0";
-                applySuiteChanges();
-            }
-        }
-        private string lastFloorName;
-        private string lastSuiteName;
         private int lastSaleStatus;
         private void comboSaleStatus_Enter(object sender, EventArgs e) { lastSaleStatus = comboSaleStatus.SelectedIndex; }
         private void comboSaleStatus_SelectedIndexChanged(object sender, EventArgs e)
