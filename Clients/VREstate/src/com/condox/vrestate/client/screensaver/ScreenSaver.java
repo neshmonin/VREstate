@@ -3,6 +3,7 @@ package com.condox.vrestate.client.screensaver;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.view._AbstractView;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 
 public class ScreenSaver extends Timer {
 
@@ -17,11 +18,10 @@ public class ScreenSaver extends Timer {
 		return instance;
 	}
 
-	private int TimeoutInterval =  2 * 60 * 1000;
+	private int TimeoutInterval =  1000;
 
 	@Override
 	public void run() {
-//		schedule(TimeoutInterval);
 		_AbstractView.PopToTheBottom();
 		notifyTimeout();
 	}

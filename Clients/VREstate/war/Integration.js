@@ -1,17 +1,4 @@
 window.onload = function() {
-	HOST_TimerExpire = function(expired) {
-		// var data = {};
-		// data.name = "TimerExpire";
-		// data.value = expired;
-		// var message = JSON.stringify(data);
-		var message = '';
-		if (expired)
-			message = 'timeout';
-		else
-			message = 'reset';
-		document.getElementById(VRT_FrameId).contentWindow.postMessage(message,
-				'*');
-	}
 
 	OnMessage = function(event) {
 		if (typeof (VRT_TimerExpire) == 'function') {
@@ -33,5 +20,4 @@ window.onload = function() {
         }
     }
     Init();
-//	alert('BrandFactory onload');
 }

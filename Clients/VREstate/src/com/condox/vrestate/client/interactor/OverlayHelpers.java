@@ -1,7 +1,6 @@
 package com.condox.vrestate.client.interactor;
 
 import com.condox.vrestate.client.ge.GE;
-import com.google.gwt.user.client.Window;
 import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
 import com.nitrous.gwt.earth.client.api.KmlUnits;
 

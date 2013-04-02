@@ -2,11 +2,10 @@ package com.condox.vrestate.client;
 
 import java.util.List;
 import java.util.Map;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.FrameElement;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -138,15 +137,17 @@ public class Options implements RequestCallback {
 		Options.SUITE_INFO = (FrameElement)elem;
 		Options.SUITE_INFO.setAttribute("frameBorder", "0");
 		if (ROLE.equals(ROLES.KIOSK))
-			Options.SUITE_INFO.setAttribute("src", "templates/musee.html");
+			Options.SUITE_INFO.setAttribute("src", "templates/default.html");
 		else
 			Options.SUITE_INFO.setAttribute("src", "templates/default.html");
 		Options.SUITE_INFO.setAttribute("id", "SuiteInfo");
+		Options.SUITE_INFO.setAttribute("name", "SuiteInfo");
 		SUITE_INFO.getStyle().setVisibility(Visibility.HIDDEN);
 		RootPanel.getBodyElement().appendChild(Options.SUITE_INFO);
 
 		theOptions = new Options(vrEstate);
-		GET.send(request, theOptions);
+		vrEstate.LoginUser();
+//		GET.send(request, theOptions);
 		// isReady = true;
 
 	};

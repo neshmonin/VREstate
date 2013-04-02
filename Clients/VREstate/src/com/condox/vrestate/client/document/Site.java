@@ -5,11 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.Position;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.user.client.Window;
 
 public class Site implements I_VRObject {
 
@@ -25,7 +23,7 @@ public class Site implements I_VRObject {
 	private String name = "";
 	private String displayModelUrl = "";
 	private String infoUrl = null;
-	private String moreInfoUrl = null;
+//	private String moreInfoUrl = null;
 	private Position position = new Position();
 	private String bubbleTemplateUrl = new String();
 

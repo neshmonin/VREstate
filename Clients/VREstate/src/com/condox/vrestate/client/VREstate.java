@@ -107,6 +107,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 				int id = site.getId();
 				SiteGeoItem geoItem = _AbstractView.getSiteGeoItem(id);
 				firstView = new HelicopterView(geoItem);
+				_AbstractView.ResetTimeOut();
 				break;
 			}
 			case VISITOR: {
