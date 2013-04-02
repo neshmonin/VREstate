@@ -115,8 +115,8 @@ namespace ConsoleSales
             foreach (var c in m_changedSuites.Values)
             {
                 if (c.changed)
-                    ret += string.Format("{0}Suite {1} changed: {2}\n",
-                        dateTimePrefix, c.suite.UniqueKey, c.WhatChanged);
+                    ret += string.Format("{0}Suite {1} changed: {2}{3}",
+                        dateTimePrefix, c.suite.UniqueKey, c.WhatChanged, System.Environment.NewLine);
                 //if (c.promoted)
                 //    ret += string.Format("{0}Suite {1} has been promoted\n",
                 //        dateTimePrefix, c.suite.UniqueKey);

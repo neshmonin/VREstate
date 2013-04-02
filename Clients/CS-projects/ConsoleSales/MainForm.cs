@@ -144,8 +144,8 @@ namespace ConsoleSales
         private ListViewColumnSorter lvwColumnSorter;
         private Dictionary<string, Building> m_buildings = new Dictionary<string, Building>();
         private bool startOnSecondary = Properties.Settings.Default.StartOnSecondaryMonitor;
-        private string importFromPath = Properties.Settings.Default.ImportFromPath;
-        private string exportToPath = Properties.Settings.Default.ExportToPath;
+        public static string importFromPath = Properties.Settings.Default.ImportFromPath;
+        public static string exportToPath = Properties.Settings.Default.ExportToPath;
         SuperServer m_superServer;
         // the plug-in instance
         private Developer m_currDeveloper = null;
@@ -886,14 +886,10 @@ namespace ConsoleSales
             if (!ChangingSuite.AtLeastOneChanged) return;
 
             string report = ChangingSuite.GenerateChangesReport(false);
-            if (MessageBox.Show("The following changes have been done:\n\n" + 
-                                report +
-                                "\n\nDo you want to Appy these changes to the Server?",
-                                "Applying your Changes",
-                                MessageBoxButtons.YesNo,
-                                MessageBoxIcon.Question) != DialogResult.Yes)
+            ChangesReportForm changesReportForm = new ChangesReportForm(report,
+                m_currSite.Name, m_currBldng.Name);
+            if (changesReportForm.ShowDialog(this) != DialogResult.OK)
                 return;
-
 
             Cursor.Current = Cursors.WaitCursor;
             Vre.Server.BusinessLogic.ClientData changes = ChangingSuite.GenerateClientData();
@@ -908,6 +904,52 @@ namespace ConsoleSales
             {
                 case HttpStatusCode.OK:
                     svCount = resp.Data.GetProperty("updated", 0);
+                    if (MessageBox.Show(svCount + " records have been updated in the Data Base." +
+                                        "\nDo you want to save the Changes Report?",
+                                    "Data has been changed successfully",
+                                    MessageBoxButtons.YesNo,
+                                    MessageBoxIcon.Information) == DialogResult.Yes)
+                    {
+                        SaveFileDialog saveFileDialog = new SaveFileDialog();
+                        if (Directory.Exists(MainForm.importFromPath))
+                            saveFileDialog.InitialDirectory = MainForm.exportToPath;
+                        else
+                            saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+                        // Displays a SaveFileDialog
+                        saveFileDialog.Filter = "Log file (*.log)|*.log";
+                        saveFileDialog.Title = "Save the Changes Report File";
+                        saveFileDialog.FileName = string.Format("{0} {1} - {2}",
+                            m_currSite.Name,
+                            m_currBldng.Name,
+                            DateTime.Now.ToLongDateString());
+                        saveFileDialog.ShowDialog();
+
+                        // If the file name is not an empty string open it for saving.
+                        if (saveFileDialog.FileName != string.Empty)
+                        {
+                            string ext = Path.GetExtension(saveFileDialog.FileName);
+                            if (ext == string.Empty)
+                            {
+                                if (saveFileDialog.FilterIndex == 1)
+                                    ext = "log";
+
+                                Path.ChangeExtension(saveFileDialog.FileName, ext);
+                            }
+                            // Save the Report
+                            FileStream stream = File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.Write);
+                            using (StreamWriter writeFile = new StreamWriter(stream))
+                            {
+                                string outStr = string.Format("Changes Report for site \'{0}\', building \'{1}\'{2}",
+                                                               m_currSite.Name,
+                                                               m_currBldng.Name,
+                                                               System.Environment.NewLine);
+                                outStr += report;
+
+                                writeFile.Write(outStr);
+                            }
+                        }
+                    }
                     break;
 
                 default:
