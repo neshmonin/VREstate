@@ -133,17 +133,17 @@ public class Options implements RequestCallback {
 ////		SUITE_INFO.getStyle().setVisibility(Visibility.HIDDEN);
 //		RootPanel.getBodyElement().appendChild(SUITE_INFO);
 		
-		Element elem = DOM.createIFrame();
-		Options.SUITE_INFO = (FrameElement)elem;
-		Options.SUITE_INFO.setAttribute("frameBorder", "0");
-		if (ROLE.equals(ROLES.KIOSK))
-			Options.SUITE_INFO.setAttribute("src", "templates/default.html");
-		else
-			Options.SUITE_INFO.setAttribute("src", "templates/default.html");
-		Options.SUITE_INFO.setAttribute("id", "SuiteInfo");
-		Options.SUITE_INFO.setAttribute("name", "SuiteInfo");
-		SUITE_INFO.getStyle().setVisibility(Visibility.HIDDEN);
-		RootPanel.getBodyElement().appendChild(Options.SUITE_INFO);
+//		Element elem = DOM.createIFrame();
+//		Options.SUITE_INFO = (FrameElement)elem;
+//		Options.SUITE_INFO.setAttribute("frameBorder", "0");
+//		if (ROLE.equals(ROLES.KIOSK))
+//			Options.SUITE_INFO.setAttribute("src", "templates/default.html");
+//		else
+//			Options.SUITE_INFO.setAttribute("src", "templates/default.html");
+//		Options.SUITE_INFO.setAttribute("id", "SuiteInfo");
+//		Options.SUITE_INFO.setAttribute("name", "SuiteInfo");
+//		SUITE_INFO.getStyle().setVisibility(Visibility.HIDDEN);
+//		RootPanel.getBodyElement().appendChild(Options.SUITE_INFO);
 
 		theOptions = new Options(vrEstate);
 		vrEstate.LoginUser();
@@ -154,9 +154,9 @@ public class Options implements RequestCallback {
 
 	@Override
 	public void onResponseReceived(Request request, Response response) {
-		SUITE_INFO_TEMPLATE = response.getText();
-//		SUITE_INFO= response.getText();
-		vrEstate.LoginUser();
+//		SUITE_INFO_TEMPLATE = response.getText();
+////		SUITE_INFO= response.getText();
+//		vrEstate.LoginUser();
 	}
 
 	@Override

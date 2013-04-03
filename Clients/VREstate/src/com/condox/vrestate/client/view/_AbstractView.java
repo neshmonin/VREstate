@@ -15,7 +15,6 @@ import com.condox.vrestate.client.document.Site;
 import com.condox.vrestate.client.document.Suite;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.I_AbstractInteractor;
-import com.condox.vrestate.client.screensaver.ScreenSaver;
 import com.condox.vrestate.client.view.Camera.Camera;
 import com.condox.vrestate.client.view.GeoItems.BuildingGeoItem;
 import com.condox.vrestate.client.view.GeoItems.IGeoItem;

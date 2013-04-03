@@ -11,7 +11,7 @@
 <!--                                                               -->
 <!-- Consider inlining CSS to reduce the number of requested files -->
 <!--                                                               -->
-<link type="text/css" rel="stylesheet" href="VREstate.css"><link rel="stylesheet" href="ReducedInfo.css" type="text/css" media="screen"/>
+<link type="text/css" rel="stylesheet" href="VREstate.css">
 
 <!--                                           -->
 <!-- Any title is fine                         -->
@@ -20,7 +20,7 @@
 
 <script
 	src="https://www.google.com/jsapi?key=ABQIAAAAm7LIvLNR-PkJLewH4qmS7hREGtQZq9OFJfHndXhPP8gxXzlLARQtA_EfZjc9zs77WO25FrLcaZ4ZVA"></script>
-<script type="text/javascript" src="Connect.js"></script>
+<!-- <script type="text/javascript" src="Connect.js"></script> -->
 <script>
     		google.load("earth", "1");
    		</script> 
@@ -50,27 +50,27 @@ src="vrestate/vrestate.nocache.js"></script>
 <!-- to create a completely dynamic UI.        -->
 <!--                                           -->
 <body>
-    <script type="text/javascript">
-	OnMessage = function(event) {
-    	if (typeof (onTimerExpire == 'function')) {
-    		if (event.data == 'reset')
-    			onTimerExpire(false);
-    		if (event.data == 'timeout')
-    			onTimerExpire(true);
-    	}
-	}
+<!--     <script type="text/javascript"> -->
+<!-- // 	OnMessage = function(event) { -->
+<!-- //     	if (typeof (onTimerExpire == 'function')) { -->
+<!-- //     		if (event.data == 'reset') -->
+<!-- //     			onTimerExpire(false); -->
+<!-- //     		if (event.data == 'timeout') -->
+<!-- //     			onTimerExpire(true); -->
+<!-- //     	} -->
+<!-- // 	} -->
 
-    window.onload = function () {
-        if (window.addEventListener) {  // all browsers except IE before version 9
-            window.addEventListener ("message", OnMessage, false);
-        }
-        else {
-            if (window.attachEvent) {   // IE before version 9
-                window.attachEvent("onmessage", OnMessage);
-            }
-        }
-    }
-    </script>
+<!-- //     window.onload = function () { -->
+<!-- //         if (window.addEventListener) {  // all browsers except IE before version 9 -->
+<!-- //             window.addEventListener ("message", OnMessage, false); -->
+<!-- //         } -->
+<!-- //         else { -->
+<!-- //             if (window.attachEvent) {   // IE before version 9 -->
+<!-- //                 window.attachEvent("onmessage", OnMessage); -->
+<!-- //             } -->
+<!-- //         } -->
+<!-- //     } -->
+<!--     </script> -->
 	<!-- OPTIONAL: include this if you want history support -->
 	<iframe src="#" id="__gwt_historyFrame" tabIndex='-1'
 		style="position: absolute; width: 0; height: 0; border: 0"></iframe>

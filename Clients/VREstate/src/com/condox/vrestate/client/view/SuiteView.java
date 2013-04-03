@@ -1,7 +1,11 @@
 package com.condox.vrestate.client.view;
 
+import com.condox.vrestate.client.GET;
 import com.condox.vrestate.client.Options;
+import com.condox.vrestate.client.document.Building;
 import com.condox.vrestate.client.document.Document;
+import com.condox.vrestate.client.document.Site;
+import com.condox.vrestate.client.document.Suite;
 import com.condox.vrestate.client.document.SuiteType;
 import com.condox.vrestate.client.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.filter.Filter;
@@ -16,7 +20,10 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.FrameElement;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -178,189 +185,201 @@ public class SuiteView extends _GEView {
 		return "" + suiteGeo.suite.getPrice();
 	}
 
-	private native String getSuiteInfoContent()/*-{
-		var suite = {};
-		suite['label'] = 'suite';
-		suite['name'] = 'NAME';
-		suite['price'] = 'PRICE';
-		return JSON.stringify(suite);
-	}-*/;
-
 	GEHtmlDivBalloon balloon = GE.getPlugin().createHtmlDivBalloon("");
 
 	public void ShowBalloon() {
-		F();
-		if (isMoreInfoVisible)
-			return;
-		isMoreInfoVisible = true;
-		//
-		balloon.setCloseButtonEnabled(false);
-
-		// Options.SUITE_INFO.getStyle().setVisibility(Visibility.VISIBLE);
-		// Element frame = Options.SUITE_INFO;
-		// // frame.setAttribute("src", "templates/template.html");
-		//
-		// com.google.gwt.dom.client.Document doc = ((FrameElement)
-		// frame).getContentDocument();
-		//
-		// NodeList<Element> styles = doc.getElementsByTagName("style");
-		// for (int i = 0; i < styles.getLength(); i++)
-		// doc.getBody().appendChild(styles.getItem(i));
-
-		// Suite suite = suiteGeo.suite;
-		// String templateUrl = new String();
-		// if (suite != null) {
-		// Building building = suite.getParent();
-		// if (building != null) {
-		// Site site = building.getParent();
-		// if (site != null)
-		// templateUrl = site.getBubbleTemplateUrl();
-		// }
-		// }
-		// if (templateUrl.isEmpty())
-		// Window.alert("Empty, using template.html");
-		// else
-		// Window.alert("Using " + templateUrl);
-		//
-		// templateUrl = templateUrl.isEmpty()? "template.html" : templateUrl;
-		// RootPanel.getBodyElement().appendChild(frame);
-		//
-		// frame.setPropertyInt("frameBorder", 0);
-		// frame.setPropertyString("src", templateUrl);
-		//
-		// com.google.gwt.dom.client.Document doc =
-		// ((FrameElement)frame).getContentDocument();
-		// NodeList<Element> styles = doc.getElementsByTagName("style");
-		// for (int i = 0; i < styles.getLength(); i++)
-		// doc.getBody().appendChild(styles.getItem(i));
-
-		SuiteType type = suiteGeo.suite.getSuiteType();
-
-		// // NAME
-		// Element name = doc.getElementById("SuiteName");
-		// if (name != null)
-		// if (suiteGeo.getName() != null && !suiteGeo.getName().isEmpty())
-		// name.setInnerText(suiteGeo.getName());
-		// // TYPE_NAME
-		// Element type_name = doc.getElementById("SuiteTypeName");
-		// if (type_name != null)
-		// if (type.getName() != null && !type.getName().isEmpty())
-		// type_name.setInnerText(type.getName());
-		// // BEDROOMS
-		// Element bedrooms = doc.getElementById("SuiteBedroomsCount");
-		// if (bedrooms != null)
-		// if (type.getBedrooms() > 0)
-		// bedrooms.setInnerText("" + type.getBedrooms());
-		// // BATHROOMS
-		// Element bathrooms = doc.getElementById("SuiteBathroomsCount");
-		// if (bathrooms != null)
-		// if (type.getBathrooms() > 0)
-		// bathrooms.setInnerText("" + type.getBathrooms());
-		// // AREA
-		// Element area = doc.getElementById("SuiteArea");
-		// if (area != null)
-		// if (type.getArea() > 0)
-		// area.setInnerText("" + type.getArea());
-		// // AREA_MEAS
-		// Element area_meas = doc.getElementById("SuiteAreaMeas");
-		// if (area_meas != null)
-		// if (type.getAreaUm() != null && !type.getAreaUm().isEmpty())
-		// area_meas.setInnerText(type.getAreaUm());
-		// // FLOORNAME
-		// Element floorname = doc.getElementById("SuiteFloorName");
-		// if (floorname != null)
-		// if (suiteGeo.getFloor_name() != null
-		// && !suiteGeo.getFloor_name().isEmpty())
-		// floorname.setInnerText(suiteGeo.getFloor_name());
-		// // BALCONIES
-		// Element balconies = doc.getElementById("SuiteBalconyTerrace");
-		// if (balconies != null)
-		// if (type.getBalconies() > 0)
-		// balconies.setInnerText("Yes");
-		// else
-		// balconies.setInnerText("No");
-		// // PRICE
-		// Element price = doc.getElementById("SuitePrice");
-		// if (price != null)
-		// if (suiteGeo.getPrice() > 0) {
-		// NumberFormat fmt = NumberFormat.getDecimalFormat();
-		// price.setInnerText("$" + fmt.format(suiteGeo.getPrice()));
-		// }
-		// // FLOORPLAN
-		// Element floorplan = doc.getElementById("SuiteFloorPlanImg");
-		// if (floorplan != null) {
-		// String url = suiteGeo.suite.getSuiteType().getFloorPlanUrl();
-		// if (url != null && !url.isEmpty())
-		// floorplan.setAttribute("src", url);
-		// }
-		//
-		// // Window.alert(doc.getBody().getString());
-		// // // TODO For debug purposes:
-		// // price.setInnerText("$" + (int) (Math.random() * 100000));
-		// // bedrooms.setInnerText("" + (int) (Math.random() * 10));
-		// // bathrooms.setInnerText("" + (int) (Math.random() * 10));
-		//
-		// Element panoramic = doc.getElementById("onShowPanoramicView");
-		// if (panoramic != null)
-		// panoramic.setAttribute("onclick", "showPanoramicView();");
-		//
-		// // floorplan = doc.getElementById("onShowFloorPlan");
-		// // floorplan.setAttribute("onclick", "showFloorPlan();");
-		//
-		// Element moreinfo = doc.getElementById("onShowMoreInfo");
-		// if (moreinfo != null)
-		// moreinfo.setAttribute("onclick", "showMoreInfo();");
-		//
-		// // Window.alert(frame.getInnerHTML());
-		// // Window.alert(doc.getBody().getInnerHTML());
-		//
-		// // balloon.setContentDiv(getSuiteInfoContent());
-
-		final Element frame = DOM.createIFrame();
-		RootPanel.getBodyElement().appendChild(frame);
-		if ((suiteGeo.suite.getInfoUrl() != null)
-				&& !suiteGeo.suite.getInfoUrl().isEmpty())
-			frame.setAttribute("src", suiteGeo.suite.getInfoUrl() + "#"
-					+ System.currentTimeMillis());
-		else
-			frame.setAttribute("src",
-					"templates/default.html#" + System.currentTimeMillis());
-
-		// // frame.getAttribute("name").postMessage();
-		sendMessage(frame, getSuiteInfoContent());
-		// balloon.setContentDiv(frame.getInnerHTML());
-		// balloon.setFeature(suiteGeo.getExtendedDataLabel());
-		// Window.alert(frame.toString());
-		// sendMessage("SuiteInfo", getSuiteInfoContent());
-		Timer pause = new Timer() {
+		String url = suiteGeo.suite.getParent().getInfoUrl();
+		if ((url == null) || url.isEmpty() || Options.isViewOrder())
+			url = "templates/default.html";
+		GET.send(url, new RequestCallback() {
 
 			@Override
-			public void run() {
-				balloon.setContentDiv(frame.getInnerText());
+			public void onResponseReceived(Request request, Response response) {
+//				Window.alert("msg");
+				balloon.setContentDiv(response.getText());
 				GE.getPlugin().setBalloon(balloon);
+				addElement((Element) balloon.getContentDiv(), getJsonParams());
 			}
-		};
-		pause.schedule(2000);
-		// Window.alert(getSuiteInfoContent());
-	};
 
-	private native void sendMessage(Element frame, String str)/*-{
-		//		alert(1);
-		frame.contentWindow.postMessage(str, "*");
-//		alert(2);
-	}-*/;
+			@Override
+			public void onError(Request request, Throwable exception) {
+				// Window.alert("2");
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+	}
+
+	// public void ShowBalloon() {
+	// F();
+	// if (isMoreInfoVisible)
+	// return;
+	// isMoreInfoVisible = true;
+	// //
+	// balloon.setCloseButtonEnabled(false);
+	//
+	// Options.SUITE_INFO.getStyle().setVisibility(Visibility.VISIBLE);
+	// Element frame = Options.SUITE_INFO;
+	// // // frame.setAttribute("src", "templates/template.html");
+	// //
+	// com.google.gwt.dom.client.Document doc = ((FrameElement) frame)
+	// .getContentDocument();
+	// //
+	// // NodeList<Element> styles = doc.getElementsByTagName("style");
+	// // for (int i = 0; i < styles.getLength(); i++)
+	// // doc.getBody().appendChild(styles.getItem(i));
+	//
+	// Suite suite = suiteGeo.suite;
+	// String templateUrl = new String();
+	// if (suite != null) {
+	// Building building = suite.getParent();
+	// if (building != null) {
+	// Site site = building.getParent();
+	// if (site != null)
+	// templateUrl = site.getBubbleTemplateUrl();
+	// }
+	// }
+	// // if (templateUrl.isEmpty())
+	// // Window.alert("Empty, using template.html");
+	// templateUrl = "templates/default.html#" + System.currentTimeMillis();
+	// // else
+	// // Window.alert("Using " + templateUrl);
+	//
+	// // templateUrl = templateUrl.isEmpty()? "template.html" : templateUrl;
+	//
+	// frame.setPropertyInt("frameBorder", 0);
+	// frame.setPropertyString("src", templateUrl);
+	// // RootPanel.getBodyElement().appendChild(frame);
+	// //
+	// // com.google.gwt.dom.client.Document doc =
+	// // ((FrameElement)frame).getContentDocument();
+	// // NodeList<Element> styles = doc.getElementsByTagName("style");
+	// // for (int i = 0; i < styles.getLength(); i++)
+	// // doc.getBody().appendChild(styles.getItem(i));
+	//
+	// SuiteType type = suiteGeo.suite.getSuiteType();
+	//
+	// // NAME
+	// Element name = doc.getElementById("SuiteName");
+	// if (name != null)
+	// if (suiteGeo.getName() != null && !suiteGeo.getName().isEmpty())
+	// name.setInnerText(suiteGeo.getName());
+	// // TYPE_NAME
+	// Element type_name = doc.getElementById("SuiteTypeName");
+	// if (type_name != null)
+	// if (type.getName() != null && !type.getName().isEmpty())
+	// type_name.setInnerText(type.getName());
+	// // BEDROOMS
+	// Element bedrooms = doc.getElementById("SuiteBedroomsCount");
+	// if (bedrooms != null)
+	// if (type.getBedrooms() > 0)
+	// bedrooms.setInnerText("" + type.getBedrooms());
+	// // BATHROOMS
+	// Element bathrooms = doc.getElementById("SuiteBathroomsCount");
+	// if (bathrooms != null)
+	// if (type.getBathrooms() > 0)
+	// bathrooms.setInnerText("" + type.getBathrooms());
+	// // AREA
+	// Element area = doc.getElementById("SuiteArea");
+	// if (area != null)
+	// if (type.getArea() > 0)
+	// area.setInnerText("" + type.getArea());
+	// // AREA_MEAS
+	// Element area_meas = doc.getElementById("SuiteAreaMeas");
+	// if (area_meas != null)
+	// if (type.getAreaUm() != null && !type.getAreaUm().isEmpty())
+	// area_meas.setInnerText(type.getAreaUm());
+	// // FLOORNAME
+	// Element floorname = doc.getElementById("SuiteFloorName");
+	// if (floorname != null)
+	// if (suiteGeo.getFloor_name() != null
+	// && !suiteGeo.getFloor_name().isEmpty())
+	// floorname.setInnerText(suiteGeo.getFloor_name());
+	// // BALCONIES
+	// Element balconies = doc.getElementById("SuiteBalconyTerrace");
+	// if (balconies != null)
+	// if (type.getBalconies() > 0)
+	// balconies.setInnerText("Yes");
+	// else
+	// balconies.setInnerText("No");
+	// // PRICE
+	// Element price = doc.getElementById("SuitePrice");
+	// if (price != null)
+	// if (suiteGeo.getPrice() > 0) {
+	// NumberFormat fmt = NumberFormat.getDecimalFormat();
+	// price.setInnerText("$" + fmt.format(suiteGeo.getPrice()));
+	// }
+	// // FLOORPLAN
+	// Element floorplan = doc.getElementById("SuiteFloorPlanImg");
+	// if (floorplan != null) {
+	// String url = suiteGeo.suite.getSuiteType().getFloorPlanUrl();
+	// if (url != null && !url.isEmpty())
+	// floorplan.setAttribute("src", url);
+	// }
+	// //
+	// // // Window.alert(doc.getBody().getString());
+	// // // // TODO For debug purposes:
+	// // // price.setInnerText("$" + (int) (Math.random() * 100000));
+	// // // bedrooms.setInnerText("" + (int) (Math.random() * 10));
+	// // // bathrooms.setInnerText("" + (int) (Math.random() * 10));
+	// //
+	//
+	//
+	//
+	// Element panoramic = doc.getElementById("onShowPanoramicView");
+	// if (panoramic != null)
+	// panoramic.setAttribute("onclick", "showPanoramicView();");
+	//
+	// // floorplan = doc.getElementById("onShowFloorPlan");
+	// // floorplan.setAttribute("onclick", "showFloorPlan();");
+	//
+	// Element moreinfo = doc.getElementById("onShowMoreInfo");
+	// if (moreinfo != null)
+	// moreinfo.setAttribute("onclick", "showMoreInfo();");
+	// //
+	// // // Window.alert(frame.getInnerHTML());
+	// // // Window.alert(doc.getBody().getInnerHTML());
+	// //
+	// // // balloon.setContentDiv(getSuiteInfoContent());
+	//
+	// // final Element frame = DOM.createIFrame();
+	// // RootPanel.getBodyElement().appendChild(frame);
+	// // if ((suiteGeo.suite.getInfoUrl() != null)
+	// // && !suiteGeo.suite.getInfoUrl().isEmpty())
+	// // frame.setAttribute("src", suiteGeo.suite.getInfoUrl() + "#"
+	// // + System.currentTimeMillis());
+	// // else
+	// // frame.setAttribute("src",
+	// // "templates/default.html#" + System.currentTimeMillis());
+	//
+	// // // frame.getAttribute("name").postMessage();
+	// // sendMessage(frame, getSuiteInfoContent());
+	// // balloon.setContentDiv(frame.getInnerHTML());
+	// // balloon.setFeature(suiteGeo.getExtendedDataLabel());
+	// // Window.alert(frame.toString());
+	// // sendMessage("SuiteInfo", getSuiteInfoContent());
+	// // Timer pause = new Timer() {
+	// //
+	// // @Override
+	// // public void run() {
+	// // balloon.setContentDiv(frame.getInnerText());
+	// // GE.getPlugin().setBalloon(balloon);
+	// // }
+	// // };
+	// // pause.schedule(2000);
+	// // Window.alert(getSuiteInfoContent());
+	// balloon.setContentDiv(doc.getBody().getInnerHTML());
+	// balloon.setFeature(suiteGeo.getExtendedDataLabel());
+	// GE.getPlugin().setBalloon(balloon);
+	// };
 
 	public void HideBalloon() {
 		if (!isMoreInfoVisible)
 			return;
 		isMoreInfoVisible = false;
-		// GEHtmlDivBalloon balloon = (GEHtmlDivBalloon) GE.getPlugin()
-		// .getBalloon();
-		// removeElement(((Element) balloon.getContentDiv()));
 		((Element) balloon.getContentDiv()).removeFromParent();
-		// Options.SUITE_INFO.getStyle().setVisibility(Visibility.HIDDEN);
 		GE.getPlugin().setBalloon(null);
-		// RootPanel.getBodyElement().removeChild(frame);
 	}
 
 	private String getJsonParams() {
@@ -419,54 +438,47 @@ public class SuiteView extends _GEView {
 	// div.appendChild(price);
 	// };
 
-	// public native void addElement(Element element, String json) /*-{
-	// //********************************
-	// $doc.getElementsByTagName('body')[0].appendChild(element);
-	// element.style.left = "10px";
-	//
-	//
-	//
-	// var scripts = element.getElementsByTagName("script");
-	// for (i = 0; i < scripts.length; i++)
-	// $wnd.eval(scripts[i].innerHTML);
-	//
-	// // $wnd.alert($doc.getElementsByTagName('head')[0].innerHTML);
-	// // var style = $doc.getElementsByTagName('style')[0];
-	// var styles = element.getElementsByTagName("style");
-	// for (i = 0; i < styles.length; i++)
-	// $doc.getElementsByTagName('head')[0].appendChild(styles[i]);
-	//
-	// // $wnd.alert($doc.innerHTML);
-	//
-	//
-	//
-	//
-	//
-	// // for (i = 0; i < scripts.length; i++) {
-	// // if src, eval it, otherwise eval the body
-	// // if (scripts[i].hasAttribute("src")) {
-	// // if (scripts[i]['src'] != null) {
-	// // var src = scripts[i].getAttribute("src");
-	// // var script = $doc.createElement('script');
-	// // script.setAttribute("src", src);
-	// // $doc.getElementsByTagName('body')[0].appendChild(script);
-	// // } else {
-	// // $wnd.eval(scripts[i].innerHTML);
-	// // }
-	// // }
-	//
-	// //********************************
-	// var suite = this;
-	// var show_panoramic_view = function() {
-	// suite.@com.condox.vrestate.client.view.SuiteView::ShowPanoramicView()();
-	// }
-	// var show_more = function() {
-	// suite.@com.condox.vrestate.client.view.SuiteView::ShowMore()();
-	// }
-	//
-	//
-	// $doc.project(element, json, show_panoramic_view, show_more);
-	// }-*/;
+	public native void addElement(Element element, String json) /*-{
+		//********************************
+		$doc.getElementsByTagName('body')[0].appendChild(element);
+		element.style.left = "10px";
+
+		var scripts = element.getElementsByTagName("script");
+		for (i = 0; i < scripts.length; i++)
+			$wnd.eval(scripts[i].innerHTML);
+
+		// $wnd.alert($doc.getElementsByTagName('head')[0].innerHTML);
+		// var style = $doc.getElementsByTagName('style')[0];
+		var styles = element.getElementsByTagName("style");
+		for (i = 0; i < styles.length; i++)
+			$doc.getElementsByTagName('head')[0].appendChild(styles[i]);
+
+		// $wnd.alert($doc.innerHTML);
+
+		// for (i = 0; i < scripts.length; i++) {
+		// if src, eval it, otherwise eval the body
+		// if (scripts[i].hasAttribute("src")) {
+		// if (scripts[i]['src'] != null) {
+		// var src = scripts[i].getAttribute("src");
+		// var script = $doc.createElement('script');
+		// script.setAttribute("src", src);
+		// $doc.getElementsByTagName('body')[0].appendChild(script);
+		// } else {
+		// $wnd.eval(scripts[i].innerHTML);
+		// }
+		// }
+
+		//********************************
+		var suite = this;
+		var show_panoramic_view = function() {
+			suite.@com.condox.vrestate.client.view.SuiteView::ShowPanoramicView()();
+		}
+		var show_more = function() {
+			//	 suite.@com.condox.vrestate.client.view.SuiteView::ShowMore()();
+		}
+
+		$doc.project(element, json, show_panoramic_view, show_more);
+	}-*/;
 
 	public native void removeElement(Element element) /*-{
 		element.parentNode.removeChild(element);
