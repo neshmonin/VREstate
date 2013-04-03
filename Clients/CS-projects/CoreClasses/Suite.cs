@@ -90,11 +90,10 @@ namespace CoreClasses
 
         public string ToCSV()
         {
-            return string.Format("{0},{1},{2},{3},{4},{5},{6}\n",
+            return string.Format("{0},{1},{2},{3},{4},{5}\n",
                                  FloorNumber,
                                  Name,
                                  ClassId,
-                                 CellingHeight,
                                  Price,
                                  Status,
                                  ShowPanoramicView?"Show":"Hide");
@@ -103,7 +102,7 @@ namespace CoreClasses
         public virtual bool FromCSV(string csv)
         {
             string[] split = csv.Split(new char[] { ',', ';', '\t' });
-            if (split.Length != 7) return false;
+            if (split.Length != 6) return false;
 
             string floor = split[0].Trim();
             int floorNum = -1;
@@ -124,19 +123,15 @@ namespace CoreClasses
             string classID = split[2].Trim();
             if (classID != ClassId) return false;
 
-            int cellingHeight = 0;
-            try { cellingHeight = int.Parse(split[3].Trim()); }
-            catch { return false; }
-
             double price = 0.0;
-            try { price = double.Parse(split[4].Trim()); }
+            try { price = double.Parse(split[3].Trim()); }
             catch { return false; }
 
             SaleStatus status = SaleStatus.Available;
-            try { status = (SaleStatus)SaleStatus.Parse(typeof(SaleStatus), split[5].Trim(), true); }
+            try { status = (SaleStatus)SaleStatus.Parse(typeof(SaleStatus), split[4].Trim(), true); }
             catch { return false; }
 
-            string showPanoramicView = split[6].Trim().ToLower();
+            string showPanoramicView = split[5].Trim().ToLower();
             switch (showPanoramicView)
             {
                 case "show":
@@ -154,7 +149,6 @@ namespace CoreClasses
             FloorNumber = floor;
             Name = name;
             _suite.SuiteType.Name = classID;
-            CellingHeight = cellingHeight;
             Price = price;
             Status = status;
 
@@ -273,16 +267,16 @@ namespace CoreClasses
         public static string UniqueKeyFromCSVline(string csvLine)
         {
             string[] split = csvLine.Split(new char[] { ',', ';', '\t' });
-            if (split.Length != 7) return "";
+            if (split.Length != 6) return "";
             string uniqueKey = string.Format("_{0}_{1}", split[1], split[2]);
             return uniqueKey;
         }
 
         public override string ToString()
         {
-            return string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}",
+            return string.Format("{0}|{1}|{2}|{3}|{4}|{5}",
                                 _suite.FloorName, Name, ClassId, 
-                                CellingHeight, _suite.CurrentPrice, Status,
+                                _suite.CurrentPrice, Status,
                                 _suite.ShowPanoramicView ? "Show" : "Hide");
         }
 
@@ -290,11 +284,10 @@ namespace CoreClasses
         {
             int sepIndx = ClassId.LastIndexOf('/');
             string SuiteTypeOnly = ClassId.Substring(sepIndx + 1);
-            string[] retArray = new string[6]
+            string[] retArray = new string[5]
                                     {
                                         Name,
                                         SuiteTypeOnly,
-                                        CellingHeight.ToString(),
                                         String.Format("{0:N2}", _suite.CurrentPrice),
                                         Status.ToString(),
                                         _suite.ShowPanoramicView ? "Show" : "Hide"

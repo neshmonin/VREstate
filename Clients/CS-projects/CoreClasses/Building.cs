@@ -85,8 +85,8 @@ namespace CoreClasses
 
         public string ToCSV()
         {
-            String outStr = "# ----------------- " + Name + " -----------------,,,,,,\n";
-            outStr += "#Floor,#Suite,#Type,#Cellings,#Price,#Status,#Panoramic View\n";
+            String outStr = "# ----------------- " + Name + " -----------------,,,,,\n";
+            outStr += "#Floor,#Suite,#Type,#Price,#Status,#Panoramic View\n";
 
             var list = Suites.Values.ToList();
             list.Sort();
@@ -99,7 +99,7 @@ namespace CoreClasses
 
         public bool FromCSV(string csvStream)
         {
-            String label = "# ----------------- " + Name + " -----------------,,,,,,";
+            String label = "# ----------------- " + Name + " -----------------,,,,,";
             int begin = csvStream.IndexOf(label);
             if (begin == -1) return false;
 
@@ -127,10 +127,8 @@ namespace CoreClasses
                 string uniqyeKey = Suite.UniqueKeyFromCSVline(csvLines[i]);
                 if (uniqyeKey != "")
                 {
-                    Suite suiteToUpdate = Suites[uniqyeKey];
-
-                    if (suiteToUpdate != null)
-                        suiteToUpdate.FromCSV(csvLines[i]);
+                    if (Suites.ContainsKey(uniqyeKey))
+                        Suites[uniqyeKey].FromCSV(csvLines[i]);
                 }
             }
 

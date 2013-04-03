@@ -144,8 +144,8 @@ namespace ConsoleSales
         private ListViewColumnSorter lvwColumnSorter;
         private Dictionary<string, Building> m_buildings = new Dictionary<string, Building>();
         private bool startOnSecondary = Properties.Settings.Default.StartOnSecondaryMonitor;
-        private string importFromPath = Properties.Settings.Default.ImportFromPath;
-        private string exportToPath = Properties.Settings.Default.ExportToPath;
+        public static string importFromPath = Properties.Settings.Default.ImportFromPath;
+        public static string exportToPath = Properties.Settings.Default.ExportToPath;
         SuperServer m_superServer;
         // the plug-in instance
         private Developer m_currDeveloper = null;
@@ -468,11 +468,10 @@ namespace ConsoleSales
             groupBox4.Enabled = false;
             groupSuiteInfo.Enabled = false;
             foreach (Site site in m_currDeveloper.Sites)
-            {
                 comboSites.Items.Add(site);
-            }
 
-            //comboSites.SelectedIndex = 0;
+            if (comboSites.Items.Count == 1)
+                comboSites.SelectedIndex = 0;
         }
 
         private void comboSites_SelectedIndexChanged(object sender, EventArgs e)
@@ -512,7 +511,8 @@ namespace ConsoleSales
                 "> Site " + m_currSite.Name + " selected", "Info");
             Trace.Flush();
 
-            comboBuildings.SelectedIndex = 0;
+            if (comboBuildings.Items.Count == 1)
+                comboBuildings.SelectedIndex = 0;
         }
 
 
@@ -581,22 +581,17 @@ namespace ConsoleSales
                 {
                     switch (i)
                     {
-                        case 3: // CellingHeight
-                            lvItem.SubItems[i].BackColor = cs.CellingHeightChanged ?
-                                Color.LightSalmon:
-                                Color.White;
-                            break;
-                        case 4: // CurrentPrice
+                        case 3: // CurrentPrice
                             lvItem.SubItems[i].BackColor = cs.PriceChanged ?
                                 Color.LightSalmon :
                                 Color.White;
                             break;
-                        case 5: // Status
+                        case 4: // Status
                             lvItem.SubItems[i].BackColor = cs.StatusChanged ?
                                 Color.LightSalmon :
                                 Color.White;
                             break;
-                        case 6: // ShowPanoramicView
+                        case 5: // ShowPanoramicView
                             lvItem.SubItems[i].BackColor = cs.ShowPanoramicViewChanged ?
                                 Color.LightSalmon :
                                 Color.White;
@@ -657,16 +652,6 @@ namespace ConsoleSales
 
                 try
                 {
-                    if (textCellingHeight.Text != string.Empty)
-                    {
-                        guiChanged = true;
-                        suite.suite.CellingHeight = int.Parse(textCellingHeight.Text);
-                    }
-                }
-                catch (System.FormatException) { }
-
-                try
-                {
                     if (textPrice.Text != string.Empty/* &&
                         textPrice.Text != "0"*/)
                     {
@@ -705,22 +690,17 @@ namespace ConsoleSales
                     {
                         switch (i)
                         {
-                            case 3: // CellingHeight
-                                lvi.SubItems[i].BackColor = suite.CellingHeightChanged ?
-                                    Color.LightSalmon :
-                                    Color.White;
-                                break;
-                            case 4: // CurrentPrice
+                            case 3: // CurrentPrice
                                 lvi.SubItems[i].BackColor = suite.PriceChanged ?
                                     Color.LightSalmon :
                                     Color.White;
                                 break;
-                            case 5: // Status
+                            case 4: // Status
                                 lvi.SubItems[i].BackColor = suite.StatusChanged ?
                                     Color.LightSalmon :
                                     Color.White;
                                 break;
-                            case 6: // ShowPanoramicView
+                            case 5: // ShowPanoramicView
                                 lvi.SubItems[i].BackColor = suite.ShowPanoramicViewChanged ?
                                     Color.LightSalmon :
                                     Color.White;
@@ -886,14 +866,10 @@ namespace ConsoleSales
             if (!ChangingSuite.AtLeastOneChanged) return;
 
             string report = ChangingSuite.GenerateChangesReport(false);
-            if (MessageBox.Show("The following changes have been done:\n\n" + 
-                                report +
-                                "\n\nDo you want to Appy these changes to the Server?",
-                                "Applying your Changes",
-                                MessageBoxButtons.YesNo,
-                                MessageBoxIcon.Question) != DialogResult.Yes)
+            ChangesReportForm changesReportForm = new ChangesReportForm(report,
+                m_currSite.Name, m_currBldng.Name);
+            if (changesReportForm.ShowDialog(this) != DialogResult.OK)
                 return;
-
 
             Cursor.Current = Cursors.WaitCursor;
             Vre.Server.BusinessLogic.ClientData changes = ChangingSuite.GenerateClientData();
@@ -908,6 +884,52 @@ namespace ConsoleSales
             {
                 case HttpStatusCode.OK:
                     svCount = resp.Data.GetProperty("updated", 0);
+                    if (MessageBox.Show(svCount + " records have been updated in the Data Base." +
+                                        "\nDo you want to save the Changes Report?",
+                                    "Data has been changed successfully",
+                                    MessageBoxButtons.YesNo,
+                                    MessageBoxIcon.Information) == DialogResult.Yes)
+                    {
+                        SaveFileDialog saveFileDialog = new SaveFileDialog();
+                        if (Directory.Exists(MainForm.importFromPath))
+                            saveFileDialog.InitialDirectory = MainForm.exportToPath;
+                        else
+                            saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+                        // Displays a SaveFileDialog
+                        saveFileDialog.Filter = "Log file (*.log)|*.log";
+                        saveFileDialog.Title = "Save the Changes Report File";
+                        saveFileDialog.FileName = string.Format("{0} {1} - {2}",
+                            m_currSite.Name,
+                            m_currBldng.Name,
+                            DateTime.Now.ToLongDateString());
+                        saveFileDialog.ShowDialog();
+
+                        // If the file name is not an empty string open it for saving.
+                        if (saveFileDialog.FileName != string.Empty)
+                        {
+                            string ext = Path.GetExtension(saveFileDialog.FileName);
+                            if (ext == string.Empty)
+                            {
+                                if (saveFileDialog.FilterIndex == 1)
+                                    ext = "log";
+
+                                Path.ChangeExtension(saveFileDialog.FileName, ext);
+                            }
+                            // Save the Report
+                            FileStream stream = File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.Write);
+                            using (StreamWriter writeFile = new StreamWriter(stream))
+                            {
+                                string outStr = string.Format("Changes Report for site \'{0}\', building \'{1}\'{2}",
+                                                               m_currSite.Name,
+                                                               m_currBldng.Name,
+                                                               System.Environment.NewLine);
+                                outStr += report;
+
+                                writeFile.Write(outStr);
+                            }
+                        }
+                    }
                     break;
 
                 default:
@@ -921,7 +943,7 @@ namespace ConsoleSales
             ChangingSuite.PromoteChanges(delegate(ChangingSuite s)
             {
                 reflectInGUI(s);
-                m_currBldng.Suites[s.suite.UniqueKey] = s.suite;
+                m_currBldng.Suites[s.suite.UniqueKey] = s;
             });
             Trace.WriteLine(DateTime.Now.ToString() + "> Changes sent to server:\n" +
                 report, "Info");
@@ -957,24 +979,6 @@ namespace ConsoleSales
                 textPrice.Text = "0";
             applySuiteChanges();
         }
-        private string lastCellingHeight;
-        private void textCellingHeight_Enter(object sender, EventArgs e)
-        {
-            LoadOnScreenKeyboard();
-            lastCellingHeight = textCellingHeight.Text;
-            textCellingHeight.SelectAll();
-        }
-        private void textCellingHeight_Leave(object sender, EventArgs e)
-        {
-            if (lastCellingHeight != textCellingHeight.Text)
-            {
-                if (string.IsNullOrWhiteSpace(textCellingHeight.Text))
-                    textCellingHeight.Text = "0";
-                applySuiteChanges();
-            }
-        }
-        private string lastFloorName;
-        private string lastSuiteName;
         private int lastSaleStatus;
         private void comboSaleStatus_Enter(object sender, EventArgs e) { lastSaleStatus = comboSaleStatus.SelectedIndex; }
         private void comboSaleStatus_SelectedIndexChanged(object sender, EventArgs e)

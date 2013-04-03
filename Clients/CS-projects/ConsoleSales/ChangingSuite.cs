@@ -86,8 +86,7 @@ namespace ConsoleSales
             {
                 return PriceChanged ||
                        StatusChanged ||
-                       ShowPanoramicViewChanged ||
-                       CellingHeightChanged;
+                       ShowPanoramicViewChanged;
             }
         }
         protected bool promoted { get { return _promoted; } }
@@ -115,8 +114,8 @@ namespace ConsoleSales
             foreach (var c in m_changedSuites.Values)
             {
                 if (c.changed)
-                    ret += string.Format("{0}Suite {1} changed: {2}\n",
-                        dateTimePrefix, c.suite.UniqueKey, c.WhatChanged);
+                    ret += string.Format("{0}Suite {1} changed: {2}{3}",
+                        dateTimePrefix, c.suite.UniqueKey, c.WhatChanged, System.Environment.NewLine);
                 //if (c.promoted)
                 //    ret += string.Format("{0}Suite {1} has been promoted\n",
                 //        dateTimePrefix, c.suite.UniqueKey);
@@ -127,7 +126,6 @@ namespace ConsoleSales
         public bool PriceChanged { get { return base.Price != _changed.Price; } }
         public bool StatusChanged { get { return base.Status != _changed.Status; } }
         public bool ShowPanoramicViewChanged { get { return base.ShowPanoramicView != _changed.ShowPanoramicView; } }
-        public bool CellingHeightChanged { get { return base.CellingHeight != _changed.CellingHeight; } }
 
         public string WhatChanged
         {
@@ -142,9 +140,6 @@ namespace ConsoleSales
 
                     if (ShowPanoramicViewChanged)
                         diffs.Add("View: (" + base.ShowPanoramicView + "->" + _changed.ShowPanoramicView + ")");
-
-                    if (CellingHeightChanged)
-                        diffs.Add("Height: (" + base.CellingHeight + "->" + _changed.CellingHeight + ")");
 
                     if (diffs.Count == 0)
                         return string.Empty;

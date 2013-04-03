@@ -38,14 +38,11 @@
             this.label9 = new System.Windows.Forms.Label();
             this.textPrice = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
-            this.textCellingHeight = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.listViewSuites = new System.Windows.Forms.ListView();
             this.columnEditingState = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnSuiteName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnSuiteType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnCealing = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnPrice = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnShowPanoramicView = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -66,16 +63,18 @@
             this.buttonApplyChanges = new System.Windows.Forms.Button();
             this.buttonRefresh = new System.Windows.Forms.Button();
             this.groupBoxSuiteTypeInfo = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.textBoxBedrooms = new System.Windows.Forms.TextBox();
-            this.textBoxBathrooms = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.textBoxBalcony = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.textBoxTerrace = new System.Windows.Forms.TextBox();
-            this.label7 = new System.Windows.Forms.Label();
+            this.textCellingHeight = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
             this.textBoxArea = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
+            this.textBoxTerrace = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.textBoxBalcony = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.textBoxBathrooms = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.textBoxBedrooms = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.groupSuiteInfo.SuspendLayout();
             this.contextMenuUnit.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -122,14 +121,12 @@
             this.groupSuiteInfo.Controls.Add(this.label9);
             this.groupSuiteInfo.Controls.Add(this.textPrice);
             this.groupSuiteInfo.Controls.Add(this.label8);
-            this.groupSuiteInfo.Controls.Add(this.textCellingHeight);
-            this.groupSuiteInfo.Controls.Add(this.label2);
             this.groupSuiteInfo.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.groupSuiteInfo.Location = new System.Drawing.Point(672, 313);
             this.groupSuiteInfo.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupSuiteInfo.Name = "groupSuiteInfo";
             this.groupSuiteInfo.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupSuiteInfo.Size = new System.Drawing.Size(284, 222);
+            this.groupSuiteInfo.Size = new System.Drawing.Size(284, 169);
             this.groupSuiteInfo.TabIndex = 5;
             this.groupSuiteInfo.TabStop = false;
             this.groupSuiteInfo.Text = "Suite Editable Info";
@@ -195,29 +192,6 @@
             this.label8.TabIndex = 2;
             this.label8.Text = "Price";
             // 
-            // textCellingHeight
-            // 
-            this.textCellingHeight.BackColor = System.Drawing.SystemColors.Window;
-            this.textCellingHeight.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textCellingHeight.Location = new System.Drawing.Point(159, 173);
-            this.textCellingHeight.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.textCellingHeight.Name = "textCellingHeight";
-            this.textCellingHeight.Size = new System.Drawing.Size(110, 26);
-            this.textCellingHeight.TabIndex = 1;
-            this.textCellingHeight.TabStop = false;
-            this.textCellingHeight.Enter += new System.EventHandler(this.textCellingHeight_Enter);
-            this.textCellingHeight.Leave += new System.EventHandler(this.textCellingHeight_Leave);
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label2.Location = new System.Drawing.Point(16, 179);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(113, 16);
-            this.label2.TabIndex = 0;
-            this.label2.Text = "Cellings Height";
-            // 
             // buttonCancel
             // 
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
@@ -237,7 +211,6 @@
             this.columnEditingState,
             this.columnSuiteName,
             this.columnSuiteType,
-            this.columnCealing,
             this.columnPrice,
             this.columnStatus,
             this.columnShowPanoramicView});
@@ -251,7 +224,7 @@
             this.listViewSuites.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.listViewSuites.Name = "listViewSuites";
             this.listViewSuites.ShowGroups = false;
-            this.listViewSuites.Size = new System.Drawing.Size(639, 679);
+            this.listViewSuites.Size = new System.Drawing.Size(621, 679);
             this.listViewSuites.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.listViewSuites.TabIndex = 4;
             this.listViewSuites.UseCompatibleStateImageBehavior = false;
@@ -272,28 +245,22 @@
             // columnSuiteType
             // 
             this.columnSuiteType.Text = "Type";
-            this.columnSuiteType.Width = 154;
-            // 
-            // columnCealing
-            // 
-            this.columnCealing.Text = "Hght";
-            this.columnCealing.Width = 57;
+            this.columnSuiteType.Width = 178;
             // 
             // columnPrice
             // 
-            this.columnPrice.DisplayIndex = 3;
             this.columnPrice.Text = "Price";
             this.columnPrice.Width = 122;
             // 
             // columnStatus
             // 
             this.columnStatus.Text = "Status";
-            this.columnStatus.Width = 105;
+            this.columnStatus.Width = 110;
             // 
             // columnShowPanoramicView
             // 
             this.columnShowPanoramicView.Text = "Show";
-            this.columnShowPanoramicView.Width = 63;
+            this.columnShowPanoramicView.Width = 70;
             // 
             // contextMenuUnit
             // 
@@ -443,6 +410,8 @@
             // 
             // groupBoxSuiteTypeInfo
             // 
+            this.groupBoxSuiteTypeInfo.Controls.Add(this.textCellingHeight);
+            this.groupBoxSuiteTypeInfo.Controls.Add(this.label11);
             this.groupBoxSuiteTypeInfo.Controls.Add(this.textBoxArea);
             this.groupBoxSuiteTypeInfo.Controls.Add(this.label10);
             this.groupBoxSuiteTypeInfo.Controls.Add(this.textBoxTerrace);
@@ -461,62 +430,43 @@
             this.groupBoxSuiteTypeInfo.TabStop = false;
             this.groupBoxSuiteTypeInfo.Text = "Suite Type Info";
             // 
-            // label1
+            // textCellingHeight
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(16, 69);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(67, 15);
-            this.label1.TabIndex = 11;
-            this.label1.Text = "Bedrooms:";
+            this.textCellingHeight.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textCellingHeight.Location = new System.Drawing.Point(214, 125);
+            this.textCellingHeight.Name = "textCellingHeight";
+            this.textCellingHeight.ReadOnly = true;
+            this.textCellingHeight.Size = new System.Drawing.Size(57, 14);
+            this.textCellingHeight.TabIndex = 22;
+            this.textCellingHeight.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // textBoxBedrooms
+            // label11
             // 
-            this.textBoxBedrooms.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBoxBedrooms.Location = new System.Drawing.Point(90, 70);
-            this.textBoxBedrooms.Name = "textBoxBedrooms";
-            this.textBoxBedrooms.ReadOnly = true;
-            this.textBoxBedrooms.Size = new System.Drawing.Size(57, 14);
-            this.textBoxBedrooms.TabIndex = 12;
-            this.textBoxBedrooms.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(178, 124);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(43, 15);
+            this.label11.TabIndex = 21;
+            this.label11.Text = "Height";
             // 
-            // textBoxBathrooms
+            // textBoxArea
             // 
-            this.textBoxBathrooms.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBoxBathrooms.Location = new System.Drawing.Point(90, 97);
-            this.textBoxBathrooms.Name = "textBoxBathrooms";
-            this.textBoxBathrooms.ReadOnly = true;
-            this.textBoxBathrooms.Size = new System.Drawing.Size(57, 14);
-            this.textBoxBathrooms.TabIndex = 14;
-            this.textBoxBathrooms.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.textBoxArea.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBoxArea.Location = new System.Drawing.Point(214, 97);
+            this.textBoxArea.Name = "textBoxArea";
+            this.textBoxArea.ReadOnly = true;
+            this.textBoxArea.Size = new System.Drawing.Size(57, 14);
+            this.textBoxArea.TabIndex = 20;
+            this.textBoxArea.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // label3
+            // label10
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(16, 96);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(67, 15);
-            this.label3.TabIndex = 13;
-            this.label3.Text = "Bathrooms";
-            // 
-            // textBoxBalcony
-            // 
-            this.textBoxBalcony.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBoxBalcony.Location = new System.Drawing.Point(90, 125);
-            this.textBoxBalcony.Name = "textBoxBalcony";
-            this.textBoxBalcony.ReadOnly = true;
-            this.textBoxBalcony.Size = new System.Drawing.Size(57, 14);
-            this.textBoxBalcony.TabIndex = 16;
-            this.textBoxBalcony.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(16, 124);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(50, 15);
-            this.label4.TabIndex = 15;
-            this.label4.Text = "Balcony";
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(178, 96);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(32, 15);
+            this.label10.TabIndex = 19;
+            this.label10.Text = "Area";
             // 
             // textBoxTerrace
             // 
@@ -537,24 +487,62 @@
             this.label7.TabIndex = 17;
             this.label7.Text = "Terrace";
             // 
-            // textBoxArea
+            // textBoxBalcony
             // 
-            this.textBoxArea.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBoxArea.Location = new System.Drawing.Point(214, 110);
-            this.textBoxArea.Name = "textBoxArea";
-            this.textBoxArea.ReadOnly = true;
-            this.textBoxArea.Size = new System.Drawing.Size(57, 14);
-            this.textBoxArea.TabIndex = 20;
-            this.textBoxArea.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.textBoxBalcony.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBoxBalcony.Location = new System.Drawing.Point(90, 125);
+            this.textBoxBalcony.Name = "textBoxBalcony";
+            this.textBoxBalcony.ReadOnly = true;
+            this.textBoxBalcony.Size = new System.Drawing.Size(57, 14);
+            this.textBoxBalcony.TabIndex = 16;
+            this.textBoxBalcony.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // label10
+            // label4
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(178, 109);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(32, 15);
-            this.label10.TabIndex = 19;
-            this.label10.Text = "Area";
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(16, 124);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(50, 15);
+            this.label4.TabIndex = 15;
+            this.label4.Text = "Balcony";
+            // 
+            // textBoxBathrooms
+            // 
+            this.textBoxBathrooms.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBoxBathrooms.Location = new System.Drawing.Point(90, 97);
+            this.textBoxBathrooms.Name = "textBoxBathrooms";
+            this.textBoxBathrooms.ReadOnly = true;
+            this.textBoxBathrooms.Size = new System.Drawing.Size(57, 14);
+            this.textBoxBathrooms.TabIndex = 14;
+            this.textBoxBathrooms.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(16, 96);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(67, 15);
+            this.label3.TabIndex = 13;
+            this.label3.Text = "Bathrooms";
+            // 
+            // textBoxBedrooms
+            // 
+            this.textBoxBedrooms.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBoxBedrooms.Location = new System.Drawing.Point(90, 70);
+            this.textBoxBedrooms.Name = "textBoxBedrooms";
+            this.textBoxBedrooms.ReadOnly = true;
+            this.textBoxBedrooms.Size = new System.Drawing.Size(57, 14);
+            this.textBoxBedrooms.TabIndex = 12;
+            this.textBoxBedrooms.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(16, 69);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(67, 15);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "Bedrooms:";
             // 
             // MainForm
             // 
@@ -604,8 +592,6 @@
         private System.Windows.Forms.GroupBox groupSuiteInfo;
         private System.Windows.Forms.TextBox textPrice;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.TextBox textCellingHeight;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.ComboBox comboSaleStatus;
         private System.Windows.Forms.Label label9;
@@ -631,7 +617,6 @@
         private System.Windows.Forms.ColumnHeader columnSuiteName;
         private System.Windows.Forms.ColumnHeader columnSuiteType;
         private System.Windows.Forms.ColumnHeader columnPrice;
-        private System.Windows.Forms.ColumnHeader columnCealing;
         private System.Windows.Forms.ColumnHeader columnStatus;
         private System.Windows.Forms.ColumnHeader columnShowPanoramicView;
         private System.Windows.Forms.GroupBox groupBoxSuiteTypeInfo;
@@ -645,6 +630,8 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBoxArea;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TextBox textCellingHeight;
+        private System.Windows.Forms.Label label11;
     }
 }
 
