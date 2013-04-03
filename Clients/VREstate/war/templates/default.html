@@ -114,8 +114,9 @@ document.project = function foo(container, json, onExterior, onInterior)
 	else 
     {
 	  var interior_img = document.createElement('img');
-	  interior_img.src = params.more;
-	  interior_img.className = 'interior_floorplan_';
+	  interior_img.src = "templates/images/ViewInternalsButton.png";
+	  interior_img.className = 'interior_button_';
+  	  interior_img.onclick = onInterior;
 	  container.appendChild(interior_img);
 	}
 }

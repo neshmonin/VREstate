@@ -55,7 +55,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 		counter++;
 		String request = Options.HOME_URL + "ev?sid=" + User.SID
 				+ "&generation=" + counter;
-		GET.send(request, Document.getCallback());
+		GETEV.send(request, Document.getCallback());
 	}
 
 	public static int checkChangesPeriodSec;

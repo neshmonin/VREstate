@@ -60,6 +60,9 @@ public class Building implements I_VRObject {
 		
 		if (obj.containsKey("AltitudeAdjustment"))
 			altitude_adjustment = obj.get("altitudeAdjustment").isNumber().doubleValue();
+
+		if (obj.containsKey("bubbleTemplateUrl"))
+			infoUrl = obj.get("bubbleTemplateUrl").isString().stringValue();
 	}
 	
 	public boolean hasAltitudeAdjustment() {

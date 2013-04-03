@@ -188,6 +188,9 @@ public class SuiteView extends _GEView {
 	GEHtmlDivBalloon balloon = GE.getPlugin().createHtmlDivBalloon("");
 
 	public void ShowBalloon() {
+		if (isMoreInfoVisible)
+			return;
+		isMoreInfoVisible = true;
 		String url = suiteGeo.suite.getParent().getInfoUrl();
 		if ((url == null) || url.isEmpty() || Options.isViewOrder())
 			url = "templates/default.html";
@@ -195,15 +198,15 @@ public class SuiteView extends _GEView {
 
 			@Override
 			public void onResponseReceived(Request request, Response response) {
-//				Window.alert("msg");
+				balloon.setCloseButtonEnabled(false);
 				balloon.setContentDiv(response.getText());
+				balloon.setFeature(suiteGeo.getExtendedDataLabel());
 				GE.getPlugin().setBalloon(balloon);
 				addElement((Element) balloon.getContentDiv(), getJsonParams());
 			}
 
 			@Override
 			public void onError(Request request, Throwable exception) {
-				// Window.alert("2");
 				// TODO Auto-generated method stub
 
 			}
@@ -474,7 +477,7 @@ public class SuiteView extends _GEView {
 			suite.@com.condox.vrestate.client.view.SuiteView::ShowPanoramicView()();
 		}
 		var show_more = function() {
-			//	 suite.@com.condox.vrestate.client.view.SuiteView::ShowMore()();
+			suite.@com.condox.vrestate.client.view.SuiteView::ShowFloorPlan()();
 		}
 
 		$doc.project(element, json, show_panoramic_view, show_more);

@@ -59,7 +59,7 @@ public abstract class _AbstractView implements I_AbstractView {
 			if (Options.ROLE.equals(Options.ROLES.KIOSK))
 				HostTimerReset();
 			if (Options.DEBUG_MODE)
-				m_timeoutTimer.schedule(20 * 1000);
+				m_timeoutTimer.schedule(2 * 60 * 1000);
 			else
 				m_timeoutTimer.schedule(TIMEOUTINTERVAL);
 	}
