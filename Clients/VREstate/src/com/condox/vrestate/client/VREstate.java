@@ -25,18 +25,18 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 	@Override
 	public void onModuleLoad() {
 		// _AbstractView.init();
-		init();
+		// init();
 		Options.Init(this);
 	}
 
-	private native void init() /*-{
-		$wnd.onTimerExpire = function(expired) {
-			if (expired)
-				@com.condox.vrestate.client.view._AbstractView::onTimerTimeout()();
-			else
-				@com.condox.vrestate.client.view._AbstractView::onTimerReset()();
-		}
-	}-*/;
+	// private native void init() /*-{
+	// $wnd.onTimerExpire = function(expired) {
+	// if (expired)
+	// @com.condox.vrestate.client.view._AbstractView::onTimerTimeout()();
+	// else
+	// @com.condox.vrestate.client.view._AbstractView::onTimerReset()();
+	// }
+	// }-*/;
 
 	public void LoginUser() {
 		User.Login(this);
@@ -84,19 +84,20 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 			if (!Options.isViewOrder()
 					|| Document.targetViewOrder.getProductType() == ProductType.PublicListing
 					|| Document.targetViewOrder.getProductType() == ProductType.Building3DLayout) {
-				if (site.getDisplayModelUrl() != "")
-					GE.getPlugin().fetchKml(
-							Options.HOME_URL + site.getDisplayModelUrl(), this);
-
+				boolean useSiteModel = true;
 				for (Building bldng : Document.get().getBuildings()) {
-					if (bldng.getDisplayModelUrl() != "")
-						GE.getPlugin().fetchKml(bldng.getDisplayModelUrl(),
-								this);
-										if (bldng.getOverlayUrl() != "")
-												GE.getPlugin().fetchKml(bldng.getOverlayUrl(), this);
-											if (bldng.getPOIUrl() != "")
-												GE.getPlugin().fetchKml(bldng.getPOIUrl(), this);
+					if (bldng.getDisplayModelUrl() != "") {
+						GE.getPlugin().fetchKml(bldng.getDisplayModelUrl(),this);
+						useSiteModel = false;
+					}
+					if (bldng.getOverlayUrl() != "")
+						GE.getPlugin().fetchKml(bldng.getOverlayUrl(), this);
+					if (bldng.getPOIUrl() != "")
+						GE.getPlugin().fetchKml(bldng.getPOIUrl(), this);
 				}
+				if (useSiteModel)
+					if (site.getDisplayModelUrl() != "")
+						GE.getPlugin().fetchKml(site.getDisplayModelUrl(), this);
 			}
 
 			_AbstractView.CreateAllGeoItems();

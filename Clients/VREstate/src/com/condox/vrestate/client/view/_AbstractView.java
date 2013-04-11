@@ -54,10 +54,7 @@ public abstract class _AbstractView implements I_AbstractView {
 	public static void ResetTimeOut() {
 //		ScreenSaver.get().reset();
 		m_timeoutTimer.cancel();
-
 		if (!m_timeoutTimerDisabled) {
-			if (Options.ROLE.equals(Options.ROLES.KIOSK))
-				HostTimerReset();
 			if (Options.DEBUG_MODE)
 				m_timeoutTimer.schedule(2 * 60 * 1000);
 			else
@@ -65,19 +62,15 @@ public abstract class _AbstractView implements I_AbstractView {
 	}
 	}
 	
-	private static void HostTimerReset() {
-		
-	}
-	
-	public static void onTimerReset() {
-		_AbstractView.ResetTimeOut();
-		// Window.alert("VR:onTimerReset");
-	}
-
-	public static void onTimerTimeout() {
-		_AbstractView.PopToTheBottom();
-		// Window.alert("VR:onTimerTimeout");
-	}
+//	public static void onTimerReset() {
+//		_AbstractView.ResetTimeOut();
+//		// Window.alert("VR:onTimerReset");
+//	}
+//
+//	public static void onTimerTimeout() {
+//		_AbstractView.PopToTheBottom();
+//		// Window.alert("VR:onTimerTimeout");
+//	}
 
 	protected boolean isViewChangedInProgress = false;
 

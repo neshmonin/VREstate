@@ -1,126 +1,147 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Suite Info</title>
-<link type="text/css" rel="stylesheet" href="templates/default.css" />
-</head>
-<body>
-
-<script>
-
-
-document.project = function foo(container, json, onExterior, onInterior) 
-{
-	var params = eval('(' + json + ')');
-
-	if (typeof params.price !== 'undefined') {
-	  var mon = document.createElement("div");
-	  mon.innerHTML = params.price;
-	  mon.className = "price_";
-	  container.appendChild(mon);
-	}
-
-	if (typeof params.suitName !== 'undefined' && typeof params.Floor !== 'undefined' ) {
-	  var suit = document.createElement("div");
-	  suit.innerHTML = "Suite " + params.suitName + " (Floor " + params.Floor + ")";
-	  suit.className = "suite_string_";
-	  container.appendChild(suit);
-	}
-
-	if (typeof (params.moreInfo) !== 'undefined') {
-		var more_link = document.createElement("div");
-		more_link.innerHTML = "<a href=\"" + params.moreInfo + "\" target=\"_blank\">More Info...</a>";
-		more_link.className = 'more_info_';
-		container.appendChild(more_link);
-	}
-
-	if (typeof (params.virtualTour) !== 'undefined') {
-		var vt_link = document.createElement("div");
-		vt_link.innerHTML = "<a href=\"" + params.virtualTour + "\" target=\"_blank\">Virtual Tour</a>";
-		vt_link.className = 'virtual_tour_';
-		container.appendChild(vt_link);
-	}
-
-	if (typeof params.bedrooms !== 'undefined') {
-	  var bed = document.createElement("div");
-	  bed.innerHTML = "Bedrooms";
-	  bed.className = 'label_bedrooms_';
-	  container.appendChild(bed);
-	
-	  var bedr = document.createElement("div");
-	  bedr.innerHTML = params.bedrooms;
-	  bedr.className = 'bedrrooms_';
-	  container.appendChild(bedr);
-	}
-
-	if (typeof params.area !== 'undefined') {
-	  var ar = document.createElement("div");
-	  ar.innerHTML = "Area (Sq.Ft.)";
-	  ar.className = 'label_indoorarea_';
-	  container.appendChild(ar);
-
-	  var are = document.createElement("div");
-	  are.innerHTML = params.area;
-	  are.className = 'indoorarea_';
-	  container.appendChild(are);
-	}
-
-	if (typeof params.balcony !== 'undefined') {
-	  var bal = document.createElement("div");
-	  bal.innerHTML = "Balconies";
-	  bal.className = 'label_balcony_';
-	  container.appendChild(bal);
-
-	  var balc = document.createElement("div");
-	  balc.innerHTML = params.balcony;
-	  balc.className = 'balcony_';
-	  container.appendChild(balc);
-	}
-
-	if (typeof params.ceiling !== 'undefined') {
-	  var cel = document.createElement("div");
-	  cel.innerHTML = "Celling Height (Ft.)";
-	  cel.className = 'label_celling_';
-	  container.appendChild(cel);
-
-	  var celn = document.createElement("div");
-	  celn.innerHTML = params.ceiling;
-	  celn.className = 'celling_';
-	  container.appendChild(celn)
-	}
-
-	if (typeof (params.panoramicViewURL) == 'undefined') {
-	  var exterior_img = document.createElement('img');
-	  exterior_img.src = "templates/images/ViewExternalsButtonDisabled.png";
-	  exterior_img.className = 'exterior_button_';
-	  container.appendChild(exterior_img);
-	}
-    else
-	{
-	  var exterior_img = document.createElement('img');
-	  exterior_img.src = "templates/images/ViewExternalsButton.png";
-	  exterior_img.className = 'exterior_button_';
-  	  exterior_img.onclick = onExterior;
-	  container.appendChild(exterior_img);
-	}
-	
-	if (typeof (params.more) == 'undefined') {
-	  var interior_img = document.createElement('img');
-	  interior_img.src = "templates/images/ViewInternalsButtonDisabled.png";
-	  interior_img.className = 'interior_button_';
-	  container.appendChild(interior_img);
-	}
-	else 
-    {
-	  var interior_img = document.createElement('img');
-	  interior_img.src = "templates/images/ViewInternalsButton.png";
-	  interior_img.className = 'interior_button_';
-  	  interior_img.onclick = onInterior;
-	  container.appendChild(interior_img);
-	}
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+<style type="text/css">
+body {
+	visibility: hidden;
 }
 
+#VRT_left {
+	float: left;
+}
+
+#VRT_right {
+	float: right;
+}
+
+#VRT_name_floor {
+	color: #DE1A1A;
+	font: 200% Arial, Helvetica, sans-serif;
+}
+
+#VRT_bedrooms,#VRT_area {
+	font: 100% Arial, Helvetica, sans-serif;
+}
+
+#VRT_moreInfo,#VRT_virtualTour {
+	font: 130% Arial, Helvetica, sans-serif;
+	color: #03F;
+}
+
+#VRT_price {
+	font: 200% Arial, Helvetica, sans-serif;
+	color: #03F;
+}
+</style>
+<script type="text/javascript">
+window.onload = function() {
+	document.domain = '3dcondox.com';
+	var hash = window.location.hash.substring(1);
+	var json = decodeURIComponent(hash);
+	json = eval('(' + json + ')');
+	if (typeof json != 'undefined') {
+		// SHOW_VIRTUAL_TOUR_LINK
+		if (typeof json.VRT_virtualTour != 'undefined'){
+			var tour = document.getElementById('VRT_virtualTour');
+			tour.style.cursor = 'pointer';
+			tour.style.visibility = 'visible';
+			tour.onclick = window.parent.VRT_showVirtualTour;
+		}
+		// SHOW_MORE_INFO_LINK
+		if (typeof json.VRT_moreInfo != 'undefined'){
+			var info = document.getElementById('VRT_moreInfo');
+			info.style.cursor = 'pointer';
+			info.style.visibility = 'visible';
+			info.onclick = window.parent.VRT_showMoreInfo;
+		}
+		// SHOW_FLOORPLAN_BUTTON
+		var floorplan = document.getElementById('VRT_showFloorplan');
+		if (typeof json.VRT_floorplanUrl != 'undefined'){
+			floorplan.style.cursor = 'pointer';
+			floorplan.src = 'img/InternalButton.png';
+			floorplan.onclick = window.parent.VRT_showFloorplan;
+		} else {
+			floorplan.src = 'img/InternalButtonDisabled.png';
+		}
+		floorplan.style.visibility = 'visible';
+		// SHOW_PANORAMIC_VIEW_BUTTON
+		var panoramic_view = document.getElementById('VRT_showPanoramicView');
+		if (typeof json.VRT_panoramicViewUrl != 'undefined'){
+			panoramic_view.style.cursor = 'pointer';
+			panoramic_view.src = 'img/ExternalButton.png';
+			panoramic_view.onclick = window.parent.VRT_showPanoramicView;
+		} else {
+			panoramic_view.src = 'img/ExternalButtonDisabled.png';
+		}
+		panoramic_view.style.visibility = 'visible';
+		// SHOW_NAME_FLOOR
+		if (typeof json.VRT_name != 'undefined')
+			if (typeof json.VRT_floor != 'undefined') {
+				var name_floor = document.getElementById('VRT_name_floor');
+				name_floor.style.visibility = 'visible';
+				name_floor.innerHTML = json.VRT_name + " (Floor " + json.VRT_floor + ")";
+		}
+		// SHOW_BEDROOMS
+		if (typeof json.VRT_bedrooms != 'undefined') {
+			var bedrooms = document.getElementById('VRT_bedrooms');
+			bedrooms.style.visibility = 'visible';
+			bedrooms.innerHTML = "Bedrooms: " + json.VRT_bedrooms;
+		}
+		// SHOW_BATHROOMS
+		if (typeof json.VRT_bathrooms != 'undefined') {
+			var bathrooms = document.getElementById('VRT_bathrooms');
+			bathrooms.style.visibility = 'visible';
+			bathrooms.innerHTML = "Bathrooms: " + json.VRT_bathrooms;
+		}
+		// SHOW_AREA
+		if (typeof json.VRT_area != 'undefined')
+			if (typeof json.VRT_areaUm != 'undefined') {
+				var area = document.getElementById('VRT_area');
+				area.style.visibility = 'visible';
+				area.innerHTML = json.VRT_area + " " + json.VRT_areaUm;
+		}
+		// SHOW_PRICE
+		if (typeof json.VRT_price != 'undefined') {
+			var price = document.getElementById('VRT_price');
+			price.style.visibility = 'visible';
+			price.innerHTML = json.VRT_price;
+		}
+		// SHOW_BALCONIES
+		if (typeof json.VRT_balconies != 'undefined') {
+			var balconies = document.getElementById('VRT_balconies');
+			balconies.style.visibility = 'visible';
+			balconies.innerHTML = "Balconies: " + json.VRT_balconies;
+		}
+	}
+	window.parent.VRT_setBalloonSize(600,200);
+}
 </script>
+</head>
+<body>
+	<div id="VRT_left" style="text-align: center;">
+		<div style="width: 100%; margin-left: auto; margin-right: auto;">
+			<div id="VRT_virtualTour">Virtual tour</div>
+			<img id="VRT_showFloorplan" src="" />
+		</div>
+	</div>
+	<div id="VRT_right" style="text-align: center;">
+		<div style="width: 100%; margin-left: auto; margin-right: auto;">
+			<div id="VRT_moreInfo">More info...</div>
+			<img id="VRT_showPanoramicView" />
+		</div>
+	</div>
+	<div id="VRT_center" style="text-align: center;">
+		<div style="width: 100%; margin-left: auto; margin-right: auto;">
+			<div id="VRT_name_floor"></div>
+			<div id="VRT_bedrooms"></div>
+			<div id="VRT_bathrooms"></div>
+			<div id="VRT_area"></div>
+			<div id="VRT_price"></div>
+			<div id="VRT_balconies"></div>
+		</div>
+	</div>
 </body>
 </html>

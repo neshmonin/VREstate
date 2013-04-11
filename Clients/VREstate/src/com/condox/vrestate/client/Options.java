@@ -4,15 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.FrameElement;
-import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.RootPanel;
 
 public class Options implements RequestCallback {
 	public enum ROLES {KIOSK, VISITOR};
@@ -48,11 +44,11 @@ public class Options implements RequestCallback {
 	// If SUPPORT_PAN is true, user can pan up and down a building
 	public static boolean SUPPORT_PAN = false;
 
-	private static Options theOptions = null;
-	private VREstate vrEstate = null;
+//	private static Options theOptions = null;
+//	private VREstate vrEstate = null;
 
 	private Options(VREstate vrEstate) {
-		this.vrEstate = vrEstate;
+//		this.vrEstate = vrEstate;
 	}
 
 	public static boolean isViewOrder() {
@@ -93,7 +89,7 @@ public class Options implements RequestCallback {
 			DEBUG_MODE = (GWT.getModuleBaseURL().contains("/vre/"));
 
 		Log.write("DEBUG_MODE=" + DEBUG_MODE);
-//		DEBUG_MODE = true;
+		DEBUG_MODE = true;
 
 		if (DEBUG_MODE) {
 			URL_VRT = "https://vrt.3dcondox.com/vre/";
@@ -122,7 +118,7 @@ public class Options implements RequestCallback {
 		
 		// SUITE_INFO_TEMPLATE = HOME_URL + "templates/SuiteInfo.html";
 //		String request = KIOSK_MODE ? (HOME_URL + "ReducedInfoKiosk.html") : (HOME_URL + "ReducedInfoWeb.html");
-		String request = /*HOME_URL + */"template.html";
+//		String request = /*HOME_URL + */"template.html";
 //		String request = "test.html";
 		
 //		Element frame = DOM.createIFrame();
@@ -145,7 +141,7 @@ public class Options implements RequestCallback {
 //		SUITE_INFO.getStyle().setVisibility(Visibility.HIDDEN);
 //		RootPanel.getBodyElement().appendChild(Options.SUITE_INFO);
 
-		theOptions = new Options(vrEstate);
+//		theOptions = new Options(vrEstate);
 		vrEstate.LoginUser();
 //		GET.send(request, theOptions);
 		// isReady = true;

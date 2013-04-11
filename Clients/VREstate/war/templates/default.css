@@ -1,0 +1,27 @@
+@CHARSET "ISO-8859-1";
+#VRT_left {
+	float: left;
+}
+
+#VRT_right {
+	float: right;
+}
+
+#VRT_name_floor {
+	color: #DE1A1A;
+	font: 200% Arial, Helvetica, sans-serif;
+}
+
+#VRT_bedrooms,#VRT_area {
+	font: 100% Arial, Helvetica, sans-serif;
+}
+
+#VRT_price {
+	font: 200% Arial, Helvetica, sans-serif;
+	color: #03F;
+}
+
+#VRT_moreInfo,#VRT_virtualTour {
+	font: 130% Arial, Helvetica, sans-serif;
+	color: #03F;
+}

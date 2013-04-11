@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>musee floorplan</title>
+<style type="text/css">
+html,body {
+	margin: 0;
+	padding: 0;
+ 	height: 100%; /* needed for container min-height */ */
+	background-color: #ffffff;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #666;
+}
+
+.container {
+	width: 1500px;
+	height: 890px;
+}
+
+.header-div {
+	height: 148px;
+	width: 1480px;
+	border-bottom: 1px solid #9DA6AB;
+}
+
+.logo {
+	padding: 36px 0px 0px 85px;
+}
+
+.panoramicview{
+	margin-top: 20px;
+	padding: px 0px 0px 0px;
+	margin-left: 680px;
+}
+
+.detail {
+	float: left;
+	width: 300px;
+	padding-left: 86px;
+	margin-top: 150px;
+	font-size: 28px;
+	color: #9DA6AB;
+	line-height: 48px;
+}
+
+.sname {
+	font-size: 48px;
+	font-weight: bold;
+	color: #E31837;
+}
+
+.flplan {
+	float: left;
+	text-align: center;
+}
+
+a img {
+    border: 0;
+}
+</style>
+<script type="text/javascript">
+window.onload = function() {
+	var hash = window.location.hash.substring(1);
+	var json = decodeURIComponent(hash);
+	json = eval('(' + json + ')');
+	if (typeof json != 'undefined') {
+//		// SHOW_VIRTUAL_TOUR_LINK
+//		if (typeof json.VRT_virtualTour != 'undefined'){
+//			var tour = document.getElementById('VRT_virtualTour');
+//			tour.style.cursor = 'pointer';
+//			tour.style.visibility = 'visible';
+//			tour.onclick = window.parent.VRT_showVirtualTour;
+//		}
+//		// SHOW_MORE_INFO_LINK
+//		if (typeof json.VRT_moreInfo != 'undefined'){
+//			var info = document.getElementById('VRT_moreInfo');
+//			info.style.cursor = 'pointer';
+//			info.style.visibility = 'visible';
+//			info.onclick = window.parent.VRT_showMoreInfo;
+//		}
+//		// SHOW_FLOORPLAN_BUTTON
+//		var floorplan = document.getElementById('VRT_showFloorplan');
+//		if (typeof json.VRT_floorplanUrl != 'undefined'){
+//			floorplan.style.cursor = 'pointer';
+//			floorplan.src = 'img/InternalButton.png';
+//			floorplan.onclick = window.parent.VRT_showFloorplan;
+//		} else {
+//			floorplan.src = 'img/InternalButtonDisabled.png';
+//		}
+//		floorplan.style.visibility = 'visible';
+		// SHOW_PANORAMIC_VIEW_BUTTON
+		var panoramic_view = document.getElementById('VRT_showPanoramicView');
+		if (typeof json.VRT_panoramicViewUrl != 'undefined'){
+			panoramic_view.onclick = window.parent.VRT_showPanoramicView;
+		} else {
+		}
+		panoramic_view.style.visibility = 'visible';
+		// SHOW_NAME
+		if (typeof json.VRT_name != 'undefined') {
+			var name = document.getElementById('VRT_name');
+			name.style.visibility = 'visible';
+			name.innerHTML = json.VRT_name;
+		}
+		// SHOW_AREA
+		if (typeof json.VRT_area != 'undefined')
+			if (typeof json.VRT_areaUm != 'undefined') {
+				var area = document.getElementById('VRT_area');
+				area.style.visibility = 'visible';
+				area.innerHTML = json.VRT_area + " " + json.VRT_areaUm;
+		}
+		// SHOW_BEDROOMS
+		if (typeof json.VRT_bedrooms != 'undefined') {
+			var bedrooms = document.getElementById('VRT_bedrooms');
+			bedrooms.style.visibility = 'visible';
+			bedrooms.innerHTML = "Bedrooms: " + json.VRT_bedrooms;
+		}
+		// SHOW_BATHROOMS
+		if (typeof json.VRT_bathrooms != 'undefined') {
+			var bathrooms = document.getElementById('VRT_bathrooms');
+			bathrooms.style.visibility = 'visible';
+			bathrooms.innerHTML = "Bathrooms: " + json.VRT_bathrooms;
+		}
+		// SHOW_FLOOR
+		if (typeof json.VRT_floor != 'undefined') {
+			var floor = document.getElementById('VRT_floor');
+			floor.style.visibility = 'visible';
+			floor.innerHTML = "Floor: " + json.VRT_floor;
+		}
+		// SHOW_PRICE
+		if (typeof json.VRT_price != 'undefined') {
+			var price = document.getElementById('VRT_price');
+			price.style.visibility = 'visible';
+			price.innerHTML = "Price: " + json.VRT_price;
+		}
+//		// SHOW_BALCONIES
+//		if (typeof json.VRT_balconies != 'undefined') {
+//			var balconies = document.getElementById('VRT_balconies');
+//			balconies.style.visibility = 'visible';
+//			balconies.innerHTML = "Balconies: " + json.VRT_balconies;
+//		}
+		// SHOW_FLOORPLAN_IMAGE
+		var floorplan = document.getElementById('VRT_floorplan');
+		if (typeof json.VRT_floorplanUrl != 'undefined'){
+//			floorplan.style.cursor = 'pointer';
+			floorplan.src = json.VRT_floorplanUrl;
+//			floorplan.onclick = window.parent.VRT_showFloorplan;
+		} else {
+			floorplan.src = json.VRT_floorplanUrl;
+		}
+		floorplan.style.visibility = 'visible';
+	}
+	window.parent.VRT_setBalloonSize(1500,890);
+}
+</script>
+</head>
+<body>
+	<div class="container">
+		<div class="header-div">
+			<img class="logo" src="img/logo-musee.png" />
+			<a href="#" id="VRT_showPanoramicView">
+				<img class="panoramicview" src="img/PanoramicView.png" />
+			</a>
+		</div>
+		<br style="clear: both" />
+		<div class="detail">
+			<span class="sname" id="VRT_name">1-A</span><br /><br /> <span
+				id="VRT_area">520</span><br /><span
+				id="VRT_bedrooms">2 + den</span><br /><span
+				id="VRT_bathrooms">2.5</span><br />
+			<!--<span id="SuiteAreaMeas"></span><br>-->
+			<span id="VRT_floor">3</span><br />
+			<!--Balcony: <span id="SuiteBalconiesTerrace">unknown</span><br>-->
+			<span id="VRT_price">$0,000,000</span><br />
+		</div>
+		<div class="flplan">
+			<img id="VRT_floorplan"/>
+		</div>
+		<!--<img class="flplate"  src="img/sampleplate.png" /><br>-->
+	</div>
+	<!-- end of container -->
+</body>
+</html>
+
+
+

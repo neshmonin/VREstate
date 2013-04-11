@@ -23,9 +23,14 @@ public class Site implements I_VRObject {
 	private String name = "";
 	private String displayModelUrl = "";
 	private String infoUrl = null;
-//	private String moreInfoUrl = null;
+	// private String moreInfoUrl = null;
 	private Position position = new Position();
-	private String bubbleTemplateUrl = new String();
+	// private String bubbleTemplateUrl = new String();
+	// --
+	private String bubbleWebTemplateUrl = null;
+	private String bubbleKioskTemplateUrl = null;
+
+	// --
 
 	// private double max_suite_altitude = 0;
 
@@ -62,22 +67,30 @@ public class Site implements I_VRObject {
 		position.setHeading(heading);
 
 		if (obj.get("displayModelUrl") != null)
-		displayModelUrl = obj.get("displayModelUrl").isString()
-				.stringValue();
-		
-		if (obj.get("bubbleTemplateUrl") != null)
-			if (obj.get("bubbleTemplateUrl").isString() != null)
-				bubbleTemplateUrl = obj.get("bubbleTemplateUrl").isString()
-			.stringValue();
+			displayModelUrl = obj.get("displayModelUrl").isString()
+					.stringValue();
+
+		// if (obj.get("bubbleTemplateUrl") != null)
+		// if (obj.get("bubbleTemplateUrl").isString() != null)
+		// bubbleTemplateUrl = obj.get("bubbleTemplateUrl").isString()
+		// .stringValue();
 		// KIOSK
-//		bubbleTemplateUrl = "template(musee).html";
-//		if (bubbleTemplateUrl.isEmpty())
-//			bubbleTemplateUrl = "template.html";
-//		
-//		if (!bubbleTemplateUrl.isEmpty()) {
-//			Window.alert("Using " + bubbleTemplateUrl);
-//			Options.SUITE_INFO.setSrc(bubbleTemplateUrl);
-//		}
+		// bubbleTemplateUrl = "template(musee).html";
+		// if (bubbleTemplateUrl.isEmpty())
+		// bubbleTemplateUrl = "template.html";
+		//
+		// if (!bubbleTemplateUrl.isEmpty()) {
+		// Window.alert("Using " + bubbleTemplateUrl);
+		// Options.SUITE_INFO.setSrc(bubbleTemplateUrl);
+		// }
+		// --
+		if (obj.containsKey("bubbleWebTemplateUrl"))
+			bubbleWebTemplateUrl = obj.get("bubbleWebTemplateUrl").isString()
+					.stringValue();
+		if (obj.containsKey("bubbleKioskTemplateUrl"))
+			bubbleKioskTemplateUrl = obj.get("bubbleKioskTemplateUrl")
+					.isString().stringValue();
+		// --
 	}
 
 	public String getName() {
@@ -87,11 +100,21 @@ public class Site implements I_VRObject {
 	public String getDisplayModelUrl() {
 		return displayModelUrl;
 	}
-	
-	public String getBubbleTemplateUrl() {
-		return bubbleTemplateUrl;
+
+	// --
+	public String getBubbleWebTemplateUrl() {
+		if (bubbleWebTemplateUrl == null || bubbleWebTemplateUrl.isEmpty())
+			return null;
+		return bubbleWebTemplateUrl;
 	}
-	
+
+	public String getBubbleKioskTemplateUrl() {
+		if (bubbleKioskTemplateUrl == null || bubbleKioskTemplateUrl.isEmpty())
+			return null;
+		return bubbleKioskTemplateUrl;
+	}
+
+	// --
 
 	public int getId() {
 		return id;
@@ -100,7 +123,7 @@ public class Site implements I_VRObject {
 	public int getParent_id() {
 		return parent_id;
 	}
-	
+
 	public static ArrayList<Site> get() {
 		ArrayList<Site> result = new ArrayList<Site>();
 		result.addAll(ids.values());
