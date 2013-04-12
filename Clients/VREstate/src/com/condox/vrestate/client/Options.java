@@ -89,7 +89,7 @@ public class Options implements RequestCallback {
 			DEBUG_MODE = (GWT.getModuleBaseURL().contains("/vre/"));
 
 		Log.write("DEBUG_MODE=" + DEBUG_MODE);
-		DEBUG_MODE = true;
+		//DEBUG_MODE = true;
 
 		if (DEBUG_MODE) {
 			URL_VRT = "https://vrt.3dcondox.com/vre/";

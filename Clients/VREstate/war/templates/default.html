@@ -11,29 +11,36 @@ body {
 
 #VRT_left {
 	float: left;
+	line-height: 35px;
 }
 
 #VRT_right {
 	float: right;
+	line-height: 35px;
 }
 
 #VRT_name_floor {
 	color: #DE1A1A;
 	font: 200% Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	line-height: 35px;
 }
 
 #VRT_bedrooms,#VRT_area {
 	font: 100% Arial, Helvetica, sans-serif;
+	line-height: 35px;
 }
 
 #VRT_moreInfo,#VRT_virtualTour {
 	font: 130% Arial, Helvetica, sans-serif;
 	color: #03F;
+	line-height: 35px;
 }
 
 #VRT_price {
 	font: 200% Arial, Helvetica, sans-serif;
 	color: #03F;
+	line-height: 35px;
 }
 </style>
 <script type="text/javascript">
@@ -103,17 +110,17 @@ window.onload = function() {
 				area.style.visibility = 'visible';
 				area.innerHTML = json.VRT_area + " " + json.VRT_areaUm;
 		}
-		// SHOW_PRICE
-		if (typeof json.VRT_price != 'undefined') {
-			var price = document.getElementById('VRT_price');
-			price.style.visibility = 'visible';
-			price.innerHTML = json.VRT_price;
-		}
 		// SHOW_BALCONIES
 		if (typeof json.VRT_balconies != 'undefined') {
 			var balconies = document.getElementById('VRT_balconies');
 			balconies.style.visibility = 'visible';
 			balconies.innerHTML = "Balconies: " + json.VRT_balconies;
+		}
+		// SHOW_PRICE
+		if (typeof json.VRT_price != 'undefined') {
+			var price = document.getElementById('VRT_price');
+			price.style.visibility = 'visible';
+			price.innerHTML = json.VRT_price;
 		}
 	}
 	window.parent.VRT_setBalloonSize(600,200);
@@ -139,8 +146,8 @@ window.onload = function() {
 			<div id="VRT_bedrooms"></div>
 			<div id="VRT_bathrooms"></div>
 			<div id="VRT_area"></div>
-			<div id="VRT_price"></div>
 			<div id="VRT_balconies"></div>
+			<div id="VRT_price"></div>
 		</div>
 	</div>
 </body>
