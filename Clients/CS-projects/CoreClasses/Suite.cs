@@ -26,19 +26,9 @@ namespace CoreClasses
             None
         }
 
-        public enum ToStringStyle
-        {
-            SortByType,
-            SortByFloor,
-            SortByStatus,
-            SortByPrice
-        }
-
         private List<SaleStatus> saleStatuses = new List<SaleStatus>(3);
 
         public List<SaleStatus> SaleStatuses { get { return saleStatuses; } }
-
-        private static ToStringStyle m_toStringStyle = ToStringStyle.SortByType;
 
         public string getPriceString()
         {
@@ -100,11 +90,10 @@ namespace CoreClasses
 
         public string ToCSV()
         {
-            return string.Format("{0},{1},{2},{3},{4},{5},{6}\n",
+            return string.Format("{0},{1},{2},{3},{4},{5}\n",
                                  FloorNumber,
                                  Name,
                                  ClassId,
-                                 CellingHeight,
                                  Price,
                                  Status,
                                  ShowPanoramicView?"Show":"Hide");
@@ -113,7 +102,7 @@ namespace CoreClasses
         public virtual bool FromCSV(string csv)
         {
             string[] split = csv.Split(new char[] { ',', ';', '\t' });
-            if (split.Length != 7) return false;
+            if (split.Length != 6) return false;
 
             string floor = split[0].Trim();
             int floorNum = -1;
@@ -126,27 +115,23 @@ namespace CoreClasses
             string name = split[1].Trim();
             int suiteNum = -1;
             try { suiteNum = int.Parse(name); } catch (System.FormatException) { }
-            if (suiteNum != -1)
-                name = string.Format("{0:D4}", suiteNum);
+            //if (suiteNum != -1)
+            //    name = string.Format("{0:D4}", suiteNum);
 
             if (name != Name) return false;
 
             string classID = split[2].Trim();
             if (classID != ClassId) return false;
 
-            int cellingHeight = 0;
-            try { cellingHeight = int.Parse(split[3].Trim()); }
-            catch { return false; }
-
             double price = 0.0;
-            try { price = double.Parse(split[4].Trim()); }
+            try { price = double.Parse(split[3].Trim()); }
             catch { return false; }
 
             SaleStatus status = SaleStatus.Available;
-            try { status = (SaleStatus)SaleStatus.Parse(typeof(SaleStatus), split[5].Trim(), true); }
+            try { status = (SaleStatus)SaleStatus.Parse(typeof(SaleStatus), split[4].Trim(), true); }
             catch { return false; }
 
-            string showPanoramicView = split[6].Trim().ToLower();
+            string showPanoramicView = split[5].Trim().ToLower();
             switch (showPanoramicView)
             {
                 case "show":
@@ -164,7 +149,6 @@ namespace CoreClasses
             FloorNumber = floor;
             Name = name;
             _suite.SuiteType.Name = classID;
-            CellingHeight = cellingHeight;
             Price = price;
             Status = status;
 
@@ -271,59 +255,53 @@ namespace CoreClasses
             set { _suite.ShowPanoramicView = value; }
         }
 
-        public static ToStringStyle ToStringSort
-        {
-            get { return m_toStringStyle; }
-            set { m_toStringStyle = value; }
-        }
-
         public string UniqueKey
         {
             get
             {
-                string uniqueKey = string.Format("_{0}_{1}_{2}",
-                                                 Name,
-                                                 _suite.FloorName,
-                                                 ClassId);
+                string uniqueKey = string.Format("_{0}_{1}", Name, ClassId);
                 return uniqueKey;
             }
         }
 
-        public override string ToString()
+        public static string UniqueKeyFromCSVline(string csvLine)
         {
-            switch (m_toStringStyle)
-            {
-                case ToStringStyle.SortByType:
-                    return string.Format("{0}\t{2}\t{1}\t{3}\t{4}\t{5}\t{6}",
-                                        ClassId, Name, _suite.FloorName,
-                                        CellingHeight, _suite.CurrentPrice, Status,
-                                        _suite.ShowPanoramicView ? "Show" : "Hide");
-                case ToStringStyle.SortByFloor:
-                    return string.Format("{2}\t{1}\t{0}\t{3}\t{4}\t{5}\t{6}",
-                                        ClassId, Name, _suite.FloorName,
-                                        CellingHeight, _suite.CurrentPrice, Status,
-                                        _suite.ShowPanoramicView ? "Show" : "Hide");
-                case ToStringStyle.SortByStatus:
-                    String stat = Status.ToString();
-                    if (Status == SaleStatus.Available)
-                        stat = Status.ToString().Substring(0, 5);
-                    else
-                    if (Status == SaleStatus.OnHold)
-                        stat = Status.ToString().Substring(0, 3);
-                    return string.Format("{5}\t{0}\t{1}\t{2}\t{3}\t{4}\t{6}",
-                                        ClassId, Name, _suite.FloorName,
-                                        CellingHeight, _suite.CurrentPrice, stat,
-                                        _suite.ShowPanoramicView ? "Show" : "Hide");
-                case ToStringStyle.SortByPrice:
-                    return string.Format("{4}\t{2}\t{0}\t{1}\t{3}\t{4}\t{6}",
-                                        ClassId, Name, _suite.FloorName,
-                                        CellingHeight, _suite.CurrentPrice, Status,
-                                        _suite.ShowPanoramicView ? "Show" : "Hide");
-                default:
-                    return UniqueKey;
-            }
+            string[] split = csvLine.Split(new char[] { ',', ';', '\t' });
+            if (split.Length != 6) return "";
+            string uniqueKey = string.Format("_{0}_{1}", split[1], split[2]);
+            return uniqueKey;
         }
 
+        public override string ToString()
+        {
+            return string.Format("{0}|{1}|{2}|{3}|{4}|{5}",
+                                _suite.FloorName, Name, ClassId, 
+                                _suite.CurrentPrice, Status,
+                                _suite.ShowPanoramicView ? "Show" : "Hide");
+        }
+
+        public virtual string[] ToStringArray()
+        {
+            int sepIndx = ClassId.LastIndexOf('/');
+            string SuiteTypeOnly = ClassId.Substring(sepIndx + 1);
+            string[] retArray = new string[5]
+                                    {
+                                        Name,
+                                        SuiteTypeOnly,
+                                        String.Format("{0:N2}", _suite.CurrentPrice),
+                                        Status.ToString(),
+                                        _suite.ShowPanoramicView ? "Show" : "Hide"
+                                    };
+
+            return retArray;                                    
+        }
+
+        char[] chars = new char[56]{'a','b','c','d','e','f','g','h','i','j',
+                                    'k','l','m','n','o','p','q','r','s','t',
+                                    'u','v','w','x','y','z','&','$','#','@',
+                                    'A','B','C','D','E','F','G','H','I','J',
+                                    'K','L','M','N','O','P','Q','R','S','T',
+                                    'U','V','W','X','Y','Z'};
         // Returns:
         //     A value that indicates the relative order of the objects being compared.
         //     The return value has the following meanings:
@@ -333,11 +311,77 @@ namespace CoreClasses
         public int CompareTo(object obj)
         {
             Suite that = obj as Suite;
-            string meStr = ToString().ToLower().TrimStart(' ','+','>');
-            string thatStr = that.ToString().ToLower().TrimStart(' ','+','>');
-            if (meStr.StartsWith("ph") && thatStr.StartsWith("rg"))
+            string meStr = ToString().ToLower().TrimStart(' ', '+', '>');
+            string thatStr = that.ToString().ToLower().TrimStart(' ', '+', '>');
+
+            string thatFloorStr = "";
+            int thatFloor = -1;
+            int thatApt = -1;
+            int thatAptIndx = that.FloorNumber.LastIndexOfAny(chars);
+            if (thatAptIndx == -1)
+            {
+                int fullNum = int.Parse(that.Name);
+                thatFloor = fullNum / 100;
+                thatApt = fullNum % 100;
+            }
+            else
+            {
+                string aptStr = that.Name.Substring(that.Name.Length - 2);
+                thatFloorStr = that.Name.Substring(0, thatAptIndx).ToLower();
+                thatApt = int.Parse(aptStr);
+                if (thatStr.StartsWith("gf")) thatFloor = 1;
+            }
+
+            string myFloorStr = "";
+            int myFloor = -1;
+            int myApt = -1;
+            int myAptIndx = FloorNumber.LastIndexOfAny(chars);
+            if (myAptIndx == -1)
+            {
+                int fullNum = int.Parse(Name);
+                myFloor = fullNum / 100;
+                myApt = fullNum % 100;
+            }
+            else
+            {
+                string aptStr = Name.Substring(Name.Length - 2);
+                myFloorStr = Name.Substring(0, myAptIndx).ToLower();
+                myApt = int.Parse(aptStr);
+                if (meStr.StartsWith("gf")) myFloor = 1;
+            }
+
+            if (thatFloor != -1 && myFloor != -1)
+            {
+                if (myFloor < thatFloor)
+                    return -1;
+                else if (myFloor > thatFloor)
+                    return 1;
+
+                if (myApt < thatApt)
+                    return -1;
+                else if (myApt > thatApt)
+                    return 1;
+                else
+                    return 0;
+            }
+
+            if (myFloorStr == thatFloorStr)
+            {
+                if (myApt < thatApt)
+                    return -1;
+                else if (myApt > thatApt)
+                    return 1;
+                else
+                    return 0;
+            }
+
+            if (myFloorStr == "ph" && thatFloorStr == "rg")
                 return 1;
-            if (meStr.StartsWith("rg") && thatStr.StartsWith("ph"))
+            if (myFloorStr == "rg" && thatFloorStr == "ph")
+                return -1;
+            if (myFloorStr == "lph" && thatFloorStr == "rg")
+                return 1;
+            if (myFloorStr == "rg" && thatFloorStr == "lph")
                 return -1;
 
             return meStr.CompareTo(thatStr);

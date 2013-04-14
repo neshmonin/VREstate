@@ -49,5 +49,18 @@ namespace CoreClasses
 
         public List<InnerLevel> Floors = new List<InnerLevel>();
         public Uri htmlPageUri = null;
+
+        public string Bedrooms
+        {
+            get
+            {
+                string den = _suiteType.DenCount == 0 ? "" : " + D"; 
+                return _suiteType.BedroomCount + "Br" + den;
+            }
+        }
+        public string Bathrooms { get { return _suiteType.Bathrooms.ToString(); } }
+        public string Balcony { get { return _suiteType.BalconyCount == 0 ? "none" : "yes"; } }
+        public string Terrace { get { return _suiteType.TerraceCount == 0 ? "none" : "yes"; } }
+        public string Area { get { return _suiteType.FloorAreaString; } }
     }
 }

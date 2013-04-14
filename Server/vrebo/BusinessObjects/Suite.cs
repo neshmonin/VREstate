@@ -50,7 +50,7 @@ namespace Vre.Server.BusinessLogic
             Building = copy.Building;
             SuiteType = copy.SuiteType;
             Location = copy.Location;
-            CeilingHeight = copy.CeilingHeight;
+            CeilingHeight = new ValueWithUM(copy.CeilingHeight.ValueAs(ValueWithUM.Unit.Feet), ValueWithUM.Unit.Feet);
             ShowPanoramicView = copy.ShowPanoramicView;
         }
 

@@ -1,0 +1,34 @@
+@CHARSET "ISO-8859-1";
+#VRT_left {
+	float: left;
+	line-height: 35px;
+}
+
+#VRT_right {
+	float: right;
+	line-height: 35px;
+}
+
+#VRT_name_floor {
+	color: #DE1A1A;
+	font: 200% Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	line-height: 35px;
+}
+
+#VRT_bedrooms,#VRT_area {
+	font: 100% Arial, Helvetica, sans-serif;
+	line-height: 35px;
+}
+
+#VRT_price {
+	font: 200% Arial, Helvetica, sans-serif;
+	line-height: 45px;
+	color: #03F;
+}
+
+#VRT_moreInfo,#VRT_virtualTour {
+	font: 130% Arial, Helvetica, sans-serif;
+	line-height: 35px;
+	color: #03F;
+}

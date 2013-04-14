@@ -85,8 +85,8 @@ namespace CoreClasses
 
         public string ToCSV()
         {
-            String outStr = "# ----------------- " + Name + " -----------------,,,,,,\n";
-            outStr += "#Floor,#Suite,#Type,#Cellings,#Price,#Status,#Panoramic View\n";
+            String outStr = "# ----------------- " + Name + " -----------------,,,,,\n";
+            outStr += "#Floor,#Suite,#Type,#Price,#Status,#Panoramic View\n";
 
             var list = Suites.Values.ToList();
             list.Sort();
@@ -99,7 +99,7 @@ namespace CoreClasses
 
         public bool FromCSV(string csvStream)
         {
-            String label = "# ----------------- " + Name + " -----------------,,,,,,\n";
+            String label = "# ----------------- " + Name + " -----------------,,,,,";
             int begin = csvStream.IndexOf(label);
             if (begin == -1) return false;
 
@@ -113,24 +113,22 @@ namespace CoreClasses
                 myCSV = csvStream.Substring(begin);
 
             string[] csvLines = myCSV.Split('\n');
-            foreach (var suite in Suites.Values)
+            for (int i = 0; i < csvLines.Length; i++)
             {
-                for (int i = 0; i < csvLines.Length; i++)
+                if (csvLines[i] == string.Empty)
+                    continue;
+
+                if (csvLines[i].StartsWith("#"))
                 {
-                    if (csvLines[i] == string.Empty)
-                        continue;
+                    csvLines[i] = string.Empty;
+                    continue;
+                }
 
-                    if (csvLines[i].StartsWith("#"))
-                    {
-                        csvLines[i] = string.Empty;
-                        continue;
-                    }
-
-                    if (suite.FromCSV(csvLines[i]))
-                    {
-                        csvLines[i] = string.Empty;
-                        break;
-                    }
+                string uniqyeKey = Suite.UniqueKeyFromCSVline(csvLines[i]);
+                if (uniqyeKey != "")
+                {
+                    if (Suites.ContainsKey(uniqyeKey))
+                        Suites[uniqyeKey].FromCSV(csvLines[i]);
                 }
             }
 

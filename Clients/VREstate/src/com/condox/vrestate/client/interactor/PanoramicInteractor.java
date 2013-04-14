@@ -130,6 +130,8 @@ public class PanoramicInteractor extends OverlayHelpers
 		case OnCenterButton:
 			view.Center();
 			break;
+		default:
+			break;
 		}
 	}
 

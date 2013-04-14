@@ -4,7 +4,9 @@ package com.condox.vrestate.client.document;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
 import com.condox.vrestate.client.JSONParams;
+import com.condox.vrestate.client.Log;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
@@ -106,6 +108,7 @@ public class SuiteType {
 		areaUm = params.getString("areaUm");
 		
 		floorPlanUrl = params.getString("floorPlanUrl");
+		Log.write(floorPlanUrl);
 	}
 	//====================================
 
@@ -162,6 +165,7 @@ public class SuiteType {
 	}
 
 	public String getFloorPlanUrl() {
+//		Window.alert(floorPlanUrl);
 		return floorPlanUrl;
 	}
 	public String getAreaUm() {

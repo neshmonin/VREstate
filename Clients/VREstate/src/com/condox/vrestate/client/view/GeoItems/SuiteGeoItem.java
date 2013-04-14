@@ -80,6 +80,8 @@ public class SuiteGeoItem implements IGeoItem {
 			style.getLineStyle().getColor().set("FFFFFFFF"); // WHITE
 			style.getLineStyle().setWidth(3.0F);
 			break;
+		default:
+			break;
 		}
 	
 		if (href == null) return;

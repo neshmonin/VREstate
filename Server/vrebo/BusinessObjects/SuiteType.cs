@@ -54,6 +54,9 @@ namespace Vre.Server.BusinessLogic
             UpdateFromClient(data);
             if (constructionSite != null)
                 constructionSite.SuiteTypes.Add(this);
+
+            double area = data.GetProperty("area", 0.0);
+            FloorArea = new ValueWithUM(area, ValueWithUM.Unit.SqFeet);
         }
 
         public SuiteType(ClientData data) : base(data) { }
@@ -77,11 +80,36 @@ namespace Vre.Server.BusinessLogic
             NoShowerBathroomCount = data.UpdateProperty("noShowerBathrooms", NoShowerBathroomCount, ref result);
             BalconyCount = data.UpdateProperty("balconies", BalconyCount, ref result);
             TerraceCount = data.UpdateProperty("terraces", TerraceCount, ref result);
-            //FloorArea.SetValue(
-            //    data.UpdateProperty("area", FloorArea.ValueAs(FloorArea.StoredAs), ref changed),
-            //    ValueWithUM.Unit.SqFeet);
 
             return result;
+        }
+
+        public float Bathrooms
+        {
+            get
+            {
+                return (NoShowerBathroomCount <= 1)
+                ? ((float)ShowerBathroomCount + 0.5f * (float)NoShowerBathroomCount)
+                : (float)(ShowerBathroomCount + NoShowerBathroomCount - 1) + 0.5f;
+            }
+        }
+
+        public virtual string FloorAreaString
+        {
+            get
+            {
+                if (FloorArea != null)
+                {
+                    switch (FloorArea.StoredAs)
+                    {
+                        case ValueWithUM.Unit.SqFeet:
+                            return FloorArea.ValueAs(FloorArea.StoredAs).ToString();
+                        case ValueWithUM.Unit.SqMeters:
+                            return FloorArea.ValueAs(FloorArea.StoredAs).ToString();
+                    }
+                }
+                return "";
+            }
         }
 
         public override ClientData GetClientData()
@@ -134,9 +162,7 @@ namespace Vre.Server.BusinessLogic
             result.Add("otherRooms", OtherRoomCount);
             result.Add("showerBathrooms", ShowerBathroomCount);
             result.Add("noShowerBathrooms", NoShowerBathroomCount);
-            result.Add("bathrooms", (NoShowerBathroomCount <= 1)
-                ? ((float)ShowerBathroomCount + 0.5f * (float)NoShowerBathroomCount)
-                : (float)(ShowerBathroomCount + NoShowerBathroomCount - 1) + 0.5f);
+            result.Add("bathrooms", Bathrooms);
             result.Add("balconies", BalconyCount);
             result.Add("terraces", TerraceCount);
 
@@ -176,9 +202,7 @@ namespace Vre.Server.BusinessLogic
             result.Add("otherRooms", OtherRoomCount);
             result.Add("showerBathrooms", ShowerBathroomCount);
             result.Add("noShowerBathrooms", NoShowerBathroomCount);
-            result.Add("bathrooms", (NoShowerBathroomCount <= 1)
-                ? ((float)ShowerBathroomCount + 0.5f * (float)NoShowerBathroomCount)
-                : (float)(ShowerBathroomCount + NoShowerBathroomCount - 1) + 0.5f);
+            result.Add("bathrooms", Bathrooms);
             result.Add("balconies", BalconyCount);
             result.Add("terraces", TerraceCount);
 

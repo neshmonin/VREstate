@@ -315,6 +315,8 @@ public class Document implements IDocument,
 					Site targetSite = this.sites.get(viewOrder.getTargetObjectId());
 					viewOrder.setTargetObject(targetSite);
 					break;
+				default:
+					break;
 				}
 			}
 		}

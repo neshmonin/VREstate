@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.document.Building;
@@ -14,7 +15,6 @@ import com.condox.vrestate.client.document.Site;
 import com.condox.vrestate.client.document.Suite;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.I_AbstractInteractor;
-import com.condox.vrestate.client.screensaver.ScreenSaver;
 import com.condox.vrestate.client.view.Camera.Camera;
 import com.condox.vrestate.client.view.GeoItems.BuildingGeoItem;
 import com.condox.vrestate.client.view.GeoItems.IGeoItem;
@@ -22,7 +22,6 @@ import com.condox.vrestate.client.view.GeoItems.SiteGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
 import com.nitrous.gwt.earth.client.api.KmlUnits;
@@ -41,60 +40,38 @@ public abstract class _AbstractView implements I_AbstractView {
 	protected String _title;
 	private static boolean m_timeoutTimerDisabled = false;
 	protected static int TIMEOUTINTERVAL = 2 * 60 * 1000;
-//	static protected Timer m_timeoutTimer = new Timer() {
-//
-//		@Override
-//		public void run() {
-//			_AbstractView.ResetTimeOut();
-//			_AbstractView.PopToTheBottom();
-//		}
-//	};
+	static protected Timer m_timeoutTimer = new Timer() {
+
+		@Override
+		public void run() {
+			_AbstractView.PopToTheBottom();
+			_AbstractView.ResetTimeOut();
+		}
+	};
 
 	// Timer to return to the first FullScreenView (Helicopter or Video) after a
 	// timeout
 	public static void ResetTimeOut() {
-		ScreenSaver.get().reset();
-//		m_timeoutTimer.cancel();
+//		ScreenSaver.get().reset();
+		m_timeoutTimer.cancel();
+		if (!m_timeoutTimerDisabled) {
+			if (Options.DEBUG_MODE)
+				m_timeoutTimer.schedule(2 * 60 * 1000);
+			else
+				m_timeoutTimer.schedule(TIMEOUTINTERVAL);
+	}
+	}
+	
+//	public static void onTimerReset() {
+//		_AbstractView.ResetTimeOut();
+//		// Window.alert("VR:onTimerReset");
+//	}
 //
-//		if (!m_timeoutTimerDisabled) {
-//			if (Options.ROLE.equals(Options.ROLES.KIOSK))
-//				HostTimerReset();
-//			if (Options.DEBUG_MODE)
-//				m_timeoutTimer.schedule(20 * 1000);
-//			else
-//				m_timeoutTimer.schedule(TIMEOUTINTERVAL);
-//		}
-	}
+//	public static void onTimerTimeout() {
+//		_AbstractView.PopToTheBottom();
+//		// Window.alert("VR:onTimerTimeout");
+//	}
 
-//	public static native void HostTimerReset() /*-{
-//		$wnd.parent.parent.postMessage('reset', '*');
-//	}-*/;
-//
-//	public static native void HostTimerTimeout() /*-{
-//		$wnd.parent.parent.postMessage('timeout', '*');
-//	}-*/;
-
-	public static void onTimerReset() {
-		_AbstractView.ResetTimeOut();
-		// Window.alert("VR:onTimerReset");
-	}
-
-	public static void onTimerTimeout() {
-		_AbstractView.PopToTheBottom();
-		// Window.alert("VR:onTimerTimeout");
-	}
-
-	// public static native void init() /*-{
-	// $wnd.onTimerReset = function() {
-	// @com.condox.vrestate.client.view._AbstractView::onTimerReset()();
-	// }
-	// $wnd.onTimerTimeout = function() {
-	// @com.condox.vrestate.client.view._AbstractView::onTimerTimeout()();
-	// }
-	// }-*/;
-
-	/* ========================================================== */
-	// A single point of handling view-changing events
 	protected boolean isViewChangedInProgress = false;
 
 	@Override

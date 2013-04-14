@@ -93,6 +93,8 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 				case Building:
 					Select("building", targetId);
 					break;
+				default:
+					break;
 				}
 			}
 
