@@ -29,7 +29,8 @@ namespace Vre.Server.HttpService
         public string[] Listeners { get { lock (_listeners) return _listeners.ToArray(); } }
 
         private HttpListener _httpListener;
-        private string _listenerHostName;
+        private List<string> _listeningHostAliasList;
+        private List<string> _referringHostList;
 
         protected string _path;
         protected int _fileBufferSize = 16384;
@@ -56,6 +57,12 @@ namespace Vre.Server.HttpService
                 Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
             _allowedFileExtensions = new HashSet<string>(CsvUtilities.Split(ServiceInstances.Configuration.GetValue("AllowedServedFileExtensions", string.Empty)));
+
+            _listeningHostAliasList = new List<string>(CsvUtilities.Split(ServiceInstances.Configuration.GetValue("ListeningHostAliasList",
+                "localhost:8026,168.144.195.160,ref.3dcondox.com,vrt.3dcondox.com,order.3dcondox.com,static.3dcondox.com,models.3dcondox.com")));
+
+            _referringHostList = new List<string>(CsvUtilities.Split(ServiceInstances.Configuration.GetValue("ReferringHostAliasList",
+                "vrt.3dcondox.com,order.3dcondox.com,static.3dcondox.com,models.3dcondox.com")));
         }
 
         public void PerformStartup()
@@ -95,6 +102,8 @@ namespace Vre.Server.HttpService
             _httpListener.BeginGetContext(httpCallback, null);
 
             ServiceInstances.Logger.Info("{0} started.", _name);
+            ServiceInstances.Logger.Info("Allowed hosts list: {0}", CsvUtilities.ToString(_listeningHostAliasList));
+            ServiceInstances.Logger.Info("Referring hosts list: {0}", CsvUtilities.ToString(_referringHostList));
 
             if (_allowExtendedLogging)
                 ServiceInstances.RequestLogger.Info("{0} started", _name);
@@ -136,9 +145,50 @@ namespace Vre.Server.HttpService
                 _httpListener.BeginGetContext(httpCallback, null);
 
                 if (null == ctx) return;  // error case; just give up the request
+                long st = System.Diagnostics.Stopwatch.GetTimestamp();
                 try
                 {
                     string hostName = ctx.Request.Headers["Host"];
+
+                    if (hostName != null)
+                    {
+                        if (!_listeningHostAliasList.Contains(hostName))
+                        {
+                            ServiceInstances.Logger.Warn("HTTP Host: {0}", hostName);
+                            ctx.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                            ctx.Response.Close();
+                            return;
+                        }
+                    }
+
+                    string origin = ctx.Request.Headers["Origin"];
+                    if (origin != null)  // CORS support (http://en.wikipedia.org/wiki/Cross-Origin_Resource_Sharing)
+                    {
+                        ServiceInstances.Logger.Debug("CORS Origin: {0}", origin);
+                        if (_referringHostList.Contains(origin))
+                        {
+                            ctx.Response.Headers.Add("Access-Control-Allow-Origin", origin);
+
+                            string acrMethod = ctx.Request.Headers["Access-Control-Request-Method"];
+                            string acrHeaders = ctx.Request.Headers["Access-Control-Request-Headers"];
+
+                            if (acrMethod != null)
+                            {
+                                ServiceInstances.Logger.Debug("CORS Meth: {0}", acrMethod);
+                                ctx.Response.Headers.Add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
+                                if (acrHeaders != null)
+                                    ctx.Response.Headers.Add("Access-Control-Allow-Headers", acrHeaders);
+                            }
+
+                            ctx.Response.Headers.Add("Access-Control-Max-Age", "3600");  // TODO: ???
+                        }
+                        else
+                        {
+                            ctx.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                            ctx.Response.Close();
+                            return;
+                        }
+                    }
 
                     string browserKey = Statistics.GetBrowserId(ctx);
 
@@ -162,6 +212,9 @@ namespace Vre.Server.HttpService
                     }
                     catch { }  // make sure this does not break server with unhandled exception
                 }
+                long el = ((System.Diagnostics.Stopwatch.GetTimestamp() - st) * 1000) / System.Diagnostics.Stopwatch.Frequency;
+                if (el < 1000) ServiceInstances.Logger.Debug("Request processed in {0} ms", el);
+                else ServiceInstances.Logger.Warn("Request processed in {0} ms !!!@@@", el);
             }
         }
 
@@ -241,6 +294,7 @@ namespace Vre.Server.HttpService
 
         private void updateResponse(HttpListenerResponse response, Exception e)
         {
+            
             if (e is ObjectExistsException)
             {
                 response.StatusCode = (int)HttpStatusCode.Conflict;
@@ -479,7 +533,7 @@ namespace Vre.Server.HttpService
         public static DateTime ParseDateTimeParam(string paramValue, DateTime? defaultValue)
         {
             DateTime result;
-            if (!DateTime.TryParseExact(paramValue, "yyyy-MM-ddTHH:mm:ssZ",
+            if (!DateTime.TryParseExact(paramValue, "yyyy-MM-ddTHH:mm:ssZ",  // TODO: Use 'K' instead of 'Z' to allow time offset specification
                 CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out result))
             {
                 if (defaultValue.HasValue) result = defaultValue.Value;
@@ -580,6 +634,16 @@ namespace Vre.Server.HttpService
                 File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location));
 
             return result.ToString();
+        }
+
+        protected static string prepareCallerInfo(string browserKey, HttpListenerContext ctx, HttpServiceRequest rq)
+        {
+            ClientSession cs = (rq != null) ? rq.UserInfo.Session : null;
+            string url = Utilities.SanitizeUrl(ctx.Request.Url.ToString());
+            if (cs != null)
+                return string.Format("Session={0}; BK={1}, REP={2}; {3}; URL={4}", cs, browserKey, ctx.Request.RemoteEndPoint, ctx.Request.HttpMethod, url);
+            else
+                return string.Format("Anonymous; BK={0}; REP={1}; {2}; URL={3}", browserKey, ctx.Request.RemoteEndPoint, ctx.Request.HttpMethod, url);
         }
     }
 }
