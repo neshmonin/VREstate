@@ -84,7 +84,7 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
-        public float Bathrooms
+        public virtual float Bathrooms
         {
             get
             {
