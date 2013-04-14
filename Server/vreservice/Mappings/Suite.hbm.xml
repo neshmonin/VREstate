@@ -19,7 +19,7 @@
 
     <many-to-one name="SuiteType"
       column="SuiteTypeID" class="SuiteType"
-      cascade="none" fetch="join" insert="true" update="true"
+      cascade="none" fetch="join" insert="true" update="true" 
     />
 
     <property name="PhysicalLevelNumber" column="PhysicalLevelNumber" />
@@ -44,10 +44,10 @@
     </component>
     -->
 
-    <bag name="OptionsPossible" table="OptionSuiteMM" cascade="all">
+    <set name="OptionsPossible" table="OptionSuiteMM" cascade="all">
       <key column="SuiteID"/>
       <many-to-many column="OptionID" class="Option"/>
-    </bag>
+    </set>
 
     <!--property name="AccountID" column="AccountID" /-->
 

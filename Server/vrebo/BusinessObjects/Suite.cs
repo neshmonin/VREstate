@@ -19,7 +19,7 @@ namespace Vre.Server.BusinessLogic
         public virtual string SuiteName { get; set; }
         public virtual SalesStatus Status { get; set; }
 
-        public virtual IList<Option> OptionsPossible { get; protected set; }
+        public virtual ICollection<Option> OptionsPossible { get; protected set; }
         //public IList<VRTour> VRTours { get; protected set; }
 
         public virtual Building Building { get; set; }
@@ -66,7 +66,7 @@ namespace Vre.Server.BusinessLogic
             Location = ViewPoint.Empty;
             CeilingHeight = ValueWithUM.EmptyLinear;
             ShowPanoramicView = true;
-            OptionsPossible = new List<Option>();
+            OptionsPossible = new HashSet<Option>();
             if (Building != null) Building.Suites.Add(this);
         }
 

@@ -182,6 +182,23 @@ namespace Vre.Server.BusinessLogic
             return -1.0f;
         }
 
+        public static float GetCurrentSuitePriceF(Suite suite)
+        {
+            Price p = null;
+
+            foreach (Option opt in suite.OptionsPossible)
+            {
+                if (OptionTypeDao.IsSuiteOptionF(opt.OpType))
+                {
+                    if (opt.Prices.Count > 0) p = opt.Prices[0];  // sorted by time [newest first] already
+                    break;
+                }
+            }
+
+            if (p != null) return p.PricePerUnitForBuyer;
+            return -1.0f;
+        }
+
         public bool SetSuitePrice(Suite suite, float price)
         {
             RolePermissionCheck.CheckUpdateSuite(_session, suite);
@@ -196,7 +213,6 @@ namespace Vre.Server.BusinessLogic
                     if (dao.IsSuiteOption(opt.OpType))
                     {
                         emitNewPrice(opt, price);
-                        //ServiceInstances.EntityUpdateTracker.NotifyModifiedSuite(suite.AutoID);
                         ServiceInstances.EntityUpdateTracker.NotifyModified(new Suite[] { suite });
 
                         result = true;
@@ -210,19 +226,20 @@ namespace Vre.Server.BusinessLogic
                     using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
                     {
                         using (OptionDao odao = new OptionDao(_session.DbSession)) odao.Create(opt);
-
+                        
                         emitNewPrice(opt, price);
+
+                        suite.OptionsPossible.Add(opt);
+
+                        using (SuiteDao sdao = new SuiteDao(_session.DbSession))
+                            result = sdao.SafeUpdate(suite);
 
                         tran.Commit();
                     }
                     
-                    suite.OptionsPossible.Add(opt);
-                    using (SuiteDao sdao = new SuiteDao(_session.DbSession)) 
-                        result = sdao.SafeUpdate(suite);
                 }
             }
 
-            _session.DbSession.Refresh(suite);
             return result;
         }
 
@@ -231,8 +248,8 @@ namespace Vre.Server.BusinessLogic
             Price p = new Price(opt);
             p.NumberOfUnits = 1;
             p.PricePerUnitForBuyer = price;
-            p.StartingDate = DateTime.Now;  // TODO ?!
-            p.UnitName = "Suite";
+            p.StartingDate = DateTime.UtcNow;
+            p.UnitName = "CAD";
 
             _session.DbSession.Save(p);  // no need for special DAO; this is single-use saveable object!!!
         }

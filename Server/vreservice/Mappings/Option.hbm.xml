@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vrebo" namespace="Vre.Server.BusinessLogic">
-  <class name="Option" table="Options" dynamic-update="true" lazy="false">
+  <class name="Option" table="Options" dynamic-update="false" lazy="true">
 
     <id name="AutoID" column="AutoID" unsaved-value="0">
       <generator class="identity" />
@@ -19,12 +19,12 @@
 
     <many-to-one name="Building"
       column="BuildingID" class="Building"
-      cascade="none" fetch="join" insert="true" update="false"
+      cascade="none" insert="true" update="false"
     />
 
     <many-to-one name="Provider"
       column="ProviderID" class="User"
-      cascade="none" fetch="join" insert="true" update="false"
+      cascade="none" insert="true" update="false"
     />
 
     <many-to-one name="OpType" column="TypeID" cascade="none"

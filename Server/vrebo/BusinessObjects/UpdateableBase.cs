@@ -100,7 +100,8 @@ namespace Vre.Server.BusinessLogic
         public virtual bool UpdateFromClient(ClientData data)
         {
             bool result;
-            Version = data.GetProperty("version", new byte[0], out result);
+            byte[] replacement = data.GetProperty("version", new byte[0], out result);
+            if (replacement.Length > 0) Version = replacement;
             return false;  // possible version value rollback should not count as an object value change; if all other fields remain intact - we consider object unchanged
         }
         #endregion

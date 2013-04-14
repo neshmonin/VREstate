@@ -39,35 +39,39 @@ namespace Vre.Server.Model
 
                     if (_typeNameIdx < 0) throw new ArgumentException("The suite type information file is not of correct format (0)");
 
-                    int lineNum = 2;
+                    int lineNum = 1;
                     do
                     {
                         line = sr.ReadLine();
+                        lineNum++;
+
+                        if (string.IsNullOrWhiteSpace(line)) continue;
+
                         parts = CsvUtilities.Split(line);
                         if (partCnt != parts.Length)
                         {
                             if (readWarnings != null)
-                                readWarnings.AppendFormat("\r\nSTMD04: Suite type information file line {0} format is invalid (missing fields?)", line);
+                                readWarnings.AppendFormat("\r\nSTMD04: Suite type information file line {0} format is invalid (missing fields?)", lineNum);
                             else
-                                throw new ArgumentException("The suite type information file is not of correct format (line " + line + ") (1)");
+                                throw new ArgumentException("The suite type information file is not of correct format (line " + lineNum + ") (1)");
                         }
 
                         if (_rawData.ContainsKey(parts[_typeNameIdx]))
                         {
                             if (readWarnings != null)
-                                readWarnings.AppendFormat("\r\nSTMD05: Suite type information file contains duplicate type name (line {0}): {1}", line, parts[_typeNameIdx]);
+                                readWarnings.AppendFormat("\r\nSTMD05: Suite type information file contains duplicate type name (line {0}): {1}", lineNum, parts[_typeNameIdx]);
                             else
                                 throw new ArgumentException(
-                                    "Suite type information file contains duplicate type name (line " + line + "): " + parts[_typeNameIdx]);
+                                    "Suite type information file contains duplicate type name (line " + lineNum + "): " + parts[_typeNameIdx]);
                         }
 
                         if (string.IsNullOrWhiteSpace(parts[_typeNameIdx]))
                         {
                             if (readWarnings != null)
-                                readWarnings.AppendFormat("\r\nSTMD06: Suite type information file contains empty type name (line {0}).", line);
+                                readWarnings.AppendFormat("\r\nSTMD06: Suite type information file contains empty type name (line {0}).", lineNum);
                             else
                                 throw new ArgumentException(
-                                    "Suite type information file contains empty type name (line " + line + "): " + parts[_typeNameIdx]);
+                                    "Suite type information file contains empty type name (line " + lineNum + "): " + parts[_typeNameIdx]);
                         }
                             
                         _rawData.Add(parts[_typeNameIdx], parts);
@@ -85,7 +89,6 @@ namespace Vre.Server.Model
                                 parts[ii] = string.Empty;
                             }
                         }
-                        lineNum++;
                     }
                     while (!sr.EndOfStream);
                 }
