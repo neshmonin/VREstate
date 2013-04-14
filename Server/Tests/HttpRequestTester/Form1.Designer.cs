@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -60,7 +61,11 @@
             this.label12 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.tbSID = new System.Windows.Forms.TextBox();
+            this.btn3DCX = new System.Windows.Forms.Button();
+            this.mnu3DCX = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.miWebLogin = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
+            this.mnu3DCX.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -439,11 +444,37 @@
             this.tbSID.TabIndex = 3;
             this.tbSID.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.selectorControl_KeyPress);
             // 
+            // btn3DCX
+            // 
+            this.btn3DCX.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn3DCX.Location = new System.Drawing.Point(472, 4);
+            this.btn3DCX.Name = "btn3DCX";
+            this.btn3DCX.Size = new System.Drawing.Size(75, 23);
+            this.btn3DCX.TabIndex = 9;
+            this.btn3DCX.Text = "3DCX >>>";
+            this.btn3DCX.UseVisualStyleBackColor = true;
+            this.btn3DCX.Click += new System.EventHandler(this.btn3DCX_Click);
+            // 
+            // mnu3DCX
+            // 
+            this.mnu3DCX.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.miWebLogin});
+            this.mnu3DCX.Name = "mnu3DCX";
+            this.mnu3DCX.Size = new System.Drawing.Size(180, 48);
+            // 
+            // miWebLogin
+            // 
+            this.miWebLogin.Name = "miWebLogin";
+            this.miWebLogin.Size = new System.Drawing.Size(179, 22);
+            this.miWebLogin.Text = "Login as Web Client";
+            this.miWebLogin.Click += new System.EventHandler(this.miWebLogin_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(559, 460);
+            this.Controls.Add(this.btn3DCX);
             this.Controls.Add(this.tbSID);
             this.Controls.Add(this.tbQuery);
             this.Controls.Add(this.btnQuery);
@@ -462,9 +493,10 @@
             this.Controls.Add(this.label13);
             this.Controls.Add(this.label1);
             this.Name = "Form1";
-            this.Text = "3DCondo Explorer Server HTTP Query Tester";
+            this.Text = "HTTP Query Tester";
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.mnu3DCX.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -504,6 +536,9 @@
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.TextBox tbSID;
+        private System.Windows.Forms.Button btn3DCX;
+        private System.Windows.Forms.ContextMenuStrip mnu3DCX;
+        private System.Windows.Forms.ToolStripMenuItem miWebLogin;
     }
 }
 

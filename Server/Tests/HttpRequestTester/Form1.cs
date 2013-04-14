@@ -32,6 +32,31 @@ namespace HttpRequestTester
             return result.ToString();
         }
 
+        private static ICollection<Control> disableControls(Control root)
+        {
+            ICollection<Control> controls = new List<Control>();
+            disableControls(root, ref controls);
+            return controls;
+        }
+
+        private static void disableControls(Control root, ref ICollection<Control> controls)
+        {
+            foreach (Control c in root.Controls)
+            {
+                if (c.Enabled)
+                {
+                    c.Enabled = false;
+                    controls.Add(c);
+                }
+                disableControls(c, ref controls);
+            }
+        }
+
+        private static void enableControls(ICollection<Control> controls)
+        {
+            foreach (Control c in controls) c.Enabled = true;
+        }
+
         private void showCollection(Dictionary<string, string> coll, TextBox control)
         {
             control.Text = collectionToString(coll, true);
@@ -80,6 +105,9 @@ namespace HttpRequestTester
         {
             Cursor saved = Cursor.Current;
             Cursor.Current = Cursors.WaitCursor;
+            ICollection<Control> disabled = disableControls(this);
+
+            string body = string.Empty;
 
             try
             {
@@ -134,7 +162,7 @@ namespace HttpRequestTester
 
                 Stream input = response.GetResponseStream();
                 using (StreamReader r = new StreamReader(input))
-                    tbResponseText.Text = r.ReadToEnd();
+                    body = r.ReadToEnd();
 
                 _respHeaders.Clear();
                 foreach (string key in response.Headers.Keys)
@@ -167,8 +195,18 @@ namespace HttpRequestTester
             }
             finally
             {
+                enableControls(disabled);
                 Cursor.Current = saved;
             }
+
+            tbResponseText.Enabled = false;
+            tbResponseText.Text = "...";
+            tbResponseText.Cursor = Cursors.WaitCursor;
+            Application.DoEvents();
+
+            tbResponseText.Text = body;  // <-- THIS IS SLOW!!!
+            tbResponseText.Enabled = true;
+            tbResponseText.Cursor = Cursors.Default;
         }
 
         private void lblHeaders_Click(object sender, EventArgs e)
@@ -184,6 +222,72 @@ namespace HttpRequestTester
         private void lblRespCookies_MouseClick(object sender, MouseEventArgs e)
         {
             showCollection(_respCookies, tbRespCookies);
+        }
+
+        private void btn3DCX_Click(object sender, EventArgs e)
+        {
+            mnu3DCX.Show(btn3DCX, btn3DCX.Size.Width, 0);
+        }
+
+        private void miWebLogin_Click(object sender, EventArgs e)
+        {
+            Cursor saved = Cursor.Current;
+            Cursor.Current = Cursors.WaitCursor;
+            ICollection<Control> disabled = disableControls(this);
+
+            try
+            {
+                string requestUri = cbxTarget.Text;
+                if (!requestUri.EndsWith("/")) requestUri += "/";
+
+                requestUri += "program?q=login&role=visitor&uid=web&pwd=web";
+                if (requestUri.EndsWith("/")) requestUri = requestUri.Substring(0, requestUri.Length - 1);
+
+                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(requestUri);
+                request.Timeout = _requestTimeoutSec * 1000;
+
+                request.Method = "GET";
+
+                HttpWebResponse response;
+
+                try
+                {
+                    response = request.GetResponse() as HttpWebResponse;
+                }
+                catch (WebException ex)
+                {
+                    response = ex.Response as HttpWebResponse;
+                }
+                if (null == response) throw new InvalidOperationException("Http request returned invalid result.");
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    string body;
+                    Stream input = response.GetResponseStream();
+                    using (StreamReader r = new StreamReader(input))
+                        body = r.ReadToEnd();
+
+                    int idx = body.IndexOf("\"sid\":\"");
+                    if (idx > 0)
+                    {
+                        int idx2 = body.IndexOf("\"", idx + 7);
+                        tbSID.Text = body.Substring(idx + 7, idx2 - idx - 7);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(response.StatusCode.ToString() + ": " + response.StatusDescription);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                enableControls(disabled);
+                Cursor.Current = saved;
+            }
         }
     }
 }
