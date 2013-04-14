@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Vre.Server
+namespace Vre
 {
     public class CsvUtilities
     {
@@ -45,7 +45,7 @@ namespace Vre.Server
 
             string[] result = new string[cnt];
             cnt = 0; idx = 0; idx0 = 0;
-            do
+            while (idx < line.Length)
             {
                 if ('\"' == line[idx])
                 {
@@ -63,7 +63,6 @@ namespace Vre.Server
 
                 idx++;
             }
-            while (idx < line.Length);
 
             if (escaped) result[cnt] = line.Substring(idx0 + 1, idx - idx0 - 2);
             else result[cnt] = line.Substring(idx0, idx - idx0);

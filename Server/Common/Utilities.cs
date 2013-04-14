@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
-namespace Vre.Server
+namespace Vre
 {
     public class Utilities
     {
