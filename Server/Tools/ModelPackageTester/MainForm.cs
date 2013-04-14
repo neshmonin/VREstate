@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Security.Principal;
 using System.Text;
 using System.Windows.Forms;
-using Vre.Server;
+using Vre;
 using Vre.Server.Model;
 using Vre.Server.Model.Kmz;
 
