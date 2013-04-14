@@ -52,6 +52,8 @@ namespace Vre.Server.Command
             {
                 DatabaseSettingsDao.VerifyDatabase();
 
+                debugBreak();
+
                 doImport(estateDeveloper, siteName,
                     infoModelFileName, extraSuiteInfoFileName, dryRun, param);
                 //instance.generateSqlScript(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName);
@@ -66,6 +68,12 @@ namespace Vre.Server.Command
             using (StreamWriter sw = new StreamWriter(logFile)) sw.Write(_log);
 
             if (importError != null) throw importError;
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private static void debugBreak()
+        {
+            System.Diagnostics.Debugger.Break();
         }
 
         private void generateSqlScript(string estateDeveloperName, string siteName,
@@ -596,6 +604,7 @@ namespace Vre.Server.Command
                 result = ServiceInstances.FileStorageManager.StoreFile(
                     "models", storePrefix, Path.GetExtension(modelFileName), dbObject.AutoID.ToString(), fs);
             _filesSaved.Add(result);
+            _log.AppendFormat("File persisted ({0}) from {1}\r\n", result, modelFileName);
             return result;
         }
 
@@ -609,45 +618,20 @@ namespace Vre.Server.Command
 
         private void importSuite(Vre.Server.Model.Kmz.Suite modelSuite, Suite dbSuite, bool isCreated)
         {
-            bool changed = isCreated;
+            // this must be the first call on new suite as it re-reads suite from DB;
+            // all subsequent changes shall be lost!
+            using (SiteManager mgr = new SiteManager(_clientSession))
+                mgr.SetSuitePrice(dbSuite, (float)modelSuite.InitialPrice);
 
-            if (isCreated)
-            {
-                // this must be the first call on new suite as it re-reads suite from DB;
-                // all subsequent changes shall be lost!
-                using (SiteManager mgr = new SiteManager(_clientSession))
-                    mgr.SetSuitePrice(dbSuite, (float)modelSuite.InitialPrice);
-
-                if (0 == modelSuite.CeilingHeightFt)
-                    dbSuite.CeilingHeight = new ValueWithUM(modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
-                else
-                    dbSuite.CeilingHeight = new ValueWithUM(
-                        modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
-
-                dbSuite.ShowPanoramicView = modelSuite.ShowPanoramicView;
-
-                //dbSuite.Status = Suite.SalesStatus.Available;
-
-                setSuiteType(dbSuite, modelSuite.ClassName);
-            }
+            if (0 == modelSuite.CeilingHeightFt)
+                dbSuite.CeilingHeight = new ValueWithUM(modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
             else
-            {
-                if (!dbSuite.SuiteType.Name.Equals(modelSuite.ClassName))
-                {
-                    setSuiteType(dbSuite, modelSuite.ClassName);
-                    changed = true;
-                }
-            }
+                dbSuite.CeilingHeight = new ValueWithUM(
+                    modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
 
-            //if (changed)
-            //{
-            //    _clientSession.DbSession.Flush();
+            dbSuite.ShowPanoramicView = modelSuite.ShowPanoramicView;
 
-            //    //using (SuiteDao dao = new SuiteDao(_clientSession.DbSession))
-            //    //    if (!dao.SafeUpdate(dbSuite)) throw new StaleObjectStateException("Suite", dbSuite.AutoID);
-
-            //    _clientSession.DbSession.Refresh(dbSuite);
-            //}
+            setSuiteType(dbSuite, modelSuite.ClassName);
         }
 
         private void setSuiteType(Suite dbSuite, string newClassName)
@@ -683,6 +667,10 @@ namespace Vre.Server.Command
                     _clientSession.DbSession.Save(stype);
                     _log.AppendFormat("Created new suite type ID={0}, Name={1}\r\n", stype.AutoID, stype.Name);
                 }
+                else
+                {
+                    _log.AppendFormat("Updating suite type ID={0}, Name={1}\r\n", stype.AutoID, stype.Name);
+                }
 
                 string fpName = _extraSuiteInfo.GetFloorPlanFileName(cn);
                 if (!string.IsNullOrWhiteSpace(fpName) && !fpName.Equals("?"))
@@ -692,10 +680,7 @@ namespace Vre.Server.Command
                     {
                         // NOTE that each committed update creates duplicated NEW floorplan files in storage
                         // Reconcilation procedure is required to remove those properly!
-                        using (FileStream fs = File.OpenRead(srcPath))
-                            stype.FloorPlanUrl = ServiceInstances.FileStorageManager.StoreFile(
-                                "models", "fp", Path.GetExtension(fpName), stype.AutoID.ToString(), fs);
-                        _filesSaved.Add(stype.FloorPlanUrl);
+                        stype.FloorPlanUrl = storeModelFile(stype, srcPath, "fp");
 
                         _clientSession.DbSession.Update(stype);
                         updated = true;
