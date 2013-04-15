@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.Position;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
@@ -82,6 +83,29 @@ public class Building implements I_VRObject {
 			bubbleKioskTemplateUrl = obj.get("bubbleKioskTemplateUrl")
 					.isString().stringValue();
 		// ---------------------------------------------
+
+		// Rest of the code is for backward compatibility
+		if (obj.containsKey("bubbleTemplateUrl"))
+			bubbleKioskTemplateUrl = obj.get("bubbleTemplateUrl")
+					.isString().stringValue();
+		
+		if (bubbleWebTemplateUrl != null) {
+		    if (bubbleWebTemplateUrl.startsWith(Options.URL_MODEL))	
+			    bubbleWebTemplateUrl = bubbleWebTemplateUrl.substring(Options.URL_MODEL.length());
+		    else if (bubbleWebTemplateUrl.startsWith(Options.URL_VRT))	
+			    bubbleWebTemplateUrl = bubbleWebTemplateUrl.substring(Options.URL_VRT.length());
+		    else if (bubbleWebTemplateUrl.startsWith(Options.URL_STATIC))	
+			    bubbleWebTemplateUrl = bubbleWebTemplateUrl.substring(Options.URL_STATIC.length());
+		}
+
+		if (bubbleKioskTemplateUrl != null) {
+			if (bubbleKioskTemplateUrl.startsWith(Options.URL_MODEL))
+			    bubbleKioskTemplateUrl = bubbleKioskTemplateUrl.substring(Options.URL_MODEL.length());
+			else if (bubbleKioskTemplateUrl.startsWith(Options.URL_VRT))
+			    bubbleKioskTemplateUrl = bubbleKioskTemplateUrl.substring(Options.URL_VRT.length());
+			else if (bubbleKioskTemplateUrl.startsWith(Options.URL_STATIC))
+			    bubbleKioskTemplateUrl = bubbleKioskTemplateUrl.substring(Options.URL_STATIC.length());
+		}
 	}
 
 	public boolean hasAltitudeAdjustment() {

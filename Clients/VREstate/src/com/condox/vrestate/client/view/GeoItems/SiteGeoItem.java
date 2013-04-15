@@ -5,7 +5,7 @@ import com.condox.vrestate.client.Position;
 import com.condox.vrestate.client.document.Site;
 
 public class SiteGeoItem implements IGeoItem {
-	private final double initialRange_m = 600;
+	private final double initialRange_m = 300;
 	private final double initialTilt_d = 60;
 
 	private Site site = null;

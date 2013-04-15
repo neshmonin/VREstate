@@ -23,5 +23,4 @@
 	<source path='client' />
 	<source path='shared' />
 	<entry-point class="com.condox.vrestate.client.VREstate" />
-	<add-linker name="xs" />
 </module>

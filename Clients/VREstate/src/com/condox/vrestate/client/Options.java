@@ -94,11 +94,11 @@ public class Options implements RequestCallback {
 		if (DEBUG_MODE) {
 			URL_VRT = "https://vrt.3dcondox.com/vre/";
 			URL_STATIC = "https://static.3dcondox.com/vre/";
-			URL_MODEL = "https://model.3dcondox.com/vre/";
+			URL_MODEL = "https://models.3dcondox.com/vre/";
 		} else {
 			URL_VRT = "https://vrt.3dcondox.com/";
 			URL_STATIC = "https://static.3dcondox.com/";
-			URL_MODEL = "https://model.3dcondox.com/";
+			URL_MODEL = "https://models.3dcondox.com/";
 		}
 
 

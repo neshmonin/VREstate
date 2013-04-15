@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.condox.vrestate.client.JSONParams;
-import com.condox.vrestate.client.Log;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
@@ -105,10 +104,13 @@ public class SuiteType {
 		terraces = params.getInteger("terraces");
 		area = params.getDouble("area");
 		area = (area > 100)? area : 100;
-		areaUm = params.getString("areaUm");
+		String rawAreaUm = params.getString("areaUm");
+		if (rawAreaUm.equals("sqFt"))
+			areaUm = "sq.ft";
+		else
+			areaUm = "sq.m";
 		
 		floorPlanUrl = params.getString("floorPlanUrl");
-		Log.write(floorPlanUrl);
 	}
 	//====================================
 
