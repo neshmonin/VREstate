@@ -9,12 +9,19 @@ namespace Vre.Server.Dao
     {
         private static int _suiteOptionId = -1;
 
+        public static bool IsSuiteOptionF(OptionType opType)
+        {
+            if (_suiteOptionId < 0)
+                using (OptionTypeDao dao = new OptionTypeDao()) dao.setupOptions();
+            return (opType.AutoID == _suiteOptionId);
+        }
+
         public OptionTypeDao() : base() 
         {
             setupOptions();
         }
 
-        public OptionTypeDao(ISession session) : base(session, true)
+        public OptionTypeDao(ISession session) : base(session, true)  // TODO: REMOVE FORCED FLUSH
         {
             setupOptions();
         }

@@ -18,15 +18,7 @@ namespace Vre.Server.HttpService
         {
             HttpServiceRequest rq = new HttpServiceRequest(ctx, _path, _maxRequestBodyLength, proc);
 
-            if (_allowExtendedLogging)
-            {
-                ClientSession cs = rq.UserInfo.Session;
-                string url = Utilities.SanitizeUrl(ctx.Request.Url.ToString());
-                if (cs != null)
-                    ServiceInstances.RequestLogger.Info("Session={0}; BK={1}; {2}; URL={3}", cs, browserKey, ctx.Request.HttpMethod, url);
-                else
-                    ServiceInstances.RequestLogger.Info("Anonymous; BK={0}; {1}; URL={2}", browserKey, ctx.Request.HttpMethod, url);
-            }
+            if (_allowExtendedLogging) ServiceInstances.RequestLogger.Info(prepareCallerInfo(browserKey, ctx, rq));
 
             if (!rq.UserInfo.StaleSession)
             {
@@ -43,10 +35,12 @@ namespace Vre.Server.HttpService
                         catch (NHibernate.HibernateException)
                         {
                             rq.UserInfo.Session.Disconnect(true);
+                            throw;
                         }
                         catch
                         {
                             rq.UserInfo.Session.Disconnect(false);
+                            throw;
                         }
                     }
                 }

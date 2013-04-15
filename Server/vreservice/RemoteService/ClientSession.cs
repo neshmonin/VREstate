@@ -257,8 +257,12 @@ namespace Vre.Server.RemoteService
                 }
                 else if (_dbSessionUseCount > 0)
                 {
-                    if ((_dbSessionUseCount-- < 1) && (DbSession != null))
-                        DbSession.Disconnect();
+                    if ((--_dbSessionUseCount < 1) && (DbSession != null))
+                    {
+                        //DbSession.Disconnect();
+                        DbSession.Dispose();
+                        DbSession = null;
+                    }
                 }
             }
             _dbSessionMutex.ReleaseMutex();

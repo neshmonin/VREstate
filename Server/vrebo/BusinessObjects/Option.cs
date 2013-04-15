@@ -17,7 +17,7 @@ namespace Vre.Server.BusinessLogic
         public virtual OptionType OpType { get; private set; }
         public virtual IList<Price> Prices { get; private set; }
 
-        private Option() { }
+        protected Option() { }
 
 		public Option(Building building, User provider, string description, OptionType type)
             : base()
@@ -30,6 +30,7 @@ namespace Vre.Server.BusinessLogic
             Building = building;
             OpType = type;
             //TypeID = typeId;
+            Prices = new List<Price>();
 		}
     }
 }

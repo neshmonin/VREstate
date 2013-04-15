@@ -182,19 +182,18 @@ namespace Vre.Server
 
             public void Commit()
             {
-                if (!_inherited) _tran.Commit();
+                if (!_inherited && _tran.IsActive) _tran.Commit();
                 _committed = true;
             }
 
             public void Rollback()
             {
                 if (_tran.IsActive) _tran.Rollback();  // do immediate rollback 
-                //if (!_inherited) _tran.Rollback();
             }
 
             public void Dispose()
             {
-                if (!_committed && _tran.IsActive) _tran.Dispose();
+                if (!_committed && _tran.IsActive && !_inherited) _tran.Dispose();
                 if (_session != null) _session.Dispose();
                 if (_clientSession != null) _clientSession.Disconnect(false);
             }

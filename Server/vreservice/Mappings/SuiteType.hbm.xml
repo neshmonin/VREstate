@@ -15,7 +15,7 @@
     <property name="Name" column="Name" />
     <property name="Model" column="Model" />
 
-    <bag name="Levels">
+    <bag name="Levels" lazy="false">
       <key column="SuiteTypeID" />
       <one-to-many class="SuiteLevel" />
     </bag>

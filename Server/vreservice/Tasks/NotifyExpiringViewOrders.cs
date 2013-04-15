@@ -34,7 +34,7 @@ namespace Vre.Server.Task
                             foreach (ViewOrder vo in vodao.GetExpiringBeforeNotNotified(getcutOffTime(param), 0))
                             {
                                 notifyViewOrderStatus(ref ccnt, ref ecnt, refVal, testMode,
-                                    session, vodao, vo, "MSG_VIEWORDER_EXPIRING");
+                                    session, vo, "MSG_VIEWORDER_EXPIRING");
                             }  // view order loop
 
                             DateTime cutOff = DateTime.UtcNow;
@@ -43,7 +43,7 @@ namespace Vre.Server.Task
                                 if ((int)cutOff.Subtract(vo.ExpiresOn).TotalDays == vo.NotificationsSent)
                                 {
                                     notifyViewOrderStatus(ref ccnt, ref ecnt, refVal, testMode,
-                                        session, vodao, vo, "MSG_VIEWORDER_EXPIRED");
+                                        session, vo, "MSG_VIEWORDER_EXPIRED");
                                 }
                             }  // view order loop
 
@@ -69,7 +69,7 @@ Ref#{1}", ecnt, refVal));
         }
 
         private void notifyViewOrderStatus(ref int ccnt, ref int ecnt, string refVal, bool testMode,
-            ISession session, ViewOrderDao vodao, ViewOrder vo, string messageTemplate)
+            ISession session, ViewOrder vo, string messageTemplate)
         {
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session))
             {
@@ -126,7 +126,8 @@ Ref#{1}", ecnt, refVal));
                 }
 
                 vo.NotificationsSent++;
-                vodao.Update(vo);
+                using (ViewOrderDao vodao = new ViewOrderDao(session)) vodao.Update(vo);
+
                 tran.Commit();
             }  // transaction
         }

@@ -172,7 +172,11 @@ namespace Vre.Server.BusinessLogic
             if (TryGetValue(propertyName, out value))
             {
                 result = value as string;
-                if (null == result) result = defaultValue;
+                if (null == result)
+                {
+                    if (value != null) result = value.ToString();
+                    else result = defaultValue;
+                }
                 else read = true;
             }
 
@@ -458,6 +462,28 @@ namespace Vre.Server.BusinessLogic
                         if (result.Contains(v)) diff--;
 
                     if (diff != 0) changed = true;
+                }
+                else
+                {
+                    changed = true;
+                }
+            }
+
+            return result;
+        }
+
+        public byte[] UpdateProperty(string propertyName, byte[] propertyValue, ref bool changed)
+        {
+            bool read;
+            byte[] result = GetProperty(propertyName, propertyValue, out read);
+            if (read)
+            {
+                int diff = propertyValue.Length;
+                if (diff == result.Length)
+                {
+                    for (diff--; diff >= 0; diff--) if (propertyValue[diff] != result[diff]) break;
+
+                    if (diff >= 0) changed = true;
                 }
                 else
                 {

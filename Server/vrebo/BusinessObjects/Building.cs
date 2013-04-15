@@ -140,7 +140,7 @@ namespace Vre.Server.BusinessLogic
             Status = data.UpdateProperty<BuildingStatus>("status", Status, ref changed);
             OpeningDate = data.UpdateProperty("openingDate", OpeningDate, ref changed);
 
-            if (Location.UpdateFromClient(data.GetNextLevelDataItem("position"))) changed = true;
+            if ((Location != null) && Location.UpdateFromClient(data.GetNextLevelDataItem("position"))) changed = true;
 
             InitialView = data.UpdateProperty("initialView", InitialView, ref changed);
 

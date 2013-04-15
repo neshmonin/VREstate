@@ -18,7 +18,7 @@
       <loader query-ref="buildingsInSite"/>
     </bag>
 
-    <bag name="SuiteTypes">
+    <bag name="SuiteTypes" lazy="false">
       <key column="SiteID" />
       <one-to-many class="SuiteType" />
       <loader query-ref="suiteTypesInSite"/>

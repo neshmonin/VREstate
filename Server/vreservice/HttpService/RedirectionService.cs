@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Security.AccessControl;
+using System.Security.Principal;
+using System.Text;
 using System.Xml;
 using Vre.Server.RemoteService;
-using System.Reflection;
-using System.Text;
 
 namespace Vre.Server.HttpService
 {
     internal class RedirectionService : HttpServiceBase
     {
-        enum ServiceType { Unknown, /*Const,*/ Redirection, Button, Reverse }
+        enum ServiceType { Unknown, /*Const,*/ Redirection, Button, Reverse, ServerSessionStatus }
         private const string _defaultImage = "default.png";
 
         private string _buttonStorePath;
@@ -87,6 +88,10 @@ namespace Vre.Server.HttpService
                                 processButtonRequest(ctx, browserKey, result);
                                 break;
 
+                            case ServiceType.ServerSessionStatus:
+                                processServerSessionStatus(ctx, path, result);
+                                break;
+
                             //case ServiceType.Const:
                             //    processConst(ctx, path, result);
                             //    break;
@@ -122,6 +127,7 @@ namespace Vre.Server.HttpService
             //else if (pathElement.Equals("robots.txt")) return ServiceType.Const;
             //else if (pathElement.Equals("humans.txt")) return ServiceType.Const;
             //else if (pathElement.Equals("version")) return ServiceType.Const;
+            else if (pathElement.Equals("sss")) return ServiceType.ServerSessionStatus;
             return ServiceType.Unknown;
         }
 
@@ -311,6 +317,35 @@ namespace Vre.Server.HttpService
 
         //    return result;
         //}
+
+        private static void processServerSessionStatus(HttpListenerContext ctx, string path, IResponseData response)
+        {
+            response.ResponseCode = HttpStatusCode.OK;
+            response.DataStreamContentType = "txt";
+
+            StringBuilder text = new StringBuilder();
+
+            var sid = new SecurityIdentifier(WellKnownSidType.WorldSid, null);
+            var mutexsecurity = new MutexSecurity();
+            mutexsecurity.AddAccessRule(new MutexAccessRule(sid, MutexRights.FullControl, AccessControlType.Allow));
+            mutexsecurity.AddAccessRule(new MutexAccessRule(sid, MutexRights.ChangePermissions, AccessControlType.Deny));
+            mutexsecurity.AddAccessRule(new MutexAccessRule(sid, MutexRights.Delete, AccessControlType.Deny));
+
+            bool created, result;
+            using (System.Threading.Mutex m = new System.Threading.Mutex(false, "Global\\788c23ce-8a6d-4024-b498-2f1bace634f2", out created, mutexsecurity))
+            {
+                result = m.WaitOne(0);
+                if (result) m.ReleaseMutex();
+            }
+
+            if (result)
+                text.Append("Server is vacant.\r\n");
+            else
+                text.Append("Server is BUSY.\r\n");
+
+            byte[] buffer = Encoding.UTF8.GetBytes(text.ToString());
+            response.DataStream.Write(buffer, 0, buffer.Length);
+        }
 
         private static void streamImage(string path, IResponseData response)
         {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Vre.Server
+namespace Vre
 {
     public static class CollectionExtensions
     {
