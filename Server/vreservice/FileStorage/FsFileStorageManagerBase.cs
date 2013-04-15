@@ -180,5 +180,11 @@ namespace Vre.Server.FileStorage
         public abstract void RemoveFile(string relativePath);
 
         public abstract StorageType Type { get; }
+
+        public virtual Stream OpenFile(string path)
+        {
+            if (!Path.IsPathRooted(path)) path = convertToLocalPath(path);
+            return File.OpenRead(path);
+        }
     }
 }

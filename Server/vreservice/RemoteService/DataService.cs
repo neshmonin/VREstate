@@ -354,7 +354,7 @@ namespace Vre.Server.RemoteService
                 {
                     Site s = siteList[idx];
                     ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-                    UrlHelper.ConvertUrlsToAbsolute(s);
+                    ReferencedFileHelper.ConvertUrlsToAbsolute(s);
                     result[idx] = s.GetClientData();
                 }
             }
@@ -410,7 +410,7 @@ namespace Vre.Server.RemoteService
                 {
                     Building b = toReturn[idx];
                     ServiceInstances.ModelCache.FillWithModelInfo(b, false);
-                    UrlHelper.ConvertUrlsToAbsolute(b);
+                    ReferencedFileHelper.ConvertUrlsToAbsolute(b);
                     result[idx] = b.GetClientData();
                 }
 
@@ -433,7 +433,7 @@ namespace Vre.Server.RemoteService
                 Building building = manager.GetBuildingById(buildingId);
 
                 ServiceInstances.ModelCache.FillWithModelInfo(building, false);
-                UrlHelper.ConvertUrlsToAbsolute(building);
+                ReferencedFileHelper.ConvertUrlsToAbsolute(building);
                 result = building.GetClientData();
 
                 if (csrq != ChangeSubscriptionRequest.None)
@@ -525,7 +525,7 @@ namespace Vre.Server.RemoteService
             }
 
             ServiceInstances.ModelCache.FillWithModelInfo(st, false);
-            UrlHelper.ConvertUrlsToAbsolute(st);
+            ReferencedFileHelper.ConvertUrlsToAbsolute(st);
 
             // produce output
             //
@@ -545,7 +545,7 @@ namespace Vre.Server.RemoteService
             foreach (SuiteType st in list)
             {
                 ServiceInstances.ModelCache.FillWithModelInfo(st, false);
-                UrlHelper.ConvertUrlsToAbsolute(st);
+                ReferencedFileHelper.ConvertUrlsToAbsolute(st);
             }
 
             // produce output
@@ -648,7 +648,7 @@ namespace Vre.Server.RemoteService
                         // a bit of too deep inspection to avoid unnecessary calls; maybe not required
                         //&& (!string.IsNullOrWhiteSpace(s.SuiteType.FloorPlanUrl)) && (!s.SuiteType.FloorPlanUrl.StartsWith("http://"))
                         )
-                        UrlHelper.ConvertUrlsToAbsolute(s.SuiteType);
+                        ReferencedFileHelper.ConvertUrlsToAbsolute(s.SuiteType);
                     
                     ClientData cd = s.GetInventoryClientData(null, false);
                     cd.Add("currentPrice", manager.GetCurrentSuitePrice(s));
@@ -1145,7 +1145,7 @@ namespace Vre.Server.RemoteService
                 {
                     if (!usedSuiteTypes.Contains(st)) continue;
                     ServiceInstances.ModelCache.FillWithModelInfo(st, false);
-                    UrlHelper.ConvertUrlsToAbsolute(st);
+                    ReferencedFileHelper.ConvertUrlsToAbsolute(st);
                     elements.Add(st.GetClientData());
                 }
             }
@@ -1155,7 +1155,7 @@ namespace Vre.Server.RemoteService
                 foreach (SuiteType st in usedSuiteTypes)
                 {
                     ServiceInstances.ModelCache.FillWithModelInfo(st, false);
-                    UrlHelper.ConvertUrlsToAbsolute(st);
+                    ReferencedFileHelper.ConvertUrlsToAbsolute(st);
                     elements.Add(st.GetClientData());
                 }
             }
@@ -1176,7 +1176,7 @@ namespace Vre.Server.RemoteService
                         if (minimizeOutput) continue;
                     }
                     ServiceInstances.ModelCache.FillWithModelInfo(b, false);
-                    UrlHelper.ConvertUrlsToAbsolute(b);
+                    ReferencedFileHelper.ConvertUrlsToAbsolute(b);
                     ClientData cd = b.GetClientData();
                     //if (maskSaleStatus) cd["status"] = "Selected";
                     cd.Add("address", AddressHelper.ConvertToReadableAddress(b, null));
@@ -1190,7 +1190,7 @@ namespace Vre.Server.RemoteService
                 foreach (Building b in usedBuildings)
                 {
                     ServiceInstances.ModelCache.FillWithModelInfo(b, false);
-                    UrlHelper.ConvertUrlsToAbsolute(b);
+                    ReferencedFileHelper.ConvertUrlsToAbsolute(b);
                     ClientData cd = b.GetClientData();
                     //if (maskSaleStatus) cd["status"] = "Selected";
                     cd.Add("address", AddressHelper.ConvertToReadableAddress(b, null));
@@ -1209,7 +1209,7 @@ namespace Vre.Server.RemoteService
                     {
                         if (!usedSites.Contains(s)) continue;
                         ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-                        UrlHelper.ConvertUrlsToAbsolute(s);
+                        ReferencedFileHelper.ConvertUrlsToAbsolute(s);
                         elements.Add(s.GetClientData());
                     }
                 }
@@ -1219,7 +1219,7 @@ namespace Vre.Server.RemoteService
                     foreach (Site s in usedSites)
                     {
                         ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-                        UrlHelper.ConvertUrlsToAbsolute(s);
+                        ReferencedFileHelper.ConvertUrlsToAbsolute(s);
                         elements.Add(s.GetClientData());
                     }
                 }

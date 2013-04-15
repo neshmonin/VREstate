@@ -42,5 +42,10 @@ namespace Vre.Server.FileStorage
         {
             removeFile(relativePath.Replace('/', Path.DirectorySeparatorChar));
         }
+
+        public override Stream OpenFile(string relativePath)
+        {
+            return base.OpenFile(relativePath.Replace('/', Path.DirectorySeparatorChar));
+        }
     }
 }

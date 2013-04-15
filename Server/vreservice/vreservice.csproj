@@ -128,6 +128,7 @@
     <Compile Include="Authentication\IAuthentication.cs" />
     <Compile Include="BusinessLogic\ExpiredException.cs" />
     <Compile Include="BusinessLogic\ObjectExistsException.cs" />
+    <Compile Include="BusinessObjects\FileStorageItem.cs" />
     <Compile Include="BusinessObjects\FinancialTransactionExt.cs" />
     <Compile Include="BusinessObjects\Localization.cs" />
     <Compile Include="BusinessObjects\ReverseRequest.cs" />
@@ -196,7 +197,7 @@
     <Compile Include="RemoteService\RemoteServiceProvider.cs" />
     <Compile Include="RemoteService\ReverseRequestService.cs" />
     <Compile Include="RemoteService\ServiceRequest.cs" />
-    <Compile Include="RemoteService\UrlHelper.cs" />
+    <Compile Include="RemoteService\ReferencedFileHelper.cs" />
     <Compile Include="ServiceInstances.cs" />
     <Compile Include="StartupShutdown.cs" />
     <Compile Include="Tasks\UpdateViewOrderTargets.cs" />
