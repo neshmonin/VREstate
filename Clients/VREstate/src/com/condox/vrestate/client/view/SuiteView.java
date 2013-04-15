@@ -137,9 +137,6 @@ public class SuiteView extends _GEView {
 		// templateUrl =
 		// "https://models.3dcondox.com/vre/templates/default.html";
 
-		// TODO remove
-		// Window.alert(url);
-
 		String content = "<iframe id=\"VRT_SuiteInfo\" src=\"";
 		content += templateUrl;
 		content += "#";
@@ -245,7 +242,6 @@ public class SuiteView extends _GEView {
 				frame.style.width = width + 'px';
 				frame.style.height = height + 'px';
 			}
-			return false;
 		};
 
 		$wnd.VRT_showVirtualTour = function() {
@@ -260,7 +256,6 @@ public class SuiteView extends _GEView {
 		$wnd.VRT_showFloorplan = function() {
 			view.@com.condox.vrestate.client.view.SuiteView::ShowFloorPlan()();
 		}
-		return false;
 	}-*/;
 
 	private void VRT_showVirtualTour() {
@@ -274,6 +269,7 @@ public class SuiteView extends _GEView {
 		if (moreInfo != null && moreInfo.length() > 0)
 			Window.open(moreInfo, "_blank", null);
 		else
+		if (Options.DEBUG_MODE)
 			Window.open(
 					"http://02ea89a.netsolhost.com/beyondsea/beachcomber.html",
 					"_blank", null);
@@ -281,11 +277,13 @@ public class SuiteView extends _GEView {
 
 	private void ShowPanoramicView() {
 		IGeoItem suiteGeo = _AbstractView.getSuiteGeoItem(theGeoItem.getId());
+		//Log.write("suiteGeo = " + suiteGeo.toString());
 		_AbstractView.Push(new PanoramicView(suiteGeo));
 	}
 
 	private void ShowFloorPlan() {
 		String floorPlanUrl = suiteGeo.suite.getSuiteType().getFloorPlanUrl();
+		//Log.write("floorPlanUrl = " + floorPlanUrl);
 		if (floorPlanUrl != null)
 			Window.open(floorPlanUrl, "_blank", null);
 	}

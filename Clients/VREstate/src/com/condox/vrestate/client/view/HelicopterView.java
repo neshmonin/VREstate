@@ -1,6 +1,7 @@
 package com.condox.vrestate.client.view;
 
 import com.condox.vrestate.client.interactor.SingleTouchInteractor;
+import com.condox.vrestate.client.view.GeoItems.BuildingGeoItem;
 import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.google.gwt.user.client.Timer;
 
@@ -57,9 +58,19 @@ public class HelicopterView extends SiteView {
 		updateViewTimer.schedule(200);
 	}
 
+	@Override
+	public double getStartingRange() {
+		return 200.0;
+	}
+	
+	
 	public void pushNextView() {
 		isFlying = false;
-		SiteView view = new SiteView(theGeoItem);
-		_AbstractView.Push(view);
+		SiteView siteView = new SiteView(theGeoItem);
+		_AbstractView.Push(siteView);
+		if (_AbstractView.getBuildingGeoItems().size() == 1) {
+			for (BuildingGeoItem buildingGeo : _AbstractView.getBuildingGeoItems())
+				_AbstractView.AddSelection(buildingGeo);
+		}
 	}
 }

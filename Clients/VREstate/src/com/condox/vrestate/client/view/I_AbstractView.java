@@ -11,6 +11,7 @@ public interface I_AbstractView extends I_UpdatableView {
 	IGeoItem getGeoItem(); // access function, implemented in _AbstractView
 	double getTransitionSpeed(); // access function, implemented in _AbstractView
 	double getRegularSpeed(); // access function, implemented in _AbstractView
+	double getStartingRange();
 	Camera getCamera(); // access function, implemented in _AbstractView
 
 	abstract void onDestroy();

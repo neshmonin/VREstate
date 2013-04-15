@@ -362,15 +362,16 @@ public abstract class _AbstractView implements I_AbstractView {
 				_camera = new Camera(curView.getCamera());
 				_camera.attributes.SetLonLatAlt(theGeoItem);
 				_camera.attributes.Tilt_d = theGeoItem.getPosition().getTilt();
-				_camera.attributes.Range_m = theGeoItem.getPosition()
-						.getRange();
+				_camera.attributes.Range_m = getStartingRange();
 			} else {
-				_camera = new Camera(Camera.Type.LookAt, theGeoItem
-						.getPosition().getHeading(), theGeoItem.getPosition()
-						.getTilt(), 0, theGeoItem.getPosition().getLatitude(),
-						theGeoItem.getPosition().getLongitude(), theGeoItem
-								.getPosition().getAltitude(), theGeoItem
-								.getPosition().getRange());
+				_camera = new Camera(Camera.Type.LookAt,
+						theGeoItem.getPosition().getHeading(),
+						theGeoItem.getPosition().getTilt(),
+						0,
+						theGeoItem.getPosition().getLatitude(),
+						theGeoItem.getPosition().getLongitude(),
+						theGeoItem.getPosition().getAltitude(), 
+						getStartingRange());
 			}
 		}
 	}
@@ -475,5 +476,10 @@ public abstract class _AbstractView implements I_AbstractView {
 
 	public static boolean isTimeoutEnabled() {
 		return !m_timeoutTimerDisabled;
+	}
+
+	@Override
+	public double getStartingRange() {
+		return theGeoItem.getPosition().getRange();
 	}
 }

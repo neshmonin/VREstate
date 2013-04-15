@@ -16,7 +16,7 @@ import com.nitrous.gwt.earth.client.api.KmlPoint;
 import com.nitrous.gwt.earth.client.api.KmlStyle;
 
 public class BuildingGeoItem implements IGeoItem {
-	private final double initialRange_m = 200;
+	private final double initialRange_m = 120;
 	private final double initialTilt_d = 45;
 
 	private Building building = null;

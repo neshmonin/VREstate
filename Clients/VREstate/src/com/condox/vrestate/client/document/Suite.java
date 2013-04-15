@@ -105,9 +105,13 @@ public class Suite implements I_VRObject {
 			}
 		}
 		
-		if (Options.DEBUG_MODE)
-		{
-			 // Workaround for prices	
+		price = -1;
+		if ((obj.get("currentPrice") != null)&&
+			(obj.get("currentPrice").isNumber() != null) &&
+			obj.get("currentPrice").isNumber().doubleValue() != 0)
+			price = (int) obj.get("currentPrice").isNumber().doubleValue();
+		
+		if (Options.DEBUG_MODE && price == -1) {
 			 price = (int) (500 + 500 * Math.random());
 			 price *= 1000;
 		}
