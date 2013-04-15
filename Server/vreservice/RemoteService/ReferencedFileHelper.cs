@@ -2,7 +2,7 @@
 
 namespace Vre.Server.RemoteService
 {
-    internal class UrlHelper
+    internal class ReferencedFileHelper
     {
         private static bool _initialized = false;
         private static bool _convertTemplateUrls;
@@ -32,8 +32,10 @@ namespace Vre.Server.RemoteService
             url = target.OverlayModelUrl;
             if (!string.IsNullOrEmpty(url)) target.OverlayModelUrl = _speedTest ?
                 ffChromeSpeedTestPathConvert(url) : ServiceInstances.FileStorageManager.ConvertToFullPath(url);
-            url = target.BubbleTemplateUrl;
-            if (_convertTemplateUrls && !string.IsNullOrEmpty(url)) target.BubbleTemplateUrl = ServiceInstances.FileStorageManager.ConvertToFullPath(url);
+            url = target.BubbleWebTemplateUrl;
+            if (_convertTemplateUrls && !string.IsNullOrEmpty(url)) target.BubbleWebTemplateUrl = ServiceInstances.FileStorageManager.ConvertToFullPath(url);
+            url = target.BubbleKioskTemplateUrl;
+            if (_convertTemplateUrls && !string.IsNullOrEmpty(url)) target.BubbleKioskTemplateUrl = ServiceInstances.FileStorageManager.ConvertToFullPath(url);
             url = target.PoiModelUrl;
             if (!string.IsNullOrEmpty(url)) target.PoiModelUrl = _speedTest ?
                 ffChromeSpeedTestPathConvert(url) : ServiceInstances.FileStorageManager.ConvertToFullPath(url);
@@ -48,8 +50,10 @@ namespace Vre.Server.RemoteService
             url = target.OverlayModelUrl;
             if (!string.IsNullOrEmpty(url)) target.OverlayModelUrl = _speedTest ?
                 ffChromeSpeedTestPathConvert(url) : ServiceInstances.FileStorageManager.ConvertToFullPath(url);
-            url = target.BubbleTemplateUrl;
-            if (_convertTemplateUrls && !string.IsNullOrEmpty(url)) target.BubbleTemplateUrl = ServiceInstances.FileStorageManager.ConvertToFullPath(url);
+            url = target.BubbleWebTemplateUrl;
+            if (_convertTemplateUrls && !string.IsNullOrEmpty(url)) target.BubbleWebTemplateUrl = ServiceInstances.FileStorageManager.ConvertToFullPath(url);
+            url = target.BubbleKioskTemplateUrl;
+            if (_convertTemplateUrls && !string.IsNullOrEmpty(url)) target.BubbleKioskTemplateUrl = ServiceInstances.FileStorageManager.ConvertToFullPath(url);
         }
 
         private const string _ffChromeSpeedTestAltRoot = "https://static.3dcondox.com/vre/";

@@ -15,7 +15,8 @@ namespace Vre.Server.BusinessLogic
 
         public virtual string DisplayModelUrl { get; set; }
         public virtual string OverlayModelUrl { get; set; }
-        public virtual string BubbleTemplateUrl { get; set; }
+        public virtual string BubbleWebTemplateUrl { get; set; }
+        public virtual string BubbleKioskTemplateUrl { get; set; }
         public virtual string ExcursionModel { get; set; }
         public virtual GeoPoint Location { get; set; }
         public virtual string InitialView { get; set; }
@@ -72,8 +73,10 @@ namespace Vre.Server.BusinessLogic
                 result.Add("displayModelUrl", DisplayModelUrl);
             if (!string.IsNullOrEmpty(OverlayModelUrl))
                 result.Add("overlayModelUrl", OverlayModelUrl);
-            if (!string.IsNullOrEmpty(BubbleTemplateUrl))
-                result.Add("bubbleTemplateUrl", BubbleTemplateUrl);
+            if (!string.IsNullOrEmpty(BubbleWebTemplateUrl))
+                result.Add("bubbleWebTemplateUrl", BubbleWebTemplateUrl);
+            if (!string.IsNullOrEmpty(BubbleKioskTemplateUrl))
+                result.Add("bubbleKioskTemplateUrl", BubbleKioskTemplateUrl);
             if (!string.IsNullOrEmpty(ExcursionModel))
                 result.Add("excursionModel", ExcursionModel);
 

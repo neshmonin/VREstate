@@ -41,5 +41,7 @@ namespace Vre.Server.FileStorage
         /// Type of storage
         /// </summary>
         StorageType Type { get; }
+
+        Stream OpenFile(string relativePath);
     }
 }

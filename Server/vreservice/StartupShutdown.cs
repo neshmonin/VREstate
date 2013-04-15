@@ -35,63 +35,69 @@ namespace Vre.Server
             );
             Status = "Starting...";
 
-            if (!Enum.TryParse<ServerRole>(ServiceInstances.Configuration.GetValue("ServerRole", "VRT"),
-                true, out _serverRole))
-                _serverRole = ServerRole.VRT;
-
-            switch (_serverRole)
+            try
             {
-                case ServerRole.VRT:
-                    {
-                        _httpService = new HttpServiceMain();
+                if (!Enum.TryParse<ServerRole>(ServiceInstances.Configuration.GetValue("ServerRole", "VRT"),
+                    true, out _serverRole))
+                    _serverRole = ServerRole.VRT;
 
-                        DatabaseSettingsDao.VerifyDatabase();
-
-                        RolePermissionCheck.FillAccessMatrix();
-
-                        using (ClientSession vcs = ClientSession.MakeSystemSession())
-                        {
-                            vcs.Resume();
-                            UserManager um = new UserManager(vcs);
-                            um.ConfirmPresetUsers();
-                        }
-
-                        ServiceInstances.FileCache = new FileCacheManager();
-
-                        ServiceInstances.ModelCache = new ModelCache.ModelCacheManager(
-                            ServiceInstances.Configuration.GetValue("ModelFileStore", string.Empty));
-                    }
-                    break;
-
-                case ServerRole.Redirector:
-                    _httpService = new RedirectionService();
-                    break;
-            }
-
-            if (startAsService)
-            {
-                System.Threading.ThreadPool.SetMinThreads(100, 100);
-
-                if (ServerRole.VRT == _serverRole)
+                switch (_serverRole)
                 {
-                    // This may take long enough for Service Control Manager to render this as hung on start!
-                    new Thread(() => ServiceInstances.FileCache.Initialize()) 
-                    { IsBackground = true, Priority = ThreadPriority.BelowNormal, Name = "InitializeFileCache" }
-                    .Start();
+                    case ServerRole.VRT:
+                        {
+                            _httpService = new HttpServiceMain();
 
-                    // This may take long enough for Service Control Manager to render this as hung on start!
-                    new Thread(() => ServiceInstances.ModelCache.Initialize()) 
-                    { IsBackground = true, Priority = ThreadPriority.BelowNormal, Name = "InitialModelReader" }
-                    .Start();
+                            DatabaseSettingsDao.VerifyDatabase();
+
+                            RolePermissionCheck.FillAccessMatrix();
+
+                            using (ClientSession vcs = ClientSession.MakeSystemSession())
+                            {
+                                vcs.Resume();
+                                UserManager um = new UserManager(vcs);
+                                um.ConfirmPresetUsers();
+                            }
+
+                            ServiceInstances.FileCache = new FileCacheManager();
+
+                            ServiceInstances.ModelCache = new ModelCache.ModelCacheManager(
+                                ServiceInstances.Configuration.GetValue("ModelFileStore", string.Empty));
+                        }
+                        break;
+
+                    case ServerRole.Redirector:
+                        _httpService = new RedirectionService();
+                        break;
                 }
-                
-                startCommunications();
+
+                if (startAsService)
+                {
+                    System.Threading.ThreadPool.SetMinThreads(100, 100);
+
+                    if (ServerRole.VRT == _serverRole)
+                    {
+                        // This may take long enough for Service Control Manager to render this as hung on start!
+                        new Thread(() => ServiceInstances.FileCache.Initialize()) { IsBackground = true, Priority = ThreadPriority.BelowNormal, Name = "InitializeFileCache" }
+                        .Start();
+
+                        // This may take long enough for Service Control Manager to render this as hung on start!
+                        new Thread(() => ServiceInstances.ModelCache.Initialize()) { IsBackground = true, Priority = ThreadPriority.BelowNormal, Name = "InitialModelReader" }
+                        .Start();
+                    }
+
+                    startCommunications();
+                }
+
+                Status = "Running.";
+
+                // TODO: DEBUG
+                Testing.RandomUpdater.Start(ServiceInstances.Configuration.GetValue("DebugRandomObjectUpdateTimeSec", 0));
             }
-
-            Status = "Running.";
-
-            // TODO: DEBUG
-            Testing.RandomUpdater.Start(ServiceInstances.Configuration.GetValue("DebugRandomObjectUpdateTimeSec", 0));
+            catch (Exception ex)
+            {
+                ServiceInstances.Logger.Fatal("Startup failed: {0}", Utilities.ExplodeException(ex));
+                throw;
+            }
         }
 
         public static void PerformShutdown()

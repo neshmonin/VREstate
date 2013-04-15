@@ -248,7 +248,8 @@ namespace Vre.Server.Command
             string displayModelFileName = extras.GetOption("displaymodel");
             string overlayModelFileName = extras.GetOption("overlaymodel");
             string poiModelFileName = extras.GetOption("poimodel");
-            string bubbleTemplateFileName = extras.GetOption("bubbletemplate");
+            string bubbleWebTemplateFileName = extras.GetOption("bubblewebtemplate");
+            string bubbleKioskTemplateFileName = extras.GetOption("bubblekiosktemplate");
             bool isSiteModel = !CommandHandler.str2bool(extras.GetOption("asbuilding"), false);
             string singleBuildingName = extras.GetOption("building");
 
@@ -306,7 +307,8 @@ namespace Vre.Server.Command
                     isSiteModel ? null : displayModelFileName,
                     isSiteModel ? null : overlayModelFileName,
                     isSiteModel ? null : poiModelFileName,
-                    isSiteModel ? null : bubbleTemplateFileName,
+                    isSiteModel ? null : bubbleWebTemplateFileName,
+                    isSiteModel ? null : bubbleKioskTemplateFileName,
                     extras);
             }
 
@@ -374,12 +376,20 @@ namespace Vre.Server.Command
                     dbSite.OverlayModelUrl = storeModelFile(dbSite, overlayModelFileName, "so");
                 }
 
-                if (bubbleTemplateFileName != null)
+                if (bubbleWebTemplateFileName != null)
                 {
                     // TODO: Always remove previous file versions?
                     //if (!string.IsNullOrEmpty(dbBuilding.Model))
                     //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbSite.BubbleTemplateUrl = storeModelFile(dbSite, bubbleTemplateFileName, "sbt");
+                    dbSite.BubbleWebTemplateUrl = storeModelFile(dbSite, bubbleWebTemplateFileName, "sbwt");
+                }
+
+                if (bubbleKioskTemplateFileName != null)
+                {
+                    // TODO: Always remove previous file versions?
+                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
+                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
+                    dbSite.BubbleKioskTemplateUrl = storeModelFile(dbSite, bubbleKioskTemplateFileName, "sbkt");
                 }
 
                 _clientSession.DbSession.Update(dbSite);
@@ -388,7 +398,7 @@ namespace Vre.Server.Command
 
         private void importBuilding(Vre.Server.Model.Kmz.Building modelBuilding, Building dbBuilding, bool isCreated,
             string infoModelFileName, string displayModelFileName, string overlayModelFileName, string poiModelFileName,
-            string bubbleTemplateFileName,
+            string bubbleWebTemplateFileName, string bubbleKioskTemplateFileName,
             Parameters extras)
         {
             List<string> missingSuites = new List<string>(dbBuilding.Suites.Count);
@@ -494,12 +504,20 @@ namespace Vre.Server.Command
                     dbBuilding.PoiModelUrl = storeModelFile(dbBuilding, poiModelFileName, "bp");
                 }
 
-                if (bubbleTemplateFileName != null)
+                if (bubbleWebTemplateFileName != null)
                 {
                     // TODO: Always remove previous file versions?
                     //if (!string.IsNullOrEmpty(dbBuilding.Model))
                     //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbBuilding.BubbleTemplateUrl = storeModelFile(dbBuilding, bubbleTemplateFileName, "bbt");
+                    dbBuilding.BubbleWebTemplateUrl = storeModelFile(dbBuilding, bubbleWebTemplateFileName, "bbwt");
+                }
+
+                if (bubbleKioskTemplateFileName != null)
+                {
+                    // TODO: Always remove previous file versions?
+                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
+                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
+                    dbBuilding.BubbleKioskTemplateUrl = storeModelFile(dbBuilding, bubbleKioskTemplateFileName, "bbkt");
                 }
 
                 modified = true;                

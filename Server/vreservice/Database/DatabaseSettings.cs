@@ -10,7 +10,7 @@ namespace Vre.Server
         /// <summary>
         /// Current schema version of database; to be verified against real DB on startup.
         /// </summary>
-        public const int CurrentDbVersion = 14;
+        public const int CurrentDbVersion = 15;
 
         /// <summary>
         /// Possible values of <see cref="Id"/> property.
