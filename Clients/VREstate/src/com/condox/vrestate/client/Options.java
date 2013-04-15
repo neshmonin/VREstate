@@ -33,6 +33,8 @@ public class Options implements RequestCallback {
 	public static int SUITE_ID;
 	public static String HOME_URL;
 	public static String ZOOM_UNZOOM_URL;
+	public static String ZOOM_IN_URL;
+	public static String ZOOM_OUT_URL;
 	public static String URL_BUTTON_PANORAMIC_VIEW;
 	public static String URL_BUTTON_EXIT_PANORAMIC_VIEW;
 	public static String URL_BUTTON_CENTER_PANORAMIC_VIEW;
@@ -107,6 +109,8 @@ public class Options implements RequestCallback {
 		HOME_URL = URL_VRT;
 
 		ZOOM_UNZOOM_URL = URL_BUTTONS + "ZoomUnzoomBar.png";
+		ZOOM_IN_URL = HOME_URL + "buttons/Unzoom.png";
+		ZOOM_OUT_URL = HOME_URL + "buttons/Zoom.png";
 		URL_BUTTON_PANORAMIC_VIEW = URL_BUTTONS + "PanoramicView.png";
 		URL_BUTTON_EXIT_PANORAMIC_VIEW = URL_BUTTONS + "Back.png";
 		URL_BUTTON_CENTER_PANORAMIC_VIEW = URL_BUTTONS + "Center.png";

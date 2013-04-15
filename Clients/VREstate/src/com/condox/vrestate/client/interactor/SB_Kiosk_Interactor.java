@@ -1,124 +1,104 @@
+
 package com.condox.vrestate.client.interactor;
 
-import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.I_SB_View;
+import com.condox.vrestate.client.view._AbstractView;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.user.client.Timer;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlMouseEvent;
 import com.nitrous.gwt.earth.client.api.KmlPlacemark;
 import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
 import com.nitrous.gwt.earth.client.api.event.MouseListener;
 
-public class SB_Interactor extends OverlayHelpers
+public class SB_Kiosk_Interactor extends OverlayHelpers
 						   implements MouseListener,
 						   			  I_AbstractInteractor{
 
 	private HandlerRegistration mouse_listener = null;
-	KmlScreenOverlay zoom_overlay = null;
-	KmlScreenOverlay unzoom_overlay = null;
-	private OvlRectangle zoomRect = null;
-	private OvlRectangle unzoomRect = null;
+	KmlScreenOverlay overlayZoomUnzoom = null;
+	private OvlRectangle rectCentralBar = null;
+	private OvlRectangle rectZoomUnzoom = null;
 
 	private I_SB_View view = null;
 
 	// Constructor
-	public SB_Interactor(I_SB_View view) {
+	public SB_Kiosk_Interactor(I_SB_View view) {
 		this.view = view;
+	    int WinH = GE.getEarthHeight();
 
-		int WinW = GE.getEarth().getOffsetWidth();
-	    int WinH = GE.getEarth().getOffsetHeight();
-	    int buttonDimention = Math.min(WinW, WinH) / 10;
+	    // ZoomUnzoomBar.png - dimentions 148x964
+	    int buttonHeightPixels = WinH * 80 / 100;
+	    int buttonWidthPixels = buttonHeightPixels * 148 / 964;
 
-		zoomRect = new OvlRectangle(
-						new OvlPoint(new OvlDimension(0.07f), 
-									 new OvlDimension(0.3f)),
-						new OvlDimension(buttonDimention),
-						new OvlDimension(buttonDimention)
-					);
-
-		unzoomRect = new OvlRectangle(
-						new OvlPoint(new OvlDimension(0.07f), 
-									 new OvlDimension(0.15f)),
-						new OvlDimension(buttonDimention),
-						new OvlDimension(buttonDimention)
-					);
+	    rectZoomUnzoom = new OvlRectangle(
+				new OvlPoint(new OvlDimension(buttonWidthPixels*3/4), 
+							 new OvlDimension(0.45f)),
+				new OvlDimension(buttonWidthPixels),
+				new OvlDimension(buttonHeightPixels)
+			);
+	    rectCentralBar = new OvlRectangle(
+				new OvlPoint(new OvlDimension(0.5f), 
+							 new OvlDimension(0.5f)),
+				new OvlDimension(0.15f),
+				new OvlDimension(1f)
+			);
 	}
-
+	
 	private enum WhereIsMouse
 	{
-	   OnZoomButton,
-	   OnUnzoomButton,
+	   OnZoomUnzoomBar,
+	   OnCentralBar,
 	   AnywhereElse
 	}
-
+	
 	private WhereIsMouse HitTest(int x, int y)
 	{
-		if (zoomRect.ContainsPixel(x, y))
-			return WhereIsMouse.OnZoomButton;
-		if (unzoomRect.ContainsPixel(x, y))
-			return WhereIsMouse.OnUnzoomButton;
-
+		if (rectZoomUnzoom.ContainsPixel(x, y))
+			return WhereIsMouse.OnZoomUnzoomBar;
+		else if (rectCentralBar.ContainsPixel(x, y))
+			return WhereIsMouse.OnCentralBar;
+		
 		return WhereIsMouse.AnywhereElse;
 	}
 
 	@Override
 	public void setEnabled(boolean enabling) {
-		Log.write("SB_Interactor: setEnabled = " + enabling);
+		//Log.write("SB_Interactor: setEnabled = " + enabling);
 		if (enabling) {
 			if (mouse_listener == null)
 				mouse_listener = GE.getPlugin().getWindow()
 						.addMouseListener(this);
 		} else {
-			// Log.write("1");
 			mouse_listener.removeHandler();
 			mouse_listener = null;
-			// Log.write("2");
 		}
 
 		if (enabling) {
-			if (zoom_overlay == null) {
+			if (overlayZoomUnzoom == null) {
 				KmlIcon icon = GE.getPlugin().createIcon("");
-				String href = Options.ZOOM_IN_URL;
+				String href = Options.ZOOM_UNZOOM_URL;
 				icon.setHref(href);
-				zoom_overlay = GE.getPlugin().createScreenOverlay("");
-				zoom_overlay.setIcon(icon);
-
+				overlayZoomUnzoom = GE.getPlugin().createScreenOverlay("");
+				overlayZoomUnzoom.setIcon(icon);
+	
 				// Set the ScreenOverlay's position and size
-				zoomRect.InitScreenOverlay(zoom_overlay);
-
-				GE.getPlugin().getFeatures().appendChild(zoom_overlay);
+				rectZoomUnzoom.InitScreenOverlay(overlayZoomUnzoom);
+	
+				GE.getPlugin().getFeatures().appendChild(overlayZoomUnzoom);
 			}
-			zoom_overlay.setVisibility(enabling);
-
-			if (unzoom_overlay == null) {
-				KmlIcon icon = GE.getPlugin().createIcon("");
-				String href = Options.ZOOM_OUT_URL;
-				icon.setHref(href);
-				unzoom_overlay = GE.getPlugin().createScreenOverlay("");
-				unzoom_overlay.setIcon(icon);
-
-				// Set the ScreenOverlay's position and size
-				unzoomRect.InitScreenOverlay(unzoom_overlay);
-
-				GE.getPlugin().getFeatures().appendChild(unzoom_overlay);
-			}
-			unzoom_overlay.setVisibility(enabling);
+			overlayZoomUnzoom.setVisibility(enabling);
+	
 		}
 		else // disabling 
 		{
-			if (zoom_overlay != null) {
-				zoom_overlay.setVisibility(enabling);
-				GE.getPlugin().getFeatures().removeChild(zoom_overlay);
-			}
-
-			if (unzoom_overlay != null) {
-				unzoom_overlay.setVisibility(enabling);
-				GE.getPlugin().getFeatures().removeChild(unzoom_overlay);
+			if (overlayZoomUnzoom != null) {
+				overlayZoomUnzoom.setVisibility(enabling);
+				GE.getPlugin().getFeatures().removeChild(overlayZoomUnzoom);
+				overlayZoomUnzoom = null;
 			}
 		}
 	}
@@ -138,35 +118,16 @@ public class SB_Interactor extends OverlayHelpers
 	/*==================================================*/
 	private int x = 0;
 	private int y = 0;
-
-	boolean action = false;
+	
 	boolean cameraPositionChanged = false;
-	boolean autoZoomUnzoom = false;
-	Timer zoomer = new Timer() {
-
-		@Override
-		public void run() {
-			ChangeRange(50);
-		}
-	};
-
-	Timer unzoomer = new Timer() {
-
-		@Override
-		public void run() {
-			ChangeRange(-50);
-		}
-	};
 
 	@Override
 	public void onClick(KmlMouseEvent event) {
 		event.preventDefault();
 
-		// Log.write("SiteInteractor::onClick()");
-
-		if (cameraPositionChanged || autoZoomUnzoom)
+		if (cameraPositionChanged)
 			return;
-
+		
 		if (event.getTarget().getType().equals("KmlPlacemark")) {
 			KmlPlacemark placemark = (KmlPlacemark) event.getTarget();
 			String json = placemark.getSnippet();
@@ -174,12 +135,10 @@ public class SB_Interactor extends OverlayHelpers
 
 			String type = obj.get("type").isString().stringValue();
 			int id = (int) obj.get("id").isNumber().doubleValue();
-
-			//Log.write("" + obj.toString());
 			this.view.Select(type, id);
 		}
 		else
-		{
+		{   // they click Navigation Controls
 	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getTransitionSpeed());
 	        this.view.getCamera().Apply();
 	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getRegularSpeed());
@@ -192,22 +151,18 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onMouseDown(KmlMouseEvent event) {
+		_AbstractView.ResetTimeOut();
 		event.preventDefault();
 		x = event.getClientX();
 		y = event.getClientY();
 
 		switch (HitTest(x, y))
 		{
-		case OnZoomButton:
-			zoomer.scheduleRepeating(100);
-			autoZoomUnzoom = true;
+		case OnZoomUnzoomBar:
 			break;
-		case OnUnzoomButton:
-			unzoomer.scheduleRepeating(100);
-			autoZoomUnzoom = true;
+		case OnCentralBar:
 			break;
 		case AnywhereElse:
-			action = true;
 			break;
 		}
 
@@ -215,20 +170,12 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onMouseUp(KmlMouseEvent event) {
+		_AbstractView.ResetTimeOut();
 		event.preventDefault();
 		if (cameraPositionChanged)
 		{
 			cameraPositionChanged = false;
 			view.onHeadingChanged();
-		}
-
-		action = false;
-
-		if (autoZoomUnzoom)
-		{
-			autoZoomUnzoom = false;
-			zoomer.cancel();
-			unzoomer.cancel();
 		}
 	}
 
@@ -245,11 +192,27 @@ public class SB_Interactor extends OverlayHelpers
 		event.preventDefault();
 		int newX = event.getClientX();
 		int newY = event.getClientY();
-
-		if (HitTest(newX, newY) != WhereIsMouse.AnywhereElse)
-			return;
-
-		if (action) {
+		double dZ;
+		switch (HitTest(newX, newY))
+		{
+		case OnZoomUnzoomBar:
+			if (event.getButton() == 0) {
+				dZ = newY - y;
+				ChangeRange(-dZ);
+				y += dZ;
+			}
+			break;
+		case OnCentralBar:
+			if (view.getGeoItem().getType() == "building" &&
+				Options.SUPPORT_PAN) {
+				if (event.getButton() == 0) {
+					dZ = newY - y;
+					this.view.Pan(dZ);
+					y += dZ;
+				}
+				break;
+			}
+		case AnywhereElse:
 			switch (event.getButton()) {
 			case 0: // LEFT
 				double dX = newX - x;
@@ -261,11 +224,12 @@ public class SB_Interactor extends OverlayHelpers
 				y += dY;
 				break;
 			case 2: // RIGHT
-				double dZ = newY - y;
+				dZ = newY - y;
 				ChangeRange(-dZ);
 				y += dZ;
 				break;
 			}
+			break;
 		}
 	}
 }

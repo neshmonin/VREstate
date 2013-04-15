@@ -1,10 +1,12 @@
 package com.condox.vrestate.client.view;
 
+import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.SB_Interactor;
+import com.condox.vrestate.client.interactor.SB_Kiosk_Interactor;
 import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.nitrous.gwt.earth.client.api.GEVisibility;
 
@@ -30,8 +32,12 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 
 		if (enabling) {
 			GE.getPlugin().getNavigationControl().setVisibility(GEVisibility.VISIBILITY_AUTO);
-			if (_interactor == null)
-				_interactor = new SB_Interactor(this);
+			if (_interactor == null) {
+				if (Options.ROLE == Options.ROLES.KIOSK)
+					_interactor = new SB_Kiosk_Interactor(this);
+				else
+					_interactor = new SB_Interactor(this);
+			}
 			_interactor.setEnabled(true);
 		}
 		else
