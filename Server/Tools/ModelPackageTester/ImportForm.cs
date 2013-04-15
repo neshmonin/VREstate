@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Vre.Server.Model.Kmz;
+using Vre.Server;
 
 namespace ModelPackageTester
 {
@@ -19,7 +20,8 @@ namespace ModelPackageTester
         private string _displayModelFileName = null;
         private string _overlayModelFileName = null;
         private string _poiModelFileName = null;
-        private string _bubbleTemplateFileName = null;
+        private string _bubbleWebTemplateFileName = null;
+        private string _bubbleKioskTemplateFileName = null;
 
         private void onNewModelFileName(object sender, string filename)
         {
@@ -38,10 +40,15 @@ namespace ModelPackageTester
                 _poiModelFileName = filename;
                 lblPoiModelFile.Text = filename;
             }
-            else if (sender.Equals(btnBubbleTemplateBrowse) || sender.Equals(lblBubbleTemplateFile))
+            else if (sender.Equals(btnBubbleWebTemplateBrowse) || sender.Equals(lblBubbleWebTemplateFile))
             {
-                _bubbleTemplateFileName = filename;
-                lblBubbleTemplateFile.Text = filename;
+                _bubbleWebTemplateFileName = filename;
+                lblBubbleWebTemplateFile.Text = filename;
+            }
+            else if (sender.Equals(btnBubbleKioskTemplateBrowse) || sender.Equals(lblBubbleKioskTemplateFile))
+            {
+                _bubbleKioskTemplateFileName = filename;
+                lblBubbleKioskTemplateFile.Text = filename;
             }
         }
 
@@ -105,10 +112,16 @@ namespace ModelPackageTester
                 }
             }
 
-            if (_bubbleTemplateFileName != null)
+            if (_bubbleWebTemplateFileName != null)
             {
-                commandLine.Append(" bubbletemplate=");
-                insertPath(_bubbleTemplateFileName, ref commandLine);
+                commandLine.Append(" bubblewebtemplate=");
+                insertPath(_bubbleWebTemplateFileName, ref commandLine);
+            }
+
+            if (_bubbleKioskTemplateFileName != null)
+            {
+                commandLine.Append(" bubblekiosktemplate=");
+                insertPath(_bubbleKioskTemplateFileName, ref commandLine);
             }
 
             commandLine.AppendFormat(" buildingStatus={0}", cbxNewBuildingStatus.SelectedItem as string);
@@ -161,7 +174,8 @@ namespace ModelPackageTester
             cbxNewBuildingStatus.SelectedIndex = 2;
         }
 
-        public void Init(string modelFileName, string stiFileName, string floorPlanPath, Kmz model, 
+        public void Init(ModelImportSettings settings,
+            string modelFileName, string stiFileName, string floorPlanPath, Kmz model,
             string executablePath, bool allowDrop, bool isProduction)
         {
             _modelFileName = modelFileName;
@@ -169,7 +183,122 @@ namespace ModelPackageTester
             _floorPlanPath = floorPlanPath;
             _model = model;
             _executablePath = executablePath;
+            initInt(allowDrop, isProduction);
 
+            string prop, path;
+
+            prop = settings.EstateDeveloperName;
+            if (prop != null) selectComboItem(cbxDeveloper, prop);
+
+            prop = settings.SiteName;
+            if (prop != null) tbSite.Text = prop;
+
+            prop = settings.DisplayModelFileName;
+            if (prop != null)
+            {
+                path = Path.Combine(settings.BasePath, prop);
+                if (File.Exists(path))
+                {
+                    _displayModelFileName = path;
+                    lblDisplayModelFile.Text = path;
+                }
+            }
+
+            prop = settings.OverlayModelFileName;
+            if (prop != null)
+            {
+                path = Path.Combine(settings.BasePath, prop);
+                if (File.Exists(path))
+                {
+                    _overlayModelFileName = path;
+                    lblOverlayModelFile.Text = path;
+                }
+            }
+
+            prop = settings.PoiModelFileName;
+            if (prop != null)
+            {
+                path = Path.Combine(settings.BasePath, prop);
+                if (File.Exists(path))
+                {
+                    _poiModelFileName = path;
+                    lblPoiModelFile.Text = path;
+                }
+            }
+
+            prop = settings.BubbleWebTemplateFileName;
+            if (prop != null)
+            {
+                path = Path.Combine(settings.BasePath, prop);
+                if (File.Exists(path))
+                {
+                    _bubbleWebTemplateFileName = path;
+                    lblBubbleWebTemplateFile.Text = path;
+                }
+            }
+
+            prop = settings.BubbleKioskTemplateFileName;
+            if (prop != null)
+            {
+                path = Path.Combine(settings.BasePath, prop);
+                if (File.Exists(path))
+                {
+                    _bubbleKioskTemplateFileName = path;
+                    lblBubbleKioskTemplateFile.Text = path;
+                }
+            }
+
+            prop = settings.NewBuildingStatusName;
+            if (prop != null) selectComboItem(cbxNewBuildingStatus, prop);
+
+            prop = settings.NewSuiteStatusName;
+            if (prop != null) selectComboItem(cbxNewSuiteStatus, prop);
+
+            prop = settings.BuildingToImportName;
+            if (prop != null)
+            {
+                cbSingleBuilding.Checked = true;
+                cbSingleBuilding_CheckedChanged(this, null);
+
+                selectComboItem(cbxBuildings, prop);
+
+                prop = settings.BuildingStreetAddress;
+                if (prop != null) tbStreetAddress.Text = prop;
+
+                prop = settings.BuildingMunicipality;
+                if (prop != null) tbMunicipality.Text = prop;
+
+                prop = settings.BuildingStateProvince;
+                if (prop != null) tbStateProvince.Text = prop;
+
+                prop = settings.BuildingPostalCode;
+                if (prop != null) tbPostalCode.Text = prop;
+
+                prop = settings.BuildingCountry;
+                if (prop != null) tbCountry.Text = prop;
+            }
+            else
+            {
+                cbSingleBuilding.Checked = false;
+                cbSingleBuilding_CheckedChanged(this, null);
+            }
+
+            btnImport.Enabled = (cbxDeveloper.Text.Length > 0) && (tbSite.Text.Length > 0);
+        }
+
+        public void Init(string modelFileName, string stiFileName, string floorPlanPath, Kmz model,
+            string executablePath, bool allowDrop, bool isProduction)
+        {
+            _modelFileName = modelFileName;
+            _stiFileName = stiFileName;
+            _floorPlanPath = floorPlanPath;
+            _model = model;
+            _executablePath = executablePath;
+            initInt(allowDrop, isProduction);
+        }
+
+        private void initInt(bool allowDrop, bool isProduction)
+        {
             string edListFile = Path.Combine(Path.GetDirectoryName(_executablePath), "estate-developer-list.txt");
             if (File.Exists(edListFile))
             {
@@ -182,8 +311,7 @@ namespace ModelPackageTester
                         if (line.Length > 0) cbxDeveloper.Items.Add(line);
                     }
                 }
-                int idx = cbxDeveloper.Items.IndexOf("Resale");
-                if (idx >= 0) cbxDeveloper.SelectedIndex = idx;
+                selectComboItem(cbxDeveloper, "Resale");
             }
 
             if (!allowDrop)
@@ -192,11 +320,11 @@ namespace ModelPackageTester
                 lblDisplayModelFile.Text = string.Empty;
                 lblOverlayModelFile.Text = string.Empty;
                 lblPoiModelFile.Text = string.Empty;
-                lblBubbleTemplateFile.Text = string.Empty;
+                lblBubbleWebTemplateFile.Text = string.Empty;
                 lblDisplayModelFile.AllowDrop = false;
                 lblOverlayModelFile.AllowDrop = false;
                 lblPoiModelFile.AllowDrop = false;
-                lblBubbleTemplateFile.AllowDrop = false;
+                lblBubbleWebTemplateFile.AllowDrop = false;
             }
 
             if (isProduction)
@@ -205,13 +333,16 @@ namespace ModelPackageTester
                 ForeColor = SystemColors.HighlightText;
                 BackColor = SystemColors.Highlight;
             }
-        }
 
-        private void ImportForm_Shown(object sender, EventArgs e)
-        {
             cbxBuildings.Items.Clear();
             foreach (Building b in _model.Model.Site.Buildings)
                 cbxBuildings.Items.Add(b.Name);
+        }
+
+        private static void selectComboItem(ComboBox target, string desirableItem)
+        {
+            int idx = target.Items.IndexOf(desirableItem);
+            if (idx >= 0) target.SelectedIndex = idx;
         }
 
         private void cbSingleBuilding_CheckedChanged(object sender, EventArgs e)

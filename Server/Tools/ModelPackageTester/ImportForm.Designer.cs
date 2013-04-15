@@ -66,8 +66,11 @@
             this.label14 = new System.Windows.Forms.Label();
             this.cbxNewBuildingStatus = new System.Windows.Forms.ComboBox();
             this.label16 = new System.Windows.Forms.Label();
-            this.lblBubbleTemplateFile = new System.Windows.Forms.Label();
-            this.btnBubbleTemplateBrowse = new System.Windows.Forms.Button();
+            this.lblBubbleWebTemplateFile = new System.Windows.Forms.Label();
+            this.btnBubbleWebTemplateBrowse = new System.Windows.Forms.Button();
+            this.label17 = new System.Windows.Forms.Label();
+            this.lblBubbleKioskTemplateFile = new System.Windows.Forms.Label();
+            this.btnBubbleKioskTemplateBrowse = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
@@ -159,11 +162,11 @@
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.tbResults.Enabled = false;
-            this.tbResults.Location = new System.Drawing.Point(15, 385);
+            this.tbResults.Location = new System.Drawing.Point(15, 418);
             this.tbResults.Multiline = true;
             this.tbResults.Name = "tbResults";
             this.tbResults.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.tbResults.Size = new System.Drawing.Size(578, 155);
+            this.tbResults.Size = new System.Drawing.Size(578, 176);
             this.tbResults.TabIndex = 4;
             // 
             // btnDisplayModelBrowse
@@ -184,7 +187,7 @@
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.panel1.Controls.Add(this.btnImport);
             this.panel1.Controls.Add(this.cbDryRun);
-            this.panel1.Location = new System.Drawing.Point(15, 348);
+            this.panel1.Location = new System.Drawing.Point(15, 379);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(578, 31);
             this.panel1.TabIndex = 8;
@@ -216,7 +219,7 @@
             // 
             this.cbxNewSuiteStatus.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbxNewSuiteStatus.FormattingEnabled = true;
-            this.cbxNewSuiteStatus.Location = new System.Drawing.Point(154, 321);
+            this.cbxNewSuiteStatus.Location = new System.Drawing.Point(154, 352);
             this.cbxNewSuiteStatus.Name = "cbxNewSuiteStatus";
             this.cbxNewSuiteStatus.Size = new System.Drawing.Size(162, 21);
             this.cbxNewSuiteStatus.TabIndex = 3;
@@ -224,7 +227,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(12, 324);
+            this.label6.Location = new System.Drawing.Point(12, 355);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(88, 13);
             this.label6.TabIndex = 3;
@@ -378,6 +381,7 @@
             this.cbxDeveloper.Size = new System.Drawing.Size(258, 21);
             this.cbxDeveloper.TabIndex = 11;
             this.cbxDeveloper.SelectedIndexChanged += new System.EventHandler(this.cbxDeveloper_TextChanged);
+            this.cbxDeveloper.TextChanged += new System.EventHandler(this.cbxDeveloper_TextChanged);
             // 
             // label13
             // 
@@ -454,7 +458,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(12, 297);
+            this.label14.Location = new System.Drawing.Point(12, 328);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(102, 13);
             this.label14.TabIndex = 3;
@@ -464,7 +468,7 @@
             // 
             this.cbxNewBuildingStatus.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbxNewBuildingStatus.FormattingEnabled = true;
-            this.cbxNewBuildingStatus.Location = new System.Drawing.Point(154, 294);
+            this.cbxNewBuildingStatus.Location = new System.Drawing.Point(154, 325);
             this.cbxNewBuildingStatus.Name = "cbxNewBuildingStatus";
             this.cbxNewBuildingStatus.Size = new System.Drawing.Size(162, 21);
             this.cbxNewBuildingStatus.TabIndex = 3;
@@ -474,56 +478,94 @@
             this.label16.AutoSize = true;
             this.label16.Location = new System.Drawing.Point(12, 271);
             this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(86, 13);
+            this.label16.Size = new System.Drawing.Size(115, 13);
             this.label16.TabIndex = 3;
-            this.label16.Text = "Bubble template:";
+            this.label16.Text = "Bubble template (web):";
             // 
-            // lblBubbleTemplateFile
+            // lblBubbleWebTemplateFile
             // 
-            this.lblBubbleTemplateFile.AllowDrop = true;
-            this.lblBubbleTemplateFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.lblBubbleWebTemplateFile.AllowDrop = true;
+            this.lblBubbleWebTemplateFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblBubbleTemplateFile.AutoEllipsis = true;
-            this.lblBubbleTemplateFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.lblBubbleTemplateFile.Location = new System.Drawing.Point(151, 271);
-            this.lblBubbleTemplateFile.Name = "lblBubbleTemplateFile";
-            this.lblBubbleTemplateFile.Size = new System.Drawing.Size(259, 13);
-            this.lblBubbleTemplateFile.TabIndex = 0;
-            this.lblBubbleTemplateFile.Text = "drop file here or press Browse -->";
-            this.lblBubbleTemplateFile.DragDrop += new System.Windows.Forms.DragEventHandler(this.ImportForm2_DragDrop);
-            this.lblBubbleTemplateFile.DragEnter += new System.Windows.Forms.DragEventHandler(this.ImportForm_DragEnter);
+            this.lblBubbleWebTemplateFile.AutoEllipsis = true;
+            this.lblBubbleWebTemplateFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lblBubbleWebTemplateFile.Location = new System.Drawing.Point(151, 271);
+            this.lblBubbleWebTemplateFile.Name = "lblBubbleWebTemplateFile";
+            this.lblBubbleWebTemplateFile.Size = new System.Drawing.Size(259, 13);
+            this.lblBubbleWebTemplateFile.TabIndex = 0;
+            this.lblBubbleWebTemplateFile.Text = "drop file here or press Browse -->";
+            this.lblBubbleWebTemplateFile.DragDrop += new System.Windows.Forms.DragEventHandler(this.ImportForm2_DragDrop);
+            this.lblBubbleWebTemplateFile.DragEnter += new System.Windows.Forms.DragEventHandler(this.ImportForm_DragEnter);
             // 
-            // btnBubbleTemplateBrowse
+            // btnBubbleWebTemplateBrowse
             // 
-            this.btnBubbleTemplateBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnBubbleTemplateBrowse.Location = new System.Drawing.Point(418, 266);
-            this.btnBubbleTemplateBrowse.Name = "btnBubbleTemplateBrowse";
-            this.btnBubbleTemplateBrowse.Size = new System.Drawing.Size(75, 23);
-            this.btnBubbleTemplateBrowse.TabIndex = 2;
-            this.btnBubbleTemplateBrowse.Text = "Browse";
-            this.btnBubbleTemplateBrowse.UseVisualStyleBackColor = true;
-            this.btnBubbleTemplateBrowse.Click += new System.EventHandler(this.btnBrowse2_Click);
+            this.btnBubbleWebTemplateBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnBubbleWebTemplateBrowse.Location = new System.Drawing.Point(418, 266);
+            this.btnBubbleWebTemplateBrowse.Name = "btnBubbleWebTemplateBrowse";
+            this.btnBubbleWebTemplateBrowse.Size = new System.Drawing.Size(75, 23);
+            this.btnBubbleWebTemplateBrowse.TabIndex = 2;
+            this.btnBubbleWebTemplateBrowse.Text = "Browse";
+            this.btnBubbleWebTemplateBrowse.UseVisualStyleBackColor = true;
+            this.btnBubbleWebTemplateBrowse.Click += new System.EventHandler(this.btnBrowse2_Click);
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(12, 301);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(120, 13);
+            this.label17.TabIndex = 3;
+            this.label17.Text = "Bubble template (kiosk):";
+            // 
+            // lblBubbleKioskTemplateFile
+            // 
+            this.lblBubbleKioskTemplateFile.AllowDrop = true;
+            this.lblBubbleKioskTemplateFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblBubbleKioskTemplateFile.AutoEllipsis = true;
+            this.lblBubbleKioskTemplateFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lblBubbleKioskTemplateFile.Location = new System.Drawing.Point(151, 301);
+            this.lblBubbleKioskTemplateFile.Name = "lblBubbleKioskTemplateFile";
+            this.lblBubbleKioskTemplateFile.Size = new System.Drawing.Size(259, 13);
+            this.lblBubbleKioskTemplateFile.TabIndex = 0;
+            this.lblBubbleKioskTemplateFile.Text = "drop file here or press Browse -->";
+            this.lblBubbleKioskTemplateFile.DragDrop += new System.Windows.Forms.DragEventHandler(this.ImportForm2_DragDrop);
+            this.lblBubbleKioskTemplateFile.DragEnter += new System.Windows.Forms.DragEventHandler(this.ImportForm_DragEnter);
+            // 
+            // btnBubbleKioskTemplateBrowse
+            // 
+            this.btnBubbleKioskTemplateBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnBubbleKioskTemplateBrowse.Location = new System.Drawing.Point(418, 296);
+            this.btnBubbleKioskTemplateBrowse.Name = "btnBubbleKioskTemplateBrowse";
+            this.btnBubbleKioskTemplateBrowse.Size = new System.Drawing.Size(75, 23);
+            this.btnBubbleKioskTemplateBrowse.TabIndex = 2;
+            this.btnBubbleKioskTemplateBrowse.Text = "Browse";
+            this.btnBubbleKioskTemplateBrowse.UseVisualStyleBackColor = true;
+            this.btnBubbleKioskTemplateBrowse.Click += new System.EventHandler(this.btnBrowse2_Click);
             // 
             // ImportForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(605, 552);
+            this.ClientSize = new System.Drawing.Size(605, 606);
             this.Controls.Add(this.cbxDeveloper);
             this.Controls.Add(this.cbxNewBuildingStatus);
             this.Controls.Add(this.cbxNewSuiteStatus);
             this.Controls.Add(this.btnPoiModelBrowse);
-            this.Controls.Add(this.btnBubbleTemplateBrowse);
+            this.Controls.Add(this.btnBubbleKioskTemplateBrowse);
+            this.Controls.Add(this.btnBubbleWebTemplateBrowse);
             this.Controls.Add(this.btnOverlayModelBrowse);
             this.Controls.Add(this.btnDisplayModelBrowse);
             this.Controls.Add(this.tbResults);
             this.Controls.Add(this.tbSite);
             this.Controls.Add(this.lblPoiModelFile);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.lblBubbleTemplateFile);
+            this.Controls.Add(this.lblBubbleKioskTemplateFile);
+            this.Controls.Add(this.lblBubbleWebTemplateFile);
             this.Controls.Add(this.lblOverlayModelFile);
             this.Controls.Add(this.label7);
+            this.Controls.Add(this.label17);
             this.Controls.Add(this.label16);
             this.Controls.Add(this.label15);
             this.Controls.Add(this.lblDisplayModelFile);
@@ -536,9 +578,9 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.panel2);
+            this.MinimumSize = new System.Drawing.Size(620, 620);
             this.Name = "ImportForm";
             this.Text = "Import Model - 3D Condo Explorer";
-            this.Shown += new System.EventHandler(this.ImportForm_Shown);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.ImportForm_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.ImportForm_DragEnter);
             this.panel1.ResumeLayout(false);
@@ -590,7 +632,10 @@
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.ComboBox cbxNewBuildingStatus;
         private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.Label lblBubbleTemplateFile;
-        private System.Windows.Forms.Button btnBubbleTemplateBrowse;
+        private System.Windows.Forms.Label lblBubbleWebTemplateFile;
+        private System.Windows.Forms.Button btnBubbleWebTemplateBrowse;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label lblBubbleKioskTemplateFile;
+        private System.Windows.Forms.Button btnBubbleKioskTemplateBrowse;
     }
 }

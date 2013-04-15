@@ -45,6 +45,7 @@
     <Compile Include="CollectionExtensions.cs" />
     <Compile Include="CsvUtilities.cs" />
     <Compile Include="Mls\IMlsInfoProvider.cs" />
+    <Compile Include="ModelImportSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UniversalId.cs" />
     <Compile Include="Utilities.cs" />

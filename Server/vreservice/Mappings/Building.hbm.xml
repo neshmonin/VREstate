@@ -32,7 +32,8 @@
     <property name="DisplayModelUrl" column="DisplayModelUrl" />
     <property name="OverlayModelUrl" column="OverlayModelUrl" />
     <property name="PoiModelUrl" column="PoiModelUrl" />
-    <property name="BubbleTemplateUrl" column="BubbleTemplateUrl" />
+    <property name="BubbleWebTemplateUrl" column="BubbleWebTemplateUrl" />
+    <property name="BubbleKioskTemplateUrl" column="BubbleKioskTemplateUrl" />
     <property name="InitialView" column="InitialView" />
     <property name="WireframeLocation" column="WireframeLocation" />
 

@@ -30,7 +30,8 @@ namespace Vre.Server.BusinessLogic
         public virtual string DisplayModelUrl { get; set; }
         public virtual string OverlayModelUrl { get; set; }
         public virtual string PoiModelUrl { get; set; }
-        public virtual string BubbleTemplateUrl { get; set; }
+        public virtual string BubbleWebTemplateUrl { get; set; }
+        public virtual string BubbleKioskTemplateUrl { get; set; }
         public virtual GeoPoint Location { get; set; }
         public virtual double AltitudeAdjustment { get; set; }
         public virtual GeoPoint Center { get; set; }
@@ -73,7 +74,8 @@ namespace Vre.Server.BusinessLogic
             DisplayModelUrl = fromServer.GetProperty("displayModelUrl", string.Empty);
             OverlayModelUrl = fromServer.GetProperty("overlayModelUrl", string.Empty);
             PoiModelUrl = fromServer.GetProperty("poiModelUrl", string.Empty);
-            BubbleTemplateUrl = fromServer.GetProperty("bubbleTemplateUrl", string.Empty);
+            BubbleWebTemplateUrl = fromServer.GetProperty("bubbleWebTemplateUrl", string.Empty);
+            BubbleKioskTemplateUrl = fromServer.GetProperty("bubbleKioskTemplateUrl", string.Empty);
 
             AddressLine1 = fromServer.GetProperty("addressLine1", string.Empty);
             AddressLine2 = fromServer.GetProperty("addressLine2", string.Empty);
@@ -113,8 +115,10 @@ namespace Vre.Server.BusinessLogic
                 result.Add("overlayModelUrl", OverlayModelUrl);
             if (!string.IsNullOrEmpty(PoiModelUrl))
                 result.Add("poiModelUrl", PoiModelUrl);
-            if (!string.IsNullOrEmpty(BubbleTemplateUrl))
-                result.Add("bubbleTemplateUrl", BubbleTemplateUrl);
+            if (!string.IsNullOrEmpty(BubbleWebTemplateUrl))
+                result.Add("bubbleWebTemplateUrl", BubbleWebTemplateUrl);
+            if (!string.IsNullOrEmpty(BubbleKioskTemplateUrl))
+                result.Add("bubbleKioskTemplateUrl", BubbleKioskTemplateUrl);
 
             if (!string.IsNullOrEmpty(AddressLine1))
                 result.Add("addressLine1", AddressLine1);

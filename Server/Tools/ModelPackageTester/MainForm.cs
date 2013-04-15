@@ -9,6 +9,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Windows.Forms;
 using Vre;
+using Vre.Server;
 using Vre.Server.Model;
 using Vre.Server.Model.Kmz;
 
@@ -16,6 +17,7 @@ namespace ModelPackageTester
 {
     public partial class MainForm : Form
     {
+        private ModelImportSettings _settings = null;
         private string _modelFileName = null;
         private Kmz _lastModel = null;
         private string _stiFileName = null;
@@ -376,6 +378,44 @@ namespace ModelPackageTester
             checkEnableTestButton();
         }
 
+        private void onImportSettings(string filename)
+        {
+            try
+            {
+                _settings = new ModelImportSettings(filename);
+
+                string file;
+
+                file = Path.Combine(_settings.BasePath, _settings.ModelFileName);
+                if (File.Exists(file))
+                {
+                    _modelFileName = file;
+                    lblModelPath.Text = _modelFileName;
+                }
+
+                file = Path.Combine(_settings.BasePath, _settings.SuiteTypeInfoFileName);
+                if (File.Exists(file))
+                {
+                    _stiFileName = file;
+                    lblSuiteTypeInfoPath.Text = _stiFileName;
+                }
+
+                file = Path.Combine(_settings.BasePath, _settings.FloorplanDirectoryName);
+                if (Directory.Exists(file))
+                {
+                    _floorPlanPath = file;
+                    lblFloorPlansPath.Text = _floorPlanPath;
+                }
+
+                checkEnableTestButton();
+            }
+            catch (Exception ex)
+            {
+                _settings = null;
+                MessageBox.Show(ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void checkEnableTestButton()
         {
             btnTest.Enabled = (_modelFileName != null) && (_stiFileName != null) && (_floorPlanPath != null);
@@ -463,8 +503,11 @@ namespace ModelPackageTester
                         else
                         {
                             string ext = Path.GetExtension(file).ToLowerInvariant();
+                            string name = Path.GetFileName(file).ToLowerInvariant();
+
                             if (ext.Equals(".kmz")) onNewModelFileName(file);
                             else if (ext.Equals(".csv")) onNewSuiteTypeInfoFileName(file);
+                            else if (name.EndsWith(".import.txt")) onImportSettings(file);
                             else MessageBox.Show("Unknown file type dropped.",
                                 Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
@@ -488,7 +531,10 @@ namespace ModelPackageTester
         private void btnImport_Click(object sender, EventArgs e)
         {
             ImportForm iform = new ImportForm();
-            iform.Init(_modelFileName, _stiFileName, _floorPlanPath, _lastModel, getImportExecutablePath(), AllowDrop, _isProduction);
+            if (_settings != null)
+                iform.Init(_settings, _modelFileName, _stiFileName, _floorPlanPath, _lastModel, getImportExecutablePath(), AllowDrop, _isProduction);
+            else
+                iform.Init(_modelFileName, _stiFileName, _floorPlanPath, _lastModel, getImportExecutablePath(), AllowDrop, _isProduction);
             iform.ShowDialog();
         }
     }
