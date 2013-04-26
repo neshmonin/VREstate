@@ -26,11 +26,12 @@ public class GET implements RequestCallback{
 	}
 	
 	public static void send(String url, RequestCallback cb) {
-		if (Options.SHOW_SOLD)
+		if (Options.context != "") {
 			if (url.endsWith("?"))
-				url += "ShowSold=true";
+				url += Options.context;
 			else if (url.contains("?"))
-				url += "&ShowSold=true";
+				url += "&" + Options.context;
+		}
 		
 		//url += "&track=true";
 		
@@ -41,7 +42,7 @@ public class GET implements RequestCallback{
 		if (request != null)
 			requests.add(request);
 		Update();
-	};
+	}
 	
 	private static GET theGET = null;
 	private static void Update() {
