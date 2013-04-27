@@ -80,9 +80,10 @@ namespace SuperAdminConsole
         {
             InitializeComponent();
 
-
             theReason = reason;
             m_developer = developer;
+
+            cleanUp();
 
             textExternalLink.Text = DEFAULT;
             textExternalLink.GotFocus += (sender, e) =>
@@ -157,8 +158,6 @@ namespace SuperAdminConsole
                 labelPrice.Visible = false;
                 numericUpDownPrice.Visible = false;
             }
-
-            cleanUp();
 
             theUser = user;
             comboBoxCountry.SelectedIndex = 0;
