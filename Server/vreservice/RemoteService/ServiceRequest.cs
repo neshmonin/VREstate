@@ -12,7 +12,11 @@ namespace Vre.Server.RemoteService
     /// </summary>
     internal class ServiceQuery : NameValueCollection
     {
-        public ServiceQuery(NameValueCollection fromRequestPri, NameValueCollection fromRequestSec)
+	    public ServiceQuery()
+	    {
+	    }
+
+	    public ServiceQuery(NameValueCollection fromRequestPri, NameValueCollection fromRequestSec)
             : base(fromRequestSec)
         {
             Add(fromRequestPri);  // duplicated keys get overwritten

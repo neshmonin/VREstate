@@ -12,7 +12,7 @@ namespace Vre.Server.Task
         {
             try
             {
-                string recipient = ServiceInstances.Configuration.GetValue("AdminMessageRecipients", "admin@3dcondox.com");
+                var recipient = ServiceInstances.Configuration.GetValue("AdminMessageRecipients", "admin@3dcondox.com");
 
                 ServiceInstances.EmailSender.Send(recipient,
                     (summary != null) ? string.Format("Task {0}: {1}", Name, summary) : string.Format("Task {0} alert", Name),
@@ -21,7 +21,7 @@ namespace Vre.Server.Task
             catch (Exception e)
             {
                 ServiceInstances.Logger.Error("Administrative alert was not send.\r\nTask: {0}\r\nSummary: {1}\r\nText: {2}\r\nError: {3}",
-                    Name, (summary != null) ? summary : "<N/A>", text, e);
+                    Name, summary ?? "<N/A>", text, e);
             }
         }
     }
