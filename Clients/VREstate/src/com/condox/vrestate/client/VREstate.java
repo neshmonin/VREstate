@@ -64,7 +64,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 		String url;
 		if (Options.isViewOrder()) {
 			url = Options.HOME_URL + "data/view?type=viewOrder&id="
-					+ Options.getViewOrderId() + "&track=true&SID=" + User.SID;
+					+ Options.getViewOrderId() + "&track=true&&SID=" + User.SID;
 		} else {
 			url = Options.HOME_URL + "data/view?type=site&id="
 					+ Options.getSiteId() + "&track=true&SID=" + User.SID;

@@ -6,6 +6,7 @@ import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.Site;
 import com.condox.vrestate.client.document.Suite;
 import com.condox.vrestate.client.document.SuiteType;
+import com.condox.vrestate.client.document.Suite.Status;
 import com.condox.vrestate.client.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
@@ -171,8 +172,12 @@ public class SuiteView extends _GEView {
 			json.put("VRT_areaUm", new JSONString(type.getAreaUm()));
 		NumberFormat fmt = NumberFormat.getDecimalFormat();
 		if (suite.getPrice() > 0)
-			json.put("VRT_price",
-					new JSONString("$" + fmt.format(suite.getPrice())));
+		{
+			String formattedPrice = fmt.format(suite.getPrice());
+			if (suite.getStatus() == Status.AvailableRent)
+				formattedPrice += "/m";
+			json.put("VRT_price", new JSONString("$" + formattedPrice));
+		}
 		if (type.getBalconies() > 0)
 			json.put("VRT_balconies", new JSONNumber(type.getBalconies()));
 		else

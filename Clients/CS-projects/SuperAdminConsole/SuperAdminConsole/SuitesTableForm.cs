@@ -54,10 +54,13 @@ namespace SuperAdminConsole
                 int int1 = NumberFromFloorName(first["floorName"] as string);
                 int int2 = NumberFromFloorName(second["floorName"] as string);
 
-                if (int1 > int2)
-                    return 1;
-                else if (int1 < int2)
-                    return -1;
+                if (int1 != -1 && int2 != -1)
+                {
+                    if (int1 > int2)
+                        return 1;
+                    else if (int1 < int2)
+                        return -1;
+                }
 
                 string str1 = first["name"] as string;
                 string str2 = second["name"] as string;
@@ -105,7 +108,7 @@ namespace SuperAdminConsole
                     lbl.TabIndex = tabIndex++;
                     this.Controls.Add(lbl);
                 }
-                Vre.Server.BusinessLogic.Suite theSuite = new Vre.Server.BusinessLogic.Suite(suite);
+                Vre.Server.BusinessLogic.Suite theSuite = new Vre.Server.BusinessLogic.Suite(suite, Building);
                 Button btn = new Button();
                 btn.Location = button;
                 btn.Size = new Size(ButtonIncrement - 4, 23);
@@ -161,20 +164,38 @@ namespace SuperAdminConsole
 
         private int NumberFromFloorName(string floor)
         {
-            int int1 = 0;
-            try
-            {
-                int1 = int.Parse(floor);
-            }
-            catch (Exception)
-            { // must be "PH"
+            if (string.IsNullOrEmpty(floor))
+                return -1;
+
+            floor = floor.ToLower();
+            int int1 = -1;
+            if (floor.StartsWith("ph"))
                 int1 = 1000;
+            else
+            if (floor.StartsWith("gf"))
+                int1 = 0;
+            else
+            if (floor.StartsWith("th"))
+                int1 = 0;
+
+            if (int1 != -1)
+            {
                 int firstDigit = floor.IndexOfAny(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
                 if (firstDigit != -1)
                 {
                     int lastDigit = floor.LastIndexOfAny(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
-                    floor = floor.Substring(firstDigit, lastDigit - firstDigit);
+                    floor = floor.Substring(firstDigit, lastDigit - firstDigit + 1);
                     int1 += int.Parse(floor);
+                }
+            }
+            else
+            {
+                try
+                {
+                    int1 = int.Parse(floor);
+                }
+                catch (Exception)
+                { // probably "RG" or something like this
                 }
             }
             return int1;

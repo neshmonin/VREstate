@@ -154,6 +154,7 @@ namespace Vre.Server.BusinessLogic
         {
             EstateDeveloperID = data.GetProperty("estateDeveloperId", -1);
             UserRole = data.GetProperty<User.Role>("role", Role.Visitor);
+            NickName = data.GetProperty("nickName", string.Empty);
             // TODO: deal with personal info (vCard) and brokerage
         }
 

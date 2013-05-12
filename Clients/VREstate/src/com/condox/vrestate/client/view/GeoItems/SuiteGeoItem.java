@@ -65,6 +65,13 @@ public class SuiteGeoItem implements IGeoItem {
 			style.getLineStyle().getColor().set("FFFFFF00"); // BLUE ??
 			style.getLineStyle().setWidth(2.0F);
 			break;
+		case AvailableRent:
+			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
+					+ suite.getName()
+					+ "&txtClr=14854399&shdClr=0&frame=0";
+			style.getLineStyle().getColor().set("FFE2A8FF"); // LIGHT-VIOLET
+			style.getLineStyle().setWidth(2.0F);
+			break;
 		case Selected:
 			href = Options.HOME_URL + "gen/txt?height=30&shadow=2&text="
 					+ suite.getName()

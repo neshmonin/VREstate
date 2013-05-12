@@ -307,7 +307,16 @@ namespace SuperAdminConsole
                 foreach (ClientData cd in admins)
                 {
                     User user = new User(cd);
-                    string nodeName = string.Format("ADMIN <{0}>", user.AutoID);
+                    string nodeName = string.Empty;
+                    if (string.IsNullOrEmpty(user.NickName))
+                        nodeName = string.Format("ADMIN <{0}>", user.AutoID);
+                    else
+                    {
+                        if (user.NickName == "mlsImport")
+                            nodeName = "-MLS-";
+                        else
+                            nodeName = string.Format("ADMIN {0}<{1}>", user.NickName, user.AutoID);
+                    }
                     //TreeNode[] children = new TreeNode[3] { new TreeNode("ViewOrders"),
                     //                                        new TreeNode("Banners"),
                     //                                        new TreeNode("Logs") };
@@ -1095,6 +1104,12 @@ namespace SuperAdminConsole
         {
             m_currentDeveloper = comboBoxEstateDeveloper.SelectedItem as Developer;
             refreshUserAccounts();
+        }
+
+        private void copyURLToClipboardToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ClientData viewOrder = ListViewOrders.SelectedItems[0].Tag as ClientData;
+            Clipboard.SetText(viewOrder["viewOrder-url"] as string);
         }
 
     }

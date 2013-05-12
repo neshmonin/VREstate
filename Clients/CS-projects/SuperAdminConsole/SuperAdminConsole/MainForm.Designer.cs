@@ -84,6 +84,7 @@
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.copyURLToClipboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripViewOrder.SuspendLayout();
             this.pnlStartupShutdown.SuspendLayout();
             this.contextMenuStripUserAccount.SuspendLayout();
@@ -116,6 +117,7 @@
             this.toolStripMenuItemChangeOrderView,
             this.toolStripSeparator1,
             this.toolStripMenuItemDelete,
+            this.copyURLToClipboardToolStripMenuItem,
             this.LoadTheLinkToolStripMenuItem,
             this.toolStripSeparator3,
             this.editNotesForThisItemToolStripMenuItem,
@@ -123,7 +125,7 @@
             this.toolStripSeparator4,
             this.composePromoEmailToolStripMenuItem});
             this.contextMenuStripViewOrder.Name = "contextMenuStripViewOrder";
-            this.contextMenuStripViewOrder.Size = new System.Drawing.Size(224, 204);
+            this.contextMenuStripViewOrder.Size = new System.Drawing.Size(251, 248);
             this.contextMenuStripViewOrder.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripViewOrder_Opening);
             // 
             // toolStripMenuItemEnableViewOrder
@@ -573,6 +575,13 @@
             // 
             this.columnHeader7.Text = "targetId";
             // 
+            // copyURLToClipboardToolStripMenuItem
+            // 
+            this.copyURLToClipboardToolStripMenuItem.Name = "copyURLToClipboardToolStripMenuItem";
+            this.copyURLToClipboardToolStripMenuItem.Size = new System.Drawing.Size(250, 22);
+            this.copyURLToClipboardToolStripMenuItem.Text = "Copy viewOrder URL to clipboard";
+            this.copyURLToClipboardToolStripMenuItem.Click += new System.EventHandler(this.copyURLToClipboardToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -669,6 +678,7 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStripUserAccount;
         private System.Windows.Forms.ToolStripMenuItem deleteThisAccountToolStripMenuItem;
         private System.Windows.Forms.ComboBox comboBoxEstateDeveloper;
+        private System.Windows.Forms.ToolStripMenuItem copyURLToClipboardToolStripMenuItem;
     }
 }
 

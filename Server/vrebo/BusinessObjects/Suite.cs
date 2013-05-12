@@ -77,14 +77,17 @@ namespace Vre.Server.BusinessLogic
             AutoID = fromServer.GetProperty("id", -1);
 
             int suiteTypeId = fromServer.GetProperty("suiteTypeId", 0);
-            Boolean found = false;            
-            foreach (SuiteType suiteType in building.ConstructionSite.SuiteTypes)
+            Boolean found = false;
+            if (building != null && building.ConstructionSite != null)
             {
-                if (suiteType.AutoID == suiteTypeId)
+                foreach (SuiteType suiteType in building.ConstructionSite.SuiteTypes)
                 {
-                    SuiteType = suiteType;  // informational only
-                    found = true;
-                    break;
+                    if (suiteType.AutoID == suiteTypeId)
+                    {
+                        SuiteType = suiteType;  // informational only
+                        found = true;
+                        break;
+                    }
                 }
             }
             if (!found)

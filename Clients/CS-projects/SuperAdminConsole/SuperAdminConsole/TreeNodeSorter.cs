@@ -23,7 +23,14 @@ namespace SuperAdminConsole
             {
                 if (tx.Text == "SELF (superAdmin)")
                     return -1;
-                else if (ty.Text == "SELF (superAdmin)")
+
+                if (ty.Text == "SELF (superAdmin)")
+                    return 1;
+
+                if (tx.Text == "-MLS-")
+                    return -1;
+
+                if (ty.Text == "-MLS-")
                     return 1;
 
                 stringX = tx.Text.Substring(tx.Text.IndexOf(' '));

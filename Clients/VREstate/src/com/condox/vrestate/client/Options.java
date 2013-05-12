@@ -1,5 +1,8 @@
 package com.condox.vrestate.client;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -14,22 +17,14 @@ public class Options implements RequestCallback {
 	public enum ROLES {KIOSK, VISITOR};
 	public static ROLES ROLE = ROLES.VISITOR;
 
-	public static boolean DEBUG_MODE = true;
-
-	// TODO: this must be set only if this client in Kiosk mode
-//	public static boolean KIOSK_MODE = false;
-	// public static boolean KIOSK = true;
+	public static boolean DEBUG_MODE = false;
 
 	public static String URL_VRT;
 	public static String URL_STATIC;
 	public static String URL_MODEL;
 
 	public static String URL_BUTTONS;
-	// public static String URL_BUTTON_PANORAMIC_VIEW;
-	// public static String URL_BUTTON_EXIT_PANORAMIC_VIEW;
-	// public static String URL_BUTTON_CENTER_PANORAMIC_VIEW;
-
-	public static int BUILDING_ID;
+	public static int BUILDING_ID = -1;
 	public static int SUITE_ID;
 	public static String HOME_URL;
 	public static String ZOOM_UNZOOM_URL;
@@ -41,57 +36,54 @@ public class Options implements RequestCallback {
 	public static String SUITE_INFO_TEMPLATE;
 	public static FrameElement SUITE_INFO;
 	public static Integer SUITE_DISTANCE;
-	public static boolean SHOW_SOLD = false;
 	public static boolean USE_FILTER = true;
 	// If SUPPORT_PAN is true, user can pan up and down a building
 	public static boolean SUPPORT_PAN = false;
 
-//	private static Options theOptions = null;
-//	private VREstate vrEstate = null;
-
 	private Options(VREstate vrEstate) {
-//		this.vrEstate = vrEstate;
 	}
 
 	public static boolean isViewOrder() {
 		return Options.getViewOrderId() != null;
 	}
 
+	public static String context = "";
 	public static void Init(VREstate vrEstate) {
 		Map<String, List<String>> params = Window.Location.getParameterMap();
-		// DEVELOPER_ID = params.containsKey("DeveloperId") ? "Developer#"
-		// + params.get("DeveloperId").get(0) : "-1";
+		Log.write(params.toString());
 
-		// SITE_ID = params.containsKey("SiteId") ? Integer.valueOf(params.get(
-		// "SiteId").get(0)) : -1;
+		Map<String, List<String>> contextMap = new HashMap<String, List<String>>(params);
+		//--------------------------------------------------//
+		List<String> oneValueList = new ArrayList<String>();
+		oneValueList.add("true");
+		contextMap.put("includeImported", oneValueList);
+		//--------------------------------------------------//
 
-		BUILDING_ID = params.containsKey("BuildingId") ? Integer.valueOf(params
-				.get("BuildingId").get(0)) : -1;
+		if (params.containsKey("gwt.codesvr"))			
+			contextMap.remove("gwt.codesvr"); // if we run from Eclipse, better strip this down
+		if (params.containsKey("viewOrderId"))			
+			contextMap.remove("viewOrderId"); // we handle this parameter outside the Init
+		
+		if (params.containsKey("UseFilter")) {			
+			USE_FILTER = Boolean.valueOf(params.get("UseFilter").get(0));
+			contextMap.remove("UseFilter");
+		}
 
-		// SUITE_ID = params.containsKey("SuiteId") ?
-		// Integer.valueOf(params.get(
-		// "SuiteId").get(0)) : -1;
+		if (params.containsKey("BuildingId")) {			
+			BUILDING_ID = Integer.valueOf(params.get("BuildingId").get(0));
+			contextMap.remove("BuildingId");
+		}
 
-		SHOW_SOLD = params.containsKey("ShowSold") ? Boolean.valueOf(params
-				.get("ShowSold").get(0)) : false;
-		USE_FILTER = params.containsKey("UseFilter") ? Boolean.valueOf(params
-				.get("UseFilter").get(0)) : true;
-
-		// BUILDING_ID = params.containsKey("BuildingId") ? "Building#"
-		// + params.get("BuildingId").get(0) : "-1";
-		// SUITE_ID = params.containsKey("SuiteId") ? "Suite#"
-		// + params.get("SuiteId").get(0) : "-1";
-		// SUITE_DISTANCE = Integer.valueOf(params.containsKey("Distance")?
-		// params.get("Distance").get(0) : "-1");
-
-		if (BUILDING_ID != -1)
-			DEBUG_MODE = params.containsKey("test") ? Boolean.valueOf(params
-					.get("test").get(0)) : false;
+		if (BUILDING_ID != -1) {
+			if (params.containsKey("test")) {
+				DEBUG_MODE = Boolean.valueOf(params.get("test").get(0));
+				contextMap.remove("test");
+			}
+		}
 		else
 			DEBUG_MODE = (GWT.getModuleBaseURL().contains("/vre/"));
 
 		Log.write("DEBUG_MODE=" + DEBUG_MODE);
-		//DEBUG_MODE = true;
 
 		if (DEBUG_MODE) {
 			URL_VRT = "https://vrt.3dcondox.com/vre/";
@@ -103,9 +95,12 @@ public class Options implements RequestCallback {
 			URL_MODEL = "https://models.3dcondox.com/";
 		}
 
-
-		URL_BUTTONS = params.containsKey("SchemaPath") ? params.get(
-				"SchemaPath").get(0) : URL_VRT + "buttons/";
+		if (params.containsKey("SchemaPath")) {			
+			URL_BUTTONS = params.get("SchemaPath").get(0);
+			contextMap.remove("BuildingId");
+		}
+		else URL_BUTTONS = URL_VRT + "buttons/";
+		
 		HOME_URL = URL_VRT;
 
 		ZOOM_UNZOOM_URL = URL_BUTTONS + "ZoomUnzoomBar.png";
@@ -115,41 +110,24 @@ public class Options implements RequestCallback {
 		URL_BUTTON_EXIT_PANORAMIC_VIEW = URL_BUTTONS + "Back.png";
 		URL_BUTTON_CENTER_PANORAMIC_VIEW = URL_BUTTONS + "Center.png";
 
-		if (params.containsKey("role")&&params.get("role").get(0).equals("kiosk"))
-			ROLE = ROLES.KIOSK;
-		Log.write(params.toString());
+		if (params.containsKey("role")) {			
+			if (params.get("role").get(0).equals("kiosk"))
+				ROLE = ROLES.KIOSK;
+			contextMap.remove("role");
+		}
 		Log.write("ROLE:" + ROLE);
 		
-		// SUITE_INFO_TEMPLATE = HOME_URL + "templates/SuiteInfo.html";
-//		String request = KIOSK_MODE ? (HOME_URL + "ReducedInfoKiosk.html") : (HOME_URL + "ReducedInfoWeb.html");
-//		String request = /*HOME_URL + */"template.html";
-//		String request = "test.html";
+		Iterator<String> keyIterator = contextMap.keySet().iterator();
+		while (keyIterator.hasNext()) {
+		    String key = keyIterator.next();
+			String param = contextMap.get(key).get(0);
+			context += key + "=" + param;
+			if (keyIterator.hasNext())
+				context += "&";
+		}
+		Log.write("context=" + context);
 		
-//		Element frame = DOM.createIFrame();
-//		SUITE_INFO = (FrameElement)frame;
-//		SUITE_INFO.setAttribute("frameBorder", "0");
-//		SUITE_INFO.setAttribute("src", "template.html");
-//		SUITE_INFO.setAttribute("id", "SuiteInfo");
-////		SUITE_INFO.getStyle().setVisibility(Visibility.HIDDEN);
-//		RootPanel.getBodyElement().appendChild(SUITE_INFO);
-		
-//		Element elem = DOM.createIFrame();
-//		Options.SUITE_INFO = (FrameElement)elem;
-//		Options.SUITE_INFO.setAttribute("frameBorder", "0");
-//		if (ROLE.equals(ROLES.KIOSK))
-//			Options.SUITE_INFO.setAttribute("src", "templates/default.html");
-//		else
-//			Options.SUITE_INFO.setAttribute("src", "templates/default.html");
-//		Options.SUITE_INFO.setAttribute("id", "SuiteInfo");
-//		Options.SUITE_INFO.setAttribute("name", "SuiteInfo");
-//		SUITE_INFO.getStyle().setVisibility(Visibility.HIDDEN);
-//		RootPanel.getBodyElement().appendChild(Options.SUITE_INFO);
-
-//		theOptions = new Options(vrEstate);
 		vrEstate.LoginUser();
-//		GET.send(request, theOptions);
-		// isReady = true;
-
 	};
 
 	@Override

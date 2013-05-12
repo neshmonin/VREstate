@@ -15,7 +15,9 @@ public class Suite implements I_VRObject {
 		OnHold, 
 		ResaleAvailable,
 		Selected,
-		Layout		
+		Layout,
+		AvailableRent,
+		NotSupported
 	}
 	
 	private int id = -1;
@@ -45,9 +47,10 @@ public class Suite implements I_VRObject {
 			else if (status.equals("ResaleAvailable")) this.status = Status.ResaleAvailable;
 			else if (status.equals("Sold")) this.status = Status.Sold;
 			else if (status.equals("OnHold")) this.status = Status.OnHold;
+			else if (status.equals("AvailableRent")) this.status = Status.AvailableRent;
 			else this.status = Status.Selected;
 		} else
-			this.status = Status.Selected;
+			this.status = Status.NotSupported;
 		
 		price = -1;
 		if ((obj.get("currentPrice") != null)&&
