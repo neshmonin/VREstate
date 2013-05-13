@@ -8,14 +8,14 @@ namespace Vre.Server.Mls
     public class RetsCsvParser
     {
         private StringBuilder _readWarnings;
-        private List<MlsUnit> _units;
+        private List<MlsItem> _units;
 
-        public IEnumerable<MlsUnit> Units { get { return _units; } }
+        public IEnumerable<MlsItem> Units { get { return _units; } }
 
         public string Parse(string fileName)
         {
             _readWarnings = new StringBuilder();
-            _units = new List<MlsUnit>();
+            _units = new List<MlsItem>();
 
             try
             {
@@ -79,7 +79,7 @@ namespace Vre.Server.Mls
         {
             string mls = null;
             double prc = 0.0;
-            MlsUnit.SaleLease sl = MlsUnit.SaleLease.Unknown;
+            MlsItem.SaleLease sl = MlsItem.SaleLease.Unknown;
 
             if ((_mlsNumIdx >= 0) && (row.Length > _mlsNumIdx)) mls = row[_mlsNumIdx];
 
@@ -92,8 +92,8 @@ namespace Vre.Server.Mls
             if ((_saleLeaseIdx >= 0) && (row.Length > _saleLeaseIdx))
             {
                 string sls = row[_saleLeaseIdx];
-                if (sls.Equals("Sale")) sl = MlsUnit.SaleLease.Sale;
-                else if (sls.Equals("Lease")) sl = MlsUnit.SaleLease.Lease;
+                if (sls.Equals("Sale")) sl = MlsItem.SaleLease.Sale;
+                else if (sls.Equals("Lease")) sl = MlsItem.SaleLease.Lease;
                 else _readWarnings.AppendFormat("MLS {0}: Unknown SaleLease type: {1}\r\n", mls, sls);
             }
 

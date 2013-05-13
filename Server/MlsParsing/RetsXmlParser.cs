@@ -10,9 +10,9 @@ namespace Vre.Server.Mls
     public class RetsXmlParser : XmlUrlResolver
     {
         private StringBuilder _readWarnings;
-        private List<MlsUnit> _units;
+        private List<MlsItem> _units;
 
-        public IEnumerable<MlsUnit> Units { get { return _units; } }
+        public IEnumerable<MlsItem> Units { get { return _units; } }
 
         //public override Uri ResolveUri(Uri baseUri, string relativeUri)
         //{
@@ -62,7 +62,7 @@ namespace Vre.Server.Mls
         public string Parse(string fileName)
         {
             _readWarnings = new StringBuilder();
-            _units = new List<MlsUnit>();
+            _units = new List<MlsItem>();
 
             try
             {
@@ -177,7 +177,7 @@ namespace Vre.Server.Mls
                 int balc = 0;
                 int terr = 0;
                 double prc = 0.0;
-                MlsUnit.SaleLease sl = MlsUnit.SaleLease.Unknown;
+                MlsItem.SaleLease sl = MlsItem.SaleLease.Unknown;
 
                 if ((aptUnit != null) && aptUnit.Equals("null")) aptUnit = null;
 
@@ -239,8 +239,8 @@ namespace Vre.Server.Mls
 
                 if (saleLease != null)
                 {
-                    if (saleLease.Equals("Sale")) sl = MlsUnit.SaleLease.Sale;
-                    else if (saleLease.Equals("Lease")) sl = MlsUnit.SaleLease.Lease;
+                    if (saleLease.Equals("Sale")) sl = MlsItem.SaleLease.Sale;
+                    else if (saleLease.Equals("Lease")) sl = MlsItem.SaleLease.Lease;
                     else _readWarnings.AppendFormat("MLS {0}: Unknown SaleLease type: {1}\r\n", mls, saleLease);
                 }
 

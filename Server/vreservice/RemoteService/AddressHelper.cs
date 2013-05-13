@@ -71,59 +71,21 @@ namespace Vre.Server.RemoteService
         public static IEnumerable<UpdateableBase> ParseGeographicalAddressToModel(ServiceQuery query, ISession dbSession,
             bool allowMultipleResults)
         {
-            string suite = query["ad_ibn"];
+            var suite = query["ad_ibn"];
+            suite = string.IsNullOrWhiteSpace(suite) ? null : Utilities.NormalizeSuiteNumber(suite);
 
-            if (!string.IsNullOrWhiteSpace(suite)) suite = Utilities.NormalizeSuiteNumber(suite);
-            else suite = null;
+	        var result = new List<UpdateableBase>();
 
-            IList<Building> searchResult = parseGeographicalAddress(query, dbSession);
-            IEnumerable<UpdateableBase> result = new UpdateableBase[0];
+			foreach (var b in parseGeographicalAddress(query, dbSession))
+	        {
+		        if ((suite != null) && (b.Suites.Count > 0))
+				    result.AddRange(b.Suites.Where(s => s.SuiteName.Equals(suite)));
+		        else
+					result.Add(b);
+	        }
 
-            if (searchResult.Count > 0)
-            {
-                if (searchResult.Count > 1)
-                {
-                    if (allowMultipleResults)
-                        result = searchResult.ToArray();
-                    else
-                        throw new ArgumentException("Address: non-unique result returned; please add details");
-                }
-                else
-                {
-                    Building b = searchResult[0];
-
-                    if ((suite != null) && (b.Suites.Count > 0))
-                    {
-                        if (b.Suites.Count > 1)
-                        {
-                            //if (null == suite) throw new ArgumentException("Address: suite number is required");
-
-                            foreach (Suite s in b.Suites)
-                            {
-                                if (s.SuiteName.Equals(suite))
-                                {
-                                    UpdateableBase[] res = new UpdateableBase[1];
-                                    res[0] = s;
-                                    result = res;
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            UpdateableBase[] res = new UpdateableBase[1];
-                            res[0] = b.Suites[0];
-                            result = res;
-                        }
-                    }
-                    else
-                    {
-                        UpdateableBase[] res = new UpdateableBase[1];
-                        res[0] = b;
-                        result = res;
-                    }
-                }
-            }
+			if ((result.Count > 1) && !allowMultipleResults)
+				throw new ArgumentException("Address: non-unique result returned; please add details");
 
             return result;
         }
@@ -174,8 +136,17 @@ namespace Vre.Server.RemoteService
                     else if (streetType.Equals("drive")) streetType = "DR";
                     else if (streetType.Equals("road")) streetType = "RD";
                     else if (streetType.Equals("street")) streetType = "ST";
-                    else if (streetType.Equals("other")) streetType = "";
-                    else throw new ArgumentException("Address: street type is invalid");
+					else if (streetType.Equals("terrace")) streetType = "TERR";
+					else if (streetType.Equals("mews")) streetType = "MEWS";
+					else if (streetType.Equals("way")) streetType = "WAY";
+					else if (streetType.Equals("quay")) streetType = "QUAY";
+					else if (streetType.Equals("boulevard")) streetType = "BLVD";
+					else if (streetType.Equals("square")) streetType = "SQ";
+					else if (streetType.Equals("lane")) streetType = "LANE";
+					else if (streetType.Equals("trail")) streetType = "TR";
+					else if (streetType.Equals("other")) streetType = "";
+                    //else throw new ArgumentException("Address: street type is invalid");
+					else streetType = streetType.Trim().ToUpperInvariant();  // assume already abbreviated name
                 }
                 else
                 {

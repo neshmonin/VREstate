@@ -15,6 +15,7 @@
     <property name="OwnerId" column="OwnerId" />
     <property name="ExpiresOn" column="ExpiresOn" />
     <property name="Enabled" column="Enabled" />
+    <property name="Imported" column="Imported" />
     <property name="Note" column="Note" />
 
     <property name="RequestCounter" column="RequestCounter" />

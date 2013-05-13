@@ -811,6 +811,7 @@ namespace Vre.Server.RemoteService
         {
             ViewOrder viewOrder;
             bool viewOrderValid = false;
+	        bool includeImported = "true".Equals(query["includeImported"]);
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
@@ -832,7 +833,7 @@ namespace Vre.Server.RemoteService
             switch (viewOrder.TargetObjectType)
             {
                 case ViewOrder.SubjectType.Suite:
-                    getViewSuiteViewOrder(session, viewOrder, csrq, resp);
+                    getViewSuiteViewOrder(session, viewOrder, csrq, includeImported, resp);
                     break;
 
                 case ViewOrder.SubjectType.Building:
@@ -879,7 +880,8 @@ namespace Vre.Server.RemoteService
                 ViewResponseSoldPropertyLevel.Suite, false);
         }
 
-        private static void getViewSuiteViewOrder(ClientSession session, ViewOrder viewOrder, ChangeSubscriptionRequest csrq, IResponseData resp)
+        private static void getViewSuiteViewOrder(ClientSession session, ViewOrder viewOrder, 
+			ChangeSubscriptionRequest csrq, bool includeImported, IResponseData resp)
         {
             // TODO: make this variable
             const double defaultProximityQuadradiusM = 1000.0;
@@ -916,14 +918,29 @@ namespace Vre.Server.RemoteService
                 ServiceInstances.Logger.Debug("dSPVO: got {0} live buildings.", buildings.Count);
 
                 using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
-                    viewOrders = dao.GetActiveInBuildings(ViewOrder.ViewOrderProduct.PublicListing, buildings.ConvertTo(b => b.AutoID).ToArray());
+                    viewOrders = dao.GetActiveInBuildings(ViewOrder.ViewOrderProduct.PublicListing, buildings.ConvertTo(b => b.AutoID).ToArray(), includeImported);
 
                 List<int> suiteIds = new List<int>(viewOrders.Count);
                 foreach (ViewOrder vo in viewOrders) suiteIds.Add(vo.TargetObjectId);
                 using (SuiteDao dao = new SuiteDao(session.DbSession))
                     suites = dao.GetByIdList(suiteIds);
 
-                if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, buildings, csrq);
+				// Add new constructed property
+				//
+	            foreach (var b in buildings)
+	            {
+					if ((b.Status == Building.BuildingStatus.InProject)
+						|| (b.Status == Building.BuildingStatus.Constructing)
+						|| (b.Status == Building.BuildingStatus.Built))
+						foreach (var s in b.Suites)
+						{
+							if ((s.Status == Suite.SalesStatus.Available)
+								|| (s.Status == Suite.SalesStatus.OnHold))
+							suites.Add(s);
+						}
+	            }
+
+	            if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, buildings, csrq);
             }
             else
             {
@@ -1122,21 +1139,26 @@ namespace Vre.Server.RemoteService
             TempReconcileViewOrdersNow(suites, dbSession);
 
             elements = new List<ClientData>(suites.Count());
-            foreach (Suite s in suites)
-            {
-                if ((soldPropertyLevel == ViewResponseSoldPropertyLevel.None)
-                    || (soldPropertyLevel == ViewResponseSoldPropertyLevel.Building))
-                {
-                    if (s.Status == Suite.SalesStatus.Sold) continue;
-                }
+			using (var manager = new SiteManager(ClientSession.MakeSystemSession(dbSession)))
+	        {
+		        foreach (Suite s in suites)
+		        {
+			        if ((soldPropertyLevel == ViewResponseSoldPropertyLevel.None)
+			            || (soldPropertyLevel == ViewResponseSoldPropertyLevel.Building))
+			        {
+				        if (s.Status == Suite.SalesStatus.Sold) continue;
+			        }
 
-                ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-                ClientData cd = s.GetClientData();
-                //if (maskSaleStatus) cd["status"] = "Selected";
-                elements.Add(cd);
-                usedSuiteTypes.Add(s.SuiteType); usedBuildings.Add(s.Building);
-            }
-            resp.Data.Add("suites", elements.ToArray());
+			        ServiceInstances.ModelCache.FillWithModelInfo(s, false);
+			        ClientData cd = SuiteEx.GetClientData(s, manager.GetCurrentSuitePrice(s));
+			        //ClientData cd = s.GetClientData();
+			        //if (maskSaleStatus) cd["status"] = "Selected";
+			        elements.Add(cd);
+			        usedSuiteTypes.Add(s.SuiteType);
+			        usedBuildings.Add(s.Building);
+		        }
+	        }
+	        resp.Data.Add("suites", elements.ToArray());
 
             if (suiteTypes != null)
             {

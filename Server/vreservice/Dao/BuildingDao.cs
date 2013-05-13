@@ -77,19 +77,19 @@ namespace Vre.Server.Dao
 
                 if (country != null) 
                 { 
-                    qs.Append(" AND Country=:co"); filterCriteriaCnt++; 
+                    qs.Append(" AND (Country=:co OR Country IS NULL)"); filterCriteriaCnt++; 
                 }
                 if (postalCode != null) 
                 { 
-                    qs.Append(" AND PostalCode=:po"); filterCriteriaCnt++; 
+                    qs.Append(" AND (PostalCode=:po OR PostalCode IS NULL)"); filterCriteriaCnt++; 
                 }
                 if (state != null) 
-                { 
-                    qs.Append(" AND StateProvince=:stpr"); filterCriteriaCnt++; 
+                {
+					qs.Append(" AND (StateProvince=:stpr OR StateProvince IS NULL)"); filterCriteriaCnt++; 
                 }
                 if (municipality != null) 
                 { 
-                    qs.Append(" AND City=:mu"); filterCriteriaCnt++; 
+                    qs.Append(" AND (City=:mu OR City IS NULL)"); filterCriteriaCnt++; 
                 }
                 if (addressFreeText != null) 
                 { 

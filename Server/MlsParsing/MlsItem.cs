@@ -1,15 +1,22 @@
 ﻿using Vre.Server.BusinessLogic;
+
 namespace Vre.Server.Mls
 {
-    public class MlsUnit
+    public class MlsItem
     {
         public enum SaleLease { Unknown, Sale, Lease }
 
-        public string MlsId { get; private set; }
+        public string MlsId;
 
-        public string SuiteName { get; private set; }
-        public string StreetAddress { get; private set; }
-        public string Municipality { get; private set; }
+        public string SuiteName;
+		public string StreetNumber;
+		public string StreetName;
+		public string StreetType;
+		public string StreetDirection;
+		public string Municipality;
+        public string StateProvince;
+        public string PostalCode;
+	    public string CompiledAddress;
 
         public int BedroomCount { get; private set; }
         public int OtherRoomCount { get; private set; }
@@ -19,11 +26,11 @@ namespace Vre.Server.Mls
         
         public int FloorAreaSqFt { get; private set; }
 
-        public string VTourUrl { get; private set; }
+        public string VTourUrl;
 
-        public SaleLease SaleLeaseState { get; private set; }
-        public char Status { get; private set; }
-        public double CurrentPrice { get; private set; }
+	    public SaleLease SaleLeaseState;
+	    public char Status;
+        public double CurrentPrice;
 
 
         public void SetSuite(Suite s)

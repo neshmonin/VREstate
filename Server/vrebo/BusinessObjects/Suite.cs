@@ -11,7 +11,8 @@ namespace Vre.Server.BusinessLogic
             Available = 0,
             OnHold = 1,
             Sold = 2,
-            ResaleAvailable = 3
+            ResaleAvailable = 3,
+            AvailableRent = 4
 	    }
 
         public virtual int PhysicalLevelNumber { get; set; }
@@ -50,7 +51,7 @@ namespace Vre.Server.BusinessLogic
             Building = copy.Building;
             SuiteType = copy.SuiteType;
             Location = copy.Location;
-            CeilingHeight = new ValueWithUM(copy.CeilingHeight.ValueAs(ValueWithUM.Unit.Feet), ValueWithUM.Unit.Feet);
+            CeilingHeight = (copy.CeilingHeight != null) ? new ValueWithUM(copy.CeilingHeight.ValueAs(ValueWithUM.Unit.Feet), ValueWithUM.Unit.Feet) : null;
             ShowPanoramicView = copy.ShowPanoramicView;
         }
 

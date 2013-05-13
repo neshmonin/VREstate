@@ -36,7 +36,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MlsUnit.cs" />
+    <Compile Include="RetsMlsStatusProvider.cs" />
+    <Compile Include="IMlsInfoProvider.cs" />
+    <Compile Include="RetsMlsInfoProviderBase.cs" />
+    <Compile Include="MlsItem.cs" />
     <Compile Include="RetsCsvParser.cs" />
     <Compile Include="RetsMlsInfoProvider.cs" />
     <Compile Include="RetsXmlParser.cs" />
