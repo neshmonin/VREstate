@@ -18,7 +18,7 @@
 					<g:layer left="360px" width="25px">
 						<g:Label text="City" width="100%" horizontalAlignment="ALIGN_LEFT"/>
 					</g:layer>
-					<g:layer left="400px" width="100px" top="14px" bottom="14px">
+					<g:layer left="391px" width="100px" top="11px" bottom="11px">
 						<g:ListBox visibleItemCount="1" width="100px" selectedIndex="0" ui:field="boxCity"/>
 					</g:layer>
 				</g:LayoutPanel>

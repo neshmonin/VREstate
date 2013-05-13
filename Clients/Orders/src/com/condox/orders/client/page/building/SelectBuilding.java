@@ -254,13 +254,13 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 	public boolean isValid(Building value, String filter) {
 		if (value.getName().toLowerCase().contains(filter.toLowerCase()))
 			return true;
-		// if (value.getAddress().toLowerCase().contains(filter.toLowerCase()))
-		// return true;
-		if (String.valueOf(value.getId()).toLowerCase()
-				.contains(filter.toLowerCase()))
-			return true;
-		if (value.getStreet().toLowerCase().contains(filter.toLowerCase()))
-			return true;
+		 if (value.getAddress().toLowerCase().contains(filter.toLowerCase()))
+		    return true;
+		//if (String.valueOf(value.getId()).toLowerCase()
+		//		.contains(filter.toLowerCase()))
+		//	return true;
+		//if (value.getStreet().toLowerCase().contains(filter.toLowerCase()))
+		//	return true;
 		if (value.getCity().toLowerCase().contains(filter.toLowerCase()))
 			return true;
 		if (value.getPostal().toLowerCase().contains(filter.toLowerCase()))
