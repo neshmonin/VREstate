@@ -340,12 +340,12 @@ namespace SuperAdminConsole
 
         private void buttonCheckAddress_Click(object sender, EventArgs e)
         {
-            // https://vrt.3dcondox.com/vre/program?
-            //                                      q=check&entity=building&
-            //                                      ad_co=CANADA&
+            // https://vrt.3dcondox.com/program?
+            //                                      q=check&entity=address&
             //                                      ad_stn=QUEENS&
             //                                      ad_bn=650&
             //                                      ad_ibn=0508&
+            //                                      ad_co=CANADA&
             //                                      sid=<SID>
             //{
             //    "result":true,
@@ -435,7 +435,7 @@ namespace SuperAdminConsole
         {
             if (!viewOrderUrlGenerated)
             {
-                // https://vrt.3dcondox.com/vre/program?
+                // https://vrt.3dcondox.com/program?
                 //                                      q=register&
                 //                                      entity=viewOrder&
                 //                                      ownerId=<user ID>&
