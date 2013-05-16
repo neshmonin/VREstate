@@ -165,6 +165,30 @@ namespace Vre.Server.Mls
 
 			}
 
+	        if (!string.IsNullOrEmpty(item.StreetName))
+	        {
+				// Extra street name conditioning
+		        item.StreetName = item.StreetName.Replace(',', ' ').Replace('.', ' ');
+
+				if (!string.IsNullOrEmpty(item.SuiteName))
+				{
+					var pos = item.StreetName.IndexOf(item.SuiteName, StringComparison.Ordinal);
+					if (pos >= 0)
+						item.StreetName = item.StreetName.Remove(pos, item.SuiteName.Length);
+				}
+
+		        int len = item.StreetName.Length, len0;
+				do
+				{
+					len0 = len;
+					item.StreetName = item.StreetName.Replace("  ", " ");
+					len = item.StreetName.Length;
+				}
+				while (len != len0);
+		        
+				item.StreetName = item.StreetName.Trim();
+	        }
+
 	        var cai = false;
 			var ca = new StringBuilder();
 			if (!string.IsNullOrEmpty(item.SuiteName)) { ca.AppendFormat("#{0}", item.SuiteName); cai = true; }
