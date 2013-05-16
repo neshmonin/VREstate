@@ -16,19 +16,19 @@
 					<g:HorizontalPanel spacing="10" width="100%">
 						<g:VerticalPanel spacing="10" width="100%" horizontalAlignment="ALIGN_LEFT">
 							<g:Label text="Your Name*" width="100%" horizontalAlignment="ALIGN_LEFT"/>
-							<g:TextBox alignment="LEFT" ui:field="txtName" visibleLength="1" width="125px"/>
+							<g:TextBox alignment="LEFT" ui:field="txtName" visibleLength="1" width="125px" height="12px"/>
 							<g:Cell horizontalAlignment="ALIGN_RIGHT">
 								<g:HTML wordWrap="true" width="125px" horizontalAlignment="ALIGN_RIGHT">Contact phone* <br></br> (including area code)</g:HTML>
 							</g:Cell>
 						</g:VerticalPanel>
 						<g:VerticalPanel width="100%" spacing="10">
 							<g:Label text="Email*" horizontalAlignment="ALIGN_LEFT" width="100%"/>
-							<g:TextBox ui:field="txtMail" visibleLength="1" width="175px"/>
+							<g:TextBox ui:field="txtMail" visibleLength="1" width="175px" height="12px"/>
 							<g:HorizontalPanel width="100%" verticalAlignment="ALIGN_MIDDLE">
-								<g:TextBox ui:field="txtPhone" visibleLength="1" width="100px"/>
+								<g:TextBox ui:field="txtPhone" visibleLength="1" width="100px" height="12px"/>
 								<g:Label text="Ext." horizontalAlignment="ALIGN_RIGHT" width="100%"/>
 								<g:Cell horizontalAlignment="ALIGN_RIGHT">
-									<g:TextBox ui:field="txtExtPhone" visibleLength="1" width="30px"/>
+									<g:TextBox ui:field="txtExtPhone" visibleLength="1" width="30px" height="12px"/>
 								</g:Cell>
 						</g:HorizontalPanel>
 						</g:VerticalPanel>
@@ -44,7 +44,6 @@
 					<g:Cell verticalAlignment="ALIGN_BOTTOM" height="">
 						<g:HTML wordWrap="true" height="50px" width="100%" horizontalAlignment="ALIGN_CENTER" ui:field="urlFloorplan"><A href="www.google.com">Floor plan</A></g:HTML>
 					</g:Cell>
-					<g:HTML wordWrap="true" styleName="my-action">All orders are free if submitted before April 15th 2013.<br /> Then it'll be just $49.99!</g:HTML>
 					<g:Label horizontalAlignment="ALIGN_LEFT" height="36px"/>
 					<g:HorizontalPanel width="100%" verticalAlignment="ALIGN_BOTTOM">
 				<g:Button width="100px" text="Cancel" ui:field="btnCancel" styleName="submit-btnCancel" height="32px"/>

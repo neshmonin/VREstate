@@ -9,6 +9,7 @@ import com.nitrous.gwt.earth.client.api.GELayerId;
 import com.nitrous.gwt.earth.client.api.GEPlugin;
 import com.nitrous.gwt.earth.client.api.GEPluginReadyListener;
 import com.nitrous.gwt.earth.client.api.GEView;
+import com.nitrous.gwt.earth.client.api.GEVisibility;
 import com.nitrous.gwt.earth.client.api.GoogleEarth;
 import com.nitrous.gwt.earth.client.api.GoogleEarthWidget;
 import com.nitrous.gwt.earth.client.api.KmlLookAt;
@@ -161,15 +162,17 @@ public class GE extends GoogleEarthWidget{
 		// show map content once the plug-in has loaded
 		GEPlugin plgn = getGEPlugin();
 		plgn.getWindow().setVisibility(true);
+		plgn.getTime().setHistoricalImageryEnabled(true);
+		plgn.getTime().getControl().setVisibility(GEVisibility.VISIBILITY_HIDE);
 
 		plgn.getOptions().setMouseNavigationEnabled(false);
 		
 		// show some layers
 		plgn.enableLayer(GELayerId.LAYER_BUILDINGS, true);
-		//plgn.enableLayer(GELayerId.LAYER_BORDERS, true);
+		plgn.enableLayer(GELayerId.LAYER_BORDERS, true);
 		plgn.enableLayer(GELayerId.LAYER_ROADS, true);
 		plgn.enableLayer(GELayerId.LAYER_TERRAIN, true);
-		//plgn.enableLayer(GELayerId.LAYER_TREES, true);
+		plgn.enableLayer(GELayerId.LAYER_TREES, true);
 		// ========================
 
 		vrEstate.LoadView();
