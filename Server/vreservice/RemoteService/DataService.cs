@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using Vre.Server.BusinessLogic;
-using Vre.Server.BusinessLogic.Client;
-using System.Diagnostics;
-using Vre.Server.Dao;
 using NHibernate;
-using NHibernate.Criterion;
+using Vre.Server.BusinessLogic;
+using Vre.Server.Dao;
 
 namespace Vre.Server.RemoteService
 {
@@ -47,7 +44,7 @@ namespace Vre.Server.RemoteService
             getPathElements(request.Request.Path, out mo, out objectId, out strObjectId);
 
             csrq = retrieveChangeSubscriptionRequest(request.Request.Query);
-            includeDeleted = request.Request.Query.GetParam("withdeleted", "false").Equals("true");
+            includeDeleted = request.Request.Query.GetParam("withdeleted", false);
 
             if (includeDeleted) RolePermissionCheck.CheckReadDeletedObjects(request.UserInfo.Session);
 
@@ -461,7 +458,7 @@ namespace Vre.Server.RemoteService
                 for (int idx = 0; idx < cnt; idx++)
                 {
                     Suite s = suiteList[idx];
-                    insertSuiteIntoResult(statusFilter, result, manager, s);
+                    insertSuiteIntoResult(statusFilter, result, s);
                 }
 
                 if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, suiteList, csrq);
@@ -474,8 +471,7 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void insertSuiteIntoResult(Suite.SalesStatus? statusFilter, List<ClientData> result, 
-            SiteManager manager, Suite s)
+        private static void insertSuiteIntoResult(Suite.SalesStatus? statusFilter, List<ClientData> result, Suite s)
         {
             bool add = false;
             if (statusFilter != null)
@@ -515,23 +511,23 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getSuiteType(ClientSession session, int siteId, string name, IResponseData resp)
-        {
-            SuiteType st;
+		//private static void getSuiteType(ClientSession session, int siteId, string name, IResponseData resp)
+		//{
+		//    SuiteType st;
 
-            using (SiteManager manager = new SiteManager(session))
-            {
-                st = manager.GetSuiteTypeByName(siteId, name);
-            }
+		//    using (SiteManager manager = new SiteManager(session))
+		//    {
+		//        st = manager.GetSuiteTypeByName(siteId, name);
+		//    }
 
-            ServiceInstances.ModelCache.FillWithModelInfo(st, false);
-            ReferencedFileHelper.ConvertUrlsToAbsolute(st);
+		//    ServiceInstances.ModelCache.FillWithModelInfo(st, false);
+		//    ReferencedFileHelper.ConvertUrlsToAbsolute(st);
 
-            // produce output
-            //
-            resp.Data = st.GetClientData();
-            resp.ResponseCode = HttpStatusCode.OK;
-        }
+		//    // produce output
+		//    //
+		//    resp.Data = st.GetClientData();
+		//    resp.ResponseCode = HttpStatusCode.OK;
+		//}
 
         private static void getSuiteTypeList(ClientSession session, int siteId, IResponseData resp)
         {
@@ -579,7 +575,7 @@ namespace Vre.Server.RemoteService
         {
             ClientData[] result;
 
-            if (query.GetParam("sellerMode", "false").Equals("true"))
+            if (query.GetParam("sellerMode", false))
             {
                 User[] list = session.User.CanView.ToArray();
 
@@ -704,7 +700,7 @@ namespace Vre.Server.RemoteService
         {
             ViewOrder viewOrder = RetrieveViewOrder(session.DbSession, strObjectId, true);
 
-            resp.Data = convertViewOrderdata(session, viewOrder, "true".Equals(query["verbose"]));
+            resp.Data = convertViewOrderdata(session, viewOrder, query.GetParam("verbose", false));
 
             resp.ResponseCode = HttpStatusCode.OK;
         }
@@ -777,7 +773,7 @@ namespace Vre.Server.RemoteService
 
             // produce output
             //
-            bool verbose = "true".Equals(query["verbose"]);
+            bool verbose = query.GetParam("verbose", false);
             int cnt = list.Length;
             List<ClientData> result = new List<ClientData>(cnt);
             for (int idx = 0; idx < cnt; idx++)
@@ -797,23 +793,25 @@ namespace Vre.Server.RemoteService
 
         private static void getView(ClientSession session, ServiceQuery query, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
-            string type = query.GetParam("type", "viewOrder");
+            var type = query.GetParam("type", "viewOrder");
 
-            if (type.Equals("viewOrder")) getViewViewOrder(session, query, csrq, resp);
-            else if (type.Equals("site")) getViewSite(session, query, csrq, resp);
-            else if (type.Equals("building")) getViewBuilding(session, query, csrq, resp);
-            else if (type.Equals("suite")) getViewSuite(session, query, csrq, resp);
-            else if (type.Equals("geo")) getViewGeo(session, query, csrq, resp);
+			var vs = new ViewSettings(query, type);
+
+            if (type.Equals("viewOrder")) getViewViewOrder(session, query, vs, csrq, resp);
+            else if (type.Equals("site")) getViewSite(session, query, vs, csrq, resp);
+            else if (type.Equals("building")) getViewBuilding(session, query, vs, csrq, resp);
+            else if (type.Equals("suite")) getViewSuite(session, query, vs, csrq, resp);
+            else if (type.Equals("geo")) getViewGeo(session, query, vs, csrq, resp);
             else throw new NotImplementedException();
         }
 
-        private static void getViewViewOrder(ClientSession session, ServiceQuery query, ChangeSubscriptionRequest csrq, IResponseData resp)
+        private static void getViewViewOrder(ClientSession session, ServiceQuery query, 
+			ViewSettings vs, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             ViewOrder viewOrder;
-            bool viewOrderValid = false;
-	        bool includeImported = "true".Equals(query["includeImported"]);
+            var viewOrderValid = false;
 
-            using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
+            using (var tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
                 viewOrder = RetrieveViewOrder(session.DbSession, query["id"], false);
 
@@ -823,7 +821,7 @@ namespace Vre.Server.RemoteService
                 {
                     viewOrder.Touch();
 
-                    using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
+                    using (var dao = new ViewOrderDao(session.DbSession))
                         dao.Update(viewOrder);
 
                     tran.Commit();
@@ -833,11 +831,11 @@ namespace Vre.Server.RemoteService
             switch (viewOrder.TargetObjectType)
             {
                 case ViewOrder.SubjectType.Suite:
-                    getViewSuiteViewOrder(session, viewOrder, csrq, includeImported, resp);
+                    getViewSuiteViewOrder(session, viewOrder, vs, csrq, resp);
                     break;
 
                 case ViewOrder.SubjectType.Building:
-                    getViewBuildingViewOrder(session, viewOrder, csrq, resp);
+                    getViewBuildingViewOrder(session, viewOrder, vs, csrq, resp);
                     break;
 
                 default:
@@ -845,7 +843,8 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void getViewBuildingViewOrder(ClientSession session, ViewOrder viewOrder, ChangeSubscriptionRequest csrq, IResponseData resp)
+        private static void getViewBuildingViewOrder(ClientSession session, ViewOrder viewOrder, 
+			ViewSettings vs, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             IList<ViewOrder> viewOrders;
             Building building;
@@ -876,12 +875,11 @@ namespace Vre.Server.RemoteService
 
             generateViewResponse(session.DbSession,
                 null, new Building[] { building }, null, building.Suites, viewOrders, viewOrder.AutoID,
-                resp,
-                ViewResponseSoldPropertyLevel.Suite, false);
+                resp, vs, false);
         }
 
         private static void getViewSuiteViewOrder(ClientSession session, ViewOrder viewOrder, 
-			ChangeSubscriptionRequest csrq, bool includeImported, IResponseData resp)
+			ViewSettings vs, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             // TODO: make this variable
             const double defaultProximityQuadradiusM = 1000.0;
@@ -891,24 +889,24 @@ namespace Vre.Server.RemoteService
             IList<Suite> suites = null;
             Suite suite;
 
-            using (SuiteDao dao = new SuiteDao(session.DbSession))
+            using (var dao = new SuiteDao(session.DbSession))
                 suite = dao.GetById(viewOrder.TargetObjectId);
 
             if (null == suite) throw new FileNotFoundException("Unknown object listed");
 
             if (viewOrder.Product == ViewOrder.ViewOrderProduct.PublicListing)
             {
-                int[] buildingIds = ServiceInstances.ModelCache.BuildingsByGeoProximity(suite.Building, defaultProximityQuadradiusM);
+                var buildingIds = ServiceInstances.ModelCache.BuildingsByGeoProximity(suite.Building, defaultProximityQuadradiusM);
 
                 ServiceInstances.Logger.Debug("dSPVO: got {0} buildings in proximity.", buildingIds.Length);
 
-                EstateDeveloper devLock = suite.Building.ConstructionSite.Developer;
+                var devLock = suite.Building.ConstructionSite.Developer;
                 buildings = new List<Building>();
-                using (BuildingDao dao = new BuildingDao(session.DbSession))
+                using (var dao = new BuildingDao(session.DbSession))
                 {
-                    foreach (int id in buildingIds)
+                    foreach (var id in buildingIds)
                     {
-                        Building b = dao.GetById(id);
+                        var b = dao.GetById(id);
                         if (b != null)  // should never happen?
                             if (b.ConstructionSite.Developer.Equals(devLock))
                                 buildings.Add(b);
@@ -917,28 +915,17 @@ namespace Vre.Server.RemoteService
 
                 ServiceInstances.Logger.Debug("dSPVO: got {0} live buildings.", buildings.Count);
 
-                using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
-                    viewOrders = dao.GetActiveInBuildings(ViewOrder.ViewOrderProduct.PublicListing, buildings.ConvertTo(b => b.AutoID).ToArray(), includeImported);
+                using (var dao = new ViewOrderDao(session.DbSession))
+                    viewOrders = dao.GetActiveInBuildings(ViewOrder.ViewOrderProduct.PublicListing, 
+						buildings.ConvertTo(b => b.AutoID).ToArray(), vs.ShowImported);
 
                 List<int> suiteIds = new List<int>(viewOrders.Count);
-                foreach (ViewOrder vo in viewOrders) suiteIds.Add(vo.TargetObjectId);
-                using (SuiteDao dao = new SuiteDao(session.DbSession))
+                foreach (var vo in viewOrders) suiteIds.Add(vo.TargetObjectId);
+                using (var dao = new SuiteDao(session.DbSession))
                     suites = dao.GetByIdList(suiteIds);
 
-				// Add new constructed property
-				//
-	            foreach (var b in buildings)
-	            {
-					if ((b.Status == Building.BuildingStatus.InProject)
-						|| (b.Status == Building.BuildingStatus.Constructing)
-						|| (b.Status == Building.BuildingStatus.Built))
-						foreach (var s in b.Suites)
-						{
-							if ((s.Status == Suite.SalesStatus.Available)
-								|| (s.Status == Suite.SalesStatus.OnHold))
-							suites.Add(s);
-						}
-	            }
+	            foreach (var s in from b in buildings from s in b.Suites where vs.SuiteStatusMatches(s) select s)
+		            if (!suites.Contains(s)) suites.Add(s);
 
 	            if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, buildings, csrq);
             }
@@ -958,11 +945,11 @@ namespace Vre.Server.RemoteService
 
             generateViewResponse(session.DbSession,
                 null, buildings, null, suites, viewOrders, viewOrder.AutoID,
-                resp,
-                ViewResponseSoldPropertyLevel.Suite, false);
+                resp, vs, false);
         }
 
-        private static void getViewGeo(ClientSession session, ServiceQuery query, ChangeSubscriptionRequest csrq, IResponseData resp)
+        private static void getViewGeo(ClientSession session, ServiceQuery query, 
+			ViewSettings vs, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             string param;
             double cLon, cLat, sqRadM;
@@ -978,8 +965,6 @@ namespace Vre.Server.RemoteService
             param = query["gsq_sqrad"];
             if (null == param) throw new ArgumentException("Geo square squradius missing.");
             if (!double.TryParse(param, out sqRadM)) throw new ArgumentException();
-
-            bool showSold = query.GetParam("showSold", "false").Equals("true");
 
             EstateDeveloper devLock = null;
             string voId = query["relatedVoId"];
@@ -1001,23 +986,20 @@ namespace Vre.Server.RemoteService
                 }
             }
 
-            List<Suite> suites = new List<Suite>();
-            foreach (Building b in buildings) suites.AddRange(b.Suites);
+            var suites = (from b in buildings from s in b.Suites where vs.SuiteStatusMatches(s) select s).ToList();
 
-            if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, buildings, suites, csrq);
+	        if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, buildings, suites, csrq);
 
             generateViewResponse(session.DbSession,
                 null, buildings, null, suites, null, Guid.Empty,
-                resp,
-                showSold ? ViewResponseSoldPropertyLevel.Suite : ViewResponseSoldPropertyLevel.Building, false);
+                resp, vs, false);
         }
 
-        private static void getViewSite(ClientSession session, ServiceQuery query, ChangeSubscriptionRequest csrq, IResponseData resp)
+        private static void getViewSite(ClientSession session, ServiceQuery query, 
+			ViewSettings vs, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             int objectId = query.GetParam("id", -1);
             if (objectId < 0) throw new ArgumentException("Object ID missing.");
-
-            bool showSold = query.GetParam("showSold", "false").Equals("true");
 
             Site site;
             using (SiteDao dao = new SiteDao(session.DbSession))
@@ -1025,23 +1007,20 @@ namespace Vre.Server.RemoteService
 
             if ((null == site) || site.Deleted) throw new FileNotFoundException("Unknown site");
 
-            List<Suite> suites = new List<Suite>();
-            foreach (Building b in site.Buildings) suites.AddRange(b.Suites);
+			var suites = (from b in site.Buildings from s in b.Suites where vs.SuiteStatusMatches(s) select s).ToList();
 
             if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, site.Buildings, suites, csrq);
 
             generateViewResponse(session.DbSession,
                 new Site[] { site }, site.Buildings, null, suites, null, Guid.Empty, 
-                resp, 
-                showSold ? ViewResponseSoldPropertyLevel.Suite : ViewResponseSoldPropertyLevel.Building, false);
+                resp, vs, false);
         }
 
-        private static void getViewBuilding(ClientSession session, ServiceQuery query, ChangeSubscriptionRequest csrq, IResponseData resp)
+        private static void getViewBuilding(ClientSession session, ServiceQuery query, 
+			ViewSettings vs, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             int objectId = query.GetParam("id", -1);
             if (objectId < 0) throw new ArgumentException("Object ID missing.");
-
-            bool showSold = query.GetParam("showSold", "false").Equals("true");
 
             Building building;
             using (BuildingDao dao = new BuildingDao(session.DbSession))
@@ -1049,15 +1028,17 @@ namespace Vre.Server.RemoteService
 
             if ((null == building) || building.Deleted) throw new FileNotFoundException("Unknown building");
 
-            if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, building, csrq);
+			var suites = (from s in building.Suites where vs.SuiteStatusMatches(s) select s).ToList();
+			
+			if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, building, csrq);
 
             generateViewResponse(session.DbSession, 
-                null, new Building[] { building }, null, building.Suites, null, Guid.Empty,
-                resp, 
-                showSold ? ViewResponseSoldPropertyLevel.Suite : ViewResponseSoldPropertyLevel.Building, true);
+                null, new Building[] { building }, null, suites, null, Guid.Empty,
+                resp, vs, true);
         }
 
-        private static void getViewSuite(ClientSession session, ServiceQuery query, ChangeSubscriptionRequest csrq, IResponseData resp)
+        private static void getViewSuite(ClientSession session, ServiceQuery query, 
+			ViewSettings vs, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             int objectId = query.GetParam("id", -1);
             if (objectId < 0) throw new ArgumentException("Object ID missing.");
@@ -1070,25 +1051,25 @@ namespace Vre.Server.RemoteService
 
             if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, suite, csrq);
 
-            generateViewResponse(session.DbSession, new Suite[] { suite }, resp, ViewResponseSoldPropertyLevel.Suite, true);
+            generateViewResponse(session.DbSession, new Suite[] { suite }, resp, vs, true);
         }
 
         private static void generateViewResponse(ISession dbSession,
-            IEnumerable<Suite> suites,
+			ICollection<Suite> suites,
             IResponseData resp,
-            ViewResponseSoldPropertyLevel soldPropertyLevel, bool minimizeOutput)
+            ViewSettings vs, bool minimizeOutput)
         {
-            generateViewResponse(dbSession, null, null, null, suites, null, Guid.Empty, resp, soldPropertyLevel, minimizeOutput);
+            generateViewResponse(dbSession, null, null, null, suites, null, Guid.Empty, resp, vs, minimizeOutput);
         }
 
         private static void generateViewResponse(ISession dbSession,
-            IEnumerable<Suite> suites,
-            IEnumerable<ViewOrder> viewOrders,
+			ICollection<Suite> suites,
+			ICollection<ViewOrder> viewOrders,
             Guid primaryListingId,
             IResponseData resp,
-            ViewResponseSoldPropertyLevel soldPropertyLevel, bool minimizeOutput)
+            ViewSettings vs, bool minimizeOutput)
         {
-            generateViewResponse(dbSession, null, null, null, suites, viewOrders, primaryListingId, resp, soldPropertyLevel, minimizeOutput);
+            generateViewResponse(dbSession, null, null, null, suites, viewOrders, primaryListingId, resp, vs, minimizeOutput);
         }
 
         private enum ViewResponseSoldPropertyLevel 
@@ -1108,24 +1089,24 @@ namespace Vre.Server.RemoteService
         }
 
         private static void generateViewResponse(ISession dbSession,
-            IEnumerable<Site> sites, IEnumerable<Building> buildings,
-            IEnumerable<SuiteType> suiteTypes, IEnumerable<Suite> suites,
-            IEnumerable<ViewOrder> viewOrders,
+			ICollection<Site> sites, ICollection<Building> buildings,
+			ICollection<SuiteType> suiteTypes, ICollection<Suite> suites,
+			ICollection<ViewOrder> viewOrders,
             Guid primaryListingId,
             IResponseData resp,
-            ViewResponseSoldPropertyLevel soldPropertyLevel, bool minimizeOutput)
+            ViewSettings vs, bool minimizeOutput)
         {
-            generateViewResponse(dbSession, sites, buildings, suiteTypes, suites, viewOrders, primaryListingId, resp, soldPropertyLevel, minimizeOutput,
+            generateViewResponse(dbSession, sites, buildings, suiteTypes, suites, viewOrders, primaryListingId, resp, vs, minimizeOutput,
                 false);
         }
 
         private static void generateViewResponse(ISession dbSession,
-            IEnumerable<Site> sites, IEnumerable<Building> buildings, 
-            IEnumerable<SuiteType> suiteTypes, IEnumerable<Suite> suites,
-            IEnumerable<ViewOrder> viewOrders,
+			ICollection<Site> sites, ICollection<Building> buildings,
+			ICollection<SuiteType> suiteTypes, ICollection<Suite> suites,
+			ICollection<ViewOrder> viewOrders,
             Guid primaryListingId,
             IResponseData resp,
-            ViewResponseSoldPropertyLevel soldPropertyLevel, bool minimizeOutput,
+            ViewSettings vs, bool minimizeOutput,
             bool tempEventMode)
         {
             resp.Data = new ClientData();
@@ -1139,15 +1120,13 @@ namespace Vre.Server.RemoteService
             TempReconcileViewOrdersNow(suites, dbSession);
 
             elements = new List<ClientData>(suites.Count());
-			using (var manager = new SiteManager(ClientSession.MakeSystemSession(dbSession)))
-	        {
-		        foreach (Suite s in suites)
-		        {
-			        if ((soldPropertyLevel == ViewResponseSoldPropertyLevel.None)
-			            || (soldPropertyLevel == ViewResponseSoldPropertyLevel.Building))
-			        {
-				        if (s.Status == Suite.SalesStatus.Sold) continue;
-			        }
+		    foreach (Suite s in suites)
+		    {
+				//if ((soldPropertyLevel == ViewResponseSoldPropertyLevel.None)
+				//    || (soldPropertyLevel == ViewResponseSoldPropertyLevel.Building))
+				//{
+				//    if (s.Status == Suite.SalesStatus.Sold) continue;
+				//}
 
 			        ServiceInstances.ModelCache.FillWithModelInfo(s, false);
 			        ClientData cd = SuiteEx.GetClientData(s, manager.GetCurrentSuitePrice(s));
@@ -1190,11 +1169,11 @@ namespace Vre.Server.RemoteService
                 {
                     if (!usedBuildings.Contains(b))
                     {
-                        if (soldPropertyLevel == ViewResponseSoldPropertyLevel.None)  // make sure suites in output are always backed
-                        // by building disregarding building status
-                        {
-                            if (b.Status == Building.BuildingStatus.Sold) continue;
-                        }
+						//if (soldPropertyLevel == ViewResponseSoldPropertyLevel.None)  // make sure suites in output are always backed
+						//// by building disregarding building status
+						//{
+						//    if (b.Status == Building.BuildingStatus.Sold) continue;
+						//}
                         if (minimizeOutput) continue;
                     }
                     ServiceInstances.ModelCache.FillWithModelInfo(b, false);
@@ -1253,25 +1232,24 @@ namespace Vre.Server.RemoteService
                     DateTime now = DateTime.UtcNow;
                     foreach (ViewOrder vo in viewOrders)
                     {
-                        ClientData cd = new ClientData();
+                        var cd = new ClientData();
                         // Cannot reuse viewOrder.GetClientData() here as it exposes too much information
                         cd.Add("id", vo.AutoID);
-                        cd.Add("targetObjectType", ClientData.ConvertProperty<ViewOrder.SubjectType>(vo.TargetObjectType));
+						// TODO: Limit output in case ViewOrder is expired
+                        cd.Add("targetObjectType", ClientData.ConvertProperty(vo.TargetObjectType));
                         cd.Add("targetObjectId", vo.TargetObjectId);
-                        cd.Add("product", ClientData.ConvertProperty<ViewOrder.ViewOrderProduct>(vo.Product));
-                        cd.Add("options", ClientData.ConvertProperty<ViewOrder.ViewOrderOptions>(vo.Options));
+                        cd.Add("product", ClientData.ConvertProperty(vo.Product));
+                        cd.Add("options", ClientData.ConvertProperty(vo.Options));
                         cd.Add("infoUrl", vo.InfoUrl);
                         cd.Add("vTourUrl", vo.VTourUrl);
 
                         if (!vo.Enabled || (vo.ExpiresOn < now))
                         {
-                            if (!vo.Enabled) cd.Add("reason", "disabled");
-                            else cd.Add("reason", "expired");
-
-                            cd.Add("recoverUrl", string.Format(_disabledViewOrderRecoverUrl, vo.AutoID.ToString("N")));
+	                        cd.Add("reason", !vo.Enabled ? "disabled" : "expired");
+	                        cd.Add("recoverUrl", string.Format(_disabledViewOrderRecoverUrl, vo.AutoID.ToString("N")));
                         }
 
-                        elements.Add(cd);
+	                    elements.Add(cd);
                     }
                 }
                 else
@@ -1279,6 +1257,8 @@ namespace Vre.Server.RemoteService
                     elements = new List<ClientData>(0);
                 }
                 resp.Data.Add("viewOrders", elements.ToArray());
+
+				resp.Data.Add("viewSettings", vs.GetClientData());
 
                 if (!primaryListingId.Equals(Guid.Empty)) resp.Data.Add("primaryViewOrderId", primaryListingId);
                 resp.Data.Add("initialView", "");  // TODO
@@ -1292,9 +1272,120 @@ namespace Vre.Server.RemoteService
             ref IList<Building> buildings, ref IList<Suite> suites)
         {
             generateViewResponse(session, null, null, null, suites, null, Guid.Empty, response,
-                ViewResponseSoldPropertyLevel.Suite, true, true);
+                new ViewSettings(true), true, true);
         }
-        #endregion
+
+		private class ViewSettings
+		{
+			public readonly bool ShowSold;
+			public readonly bool ShowAvailable;
+			public readonly bool ShowOnHold;
+			public readonly bool ShowResaleAvailable;
+			public readonly bool ShowRental;
+			public readonly bool ShowImported;
+
+			public ViewSettings(bool defSetting)
+			{
+				ShowSold = defSetting;
+				ShowAvailable = defSetting;
+				ShowOnHold = defSetting;
+				ShowResaleAvailable = defSetting;
+				ShowRental = defSetting;
+				ShowImported = defSetting;
+			}
+
+			public ViewSettings(ServiceQuery query, string type)
+			{
+				ShowImported = false;
+
+				if (type.Equals("viewOrder"))
+				{
+					ShowSold = false;
+					ShowAvailable = false;
+					ShowOnHold = false;
+					ShowResaleAvailable = true;
+					ShowRental = true;
+				}
+				else if (type.Equals("site"))
+				{
+					ShowSold = false;
+					ShowAvailable = true;
+					ShowOnHold = true;
+					ShowResaleAvailable = false;
+					ShowRental = false;
+				}
+				else if (type.Equals("building"))
+				{
+					ShowSold = false;                       
+					ShowAvailable = true;
+					ShowOnHold = true;
+					ShowResaleAvailable = false;
+					ShowRental = false;
+				}
+				else if (type.Equals("suite"))
+				{
+					ShowSold = true;
+					ShowAvailable = true;
+					ShowOnHold = true;
+					ShowResaleAvailable = true;
+					ShowRental = true;
+				}
+				else if (type.Equals("geo"))
+				{
+					ShowSold = true;
+					ShowAvailable = true;
+					ShowOnHold = true;
+					ShowResaleAvailable = true;
+					ShowRental = true;
+				}
+				else throw new NotImplementedException();
+
+				ShowSold = query.GetParam("showSold", ShowSold);
+				ShowSold = query.GetParam("sp_s", ShowSold);
+				ShowAvailable = query.GetParam("sp_sa", ShowAvailable);
+				ShowOnHold = query.GetParam("sp_sh", ShowOnHold);
+				ShowResaleAvailable = query.GetParam("sp_ra", ShowResaleAvailable);
+				ShowRental = query.GetParam("sp_rr", ShowRental);
+				ShowImported = query.GetParam("includeImported", ShowImported);
+				ShowImported = query.GetParam("sp_i", ShowImported);
+			}
+
+			public ClientData GetClientData()
+			{
+				return new ClientData
+					{
+						{"sp_s", ShowSold},
+						{"sp_sa", ShowAvailable},
+						{"sp_sh", ShowOnHold},
+						{"sp_ra", ShowResaleAvailable},
+						{"sp_rr", ShowRental},
+						{"sp_i", ShowImported}
+					};
+			}
+
+			public bool SuiteStatusMatches(Suite s)
+			{
+				switch (s.Status)
+				{
+					case Suite.SalesStatus.Available:
+						return ShowAvailable;
+
+					case Suite.SalesStatus.AvailableRent:
+						return ShowRental;
+
+					case Suite.SalesStatus.OnHold:
+						return ShowOnHold;
+
+					case Suite.SalesStatus.ResaleAvailable:
+						return ShowResaleAvailable;
+
+					case Suite.SalesStatus.Sold:
+						return ShowSold;
+				}
+				return false;
+			}
+		}
+		#endregion
 
         #region update
         private static void updateBuilding(ClientSession session, int buildingId, ClientData data, IResponseData resp)
@@ -1406,16 +1497,14 @@ namespace Vre.Server.RemoteService
             if (null == error)
             {
                 resp.ResponseCode = (0 == updatedCnt) ? HttpStatusCode.NotModified : HttpStatusCode.OK;
-                resp.Data = new ClientData();
-                resp.Data.Add("updated", updatedCnt);
+                resp.Data = new ClientData {{"updated", updatedCnt}};
             }
             else
             {
                 resp.ResponseCode = HttpStatusCode.Conflict;
                 resp.ResponseCodeDescription = error;
-                resp.Data = new ClientData();
-                resp.Data.Add("updated", 0);
-                if (staleIds.Count > 0) resp.Data.Add("staleIds", CsvUtilities.ToString<int>(staleIds));
+                resp.Data = new ClientData {{"updated", 0}};
+	            if (staleIds.Count > 0) resp.Data.Add("staleIds", CsvUtilities.ToString<int>(staleIds));
             }
         }
 
@@ -1509,7 +1598,8 @@ namespace Vre.Server.RemoteService
                 tran.Commit();
             }
         }
-        #endregion
+
+	    #endregion
 
         #region create
         private static void createUser(ClientSession session, ClientData data, IResponseData resp)

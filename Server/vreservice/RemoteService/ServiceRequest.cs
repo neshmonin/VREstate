@@ -22,7 +22,19 @@ namespace Vre.Server.RemoteService
             Add(fromRequestPri);  // duplicated keys get overwritten
         }
 
-        public int GetParam(string name, int defaultValue)
+		public bool GetParam(string name, bool defaultValue)
+		{
+			bool result = defaultValue;
+			string arg = this[name];
+			if (arg != null)
+			{
+				if (arg.Equals("true")) result = true;
+				else if (arg.Equals("false")) result = false;
+			}
+			return result;
+		}
+
+		public int GetParam(string name, int defaultValue)
         {
             int result = defaultValue;
             string arg = this[name];
