@@ -42,10 +42,20 @@ namespace Vre.Server.HttpService
         protected HashSet<string> _allowedFileExtensions = new HashSet<string>();
         protected string _filesRootFolder = null;
 
+	    private long _minRqTime, _maxRqTime, _rqCnt, _lastRqStatCnt;
+	    private DateTime _nextRqStatTime, _createTime;
+
         public HttpServiceBase(string serviceName)
         {
             _name = serviceName;
             Status = "Stopped";
+
+	        _createTime = DateTime.UtcNow;
+	        _minRqTime = long.MaxValue;
+	        _maxRqTime = 0;
+	        _rqCnt = 0;
+	        _lastRqStatCnt = 0;
+	        _nextRqStatTime = DateTime.UtcNow.AddHours(1);
 
             if (0 == ContentTypeByExtension.Count) initializeContentType();
             _fileBufferSize = ServiceInstances.Configuration.GetValue("FileStreamingBufferSize", 16384);
@@ -164,7 +174,6 @@ namespace Vre.Server.HttpService
                     string origin = ctx.Request.Headers["Origin"];
                     if (origin != null)  // CORS support (http://en.wikipedia.org/wiki/Cross-Origin_Resource_Sharing)
                     {
-                        ServiceInstances.Logger.Debug("CORS Origin: {0}", origin);
                         if (_referringHostList.Contains(origin))
                         {
                             ctx.Response.Headers.Add("Access-Control-Allow-Origin", origin);
@@ -184,6 +193,7 @@ namespace Vre.Server.HttpService
                         }
                         else
                         {
+                            ServiceInstances.Logger.Warn("CORS Origin: {0}", origin);
                             ctx.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                             ctx.Response.Close();
                             return;
@@ -212,9 +222,34 @@ namespace Vre.Server.HttpService
                     }
                     catch { }  // make sure this does not break server with unhandled exception
                 }
+
+				// calculate request processing time
+				//
                 long el = ((System.Diagnostics.Stopwatch.GetTimestamp() - st) * 1000) / System.Diagnostics.Stopwatch.Frequency;
-                if (el < 1000) ServiceInstances.Logger.Debug("Request processed in {0} ms", el);
-                else ServiceInstances.Logger.Warn("Request processed in {0} ms !!!@@@", el);
+				//if (el < 1000) ServiceInstances.Logger.Debug("Request processed in {0} ms", el);
+				//else ServiceInstances.Logger.Warn("Request processed in {0} ms !!!@@@", el);
+				if (el >= 1000) ServiceInstances.Logger.Warn("Request processed in {0} ms !!!@@@", el);
+				else if (_allowExtendedLogging) ServiceInstances.Logger.Debug("Request processed in {0} ms", el);
+
+				// update statistics
+				//
+	            if (_minRqTime > el) _minRqTime = el;
+	            if (_maxRqTime < el) _maxRqTime = el;
+	            _rqCnt++;
+
+				// log statistics
+				//
+	            if (((_rqCnt - _lastRqStatCnt) > 1000) || (DateTime.UtcNow > _nextRqStatTime))
+	            {
+					ServiceInstances.Logger.Info(@"Request process stats (uptime is {0:d HH:mm:ss}):
+- total count: {1}
+- minimal time (ms): {2}
+- maximal time (ms): {3}",
+						DateTime.UtcNow.Subtract(_createTime), _rqCnt, _minRqTime, _maxRqTime);
+
+					_nextRqStatTime = DateTime.UtcNow.AddHours(1);
+		            _lastRqStatCnt = _rqCnt;
+	            }
             }
         }
 
