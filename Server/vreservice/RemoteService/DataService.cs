@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using NHibernate;
 using Vre.Server.BusinessLogic;
+using Vre.Server.BusinessLogic.Client;
 using Vre.Server.Dao;
 
 namespace Vre.Server.RemoteService
@@ -458,7 +459,7 @@ namespace Vre.Server.RemoteService
                 for (int idx = 0; idx < cnt; idx++)
                 {
                     Suite s = suiteList[idx];
-                    insertSuiteIntoResult(statusFilter, result, s);
+                    insertSuiteIntoResult(statusFilter, result, manager, s);
                 }
 
                 if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, suiteList, csrq);
@@ -471,7 +472,7 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void insertSuiteIntoResult(Suite.SalesStatus? statusFilter, List<ClientData> result, Suite s)
+        private static void insertSuiteIntoResult(Suite.SalesStatus? statusFilter, List<ClientData> result, SiteManager manager, Suite s)
         {
             bool add = false;
             if (statusFilter != null)
@@ -1120,13 +1121,15 @@ namespace Vre.Server.RemoteService
             TempReconcileViewOrdersNow(suites, dbSession);
 
             elements = new List<ClientData>(suites.Count());
-		    foreach (Suite s in suites)
-		    {
-				//if ((soldPropertyLevel == ViewResponseSoldPropertyLevel.None)
-				//    || (soldPropertyLevel == ViewResponseSoldPropertyLevel.Building))
-				//{
-				//    if (s.Status == Suite.SalesStatus.Sold) continue;
-				//}
+	        using (var manager = new SiteManager(ClientSession.MakeSystemSession(dbSession)))
+	        {
+		        foreach (Suite s in suites)
+		        {
+			        //if ((soldPropertyLevel == ViewResponseSoldPropertyLevel.None)
+			        //    || (soldPropertyLevel == ViewResponseSoldPropertyLevel.Building))
+			        //{
+			        //    if (s.Status == Suite.SalesStatus.Sold) continue;
+			        //}
 
 			        ServiceInstances.ModelCache.FillWithModelInfo(s, false);
 			        ClientData cd = SuiteEx.GetClientData(s, manager.GetCurrentSuitePrice(s));
