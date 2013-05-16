@@ -46,7 +46,7 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 	private static SelectBuildingUiBinder uiBinder = GWT
 			.create(SelectBuildingUiBinder.class);
 	@UiField(provided = true)
-	DataGrid<Building> dataGrid = new DataGrid<Building>();
+	DataGrid<Building> dataGrid = new DataGrid<Building>(100);
 	@UiField TextBox textFilter;
 	@UiField ListBox boxCity;
 	
@@ -223,7 +223,7 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 
 	private void GetBuildingsList() {
 		String url = Options.URL_VRT
-				+ "/data/building?scopeType=address&ad_mu=Toronto" + "&ed=Resale" + "&sid="
+				+ "data/building?scopeType=address&ad_mu=Toronto" + "&ed=Resale" + "&sid="
 				+ User.SID;
 		GET.send(url, new RequestCallback() {
 
