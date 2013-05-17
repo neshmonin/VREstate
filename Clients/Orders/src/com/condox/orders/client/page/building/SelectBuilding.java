@@ -262,8 +262,8 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 			return true;
 		// if (value.getCity().toLowerCase().contains(filter.toLowerCase()))
 		// return true;
-		// if (value.getPostal().toLowerCase().contains(filter.toLowerCase()))
-		// return true;
+		 if (value.getPostal().toLowerCase().contains(filter.toLowerCase()))
+		 return true;
 		return false;
 	}
 
