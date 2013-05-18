@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -42,20 +43,14 @@ namespace Vre.Server.HttpService
         protected HashSet<string> _allowedFileExtensions = new HashSet<string>();
         protected string _filesRootFolder = null;
 
-	    private long _minRqTime, _maxRqTime, _rqCnt, _lastRqStatCnt;
-	    private DateTime _nextRqStatTime, _createTime;
-
-        public HttpServiceBase(string serviceName)
+		private DateTime _createTime;
+		
+		public HttpServiceBase(string serviceName)
         {
             _name = serviceName;
             Status = "Stopped";
 
 	        _createTime = DateTime.UtcNow;
-	        _minRqTime = long.MaxValue;
-	        _maxRqTime = 0;
-	        _rqCnt = 0;
-	        _lastRqStatCnt = 0;
-	        _nextRqStatTime = DateTime.UtcNow.AddHours(1);
 
             if (0 == ContentTypeByExtension.Count) initializeContentType();
             _fileBufferSize = ServiceInstances.Configuration.GetValue("FileStreamingBufferSize", 16384);
@@ -79,6 +74,8 @@ namespace Vre.Server.HttpService
         {
             ServiceInstances.Logger.Info("Starting {0}...", _name);
             Status = "Starting";
+
+			new Thread(queryStatThread) { Name = "HTTPQueryStat", IsBackground = true, Priority = ThreadPriority.Lowest }.Start();
 
             _httpListener = new HttpListener();
 
@@ -132,6 +129,9 @@ namespace Vre.Server.HttpService
                 _httpListener = null;
                 ServiceInstances.Logger.Info("{0} stopped.", _name);
             }
+
+	        _queryStatExit.Set();
+
             Status = "Stopped";
         }
 
@@ -226,30 +226,11 @@ namespace Vre.Server.HttpService
 				// calculate request processing time
 				//
                 long el = ((System.Diagnostics.Stopwatch.GetTimestamp() - st) * 1000) / System.Diagnostics.Stopwatch.Frequency;
+				enqueueQueryStat(el);
 				//if (el < 1000) ServiceInstances.Logger.Debug("Request processed in {0} ms", el);
 				//else ServiceInstances.Logger.Warn("Request processed in {0} ms !!!@@@", el);
 				if (el >= 1000) ServiceInstances.Logger.Warn("Request processed in {0} ms !!!@@@", el);
 				else if (_allowExtendedLogging) ServiceInstances.Logger.Debug("Request processed in {0} ms", el);
-
-				// update statistics
-				//
-	            if (_minRqTime > el) _minRqTime = el;
-	            if (_maxRqTime < el) _maxRqTime = el;
-	            _rqCnt++;
-
-				// log statistics
-				//
-	            if (((_rqCnt - _lastRqStatCnt) > 1000) || (DateTime.UtcNow > _nextRqStatTime))
-	            {
-					ServiceInstances.Logger.Info(@"Request process stats (uptime is {0:d HH:mm:ss}):
-- total count: {1}
-- minimal time (ms): {2}
-- maximal time (ms): {3}",
-						DateTime.UtcNow.Subtract(_createTime), _rqCnt, _minRqTime, _maxRqTime);
-
-					_nextRqStatTime = DateTime.UtcNow.AddHours(1);
-		            _lastRqStatCnt = _rqCnt;
-	            }
             }
         }
 
@@ -680,5 +661,63 @@ namespace Vre.Server.HttpService
             else
                 return string.Format("Anonymous; BK={0}; REP={1}; {2}; URL={3}", browserKey, ctx.Request.RemoteEndPoint, ctx.Request.HttpMethod, url);
         }
-    }
+
+		#region query statistics
+		private ConcurrentQueue<long> _queryStatQueue = new ConcurrentQueue<long>();
+		private AutoResetEvent _queryStatTrigger = new AutoResetEvent(false);
+		private AutoResetEvent _queryStatExit = new AutoResetEvent(false);
+
+	    private void enqueueQueryStat(long procTime)
+	    {
+			_queryStatQueue.Enqueue(procTime);
+		    _queryStatTrigger.Set();
+	    }
+
+	    private void queryStatThread()
+	    {
+			long minRqTime = long.MaxValue, maxRqTime = 0, rqCnt = 0, lastRqStatCnt = 0;
+		    DateTime nextRqStatTime = DateTime.UtcNow.AddHours(1);
+
+			var events = new WaitHandle[2];
+		    events[0] = _queryStatTrigger;
+		    events[1] = _queryStatExit;
+
+		    while (true)
+		    {
+			    switch (WaitHandle.WaitAny(events))
+			    {
+					case 0:
+					    {
+							long el;
+						    while (_queryStatQueue.TryDequeue(out el))
+						    {
+							    // update statistics
+							    //
+							    if (minRqTime > el) minRqTime = el;
+							    if (maxRqTime < el) maxRqTime = el;
+							    rqCnt++;
+
+							    // log statistics
+							    //
+							    if (((rqCnt - lastRqStatCnt) < 1000) && (DateTime.UtcNow <= nextRqStatTime)) continue;
+
+							    ServiceInstances.Logger.Info(@"Request process stats (uptime is {0:d\ hh\:mm\:ss}):
+- total count: {1}
+- minimal time (ms): {2}
+- maximal time (ms): {3}",
+							        DateTime.UtcNow.Subtract(_createTime), rqCnt, minRqTime, maxRqTime);
+
+							    nextRqStatTime = DateTime.UtcNow.AddHours(1);
+							    lastRqStatCnt = rqCnt;
+						    }
+					    }
+					    break;
+
+				    default:
+					    return;
+			    }
+		    }
+		}
+		#endregion
+	}
 }
