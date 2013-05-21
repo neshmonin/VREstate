@@ -415,7 +415,7 @@ public abstract class _AbstractView implements I_AbstractView {
 		int count = 0;
 		int howMany = Document.get().getSuites().size();
 		for (Suite suite : Document.get().getSuites().values()) {
-			addSiteGeoItem(suite, false);
+			addSuiteGeoItem(suite, false);
 
 			count++;
 			Document.progressBar.Update(count * 100.0 / howMany);
@@ -431,17 +431,12 @@ public abstract class _AbstractView implements I_AbstractView {
 				if (vTourUrl != null)
 					targetSuite.setVTourUrl(vTourUrl);
 			}
-			else
-			if (Document.targetViewOrder.getProductType() == ViewOrder.ProductType.Building3DLayout){
-				for (SuiteGeoItem suiteGI : suiteGeoItems.values())
-					suiteGI.setGeoStatus(GeoStatus.Layout);
-			}
 		}
 		
 		Document.progressBar.Cleanup();
 	}
 
-	public static void addSiteGeoItem(Suite suite, boolean redraw) {
+	public static void addSuiteGeoItem(Suite suite, boolean redraw) {
 		SuiteGeoItem suiteGeo = new SuiteGeoItem(suite);
 		if (suiteGeoItems.containsKey(suite.getId()))
 			Log.write("_AbstractView.addSiteGeoItem -> duplicate suiteGeoItem: suiteId="

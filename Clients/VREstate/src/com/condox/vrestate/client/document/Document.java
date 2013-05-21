@@ -177,7 +177,7 @@ public class Document implements IDocument,
 				this.suites.put(theSuite.getId(), theSuite);
 				if (redraw) {
 					theSuite.CalcLineCoords();
-					_AbstractView.addSiteGeoItem(theSuite, true);
+					_AbstractView.addSuiteGeoItem(theSuite, true);
 				}
 			}
 			else {

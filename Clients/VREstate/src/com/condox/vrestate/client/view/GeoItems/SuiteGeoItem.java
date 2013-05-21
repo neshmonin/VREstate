@@ -3,7 +3,9 @@ package com.condox.vrestate.client.view.GeoItems;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.Position;
 import com.condox.vrestate.client.document.Building;
+import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.Suite;
+import com.condox.vrestate.client.document.ViewOrder;
 import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view._AbstractView;
@@ -45,16 +47,20 @@ public class SuiteGeoItem implements IGeoItem {
 
 		this.suite = suite;
 
-		Suite.Status status = suite.getStatus();
-		switch (status) {
-		case Sold: geoStatus = GeoStatus.Sold; break;
-		case Available: geoStatus = GeoStatus.Available; break;
-		case OnHold: geoStatus = GeoStatus.OnHold; break;
-		case ResaleAvailable: geoStatus = GeoStatus.ResaleAvailable; break;
-		case AvailableRent: geoStatus = GeoStatus.AvailableRent; break;
-		case NotSupported: geoStatus = GeoStatus.NotSupported; break;
-		default:
-			geoStatus = GeoStatus.NotSupported; break;
+		if (Document.targetViewOrder.getProductType() == ViewOrder.ProductType.Building3DLayout)
+			geoStatus = GeoStatus.Layout;
+		else {
+			Suite.Status status = suite.getStatus();
+			switch (status) {
+			case Sold: geoStatus = GeoStatus.Sold; break;
+			case Available: geoStatus = GeoStatus.Available; break;
+			case OnHold: geoStatus = GeoStatus.OnHold; break;
+			case ResaleAvailable: geoStatus = GeoStatus.ResaleAvailable; break;
+			case AvailableRent: geoStatus = GeoStatus.AvailableRent; break;
+			case NotSupported: geoStatus = GeoStatus.NotSupported; break;
+			default:
+				geoStatus = GeoStatus.NotSupported; break;
+			}
 		}
 		
 		float scale = 1.0F;
@@ -63,22 +69,22 @@ public class SuiteGeoItem implements IGeoItem {
 		case Available:
 			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
 					+ suite.getName()
-					+ "&txtClr=65280&shdClr=0&frame=0";
+					+ "&txtClr=65280&shdClr=65280&frame=0";
 			style.getLineStyle().getColor().set("FF00FF00"); // GREEN
 			style.getLineStyle().setWidth(2.0F);
 			break;
 		case OnHold:
 			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
 					+ suite.getName()
-					+ "&txtClr=16776960&shdClr=0&frame=0";
+					+ "&txtClr=16776960&shdClr=16776960&frame=0";
 			style.getLineStyle().getColor().set("FF00FFFF"); // YELLOW
 			style.getLineStyle().setWidth(2.0F);
 			break;
 		case Sold:
 			if (Options.getShowSold()) {
 				href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
-				+ suite.getName()
-				+ "&txtClr=16711680&shdClr=0&frame=0";
+					+ suite.getName()
+					+ "&txtClr=16711680&shdClr=0&frame=0";
 				style.getLineStyle().getColor().set("FF0000FF"); // RED
 				style.getLineStyle().setWidth(2.0F);
 			}
@@ -100,7 +106,7 @@ public class SuiteGeoItem implements IGeoItem {
 			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=14854399&shdClr=0&frame=0";
-			style.getLineStyle().getColor().set("FFE2A8FF"); // LIGHT-VIOLET
+			style.getLineStyle().getColor().set("FFE2A8FF"); // PINK
 			style.getLineStyle().setWidth(2.0F);
 			break;
 		case Selected:
