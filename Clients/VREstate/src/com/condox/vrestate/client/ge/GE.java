@@ -1,6 +1,7 @@
 package com.condox.vrestate.client.ge;
 
 import com.condox.vrestate.client.Log;
+import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.VREstate;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
@@ -162,8 +163,10 @@ public class GE extends GoogleEarthWidget{
 		// show map content once the plug-in has loaded
 		GEPlugin plgn = getGEPlugin();
 		plgn.getWindow().setVisibility(true);
-		plgn.getTime().setHistoricalImageryEnabled(true);
-		plgn.getTime().getControl().setVisibility(GEVisibility.VISIBILITY_HIDE);
+		if (Options.USE_HISTORICAL) {
+			plgn.getTime().setHistoricalImageryEnabled(true);
+			plgn.getTime().getControl().setVisibility(GEVisibility.VISIBILITY_HIDE);
+		}
 
 		plgn.getOptions().setMouseNavigationEnabled(false);
 		

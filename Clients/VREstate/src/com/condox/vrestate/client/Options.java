@@ -37,6 +37,7 @@ public class Options implements RequestCallback {
 	public static FrameElement SUITE_INFO;
 	public static Integer SUITE_DISTANCE;
 	public static boolean USE_FILTER = true;
+	public static boolean USE_HISTORICAL = false;
 	// If SUPPORT_PAN is true, user can pan up and down a building
 	public static boolean SUPPORT_PAN = false;
 
@@ -67,6 +68,11 @@ public class Options implements RequestCallback {
 		if (params.containsKey("UseFilter")) {			
 			USE_FILTER = Boolean.valueOf(params.get("UseFilter").get(0));
 			contextMap.remove("UseFilter");
+		}
+
+		if (params.containsKey("UseHistorical")) {			
+			USE_HISTORICAL = Boolean.valueOf(params.get("UseHistorical").get(0));
+			contextMap.remove("UseHistorical");
 		}
 
 		if (params.containsKey("BuildingId")) {			
