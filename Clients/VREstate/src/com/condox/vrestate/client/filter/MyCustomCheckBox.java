@@ -3,8 +3,8 @@ package com.condox.vrestate.client.filter;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.ui.CheckBox;
 
-public class MyCustomCheckBox extends CheckBox {
-
+public class MyCustomCheckBox extends CheckBox implements I_State {
+	
 	public MyCustomCheckBox(String string) {
 		super(string);
 	}
@@ -17,7 +17,13 @@ public class MyCustomCheckBox extends CheckBox {
 	    	  if (fireEvents)
 	    		  ValueChangeEvent.fire(this, value);
 	}
-	
-	
+
+	@Override
+	public int StateHash() {
+		int hash = hashCode();
+		if (getValue())
+			hash += 123;
+		return hash;
+	}
 
 }

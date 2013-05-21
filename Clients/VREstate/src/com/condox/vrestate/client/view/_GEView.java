@@ -15,7 +15,7 @@ public abstract class _GEView extends _AbstractView {
 	@Override
 	public void onHeadingChanged() {
 		double heading_d = getHeading();
-		for (SuiteGeoItem suiteGeo : _AbstractView.getSuiteGeoItems())
+		for (SuiteGeoItem suiteGeo : _AbstractView.getSuiteGeoItems().values())
 			suiteGeo.onHeadingChanged(heading_d);
 	}
 

@@ -16,9 +16,14 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 	protected double dT = 0;
 	protected double dR = 0;
 	protected double dP = 0;
+	private static Filter filter = null;
 	
 	protected _SB_View(IGeoItem geoItem) {
 		super( geoItem );
+		if (filter == null) {
+			filter = Filter.get();
+			filter.Reset();
+		}
 	}
 
 	@Override
@@ -104,6 +109,7 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 				}
 			}
 
+			Document.progressBar.Cleanup();
 			Document.progressBar = null;
 		}
 		else

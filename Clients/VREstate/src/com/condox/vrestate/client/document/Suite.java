@@ -14,8 +14,6 @@ public class Suite implements I_VRObject {
 		Available, 
 		OnHold, 
 		ResaleAvailable,
-		Selected,
-		Layout,
 		AvailableRent,
 		NotSupported
 	}
@@ -48,7 +46,7 @@ public class Suite implements I_VRObject {
 			else if (status.equals("Sold")) this.status = Status.Sold;
 			else if (status.equals("OnHold")) this.status = Status.OnHold;
 			else if (status.equals("AvailableRent")) this.status = Status.AvailableRent;
-			else this.status = Status.Selected;
+			else this.status = Status.NotSupported;
 		} else
 			this.status = Status.NotSupported;
 		
@@ -57,15 +55,11 @@ public class Suite implements I_VRObject {
 			(obj.get("currentPrice").isNumber() != null) &&
 			obj.get("currentPrice").isNumber().doubleValue() != 0)
 			price = (int) obj.get("currentPrice").isNumber().doubleValue();
-		
-		// TODO show_panoramic_view
-	
 	}
 	
 	void Parse(JSONValue value) {
 		JSONObject obj = value.isObject();
 		id = (int) obj.get("id").isNumber().doubleValue();
-		// TODO version
 		
 		ParseDynamic(obj);		
 		parent_id = (int) obj.get("buildingId").isNumber().doubleValue();
@@ -94,20 +88,10 @@ public class Suite implements I_VRObject {
 			this.position.setHeading(heading);
 		}
 		
-		for (Building item : Document.get().getBuildings())
-			if (item.getId() == getParent_id())
-				this.parent = item;
-
-		int type_id = (int) obj.get("suiteTypeId").isNumber()
-				.doubleValue();
+		this.parent = Document.get().getBuildings().get(getParent_id());
+		int type_id = (int) obj.get("suiteTypeId").isNumber().doubleValue();
 		
-		for (SuiteType type : Document.get().getSuiteTypes()) {
-			if (type.getId() == type_id) {
-				suite_type = type;
-				break;
-			}
-		}
-		
+		suite_type = Document.get().getSuiteTypes().get(type_id);
 		price = -1;
 		if ((obj.get("currentPrice") != null)&&
 			(obj.get("currentPrice").isNumber() != null) &&
@@ -160,11 +144,7 @@ public class Suite implements I_VRObject {
 			// Z
 			double alt = this.getPosition().getAltitude()
 					+ suite_type.getPoints().get(i) * 0.0254;
-			Building parent = null;
-			for (Building item : Document.get().getBuildings())
-				if (item.getId() == this.getParent_id())
-					parent = item;
-
+			Building parent = Document.get().getBuildings().get(this.getParent_id());
 			
 			if ((parent != null) && (parent.hasAltitudeAdjustment()))
 				alt += parent.getAltitudeAdjustment();

@@ -38,7 +38,6 @@ public class Site implements I_VRObject {
 	void Parse(JSONValue value) {
 		JSONObject obj = value.isObject();
 		id = (int) obj.get("id").isNumber().doubleValue();
-		// TODO version
 		// parent_id = (int) obj.get("siteId").isNumber().doubleValue();
 		name = obj.get("name").isString().stringValue();
 
@@ -49,7 +48,7 @@ public class Site implements I_VRObject {
 		double alt = 0;
 		int count = 0;
 
-		for (Building building : Document.get().getBuildings()) {
+		for (Building building : Document.get().getBuildings().values()) {
 			Position position = building.getPosition();
 			lat += position.getLatitude();
 			lon += position.getLongitude();

@@ -1,18 +1,17 @@
 package com.condox.vrestate.client.view;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.document.Building;
 import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.Site;
 import com.condox.vrestate.client.document.Suite;
+import com.condox.vrestate.client.document.ViewOrder;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.I_AbstractInteractor;
 import com.condox.vrestate.client.view.Camera.Camera;
@@ -20,6 +19,7 @@ import com.condox.vrestate.client.view.GeoItems.BuildingGeoItem;
 import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SiteGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
+import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem.GeoStatus;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
@@ -293,21 +293,6 @@ public abstract class _AbstractView implements I_AbstractView {
 		info_overlay.setVisibility(value);
 	};
 
-	public static void ApplyFilter() {
-		Document.progressBar = new ProgressBar();
-		Document.progressBar.Update(ProgressBar.ProgressLabel.Processing);
-
-		int howMany = getSuiteGeoItems().size();
-		int count = 0;
-		for (SuiteGeoItem suiteGeo : getSuiteGeoItems()) {
-			Document.progressBar.Update(count * 100 / howMany);
-			suiteGeo.Redraw();
-			count++;
-		}
-		Document.progressBar.Cleanup();
-		Document.progressBar = null;
-	}
-
 	@Override
 	public IGeoItem getGeoItem() {
 		return theGeoItem;
@@ -417,33 +402,56 @@ public abstract class _AbstractView implements I_AbstractView {
 	// etc.)
 	public static void CreateAllGeoItems() {
 		Document.progressBar.Update(ProgressBar.ProgressLabel.Processing);
-		for (Site site : Document.get().getSites()) {
+		for (Site site : Document.get().getSites().values()) {
 			SiteGeoItem siteGeo = new SiteGeoItem(site);
 			siteGeoItems.put(site.getId(), siteGeo);
 		}
 
-		for (Building building : Document.get().getBuildings()) {
+		for (Building building : Document.get().getBuildings().values()) {
 			BuildingGeoItem buildingGeo = new BuildingGeoItem(building);
 			buildingGeoItems.put(building.getId(), buildingGeo);
 		}
 
 		int count = 0;
 		int howMany = Document.get().getSuites().size();
-		for (Suite suite : Document.get().getSuites()) {
+		for (Suite suite : Document.get().getSuites().values()) {
 			addSiteGeoItem(suite, false);
 
 			count++;
 			Document.progressBar.Update(count * 100.0 / howMany);
 		}
 
+		if (Document.targetViewOrder != null) {
+			if (Document.targetViewOrder.getProductType() == ViewOrder.ProductType.PrivateListing ||
+				Document.targetViewOrder.getProductType() == ViewOrder.ProductType.PublicListing) {
+				Suite targetSuite = (Suite) Document.targetViewOrder.getTargetObject();
+				suiteGeoItems.get(targetSuite.getId()).setGeoStatus(GeoStatus.Selected);
+				
+				String vTourUrl =  Document.targetViewOrder.getVTourUrl();
+				if (vTourUrl != null)
+					targetSuite.setVTourUrl(vTourUrl);
+			}
+			else
+			if (Document.targetViewOrder.getProductType() == ViewOrder.ProductType.Building3DLayout){
+				for (SuiteGeoItem suiteGI : suiteGeoItems.values())
+					suiteGI.setGeoStatus(GeoStatus.Layout);
+			}
+		}
+		
 		Document.progressBar.Cleanup();
 	}
 
 	public static void addSiteGeoItem(Suite suite, boolean redraw) {
 		SuiteGeoItem suiteGeo = new SuiteGeoItem(suite);
+		if (suiteGeoItems.containsKey(suite.getId()))
+			Log.write("_AbstractView.addSiteGeoItem -> duplicate suiteGeoItem: suiteId="
+					+suite.getId()+
+					" suiteName="+suite.getName()+
+					" suiteType="+suite.getSuiteType().toString());
+
 		suiteGeoItems.put(suite.getId(), suiteGeo);
 		if (redraw)
-			suiteGeo.Redraw();
+			suiteGeo.ShowIfFilteredIn();
 	}
 
 	public static SiteGeoItem getSiteGeoItem(int id) {
@@ -458,16 +466,16 @@ public abstract class _AbstractView implements I_AbstractView {
 		return suiteGeoItems.get(id);
 	}
 
-	public static Collection<SiteGeoItem> getSiteGeoItems() {
-		return siteGeoItems.values();
+	public static Map<Integer, SiteGeoItem> getSiteGeoItems() {
+		return siteGeoItems;
 	}
 
-	public static Collection<BuildingGeoItem> getBuildingGeoItems() {
-		return buildingGeoItems.values();
+	public static Map<Integer, BuildingGeoItem> getBuildingGeoItems() {
+		return buildingGeoItems;
 	}
 
-	public static Collection<SuiteGeoItem> getSuiteGeoItems() {
-		return suiteGeoItems.values();
+	public static Map<Integer, SuiteGeoItem> getSuiteGeoItems() {
+		return suiteGeoItems;
 	}
 
 	public static void enableTimeout(boolean enable) {

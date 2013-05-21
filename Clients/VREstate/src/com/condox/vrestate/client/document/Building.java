@@ -37,7 +37,7 @@ public class Building implements I_VRObject {
 		parent_id = (int) obj.get("siteId").isNumber().doubleValue();
 		name = obj.get("name").isString().stringValue();
 
-		if (obj.containsKey("center")) { // ?? TODO
+		if (obj.containsKey("center")) { 
 			JSONObject position = obj.get("center").isObject();
 			double longitude = position.get("lon").isNumber().doubleValue();
 			double latitude = position.get("lat").isNumber().doubleValue();
@@ -137,10 +137,7 @@ public class Building implements I_VRObject {
 	}
 
 	public Site getParent() {
-		for (Site item : Document.get().getSites())
-			if (item.getId() == getParent_id())
-				return item;
-		return null;
+		return Document.get().getSites().get(getParent_id());
 	}
 
 	public static ArrayList<Building> get() {
@@ -210,13 +207,11 @@ public class Building implements I_VRObject {
 	//--
 	public String getBubbleWebTemplateUrl() {
 		if (bubbleWebTemplateUrl == null || bubbleWebTemplateUrl.isEmpty())
-			// TODO replace with return null
 			return null;
 		return bubbleWebTemplateUrl;
 	}
 	public String getBubbleKioskTemplateUrl() {
 		if (bubbleKioskTemplateUrl == null || bubbleKioskTemplateUrl.isEmpty())
-			// TODO replace with return null
 			return infoUrl;
 		return bubbleKioskTemplateUrl;
 	}
