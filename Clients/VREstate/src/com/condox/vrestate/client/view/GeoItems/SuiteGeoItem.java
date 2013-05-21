@@ -47,7 +47,8 @@ public class SuiteGeoItem implements IGeoItem {
 
 		this.suite = suite;
 
-		if (Document.targetViewOrder.getProductType() == ViewOrder.ProductType.Building3DLayout)
+		if (Document.targetViewOrder!=null&&
+			Document.targetViewOrder.getProductType() == ViewOrder.ProductType.Building3DLayout)
 			geoStatus = GeoStatus.Layout;
 		else {
 			Suite.Status status = suite.getStatus();
