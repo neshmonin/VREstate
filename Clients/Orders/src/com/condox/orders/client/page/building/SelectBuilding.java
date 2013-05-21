@@ -46,28 +46,30 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 	private static SelectBuildingUiBinder uiBinder = GWT
 			.create(SelectBuildingUiBinder.class);
 	@UiField(provided = true)
-	DataGrid<Building> dataGrid = new DataGrid<Building>();
-	@UiField TextBox textFilter;
-	@UiField ListBox boxCity;
-	
+	DataGrid<Building> dataGrid = new DataGrid<Building>(100);
+	@UiField
+	TextBox textFilter;
+	@UiField
+	ListBox boxCity;
+
 	interface SelectBuildingUiBinder extends UiBinder<Widget, SelectBuilding> {
 	}
-	
-	//**************************************************************************
-//	private class CustomHeaderBuilder extends Header<Building> {
-//
-//		public CustomHeaderBuilder(Cell<Building> cell) {
-//			super(cell);
-//		}
-//
-//		@Override
-//		public Building getValue() {
-//			// TODO Auto-generated method stub
-//			return null;
-//		}
-//		
-//	}
-	//**************************************************************************
+
+	// **************************************************************************
+	// private class CustomHeaderBuilder extends Header<Building> {
+	//
+	// public CustomHeaderBuilder(Cell<Building> cell) {
+	// super(cell);
+	// }
+	//
+	// @Override
+	// public Building getValue() {
+	// // TODO Auto-generated method stub
+	// return null;
+	// }
+	//
+	// }
+	// **************************************************************************
 
 	public SelectBuilding() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -78,14 +80,14 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 		initWidget(uiBinder.createAndBindUi(this));
 		setup();
 	}
-	
+
 	private void setup() {
 		boxCity.addItem("Toronto");
 		boxCity.setEnabled(true);
 		textFilter.setText(Config.TXT_START_TYPING);
-		
-//	    resources = GWT.create(Resources.class);
-//	    resources.styles().ensureInjected();
+
+		// resources = GWT.create(Resources.class);
+		// resources.styles().ensureInjected();
 	}
 
 	@Override
@@ -94,10 +96,10 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 		GetBuildingsList();
 	}
 
-//	private Column<Building, String> viewSuitesColumn;
-//	private Column<Building, String> viewSuitesColumn2;
-	private FilteredListDataProvider<Building> dataProvider = 
-		new FilteredListDataProvider<Building>(this);
+	// private Column<Building, String> viewSuitesColumn;
+	// private Column<Building, String> viewSuitesColumn2;
+	private FilteredListDataProvider<Building> dataProvider = new FilteredListDataProvider<Building>(
+			this);
 
 	private void CreateDataGrid() {
 		int count = dataGrid.getColumnCount();
@@ -155,51 +157,49 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 		});
 		dataGrid.addColumn(postalColumn, "Postal");
 
-		
-		
-		
-		
-		 // View friends.
-	    SafeHtmlRenderer<String> anchorRenderer = new AbstractSafeHtmlRenderer<String>() {
-	    	
-	    	@Override
+		// View friends.
+		SafeHtmlRenderer<String> anchorRenderer = new AbstractSafeHtmlRenderer<String>() {
+
+			@Override
 			public SafeHtml render(String object) {
 				// TODO Auto-generated method stub
-	    		 SafeHtmlBuilder sb = new SafeHtmlBuilder();
-	    		 sb.appendHtmlConstant("<img src=\"Select_but.png\"/>");
-	    		 return sb.toSafeHtml();
+				SafeHtmlBuilder sb = new SafeHtmlBuilder();
+				sb.appendHtmlConstant("<img src=\"Select_but.png\"/>");
+				return sb.toSafeHtml();
 			}
-	    };
-	    
-	    // Add a button column to pick a suite.
-	    Column<Building, String> viewSuitesColumn = new Column<Building, String>(new ClickableTextCell(anchorRenderer)) {
-	      @Override
+		};
+
+		// Add a button column to pick a suite.
+		Column<Building, String> viewSuitesColumn = new Column<Building, String>(
+				new ClickableTextCell(anchorRenderer)) {
+			@Override
 			public String getValue(Building object) {
 				return "Pick a Suite...";
 			}
 
-			
 		};
 		viewSuitesColumn.setFieldUpdater(new FieldUpdater<Building, String>() {
 
 			@Override
 			public void update(int index, Building object, String value) {
 				Orders.selectedBuilding = object;
-				//***************************************
-//				UrlBuilder builder = Window.Location.createUrlBuilder();
-//				builder.setParameter("BuildingId", String.valueOf(object.getId()));
-//				Window.Location.replace(builder.buildString().replaceAll("buildings", "suits"));
-				//***************************************
+				// ***************************************
+				// UrlBuilder builder = Window.Location.createUrlBuilder();
+				// builder.setParameter("BuildingId",
+				// String.valueOf(object.getId()));
+				// Window.Location.replace(builder.buildString().replaceAll("buildings",
+				// "suits"));
+				// ***************************************
 				History.newItem("suits");
 			}
 		});
 		dataGrid.addColumn(viewSuitesColumn, "");
-		
+
 		// Add a column to fit free space.
 		TextColumn<Building> freeSpaceColumn = new TextColumn<Building>() {
 			@Override
 			public String getValue(Building object) {
-				return /*object.getPostal()*/null;
+				return /* object.getPostal() */null;
 			}
 		};
 		postalColumn.setSortable(true);
@@ -211,10 +211,9 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 		});
 		dataGrid.addColumn(freeSpaceColumn, "");
 
-
 		if (!dataProvider.getDataDisplays().contains(dataGrid))
 			dataProvider.addDataDisplay(dataGrid);
-		
+
 		dataGrid.setColumnWidth(nameColumn, "200px");
 		dataGrid.setColumnWidth(streetColumn, "200px");
 		dataGrid.setColumnWidth(postalColumn, "100px");
@@ -223,8 +222,8 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 
 	private void GetBuildingsList() {
 		String url = Options.URL_VRT
-				+ "/data/building?scopeType=address&ad_mu=Toronto" + "&ed=Resale" + "&sid="
-				+ User.SID;
+				+ "data/building?scopeType=address&ad_mu=Toronto"
+				+ "&ed=Resale" + "&sid=" + User.SID;
 		GET.send(url, new RequestCallback() {
 
 			@Override
@@ -254,23 +253,25 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 	public boolean isValid(Building value, String filter) {
 		if (value.getName().toLowerCase().contains(filter.toLowerCase()))
 			return true;
-		 if (value.getAddress().toLowerCase().contains(filter.toLowerCase()))
-		    return true;
-		//if (String.valueOf(value.getId()).toLowerCase()
-		//		.contains(filter.toLowerCase()))
-		//	return true;
-		//if (value.getStreet().toLowerCase().contains(filter.toLowerCase()))
-		//	return true;
-		if (value.getCity().toLowerCase().contains(filter.toLowerCase()))
+		// if (value.getAddress().toLowerCase().contains(filter.toLowerCase()))
+		// return true;
+		// if (String.valueOf(value.getId()).toLowerCase()
+		// .contains(filter.toLowerCase()))
+		// return true;
+		if (value.getStreet().toLowerCase().contains(filter.toLowerCase()))
 			return true;
-		if (value.getPostal().toLowerCase().contains(filter.toLowerCase()))
-			return true;
+		// if (value.getCity().toLowerCase().contains(filter.toLowerCase()))
+		// return true;
+		 if (value.getPostal().toLowerCase().contains(filter.toLowerCase()))
+		 return true;
 		return false;
 	}
-	 @UiHandler("textFilter")
-	 void onTextFilterKeyUp(KeyUpEvent event) {
-	 dataProvider.setFilter(textFilter.getText());
-	 }
+
+	@UiHandler("textFilter")
+	void onTextFilterKeyUp(KeyUpEvent event) {
+		dataProvider.setFilter(textFilter.getText());
+	}
+
 	@UiHandler("textFilter")
 	void onTextFilterFocus(FocusEvent event) {
 		if (textFilter.getText().equals(Config.TXT_START_TYPING))
@@ -278,6 +279,7 @@ public class SelectBuilding extends Composite implements IFilter<Building>,
 		else
 			textFilter.selectAll();
 	}
+
 	@UiHandler("textFilter")
 	void onTextFilterBlur(BlurEvent event) {
 		if (textFilter.getText().isEmpty())
