@@ -47,7 +47,9 @@ namespace CoreClasses
                 return false;
 
             string name = "Default";
-            int ID = int.Parse(developerId);
+            int ID = 0;
+            try { ID = int.Parse(developerId); } catch (System.FormatException) {}
+
             Developer dev = CreateDeveloper(ID, name);
             Developers.Add(name, dev);
 

@@ -195,7 +195,7 @@ namespace SuperAdminConsole
                                         ", developerId=" + developerId +
                                         ", SID=" + ServerProxy.SID, "Info");
                         Trace.Flush();
-                        comboBoxEstateDeveloper.Items.Add(SuperServer.Developers[developerId]);
+                        comboBoxEstateDeveloper.Items.Add(SuperServer.Developers["Default"]);
                         comboBoxEstateDeveloper.SelectedIndex = 0;
                         return true;
                     }
@@ -574,7 +574,7 @@ namespace SuperAdminConsole
                         subitems[2] = "PrL";
                         break;
                     case ViewOrder.ViewOrderProduct.PublicListing:
-                        subitems[2] = "PuL";
+                        subitems[2] = "ShL";
                         break;
                     case ViewOrder.ViewOrderProduct.Building3DLayout:
                         subitems[2] = "3DL";
@@ -667,6 +667,20 @@ namespace SuperAdminConsole
 
             ClientData viewOrder = ListViewOrders.SelectedItems[0].Tag as ClientData;
             bool enabled = viewOrder.GetProperty("enabled", true);
+            switch (viewOrder.GetProperty<ViewOrder.ViewOrderProduct>("product", ViewOrder.ViewOrderProduct.PublicListing))
+            {
+                case ViewOrder.ViewOrderProduct.PrivateListing:
+                    toolStripMenuItemConvert.Visible = true;
+                    toolStripMenuItemConvert.Text = "Convert to Shared Listing";
+                    break;
+                case ViewOrder.ViewOrderProduct.PublicListing:
+                    toolStripMenuItemConvert.Visible = true;
+                    toolStripMenuItemConvert.Text = "Convert to Private Listing";
+                    break;
+                default:
+                    toolStripMenuItemConvert.Visible = false;
+                    break;
+            }
             toolStripMenuItemEnableViewOrder.Text = enabled ? "Disable" : "Enable";
         }
 
@@ -742,9 +756,9 @@ namespace SuperAdminConsole
             if (e.Button != System.Windows.Forms.MouseButtons.Left)
                 return;
 
-            if (m_agent.UserRole != User.Role.SuperAdmin &&
-                m_agent.UserRole != User.Role.DeveloperAdmin)
-                return;
+            //if (m_agent.UserRole != User.Role.SuperAdmin &&
+            //    m_agent.UserRole != User.Role.DeveloperAdmin)
+            //    return;
 
             if (ListViewOrders.SelectedItems.Count != 0)
                 ListViewOrders.DoDragDrop(ListViewOrders.SelectedItems[0], DragDropEffects.Move);
@@ -791,12 +805,12 @@ namespace SuperAdminConsole
                 return;
             }
 
-            if (newUser.UserRole == User.Role.SuperAdmin ||
-                newUser.UserRole == User.Role.DeveloperAdmin)
-            {
-                e.Effect = DragDropEffects.None;
-                return;
-            }
+            //if (newUser.UserRole == User.Role.SuperAdmin ||
+            //    newUser.UserRole == User.Role.DeveloperAdmin)
+           // {
+           //     e.Effect = DragDropEffects.None;
+           //     return;
+           // }
 
             m_agent = newUser;
 
@@ -1110,6 +1124,38 @@ namespace SuperAdminConsole
         {
             ClientData viewOrder = ListViewOrders.SelectedItems[0].Tag as ClientData;
             Clipboard.SetText(viewOrder["viewOrder-url"] as string);
+        }
+
+        private void toolStripMenuItemConvert_Click(object sender, EventArgs e)
+        {
+            ClientData viewOrder = ListViewOrders.SelectedItems[0].Tag as ClientData;
+            // https://vrt.3dcondox.com/vre/data/viewOrder/<viewOrder ID>?sid=<SID>
+            //    (HTTP PUT, in JSON should be "enabled"="frue")
+            switch (viewOrder.GetProperty<ViewOrder.ViewOrderProduct>("product", ViewOrder.ViewOrderProduct.PublicListing))
+            {
+                case ViewOrder.ViewOrderProduct.PrivateListing:
+                    viewOrder["product"] = ViewOrder.ViewOrderProduct.PublicListing;
+                    break;
+                case ViewOrder.ViewOrderProduct.PublicListing:
+                    viewOrder["product"] = ViewOrder.ViewOrderProduct.PrivateListing;
+                    break;
+                default:
+                    toolStripMenuItemConvert.Visible = false;
+                    break;
+            }
+
+            string viewOrderId = viewOrder.GetProperty("id", string.Empty);
+            if (viewOrderId != string.Empty)
+            {
+                // ClientData agent = treeViewAccounts.SelectedNode.Tag as ClientData;
+
+                viewOrderId = viewOrderId.Replace("-", string.Empty);
+                ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
+                                                                  "viewOrder/" + viewOrderId,
+                                                                  "", viewOrder);
+                refreshOrders();
+            }
+            UpdateState();
         }
 
     }
