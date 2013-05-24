@@ -69,7 +69,7 @@ public class HelicopterView extends SiteView {
 		SiteView siteView = new SiteView(theGeoItem);
 		_AbstractView.Push(siteView);
 		if (_AbstractView.getBuildingGeoItems().size() == 1) {
-			for (BuildingGeoItem buildingGeo : _AbstractView.getBuildingGeoItems())
+			for (BuildingGeoItem buildingGeo : _AbstractView.getBuildingGeoItems().values())
 				_AbstractView.AddSelection(buildingGeo);
 		}
 	}

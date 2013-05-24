@@ -1,13 +1,10 @@
 package com.condox.vrestate.client.document;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.User;
 import com.condox.vrestate.client.VREstate;
-import com.condox.vrestate.client.document.Suite.Status;
 import com.condox.vrestate.client.view.ProgressBar;
 import com.condox.vrestate.client.view._AbstractView;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
@@ -77,26 +74,11 @@ public class Document implements IDocument,
 				JSONString jsonString = obj.get("primaryViewOrderId").isString();
 				String primaryViewOrderId = jsonString.stringValue();
 				ViewOrder vo = viewOrders.get(primaryViewOrderId);
-				if (vo != null) {
+				if (vo != null)
 					targetViewOrder = vo;
-					if (vo.getProductType() == ViewOrder.ProductType.PrivateListing ||
-						vo.getProductType() == ViewOrder.ProductType.PublicListing) {
-						Suite targetSuite = (Suite) vo.getTargetObject();
-						targetSuite.setStatus(Suite.Status.Selected);
-
-						String vTourUrl =  vo.getVTourUrl();
-						if (vTourUrl != null)
-							targetSuite.setVTourUrl(vTourUrl);
-					}
-					else if (vo.getProductType() == ViewOrder.ProductType.Building3DLayout){
-						for (Suite suite : this.suites.values())
-							suite.setStatus(Status.Layout);
-					}
-						
-				}
 			}		
 
-			for (Suite suite : getSuites())
+			for (Suite suite : getSuites().values())
 				suite.CalcLineCoords();
 
 			progressBar.Cleanup();
@@ -195,14 +177,14 @@ public class Document implements IDocument,
 				this.suites.put(theSuite.getId(), theSuite);
 				if (redraw) {
 					theSuite.CalcLineCoords();
-					_AbstractView.addSiteGeoItem(theSuite, true);
+					_AbstractView.addSuiteGeoItem(theSuite, true);
 				}
 			}
 			else {
 				theSuite.ParseDynamic(JSONsuite);
 				SuiteGeoItem suiteGeo = (SuiteGeoItem)_AbstractView.getSuiteGeoItem(id);
 				suiteGeo.Init(theSuite);
-				suiteGeo.Redraw();
+				suiteGeo.ShowIfFilteredIn();
 			}					
 		}
 	}
@@ -302,9 +284,6 @@ public class Document implements IDocument,
 					viewOrder.setTargetObject(targetSuite);
 					targetSuite.setInfoUrl(viewOrder.getInfoUrl());
 					targetSuite.setVTourUrl(viewOrder.getVTourUrl());
-	
-					if (viewOrder.getProductType() == ViewOrder.ProductType.Building3DLayout)
-						targetSuite.setStatus(Suite.Status.Layout);
 					break;
 				case Building:
 					Building targetBuilding = this.buildings.get(viewOrder.getTargetObjectId());
@@ -323,28 +302,28 @@ public class Document implements IDocument,
 	}
 
 	@Override
-	public Collection<Site> getSites() {
-		return this.sites.values();
+	public Map<Integer, Site> getSites() {
+		return this.sites;
 	}
 
 	@Override
-	public Collection<Building> getBuildings() {
-		return this.buildings.values();
+	public Map<Integer, Building> getBuildings() {
+		return this.buildings;
 	}
 
 	@Override
-	public Collection<Suite> getSuites() {
-		return this.suites.values();
+	public Map<Integer, Suite> getSuites() {
+		return this.suites;
 	}
 	
 	@Override
-	public Collection<SuiteType> getSuiteTypes() {
-		return this.suite_types.values();
+	public Map<Integer, SuiteType> getSuiteTypes() {
+		return this.suite_types;
 	}
 
 	@Override
-	public Collection<ViewOrder> getViewOrders() {
-		return this.viewOrders.values();
+	public Map<String, ViewOrder> getViewOrders() {
+		return this.viewOrders;
 	}
 
 	public static String SID;
@@ -354,7 +333,7 @@ public class Document implements IDocument,
 	@Override
 	public void onResponseReceived(Request request, Response response) {
 		String received = response.getText();
-		if (received == null || received == "") return;
+		if (received == null || received.length() == 0) return;
 		
 		JSONValue JSONreceived = JSONParser.parseLenient(received);
 		if (JSONreceived == null) return;

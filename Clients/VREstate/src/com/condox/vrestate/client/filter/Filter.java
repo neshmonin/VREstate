@@ -1,16 +1,19 @@
 package com.condox.vrestate.client.filter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.Options;
-import com.condox.vrestate.client.document.Document;
-import com.condox.vrestate.client.document.Suite;
+import com.condox.vrestate.client.document.SuiteType;
 import com.condox.vrestate.client.view.I_AbstractView;
+import com.condox.vrestate.client.view.ProgressBar;
 import com.condox.vrestate.client.view._AbstractView;
 import com.condox.vrestate.client.view.GeoItems.IGeoItem;
+import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.IFrameElement;
@@ -32,10 +35,11 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.StackPanel;
 
-public class Filter extends StackPanel implements I_FilterSection {
+public class Filter extends StackPanel implements I_FilterSectionContainer {
 	public static boolean initialized = false;
 	private static Filter instance = new Filter();
-	private List<Suite> filteredIn_suites = null;
+	private static SortedMap<Integer, SuiteGeoItem> filteredIn_suiteGeos = null;
+	private static SortedMap<Integer, SuiteGeoItem> active_suiteGeos = null;
 
 	ArrayList<I_FilterSection> sections = new ArrayList<I_FilterSection>();
 
@@ -83,7 +87,7 @@ public class Filter extends StackPanel implements I_FilterSection {
 			public void onClick(ClickEvent event) {
 				Reset();
 				btnReset.setEnabled(false);
-				Apply();
+				ApplyAndSelect();
 				btnApply.setEnabled(false);
 			}
 		});
@@ -95,7 +99,7 @@ public class Filter extends StackPanel implements I_FilterSection {
 		btnApply = new Button("New button");
 		btnApply.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				Apply();
+				ApplyAndSelect();
 				btnApply.setEnabled(false);
 			}
 		});
@@ -125,27 +129,28 @@ public class Filter extends StackPanel implements I_FilterSection {
 		frame = com.google.gwt.dom.client.Document.get().createIFrameElement();
 		com.google.gwt.dom.client.Document.get().getBody().appendChild(frame);
 
-		PriceSection priceSection = PriceSection.CreateSectionPanel("Price", stackPanel);
-		if (priceSection != null) sections.add(priceSection);
-		BedroomsSection bedroomsSection = BedroomsSection.CreateSectionPanel("Bedrooms", stackPanel);
-		if (bedroomsSection != null) sections.add(bedroomsSection);
-		BathroomSection bathroomSection = BathroomSection.CreateSectionPanel("Bathrooms", stackPanel);
-		if (bathroomSection != null) sections.add(bathroomSection);
-		AreaSection areaSection = AreaSection.CreateSectionPanel("Area", stackPanel);
-		if (areaSection != null) sections.add(areaSection);
-		BalconySection balconySection = BalconySection.CreateSectionPanel("Balconies", stackPanel);
-		if (balconySection != null) sections.add(balconySection);
+		getActiveSuiteGeoItems().putAll(_AbstractView.getSuiteGeoItems());
+		
+		I_FilterSection propertyTypeSection = 
+			OwnershipSection.CreateSectionPanel(this, "Property Type", stackPanel);
+		if (propertyTypeSection != null) sections.add(propertyTypeSection);
+//		I_FilterSection bedroomsSection = BedroomsSection.CreateSectionPanel("Bedrooms", stackPanel);
+//		if (bedroomsSection != null) sections.add(bedroomsSection);
+//		I_FilterSection bathroomSection = BathroomSection.CreateSectionPanel("Bathrooms", stackPanel);
+//		if (bathroomSection != null) sections.add(bathroomSection);
+//		I_FilterSection areaSection = AreaSection.CreateSectionPanel("Area", stackPanel);
+//		if (areaSection != null) sections.add(areaSection);
+//		I_FilterSection balconySection = BalconySection.CreateSectionPanel("Balconies", stackPanel);
+//		if (balconySection != null) sections.add(balconySection);
 			
 		Iterator<I_FilterSection> iterator = sections.iterator();
 		while (iterator.hasNext())
 			if (iterator.next() == null)
 				iterator.remove();
 
-		filteredIn_suites = new ArrayList<Suite>();
-		this.filteredIn_suites.addAll(Document.get().getSuites());
-		Init();
+		//Init();
 
-		Reset();
+		//Reset();
 		UpdateSize();
 		setVisible(false);
 		initialized = true;
@@ -204,21 +209,8 @@ public class Filter extends StackPanel implements I_FilterSection {
 		});
 	}
 
-	public void Apply() {
-		for (I_FilterSection section : sections)
-			section.Apply();
-
-		this.filteredIn_suites.clear();
-		_AbstractView.ApplyFilter();
-		if (this.filteredIn_suites.size() == Document.get().getSuites().size())
-			dpFilter.getHeaderTextAccessor().setText(
-					"Selection Filter (" + Document.get().getSuites().size()
-							+ " units available)");
-		else
-			dpFilter.getHeaderTextAccessor().setText(
-					"Selection Filter (" + this.filteredIn_suites.size() + " out of "
-							+ Document.get().getSuites().size() + ")");
-
+	public void ApplyAndSelect() {
+		Apply();
 		IGeoItem suiteGeo = Filter.get().getNextGeoItem();
 		if (suiteGeo != null) {
 			I_AbstractView currView = _AbstractView.getCurrentView();
@@ -226,26 +218,75 @@ public class Filter extends StackPanel implements I_FilterSection {
 				currView.Select(suiteGeo.getType(), suiteGeo.getId());
 		}
 	}
-
+	
+	
 	@Override
-	public void Reset() {
+	public void Apply() {
 		for (I_FilterSection section : sections)
-			section.Reset();
+			section.Apply();
+		
+		getFilteredInSuiteGeoItems().clear();
 
-		this.filteredIn_suites.clear();
-		this.filteredIn_suites.addAll(Document.get().getSuites());
-		dpFilter.getHeaderTextAccessor().setText(
-				"Selection Filter (" + Document.get().getSuites().size()
-						+ " units available)");
+		ProgressBar progressBar = new ProgressBar();
+		progressBar.Update(ProgressBar.ProgressLabel.Processing);
+
+		int howMany = _AbstractView.getSuiteGeoItems().size();
+		int count = 0;
+		for (SuiteGeoItem suiteGeo : _AbstractView.getSuiteGeoItems().values()) {
+			progressBar.Update(count * 100 / howMany);
+			if (suiteGeo.ShowIfFilteredIn())
+				getFilteredInSuiteGeoItems().put(suiteGeo.getId(), suiteGeo);
+			//else
+			//	Log.write("Filter->Apply -> filtered out: suiteId="
+			//			+suiteGeo.getId()+
+			//			" suiteName="+suiteGeo.getName());
+				
+			count++;
+		}
+		progressBar.Cleanup();
+
+		if (btnApply != null)
+			btnApply.setEnabled(true);
+		if (btnReset != null)
+			btnReset.setEnabled(true);
+		lastState = StateHash();
+
+		if (getFilteredInSuiteGeoItems().size() == _AbstractView.getSuiteGeoItems().size())
+			dpFilter.getHeaderTextAccessor().setText(
+					"Selection Filter (" + _AbstractView.getSuiteGeoItems().size()
+							+ " units available)");
+		else
+			dpFilter.getHeaderTextAccessor().setText(
+					"Selection Filter (" + getFilteredInSuiteGeoItems().size() + " out of "
+							+ _AbstractView.getSuiteGeoItems().size() + ")");
 	}
 
 	@Override
-	public boolean isFilteredIn(Suite suite) {
+	public int StateHash() {
+		int hash = 9999;
+		if (sections != null) {			
+			for (I_FilterSection section : sections)
+				hash += section.StateHash();
+		}
+		
+		return hash;
+	}
+
+	@Override
+	public void Reset() {
+		getFilteredInSuiteGeoItems().putAll(getActiveSuiteGeoItems());
 		for (I_FilterSection section : sections)
-			if (!section.isFilteredIn(suite))
+			section.Reset();
+
+		Apply();
+	}
+
+	@Override
+	public boolean isFilteredIn(SuiteGeoItem suiteGI) {
+		for (I_FilterSection section : sections)
+			if (!section.isFilteredIn(suiteGI))
 				return false;
 
-		this.filteredIn_suites.add(suite);
 		return true;
 	}
 
@@ -256,75 +297,106 @@ public class Filter extends StackPanel implements I_FilterSection {
 				return false;
 		return true;
 	}
-
-	@Override
-	public boolean isChanged() {
-		for (I_FilterSection section : sections)
-			if (section.isChanged())
-				return true;
-		return false;
-	}
-	
-	public void onChanged() {
-		if (isChanged()) {
-			if (btnApply != null)
-				btnApply.setEnabled(true);
-			if (btnReset != null)
-				btnReset.setEnabled(true);
-		}
-	}
 	
 	public int howManyFilteredIn() {
-		return this.filteredIn_suites.size();
+		return getFilteredInSuiteGeoItems().size();
 	}	
 	
+	@Override
+	public Map<Integer, SuiteGeoItem> getActiveSuiteGeoItems() {
+		if (active_suiteGeos == null) {
+			active_suiteGeos = new TreeMap<Integer, SuiteGeoItem>();
+			active_suiteGeos.putAll(_AbstractView.getSuiteGeoItems());
+		}
+		return active_suiteGeos;
+	}
+
+	@Override
+	public void setActiveSuiteGeoItems(Map<Integer, SuiteGeoItem> suites) {
+		getActiveSuiteGeoItems().clear();
+		getActiveSuiteGeoItems().putAll(suites);
+	}
+	
+	public Map<Integer, SuiteGeoItem> getFilteredInSuiteGeoItems() {
+		if (filteredIn_suiteGeos == null) {
+			filteredIn_suiteGeos = new TreeMap<Integer, SuiteGeoItem>();
+			filteredIn_suiteGeos.putAll(getActiveSuiteGeoItems());
+		}
+		return filteredIn_suiteGeos;
+	}
+
+	@Override
+	public Map<Integer, SuiteType> getActiveSuiteTypes() {
+		Map<Integer, SuiteType> suiteTypes = new HashMap<Integer, SuiteType>();
+		for (SuiteGeoItem suiteGI : getActiveSuiteGeoItems().values()) {
+			SuiteType type = suiteGI.suite.getSuiteType();
+			if (type == null) continue;
+			int typeId = type.getId();
+			if (!suiteTypes.containsKey(typeId))
+				suiteTypes.put(typeId, type);
+		}			
+			
+		return suiteTypes;
+	}
+
+
 	public IGeoItem getNextGeoItem() {
 		int currId = _AbstractView.getCurrentGeoItem().getId();
-		if (this.filteredIn_suites == null) {
-			this.filteredIn_suites = new ArrayList<Suite>();
-			this.filteredIn_suites.addAll(Document.get().getSuites());
-		}
-			
-		int size = this.filteredIn_suites.size();
+		int size = getFilteredInSuiteGeoItems().size();
 		if (size == 0) return null;
 		
+		SuiteGeoItem[] suitesGIArray = getFilteredInSuiteGeoItems().values().toArray(new SuiteGeoItem[size]);
 		for (int i=0; i< size; i++) {
-			Suite suite = this.filteredIn_suites.get(i);
-			if (suite.getId() == currId) {
-				Suite next = i+1 < size? this.filteredIn_suites.get(i+1) : 
-										 this.filteredIn_suites.get(0);
-				IGeoItem nextGeo = _AbstractView.getSuiteGeoItem(next.getId());
+			SuiteGeoItem suiteGI = suitesGIArray[i];
+			if (suiteGI.suite.getId() == currId) {
+				SuiteGeoItem nextGeo = i+1 < size? suitesGIArray[i+1] : suitesGIArray[0];
 				return nextGeo;
 			}				
 		}
 
-		Suite first = this.filteredIn_suites.get(0);
-		IGeoItem firstGeo = _AbstractView.getSuiteGeoItem(first.getId());
-		return firstGeo;
+		SuiteGeoItem first = suitesGIArray[0];
+		return first;
 	}
 
 	public IGeoItem getPrevGeoItem() {
 		int currId = _AbstractView.getCurrentGeoItem().getId();
-		if (this.filteredIn_suites == null) {
-			this.filteredIn_suites = new ArrayList<Suite>();
-			this.filteredIn_suites.addAll(Document.get().getSuites());
-		}
-			
-		int size = this.filteredIn_suites.size();
+		int size = getFilteredInSuiteGeoItems().size();
 		if (size == 0) return null;
 		
+		SuiteGeoItem[] suitesGIArray = getFilteredInSuiteGeoItems().values().toArray(new SuiteGeoItem[size]);
 		for (int i=0; i< size; i++) {
-			Suite suite = this.filteredIn_suites.get(i);
-			if (suite.getId() == currId) {
-				Suite prev = i > 1 ? this.filteredIn_suites.get(i-1) : 
-									 this.filteredIn_suites.get(size-1);
-				IGeoItem nextGeo = _AbstractView.getSuiteGeoItem(prev.getId());
-				return nextGeo;
+			SuiteGeoItem suiteGI = suitesGIArray[i];
+			if (suiteGI.suite.getId() == currId) {
+				SuiteGeoItem prev = i > 1 ? suitesGIArray[i-1] : suitesGIArray[size-1];
+				return prev;
 			}				
 		}
 
-		Suite first = this.filteredIn_suites.get(0);
-		IGeoItem firstGeo = _AbstractView.getSuiteGeoItem(first.getId());
-		return firstGeo;
+		SuiteGeoItem first = suitesGIArray[0];
+		return first;
 	}
+
+	@Override
+	public void RemoveSection() {
+	}
+
+	@Override
+	public I_FilterSectionContainer getParentSectionContainer() {
+		return null;
+	}
+
+	private static int lastState = -1;
+	public static void onChange() {
+		if (instance == null) return;
+		
+		if (instance.StateHash() != lastState) {
+			if (instance.btnApply != null)
+				instance.btnApply.setEnabled(true);
+			if (instance.btnReset != null)
+				instance.btnReset.setEnabled(true);
+			
+			instance.UpdateSize();
+		}			
+	}
+	
 }

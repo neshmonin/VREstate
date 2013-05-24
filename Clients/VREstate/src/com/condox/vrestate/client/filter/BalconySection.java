@@ -1,8 +1,8 @@
 package com.condox.vrestate.client.filter;
 
-import com.condox.vrestate.client.document.Document;
-import com.condox.vrestate.client.document.Suite;
+import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.document.SuiteType;
+import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.RadioButton;
@@ -19,6 +19,7 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
  	private static RadioButton rbBalconyYes = null;
 	private static RadioButton rbTerraceYes = null;
 	private static RadioButton rbBalconyOrTerrace = null;
+	private I_FilterSectionContainer parentSection;
 	
 	private BalconySection(){
 		super();
@@ -27,9 +28,12 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 	static boolean nonePresent = false;
 	static boolean terracesPresent = false;
 	static boolean balconiesPresent = false;
-	public static BalconySection CreateSectionPanel(String sectionLabel, StackPanel stackPanel) {
+	public static I_FilterSection CreateSectionPanel(I_FilterSectionContainer parentSection, 
+			String sectionLabel,
+			StackPanel stackPanel) {
+		Log.write("BalconySection(" + sectionLabel + ")");
 		// =====================================================
-		for (SuiteType suite_type : Document.get().getSuiteTypes()) {
+		for (SuiteType suite_type : parentSection.getActiveSuiteTypes().values()) {
 			nonePresent = nonePresent || (suite_type.getBalconies()== 0 && suite_type.getTerraces() == 0); 
 			balconiesPresent = balconiesPresent || (suite_type.getBalconies()> 0);
 			terracesPresent = terracesPresent || (suite_type.getTerraces() > 0);
@@ -38,6 +42,7 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 			return null;
 		// =====================================================
 		instance = new BalconySection();
+		instance.parentSection = parentSection;
 		instance.stackPanel = stackPanel;  
 		//instance.setSpacing(10);
 		stackPanel.add(instance, generateTitle(), false);
@@ -47,7 +52,7 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 		rbDoNotCare.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				instance.UpdateCaption();
+				instance.Apply();
 			}});
 		rbDoNotCare.setValue(true, true);
 		instance.add(rbDoNotCare);
@@ -58,7 +63,7 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 			rbNone.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
 				@Override
 				public void onValueChange(ValueChangeEvent<Boolean> event) {
-					instance.UpdateCaption();
+					instance.Apply();
 				}});
 			instance.add(rbNone);
 		}
@@ -68,7 +73,7 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 			rbBalconyYes.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
 				@Override
 				public void onValueChange(ValueChangeEvent<Boolean> event) {
-					instance.UpdateCaption();
+					instance.Apply();
 				}});
 			rbBalconyYes.addStyleDependentName("margined");
 			instance.add(rbBalconyYes);
@@ -79,7 +84,7 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 			rbTerraceYes.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
 				@Override
 				public void onValueChange(ValueChangeEvent<Boolean> event) {
-					instance.UpdateCaption();
+					instance.Apply();
 				}});
 			rbTerraceYes.addStyleDependentName("margined");
 			instance.add(rbTerraceYes);
@@ -90,7 +95,7 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 			rbBalconyOrTerrace.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
 				@Override
 				public void onValueChange(ValueChangeEvent<Boolean> event) {
-					instance.UpdateCaption();
+					instance.Apply();
 				}});
 			rbBalconyOrTerrace.addStyleDependentName("margined");
 			instance.add(rbBalconyOrTerrace);
@@ -111,11 +116,24 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 	}
 
 	@Override
-	public boolean isFilteredIn(Suite suite) {
+	public int StateHash() {
+		int hash = hashCode();
+		
+		if (rbNone!=null && rbNone.getValue()) hash += rbNone.hashCode();
+		if (rbDoNotCare!=null&&rbDoNotCare.getValue()) hash += rbDoNotCare.hashCode();
+		if (rbBalconyOrTerrace!=null&&rbBalconyOrTerrace.getValue()) hash += rbBalconyOrTerrace.hashCode();
+		if (rbBalconyYes!=null&&rbBalconyYes.getValue()) hash += rbBalconyYes.hashCode();
+		if (rbTerraceYes!=null&&rbTerraceYes.getValue()) hash += rbTerraceYes.hashCode();
+		
+		return hash;
+	}
+	
+	@Override
+	public boolean isFilteredIn(SuiteGeoItem suiteGI) {
 		if (rbDoNotCare.getValue())
 			return true;
 		
-		SuiteType type = suite.getSuiteType();
+		SuiteType type = suiteGI.suite.getSuiteType();
 		if (rbNone != null && rbNone.getValue() &&
 				(type.getTerraces() == 0 && type.getBalconies() == 0))
 			return true;
@@ -139,15 +157,13 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 
 	@Override
 	public void Apply() {
-		instance.isChanged = false;
-		if (Filter.initialized == true)
-			Filter.get().onChanged();
-	}
-
-	private boolean isChanged = false;
-	@Override
-	public boolean isChanged() {
-		return isChanged;
+		if (rbDoNotCare.getValue())
+			instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), 
+					generateTitle() + "(any)");
+ 		else
+			instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), 
+					generateTitle());
+		Filter.onChange();
 	}
 
 	private static String generateTitle() {
@@ -159,16 +175,14 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 			return "Terraces";
 		return "";		
 	}
-	
-	private void UpdateCaption() {
-		if (rbDoNotCare.getValue())
-			instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), 
-					generateTitle() + "(any)");
- 		else
-			instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), 
-					generateTitle());
-		isChanged = true;
-		if (Filter.initialized == true)
-			Filter.get().onChanged();
+
+	@Override
+	public void RemoveSection() {
+		super.removeFromParent();
+	}
+
+	@Override
+	public I_FilterSectionContainer getParentSectionContainer() {
+		return parentSection;
 	}
 }

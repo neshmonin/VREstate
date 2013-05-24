@@ -1,15 +1,15 @@
 package com.condox.vrestate.client.filter;
 
 import java.util.ArrayList;
-import com.condox.vrestate.client.document.Document;
-import com.condox.vrestate.client.document.Suite;
+
+import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.document.SuiteType;
+import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.StackPanel;
@@ -20,19 +20,22 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 	StackPanel stackPanel = null;
 
 	private static AreaSection instance = null;
-	private static CheckBox cbAnyArea = null;
+	private static MyCustomCheckBox cbAnyArea = null;
 	private static ListBox lbMinArea = null;
 	private static ListBox lbMaxArea = null;
 	private ArrayList<Double> areas = new ArrayList<Double>();
+	private I_FilterSectionContainer parentSection;
 
 	private AreaSection(){super();}
 	
-	public static AreaSection CreateSectionPanel(String sectionLabel, StackPanel stackPanel) {
-		
+	public static I_FilterSection CreateSectionPanel(I_FilterSectionContainer parentSection, 
+			String sectionLabel,
+			StackPanel stackPanel) {
+		Log.write("AreaSection(" + sectionLabel + ")");
 		//==============
 		double min_area = Integer.MAX_VALUE;
 		double max_area = Integer.MIN_VALUE;
-		for (SuiteType suite_type : Document.get().getSuiteTypes()) {
+		for (SuiteType suite_type : parentSection.getActiveSuiteTypes().values()) {
 			double area = suite_type.getArea(); 
 			if (area <= 0)
 				continue;
@@ -47,6 +50,7 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 		//==============
 		
 		instance = new AreaSection();
+		instance.parentSection = parentSection;
 		instance.stackPanel = stackPanel;  
 		stackPanel.add(instance, "Area (any)", false);
 		instance.setSize("100%", "150px");
@@ -56,7 +60,7 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 		instance.add(vpArea);
 		vpArea.setWidth("100%");
 		
-		cbAnyArea = new CheckBox("Any area");
+		cbAnyArea = new MyCustomCheckBox("Any area");
 		cbAnyArea.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
 			@Override
@@ -67,7 +71,7 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 					instance.isAny = true;
 				} //else 
 					//cbAnyPrice.setValue(true,true);
-				UpdateSectionCaption();
+				instance.Apply();
 			}});
 		vpArea.add(cbAnyArea);
 
@@ -85,7 +89,7 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 				instance.isAny = lbMinArea.getSelectedIndex() == 0 &&
 								 lbMaxArea.getSelectedIndex() == (lbMaxArea.getItemCount()-1);
 				cbAnyArea.setValue(instance.isAny);
-				UpdateSectionCaption();
+				instance.Apply();
 			}
 		});
 		lbMinArea.setEnabled(false);
@@ -101,7 +105,7 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 				instance.isAny = lbMinArea.getSelectedIndex() == 0 &&
 					lbMaxArea.getSelectedIndex() == (lbMaxArea.getItemCount()-1); 
 				cbAnyArea.setValue(instance.isAny);
-				UpdateSectionCaption();
+				instance.Apply();
 			}
 		});
 		lbMaxArea.setEnabled(false);
@@ -115,7 +119,7 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 	public void Init() {
 		double min_area = Integer.MAX_VALUE;
 		double max_area = Integer.MIN_VALUE;
-		for (SuiteType suite_type : Document.get().getSuiteTypes()) {
+		for (SuiteType suite_type : getParentSectionContainer().getActiveSuiteTypes().values()) {
 			double area = suite_type.getArea(); 
 			if (area <= 0)
 				continue;
@@ -175,13 +179,22 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 		lbMaxArea.setSelectedIndex(lbMaxArea.getItemCount() - 1);
 		isAny = true;
 	}
+	
+	@Override
+	public int StateHash() {
+		int hash = hashCode() + cbAnyArea.StateHash();
+		hash += lbMinArea.hashCode() * lbMinArea.getSelectedIndex();
+		hash += lbMaxArea.hashCode() * lbMaxArea.getSelectedIndex();		
+		
+		return hash;
+	}
 
 	@Override
-	public boolean isFilteredIn(Suite suite) {
+	public boolean isFilteredIn(SuiteGeoItem suiteGI) {
 		if (isAny)
 			return true;
 		
-		SuiteType type = suite.getSuiteType();
+		SuiteType type = suiteGI.suite.getSuiteType();
 		double area = type.getArea();
 		if (area <= areas.get(lbMinArea.getSelectedIndex()))
 			return false;
@@ -198,26 +211,22 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 		return isAny;
 	}
 	
-	private static void UpdateSectionCaption() {
-		if (instance.isAny)
-			instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Area (any)");
-		else
-			instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), "Area");
-		instance.isChanged = true;
-		if (Filter.initialized == true)
-			Filter.get().onChanged();
-	}
-
 	@Override
 	public void Apply() {
-		instance.isChanged = false;
-		if (Filter.initialized == true)
-			Filter.get().onChanged();
+		if (isAny)
+			stackPanel.setStackText(stackPanel.getWidgetIndex(this), "Area (any)");
+		else
+			stackPanel.setStackText(stackPanel.getWidgetIndex(this), "Area");
+		Filter.onChange();
 	}
 
-	private boolean isChanged = false;
 	@Override
-	public boolean isChanged() {
-		return isChanged;
+	public void RemoveSection() {
+		super.removeFromParent();
+	}
+
+	@Override
+	public I_FilterSectionContainer getParentSectionContainer() {
+		return parentSection;
 	}
 }

@@ -37,6 +37,7 @@
             this.toolStripMenuItemChangeOrderView = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItemDelete = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyURLToClipboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.LoadTheLinkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.editNotesForThisItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -84,7 +85,7 @@
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.copyURLToClipboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemConvert = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripViewOrder.SuspendLayout();
             this.pnlStartupShutdown.SuspendLayout();
             this.contextMenuStripUserAccount.SuspendLayout();
@@ -113,6 +114,7 @@
             this.contextMenuStripViewOrder.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItemEnableViewOrder,
             this.toolStripMenuItemExtend,
+            this.toolStripMenuItemConvert,
             this.toolStripSeparator2,
             this.toolStripMenuItemChangeOrderView,
             this.toolStripSeparator1,
@@ -125,82 +127,89 @@
             this.toolStripSeparator4,
             this.composePromoEmailToolStripMenuItem});
             this.contextMenuStripViewOrder.Name = "contextMenuStripViewOrder";
-            this.contextMenuStripViewOrder.Size = new System.Drawing.Size(251, 248);
+            this.contextMenuStripViewOrder.Size = new System.Drawing.Size(251, 270);
             this.contextMenuStripViewOrder.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripViewOrder_Opening);
             // 
             // toolStripMenuItemEnableViewOrder
             // 
             this.toolStripMenuItemEnableViewOrder.Name = "toolStripMenuItemEnableViewOrder";
-            this.toolStripMenuItemEnableViewOrder.Size = new System.Drawing.Size(223, 22);
+            this.toolStripMenuItemEnableViewOrder.Size = new System.Drawing.Size(250, 22);
             this.toolStripMenuItemEnableViewOrder.Text = "Enabled";
             this.toolStripMenuItemEnableViewOrder.Click += new System.EventHandler(this.toolStripMenuItemEnableViewOrder_Click);
             // 
             // toolStripMenuItemExtend
             // 
             this.toolStripMenuItemExtend.Name = "toolStripMenuItemExtend";
-            this.toolStripMenuItemExtend.Size = new System.Drawing.Size(223, 22);
+            this.toolStripMenuItemExtend.Size = new System.Drawing.Size(250, 22);
             this.toolStripMenuItemExtend.Text = "Extend...";
             this.toolStripMenuItemExtend.Click += new System.EventHandler(this.toolStripMenuItemExtend_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(220, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(247, 6);
             // 
             // toolStripMenuItemChangeOrderView
             // 
             this.toolStripMenuItemChangeOrderView.Name = "toolStripMenuItemChangeOrderView";
-            this.toolStripMenuItemChangeOrderView.Size = new System.Drawing.Size(223, 22);
+            this.toolStripMenuItemChangeOrderView.Size = new System.Drawing.Size(250, 22);
             this.toolStripMenuItemChangeOrderView.Text = "Change Options...";
             this.toolStripMenuItemChangeOrderView.Click += new System.EventHandler(this.toolStripMenuItemChangeOrderView_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(220, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(247, 6);
             // 
             // toolStripMenuItemDelete
             // 
             this.toolStripMenuItemDelete.Name = "toolStripMenuItemDelete";
-            this.toolStripMenuItemDelete.Size = new System.Drawing.Size(223, 22);
+            this.toolStripMenuItemDelete.Size = new System.Drawing.Size(250, 22);
             this.toolStripMenuItemDelete.Text = "Delete";
             this.toolStripMenuItemDelete.Click += new System.EventHandler(this.toolStripMenuItemDelete_Click);
+            // 
+            // copyURLToClipboardToolStripMenuItem
+            // 
+            this.copyURLToClipboardToolStripMenuItem.Name = "copyURLToClipboardToolStripMenuItem";
+            this.copyURLToClipboardToolStripMenuItem.Size = new System.Drawing.Size(250, 22);
+            this.copyURLToClipboardToolStripMenuItem.Text = "Copy viewOrder URL to clipboard";
+            this.copyURLToClipboardToolStripMenuItem.Click += new System.EventHandler(this.copyURLToClipboardToolStripMenuItem_Click);
             // 
             // LoadTheLinkToolStripMenuItem
             // 
             this.LoadTheLinkToolStripMenuItem.Name = "LoadTheLinkToolStripMenuItem";
-            this.LoadTheLinkToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
+            this.LoadTheLinkToolStripMenuItem.Size = new System.Drawing.Size(250, 22);
             this.LoadTheLinkToolStripMenuItem.Text = "Load in Default Browser";
             this.LoadTheLinkToolStripMenuItem.Click += new System.EventHandler(this.loadTheLinkToolStripMenuItem_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(220, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(247, 6);
             // 
             // editNotesForThisItemToolStripMenuItem
             // 
             this.editNotesForThisItemToolStripMenuItem.Name = "editNotesForThisItemToolStripMenuItem";
-            this.editNotesForThisItemToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
+            this.editNotesForThisItemToolStripMenuItem.Size = new System.Drawing.Size(250, 22);
             this.editNotesForThisItemToolStripMenuItem.Text = "Edit Notes for This Item...";
             this.editNotesForThisItemToolStripMenuItem.Click += new System.EventHandler(this.editNotesForThisItemToolStripMenuItem_Click);
             // 
             // editMLSURLForThisItemToolStripMenuItem
             // 
             this.editMLSURLForThisItemToolStripMenuItem.Name = "editMLSURLForThisItemToolStripMenuItem";
-            this.editMLSURLForThisItemToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
+            this.editMLSURLForThisItemToolStripMenuItem.Size = new System.Drawing.Size(250, 22);
             this.editMLSURLForThisItemToolStripMenuItem.Text = "Edit MLS URL for This Item...";
             this.editMLSURLForThisItemToolStripMenuItem.Click += new System.EventHandler(this.editMLSURLForThisItemToolStripMenuItem_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(220, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(247, 6);
             // 
             // composePromoEmailToolStripMenuItem
             // 
             this.composePromoEmailToolStripMenuItem.Name = "composePromoEmailToolStripMenuItem";
-            this.composePromoEmailToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
+            this.composePromoEmailToolStripMenuItem.Size = new System.Drawing.Size(250, 22);
             this.composePromoEmailToolStripMenuItem.Text = "Compose Promo Email...";
             this.composePromoEmailToolStripMenuItem.Click += new System.EventHandler(this.composePromoEmailToolStripMenuItem_Click);
             // 
@@ -575,12 +584,12 @@
             // 
             this.columnHeader7.Text = "targetId";
             // 
-            // copyURLToClipboardToolStripMenuItem
+            // toolStripMenuItemConvert
             // 
-            this.copyURLToClipboardToolStripMenuItem.Name = "copyURLToClipboardToolStripMenuItem";
-            this.copyURLToClipboardToolStripMenuItem.Size = new System.Drawing.Size(250, 22);
-            this.copyURLToClipboardToolStripMenuItem.Text = "Copy viewOrder URL to clipboard";
-            this.copyURLToClipboardToolStripMenuItem.Click += new System.EventHandler(this.copyURLToClipboardToolStripMenuItem_Click);
+            this.toolStripMenuItemConvert.Name = "toolStripMenuItemConvert";
+            this.toolStripMenuItemConvert.Size = new System.Drawing.Size(250, 22);
+            this.toolStripMenuItemConvert.Text = "Convert to Private Listing";
+            this.toolStripMenuItemConvert.Click += new System.EventHandler(this.toolStripMenuItemConvert_Click);
             // 
             // MainForm
             // 
@@ -679,6 +688,7 @@
         private System.Windows.Forms.ToolStripMenuItem deleteThisAccountToolStripMenuItem;
         private System.Windows.Forms.ComboBox comboBoxEstateDeveloper;
         private System.Windows.Forms.ToolStripMenuItem copyURLToClipboardToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemConvert;
     }
 }
 

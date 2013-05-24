@@ -3,7 +3,9 @@ package com.condox.vrestate.client.view.GeoItems;
 import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.Position;
 import com.condox.vrestate.client.document.Building;
+import com.condox.vrestate.client.document.Document;
 import com.condox.vrestate.client.document.Suite;
+import com.condox.vrestate.client.document.ViewOrder;
 import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view._AbstractView;
@@ -20,11 +22,23 @@ import com.nitrous.gwt.earth.client.api.KmlPoint;
 import com.nitrous.gwt.earth.client.api.KmlStyle;
 
 public class SuiteGeoItem implements IGeoItem {
+	public enum GeoStatus {
+		Sold, 
+		Available, 
+		OnHold, 
+		ResaleAvailable,
+		Selected,
+		Layout,
+		AvailableRent,
+		NotSupported
+	}
+	
+
 	private final double initialRange_m = 30;
 	private final double initialTilt_d = 75;
 
 	public Suite suite = null;
-	
+	GeoStatus geoStatus = GeoStatus.NotSupported;
 	String href = null;
 	public SuiteGeoItem(Suite suite){
 		Init(suite);
@@ -32,10 +46,27 @@ public class SuiteGeoItem implements IGeoItem {
 	public void Init(Suite suite){
 
 		this.suite = suite;
+
+		if (Document.targetViewOrder!=null&&
+			Document.targetViewOrder.getProductType() == ViewOrder.ProductType.Building3DLayout)
+			geoStatus = GeoStatus.Layout;
+		else {
+			Suite.Status status = suite.getStatus();
+			switch (status) {
+			case Sold: geoStatus = GeoStatus.Sold; break;
+			case Available: geoStatus = GeoStatus.Available; break;
+			case OnHold: geoStatus = GeoStatus.OnHold; break;
+			case ResaleAvailable: geoStatus = GeoStatus.ResaleAvailable; break;
+			case AvailableRent: geoStatus = GeoStatus.AvailableRent; break;
+			case NotSupported: geoStatus = GeoStatus.NotSupported; break;
+			default:
+				geoStatus = GeoStatus.NotSupported; break;
+			}
+		}
 		
 		float scale = 1.0F;
 		KmlStyle style = GE.getPlugin().createStyle("");
-		switch (suite.getStatus()) {
+		switch (getGeoStatus()) {
 		case Available:
 			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
 					+ suite.getName()
@@ -43,11 +74,18 @@ public class SuiteGeoItem implements IGeoItem {
 			style.getLineStyle().getColor().set("FF00FF00"); // GREEN
 			style.getLineStyle().setWidth(2.0F);
 			break;
+		case OnHold:
+			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
+					+ suite.getName()
+					+ "&txtClr=16776960&shdClr=16776960&frame=0";
+			style.getLineStyle().getColor().set("FF00FFFF"); // YELLOW
+			style.getLineStyle().setWidth(2.0F);
+			break;
 		case Sold:
 			if (Options.getShowSold()) {
 				href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
-				+ suite.getName()
-				+ "&txtClr=16711680&shdClr=0&frame=0";
+					+ suite.getName()
+					+ "&txtClr=16711680&shdClr=0&frame=0";
 				style.getLineStyle().getColor().set("FF0000FF"); // RED
 				style.getLineStyle().setWidth(2.0F);
 			}
@@ -69,7 +107,7 @@ public class SuiteGeoItem implements IGeoItem {
 			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=14854399&shdClr=0&frame=0";
-			style.getLineStyle().getColor().set("FFE2A8FF"); // LIGHT-VIOLET
+			style.getLineStyle().getColor().set("FFE2A8FF"); // PINK
 			style.getLineStyle().setWidth(2.0F);
 			break;
 		case Selected:
@@ -168,6 +206,14 @@ public class SuiteGeoItem implements IGeoItem {
 
 	}
 	
+	public GeoStatus getGeoStatus() {
+		return geoStatus;
+	}
+	
+	public void setGeoStatus(GeoStatus stat) {
+		geoStatus = stat;
+	}
+	
 	public void onHeadingChanged(double heading_d) {
 		if (href == null) return;
 
@@ -177,10 +223,11 @@ public class SuiteGeoItem implements IGeoItem {
 	}
 	
 	private boolean isFilteredIn = true;
-	public void Redraw() {
-		if (href == null) return;
+	public boolean ShowIfFilteredIn() {
+		if (href == null)
+			return false;
 
-		isFilteredIn = Filter.get().isFilteredIn(suite);
+		isFilteredIn = Filter.get().isFilteredIn(this);
 		if (!isFilteredIn && filteredOutNotificationHandler != null)
 			filteredOutNotificationHandler.onFilteredOut();
 
@@ -188,6 +235,8 @@ public class SuiteGeoItem implements IGeoItem {
 			extended_data_lines.setVisibility(isFilteredIn);
 		if (extended_data_label.getVisibility() != isFilteredIn)
 			extended_data_label.setVisibility(isFilteredIn);
+		
+		return isFilteredIn;
 	}
 	
 	private FilteredOutNotification filteredOutNotificationHandler = null;

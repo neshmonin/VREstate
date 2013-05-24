@@ -618,9 +618,9 @@
             // 
             this.textBoxInfoUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxInfoUrl.Location = new System.Drawing.Point(71, 167);
+            this.textBoxInfoUrl.Location = new System.Drawing.Point(96, 167);
             this.textBoxInfoUrl.Name = "textBoxInfoUrl";
-            this.textBoxInfoUrl.Size = new System.Drawing.Size(405, 20);
+            this.textBoxInfoUrl.Size = new System.Drawing.Size(380, 20);
             this.textBoxInfoUrl.TabIndex = 5;
             this.textBoxInfoUrl.TextChanged += new System.EventHandler(this.updateStateEvent);
             // 
@@ -629,9 +629,9 @@
             this.label12.AutoSize = true;
             this.label12.Location = new System.Drawing.Point(13, 172);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(58, 13);
+            this.label12.Size = new System.Drawing.Size(77, 13);
             this.label12.TabIndex = 4;
-            this.label12.Text = "Web Page";
+            this.label12.Text = "More Info URL";
             // 
             // label11
             // 
@@ -843,9 +843,9 @@
             this.radioButtonExternalLink.AutoSize = true;
             this.radioButtonExternalLink.Location = new System.Drawing.Point(19, 54);
             this.radioButtonExternalLink.Name = "radioButtonExternalLink";
-            this.radioButtonExternalLink.Size = new System.Drawing.Size(86, 17);
+            this.radioButtonExternalLink.Size = new System.Drawing.Size(104, 17);
             this.radioButtonExternalLink.TabIndex = 9;
-            this.radioButtonExternalLink.Text = "External Link";
+            this.radioButtonExternalLink.Text = "Virtual Tour URL";
             this.radioButtonExternalLink.UseVisualStyleBackColor = true;
             this.radioButtonExternalLink.CheckedChanged += new System.EventHandler(this.radioButtonExternalLink_CheckedChanged);
             // 

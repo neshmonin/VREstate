@@ -1,8 +1,8 @@
 package com.condox.vrestate.client.filter;
 
-import com.condox.vrestate.client.document.Document;
-import com.condox.vrestate.client.document.Suite;
+import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.document.SuiteType;
+import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -24,21 +24,25 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 	private static CheckBox cbFourBathrooms = null;
 	private static CheckBox cbFourAndHalfBathrooms = null;
 	private static CheckBox cbFiveBathrooms = null;
+	private I_FilterSectionContainer parentSection;
 
 	private BathroomSection() {
 		super();
 	}
 
-	public static BathroomSection CreateSectionPanel(String sectionLabel,
+	public static I_FilterSection CreateSectionPanel(I_FilterSectionContainer parentSection, 
+			String sectionLabel,
 			StackPanel stackPanel) {
+		Log.write("BathroomSection(" + sectionLabel + ")");
 		// =====================================================
 		boolean creating = false;
-		for (SuiteType suite_type : Document.get().getSuiteTypes())
+		for (SuiteType suite_type : parentSection.getActiveSuiteTypes().values())
 			creating = creating || (suite_type.getBathrooms() >= 0);
 		if (!creating)
 			return null;
 		// =====================================================
 		instance = new BathroomSection();
+		instance.parentSection = parentSection;
 		instance.stackPanel = stackPanel;
 		instance.setSpacing(5);
 		stackPanel.add(instance, "Bathrooms", false);
@@ -59,7 +63,7 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 					cbFourAndHalfBathrooms.setValue(true, false);
 					cbFiveBathrooms.setValue(true, false);
 				}
-				instance.UpdateCaption();
+				instance.Apply();
 			}
 		});
 		instance.add(cbAny);
@@ -70,7 +74,10 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				if (isAllBathroomsUnchecked())
 					cbAny.setValue(true, true);
-				cbAny.setValue(!isAtLeastOneUnchecked(), true);
+				else {					 
+					cbAny.setValue(!isAtLeastOneUnchecked(), true);
+					instance.Apply();
+				}
 			}
 		});
 		instance.add(cbOneBathroom);
@@ -82,7 +89,10 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 					public void onValueChange(ValueChangeEvent<Boolean> event) {
 						if (isAllBathroomsUnchecked())
 							cbAny.setValue(true, true);
-						cbAny.setValue(!isAtLeastOneUnchecked(), true);
+						else {
+							cbAny.setValue(!isAtLeastOneUnchecked(), true);
+							instance.Apply();
+						}
 					}
 				});
 		instance.add(cbOneAndHalfBathroom);
@@ -93,86 +103,96 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				if (isAllBathroomsUnchecked())
 					cbAny.setValue(true, true);
-				cbAny.setValue(!isAtLeastOneUnchecked(), true);
+				else {
+					cbAny.setValue(!isAtLeastOneUnchecked(), true);
+					instance.Apply();
+				}
 			}
 		});
 		instance.add(cbTwoBathrooms);
 
 		cbTwoAndHalfBathrooms = new CheckBox("2.5 Bathrooms");
 		cbTwoAndHalfBathrooms.addStyleDependentName("margined");
-		cbTwoAndHalfBathrooms
-				.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-					public void onValueChange(ValueChangeEvent<Boolean> event) {
-						if (isAllBathroomsUnchecked())
-							cbAny.setValue(true, true);
-						cbAny.setValue(!isAtLeastOneUnchecked(), true);
-					}
-				});
+		cbTwoAndHalfBathrooms.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				if (isAllBathroomsUnchecked())
+					cbAny.setValue(true, true);
+				else {
+					cbAny.setValue(!isAtLeastOneUnchecked(), true);
+					instance.Apply();
+				}
+			}
+		});
 		instance.add(cbTwoAndHalfBathrooms);
 
 		cbThreeBathrooms = new CheckBox("3 Bathrooms");
 		cbThreeBathrooms.addStyleDependentName("margined");
-		cbThreeBathrooms
-				.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-					public void onValueChange(ValueChangeEvent<Boolean> event) {
-						if (isAllBathroomsUnchecked())
-							cbAny.setValue(true, true);
-
-						cbAny.setValue(!isAtLeastOneUnchecked(), true);
-					}
-				});
+		cbThreeBathrooms.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				if (isAllBathroomsUnchecked())
+					cbAny.setValue(true, true);
+				else {
+					cbAny.setValue(!isAtLeastOneUnchecked(), true);
+					instance.Apply();
+				}
+			}
+		});
 		instance.add(cbThreeBathrooms);
 
 		cbThreeAndHalfBathrooms = new CheckBox("3.5 Bathrooms");
 		cbThreeAndHalfBathrooms.addStyleDependentName("margined");
-		cbThreeAndHalfBathrooms
-				.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-					public void onValueChange(ValueChangeEvent<Boolean> event) {
-						if (isAllBathroomsUnchecked())
-							cbAny.setValue(true, true);
-
-						cbAny.setValue(!isAtLeastOneUnchecked(), true);
-					}
-				});
+		cbThreeAndHalfBathrooms.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				if (isAllBathroomsUnchecked())
+					cbAny.setValue(true, true);
+				else {
+					cbAny.setValue(!isAtLeastOneUnchecked(), true);
+					instance.Apply();
+				}
+			}
+		});
 		instance.add(cbThreeAndHalfBathrooms);
 
 		cbFourBathrooms = new CheckBox("4 Bathrooms");
 		cbFourBathrooms.addStyleDependentName("margined");
-		cbFourBathrooms
-				.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-					public void onValueChange(ValueChangeEvent<Boolean> event) {
-						if (isAllBathroomsUnchecked())
-							cbAny.setValue(true, true);
-
-						cbAny.setValue(!isAtLeastOneUnchecked(), true);
-					}
-				});
+		cbFourBathrooms.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				if (isAllBathroomsUnchecked())
+					cbAny.setValue(true, true);
+				else {
+					cbAny.setValue(!isAtLeastOneUnchecked(), true);
+					instance.Apply();
+				}
+			}
+		});
 		instance.add(cbFourBathrooms);
 
 		cbFourAndHalfBathrooms = new CheckBox("4.5 Bathrooms");
 		cbFourAndHalfBathrooms.addStyleDependentName("margined");
-		cbFourAndHalfBathrooms
-				.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-					public void onValueChange(ValueChangeEvent<Boolean> event) {
-						if (isAllBathroomsUnchecked())
-							cbAny.setValue(true, true);
-
-						cbAny.setValue(!isAtLeastOneUnchecked(), true);
-					}
-				});
+		cbFourAndHalfBathrooms.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				if (isAllBathroomsUnchecked())
+					cbAny.setValue(true, true);
+				else {
+					cbAny.setValue(!isAtLeastOneUnchecked(), true);
+					instance.Apply();
+				}
+			}
+		});
 		instance.add(cbFourAndHalfBathrooms);
 
 		cbFiveBathrooms = new CheckBox("More");
 		cbFiveBathrooms.addStyleDependentName("margined");
-		cbFiveBathrooms
-				.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-					public void onValueChange(ValueChangeEvent<Boolean> event) {
-						if (isAllBathroomsUnchecked())
-							cbAny.setValue(true, true);
-
-						cbAny.setValue(!isAtLeastOneUnchecked(), true);
-					}
-				});
+		cbFiveBathrooms.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				if (isAllBathroomsUnchecked())
+					cbAny.setValue(true, true);
+				else {
+					cbAny.setValue(!isAtLeastOneUnchecked(), true);
+					instance.Apply();
+				}
+			}
+		});
 		instance.add(cbFiveBathrooms);
 
 		return instance;
@@ -236,7 +256,7 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 		boolean four = false;
 		boolean four_half = false;
 		boolean five = false;
-		for (SuiteType suite_type : Document.get().getSuiteTypes()) {
+		for (SuiteType suite_type : getParentSectionContainer().getActiveSuiteTypes().values()) {
 			double bathrooms = suite_type.getBathrooms(); 
 			if (bathrooms == 0.0)
 				break;
@@ -282,16 +302,32 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 	}
 
 	@Override
+	public int StateHash() {
+		int hash = hashCode();  
+		if (cbOneBathroom!=null&&cbOneBathroom.getValue()) hash += cbOneBathroom.hashCode(); 
+		if (cbOneAndHalfBathroom!=null&&cbOneAndHalfBathroom.getValue()) hash += cbOneAndHalfBathroom.hashCode(); 
+		if (cbTwoBathrooms!=null&&cbTwoBathrooms.getValue()) hash += cbTwoBathrooms.hashCode(); 
+		if (cbTwoAndHalfBathrooms!=null&&cbTwoAndHalfBathrooms.getValue()) hash += cbTwoAndHalfBathrooms.hashCode(); 
+		if (cbThreeBathrooms!=null&&cbThreeBathrooms.getValue()) hash += cbThreeBathrooms.hashCode(); 
+		if (cbThreeAndHalfBathrooms!=null&&cbThreeAndHalfBathrooms.getValue()) hash += cbThreeAndHalfBathrooms.hashCode(); 
+		if (cbFourBathrooms!=null&&cbFourBathrooms.getValue()) hash += cbFourBathrooms.hashCode(); 
+		if (cbFourAndHalfBathrooms!=null&&cbFourAndHalfBathrooms.getValue()) hash += cbFourAndHalfBathrooms.hashCode(); 
+		if (cbFiveBathrooms!=null&&cbFiveBathrooms.getValue()) hash += cbFiveBathrooms.hashCode(); 
+		
+		return hash;
+	}
+
+	@Override
 	public void Reset() {
 		cbAny.setValue(true, true);
 	}
 
 	@Override
-	public boolean isFilteredIn(Suite suite) {
+	public boolean isFilteredIn(SuiteGeoItem suiteGI) {
 		if (isAny)
 			return true;
 
-		SuiteType type = suite.getSuiteType();
+		SuiteType type = suiteGI.suite.getSuiteType();
 		double bathrooms = type.getBathrooms();
 		if (cbOneBathroom.getValue() && bathrooms == 1.0) return true;
 		else if (cbOneAndHalfBathroom.getValue() && bathrooms == 1.5) return true;
@@ -315,19 +351,6 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 
 	@Override
 	public void Apply() {
-		instance.isChanged = false;
-		if (Filter.initialized == true)
-			Filter.get().onChanged();
-
-	}
-
-	private boolean isChanged = false;
-	@Override
-	public boolean isChanged() {
-		return isChanged;
-	}
-
-	private void UpdateCaption() {
 		if (isAny)
 			instance.stackPanel.setStackText(
 					instance.stackPanel.getWidgetIndex(instance),
@@ -335,8 +358,16 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 		else
 			instance.stackPanel.setStackText(
 					instance.stackPanel.getWidgetIndex(instance), "Bathrooms");
-		instance.isChanged = true;
-		if (Filter.initialized == true)
-			Filter.get().onChanged();
+		Filter.onChange();
+	}
+
+	@Override
+	public void RemoveSection() {
+		super.removeFromParent();
+	}
+
+	@Override
+	public I_FilterSectionContainer getParentSectionContainer() {
+		return parentSection;
 	}
 }

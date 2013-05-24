@@ -1,9 +1,8 @@
 package com.condox.vrestate.client.filter;
 
 import com.condox.vrestate.client.Log;
-import com.condox.vrestate.client.document.Document;
-import com.condox.vrestate.client.document.Suite;
 import com.condox.vrestate.client.document.SuiteType;
+import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -26,21 +25,25 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 	private static CheckBox cbFourBedrooms = null;
 	private static CheckBox cbFourBedroomsDens = null;
 	private static CheckBox cbFiveBedrooms = null;
+	private I_FilterSectionContainer parentSection;
 
 	private BedroomsSection() {
 		super();
 	}
 
-	public static BedroomsSection CreateSectionPanel(String sectionLabel,
+	public static I_FilterSection CreateSectionPanel(I_FilterSectionContainer parentSection, 
+			String sectionLabel,
 			StackPanel stackPanel) {
+		Log.write("BedroomsSection(" + sectionLabel + ")");
 		// =====================================================
 		boolean creating = false;
-		for (SuiteType suite_type : Document.get().getSuiteTypes())
+		for (SuiteType suite_type : parentSection.getActiveSuiteTypes().values())
 			creating = creating || (suite_type.getBedrooms() >= 0);
 		if (!creating)
 			return null;
 		// =====================================================
 		instance = new BedroomsSection();
+		instance.parentSection = parentSection;
 		instance.stackPanel = stackPanel;
 		stackPanel.add(instance, "Bedrooms", false);
 		instance.setSize("100%", "150px");
@@ -61,7 +64,7 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 					cbFourBedroomsDens.setValue(true, false);
 					cbFiveBedrooms.setValue(true, false);
 				}
-				instance.UpdateCaption();
+				instance.Apply();
 			}
 		});
 		instance.add(cbAny);
@@ -71,7 +74,10 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				if (isAllBedroomsUnchecked())
 					cbAny.setValue(true, true);
-				cbAny.setValue(!isAtLeastOneUnchecked(), true);
+				else {
+					cbAny.setValue(!isAtLeastOneUnchecked(), true);
+					instance.Apply();
+				}
 			}
 		});
 		cbStudio.addStyleDependentName("margined");
@@ -83,7 +89,10 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				if (isAllBedroomsUnchecked())
 					cbAny.setValue(true, true);
-				cbAny.setValue(!isAtLeastOneUnchecked(), true);
+				else {
+					cbAny.setValue(!isAtLeastOneUnchecked(), true);
+					instance.Apply();
+				}
 			}
 		});
 		instance.add(cbOneBedrooms);
@@ -95,7 +104,10 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 					public void onValueChange(ValueChangeEvent<Boolean> event) {
 						if (isAllBedroomsUnchecked())
 							cbAny.setValue(true, true);
-						cbAny.setValue(!isAtLeastOneUnchecked(), true);
+						else {
+							cbAny.setValue(!isAtLeastOneUnchecked(), true);
+							instance.Apply();
+						}
 					}
 				});
 		instance.add(cbOneBedroomsDens);
@@ -106,7 +118,10 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				if (isAllBedroomsUnchecked())
 					cbAny.setValue(true, true);
-				cbAny.setValue(!isAtLeastOneUnchecked(), true);
+				else {
+					cbAny.setValue(!isAtLeastOneUnchecked(), true);
+					instance.Apply();
+				}
 			}
 		});
 		instance.add(cbTwoBedrooms);
@@ -118,7 +133,10 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 					public void onValueChange(ValueChangeEvent<Boolean> event) {
 						if (isAllBedroomsUnchecked())
 							cbAny.setValue(true, true);
-						cbAny.setValue(!isAtLeastOneUnchecked(), true);
+						else {
+							cbAny.setValue(!isAtLeastOneUnchecked(), true);
+							instance.Apply();
+						}
 					}
 				});
 		instance.add(cbTwoBedroomsDens);
@@ -130,7 +148,10 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 					public void onValueChange(ValueChangeEvent<Boolean> event) {
 						if (isAllBedroomsUnchecked())
 							cbAny.setValue(true, true);
-						cbAny.setValue(!isAtLeastOneUnchecked(), true);
+						else {
+							cbAny.setValue(!isAtLeastOneUnchecked(), true);
+							instance.Apply();
+						}
 					}
 				});
 		instance.add(cbThreeBedrooms);
@@ -142,7 +163,10 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 					public void onValueChange(ValueChangeEvent<Boolean> event) {
 						if (isAllBedroomsUnchecked())
 							cbAny.setValue(true, true);
-						cbAny.setValue(!isAtLeastOneUnchecked(), true);
+						else {
+							cbAny.setValue(!isAtLeastOneUnchecked(), true);
+							instance.Apply();
+						}
 					}
 				});
 		instance.add(cbThreeBedroomsDens);
@@ -153,7 +177,10 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				if (isAllBedroomsUnchecked())
 					cbAny.setValue(true, true);
-				cbAny.setValue(!isAtLeastOneUnchecked(), true);
+				else {
+					cbAny.setValue(!isAtLeastOneUnchecked(), true);
+					instance.Apply();
+				}
 			}
 		});
 		instance.add(cbFourBedrooms);
@@ -165,7 +192,10 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 					public void onValueChange(ValueChangeEvent<Boolean> event) {
 						if (isAllBedroomsUnchecked())
 							cbAny.setValue(true, true);
-						cbAny.setValue(!isAtLeastOneUnchecked(), true);
+						else {
+							cbAny.setValue(!isAtLeastOneUnchecked(), true);
+							instance.Apply();
+						}
 					}
 				});
 		instance.add(cbFourBedroomsDens);
@@ -176,7 +206,10 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				if (isAllBedroomsUnchecked())
 					cbAny.setValue(true, true);
-				cbAny.setValue(!isAtLeastOneUnchecked(), true);
+				else {
+					cbAny.setValue(!isAtLeastOneUnchecked(), true);
+					instance.Apply();
+				}
 			}
 		});
 		instance.add(cbFiveBedrooms);
@@ -211,29 +244,36 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 	private static boolean isAtLeastOneUnchecked() {
 		instance.isAny = false;
 
-		if (!cbStudio.getValue() && (cbStudio.isEnabled()))
-			return true;
-		if (!cbOneBedrooms.getValue() && (cbOneBedrooms.isEnabled()))
-			return true;
-		if (!cbOneBedroomsDens.getValue() && (cbOneBedroomsDens.isEnabled()))
-			return true;
-		if (!cbTwoBedrooms.getValue() && (cbTwoBedrooms.isEnabled()))
-			return true;
-		if (!cbTwoBedroomsDens.getValue() && (cbTwoBedroomsDens.isEnabled()))
-			return true;
-		if (!cbThreeBedrooms.getValue() && (cbThreeBedrooms.isEnabled()))
-			return true;
-		if (!cbThreeBedroomsDens.getValue() && (cbThreeBedroomsDens.isEnabled()))
-			return true;
-		if (!cbFourBedrooms.getValue() && (cbFourBedrooms.isEnabled()))
-			return true;
-		if (!cbFourBedroomsDens.getValue() && (cbFourBedroomsDens.isEnabled()))
-			return true;
-		if (!cbFiveBedrooms.getValue() && (cbFiveBedrooms.isEnabled()))
-			return true;
+		if (!cbStudio.getValue() && (cbStudio.isEnabled())) return true;
+		if (!cbOneBedrooms.getValue() && (cbOneBedrooms.isEnabled())) return true;
+		if (!cbOneBedroomsDens.getValue() && (cbOneBedroomsDens.isEnabled())) return true;
+		if (!cbTwoBedrooms.getValue() && (cbTwoBedrooms.isEnabled())) return true;
+		if (!cbTwoBedroomsDens.getValue() && (cbTwoBedroomsDens.isEnabled())) return true;
+		if (!cbThreeBedrooms.getValue() && (cbThreeBedrooms.isEnabled())) return true;
+		if (!cbThreeBedroomsDens.getValue() && (cbThreeBedroomsDens.isEnabled())) return true;
+		if (!cbFourBedrooms.getValue() && (cbFourBedrooms.isEnabled())) return true;
+		if (!cbFourBedroomsDens.getValue() && (cbFourBedroomsDens.isEnabled())) return true;
+		if (!cbFiveBedrooms.getValue() && (cbFiveBedrooms.isEnabled())) return true;
 
 		instance.isAny = true;
 		return false;
+	}
+
+	@Override
+	public int StateHash() {
+		int hash = hashCode();  
+		if (cbStudio!=null&&cbStudio.getValue()) hash += cbStudio.hashCode(); 
+		if (cbOneBedrooms!=null&&cbOneBedrooms.getValue()) hash += cbOneBedrooms.hashCode(); 
+		if (cbOneBedroomsDens!=null&&cbOneBedroomsDens.getValue()) hash += cbOneBedroomsDens.hashCode(); 
+		if (cbTwoBedrooms!=null&&cbTwoBedrooms.getValue()) hash += cbTwoBedrooms.hashCode(); 
+		if (cbTwoBedroomsDens!=null&&cbTwoBedroomsDens.getValue()) hash += cbTwoBedroomsDens.hashCode(); 
+		if (cbThreeBedrooms!=null&&cbThreeBedrooms.getValue()) hash += cbThreeBedrooms.hashCode(); 
+		if (cbThreeBedroomsDens!=null&&cbThreeBedroomsDens.getValue()) hash += cbThreeBedroomsDens.hashCode(); 
+		if (cbFourBedrooms!=null&&cbFourBedrooms.getValue()) hash += cbFourBedrooms.hashCode(); 
+		if (cbFourBedroomsDens!=null&&cbFourBedroomsDens.getValue()) hash += cbFourBedroomsDens.hashCode(); 
+		if (cbFiveBedrooms!=null&&cbFiveBedrooms.getValue()) hash += cbFiveBedrooms.hashCode(); 
+		
+		return hash;
 	}
 
 	@Override
@@ -248,7 +288,7 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 		boolean four = false;
 		boolean four_dens = false;
 		boolean five = false;
-		for (SuiteType suite_type : Document.get().getSuiteTypes()) {
+		for (SuiteType suite_type : getParentSectionContainer().getActiveSuiteTypes().values()) {
 			switch (suite_type.getBedrooms()) {
 			case 0:
 				studio = true;
@@ -312,11 +352,11 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 	}
 
 	@Override
-	public boolean isFilteredIn(Suite suite) {
+	public boolean isFilteredIn(SuiteGeoItem suiteGI) {
 		if (isAny)
 			return true;
 
-		SuiteType type = suite.getSuiteType();
+		SuiteType type = suiteGI.suite.getSuiteType();
 		if (type == null)
 			Log.write("Filter->isFilteredIn: suite.getSuiteType() returned null");
 		int bedrooms = type.getBedrooms();
@@ -353,25 +393,20 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 
 	@Override
 	public void Apply() {
-		instance.isChanged = false;
-		if (Filter.initialized == true)
-			Filter.get().onChanged();
-
-	}
-
-	private boolean isChanged = false;
-	@Override
-	public boolean isChanged() {
-		return isChanged;
-	}
-	
-	private void UpdateCaption() {
 		if (isAny)
 			instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance),"Bedrooms (any)");
 		else
 			instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance),"Bedrooms");
-		instance.isChanged = true;
-		if (Filter.initialized == true)
-			Filter.get().onChanged();
+		Filter.onChange();
+	}
+
+	@Override
+	public void RemoveSection() {
+		super.removeFromParent();
+	}
+
+	@Override
+	public I_FilterSectionContainer getParentSectionContainer() {
+		return parentSection;
 	}
 }

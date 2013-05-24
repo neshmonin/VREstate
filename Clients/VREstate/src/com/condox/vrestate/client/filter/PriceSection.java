@@ -1,8 +1,10 @@
 package com.condox.vrestate.client.filter;
 
 import java.util.ArrayList;
-import com.condox.vrestate.client.document.Document;
+
+import com.condox.vrestate.client.Log;
 import com.condox.vrestate.client.document.Suite;
+import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -19,42 +21,65 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 
 	StackPanel stackPanel = null;
 
+	public enum PriceType {
+		Ownership,
+		Rent
+	}
 	private static PriceSection instance = null;
-	private static CheckBox cbAnyPrice = null;
-	private static ListBox cbMinPrice = null;
-	private static ListBox cbMaxPrice = null;
-	private static ArrayList<Integer> prices = new ArrayList<Integer>();
-	private int min_price_range = 0;
-	private int max_price_range = 0;
-	//private int last_min_price_range = 0;
-	//private int last_max_price_range = 0;
+	private CheckBox cbAnyPrice = null;
+	private ListBox cbMinPrice = null;
+	private ListBox cbMaxPrice = null;
+	private ArrayList<Integer> prices = null;
+	private String sectionLabel = "";
+	private PriceType priceType;
+	private I_FilterSectionContainer parentSection;
 
 	private PriceSection() {
 		super();
 	}
 
-	public static PriceSection CreateSectionPanel(String sectionLabel,
-			StackPanel stackPanel) {
-
+	public static PriceSection CreateSectionPanel(I_FilterSectionContainer parentSection, 
+			String sectionLabel,
+			StackPanel stackPanel, PriceType priceType) {
+		Log.write("PriceSection(" + sectionLabel + ")");
 		// ==============
 		int min_price = Integer.MAX_VALUE;
 		int max_price = Integer.MIN_VALUE;
-		for (Suite suite : Document.get().getSuites()) {
-			min_price = Math.min(min_price, suite.getPrice());
-			max_price = Math.max(max_price, suite.getPrice());
+		for (SuiteGeoItem suiteGE : parentSection.getActiveSuiteGeoItems().values()) {
+			Suite.Status status = suiteGE.suite.getStatus(); 
+			if (status == Suite.Status.Sold)
+				continue;
+
+			if (priceType == PriceType.Ownership && 
+				status == Suite.Status.AvailableRent)
+				continue;
+			else
+			if (priceType == PriceType.Rent && 
+				status != Suite.Status.AvailableRent)
+				continue;
+				
+			int price = suiteGE.suite.getPrice();
+			if (price > 0) {
+				min_price = Math.min(min_price, price);
+				max_price = Math.max(max_price, price);
+			}
 		}
-		if (min_price <= 0)
+		if (min_price == Integer.MAX_VALUE || max_price == Integer.MIN_VALUE)
 			return null;
-		if (max_price <= 0)
-			return null;
+		
 		if (max_price <= min_price)
 			return null;
 		// ==============
 
 		instance = new PriceSection();
+		instance.parentSection = parentSection;
+		instance.prices = new ArrayList<Integer>();
+		instance.sectionLabel = sectionLabel;
+		instance.priceType = priceType;
+
 		instance.stackPanel = stackPanel;
 		instance.setSpacing(5);
-		stackPanel.add(instance, "Price (any)", false);
+		stackPanel.add(instance, instance.generateLabel(), false);
 		instance.setSize("100%", "150px");
 
 		VerticalPanel vpPrice = new VerticalPanel();
@@ -62,80 +87,93 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 		instance.add(vpPrice);
 		vpPrice.setWidth("100%");
 
-		cbAnyPrice = new CheckBox("Any price");
-		cbAnyPrice.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+		instance.cbAnyPrice = new CheckBox("Any price");
+		instance.cbAnyPrice.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				if (cbAnyPrice.getValue()) {
-					cbMinPrice.setSelectedIndex(0); // !!
-					cbMaxPrice.setSelectedIndex(cbMaxPrice.getItemCount() - 1); // !!
-					instance.isChanged = true;
+				if (instance.cbAnyPrice.getValue()) {
+					instance.cbMinPrice.setSelectedIndex(0); // !!
+					instance.cbMaxPrice.setSelectedIndex(instance.cbMaxPrice.getItemCount() - 1); // !!
 					instance.isAny = true;
 				} // else
-				UpdateSectionCaption();
+				instance.Apply();
 			}
 		});
-		vpPrice.add(cbAnyPrice);
+		vpPrice.add(instance.cbAnyPrice);
 
 		HorizontalPanel horizontalPanel_1 = new HorizontalPanel();
 		horizontalPanel_1.setSpacing(5);
 		vpPrice.add(horizontalPanel_1);
 		horizontalPanel_1.setSize("100%", "100px");
 
-		cbMinPrice = new ListBox();
-		cbMinPrice.setEnabled(false);
-		horizontalPanel_1.add(cbMinPrice);
-		cbMinPrice.addChangeHandler(new ChangeHandler() {
+		instance.cbMinPrice = new ListBox();
+		instance.cbMinPrice.setEnabled(false);
+		horizontalPanel_1.add(instance.cbMinPrice);
+		instance.cbMinPrice.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
-				cbMaxPrice.setSelectedIndex(Math.max(
-						cbMaxPrice.getSelectedIndex(),
-						cbMinPrice.getSelectedIndex()));
-				instance.isAny = cbMinPrice.getSelectedIndex() == 0
-						&& cbMaxPrice.getSelectedIndex() == (cbMaxPrice
+				instance.cbMaxPrice.setSelectedIndex(Math.max(
+						instance.cbMaxPrice.getSelectedIndex(),
+						instance.cbMinPrice.getSelectedIndex()));
+				instance.isAny = instance.cbMinPrice.getSelectedIndex() == 0
+						&& instance.cbMaxPrice.getSelectedIndex() == (instance.cbMaxPrice
 								.getItemCount() - 1);
-				cbAnyPrice.setValue(instance.isAny);
-				UpdateSectionCaption();
+				instance.cbAnyPrice.setValue(instance.isAny);
+				instance.Apply();
 			}
 		});
-		cbMinPrice.setWidth("100%");
+		instance.cbMinPrice.setWidth("100%");
 
-		cbMaxPrice = new ListBox();
-		cbMaxPrice.setEnabled(false);
-		horizontalPanel_1.add(cbMaxPrice);
-		cbMaxPrice.addChangeHandler(new ChangeHandler() {
+		instance.cbMaxPrice = new ListBox();
+		instance.cbMaxPrice.setEnabled(false);
+		horizontalPanel_1.add(instance.cbMaxPrice);
+		instance.cbMaxPrice.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
-				cbMinPrice.setSelectedIndex(Math.min(
-						cbMinPrice.getSelectedIndex(),
-						cbMaxPrice.getSelectedIndex()));
-				instance.isAny = cbMinPrice.getSelectedIndex() == 0
-						&& cbMaxPrice.getSelectedIndex() == (cbMaxPrice
+				instance.cbMinPrice.setSelectedIndex(Math.min(
+						instance.cbMinPrice.getSelectedIndex(),
+						instance.cbMaxPrice.getSelectedIndex()));
+				instance.isAny = instance.cbMinPrice.getSelectedIndex() == 0
+						&& instance.cbMaxPrice.getSelectedIndex() == (instance.cbMaxPrice
 								.getItemCount() - 1);
-				cbAnyPrice.setValue(instance.isAny);
-				UpdateSectionCaption();
+				instance.cbAnyPrice.setValue(instance.isAny);
+				instance.Apply();
 			}
 		});
-		cbMaxPrice.setWidth("100%");
+		instance.cbMaxPrice.setWidth("100%");
 
 		return instance;
 	}
 
+	private String generateLabel() {
+		return sectionLabel + (isAny ? " (any)" : "");
+	}
+	
 	@Override
 	public void Reset() {
 		cbAnyPrice.setValue(true, true);
 		cbMinPrice.setEnabled(true);
-		// cbMinPrice.setSelectedIndex(0); // !!
+		cbMinPrice.setSelectedIndex(0); // !!
 		cbMaxPrice.setEnabled(true);
-		// cbMaxPrice.setSelectedIndex(cbMaxPrice.getItemCount() - 1); //!!
+		cbMaxPrice.setSelectedIndex(cbMaxPrice.getItemCount() - 1); //!!
 		isAny = true;
 	}
 
 	@Override
-	public boolean isFilteredIn(Suite suite) {
+	public int StateHash() {
+		int hash = hashCode();
+		if (cbAnyPrice.getValue()) hash += cbAnyPrice.hashCode();
+		hash += cbMinPrice.hashCode() * cbMinPrice.getSelectedIndex();
+		hash += cbMaxPrice.hashCode() * cbMaxPrice.getSelectedIndex();
+		
+		return hash;
+	}
+	
+	@Override
+	public boolean isFilteredIn(SuiteGeoItem suiteGI) {
 		if (isAny)
 			return true;
 
-		int price = suite.getPrice();
+		int price = suiteGI.getPrice();
 		if (prices.isEmpty())
 			return true;
 		if (price <= prices.get(cbMinPrice.getSelectedIndex()))
@@ -149,9 +187,24 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 	public void Init() {
 		int min_price = Integer.MAX_VALUE;
 		int max_price = Integer.MIN_VALUE;
-		for (Suite suite : Document.get().getSuites()) {
-			min_price = Math.min(min_price, suite.getPrice());
-			max_price = Math.max(max_price, suite.getPrice());
+		for (SuiteGeoItem suiteGI : getParentSectionContainer().getActiveSuiteGeoItems().values()) {
+			Suite.Status status = suiteGI.suite.getStatus(); 
+			if (status == Suite.Status.Sold)
+				continue;
+
+			if (priceType == PriceType.Ownership && 
+				status == Suite.Status.AvailableRent)
+				continue;
+			else
+			if (priceType == PriceType.Rent && 
+				status != Suite.Status.AvailableRent)
+				continue;
+				
+			int price = suiteGI.suite.getPrice();
+			if (price > 0) {
+				min_price = Math.min(min_price, price);
+				max_price = Math.max(max_price, price);
+			}
 		}
 
 		int diff = max_price - min_price;
@@ -161,19 +214,28 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 		while (diff > a)
 			a *= 10;
 
-		int i = 0;
-		while (a * (i + 1) < min_price)
-			i++;
+		while (true)
+		{
+			int i = 0;
+			while (a * (i + 1) < min_price)
+				i++;
+	
+			prices.clear();
+	
+			// prices.add(Integer.MIN_VALUE);
+	
+			while (a * i < max_price) {
+				prices.add(a * i);
+				i++;
+			}
+			if (i >= 4) {
+				prices.add(a * i);
+				break;
+			}
 
-		prices.clear();
-
-		// prices.add(Integer.MIN_VALUE);
-
-		while (a * i < max_price) {
-			prices.add(a * i);
-			i++;
+			a = a/2;
 		}
-		prices.add(a * i);
+
 		// prices.add(Integer.MAX_VALUE);
 
 		cbMinPrice.clear();
@@ -195,39 +257,11 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 //		Apply();
 	}
 
-	public int getMinPriceRange() {
-		return min_price_range;
-	}
-
-	public int getMaxPriceRange() {
-		return max_price_range;
-	}
-
 	private boolean isAny = true;
 
 	@Override
 	public boolean isAny() {
 		return isAny;
-	}
-
-	private static void UpdateSectionCaption() {
-		if (instance.isAny)
-			instance.stackPanel
-					.setStackText(instance.stackPanel.getWidgetIndex(instance),
-							"Price (any)");
-		else
-			instance.stackPanel.setStackText(
-					instance.stackPanel.getWidgetIndex(instance), "Price");
-		instance.isChanged = true;
-		if (Filter.initialized == true)
-			Filter.get().onChanged();
-	}
-
-	private boolean isChanged = false;
-	
-	@Override
-	public boolean isChanged() {
-		return isChanged;
 	}
 
 	public JSONObject getJSON() {
@@ -236,8 +270,17 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 
 	@Override
 	public void Apply() {
-		isChanged = false;
-		if (Filter.initialized == true)
-			Filter.get().onChanged();
+		stackPanel.setStackText(stackPanel.getWidgetIndex(this), generateLabel());
+		Filter.onChange();
+	}
+
+	@Override
+	public void RemoveSection() {
+		super.removeFromParent();
+	}
+
+	@Override
+	public I_FilterSectionContainer getParentSectionContainer() {
+		return parentSection;
 	}
 }

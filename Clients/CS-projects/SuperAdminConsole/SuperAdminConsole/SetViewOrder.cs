@@ -172,7 +172,7 @@ namespace SuperAdminConsole
             listViewAddresses.ListViewItemSorter = lvwColumnSorter;
             textBoxMLS.ReadOnly = theReason != ChangeReason.Creation;
             textBoxInfoUrl.ReadOnly = theReason != ChangeReason.Creation;
-            textBoxNote.Visible = theReason == ChangeReason.Creation;
+            //textBoxNote.Visible = theReason == ChangeReason.Creation;
             label11.Visible = theReason == ChangeReason.Creation;
 
             UpdateState();
@@ -614,6 +614,7 @@ namespace SuperAdminConsole
                 expiresOn = System.TimeZone.CurrentTimeZone.ToUniversalTime(expiresOn.Date);
                 theOrder["expiresOn"] = expiresOn;
                 theOrder["ownerId"] = theUser.AutoID;
+                theOrder["note"] = textBoxNote.Text;
             }
 
             if (theReason != ChangeReason.Creation)
@@ -626,7 +627,7 @@ namespace SuperAdminConsole
                 theOrder["vTourUrl"] = radioButtonExternalLink.Checked ? textExternalLink.Text : string.Empty;
                 theOrder["mlsId"] = textBoxMLS.Text;
                 theOrder["infoUrl"] = textBoxInfoUrl.Text;
-                theOrder["mlsNote"] = textBoxNote.Text;
+                theOrder["note"] = textBoxNote.Text;
             }
 
             DialogResult = System.Windows.Forms.DialogResult.OK;
