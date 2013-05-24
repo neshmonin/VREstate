@@ -592,6 +592,9 @@ namespace Vre.Server.RemoteService
                 string nameLookup = query.GetParam("nameFilter", string.Empty);// data.GetProperty("nameFilter", string.Empty);
                 User[] list;
 
+				if (User.IsEstateDeveloperTied(role) && (estateDeveloperId < 0) && session.User.EstateDeveloperID.HasValue)
+					estateDeveloperId = session.User.EstateDeveloperID.Value;
+
                 using (UserManager manager = new UserManager(session))
                     list = manager.List(role, estateDeveloperId, nameLookup, includeDeleted);
 

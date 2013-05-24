@@ -279,7 +279,7 @@ namespace Vre.Server.BusinessLogic
                 UserInfoAccessLevel.None, UserInfoAccessLevel.Administrative);
             addUserAcl(User.Role.DeveloperAdmin, User.Role.SellingAgent,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,  // Should be more here?
-                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+                UserInfoAccessLevel.Transactional, UserInfoAccessLevel.Transactional);
             addUserAcl(User.Role.DeveloperAdmin, User.Role.Subcontractor,
                 UserInfoAccessLevel.None, UserInfoAccessLevel.Administrative,
                 UserInfoAccessLevel.Contact, UserInfoAccessLevel.Administrative);
