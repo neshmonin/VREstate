@@ -147,13 +147,16 @@ namespace Vre.Server.Task
 
 				using (var manager = new SiteManager(ClientSession.MakeSystemSession(session)))
 				{
-					var current = manager.GetCurrentSuitePrice(s);
-					if (Math.Abs(current - item.CurrentPrice) >= 0.01)
+					var currentPrice = s.CurrentPrice;
+					var newPrice = new Money(Convert.ToDecimal(item.CurrentPrice), Currency.Cad); // TODO: Currently locked to CAD
+					if (!currentPrice.HasValue || (currentPrice.Value.CompareTo(newPrice) != 0))
+					//if (Math.Abs(current - item.CurrentPrice) >= 0.01)
 					{
-						manager.SetSuitePrice(s, (float)item.CurrentPrice);
+						s.CurrentPrice = newPrice;
+						manager.LogNewSuitePrice(s, (float)item.CurrentPrice);
 
 						ServiceInstances.Logger.Info("Changing suite ID {0} ({1}, {2}) price {3} -> {4}",
-						                                s.AutoID, item.SuiteName, item.CompiledAddress, current, item.CurrentPrice);
+					                                s.AutoID, item.SuiteName, item.CompiledAddress, currentPrice, newPrice);
 						changed = true;
 					}
 				}
@@ -263,9 +266,10 @@ namespace Vre.Server.Task
 				{
 					using (var dao = new ViewOrderDao(session)) dao.Create(vo);
 
+					suite.CurrentPrice = new Money(Convert.ToDecimal(item.CurrentPrice), Currency.Cad); // TODO: Currently locked to CAD
 					using (var manager = new SiteManager(ClientSession.MakeSystemSession(session)))
 					{
-						manager.SetSuitePrice(suite, (float)item.CurrentPrice);
+						manager.LogNewSuitePrice(suite, (float)item.CurrentPrice);
 					}
 
 					switch (item.SaleLeaseState)

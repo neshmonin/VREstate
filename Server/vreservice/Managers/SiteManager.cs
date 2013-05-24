@@ -162,88 +162,132 @@ namespace Vre.Server.BusinessLogic
             }
         }
 
-        public float GetCurrentSuitePrice(Suite suite)
-        {
-            Price p = null;
+		//public float GetCurrentSuitePrice(Suite suite)
+		//{
+		//    Price p = null;
                         
-            using (OptionTypeDao dao = new OptionTypeDao(_session.DbSession))
-            {
-                foreach (Option opt in suite.OptionsPossible)
-                {
-                    if (dao.IsSuiteOption(opt.OpType))
-                    {
-                        if (opt.Prices.Count > 0) p = opt.Prices[0];  // sorted by time [newest first] already
-                        break;
-                    }
-                }
-            }
+		//    using (OptionTypeDao dao = new OptionTypeDao(_session.DbSession))
+		//    {
+		//        foreach (Option opt in suite.OptionsPossible)
+		//        {
+		//            if (dao.IsSuiteOption(opt.OpType))
+		//            {
+		//                if (opt.Prices.Count > 0) p = opt.Prices[0];  // sorted by time [newest first] already
+		//                break;
+		//            }
+		//        }
+		//    }
 
-            if (p != null) return p.PricePerUnitForBuyer;
-            return -1.0f;
-        }
+		//    if (p != null) return p.PricePerUnitForBuyer;
+		//    return -1.0f;
+		//}
 
-        public static float GetCurrentSuitePriceF(Suite suite)
-        {
-            Price p = null;
+		//public static float GetCurrentSuitePriceF(Suite suite)
+		//{
+		//    Price p = null;
 
-            foreach (Option opt in suite.OptionsPossible)
-            {
-                if (OptionTypeDao.IsSuiteOptionF(opt.OpType))
-                {
-                    if (opt.Prices.Count > 0) p = opt.Prices[0];  // sorted by time [newest first] already
-                    break;
-                }
-            }
+		//    foreach (Option opt in suite.OptionsPossible)
+		//    {
+		//        if (OptionTypeDao.IsSuiteOptionF(opt.OpType))
+		//        {
+		//            if (opt.Prices.Count > 0) p = opt.Prices[0];  // sorted by time [newest first] already
+		//            break;
+		//        }
+		//    }
 
-            if (p != null) return p.PricePerUnitForBuyer;
-            return -1.0f;
-        }
+		//    if (p != null) return p.PricePerUnitForBuyer;
+		//    return -1.0f;
+		//}
 
-        public bool SetSuitePrice(Suite suite, float price)
-        {
-            RolePermissionCheck.CheckUpdateSuite(_session, suite);
+		//public bool SetSuitePrice(Suite suite, float price)
+		//{
+		//    RolePermissionCheck.CheckUpdateSuite(_session, suite);
 
-            bool result = false;
+		//    bool result = false;
 
-            using (OptionTypeDao dao = new OptionTypeDao(_session.DbSession))
-            {
-                // search for a "Suite" option first
-                foreach (Option opt in suite.OptionsPossible)
-                {
-                    if (dao.IsSuiteOption(opt.OpType))
-                    {
-                        emitNewPrice(opt, price);
-                        ServiceInstances.EntityUpdateTracker.NotifyModified(new Suite[] { suite });
+		//    using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
+		//    {
+		//        using (OptionTypeDao dao = new OptionTypeDao(_session.DbSession))
+		//        {
+		//            // search for a "Suite" option first
+		//            foreach (Option opt in suite.OptionsPossible)
+		//            {
+		//                if (dao.IsSuiteOption(opt.OpType))
+		//                {
+		//                    emitNewPrice(opt, price);
+		//                    ServiceInstances.EntityUpdateTracker.NotifyModified(new Suite[] {suite});
 
-                        result = true;
-                        break;
-                    }
-                }
-                if (!result)  // first-time price set; create new option
-                {
-                    // TODO: Option's owner is requesting user; should be someone else?!
-                    Option opt = new Option(suite.Building, _session.User, "Suite", dao.GetSuiteOption());
-                    using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
-                    {
-                        using (OptionDao odao = new OptionDao(_session.DbSession)) odao.Create(opt);
-                        
-                        emitNewPrice(opt, price);
+		//                    result = true;
+		//                    break;
+		//                }
+		//            }
+		//            if (!result) // first-time price set; create new option
+		//            {
+		//                // TODO: Option's owner is requesting user; should be someone else?!
+		//                Option opt = new Option(suite.Building, _session.User, "Suite", dao.GetSuiteOption());
+		//                using (OptionDao odao = new OptionDao(_session.DbSession)) odao.Create(opt);
 
-                        suite.OptionsPossible.Add(opt);
+		//                emitNewPrice(opt, price);
 
-                        using (SuiteDao sdao = new SuiteDao(_session.DbSession))
-                            result = sdao.SafeUpdate(suite);
+		//                suite.OptionsPossible.Add(opt);
 
-                        tran.Commit();
-                    }
-                    
-                }
-            }
+		//                using (SuiteDao sdao = new SuiteDao(_session.DbSession))
+		//                    result = sdao.SafeUpdate(suite);
+		//            }
+		//        }
 
-            return result;
-        }
+		//        suite.CurrentPrice = new Money(Convert.ToDecimal(price), Currency.Cad);
+		//        using (var dao = new SuiteDao(_session.DbSession)) dao.SafeUpdate(suite);
 
-        private void emitNewPrice(Option opt, float price)
+		//        tran.Commit();
+		//    }
+
+		//    return result;
+		//}
+
+		public bool LogNewSuitePrice(Suite suite, float price)
+		{
+			RolePermissionCheck.CheckUpdateSuite(_session, suite);
+
+			bool result = false;
+
+			using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
+			{
+				using (OptionTypeDao dao = new OptionTypeDao(_session.DbSession))
+				{
+					// search for a "Suite" option first
+					foreach (Option opt in suite.OptionsPossible)
+					{
+						if (dao.IsSuiteOption(opt.OpType))
+						{
+							emitNewPrice(opt, price);
+
+							result = true;
+							break;
+						}
+					}
+					if (!result) // first-time price set; create new option
+					{
+						// TODO: Option's owner is requesting user; should be someone else?!
+						Option opt = new Option(suite.Building, _session.User, "Suite", dao.GetSuiteOption());
+						using (OptionDao odao = new OptionDao(_session.DbSession)) odao.Create(opt);
+
+						emitNewPrice(opt, price);
+
+						suite.OptionsPossible.Add(opt);
+
+						using (SuiteDao sdao = new SuiteDao(_session.DbSession))
+							result = sdao.SafeUpdate(suite);
+					}
+				}
+
+				tran.Commit();
+			}
+
+			return result;
+		}
+
+		private void emitNewPrice(Option opt, float price)
         {
             Price p = new Price(opt);
             p.NumberOfUnits = 1;

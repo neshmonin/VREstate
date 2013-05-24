@@ -494,7 +494,24 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
-        /// <summary>
+		/// <summary>
+		/// Update floating point property in business object.
+		/// <para>If ClientData has no related value or value is unreadable status is considered <b>unchanged</b>.</para>
+		/// </summary>
+		/// <param name="propertyName">Property name in ClientData store.</param>
+		/// <param name="propertyValue">Current BO's property value.</param>
+		/// <param name="changed">Value updated to <b>true</b> if property value changed; 
+		/// value <b>not changed</b> if property value is same. This allows iterative calls with
+		/// minimal surrounded logic.</param>
+		/// <returns>Updated or same property value.</returns>
+		public decimal UpdateProperty(string propertyName, decimal propertyValue, ref bool changed)
+		{
+			decimal result = GetProperty(propertyName, propertyValue);
+			if (result != propertyValue) changed = true;
+			return result;
+		}
+
+		/// <summary>
         /// Update floating point property in business object.
         /// <para>If ClientData has no related value or value is unreadable status is considered <b>unchanged</b>.</para>
         /// </summary>

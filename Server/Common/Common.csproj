@@ -45,6 +45,15 @@
     <Compile Include="CollectionExtensions.cs" />
     <Compile Include="CsvUtilities.cs" />
     <Compile Include="ModelImportSettings.cs" />
+    <Compile Include="Money\Currency.cs" />
+    <Compile Include="Money\FractionReceivers.cs" />
+    <Compile Include="Money\MersenneTwister.cs" />
+    <Compile Include="Money\MidpointRoundingRule.cs" />
+    <Compile Include="Money\Money.cs" />
+    <Compile Include="Money\MoneyAllocationException.cs" />
+    <Compile Include="Money\MoneyDistributor.cs" />
+    <Compile Include="Money\MoneyExtensions.cs" />
+    <Compile Include="Money\RoundingPlaces.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UniversalId.cs" />
     <Compile Include="Utilities.cs" />

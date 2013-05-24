@@ -638,8 +638,10 @@ namespace Vre.Server.Command
         {
             // this must be the first call on new suite as it re-reads suite from DB;
             // all subsequent changes shall be lost!
+			dbSuite.CurrentPrice = new Money(Convert.ToDecimal(modelSuite.InitialPrice), Currency.Cad); // TODO: Currently locked to CAD
+
             using (SiteManager mgr = new SiteManager(_clientSession))
-                mgr.SetSuitePrice(dbSuite, (float)modelSuite.InitialPrice);
+                mgr.LogNewSuitePrice(dbSuite, (float)modelSuite.InitialPrice);
 
             if (0 == modelSuite.CeilingHeightFt)
                 dbSuite.CeilingHeight = new ValueWithUM(modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
