@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net;
 using NHibernate;
 using Vre.Server.BusinessLogic;
-using Vre.Server.BusinessLogic.Client;
 using Vre.Server.Dao;
 
 namespace Vre.Server.RemoteService
@@ -459,7 +458,7 @@ namespace Vre.Server.RemoteService
                 for (int idx = 0; idx < cnt; idx++)
                 {
                     Suite s = suiteList[idx];
-                    insertSuiteIntoResult(statusFilter, result, manager, s);
+                    insertSuiteIntoResult(statusFilter, result, s);
                 }
 
                 if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, suiteList, csrq);
@@ -472,7 +471,7 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void insertSuiteIntoResult(Suite.SalesStatus? statusFilter, List<ClientData> result, SiteManager manager, Suite s)
+        private static void insertSuiteIntoResult(Suite.SalesStatus? statusFilter, List<ClientData> result, Suite s)
         {
             bool add = false;
             if (statusFilter != null)
@@ -486,7 +485,7 @@ namespace Vre.Server.RemoteService
             if (add)
             {
                 ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-                result.Add(SuiteEx.GetClientData(s, manager.GetCurrentSuitePrice(s)));
+                result.Add(s.GetClientData());
             }
         }
 
@@ -494,12 +493,12 @@ namespace Vre.Server.RemoteService
         {
             ClientData result = null;
 
-            using (SiteManager manager = new SiteManager(session))
+            using (var dao = new SuiteDao(session.DbSession))
             {
-                Suite suite = manager.GetSuiteById(suiteId);
+                var suite = dao.GetById(suiteId);
 
                 ServiceInstances.ModelCache.FillWithModelInfo(suite, false);
-                result = SuiteEx.GetClientData(suite, manager.GetCurrentSuitePrice(suite));
+	            result = suite.GetClientData();
 
                 if (csrq != ChangeSubscriptionRequest.None)
                     setChangeSubscription(session, suite, csrq);
@@ -593,6 +592,9 @@ namespace Vre.Server.RemoteService
                 string nameLookup = query.GetParam("nameFilter", string.Empty);// data.GetProperty("nameFilter", string.Empty);
                 User[] list;
 
+				if (User.IsEstateDeveloperTied(role) && (estateDeveloperId < 0) && session.User.EstateDeveloperID.HasValue)
+					estateDeveloperId = session.User.EstateDeveloperID.Value;
+
                 using (UserManager manager = new UserManager(session))
                     list = manager.List(role, estateDeveloperId, nameLookup, includeDeleted);
 
@@ -637,22 +639,15 @@ namespace Vre.Server.RemoteService
             if (null == b) throw new FileNotFoundException("Building does not exist");
 
             List<ClientData> result = new List<ClientData>(b.Suites.Count);
-            using (SiteManager manager = new SiteManager(session))
+            foreach (Suite s in b.Suites)
             {
-                foreach (Suite s in b.Suites)
-                {
-                    if ((s.SuiteType != null)
-                        // a bit of too deep inspection to avoid unnecessary calls; maybe not required
-                        //&& (!string.IsNullOrWhiteSpace(s.SuiteType.FloorPlanUrl)) && (!s.SuiteType.FloorPlanUrl.StartsWith("http://"))
-                        )
-                        ReferencedFileHelper.ConvertUrlsToAbsolute(s.SuiteType);
+                if ((s.SuiteType != null)
+                    // a bit of too deep inspection to avoid unnecessary calls; maybe not required
+                    //&& (!string.IsNullOrWhiteSpace(s.SuiteType.FloorPlanUrl)) && (!s.SuiteType.FloorPlanUrl.StartsWith("http://"))
+                    )
+                    ReferencedFileHelper.ConvertUrlsToAbsolute(s.SuiteType);
                     
-                    ClientData cd = s.GetInventoryClientData(null, false);
-                    cd.Add("currentPrice", manager.GetCurrentSuitePrice(s));
-
-                    result.Add(cd);
-                }
-
+				result.Add(s.GetInventoryClientData(null, false));
             }
 
             if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, b.Suites, csrq);
@@ -1121,25 +1116,22 @@ namespace Vre.Server.RemoteService
             TempReconcileViewOrdersNow(suites, dbSession);
 
             elements = new List<ClientData>(suites.Count());
-	        using (var manager = new SiteManager(ClientSession.MakeSystemSession(dbSession)))
-	        {
-		        foreach (Suite s in suites)
-		        {
-			        //if ((soldPropertyLevel == ViewResponseSoldPropertyLevel.None)
-			        //    || (soldPropertyLevel == ViewResponseSoldPropertyLevel.Building))
-			        //{
-			        //    if (s.Status == Suite.SalesStatus.Sold) continue;
-			        //}
+		    foreach (Suite s in suites)
+		    {
+				//if ((soldPropertyLevel == ViewResponseSoldPropertyLevel.None)
+				//    || (soldPropertyLevel == ViewResponseSoldPropertyLevel.Building))
+				//{
+				//    if (s.Status == Suite.SalesStatus.Sold) continue;
+				//}
 
-			        ServiceInstances.ModelCache.FillWithModelInfo(s, false);
-			        ClientData cd = SuiteEx.GetClientData(s, manager.GetCurrentSuitePrice(s));
-			        //ClientData cd = s.GetClientData();
-			        //if (maskSaleStatus) cd["status"] = "Selected";
-			        elements.Add(cd);
-			        usedSuiteTypes.Add(s.SuiteType);
-			        usedBuildings.Add(s.Building);
-		        }
-	        }
+			    ServiceInstances.ModelCache.FillWithModelInfo(s, false);
+			    ClientData cd = s.GetClientData();
+			    //ClientData cd = s.GetClientData();
+			    //if (maskSaleStatus) cd["status"] = "Selected";
+			    elements.Add(cd);
+			    usedSuiteTypes.Add(s.SuiteType);
+			    usedBuildings.Add(s.Building);
+		    }
 	        resp.Data.Add("suites", elements.ToArray());
 
             if (suiteTypes != null)
@@ -1436,56 +1428,29 @@ namespace Vre.Server.RemoteService
                                 " does not belong to building ID=" + building.AutoID);
                         }
 
-                        bool updated = false, canUpdate = true;
-                        if (suite.UpdateFromClient(suiteData))
-                        {
-                            try
-                            {
-                                if (manager.UpdateSuite(suite))
-                                {
-                                    updatedCnt++;
-                                    updated = true;
-                                }
-                                else
-                                {
-                                    staleIds.Add(suite.AutoID);
-                                    error = "At least one object is stale.";
-                                    canUpdate = false;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                error = string.Format("Cannot update suite {0} (ID={1}): {2}", suite.SuiteName, suite.AutoID, ex.Message);
-                                ServiceInstances.Logger.Error("Cannot update suite ID={0}: {1}", suite.AutoID, Utilities.ExplodeException(ex));
-                                break;
-                            }
-                        }
+	                    var price = suite.CurrentPrice;
+	                    if (!suite.UpdateFromClient(suiteData)) continue;
+	                    try
+	                    {
+		                    if (manager.UpdateSuite(suite))
+		                    {
+			                    updatedCnt++;
 
-                        // update price
-                        if (canUpdate)
-                        {
-                            SuiteEx suiteEx = new SuiteEx(suite, manager.GetCurrentSuitePrice(suite));
-                            if (suiteEx.UpdateFromClient(suiteData))
-                            {
-                                if (manager.SetSuitePrice(suite, (float)suiteEx.CurrentPrice))
-                                {
-                                    if (!updated) updatedCnt++;  // increment counter if not done above
-                                }
-                                else
-                                {
-                                    staleIds.Add(suite.AutoID);
-                                    error = "At least one object is stale.";
-                                }
-                            }
-                        }
-                        
-                        //double pp = manager.GetCurrentSuitePrice(suite);
-                        //double ip = suiteData.GetProperty("currentPrice", -1.0);
-                        //if ((ip > 0.0) && (ip != pp) && canUpdate)
-                        //{
-                        //    manager.SetSuitePrice(session.User, suite, (float)ip);
-                        //    if (!updated) updatedCnt++;
-                        //}
+			                    if (price.HasValue && (price.Value.CompareTo(suite.CurrentPrice.Value) != 0))
+				                    manager.LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice));
+		                    }
+		                    else
+		                    {
+			                    staleIds.Add(suite.AutoID);
+			                    error = "At least one object is stale.";
+		                    }
+	                    }
+	                    catch (Exception ex)
+	                    {
+		                    error = string.Format("Cannot update suite {0} (ID={1}): {2}", suite.SuiteName, suite.AutoID, ex.Message);
+		                    ServiceInstances.Logger.Error("Cannot update suite ID={0}: {1}", suite.AutoID, Utilities.ExplodeException(ex));
+		                    break;
+	                    }
                     }  // foreach suite
 
                 }  // using SiteManager

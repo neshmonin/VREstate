@@ -141,7 +141,7 @@ namespace Vre.Server.BusinessLogic
 
             Enabled = data.UpdateProperty("enabled", Enabled, ref result);
 			Imported = data.UpdateProperty("imported", Imported, ref result);
-			Note = data.GetProperty("note", string.Empty);
+			Note = data.UpdateProperty("note", Note, ref result);
             ExpiresOn = data.UpdateProperty("expiresOn", ExpiresOn, ref result);
             OwnerId = data.UpdateProperty("ownerId", OwnerId, ref result);
             Product = data.UpdateProperty<ViewOrderProduct>("product", Product, ref result);

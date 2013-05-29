@@ -29,7 +29,14 @@ namespace Vre.Server.BusinessLogic
         public virtual ValueWithUM CeilingHeight { get; set; }
         public virtual bool ShowPanoramicView { get; set; }
 
-        public virtual string BubbleTemplateUrl { get; set; }
+		public virtual Money? CurrentPrice { get; set; }
+		protected virtual string currentPriceDb
+		{
+			get { return (CurrentPrice.HasValue ? CurrentPrice.Value.ToFullString() : null); }
+			set { Money m; if (Money.TryParse(value, out m)) CurrentPrice = m; }
+		}
+
+		public virtual string BubbleTemplateUrl { get; set; }
 
         /// <summary>
         /// Seller agent reference
@@ -52,6 +59,7 @@ namespace Vre.Server.BusinessLogic
             SuiteType = copy.SuiteType;
             Location = copy.Location;
             CeilingHeight = (copy.CeilingHeight != null) ? new ValueWithUM(copy.CeilingHeight.ValueAs(ValueWithUM.Unit.Feet), ValueWithUM.Unit.Feet) : null;
+	        CurrentPrice = copy.CurrentPrice;
             ShowPanoramicView = copy.ShowPanoramicView;
         }
 
@@ -66,6 +74,7 @@ namespace Vre.Server.BusinessLogic
             Status = SalesStatus.Available;
             Location = ViewPoint.Empty;
             CeilingHeight = ValueWithUM.EmptyLinear;
+	        CurrentPrice = new Money();
             ShowPanoramicView = true;
             OptionsPossible = new HashSet<Option>();
             if (Building != null) Building.Suites.Add(this);
@@ -98,6 +107,11 @@ namespace Vre.Server.BusinessLogic
             FloorName = fromServer.UpdateProperty("floorName", FloorName, ref changed);
             if (CeilingHeight != null)
                 CeilingHeight.SetValue(fromServer.UpdateProperty("ceilingHeightFt", CeilingHeight.ValueAs(ValueWithUM.Unit.Feet), ref changed), ValueWithUM.Unit.Feet);
+
+	        decimal cp = fromServer.GetProperty("currentPrice", -1.0m);
+	        Currency cpc;
+			if ((cp >= 0.0m) && Currency.TryParse(fromServer.GetProperty("currentPriceCurrency", string.Empty), out cpc))
+				CurrentPrice = new Money(cp, cpc);
         }
 
         public Suite(ClientData fromServer) : this(fromServer, null) {}
@@ -128,7 +142,14 @@ namespace Vre.Server.BusinessLogic
             if (!string.IsNullOrEmpty(BubbleTemplateUrl))
                 result.Add("bubbleTemplateUrl", BubbleTemplateUrl);
 
-            return result;
+	        if (CurrentPrice.HasValue)
+	        {
+		        result.Add("currentPrice", CurrentPrice.Value.ToString("F"));
+				result.Add("currentPriceDisplay", CurrentPrice.Value.ToString("C"));
+				result.Add("currentPriceCurrency", CurrentPrice.Value.Currency.Iso3LetterCode);
+	        }
+
+	        return result;
         }
 
         public virtual ClientData GetInventoryClientData(ClientData result, bool supplement)
@@ -151,7 +172,13 @@ namespace Vre.Server.BusinessLogic
             if (!string.IsNullOrEmpty(BubbleTemplateUrl))
                 result.Add("bubbleTemplateUrl", BubbleTemplateUrl);
 
-            return result;
+			if (CurrentPrice.HasValue)
+			{
+				result.Add("currentPrice", CurrentPrice.Value.ToString("F"));
+				result.Add("currentPriceCurrency", CurrentPrice.Value.Currency.Iso3LetterCode);
+			}
+
+			return result;
         }
 
         public override bool UpdateFromClient(ClientData data)
@@ -161,7 +188,11 @@ namespace Vre.Server.BusinessLogic
             PhysicalLevelNumber = data.UpdateProperty("levelNumber", PhysicalLevelNumber, ref changed);
             SuiteName = data.UpdateProperty("name", SuiteName, ref changed);
             ShowPanoramicView = data.UpdateProperty("showPanoramicView", ShowPanoramicView, ref changed);
-            Status = data.UpdateProperty<SalesStatus>("status", Status, ref changed);
+            Status = data.UpdateProperty("status", Status, ref changed);
+			if (CurrentPrice.HasValue)
+				CurrentPrice = new Money(
+					data.UpdateProperty("currentPrice", Convert.ToDecimal(CurrentPrice.Value), ref changed), 
+					CurrentPrice.Value.Currency);
 
             return changed;
         }

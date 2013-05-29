@@ -227,8 +227,6 @@ namespace Vre.Server.HttpService
 				//
                 long el = ((System.Diagnostics.Stopwatch.GetTimestamp() - st) * 1000) / System.Diagnostics.Stopwatch.Frequency;
 				enqueueQueryStat(el);
-				//if (el < 1000) ServiceInstances.Logger.Debug("Request processed in {0} ms", el);
-				//else ServiceInstances.Logger.Warn("Request processed in {0} ms !!!@@@", el);
 				if (el >= 1000) ServiceInstances.Logger.Warn("Request processed in {0} ms !!!@@@", el);
 				else if (_allowExtendedLogging) ServiceInstances.Logger.Debug("Request processed in {0} ms", el);
             }

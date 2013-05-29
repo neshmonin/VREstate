@@ -34,6 +34,8 @@
       cascade="none" fetch="join" insert="true" update="true"
     />
 
+    <property name="currentPriceDb" column="CurrentPrice" />
+
     <!-- Geometry-related elements are read directly from model cached
     <property name="ceilingHeight" column="CeilingHeight" />
     <component name="Location">
