@@ -121,15 +121,6 @@ namespace SuperAdminConsole.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("120")]
-        public int defaultDaysValidPermanent {
-            get {
-                return ((int)(this["defaultDaysValidPermanent"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("We created Interactive 3D Listing for this property:\r\n{0}\r\nIt is free, just try i" +
             "t!\r\nThis link will die in {1} days. If you want to keep it, send email to sales@" +
             "3DcondoX.com.  \r\nFor more info see http://youtu.be/byMQRkqmFmU\r\n  Thanks, 3dcond" +
@@ -227,6 +218,15 @@ The 3D Condo Explorer Sales Team")]
         public string listingPromoTemplate {
             get {
                 return ((string)(this["listingPromoTemplate"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("365")]
+        public int defaultDaysValidPermanent {
+            get {
+                return ((int)(this["defaultDaysValidPermanent"]));
             }
         }
     }

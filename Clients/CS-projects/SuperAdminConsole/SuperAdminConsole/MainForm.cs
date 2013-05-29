@@ -195,7 +195,7 @@ namespace SuperAdminConsole
                                         ", developerId=" + developerId +
                                         ", SID=" + ServerProxy.SID, "Info");
                         Trace.Flush();
-                        comboBoxEstateDeveloper.Items.Add(SuperServer.Developers["Default"]);
+                        comboBoxEstateDeveloper.Items.Add(SuperServer.Developers[developerId]);
                         comboBoxEstateDeveloper.SelectedIndex = 0;
                         return true;
                     }
@@ -286,52 +286,49 @@ namespace SuperAdminConsole
             topNode.Tag = admin;
             treeViewAccounts.Nodes.Add(topNode);
 
-            if (myRole == "SuperAdmin")
+            ///data/user?sid=<SID>[&genval=<generation>][&withdeleted={true|false}][&<hints>]
+            resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
+                                                "user",
+                                                "role=DeveloperAdmin&ed=" +
+                                                m_currentDeveloper.Name, 
+                                                null);
+            if (HttpStatusCode.OK != resp.ResponseCode)
             {
-                ///data/user?sid=<SID>[&genval=<generation>][&withdeleted={true|false}][&<hints>]
-                
-                resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
-                                                    "user",
-                                                    "role=DeveloperAdmin&ed=" +
-                                                    m_currentDeveloper.Name, 
-                                                    null);
-                if (HttpStatusCode.OK != resp.ResponseCode)
-                {
-                    MessageBox.Show("Failed querying the list of customers");
-                    return;
-                }
+                MessageBox.Show("Failed querying the list of customers");
+                return;
+            }
 
-                ClientData adminsJASON = resp.Data;
-                ClientData[] admins = adminsJASON.GetNextLevelDataArray("users");
+            ClientData adminsJASON = resp.Data;
+            ClientData[] admins = adminsJASON.GetNextLevelDataArray("users");
 
-                foreach (ClientData cd in admins)
+            foreach (ClientData cd in admins)
+            {
+                User user = new User(cd);
+                string nodeName = string.Empty;
+                if (string.IsNullOrEmpty(user.NickName))
+                    nodeName = string.Format("ADMIN <{0}>", user.AutoID);
+                else
                 {
-                    User user = new User(cd);
-                    string nodeName = string.Empty;
-                    if (string.IsNullOrEmpty(user.NickName))
-                        nodeName = string.Format("ADMIN <{0}>", user.AutoID);
+                    if (user.NickName == "mlsImport")
+                        nodeName = "-MLS-";
                     else
-                    {
-                        if (user.NickName == "mlsImport")
-                            nodeName = "-MLS-";
-                        else
-                            nodeName = string.Format("ADMIN {0}<{1}>", user.NickName, user.AutoID);
-                    }
-                    //TreeNode[] children = new TreeNode[3] { new TreeNode("ViewOrders"),
-                    //                                        new TreeNode("Banners"),
-                    //                                        new TreeNode("Logs") };
-                    TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
-                                                        new TreeNode("Logs") };
-                    TreeNode treeNode = new TreeNode(nodeName, children);
-                    treeNode.Tag = user;
-                    treeViewAccounts.Nodes.Add(treeNode);
+                        nodeName = string.Format("ADMIN {0}<{1}>", user.NickName, user.AutoID);
                 }
+                //TreeNode[] children = new TreeNode[3] { new TreeNode("ViewOrders"),
+                //                                        new TreeNode("Banners"),
+                //                                        new TreeNode("Logs") };
+                TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
+                                                    new TreeNode("Logs") };
+                TreeNode treeNode = new TreeNode(nodeName, children);
+                treeNode.Tag = user;
+                treeViewAccounts.Nodes.Add(treeNode);
             }
 
             ///data/user?sid=<SID>[&genval=<generation>][&withdeleted={true|false}][&<hints>]
             resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
-                                                              "user",
-                                                              "role=sellingagent", null);
+                                               "user",
+                                               "role=sellingagent",
+                                               null);
             if (HttpStatusCode.OK != resp.ResponseCode)
             {
                 MessageBox.Show("Failed querying the list of customers");

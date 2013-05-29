@@ -46,7 +46,7 @@ namespace CoreClasses
             if (!ServerProxy.Login(login, password, role, developerId))
                 return false;
 
-            string name = "Default";
+            string name = developerId;
             int ID = 0;
             try { ID = int.Parse(developerId); } catch (System.FormatException) {}
 
