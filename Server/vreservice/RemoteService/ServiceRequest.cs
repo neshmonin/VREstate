@@ -70,7 +70,7 @@ namespace Vre.Server.RemoteService
 
     internal interface IRemoteUserInfo
     {
-        IPEndPoint EndPoint { get; }
+		string BrowserKey { get; }
         ClientSession Session { get; }
         bool StaleSession { get; }
     }
@@ -79,6 +79,7 @@ namespace Vre.Server.RemoteService
 
     internal interface IRequestData
     {
+		Uri Referer { get; }
         RequestType Type { get; }
         string Path { get; }
         ServiceQuery Query { get; }
@@ -89,7 +90,8 @@ namespace Vre.Server.RemoteService
         /// <para>Required to generate a resource for client containing references to server's other resources.</para>
         /// </summary>
         string ConstructClientRootUri();
-        bool IsSecureConnection { get; }
+		IPEndPoint EndPoint { get; }
+		bool IsSecureConnection { get; }
     }
 
     internal interface IResponseData

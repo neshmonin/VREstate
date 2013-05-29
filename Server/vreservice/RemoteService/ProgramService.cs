@@ -91,7 +91,7 @@ namespace Vre.Server.RemoteService
             ServiceInstances.EmailSender.Send(testMode ? Sender.Server : Sender.ECommerce, recipient, subject, body);
 
             ServiceInstances.Logger.Info("Sent sales msg {0}->{1} via {2}",
-                Enum.GetName(typeof(Sender), testMode ? Sender.Server : Sender.ECommerce), recipient, request.UserInfo.EndPoint);
+                Enum.GetName(typeof(Sender), testMode ? Sender.Server : Sender.ECommerce), recipient, request.Request.EndPoint);
 
             request.Response.ResponseCode = HttpStatusCode.OK;
         }
@@ -117,7 +117,7 @@ namespace Vre.Server.RemoteService
             //
             if ((!string.IsNullOrWhiteSpace(login)) && (!string.IsNullOrWhiteSpace(password)))
             {
-                sessionId = ServiceInstances.SessionStore.LoginUser(request.UserInfo.EndPoint, 
+                sessionId = ServiceInstances.SessionStore.LoginUser(request.Request.EndPoint, 
                     loginType, role, edId, login, password);
             }
 

@@ -35,6 +35,13 @@ namespace Vre.Server.BusinessLogic
         public IList<UserLicense> Licenses { get; private set; }
         public decimal CreditUnits { get; private set; }
 
+		public string[] RefererRestriction 
+		{
+			get { return string.IsNullOrEmpty(refererRestriction) ? new string[0] : refererRestriction.Split('\0'); }
+			set { refererRestriction = ((value != null) && (value.Length > 0)) ? value.ToString('\0') : null; }
+		}
+		private string refererRestriction { get; set; }
+
         /// <summary>
         /// Suites managed by this user (sales person or selling agent); initially only used by latter.
         /// </summary>
@@ -71,6 +78,7 @@ namespace Vre.Server.BusinessLogic
             CanView = new HashSet<User>();
             Licenses = new List<UserLicense>();
             CreditUnits = 0m;
+			RefererRestriction = null;
         }
 
         /// <summary>
@@ -174,6 +182,9 @@ namespace Vre.Server.BusinessLogic
             if (BrokerInfo != null)
                 result.Add("brokerageInfo", BrokerInfo.GetClientData());
 
+			if (refererRestriction != null)
+				result.Add("refererRestriction", RefererRestriction);
+
             return result;
         }
 
@@ -185,6 +196,7 @@ namespace Vre.Server.BusinessLogic
             PrimaryEmailAddress = data.UpdateProperty("primaryEmail", PrimaryEmailAddress, ref changed);
             TimeZone = data.UpdateProperty("timeZone", TimeZone, ref changed);
             PersonalInfo = data.UpdateProperty("personalInfo", PersonalInfo, ref changed);
+			RefererRestriction = data.UpdateProperty("refererRestriction", RefererRestriction, ref changed);
 
             ClientData bicd = data.GetNextLevelDataItem("brokerageInfo");
             if (bicd.Count > 0)

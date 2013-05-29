@@ -124,7 +124,6 @@
     <Compile Include="BusinessObjects\SuiteLevel.cs" />
     <Compile Include="BusinessObjects\SuiteType.cs" />
     <Compile Include="BusinessObjects\GeoPoint.cs" />
-    <Compile Include="ClientBusinessObjects\Suite.cs" />
     <Compile Include="Interfaces\IClientDataProvider.cs" />
     <Compile Include="BusinessObjects\Site.cs" />
     <Compile Include="BusinessObjects\TransactionalBase.cs" />

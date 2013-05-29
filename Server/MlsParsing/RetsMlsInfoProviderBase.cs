@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Security;
 using System.Text;
 
@@ -39,7 +40,7 @@ namespace Vre.Server.Mls
             }
         }
 
-        public string Run()
+        public void Run()
         {
             if (_executable != null)
             {
@@ -62,49 +63,59 @@ namespace Vre.Server.Mls
                     throw new ApplicationException("Failed running MLS Connector (error " +
                         proc.ExitCode.ToString() + "): " + _executable + " " + _arguments);
             }
+		}
 
-            string selectedFile = null;
-            DateTime selectedFileCT = DateTime.MinValue;
-            foreach (string fileName in Directory.EnumerateFiles(_resultPath, _resultPattern, SearchOption.TopDirectoryOnly))
-            {
-                FileInfo fi = new FileInfo(fileName);
-                if (fi.CreationTimeUtc > selectedFileCT)
-                {
-                    selectedFileCT = fi.CreationTimeUtc;
-                    selectedFile = fileName;
-                }
-            }
+		public IList<FileInfo> AvailableFiles
+		{
+			get
+			{
+				List<FileInfo> result = new List<FileInfo>();
+				foreach (var fileName in Directory.EnumerateFiles(_resultPath, _resultPattern, SearchOption.TopDirectoryOnly))
+					result.Add(new FileInfo(fileName));
+				return result;
+			}
+		}
 
+		public string Parse()
+		{
+			var available = AvailableFiles;
+
+			if (available.Count > 0)
+				return Parse(available.OrderBy((a) => a.CreationTimeUtc).Last().FullName);
+			else
+				return "No file found for parsing.";
+		}
+
+		public string Parse(string fileName)
+		{
             StringBuilder errors = new StringBuilder();
             List<string> result = new List<string>();
-            if (selectedFile != null)
-            {
-                using (FileStream file = File.OpenRead(selectedFile))
-                {
-                    using (StreamReader rdr = new StreamReader(file))
-                    {
-                        if (!rdr.EndOfStream) // not empty file
-                        {
-                            syncUp(CsvUtilities.Split(rdr.ReadLine()));
 
-                            int line = 1;
-                            StringBuilder warnings = new StringBuilder();
-                            while (!rdr.EndOfStream)
+			using (FileStream file = File.OpenRead(fileName))
+            {
+                using (StreamReader rdr = new StreamReader(file))
+                {
+                    if (!rdr.EndOfStream) // not empty file
+                    {
+                        syncUp(CsvUtilities.Split(rdr.ReadLine()));
+
+                        int line = 1;
+                        StringBuilder warnings = new StringBuilder();
+                        while (!rdr.EndOfStream)
+                        {
+                            line++;
+                            try
                             {
-                                line++;
-                                try
-                                {
-                                    process(CsvUtilities.Split(rdr.ReadLine()), warnings);
-                                }
-                                catch (Exception e)
-                                {
-                                    errors.AppendFormat("Line {0}: {1}", line, e.Message);
-                                }
-                                if (warnings.Length > 0)
-                                {
-                                    errors.AppendFormat("Line {0}: {1}", line, warnings);
-                                    warnings.Length = 0;
-                                }
+                                process(CsvUtilities.Split(rdr.ReadLine()), warnings);
+                            }
+                            catch (Exception e)
+                            {
+                                errors.AppendFormat("Line {0}: {1}", line, e.Message);
+                            }
+                            if (warnings.Length > 0)
+                            {
+                                errors.AppendFormat("Line {0}: {1}", line, warnings);
+                                warnings.Length = 0;
                             }
                         }
                     }
@@ -112,7 +123,7 @@ namespace Vre.Server.Mls
             }
 
             if (errors.Length > 0)
-                return string.Format("Processing file {0} errors:\r\n{1}", selectedFile, errors);
+                return string.Format("Processing file {0} errors:\r\n{1}", fileName, errors);
             else
                 return string.Empty;
         }

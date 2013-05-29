@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Vre
 {
@@ -20,5 +21,18 @@ namespace Vre
             if (null == converter) throw new ArgumentNullException("Converter");
             foreach (X o in coll) yield return converter(o);
         }
+
+		public static string ToString<T>(this IEnumerable<T> coll, char separator)
+		{
+			StringBuilder result = new StringBuilder();
+			bool sep = false;
+			foreach (var item in coll)
+			{
+				if (sep) result.Append(separator);
+				result.Append(item.ToString());
+				sep = true;
+			}
+			return result.ToString();
+		}
     }
 }

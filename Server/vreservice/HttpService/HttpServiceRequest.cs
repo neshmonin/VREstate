@@ -13,7 +13,7 @@ namespace Vre.Server.HttpService
                 
         class RemoteUserInfo : IRemoteUserInfo
         {
-            public RemoteUserInfo(IPEndPoint ep, NameValueCollection headers, ServiceQuery query)
+            public RemoteUserInfo(string browserKey, NameValueCollection headers, ServiceQuery query)
             {
                 string sidFromHttpHeader = headers["sid"];
                 if (string.IsNullOrWhiteSpace(sidFromHttpHeader)) sidFromHttpHeader = query["sid"];
@@ -28,9 +28,9 @@ namespace Vre.Server.HttpService
                     StaleSession = false;
                 }
 
-                EndPoint = ep;
+				BrowserKey = browserKey;
             }
-            public IPEndPoint EndPoint { get; private set; }
+			public string BrowserKey { get; private set; }
             public ClientSession Session { get; private set; }
             public bool StaleSession { get; private set; }
         }
@@ -39,7 +39,7 @@ namespace Vre.Server.HttpService
         {
             private static string _serverRootPath = null;
             private Uri _rawRequest;
-            public RequestData(HttpListenerRequest request, string path, ServiceQuery query, long bodySizeLimit)
+			public RequestData(HttpListenerRequest request, IPEndPoint ep, Uri referer, string path, ServiceQuery query, long bodySizeLimit)
             {
                 string type = request.HttpMethod;
 
@@ -51,8 +51,10 @@ namespace Vre.Server.HttpService
                 else throw new ArgumentException("Unknown HTTP method.");
 
                 _rawRequest = request.Url;
+				Referer = referer;
                 Path = path;
                 Query = query;
+				EndPoint = ep;
 
                 // either HTTPS (SSL) or local connection is required to qualify as secure
                 IsSecureConnection = request.IsSecureConnection | IsCallerSecure(request.RemoteEndPoint.Address);
@@ -76,12 +78,14 @@ namespace Vre.Server.HttpService
                     }
                 }
             }
-            public RequestType Type { get; private set; }
+			public Uri Referer { get; private set; }
+			public RequestType Type { get; private set; }
             public string Path { get; private set; }
             public ServiceQuery Query { get; private set; }
             public ClientData Data { get; private set; }
             public byte[] RawData { get; private set; }
-            public bool IsSecureConnection { get; private set; }
+			public IPEndPoint EndPoint { get; private set; }
+			public bool IsSecureConnection { get; private set; }
             public string ConstructClientRootUri()
             {
                 if (null == _serverRootPath)
@@ -142,7 +146,8 @@ namespace Vre.Server.HttpService
         public IRequestData Request { get; private set; }
         public IResponseData Response { get; private set; }
 
-        public HttpServiceRequest(HttpListenerContext ctx, string servicePath, long requestBodySizeLimit, ProcessResponse proc)
+        public HttpServiceRequest(HttpListenerContext ctx, string browserKey, Uri referer,
+			string servicePath, long requestBodySizeLimit, ProcessResponse proc)
         {
             // TODO: verify this is valid:
             // ctx.Request.ContentEncoding
@@ -155,8 +160,8 @@ namespace Vre.Server.HttpService
             string file = ctx.Request.Url.LocalPath;//.Replace("/", "");
             if (file.StartsWith(servicePath)) file = file.Remove(0, servicePath.Length);
 
-            UserInfo = new RemoteUserInfo(ctx.Request.RemoteEndPoint, ctx.Request.Headers, query);
-            Request = new RequestData(ctx.Request, file, query, requestBodySizeLimit);
+            UserInfo = new RemoteUserInfo(browserKey, ctx.Request.Headers, query);
+			Request = new RequestData(ctx.Request, ctx.Request.RemoteEndPoint, referer, file, query, requestBodySizeLimit);
             Response = new ResponseData(new MemoryStream(), ctx.Response, proc);
 
             // update trusted value for this request: managers do not get request object!

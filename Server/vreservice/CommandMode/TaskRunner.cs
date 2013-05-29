@@ -15,7 +15,8 @@ namespace Vre.Server.Command
             addTask(new UpdateViewOrderTargets());
             addTask(new NotifyExpiringViewOrders());
             addTask(new RemoveStaleReverseRequests());
-        }
+			addTask(new RetroImportViewOrderTargets());
+		}
 
         private void addTask(ITask task) { _tasks.Add(task.Name, task); }
 

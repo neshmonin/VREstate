@@ -44,6 +44,7 @@
     </Compile>
     <Compile Include="CollectionExtensions.cs" />
     <Compile Include="CsvUtilities.cs" />
+    <Compile Include="IPAddressTools.cs" />
     <Compile Include="ModelImportSettings.cs" />
     <Compile Include="Money\Currency.cs" />
     <Compile Include="Money\FractionReceivers.cs" />

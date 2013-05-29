@@ -178,6 +178,7 @@
     <Compile Include="ModelCache\ModelCacheManager.cs" />
     <Compile Include="RemoteService\EventService.cs" />
     <Compile Include="Tasks\BaseTask.cs" />
+    <Compile Include="Tasks\RetroImportViewOrderTargets.cs" />
     <Compile Include="Tasks\RemoveStaleReverseRequests.cs" />
     <Compile Include="Tasks\NotifyExpiringViewOrders.cs" />
     <Compile Include="UpdateTracking\TrackerDirectory.cs" />

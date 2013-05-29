@@ -26,6 +26,8 @@
 
     <property name="CreditUnits" column="CreditUnits" />
 
+    <property name="refererRestriction" column="RefererRestriction" />
+
     <!--
     <bag name="VRTours" inverse="true" lazy="false" cascade="all-delete-orphan" >
       <key column="SuiteID"/>

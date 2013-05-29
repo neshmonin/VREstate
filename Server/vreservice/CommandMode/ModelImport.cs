@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using NHibernate;
@@ -8,6 +9,7 @@ using Vre.Server.BusinessLogic;
 using Vre.Server.Dao;
 using Vre.Server.Model;
 using Vre.Server.RemoteService;
+using Vre.Server.Mls;
 
 namespace Vre.Server.Command
 {
@@ -612,6 +614,8 @@ namespace Vre.Server.Command
                 modified = true;
             }
 
+			if (isCreated) tryImportExistingListings(dbBuilding);
+
             if (modified) _clientSession.DbSession.Update(dbBuilding);
         }
 
@@ -768,5 +772,66 @@ namespace Vre.Server.Command
 
             return result;
         }
+
+		internal void tryImportExistingListings(Building building)
+		{
+			TryImportExistingListings(_clientSession, building.AutoID, _log);
+		}
+
+		internal static void TryImportExistingListings(ClientSession session, int buildingId, StringBuilder report)
+		{
+			IMlsInfoProvider prov;
+			string issues;
+
+			// STEP 1
+			//
+			// TODO: MLS provider injection point
+			prov = new RetsMlsStatusProvider();
+
+			prov.Configure(ServiceInstances.Configuration.GetValue("MLS-STATUS-TREB-Config", string.Empty));
+			issues = prov.Parse();
+			if (issues.Length > 0) report.AppendFormat("\r\nMLS Status Retrieval problems:\r\n{0}", issues);
+
+			var activeItems = prov.GetCurrentActiveItems();
+
+			// STEP 2
+			//
+			// TODO: MLS provider injection point
+			prov = new RetsMlsInfoProvider();
+
+			prov.Configure(ServiceInstances.Configuration.GetValue("MLS-INFO-TREB-Config", string.Empty));
+
+			int mlsCnt = 0, add = 0, err = 0;
+			List<string> processedIds = new List<string>();
+			foreach (var file in prov.AvailableFiles.OrderBy((a) => a.CreationTimeUtc).Reverse())
+			{
+				issues = prov.Parse(file.FullName);
+				if (issues.Length > 0) report.AppendFormat("\r\nMLS Info Retrieval problems:\r\n{0}", issues);
+
+				var items = prov.GetNewItems();
+				for (int idx = items.Count - 1; idx >= 0; idx--)
+				{
+					if (!activeItems.Contains(items[idx].MlsId))
+					{
+						items.RemoveAt(idx);
+					}
+					else if (processedIds.Contains(items[idx].MlsId))
+					{
+						items.RemoveAt(idx);
+					}
+				}
+
+				using (var manager = new SiteManager(session))
+					issues = manager.RetroImportExistingViewOrders(items, buildingId, ref add, ref err);
+				if (issues.Length > 0) report.AppendFormat("\r\nMLS Import problems:\r\n{0}", issues);
+
+				foreach (var item in items) processedIds.Add(item.MlsId);
+
+				mlsCnt += items.Count;
+			}
+
+			report.AppendFormat("\r\nUpdate completed: {0} MLS items processed; {1} ViewOrders added; {2} errors.",
+				mlsCnt, add, err);
+		}
     }
 }

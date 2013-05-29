@@ -42,6 +42,7 @@ namespace Vre.Server.HttpService
 
         protected HashSet<string> _allowedFileExtensions = new HashSet<string>();
         protected string _filesRootFolder = null;
+		protected string _viewClientPath = null;
 
 		private DateTime _createTime;
 		
@@ -61,7 +62,9 @@ namespace Vre.Server.HttpService
             _filesRootFolder = ServiceInstances.Configuration.GetValue("FilesRoot",
                 Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
-            _allowedFileExtensions = new HashSet<string>(CsvUtilities.Split(ServiceInstances.Configuration.GetValue("AllowedServedFileExtensions", string.Empty)));
+			_viewClientPath = ServiceInstances.Configuration.GetValue("ViewClientPath", "VREstate.html");
+
+			_allowedFileExtensions = new HashSet<string>(CsvUtilities.Split(ServiceInstances.Configuration.GetValue("AllowedServedFileExtensions", string.Empty)));
 
             _listeningHostAliasList = new List<string>(CsvUtilities.Split(ServiceInstances.Configuration.GetValue("ListeningHostAliasList",
                 "localhost:8026,168.144.195.160,ref.3dcondox.com,vrt.3dcondox.com,order.3dcondox.com,static.3dcondox.com,models.3dcondox.com")));
@@ -458,12 +461,13 @@ namespace Vre.Server.HttpService
         public void ProcessFileRequest(string file, IResponseData response)
         {
             if (file.Equals("version")) rq_version(response);
-            else if (file.Equals("test")) rq_test(response);
             else if (file.Equals("humans.txt")) rq_text(1, response);
             else if (file.Equals("robots.txt")) rq_text(0, response);
             else if (file.Equals("base")) rq_redirect(0, response);
             else
             {
+				if (file.Equals("view")) file = _viewClientPath;
+
                 // validate path
                 if (!IsPathValid(file, true)) throw new FileNotFoundException("Path is invalid.");
 
@@ -564,16 +568,6 @@ namespace Vre.Server.HttpService
             response.ResponseCode = HttpStatusCode.OK;
         }
 
-        private void rq_test(IResponseData response)
-        {
-            // EXPERIMENTAL: starts an HTTP server push response which responds with progressing 
-            // status pushes until client shuts connection down
-            response.ResponseCode = HttpStatusCode.OK;
-            response.HoldResponseForServerPush = true;
-            response.Data = new BusinessLogic.ClientData();
-            response.Data.Add("status", 0);
-        }
-
         private void rq_text(int type, IResponseData response)
         {
             response.ResponseCode = HttpStatusCode.OK;
@@ -655,9 +649,9 @@ namespace Vre.Server.HttpService
             ClientSession cs = (rq != null) ? rq.UserInfo.Session : null;
             string url = Utilities.SanitizeUrl(ctx.Request.Url.ToString());
             if (cs != null)
-                return string.Format("Session={0}; BK={1}, REP={2}; {3}; URL={4}", cs, browserKey, ctx.Request.RemoteEndPoint, ctx.Request.HttpMethod, url);
+				return string.Format("Session={0}; BK={1}, REP={2}; {3}; URL={4}; {5}", cs, browserKey, ctx.Request.RemoteEndPoint, ctx.Request.HttpMethod, url, ctx.Request.UrlReferrer);
             else
-                return string.Format("Anonymous; BK={0}; REP={1}; {2}; URL={3}", browserKey, ctx.Request.RemoteEndPoint, ctx.Request.HttpMethod, url);
+				return string.Format("Anonymous; BK={0}; REP={1}; {2}; URL={3}; {4}", browserKey, ctx.Request.RemoteEndPoint, ctx.Request.HttpMethod, url, ctx.Request.UrlReferrer);
         }
 
 		#region query statistics

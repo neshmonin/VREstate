@@ -39,6 +39,8 @@ namespace Vre.Server.RemoteService
             _staleSessionDropThreadExit.Set();
         }
 
+		public int CleanupTimeoutSec { get { return _cleanupTimeoutSec; } }
+
         public int ClientKeepalivePeriodSec { get { return _cleanupTimeoutSec / 2; } }
 
         public string LoginUser(IPEndPoint ep, LoginType loginType, 
