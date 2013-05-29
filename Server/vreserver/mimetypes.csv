@@ -1,0 +1,17 @@
+﻿html,text/html
+htm,text/html
+txt,text/plain
+xml,text/xml
+css,text/css
+gif,image/gif
+jpeg,image/jpeg
+jpg,image/jpeg
+png,image/png
+ico,image/vnd.microsoft.icon
+js,application/javascript
+json,"application/""json"""
+kml,"application/vnd.google-earth.kml+xml"
+kmz,"application
+/vnd.google-earth.kmz"
+pdf,application/pdf
+swf,application/x-shockwave-flash
