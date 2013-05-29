@@ -31,9 +31,10 @@ namespace ModelReaderTest
             string modelFileName;
             if (args.Length > 1) return;
             if (args.Length < 1)
-                //modelFileName = @"C:\Internet Downloads\Business\Resale\Test Model - Dual.kmz";
+                modelFileName = @"C:\Internet Downloads\Business\Resale\Test Model - Dual.kmz";
+                //modelFileName = @"C:\Internet Downloads\Business\Resale\Test Model\Test Model.kmz";
                 //modelFileName = @"C:\src\vr\20120930-Quay West\Wires.kmz";
-                modelFileName = @"C:\Users\port443\Downloads\Model.kmz";
+                //modelFileName = @"C:\Users\port443\Downloads\Model.kmz";
             //modelFileName = @"C:\Documents and Settings\port443\My Documents\My Dropbox\AndrewShare\Eden Park Towers (Phase II) - Read Only.kmz";
             //modelFileName = @"C:\Documents and Settings\port443\My Documents\My Dropbox\AndrewShare\SuperServer\Times Group Corporation\Eden_Park_Towers_Phase_II\Model.kmz";
             else
@@ -158,18 +159,18 @@ namespace ModelReaderTest
     </MultiGeometry> 
         </Placemark> 
                      */
-                    writePlacemark(sw, "s1", "Base", "Construction site",
-                        readModel.Model.Location, readModel.Model.Site.LocationCart.AsViewPoint(), altAdj);
+                    //writePlacemark(sw, "s1", "Base", "Construction site",
+                    //    readModel.Model.Location, readModel.Model.Site.LocationCart.AsViewPoint(), altAdj);
 
                     foreach (Vre.Server.Model.Kmz.Building bldg in readModel.Model.Site.Buildings)
                     {
-                        writePlacemark(sw, "s2", bldg.Name, "Building",
-                            readModel.Model.Site.LocationCart, bldg.LocationCart, altAdj);
+                        //writePlacemark(sw, "s2", bldg.Name, "Building",
+                        //    readModel.Model.Site.LocationCart, bldg.LocationCart, altAdj);
 
                         foreach (Vre.Server.Model.Kmz.Suite s in bldg.Suites)
                         {
-                            writePlacemark(sw, "s3", s.Name, "Suite",
-                                bldg.LocationCart, s.LocationCart, altAdj);
+                            //writePlacemark(sw, "s3", s.Name, "Suite",
+                            //    bldg.LocationCart, s.LocationCart, altAdj);
 
                             Vre.Server.Model.Kmz.Geometry[] geo;
                             if (readModel.Model.Site.Geometries.TryGetValue(s.ClassName, out geo))
@@ -180,6 +181,8 @@ namespace ModelReaderTest
                             //    if (readModel.Model.Site.Geometries.TryGetValue(id, out geo))
                             //        writeGeometry(sw, "s6", s.LocationCart, geo, altAdj);
                             //}
+
+                            writeVector(sw, "s5", s.LocationCart, s.Matrix, altAdj);
                         }
                     }
 
@@ -219,31 +222,6 @@ namespace ModelReaderTest
 //            sw.WriteLine("</MultiGeometry>");
 
             sw.WriteLine("</Placemark>");
-
-            double lon, lat, alt;
-            string style;
-            if ((to.Heading >= 0.0) && (to.Heading < 360.0))
-            {
-                lon = to.Longitude - Math.Sin(to.Heading * Vre.Server.Model.Kmz.EcefViewPoint.DegreesToRad) * 0.0001;
-                lat = to.Latitude + Math.Cos(to.Heading * Vre.Server.Model.Kmz.EcefViewPoint.DegreesToRad) * 0.0001;
-                alt = to.Altitude + altAdj;
-                style = "s4";
-            }
-            else
-            {
-                lon = to.Longitude;
-                lat = to.Latitude;
-                alt = to.Altitude + 4.0 + altAdj;
-                style = "s5";
-            }
-            sw.WriteLine("<Placemark>");
-            if (styleUrl != null) sw.WriteLine("<styleUrl>{0}</styleUrl>", style);
-
-            sw.WriteLine("<LineString><altitudeMode>relativeToGround</altitudeMode><coordinates>");
-            sw.WriteLine("{0},{1},{2} {3}", lon, lat, alt, viewPointToKmlNotation(to, altAdj));
-            sw.WriteLine("</coordinates></LineString>");
-
-            sw.WriteLine("</Placemark>");
         }
 
         private static string viewPointToKmlNotation(Vre.Server.Model.Kmz.ViewPoint vp, double altAdj)
@@ -265,12 +243,12 @@ namespace ModelReaderTest
                 foreach (Vre.Server.Model.Kmz.Geometry.Line l in g.Lines)
                 {
                     Vre.Server.Model.Kmz.Geometry.Point3D s = pts[l.Start];
-                    Vre.Server.Model.Kmz.Geometry.Point3D ss = matrix.Transform(s);
+                    Vre.Server.Model.Kmz.Geometry.Point3D ss = matrix.Transform(s.X+10, s.Y, s.Z);
                     Vre.Server.Model.Kmz.ViewPoint vpS =
                         matrix.Point3D2ViewPoint(ss, basePoint.Base);
 
                     Vre.Server.Model.Kmz.Geometry.Point3D e = pts[l.End];
-                    Vre.Server.Model.Kmz.Geometry.Point3D ee = matrix.Transform(e);
+                    Vre.Server.Model.Kmz.Geometry.Point3D ee = matrix.Transform(e.X+10, e.Y, e.Z);
                     Vre.Server.Model.Kmz.ViewPoint vpE =
                         matrix.Point3D2ViewPoint(ee, basePoint.Base);
 
@@ -288,5 +266,36 @@ namespace ModelReaderTest
                 }
             }
         }
+
+        private static void writeVector(
+            StreamWriter sw,
+            string styleUrl,
+            Vre.Server.Model.Kmz.EcefViewPoint basePoint,
+            Vre.Server.Model.Kmz.TMatrix matrix,
+            double altAdj)
+        {
+            Vre.Server.Model.Kmz.Geometry.Point3D s = new Vre.Server.Model.Kmz.Geometry.Point3D(0.0, 0.0, 0.0);
+            Vre.Server.Model.Kmz.Geometry.Point3D ss = matrix.Transform(s);
+            Vre.Server.Model.Kmz.ViewPoint vpS =
+                matrix.Point3D2ViewPoint(ss, basePoint.Base);
+
+            Vre.Server.Model.Kmz.Geometry.Point3D e = new Vre.Server.Model.Kmz.Geometry.Point3D(200.0, 0.0, 0.0);
+            Vre.Server.Model.Kmz.Geometry.Point3D ee = matrix.Transform(e);
+            Vre.Server.Model.Kmz.ViewPoint vpE =
+                matrix.Point3D2ViewPoint(ee, basePoint.Base);
+
+            sw.WriteLine("<Placemark>");
+
+            if (styleUrl != null) sw.WriteLine("<styleUrl>{0}</styleUrl>", styleUrl);
+
+            sw.WriteLine("<LineString><altitudeMode>relativeToGround</altitudeMode><coordinates>");
+            sw.WriteLine("{0}{1}",
+                viewPointToKmlNotation(vpS, altAdj),
+                viewPointToKmlNotation(vpE, altAdj));
+            sw.WriteLine("</coordinates></LineString>");
+
+            sw.WriteLine("</Placemark>");
+        }
+
     }
 }

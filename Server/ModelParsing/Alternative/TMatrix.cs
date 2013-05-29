@@ -320,6 +320,12 @@ namespace Vre.Server.Model.Kmz
         /// </summary>
         /// <param name="point"></param>
         /// <returns></returns>
+        public Geometry.Point3D Transform(double x, double y, double z)
+        {
+            Geometry.Point3D point = new Geometry.Point3D(x, y, z);
+            return Translate(Rotate(point));
+        }
+
         public Geometry.Point3D Transform(Geometry.Point3D point)
         {
             return Translate(Rotate(point));
