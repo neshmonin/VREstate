@@ -48,7 +48,8 @@ namespace Vre.Server.BusinessLogic
 
         protected Suite() { }
 
-        protected Suite(Suite copy) : base(copy)
+        public Suite(Suite copy)
+            : base(copy)
         {
             PhysicalLevelNumber = copy.PhysicalLevelNumber;
             FloorName = copy.FloorName;

@@ -87,6 +87,12 @@
     <Compile Include="NewAccount.Designer.cs">
       <DependentUpon>NewAccount.cs</DependentUpon>
     </Compile>
+    <Compile Include="NewEstateDeveloper.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NewEstateDeveloper.Designer.cs">
+      <DependentUpon>NewEstateDeveloper.cs</DependentUpon>
+    </Compile>
     <Compile Include="Note.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -137,6 +143,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="NewAccount.resx">
       <DependentUpon>NewAccount.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NewEstateDeveloper.resx">
+      <DependentUpon>NewEstateDeveloper.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Note.resx">
       <DependentUpon>Note.cs</DependentUpon>
