@@ -98,6 +98,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web.Extensions" />
   </ItemGroup>
@@ -113,6 +114,7 @@
     <Compile Include="BusinessObjects\ContactInfo.cs" />
     <Compile Include="BusinessObjects\BrokerageInfo.cs" />
     <Compile Include="BusinessObjects\FinancialTransaction.cs" />
+    <Compile Include="BusinessObjects\NamedSearchFilter.cs" />
     <Compile Include="BusinessObjects\ViewOrder.cs" />
     <Compile Include="BusinessObjects\PhoneNumber.cs" />
     <Compile Include="BusinessObjects\UserLicense.cs" />
