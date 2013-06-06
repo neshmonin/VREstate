@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>billboard</title>
+<style type="text/css">
+html,body {
+	margin: 0;
+	padding: 0;
+	height: 100%; /* needed for container min-height */
+	background-color: #ffffff;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #666;
+}
+
+._billboard_container {
+	width: 585px;
+	height: 200px;
+}
+
+._billboard_header {
+	height: 105px;
+	width: 585px;
+	border-bottom: 1px solid #9DA6AB;
+}
+
+._billboard_logo {
+	padding: 16px 0px 0px 25px;
+	float: left;
+}
+
+._billboard_spec {
+	padding: 36px 10px 10px 25px;
+	float: right;
+}
+._billboard_detail {
+	margin-top: 5px;
+	padding: 5px 0px 0px 15px;
+	float: left;
+}
+
+._billboard_sname {
+	font-size: 40px;
+	font-weight: bold;
+	color: #E31837;
+}
+
+._billboard_panoramicview{
+	float: left;
+	text-align: center;
+}
+
+a img {
+    border: 0;
+}
+</style>
+<script type="text/javascript">
+window.onload = function() {
+	document.domain='3dcondox.com';
+	var hash = window.location.hash.substring(1);
+	var json = decodeURIComponent(hash);
+	json = eval('(' + json + ')');
+	if (typeof json != 'undefined') {
+		// SHOW_PANORAMIC_VIEW_BUTTON
+		var panoramic_view = document.getElementById('VRT_showPanoramicView');
+		if (typeof json.VRT_panoramicViewUrl != 'undefined'){
+			panoramic_view.onclick = window.parent.VRT_showPanoramicView;
+		} else {
+		}
+		panoramic_view.style.visibility = 'visible';
+		// SHOW_NAME
+		if (typeof json.VRT_name != 'undefined') {
+			var name = document.getElementById('VRT_name');
+			name.style.visibility = 'visible';
+			name.innerHTML = json.VRT_name;
+		}
+		// SHOW_FLOORPLAN_BUTTON
+		var floorplan = document.getElementById('VRT_showFloorplan');
+		if (typeof json.VRT_floorplanUrl != 'undefined'){
+			floorplan.style.cursor = 'pointer';
+			floorplan.src = 'img/InternalButton.png';
+			floorplan.onclick = window.parent.VRT_showFloorplan;
+		} else {
+			floorplan.src = 'img/InternalButtonDisabled.png';
+		}
+		floorplan.style.visibility = 'visible';
+	}
+	window.parent.VRT_setBalloonSize(1020,681);
+}
+</script>
+</head>
+<body>
+	<div class="_billboard_container">
+		<div class="_billboard_header">
+			<img class="_billboard_logo" src="img/logo-billboard.png" />
+			<a href="#" id="VRT_showFloorplan"><img class="_billboard_spec" src="img/billboard_spec.png" />
+			</a>
+		</div>
+		<br style="clear: both" />
+		<div class="_billboard_detail">
+			<a href="#" id="VRT_showPanoramicView"><img class="_billboard_panoramicview" src="img/BillboardPanoramicView.png" />
+			</a>
+		</div>
+	</div>
+	<!-- end of container -->
+</body>
+</html>
+
+
+
+

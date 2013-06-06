@@ -11,7 +11,7 @@ namespace CoreClasses
 {
     public class Suite : Model, ICountable, ICSV, IComparable
     {
-        private Vre.Server.BusinessLogic.Client.SuiteEx _suite;
+        private Vre.Server.BusinessLogic.Suite _suite;
 
         public Vre.Server.BusinessLogic.ClientData ClientData
         {
@@ -32,7 +32,7 @@ namespace CoreClasses
 
         public string getPriceString()
         {
-            decimal money = (decimal)Math.Round(_suite.CurrentPrice);
+            decimal money = (decimal)Math.Round((decimal)_suite.CurrentPrice);
 
             string result = string.Empty;
             int t = (int)money;
@@ -57,7 +57,7 @@ namespace CoreClasses
 
         private double m_heading = 0.0f;
         //int stop = 0;
-        public Suite(Vre.Server.BusinessLogic.Client.SuiteEx suite)
+        public Suite(Vre.Server.BusinessLogic.Suite suite)
         {
             _suite = suite;
             saleStatuses.Add(SaleStatus.Available);
@@ -69,8 +69,8 @@ namespace CoreClasses
 
         public Suite MakeClone()
         {
-            Vre.Server.BusinessLogic.Client.SuiteEx _clone = 
-                      new Vre.Server.BusinessLogic.Client.SuiteEx(_suite, _suite.CurrentPrice);
+            Vre.Server.BusinessLogic.Suite _clone = 
+                      new Vre.Server.BusinessLogic.Suite(_suite);
             Suite clone = new Suite(_clone);
 
             return clone;
@@ -232,8 +232,8 @@ namespace CoreClasses
 
         public double Price
         {
-            get { return _suite.CurrentPrice; }
-            set { _suite.CurrentPrice = value; }
+            get { return _suite.CurrentPrice.Value.ToDouble(null); }
+            set { _suite.CurrentPrice = (Money)(value); }
         }
 
         public int CellingHeight

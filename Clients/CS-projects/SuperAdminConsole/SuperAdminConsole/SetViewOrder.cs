@@ -701,6 +701,7 @@ namespace SuperAdminConsole
         private void filterAddresses()
         {
             listViewAddresses.Items.Clear();
+            //int count = 1;
             foreach (ClientData building in buildingsOfTheSelectedCity)
             {
                 string filter = textBoxStreetName.Text.ToLower();
@@ -735,6 +736,16 @@ namespace SuperAdminConsole
                 subitems[2] = addressLine1.Substring(separator + 1);
                 subitems[3] = building.GetProperty("city", string.Empty);
                 subitems[4] = postal;
+
+                //string buildingInfo = string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}",
+                //    count++,
+                //    buildingName,
+                //    addressLine1.Substring(0, separator + 1),
+                //    addressLine1.Substring(separator + 1),
+                //    building.GetProperty("city", string.Empty),
+                //    postal);
+                //System.Diagnostics.Trace.WriteLine(buildingInfo);
+                //System.Diagnostics.Trace.Flush();
 
                 ListViewItem buildingItem = new ListViewItem(subitems);
                 buildingItem.Tag = building;
