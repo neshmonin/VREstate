@@ -33,7 +33,7 @@ public class WelcomeView extends Composite implements IView {
 	}
 	
 	private void defaultLogin() {
-		GET.send(Globals.getLoginRequest(null, null, null), onLoginRequest);
+		GET.send(Globals.getLoginRequest("visitor", "web", "web"), onLoginRequest);
 	}
 	
 	private RequestCallback onLoginRequest = new RequestCallback(){
