@@ -8,7 +8,6 @@ import com.condox.order.client.context.ContextTree;
 import com.condox.order.client.context.IContext.Types;
 import com.condox.order.client.utils.GET;
 import com.condox.order.client.utils.Globals;
-import com.condox.order.client.utils.Log;
 import com.condox.order.client.view.IView;
 import com.condox.order.client.view.IViewContainer;
 import com.condox.order.shared.BuildingInfo;
@@ -19,9 +18,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class BuildingsPresenter implements IPresenter {
@@ -36,14 +33,14 @@ public class BuildingsPresenter implements IPresenter {
 		Widget asWidget();
 	}
 
-	private EventBus eventBus;
+//	private EventBus eventBus;
 	private ContextTree tree;
 	private IDisplay display;
 	private List<BuildingInfo> data = new ArrayList<BuildingInfo>();
 	private BuildingInfo selected;
 
 	public BuildingsPresenter(EventBus eventBus, ContextTree tree, IDisplay display) {
-		this.eventBus = eventBus;
+//		this.eventBus = eventBus;
 		this.tree = tree;
 		this.display = display;
 		this.display.setPresenter(this);

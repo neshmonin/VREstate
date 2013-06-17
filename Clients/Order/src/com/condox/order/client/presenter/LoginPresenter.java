@@ -1,8 +1,8 @@
 package com.condox.order.client.presenter;
 
-import com.condox.order.client.context.IContext.Types;
 import com.condox.order.client.context.BaseContext;
 import com.condox.order.client.context.ContextTree;
+import com.condox.order.client.context.IContext.Types;
 import com.condox.order.client.utils.GET;
 import com.condox.order.client.utils.Globals;
 import com.condox.order.client.view.IView;
@@ -14,7 +14,6 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class LoginPresenter implements IPresenter {
@@ -31,12 +30,12 @@ public class LoginPresenter implements IPresenter {
 		Widget asWidget();
 	}
 
-	private EventBus eventBus;
+//	private EventBus eventBus;
 	private ContextTree tree;
 	private IDisplay display;
 
 	public LoginPresenter(EventBus eventBus, ContextTree tree, IDisplay display) {
-		this.eventBus = eventBus;
+//		this.eventBus = eventBus;
 		this.tree = tree;
 		this.display = display;
 		this.display.setPresenter(this);

@@ -1,14 +1,13 @@
 package com.condox.order.client;
 
-import com.condox.order.client.context.IContext;
-import com.condox.order.client.context.IContext.Types;
 import com.condox.order.client.context.BaseContext;
 import com.condox.order.client.context.ContextTree;
+import com.condox.order.client.context.IContext;
+import com.condox.order.client.context.IContext.Types;
 import com.condox.order.client.presenter.PresenterFactory;
 import com.condox.order.client.view.ViewContainer;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.RootPanel;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.

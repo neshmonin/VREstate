@@ -1,15 +1,11 @@
 package com.condox.order.client.presenter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.condox.order.client.context.ContextTree;
 import com.condox.order.client.utils.Globals;
 import com.condox.order.client.utils.Log;
 import com.condox.order.client.utils.PUT;
 import com.condox.order.client.view.IView;
 import com.condox.order.client.view.IViewContainer;
-import com.condox.order.shared.SuiteInfo;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -39,12 +35,12 @@ public class SubmitPresenter implements IPresenter {
 		Widget asWidget();
 	}
 
-	private EventBus eventBus;
+//	private EventBus eventBus;
 	private ContextTree tree;
 	private IDisplay display;
 
 	public SubmitPresenter(EventBus eventBus, ContextTree tree, IDisplay display) {
-		this.eventBus = eventBus;
+//		this.eventBus = eventBus;
 		this.tree = tree;
 		this.display = display;
 		this.display.setFloorplanUrl(tree.getValue("suite.floorplan"));

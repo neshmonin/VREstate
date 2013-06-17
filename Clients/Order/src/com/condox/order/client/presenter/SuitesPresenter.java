@@ -1,17 +1,13 @@
 package com.condox.order.client.presenter;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
-import com.condox.order.client.context.IContext.Types;
 import com.condox.order.client.context.BaseContext;
 import com.condox.order.client.context.ContextTree;
+import com.condox.order.client.context.IContext.Types;
 import com.condox.order.client.utils.GET;
 import com.condox.order.client.utils.Globals;
-import com.condox.order.client.utils.Log;
 import com.condox.order.client.view.IView;
 import com.condox.order.client.view.IViewContainer;
 import com.condox.order.shared.SuiteInfo;
@@ -22,7 +18,6 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SuitesPresenter implements IPresenter {
@@ -35,13 +30,13 @@ public class SuitesPresenter implements IPresenter {
 		Widget asWidget();
 	}
 
-	private EventBus eventBus;
+//	private EventBus eventBus;
 	private ContextTree tree;
 	private IDisplay display;
 	private List<SuiteInfo> data = new ArrayList<SuiteInfo>();
 
 	public SuitesPresenter(EventBus eventBus, ContextTree tree, IDisplay display) {
-		this.eventBus = eventBus;
+//		this.eventBus = eventBus;
 		this.tree = tree;
 		this.display = display;
 		this.display.setPresenter(this);
