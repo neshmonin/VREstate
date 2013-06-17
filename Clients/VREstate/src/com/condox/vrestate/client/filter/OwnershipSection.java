@@ -43,7 +43,8 @@ public class OwnershipSection extends SectionContainer {
 			anyNotBuild = anyNotBuild || status == Suite.Status.Available ||
 										 status == Suite.Status.OnHold;
 			anyResale = anyResale || status == Suite.Status.ResaleAvailable;
-			anyRent = anyRent || status == Suite.Status.AvailableRent;
+			anyRent = anyRent || (status == Suite.Status.AvailableRent &&
+								  suiteGE.suite.getPrice() < SuiteGeoItem.MaxRentTreshold);
 		}
 
 		simpleCase = (!anyNotBuild && !anyResale) ||

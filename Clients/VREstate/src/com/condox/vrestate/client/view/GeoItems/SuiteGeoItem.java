@@ -33,6 +33,7 @@ public class SuiteGeoItem implements IGeoItem {
 		NotSupported
 	}
 	
+	public static final int MaxRentTreshold = 10000;
 
 	private final double initialRange_m = 30;
 	private final double initialTilt_d = 75;
