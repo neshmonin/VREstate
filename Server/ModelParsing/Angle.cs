@@ -26,11 +26,16 @@ namespace VrEstate
             return angle;
         }
 
+        public const double UNDEFINED_HEADING = 1111.0f;
+
         public static double Heading_dFromMatrix(double [][] matrix)
         {
             double angle_d = 0.0f;
             double heading0 = Math.Round(RadiansToDegrees(Math.Acos(Math.Round(matrix[0][0],3))), 2);
             double heading1 = Math.Round(RadiansToDegrees(Math.Asin(Math.Round(matrix[1][0],3))), 2);
+            if (heading0 == 0.0 && heading1 == 0.0)
+                return UNDEFINED_HEADING;
+
             if (heading0 > 0 == heading1 > 0)
             {
                 if (Math.Sign(heading0) == Math.Sign(heading1))
