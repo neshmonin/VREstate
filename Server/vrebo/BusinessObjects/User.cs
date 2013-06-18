@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Vre.Server.BusinessLogic
 {
@@ -17,19 +18,23 @@ namespace Vre.Server.BusinessLogic
             SalesPerson = 4,
             SellingAgent = 5,
             Visitor = 6,
-            Kiosk = 7
+            Kiosk = 7,
+			BuyingAgent = 8
 	    }
 
         public Role UserRole { get; private set; }
         public int? EstateDeveloperID { get; private set; }
         public DateTime LastLogin { get; set; }
-        public string NickName { get; set; }
-        public string PrimaryEmailAddress { get; set; }
+		[StringLength(256)]
+		public string NickName { get; set; }
+		[StringLength(256)]
+		public string PrimaryEmailAddress { get; set; }
         /// <summary>
         /// For handling: http://code.google.com/p/noda-time/
         /// </summary>
-        public string TimeZone { get; set; }
-        public string PersonalInfo { get; set; }
+		[StringLength(256)]
+		public string TimeZone { get; set; }
+		public string PersonalInfo { get; set; }
         //public ContactInfo PersonalInfo { get; private set; }
         public BrokerageInfo BrokerInfo { get; private set; }
         public IList<UserLicense> Licenses { get; private set; }
@@ -87,7 +92,7 @@ namespace Vre.Server.BusinessLogic
         /// </summary>
         public static bool IsEstateDeveloperTied(Role role)
         {
-            return ((role != Role.SellingAgent) && (role != Role.SuperAdmin) && (role != Role.Buyer) && (role != Role.Visitor));
+            return ((role != Role.SellingAgent) && (role != Role.BuyingAgent) && (role != Role.SuperAdmin) && (role != Role.Buyer) && (role != Role.Visitor));
         }
 
         public void UpdatePersonalInfo(string info)

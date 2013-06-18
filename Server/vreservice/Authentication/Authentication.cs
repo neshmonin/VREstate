@@ -306,7 +306,10 @@ namespace Vre.Server.BusinessLogic
                 case User.Role.SellingAgent:
                     return string.Format("#{0}", login);
 
-                case User.Role.Kiosk:
+				case User.Role.BuyingAgent:
+					return string.Format("^{0}", login);
+
+				case User.Role.Kiosk:
                     return string.Format("@{0}k{1}", estateDeveloperId, login);
 
                 default:
@@ -344,7 +347,14 @@ namespace Vre.Server.BusinessLogic
                 login = intLogin.Substring(1);
                 result = true;
             }
-            else if (intLogin.StartsWith("%"))
+			else if (intLogin.StartsWith("^"))
+			{
+				role = User.Role.BuyingAgent;
+				estateDeveloperId = -1;
+				login = intLogin.Substring(1);
+				result = true;
+			}
+			else if (intLogin.StartsWith("%"))
             {
                 role = User.Role.Buyer;
                 estateDeveloperId = -1;

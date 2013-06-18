@@ -20,7 +20,7 @@ namespace Vre.Server.RemoteService
         public const string ServicePathPrefix = ServicePathElement0 + "/";
         private const string ServicePathElement0 = "data";
 
-        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction, Inventory }
+        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction, Inventory, NamedSearchFilter }
 
         private static void configure()
         {
@@ -102,6 +102,7 @@ namespace Vre.Server.RemoteService
 
                         Suite.SalesStatus filter;
                         string filterStr = request.Request.Query.GetParam("statusFilter", "");
+						// TODO: Missing 'includeDeleted' option!
                         if (Enum.TryParse<Suite.SalesStatus>(filterStr, true, out filter))
                             getSuiteList(request.UserInfo.Session, buildingId, request.Response, csrq, filter);
                         else
@@ -118,7 +119,8 @@ namespace Vre.Server.RemoteService
                     {                        
                         int siteId = request.Request.Query.GetParam("site", -1);
                         if (-1 == siteId) throw new ArgumentException("Site ID is missing.");
-                        getSuiteTypeList(request.UserInfo.Session, siteId, request.Response);
+						// TODO: Missing 'includeDeleted' option!
+						getSuiteTypeList(request.UserInfo.Session, siteId, request.Response);
                     }
                     else
                     {
@@ -184,7 +186,18 @@ namespace Vre.Server.RemoteService
                         throw new NotImplementedException();
                     }
                     return;
-            }
+
+				case ModelObject.NamedSearchFilter:
+					if (-1 == objectId)
+					{
+						getNamedSearchFilterList(request.UserInfo.Session, request.Request.Query, request.Response, includeDeleted);
+					}
+					else
+					{
+						getNamedSearchFilter(request.UserInfo.Session, objectId, request.Response);
+					}
+					return;
+			}
 
             throw new NotImplementedException();
         }
@@ -219,7 +232,12 @@ namespace Vre.Server.RemoteService
                     if (null == strObjectId) throw new ArgumentException("Object ID is missing.");
                     updateViewOrder(request.UserInfo.Session, request.Request.Query, strObjectId, request.Request.Data, request.Response);
                     return;
-            }
+
+				case ModelObject.NamedSearchFilter:
+					if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
+					updateNamedSearchFilter(request.UserInfo.Session, objectId, request.Request.Data, request.Response);
+					return;
+			}
 
             throw new NotImplementedException();
         }
@@ -247,6 +265,10 @@ namespace Vre.Server.RemoteService
                 //case ModelObject.ViewOrder:
                 //    createListing(request.UserInfo.Session, request.Request.Data, request.Response);
                 //    return;
+
+				case ModelObject.NamedSearchFilter:
+					createNamedSearchFilter(request.UserInfo.Session, request.Request.Data, request.Response);
+                    return;
             }
 
             throw new NotImplementedException();
@@ -275,7 +297,17 @@ namespace Vre.Server.RemoteService
                     if (null == strObjectId) throw new ArgumentException("Object ID is missing.");
                     deleteViewOrder(request.UserInfo.Session, strObjectId, request.Response);
                     return;
-            }
+
+				case ModelObject.Building:
+					if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
+					deleteBuilding(request.UserInfo.Session, objectId, request.Response);
+					return;
+
+				case ModelObject.NamedSearchFilter:
+					if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
+					deleteNamedSearchFilter(request.UserInfo.Session, objectId, request.Response);
+					return;
+			}
 
             throw new NotImplementedException();
         }
@@ -297,7 +329,8 @@ namespace Vre.Server.RemoteService
             else if (elements[1].Equals("view")) mo = ModelObject.View;
             else if (elements[1].Equals("ft")) mo = ModelObject.FinancialTransaction;
             else if (elements[1].Equals("inventory")) mo = ModelObject.Inventory;
-            else throw new ArgumentException("Object path is invalid (2).");
+			else if (elements[1].Equals("nsf")) mo = ModelObject.NamedSearchFilter;
+			else throw new ArgumentException("Object path is invalid (2).");
 
             strId = null;
 
@@ -638,7 +671,47 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void getInventoryList(ClientSession session, int buildingId, ChangeSubscriptionRequest csrq, IResponseData resp)
+		private static void getNamedSearchFilterList(ClientSession session, ServiceQuery query, IResponseData resp,
+			bool includeDeleted)
+		{
+			IList<NamedSearchFilter> toReturn = null;
+			ClientData[] result = null;
+
+			int ownerId = query.GetParam("ownerId", session.User.AutoID);
+
+			using (var dao = new NamedSearchFilterDao(session.DbSession))
+				toReturn = dao.Get(ownerId, includeDeleted);
+
+			int cnt = toReturn.Count;
+			result = new ClientData[cnt];
+			for (int idx = 0; idx < cnt; idx++)
+			{
+				var nsf = toReturn[idx];
+				RolePermissionCheck.CheckReadNamedSearchFilter(session, nsf);
+				result[idx] = nsf.GetClientData();
+			}
+
+			// produce output
+			//
+			resp.Data = new ClientData();
+			if (result != null) resp.Data.Add("filters", result);
+			resp.ResponseCode = HttpStatusCode.OK;
+		}
+
+		private static void getNamedSearchFilter(ClientSession session, int filterId, IResponseData resp)
+		{
+			NamedSearchFilter toReturn = null;
+
+			using (var dao = new NamedSearchFilterDao(session.DbSession))
+				toReturn = dao.GetById(filterId);
+
+			RolePermissionCheck.CheckReadNamedSearchFilter(session, toReturn);
+
+			resp.Data = toReturn.GetClientData();
+			resp.ResponseCode = HttpStatusCode.OK;
+		}
+
+		private static void getInventoryList(ClientSession session, int buildingId, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
             Building b;
 
@@ -1513,6 +1586,38 @@ namespace Vre.Server.RemoteService
             }
         }
 
+		private static void updateNamedSearchFilter(ClientSession session, int filterId, ClientData data, IResponseData resp)
+		{
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
+			{
+				using (var dao = new NamedSearchFilterDao(session.DbSession))
+				{
+					var nsf = dao.GetById(filterId);
+
+					if (null == nsf) throw new FileNotFoundException();
+
+					RolePermissionCheck.CheckUpdateNamedSearchFilter(session, nsf);
+
+					if (nsf.UpdateFromClient(data))
+					{
+						nsf.MarkUpdated();
+						dao.Update(nsf);
+						resp.ResponseCode = HttpStatusCode.OK;
+						resp.Data = new ClientData();
+						resp.Data.Add("updated", 1);
+					}
+					else
+					{
+						resp.ResponseCode = HttpStatusCode.NotModified;
+						resp.Data = new ClientData();
+						resp.Data.Add("updated", 0);
+					}
+				}
+
+				tran.Commit();
+			}
+		}
+
         private static void updateViewOrder(ClientSession session, ServiceQuery query, string strObjectId, ClientData data, IResponseData resp)
         {
             string paymentSystemRefId = query["pr"];
@@ -1596,7 +1701,9 @@ namespace Vre.Server.RemoteService
                     User u = manager.Get(type, role, estateDeveloperId, login);
                     u.UpdateFromClient(data);
                     resp.ResponseCode = HttpStatusCode.OK;
-                }
+					resp.Data = new ClientData();
+					resp.Data.Add("id", u.AutoID);
+				}
                 catch (Exception ex)
                 {
                     resp.ResponseCode = HttpStatusCode.Created;
@@ -1605,6 +1712,21 @@ namespace Vre.Server.RemoteService
                 }
             }
         }
+
+		private static void createNamedSearchFilter(ClientSession session, ClientData data, IResponseData resp)
+		{
+			RolePermissionCheck.CheckCreateNamedSearchFilter(session);
+			
+			NamedSearchFilter result = new NamedSearchFilter(session.User);
+			result.UpdateFromClient(data);
+
+			using (var dao = new NamedSearchFilterDao(session.DbSession))
+				dao.Create(result);
+
+			resp.ResponseCode = HttpStatusCode.OK;
+			resp.Data = new ClientData();
+			resp.Data.Add("id", result.AutoID);
+		}
 
         //private static void createListing(ClientSession session, ClientData data, IResponseData resp)
         //{
@@ -1667,7 +1789,53 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void deleteViewOrder(ClientSession session, string strObjectId, IResponseData resp)
+		private static void deleteBuilding(ClientSession session, int buildingId, IResponseData resp)
+		{
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
+			{
+				using (var dao = new BuildingDao(session.DbSession))
+				{
+					var building = dao.GetById(buildingId);
+
+					if (null == building) throw new FileNotFoundException();
+
+					RolePermissionCheck.CheckDeleteBuilding(session, building);
+
+					building.MarkDeleted();
+					dao.SafeUpdate(building);
+
+					resp.ResponseCode = HttpStatusCode.OK;
+					resp.Data = new ClientData();
+					resp.Data.Add("deleted", 1);
+				}
+				tran.Commit();
+			}
+		}
+
+		private static void deleteNamedSearchFilter(ClientSession session, int filterId, IResponseData resp)
+		{
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
+			{
+				using (var dao = new NamedSearchFilterDao(session.DbSession))
+				{
+					var nsf = dao.GetById(filterId);
+
+					if (null == nsf) throw new FileNotFoundException();
+
+					RolePermissionCheck.CheckDeleteNamedSearchFilter(session, nsf);
+
+					nsf.MarkDeleted();
+					dao.Update(nsf);
+
+					resp.ResponseCode = HttpStatusCode.OK;
+					resp.Data = new ClientData();
+					resp.Data.Add("deleted", 1);
+				}
+				tran.Commit();
+			}
+		}
+
+		private static void deleteViewOrder(ClientSession session, string strObjectId, IResponseData resp)
         {
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {

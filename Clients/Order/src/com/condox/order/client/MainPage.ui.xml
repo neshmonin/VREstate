@@ -1,0 +1,43 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		.important {
+			font-weight: bold;
+		}
+		.my1 {
+			background-color: mediumblue;
+		}
+		.my2 {
+			background-color: red;
+		}
+	</ui:style>
+				<g:DockLayoutPanel unit="PX">
+					<g:north size="116.0">
+						<g:LayoutPanel styleName="my-header">
+							<g:layer>
+								<g:Image ui:field="image" url="templates/cube.jpg"/>
+							</g:layer>
+							<g:layer left="200px" width="800px">
+								<g:Image url="templates/mainheader.jpg"/>
+							</g:layer>
+						</g:LayoutPanel>
+					</g:north>
+					<g:west size="200.0">
+						<g:LayoutPanel ui:field="menuPanel" styleName="my-menu">
+							<g:layer left="10px" width="178px" top="10px" height="45px">
+								<g:PushButton text="3d condo explorer" styleName="my-menu-item" ui:field="pushButton"/>
+							</g:layer>
+							<g:layer left="10px" width="178px" top="55px" height="45px">
+								<g:PushButton text="future page" styleName="my-menu-item" ui:field="pushButton_1">contact us</g:PushButton>
+							</g:layer>
+							<g:layer left="10px" width="178px" top="100px" height="45px">
+								<g:PushButton text="login" ui:field="loginMenu" styleName="my-menu-item">Login</g:PushButton>
+							</g:layer>
+						</g:LayoutPanel>
+					</g:west>
+					<g:center>
+						<g:LayoutPanel ui:field="containerPanel" styleName="my-container"/>
+					</g:center>
+				</g:DockLayoutPanel>
+</ui:UiBinder> 
