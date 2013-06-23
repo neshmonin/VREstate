@@ -1,7 +1,6 @@
-package com.condox.vrestate.client;
+package com.condox.vrestate.shared;
 
 import com.google.gwt.core.client.GWT;
-//import com.google.gwt.user.client.Window;
 
 public class Log {
 	public static void write(String message) {

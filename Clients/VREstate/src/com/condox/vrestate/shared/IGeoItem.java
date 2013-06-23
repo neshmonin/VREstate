@@ -1,6 +1,5 @@
 package com.condox.vrestate.shared;
 
-
 public interface IGeoItem {
 
 	public abstract Position getPosition();

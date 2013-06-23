@@ -1,7 +1,5 @@
 package com.condox.vrestate.shared;
 
-import com.condox.vrestate.client.view.I_UpdatableView;
-
 public interface I_AbstractView extends I_UpdatableView {
 	public void Select(String type, int id);
 	public void onHeadingChanged();

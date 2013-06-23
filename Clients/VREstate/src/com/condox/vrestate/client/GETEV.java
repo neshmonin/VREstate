@@ -6,6 +6,7 @@ import java.util.Map;
 //import com.google.gwt.core.client.GWT;
 import com.condox.vrestate.client.view._AbstractView;
 import com.condox.vrestate.shared.IDocument;
+import com.condox.vrestate.shared.Log;
 import com.condox.vrestate.shared.Options;
 import com.condox.vrestate.shared.Suite;
 import com.google.gwt.http.client.Request;

@@ -1,9 +1,10 @@
 package com.condox.vrestate.client;
 
 
+import com.condox.vrestate.shared.JSONParams;
+import com.condox.vrestate.shared.Log;
 import com.condox.vrestate.shared.Options;
 import com.condox.vrestate.client.GET;
-import com.condox.vrestate.client.JSONParams;
 //import com.condox.vrestate.client.Log;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;

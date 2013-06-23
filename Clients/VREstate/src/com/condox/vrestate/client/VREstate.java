@@ -29,7 +29,8 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 	public void onModuleLoad() {
 		// _AbstractView.init();
 		// init();
-		Options.Init(this);
+		Options.Init();
+		LoginUser();
 	}
 
 	// private native void init() /*-{

@@ -9,6 +9,7 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.condox.vrestate.shared.Log;
 import com.condox.vrestate.shared.Options;
 
 public class GET implements RequestCallback{

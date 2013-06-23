@@ -4,8 +4,6 @@ package com.condox.vrestate.shared;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.condox.vrestate.client.JSONParams;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;

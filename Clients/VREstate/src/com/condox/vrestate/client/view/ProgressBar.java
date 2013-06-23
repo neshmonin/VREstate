@@ -2,6 +2,7 @@ package com.condox.vrestate.client.view;
 
 
 import com.condox.vrestate.shared.I_Progress;
+import com.condox.vrestate.shared.I_UpdatableView;
 import com.condox.vrestate.shared.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.OverlayHelpers;

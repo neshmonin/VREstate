@@ -1,12 +1,10 @@
 package com.condox.vrestate.shared;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import com.condox.vrestate.client.Log;
-import com.condox.vrestate.client.VREstate;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.FrameElement;
 import com.google.gwt.http.client.Request;
@@ -47,14 +45,11 @@ public class Options implements RequestCallback {
 	public static String context = "";
 
 
-	private Options(VREstate vrEstate) {
-	}
-
 	public static boolean isViewOrder() {
 		return Options.getViewOrderId() != null;
 	}
 
-	public static void Init(VREstate vrEstate) {
+	public static void Init() {
 		Map<String, List<String>> params = Window.Location.getParameterMap();
 		Log.write(params.toString());
 
@@ -140,8 +135,6 @@ public class Options implements RequestCallback {
 				context += "&";
 		}
 		Log.write("context=" + context);
-
-		vrEstate.LoginUser();
 	};
 
 	@Override

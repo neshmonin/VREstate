@@ -1,4 +1,4 @@
-package com.condox.vrestate.client;
+package com.condox.vrestate.shared;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;

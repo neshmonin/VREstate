@@ -1,7 +1,6 @@
 package com.condox.vrestate.shared;
 
 import java.util.ArrayList;
-
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;

@@ -2,7 +2,6 @@ package com.condox.vrestate.shared;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
