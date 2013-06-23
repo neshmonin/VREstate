@@ -1,22 +1,26 @@
 package com.condox.vrestate.client.view;
 
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+
+import com.condox.vrestate.shared.Building;
+import com.condox.vrestate.shared.Document;
+import com.condox.vrestate.shared.IGeoItem;
+import com.condox.vrestate.shared.I_AbstractView;
+import com.condox.vrestate.shared.I_Progress;
+import com.condox.vrestate.shared.Site;
+import com.condox.vrestate.shared.Suite;
+import com.condox.vrestate.shared.ViewOrder;
+import com.condox.vrestate.shared.Options;
 import com.condox.vrestate.client.Log;
-import com.condox.vrestate.client.Options;
-import com.condox.vrestate.client.document.Building;
-import com.condox.vrestate.client.document.Document;
-import com.condox.vrestate.client.document.Site;
-import com.condox.vrestate.client.document.Suite;
-import com.condox.vrestate.client.document.ViewOrder;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.I_AbstractInteractor;
 import com.condox.vrestate.client.view.Camera.Camera;
 import com.condox.vrestate.client.view.GeoItems.BuildingGeoItem;
-import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SiteGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem.GeoStatus;
@@ -156,6 +160,11 @@ public abstract class _AbstractView implements I_AbstractView {
 	public void onDestroy() {
 	}
 
+	@Override
+	public void ApplyCamera() {
+		getCamera().Apply();
+	}
+	
 	public static void Push(I_AbstractView newView) {
 		newView.scheduleSetEnabled();
 		newView.setupCamera(null);
@@ -170,7 +179,7 @@ public abstract class _AbstractView implements I_AbstractView {
 		Log.write(getPrintableViews("Push"));
 
 		GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
-		newView.getCamera().Apply();
+		newView.ApplyCamera();
 		GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
 	}
 
@@ -192,7 +201,7 @@ public abstract class _AbstractView implements I_AbstractView {
 		Log.write(getPrintableViews("Pop"));
 
 		GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
-		newView.getCamera().Apply();
+		newView.ApplyCamera();
 		GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
 
 		return newView;
@@ -214,7 +223,7 @@ public abstract class _AbstractView implements I_AbstractView {
 
 			GE.getPlugin().getOptions()
 					.setFlyToSpeed(newView.getTransitionSpeed());
-			newView.getCamera().Apply();
+			newView.ApplyCamera();
 			GE.getPlugin().getOptions()
 					.setFlyToSpeed(newView.getRegularSpeed());
 		}
@@ -238,7 +247,7 @@ public abstract class _AbstractView implements I_AbstractView {
 		Log.write(getPrintableViews("Pop-Push"));
 
 		GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
-		newView.getCamera().Apply();
+		newView.ApplyCamera();
 		GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
 
 	}
@@ -264,7 +273,7 @@ public abstract class _AbstractView implements I_AbstractView {
 		Log.write(getPrintableViews("Pop-Pop-Push"));
 
 		GE.getPlugin().getOptions().setFlyToSpeed(newView.getTransitionSpeed());
-		newView.getCamera().Apply();
+		newView.ApplyCamera();
 		GE.getPlugin().getOptions().setFlyToSpeed(newView.getRegularSpeed());
 
 	}
@@ -308,7 +317,6 @@ public abstract class _AbstractView implements I_AbstractView {
 		return _regularSpeed;
 	}
 
-	@Override
 	public Camera getCamera() {
 		return _camera;
 	}
@@ -330,35 +338,6 @@ public abstract class _AbstractView implements I_AbstractView {
 
 		I_AbstractView currentView = views.peek();
 		return currentView;
-	}
-
-	protected void setupStandardLookAtCamera(I_AbstractView poppedView) {
-		if (_camera != null) {
-			_camera.attributes.SetLonLatAlt(theGeoItem);
-			if (poppedView != null) {
-				Camera poppedCamera = poppedView.getCamera();
-				if (poppedCamera.CameraType == _camera.CameraType)
-					_camera.attributes.Heading_d = Camera
-							.NormalizeHeading_d(poppedCamera.attributes.Heading_d);
-			}
-		} else {
-			I_AbstractView curView = _AbstractView.getCurrentView();
-			if (curView != null) {
-				_camera = new Camera(curView.getCamera());
-				_camera.attributes.SetLonLatAlt(theGeoItem);
-				_camera.attributes.Tilt_d = theGeoItem.getPosition().getTilt();
-				_camera.attributes.Range_m = getStartingRange();
-			} else {
-				_camera = new Camera(Camera.Type.LookAt,
-						theGeoItem.getPosition().getHeading(),
-						theGeoItem.getPosition().getTilt(),
-						0,
-						theGeoItem.getPosition().getLatitude(),
-						theGeoItem.getPosition().getLongitude(),
-						theGeoItem.getPosition().getAltitude(), 
-						getStartingRange());
-			}
-		}
 	}
 
 	boolean setEnabledScheduled = false;
@@ -401,7 +380,8 @@ public abstract class _AbstractView implements I_AbstractView {
 	// Site and all obtained hierarchy of elements (BuildingGeo-s, SuiteGeo-s,
 	// etc.)
 	public static void CreateAllGeoItems() {
-		Document.progressBar.Update(ProgressBar.ProgressLabel.Processing);
+		I_Progress progressBar = new ProgressBar();
+		progressBar.SetupProgress(I_Progress.ProgressType.Processing);
 		for (Site site : Document.get().getSites().values()) {
 			SiteGeoItem siteGeo = new SiteGeoItem(site);
 			siteGeoItems.put(site.getId(), siteGeo);
@@ -418,7 +398,7 @@ public abstract class _AbstractView implements I_AbstractView {
 			addSuiteGeoItem(suite, false);
 
 			count++;
-			Document.progressBar.Update(count * 100.0 / howMany);
+			progressBar.UpdateProgress(count * 100.0 / howMany);
 		}
 
 		if (Document.targetViewOrder != null) {
@@ -433,7 +413,24 @@ public abstract class _AbstractView implements I_AbstractView {
 			}
 		}
 		
-		Document.progressBar.Cleanup();
+		progressBar.CleanupProgress();
+	}
+	
+	public static void UpdateSuiteGeoItems(Map<Integer, Suite> changedSuites) {
+		for (Suite suite : changedSuites.values()) {
+			int id = suite.getId();
+			if (suiteGeoItems.containsKey(id)) {
+				// updating the existing SuiteGeoItem
+				SuiteGeoItem suiteGeo = getSuiteGeoItem(id);
+				suiteGeo.Init(suite);
+				suiteGeo.ShowIfFilteredIn();
+			}
+			else {
+				// creating new SuiteGeoItem
+				suite.CalcLineCoords();
+				_AbstractView.addSuiteGeoItem(suite, true);
+			}
+		}
 	}
 
 	public static void addSuiteGeoItem(Suite suite, boolean redraw) {

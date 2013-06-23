@@ -1,8 +1,9 @@
 package com.condox.vrestate.client.view.GeoItems;
 
-import com.condox.vrestate.client.Options;
-import com.condox.vrestate.client.Position;
-import com.condox.vrestate.client.document.Site;
+import com.condox.vrestate.shared.IGeoItem;
+import com.condox.vrestate.shared.Position;
+import com.condox.vrestate.shared.Site;
+import com.condox.vrestate.shared.Options;
 
 public class SiteGeoItem implements IGeoItem {
 	private final double initialRange_m = 300;

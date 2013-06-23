@@ -1,7 +1,7 @@
 package com.condox.vrestate.client.view.Camera;
 
 import com.condox.vrestate.client.view._AbstractView;
-import com.condox.vrestate.client.view.GeoItems.IGeoItem;
+import com.condox.vrestate.shared.IGeoItem;
 
 public class CameraAttributes {
     public double Heading_d;

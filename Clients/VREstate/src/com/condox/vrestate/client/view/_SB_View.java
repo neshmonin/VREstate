@@ -1,13 +1,15 @@
 package com.condox.vrestate.client.view;
 
-import com.condox.vrestate.client.Options;
-import com.condox.vrestate.client.document.Document;
-import com.condox.vrestate.client.document.ViewOrder.ProductType;
+
+import com.condox.vrestate.shared.Document;
+import com.condox.vrestate.shared.IGeoItem;
+import com.condox.vrestate.shared.I_AbstractView;
+import com.condox.vrestate.shared.Options;
+import com.condox.vrestate.shared.ViewOrder.ProductType;
 import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.SB_Interactor;
 import com.condox.vrestate.client.interactor.SB_Kiosk_Interactor;
-import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.nitrous.gwt.earth.client.api.GEVisibility;
 
 public abstract class _SB_View extends _GEView implements I_SB_View {
@@ -86,7 +88,7 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 
 	@Override
 	public void setupCamera(I_AbstractView poppedView) {
-		setupStandardLookAtCamera(poppedView);
+		setupStandardLookAtCamera((_GEView)poppedView);
     }
 
 	@Override
@@ -109,7 +111,7 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 				}
 			}
 
-			Document.progressBar.Cleanup();
+			Document.progressBar.CleanupProgress();
 			Document.progressBar = null;
 		}
 		else

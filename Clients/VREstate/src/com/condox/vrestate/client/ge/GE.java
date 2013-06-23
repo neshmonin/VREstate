@@ -1,7 +1,8 @@
 package com.condox.vrestate.client.ge;
 
+
+import com.condox.vrestate.shared.Options;
 import com.condox.vrestate.client.Log;
-import com.condox.vrestate.client.Options;
 import com.condox.vrestate.client.VREstate;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootLayoutPanel;

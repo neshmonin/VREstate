@@ -1,12 +1,15 @@
 package com.condox.vrestate.client;
 
-import com.condox.vrestate.client.document.Building;
-import com.condox.vrestate.client.document.Document;
-import com.condox.vrestate.client.document.Site;
-import com.condox.vrestate.client.document.ViewOrder.ProductType;
+import com.condox.vrestate.shared.Building;
+import com.condox.vrestate.shared.Document;
+import com.condox.vrestate.shared.IDocument;
+import com.condox.vrestate.shared.I_AbstractView;
+import com.condox.vrestate.shared.Site;
+import com.condox.vrestate.shared.ViewOrder.ProductType;
+import com.condox.vrestate.shared.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.HelicopterView;
-import com.condox.vrestate.client.view.I_AbstractView;
+import com.condox.vrestate.client.view.ProgressBar;
 import com.condox.vrestate.client.view.SiteView;
 import com.condox.vrestate.client.view._AbstractView;
 import com.condox.vrestate.client.view.GeoItems.SiteGeoItem;
@@ -49,15 +52,6 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 		ge.Init(this);
 	};
 
-	private static int counter = 0;
-
-	public static void RenewCheckChangesThread() {
-		counter++;
-		String request = Options.HOME_URL + "ev?sid=" + User.SID
-				+ "&generation=" + counter;
-		GETEV.send(request, Document.getCallback());
-	}
-
 	public static int checkChangesPeriodSec;
 
 	public void LoadView() {
@@ -71,7 +65,8 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 		}
 		GET.send(url, this);
 
-		VREstate.RenewCheckChangesThread();
+		GETEV.RegisterDocument(Document.get());
+		GETEV.RenewCheckChangesThread();
 	}
 
 	I_AbstractView firstView = null;
@@ -79,6 +74,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 	@Override
 	public void onResponseReceived(Request request, Response response) {
 		String json = response.getText();
+		Document.progressBar = new ProgressBar();
 		if (Document.get().Parse(json)) {
 			Site site = (Site) Document.get().getSites().values().toArray()[0];
 			if (!Options.isViewOrder()

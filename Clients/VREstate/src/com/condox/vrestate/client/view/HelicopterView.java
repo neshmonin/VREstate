@@ -2,7 +2,7 @@ package com.condox.vrestate.client.view;
 
 import com.condox.vrestate.client.interactor.SingleTouchInteractor;
 import com.condox.vrestate.client.view.GeoItems.BuildingGeoItem;
-import com.condox.vrestate.client.view.GeoItems.IGeoItem;
+import com.condox.vrestate.shared.IGeoItem;
 import com.google.gwt.user.client.Timer;
 
 public class HelicopterView extends SiteView {

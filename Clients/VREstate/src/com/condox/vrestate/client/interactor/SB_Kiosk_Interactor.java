@@ -1,7 +1,8 @@
 
 package com.condox.vrestate.client.interactor;
 
-import com.condox.vrestate.client.Options;
+
+import com.condox.vrestate.shared.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.I_SB_View;
 import com.condox.vrestate.client.view._AbstractView;
@@ -140,7 +141,7 @@ public class SB_Kiosk_Interactor extends OverlayHelpers
 		else
 		{   // they click Navigation Controls
 	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getTransitionSpeed());
-	        this.view.getCamera().Apply();
+	        this.view.ApplyCamera();
 	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getRegularSpeed());
 		}
 	}
