@@ -11,7 +11,7 @@ namespace ConsoleSales
     {
         public ChangingBuilding(Vre.Server.BusinessLogic.Building building) : base (building){}
 
-        protected override Suite CreateSuite(Vre.Server.BusinessLogic.Client.SuiteEx suite)
+        protected override Suite CreateSuite(Vre.Server.BusinessLogic.Suite suite)
         {
             return new ChangingSuite(suite);
         }

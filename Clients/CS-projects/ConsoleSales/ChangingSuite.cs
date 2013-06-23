@@ -14,7 +14,7 @@ namespace ConsoleSales
         protected Suite _changed;
         private bool _promoted = false;
 
-        public ChangingSuite(Vre.Server.BusinessLogic.Client.SuiteEx suite)
+        public ChangingSuite(Vre.Server.BusinessLogic.Suite suite)
             : base(suite)
         {
             _changed = base.MakeClone();

@@ -99,6 +99,7 @@
     <Compile Include="Note.Designer.cs">
       <DependentUpon>Note.cs</DependentUpon>
     </Compile>
+    <Compile Include="Settings.cs" />
     <Compile Include="SetViewOrder.cs">
       <SubType>Form</SubType>
     </Compile>
