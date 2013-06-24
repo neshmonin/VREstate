@@ -1,10 +1,10 @@
 package com.condox.vrestate.client.view;
 
+import com.condox.clientshared.abstractview.IGeoItem;
+import com.condox.clientshared.abstractview.I_AbstractView;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.PanoramicInteractor;
 import com.condox.vrestate.client.view.Camera.Camera;
-import com.condox.vrestate.shared.IGeoItem;
-import com.condox.vrestate.shared.I_AbstractView;
 import com.nitrous.gwt.earth.client.api.GEVisibility;
 
 public class PanoramicView extends _GEView {

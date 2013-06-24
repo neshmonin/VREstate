@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import com.condox.vrestate.shared.IGeoItem;
-import com.condox.vrestate.shared.I_AbstractView;
-import com.condox.vrestate.shared.I_Progress;
-import com.condox.vrestate.shared.Log;
-import com.condox.vrestate.shared.SuiteType;
-import com.condox.vrestate.shared.Options;
+import com.condox.clientshared.abstractview.IGeoItem;
+import com.condox.clientshared.abstractview.I_AbstractView;
+import com.condox.clientshared.abstractview.I_Progress;
+import com.condox.clientshared.abstractview.Log;
+import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.document.SuiteType;
 import com.condox.vrestate.client.view.ProgressBar;
 import com.condox.vrestate.client.view._AbstractView;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import com.condox.vrestate.shared.SuiteType;
+import com.condox.clientshared.document.SuiteType;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 

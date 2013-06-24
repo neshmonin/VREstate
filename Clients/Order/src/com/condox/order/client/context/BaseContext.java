@@ -3,7 +3,7 @@ package com.condox.order.client.context;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.condox.order.client.utils.Log;
+import com.condox.clientshared.abstractview.Log;
 
 public class BaseContext implements IContext {
 

@@ -6,8 +6,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import com.condox.clientshared.document.SuiteInfo;
 import com.condox.order.client.presenter.SuitesPresenter;
-import com.condox.order.shared.SuiteInfo;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;

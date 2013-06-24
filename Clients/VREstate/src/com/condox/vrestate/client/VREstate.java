@@ -1,12 +1,16 @@
 package com.condox.vrestate.client;
 
-import com.condox.vrestate.shared.Building;
-import com.condox.vrestate.shared.Document;
-import com.condox.vrestate.shared.IDocument;
-import com.condox.vrestate.shared.I_AbstractView;
-import com.condox.vrestate.shared.Site;
-import com.condox.vrestate.shared.ViewOrder.ProductType;
-import com.condox.vrestate.shared.Options;
+import com.condox.clientshared.abstractview.I_AbstractView;
+import com.condox.clientshared.abstractview.Log;
+import com.condox.clientshared.communication.GET;
+import com.condox.clientshared.communication.I_Login;
+import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.communication.UpdatesFromServer;
+import com.condox.clientshared.communication.User;
+import com.condox.clientshared.document.Building;
+import com.condox.clientshared.document.Document;
+import com.condox.clientshared.document.Site;
+import com.condox.clientshared.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.HelicopterView;
 import com.condox.vrestate.client.view.ProgressBar;
@@ -20,7 +24,7 @@ import com.google.gwt.http.client.Response;
 import com.nitrous.gwt.earth.client.api.KmlObject;
 import com.nitrous.gwt.earth.client.api.event.KmlLoadCallback;
 
-public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
+public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I_Login {
 
 	/**
 	 * @wbp.parser.entryPoint
@@ -66,8 +70,8 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 		}
 		GET.send(url, this);
 
-		GETEV.RegisterDocument(Document.get());
-		GETEV.RenewCheckChangesThread();
+		UpdatesFromServer.RegisterHandler(Document.get());
+		UpdatesFromServer.RenewCheckChangesThread();
 	}
 
 	I_AbstractView firstView = null;
@@ -146,6 +150,16 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 	public void onLoaded(KmlObject feature) {
 		if (feature != null)
 			GE.getPlugin().getFeatures().appendChild(feature);
+	}
+
+	@Override
+	public void onLoginSucceed() {
+		StartGE();
+	}
+
+	@Override
+	public void onLoginFailed() {
+		Log.write("Failed to Login");
 	}
 }
 // private static final String EARTH_API_KEY =

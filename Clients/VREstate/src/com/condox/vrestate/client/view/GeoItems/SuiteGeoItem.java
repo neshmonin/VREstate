@@ -1,13 +1,13 @@
 package com.condox.vrestate.client.view.GeoItems;
 
 
-import com.condox.vrestate.shared.Building;
-import com.condox.vrestate.shared.Document;
-import com.condox.vrestate.shared.IGeoItem;
-import com.condox.vrestate.shared.Position;
-import com.condox.vrestate.shared.Suite;
-import com.condox.vrestate.shared.ViewOrder;
-import com.condox.vrestate.shared.Options;
+import com.condox.clientshared.abstractview.IGeoItem;
+import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.document.Building;
+import com.condox.clientshared.document.Document;
+import com.condox.clientshared.document.Position;
+import com.condox.clientshared.document.Suite;
+import com.condox.clientshared.document.ViewOrder;
 import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view._AbstractView;

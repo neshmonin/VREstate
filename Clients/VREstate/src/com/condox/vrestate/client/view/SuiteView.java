@@ -1,16 +1,16 @@
 package com.condox.vrestate.client.view;
 
 
-import com.condox.vrestate.shared.Building;
-import com.condox.vrestate.shared.Document;
-import com.condox.vrestate.shared.IGeoItem;
-import com.condox.vrestate.shared.I_AbstractView;
-import com.condox.vrestate.shared.Site;
-import com.condox.vrestate.shared.Suite;
-import com.condox.vrestate.shared.SuiteType;
-import com.condox.vrestate.shared.Options;
-import com.condox.vrestate.shared.Suite.Status;
-import com.condox.vrestate.shared.ViewOrder.ProductType;
+import com.condox.clientshared.abstractview.IGeoItem;
+import com.condox.clientshared.abstractview.I_AbstractView;
+import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.document.Building;
+import com.condox.clientshared.document.Document;
+import com.condox.clientshared.document.Site;
+import com.condox.clientshared.document.Suite;
+import com.condox.clientshared.document.SuiteType;
+import com.condox.clientshared.document.Suite.Status;
+import com.condox.clientshared.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.SuiteInteractor;

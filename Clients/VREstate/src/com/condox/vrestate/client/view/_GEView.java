@@ -1,9 +1,9 @@
 package com.condox.vrestate.client.view;
 
+import com.condox.clientshared.abstractview.IGeoItem;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.Camera.Camera;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
-import com.condox.vrestate.shared.IGeoItem;
 import com.nitrous.gwt.earth.client.api.KmlAltitudeMode;
 import com.nitrous.gwt.earth.client.api.KmlLookAt;
 

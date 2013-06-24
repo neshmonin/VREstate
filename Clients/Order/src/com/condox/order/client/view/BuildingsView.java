@@ -3,10 +3,10 @@ package com.condox.order.client.view;
 import java.util.Comparator;
 import java.util.List;
 
+import com.condox.clientshared.document.BuildingInfo;
 import com.condox.order.client.presenter.BuildingsPresenter;
 import com.condox.order.client.view.utils.FilteredListDataProvider;
 import com.condox.order.client.view.utils.IFilter;
-import com.condox.order.shared.BuildingInfo;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;

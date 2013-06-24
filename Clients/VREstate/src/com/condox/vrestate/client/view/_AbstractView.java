@@ -1,23 +1,22 @@
 package com.condox.vrestate.client.view;
 
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-
-import com.condox.vrestate.shared.Building;
-import com.condox.vrestate.shared.Document;
-import com.condox.vrestate.shared.IGeoItem;
-import com.condox.vrestate.shared.I_AbstractView;
-import com.condox.vrestate.shared.I_Progress;
-import com.condox.vrestate.shared.I_UpdatableView;
-import com.condox.vrestate.shared.Log;
-import com.condox.vrestate.shared.Site;
-import com.condox.vrestate.shared.Suite;
-import com.condox.vrestate.shared.ViewOrder;
-import com.condox.vrestate.shared.Options;
+import com.condox.clientshared.abstractview.IGeoItem;
+import com.condox.clientshared.abstractview.I_AbstractView;
+import com.condox.clientshared.abstractview.I_Progress;
+import com.condox.clientshared.abstractview.I_UpdatableView;
+import com.condox.clientshared.abstractview.Log;
+import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.document.Building;
+import com.condox.clientshared.document.Document;
+import com.condox.clientshared.document.I_VRObject;
+import com.condox.clientshared.document.Site;
+import com.condox.clientshared.document.Suite;
+import com.condox.clientshared.document.ViewOrder;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.I_AbstractInteractor;
 import com.condox.vrestate.client.view.Camera.Camera;
@@ -417,19 +416,28 @@ public abstract class _AbstractView implements I_AbstractView {
 		progressBar.CleanupProgress();
 	}
 	
-	public static void UpdateSuiteGeoItems(Map<Integer, Suite> changedSuites) {
-		for (Suite suite : changedSuites.values()) {
-			int id = suite.getId();
-			if (suiteGeoItems.containsKey(id)) {
-				// updating the existing SuiteGeoItem
-				SuiteGeoItem suiteGeo = getSuiteGeoItem(id);
-				suiteGeo.Init(suite);
-				suiteGeo.ShowIfFilteredIn();
-			}
-			else {
-				// creating new SuiteGeoItem
-				suite.CalcLineCoords();
-				_AbstractView.addSuiteGeoItem(suite, true);
+	@Override
+	public void UpdateChangedGeoItems(Map<Integer, I_VRObject> changedVRObjects) {
+		if (changedVRObjects == null)
+			return;
+		
+		for (I_VRObject vrObject : changedVRObjects.values()) {
+			int id = vrObject.getId();
+			switch (vrObject.getType()) {
+			case Suite:
+				Suite suite = (Suite)vrObject;
+				if (suiteGeoItems.containsKey(id)) {
+					// updating the existing SuiteGeoItem
+					SuiteGeoItem suiteGeo = getSuiteGeoItem(id);
+					suiteGeo.Init(suite);
+					suiteGeo.ShowIfFilteredIn();
+				}
+				else {
+					// creating new SuiteGeoItem
+					suite.CalcLineCoords();
+					_AbstractView.addSuiteGeoItem(suite, true);
+				}
+				break;
 			}
 		}
 	}
@@ -483,4 +491,5 @@ public abstract class _AbstractView implements I_AbstractView {
 	public double getStartingRange() {
 		return theGeoItem.getPosition().getRange();
 	}
+	
 }
