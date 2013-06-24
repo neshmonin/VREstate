@@ -21,7 +21,6 @@
 	<inherits name="com.google.gwt.json.JSON" />
 
 	<!-- Specify the app entry point class.                         -->
-	<entry-point class='com.condox.clientshared.ClientShared'/>
 
 	<!-- Specify the paths for translatable code                    -->
 	<source path='' />
