@@ -52,7 +52,7 @@ public class BuildingGeoItem implements IGeoItem {
 		KmlPoint point = GE.getPlugin().createPoint("");
 		point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND);
 		point.setExtrude(true);
-		Position position = building.getPosition();
+		Position position = building.getCenter();
 		if (position != null) {
 			position.setTilt(initialTilt_d);
 			position.setRange(initialRange_m);
@@ -99,7 +99,7 @@ public class BuildingGeoItem implements IGeoItem {
 	
 	@Override
 	public Position getPosition() {
-		return building.getPosition();
+		return building.getCenter();
 	}
 
 	@Override

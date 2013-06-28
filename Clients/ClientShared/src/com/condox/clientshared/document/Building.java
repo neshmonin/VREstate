@@ -21,6 +21,7 @@ public class Building implements I_VRObject {
 	private String street = "";
 	private String city = "";
 	private String postal = "";
+	private Position center = null;
 	private Position position = null;
 	private Double altitude_adjustment = null;
 	private String displayModelUrl = "";
@@ -40,7 +41,20 @@ public class Building implements I_VRObject {
 		name = obj.get("name").isString().stringValue();
 
 		if (obj.containsKey("center")) {
-			JSONObject position = obj.get("center").isObject();
+			JSONObject center = obj.get("center").isObject();
+			double longitude = center.get("lon").isNumber().doubleValue();
+			double latitude = center.get("lat").isNumber().doubleValue();
+			double altitude = center.get("alt").isNumber().doubleValue();
+			double heading = 0;
+
+			this.center = new Position();
+			this.center.setLongitude(longitude);
+			this.center.setLatitude(latitude);
+			this.center.setAltitude(altitude);
+			this.center.setHeading(heading);
+		}
+		if (obj.containsKey("position")) {
+			JSONObject position = obj.get("position").isObject();
 			double longitude = position.get("lon").isNumber().doubleValue();
 			double latitude = position.get("lat").isNumber().doubleValue();
 			double altitude = position.get("alt").isNumber().doubleValue();
@@ -80,7 +94,7 @@ public class Building implements I_VRObject {
 			overlayModelUrl = obj.get("overlayModelUrl").isString()
 					.stringValue();
 
-		if (obj.containsKey("AltitudeAdjustment"))
+		if (obj.containsKey("altitudeAdjustment"))
 			altitude_adjustment = obj.get("altitudeAdjustment").isNumber()
 					.doubleValue();
 
@@ -191,6 +205,10 @@ public class Building implements I_VRObject {
 	// selection.add(site);
 	// Draw();
 	// }
+
+	public Position getCenter() {
+		return center;
+	}
 
 	public Position getPosition() {
 		return position;

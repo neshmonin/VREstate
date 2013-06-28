@@ -167,7 +167,7 @@ public class SuiteGeoItem implements IGeoItem {
 			Building parent = suite.getParent();
 			if ((parent != null) && (parent.hasAltitudeAdjustment())) {
 				point.setAltitude(position.getAltitude()
-						+ parent.getAltitudeAdjustment());
+						+ parent.getAltitudeAdjustment() + parent.getPosition().getAltitude());
 				point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_ABSOLUTE);
 			} else {
 				point.setAltitude(position.getAltitude());

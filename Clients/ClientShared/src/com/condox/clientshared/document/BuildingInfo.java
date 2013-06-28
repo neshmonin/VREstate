@@ -63,7 +63,7 @@ public class BuildingInfo {
 		if (obj.containsKey("postalCode"))
 			postal = obj.get("postalCode").isString().stringValue();
 		
-		if (obj.containsKey("AltitudeAdjustment")) {
+		if (obj.containsKey("altitudeAdjustment")) {
 			altitude_adjustment = obj.get("altitudeAdjustment").isNumber().doubleValue();
 		}
 			

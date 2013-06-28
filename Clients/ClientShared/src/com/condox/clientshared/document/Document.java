@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.condox.clientshared.abstractview.I_AbstractView;
 import com.condox.clientshared.abstractview.I_Progress;
+import com.condox.clientshared.document.Suite.Status;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -272,6 +273,9 @@ public class Document implements IDocument, I_Progress
 					viewOrder.setTargetObject(targetSuite);
 					targetSuite.setInfoUrl(viewOrder.getInfoUrl());
 					targetSuite.setVTourUrl(viewOrder.getVTourUrl());
+					// TODO: This is a quick and dirty workaround for a server-side bug
+					if (targetSuite.getStatus() == Status.Sold)
+						targetSuite.setStatus(Status.ResaleAvailable);
 					break;
 				case Building:
 					Building targetBuilding = this.buildings.get(viewOrder

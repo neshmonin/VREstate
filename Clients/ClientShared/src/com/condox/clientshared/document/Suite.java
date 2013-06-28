@@ -141,11 +141,9 @@ public class Suite implements I_VRObject {
 			// Z
 			double alt = this.getPosition().getAltitude()
 					+ suite_type.getPoints().get(i) * 0.0254;
-			Building parent = Document.get().getBuildings()
-					.get(this.getParent_id());
 
 			if ((parent != null) && (parent.hasAltitudeAdjustment()))
-				alt += parent.getAltitudeAdjustment();
+				alt += parent.getPosition().getAltitude() + parent.getAltitudeAdjustment();
 			i++;
 			points.add(lat);
 			points.add(lon);

@@ -47,7 +47,7 @@ public class Site implements I_VRObject {
 		int count = 0;
 
 		for (Building building : Document.get().getBuildings().values()) {
-			Position position = building.getPosition();
+			Position position = building.getCenter();
 			lat += position.getLatitude();
 			lon += position.getLongitude();
 			alt += position.getAltitude();
