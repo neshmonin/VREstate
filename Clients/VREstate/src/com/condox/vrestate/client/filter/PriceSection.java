@@ -60,6 +60,11 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 				continue;
 				
 			int price = suiteGE.suite.getPrice();
+			if (priceType != PriceType.Rent) {
+				min_price = Math.min(min_price, price);
+				max_price = Math.max(max_price, price);
+			}
+			else
 			if (price > 0 && price < SuiteGeoItem.MaxRentTreshold) {
 				min_price = Math.min(min_price, price);
 				max_price = Math.max(max_price, price);
