@@ -24,7 +24,7 @@ namespace Vre.Server.HttpService
                 }
                 else
                 {
-                    Session = null;
+					Session = ClientSession.MakeGuestSession();
                     StaleSession = false;
                 }
 

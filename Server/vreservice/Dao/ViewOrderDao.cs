@@ -12,7 +12,27 @@ namespace Vre.Server.Dao
     {
         public ViewOrderDao(ISession session) : base(session) { }
 
-        public ViewOrder GetActive(int ownerId, ViewOrder.SubjectType type, int targetObjectId)
+		public IList<ViewOrder> GetByMlsId(string mlsId)
+		{
+			return _session.CreateQuery(
+				"FROM Vre.Server.BusinessLogic.ViewOrder WHERE MlsId=:id "
+				+ "AND Deleted=0 AND Enabled=1 AND ExpiresOn>:ex")
+				.SetString("id", mlsId)
+				.SetDateTime("ex", DateTime.UtcNow)
+				.List<ViewOrder>();
+		}
+
+		public IList<ViewOrder> GetByImportedMlsId(string mlsId)
+		{
+			return _session.CreateQuery(
+				"FROM Vre.Server.BusinessLogic.ViewOrder WHERE MlsId=:id "
+				+ "AND Deleted=0 AND Enabled=1 AND ExpiresOn>:ex AND Imported=1")
+				.SetString("id", mlsId)
+				.SetDateTime("ex", DateTime.UtcNow)
+				.List<ViewOrder>();
+		}
+
+		public ViewOrder GetActive(int ownerId, ViewOrder.SubjectType type, int targetObjectId)
         {
             return _session.CreateQuery(
                 "FROM Vre.Server.BusinessLogic.ViewOrder WHERE OwnerId=:oid "

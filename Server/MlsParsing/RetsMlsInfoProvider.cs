@@ -37,6 +37,8 @@ namespace Vre.Server.Mls
         private int _bathroomCntIdx = -1;
         private int _floorAreaRangeIdx = -1;
 
+		private string[] _allHeaders = null;
+
         private List<MlsItem> _items = new List<MlsItem>();
 
         public override IList<string> GetCurrentActiveItems() { throw new NotImplementedException(); }
@@ -51,6 +53,8 @@ namespace Vre.Server.Mls
             //Level1,Level10,Level11,Level12,Level2,Level3,Level4,Level5,Level6,Level7,Level8,Level9,"Idx_dt",
             //"Kit_plus",Den_fr,Br,Br_plus,Addr,"Apt_num","Bath_tot","Bsmt1_out","Bsmt2_out",Corp_num,"County",
             //Disp_addr,Type_own_srch
+
+			_allHeaders = header;
 
             for (int idx = header.Length - 1; idx >= 0; idx--)
             {
@@ -209,6 +213,12 @@ namespace Vre.Server.Mls
             int bt1 = getBathroomCountAlt(row, warnings);
             rc0.Equals(rc1).Equals(bd).Equals(bt0).Equals(bt1);
 #endif
+
+			for (var idx = _allHeaders.Length - 1; idx >= 0; idx--)
+			{
+				var val = row[idx];
+				if (!string.IsNullOrWhiteSpace(val)) item.RawData.Add(_allHeaders[idx], val);
+			}
 
             _items.Add(item);
         }

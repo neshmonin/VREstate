@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Reflection;
-using System.Text;
 using Vre.Server.HttpService;
 
 namespace Vre.Server.RemoteService
@@ -111,8 +106,9 @@ namespace Vre.Server.RemoteService
                 // Write request always:
                 // - has a sid query parameter (or passed in HTTP header)
                 // - refers to a valid active session
-                if (null == request.UserInfo.Session) throw new ArgumentException("Need a valid session to perform this operation.");
-
+                // NOW: Session is always available: if there's no SID passed - guest session is auto-created.
+				//if (null == request.UserInfo.Session) throw new ArgumentException("Need a valid session to perform this operation.");
+				
                 DataService.ProcessGetRequest(request);
                 return;
             }
@@ -125,7 +121,7 @@ namespace Vre.Server.RemoteService
                 return;
             }
             else //if (0 == request.Request.Query.Count)  // FS file reading
-            {                
+            {
                 server.ProcessFileRequest(request.Request.Path, request.Response);
                 return;
             }

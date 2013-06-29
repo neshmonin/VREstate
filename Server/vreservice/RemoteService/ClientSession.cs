@@ -223,6 +223,11 @@ namespace Vre.Server.RemoteService
                 return new ClientSession(LoginType.Plain, "<system>", new User(null, User.Role.SuperAdmin), true, dbSession);
         }
 
+		public static ClientSession MakeGuestSession()
+		{
+			return new ClientSession(LoginType.Plain, "<guest>", new User(null, User.Role.Visitor), false, null);
+		}
+
         /// <summary>
         /// Starts user's database session if it is not started yet.
         /// </summary>

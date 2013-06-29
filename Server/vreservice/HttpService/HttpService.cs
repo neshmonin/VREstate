@@ -36,6 +36,8 @@ namespace Vre.Server.HttpService
                     {
                         try
                         {
+							// TODO: Currently ANY request opens a DB session!
+							// NHibernate's connection pooling should take care of this.
                             rq.UserInfo.Session.Resume();
                             _rsp.ProcessRequest(this, rq);
                             rq.UserInfo.Session.Disconnect(false);
