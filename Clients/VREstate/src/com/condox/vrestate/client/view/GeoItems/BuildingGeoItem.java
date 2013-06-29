@@ -1,8 +1,10 @@
 package com.condox.vrestate.client.view.GeoItems;
 
-import com.condox.vrestate.client.Options;
-import com.condox.vrestate.client.Position;
-import com.condox.vrestate.client.document.Building;
+
+import com.condox.clientshared.abstractview.IGeoItem;
+import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.document.Building;
+import com.condox.clientshared.document.Position;
 import com.condox.vrestate.client.ge.GE;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -50,7 +52,7 @@ public class BuildingGeoItem implements IGeoItem {
 		KmlPoint point = GE.getPlugin().createPoint("");
 		point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND);
 		point.setExtrude(true);
-		Position position = building.getPosition();
+		Position position = building.getCenter();
 		if (position != null) {
 			position.setTilt(initialTilt_d);
 			position.setRange(initialRange_m);
@@ -97,7 +99,7 @@ public class BuildingGeoItem implements IGeoItem {
 	
 	@Override
 	public Position getPosition() {
-		return building.getPosition();
+		return building.getCenter();
 	}
 
 	@Override

@@ -1,12 +1,19 @@
 package com.condox.vrestate.client;
 
-import com.condox.vrestate.client.document.Building;
-import com.condox.vrestate.client.document.Document;
-import com.condox.vrestate.client.document.Site;
-import com.condox.vrestate.client.document.ViewOrder.ProductType;
+import com.condox.clientshared.abstractview.I_AbstractView;
+import com.condox.clientshared.abstractview.Log;
+import com.condox.clientshared.communication.GET;
+import com.condox.clientshared.communication.I_Login;
+import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.communication.UpdatesFromServer;
+import com.condox.clientshared.communication.User;
+import com.condox.clientshared.document.Building;
+import com.condox.clientshared.document.Document;
+import com.condox.clientshared.document.Site;
+import com.condox.clientshared.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.HelicopterView;
-import com.condox.vrestate.client.view.I_AbstractView;
+import com.condox.vrestate.client.view.ProgressBar;
 import com.condox.vrestate.client.view.SiteView;
 import com.condox.vrestate.client.view._AbstractView;
 import com.condox.vrestate.client.view.GeoItems.SiteGeoItem;
@@ -17,7 +24,7 @@ import com.google.gwt.http.client.Response;
 import com.nitrous.gwt.earth.client.api.KmlObject;
 import com.nitrous.gwt.earth.client.api.event.KmlLoadCallback;
 
-public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
+public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I_Login {
 
 	/**
 	 * @wbp.parser.entryPoint
@@ -26,7 +33,8 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 	public void onModuleLoad() {
 		// _AbstractView.init();
 		// init();
-		Options.Init(this);
+		Options.Init();
+		LoginUser();
 	}
 
 	// private native void init() /*-{
@@ -49,15 +57,6 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 		ge.Init(this);
 	};
 
-	private static int counter = 0;
-
-	public static void RenewCheckChangesThread() {
-		counter++;
-		String request = Options.HOME_URL + "ev?sid=" + User.SID
-				+ "&generation=" + counter;
-		GETEV.send(request, Document.getCallback());
-	}
-
 	public static int checkChangesPeriodSec;
 
 	public void LoadView() {
@@ -71,7 +70,8 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 		}
 		GET.send(url, this);
 
-		VREstate.RenewCheckChangesThread();
+		UpdatesFromServer.RegisterHandler(Document.get());
+		UpdatesFromServer.RenewCheckChangesThread();
 	}
 
 	I_AbstractView firstView = null;
@@ -79,6 +79,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 	@Override
 	public void onResponseReceived(Request request, Response response) {
 		String json = response.getText();
+		Document.progressBar = new ProgressBar();
 		if (Document.get().Parse(json)) {
 			Site site = (Site) Document.get().getSites().values().toArray()[0];
 			if (!Options.isViewOrder()
@@ -149,6 +150,16 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback {
 	public void onLoaded(KmlObject feature) {
 		if (feature != null)
 			GE.getPlugin().getFeatures().appendChild(feature);
+	}
+
+	@Override
+	public void onLoginSucceed() {
+		StartGE();
+	}
+
+	@Override
+	public void onLoginFailed() {
+		Log.write("Failed to Login");
 	}
 }
 // private static final String EARTH_API_KEY =

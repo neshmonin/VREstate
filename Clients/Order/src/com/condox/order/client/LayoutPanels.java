@@ -1,6 +1,6 @@
 package com.condox.order.client;
 
-import com.condox.order.client.utils.Log;
+import com.condox.clientshared.abstractview.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;

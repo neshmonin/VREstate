@@ -1,12 +1,13 @@
 package com.condox.vrestate.client.filter;
 
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import com.condox.vrestate.client.document.SuiteType;
+import com.condox.clientshared.document.SuiteType;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 

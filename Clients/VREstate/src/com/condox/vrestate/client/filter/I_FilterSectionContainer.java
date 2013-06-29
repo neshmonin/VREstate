@@ -1,8 +1,9 @@
 package com.condox.vrestate.client.filter;
 
+
 import java.util.Map;
 
-import com.condox.vrestate.client.document.SuiteType;
+import com.condox.clientshared.document.SuiteType;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 
 public interface I_FilterSectionContainer extends I_FilterSection{

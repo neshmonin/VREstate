@@ -1,12 +1,14 @@
 package com.condox.vrestate.client.filter;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.condox.vrestate.client.Log;
-import com.condox.vrestate.client.document.Suite;
-import com.condox.vrestate.client.document.Suite.Status;
+
+import com.condox.clientshared.abstractview.Log;
+import com.condox.clientshared.document.Suite;
+import com.condox.clientshared.document.Suite.Status;
 import com.condox.vrestate.client.filter.PriceSection.PriceType;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;

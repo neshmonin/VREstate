@@ -32,9 +32,6 @@
     <Setting Name="defaultDaysValidTemp" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">10</Value>
     </Setting>
-    <Setting Name="defaultDaysValidPermanent" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">120</Value>
-    </Setting>
     <Setting Name="the300charsTemplate" Type="System.String" Scope="Application">
       <Value Profile="(Default)">We created Interactive 3D Listing for this property:
 {0}
@@ -134,6 +131,9 @@ We are glad to help you with your highly competitive and challenging business.
 Yours,
 {8}
 {6}</Value>
+    </Setting>
+    <Setting Name="defaultDaysValidPermanent" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">365</Value>
     </Setting>
   </Settings>
 </SettingsFile>

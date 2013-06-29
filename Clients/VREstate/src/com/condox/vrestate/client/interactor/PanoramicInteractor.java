@@ -1,6 +1,7 @@
 package com.condox.vrestate.client.interactor;
 
-import com.condox.vrestate.client.Options;
+
+import com.condox.clientshared.communication.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.PanoramicView;
 import com.condox.vrestate.client.view._AbstractView;

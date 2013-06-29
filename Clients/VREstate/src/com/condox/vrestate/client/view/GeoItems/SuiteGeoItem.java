@@ -1,11 +1,13 @@
 package com.condox.vrestate.client.view.GeoItems;
 
-import com.condox.vrestate.client.Options;
-import com.condox.vrestate.client.Position;
-import com.condox.vrestate.client.document.Building;
-import com.condox.vrestate.client.document.Document;
-import com.condox.vrestate.client.document.Suite;
-import com.condox.vrestate.client.document.ViewOrder;
+
+import com.condox.clientshared.abstractview.IGeoItem;
+import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.document.Building;
+import com.condox.clientshared.document.Document;
+import com.condox.clientshared.document.Position;
+import com.condox.clientshared.document.Suite;
+import com.condox.clientshared.document.ViewOrder;
 import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view._AbstractView;
@@ -165,7 +167,7 @@ public class SuiteGeoItem implements IGeoItem {
 			Building parent = suite.getParent();
 			if ((parent != null) && (parent.hasAltitudeAdjustment())) {
 				point.setAltitude(position.getAltitude()
-						+ parent.getAltitudeAdjustment());
+						+ parent.getAltitudeAdjustment() + parent.getPosition().getAltitude());
 				point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_ABSOLUTE);
 			} else {
 				point.setAltitude(position.getAltitude());
@@ -251,6 +253,10 @@ public class SuiteGeoItem implements IGeoItem {
 	
 	private boolean isVisible(double heading_d) {
 		if (href == null) return false;
+		
+		double suiteHeading = suite.getPosition().getHeading();
+		if (suiteHeading == 1111)
+			return true;
 
 		heading_d += 180;
 		if (heading_d > 360)
@@ -300,7 +306,7 @@ public class SuiteGeoItem implements IGeoItem {
 	}
 	
 	public String getFloor_name() {
-		return suite.getFloor_name();
+		return suite.getFloorName();
 	}
 	
 	public int getCellingHeight() {

@@ -1,7 +1,7 @@
 package com.condox.vrestate.client.view;
 
+import com.condox.clientshared.abstractview.IGeoItem;
 import com.condox.vrestate.client.view.GeoItems.BuildingGeoItem;
-import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 
 public class SiteView extends _SB_View {

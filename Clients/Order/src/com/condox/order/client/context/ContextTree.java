@@ -1,7 +1,7 @@
 package com.condox.order.client.context;
 
+import com.condox.clientshared.abstractview.Log;
 import com.condox.order.client.presenter.PresenterFactory;
-import com.condox.order.client.utils.Log;
 
 public class ContextTree {
 	private ContextNode root;

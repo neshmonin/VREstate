@@ -1,19 +1,21 @@
 package com.condox.vrestate.client.view;
 
-import com.condox.vrestate.client.Options;
-import com.condox.vrestate.client.document.Building;
-import com.condox.vrestate.client.document.Document;
-import com.condox.vrestate.client.document.Site;
-import com.condox.vrestate.client.document.Suite;
-import com.condox.vrestate.client.document.SuiteType;
-import com.condox.vrestate.client.document.Suite.Status;
-import com.condox.vrestate.client.document.ViewOrder.ProductType;
+
+import com.condox.clientshared.abstractview.IGeoItem;
+import com.condox.clientshared.abstractview.I_AbstractView;
+import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.document.Building;
+import com.condox.clientshared.document.Document;
+import com.condox.clientshared.document.Site;
+import com.condox.clientshared.document.Suite;
+import com.condox.clientshared.document.SuiteType;
+import com.condox.clientshared.document.Suite.Status;
+import com.condox.clientshared.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.SuiteInteractor;
 import com.condox.vrestate.client.view.Camera.Camera;
 import com.condox.vrestate.client.view.GeoItems.BuildingGeoItem;
-import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -163,7 +165,7 @@ public class SuiteView extends _GEView {
 		JSONObject json = new JSONObject();
 		// Suite
 		json.put("VRT_name", new JSONString(suite.getName()));
-		json.put("VRT_floor", new JSONString(suite.getFloor_name()));
+		json.put("VRT_floor", new JSONString(suite.getFloorName()));
 		json.put("VRT_bedrooms", new JSONString(type.getRoomsStr()));
 		json.put("VRT_bathrooms", new JSONNumber(type.getBathrooms()));
 		if (type.getArea() > 0)
@@ -299,7 +301,7 @@ public class SuiteView extends _GEView {
 
 	@Override
 	public void setupCamera(I_AbstractView poppedView) {
-		setupStandardLookAtCamera(poppedView);
+		setupStandardLookAtCamera((_GEView)poppedView);
 		_camera.attributes.Heading_d = Camera.NormalizeHeading_d(theGeoItem
 				.getPosition().getHeading() + 180);
 	}

@@ -1,18 +1,21 @@
 package com.condox.vrestate.client.filter;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import com.condox.vrestate.client.Log;
-import com.condox.vrestate.client.Options;
-import com.condox.vrestate.client.document.SuiteType;
-import com.condox.vrestate.client.view.I_AbstractView;
+
+import com.condox.clientshared.abstractview.IGeoItem;
+import com.condox.clientshared.abstractview.I_AbstractView;
+import com.condox.clientshared.abstractview.I_Progress;
+import com.condox.clientshared.abstractview.Log;
+import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.document.SuiteType;
 import com.condox.vrestate.client.view.ProgressBar;
 import com.condox.vrestate.client.view._AbstractView;
-import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -227,13 +230,13 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 		
 		getFilteredInSuiteGeoItems().clear();
 
-		ProgressBar progressBar = new ProgressBar();
-		progressBar.Update(ProgressBar.ProgressLabel.Processing);
+		I_Progress progressBar = new ProgressBar();
+		progressBar.SetupProgress(I_Progress.ProgressType.Processing);
 
 		int howMany = _AbstractView.getSuiteGeoItems().size();
 		int count = 0;
 		for (SuiteGeoItem suiteGeo : _AbstractView.getSuiteGeoItems().values()) {
-			progressBar.Update(count * 100 / howMany);
+			progressBar.UpdateProgress(count * 100 / howMany);
 			if (suiteGeo.ShowIfFilteredIn())
 				getFilteredInSuiteGeoItems().put(suiteGeo.getId(), suiteGeo);
 			//else
@@ -243,7 +246,7 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 				
 			count++;
 		}
-		progressBar.Cleanup();
+		progressBar.CleanupProgress();
 
 		if (btnApply != null)
 			btnApply.setEnabled(true);

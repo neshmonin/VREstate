@@ -1,12 +1,15 @@
 package com.condox.vrestate.client.view;
 
-import com.condox.vrestate.client.Options;
+
+import com.condox.clientshared.abstractview.I_Progress;
+import com.condox.clientshared.abstractview.I_UpdatableView;
+import com.condox.clientshared.communication.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.OverlayHelpers;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
 
-public class ProgressBar extends OverlayHelpers implements I_UpdatableView {
+public class ProgressBar extends OverlayHelpers implements I_UpdatableView, I_Progress {
 
 	private OvlRectangle progressRect = null;
 	private OvlRectangle labelRect = null;
@@ -14,10 +17,6 @@ public class ProgressBar extends OverlayHelpers implements I_UpdatableView {
 	private KmlScreenOverlay progressOvl = null;
 	private String displayedProgress = null;
 	private String displayedLabel = "<none>";
-
-	public enum ProgressLabel {
-		Error, Loading, Processing, Executing, Wait, None
-	}
 
 	public ProgressBar() {
 		progressRect = new OvlRectangle(new OvlPoint(new OvlDimension(0.5f),
@@ -59,7 +58,7 @@ public class ProgressBar extends OverlayHelpers implements I_UpdatableView {
 		return progressUrl;
 	}
 
-	private String getLabelHref(ProgressLabel label) {
+	private String getLabelHref(ProgressType label) {
 		String hrefLabel = null;
 		switch (label) {
 		case Error:
@@ -82,10 +81,10 @@ public class ProgressBar extends OverlayHelpers implements I_UpdatableView {
 		}
 
 		OvlDimension dimX, dimY;
-		if (label == ProgressLabel.Error) {
+		if (label == ProgressType.Error) {
 			dimX = new OvlDimension(0.5f);
 			dimY = new OvlDimension(0.1f);
-		} else if (label == ProgressLabel.Wait) {
+		} else if (label == ProgressType.Wait) {
 			dimX = new OvlDimension(0.8f);
 			dimY = new OvlDimension(0.8f);
 		} else {
@@ -106,19 +105,32 @@ public class ProgressBar extends OverlayHelpers implements I_UpdatableView {
 
 	double percent = 0.0;
 
-	public void Update(double percent) {
+	/* (non-Javadoc)
+	 * @see com.condox.vrestate.client.view.I_Progress#Update(double)
+	 */
+	@Override
+	public void UpdateProgress(double percent) {
 		this.percent = percent;
 		onViewChanged();
 	}
 
-	ProgressLabel label = ProgressLabel.None;
+	ProgressType label = ProgressType.None;
 
-	public void Update(ProgressLabel label) {
+	/* (non-Javadoc)
+	 * @see com.condox.vrestate.client.view.I_Progress#Update(com.condox.vrestate.client.view.ProgressBar.ProgressLabel)
+	 */
+	@Override
+	public void SetupProgress(ProgressType label) {
+		UpdateProgress(-1.0);
 		this.label = label;
 		onViewChanged();
 	}
 
-	public void Cleanup() {
+	/* (non-Javadoc)
+	 * @see com.condox.vrestate.client.view.I_Progress#Cleanup()
+	 */
+	@Override
+	public void CleanupProgress() {
 		if (progressOvl != null) {
 			GE.getPlugin().getFeatures().removeChild(progressOvl);
 			progressOvl = null;

@@ -27,4 +27,10 @@
 		<nature>com.google.gwt.eclipse.core.gwtNature</nature>
 		<nature>org.eclipse.jem.beaninfo.BeanInfoNature</nature>
 	</natures>
+	<variableList>
+		<variable>
+			<name>CLIENTS_LOC</name>
+			<value>file:/C:/MyProjects/VirtualEstate/Trunk/GIT/VREstate/Clients</value>
+		</variable>
+	</variableList>
 </projectDescription>

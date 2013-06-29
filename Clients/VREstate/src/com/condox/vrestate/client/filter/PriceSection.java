@@ -1,9 +1,10 @@
 package com.condox.vrestate.client.filter;
 
+
 import java.util.ArrayList;
 
-import com.condox.vrestate.client.Log;
-import com.condox.vrestate.client.document.Suite;
+import com.condox.clientshared.abstractview.Log;
+import com.condox.clientshared.document.Suite;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -59,6 +60,11 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 				continue;
 				
 			int price = suiteGE.suite.getPrice();
+			if (priceType != PriceType.Rent) {
+				min_price = Math.min(min_price, price);
+				max_price = Math.max(max_price, price);
+			}
+			else
 			if (price > 0 && price < SuiteGeoItem.MaxRentTreshold) {
 				min_price = Math.min(min_price, price);
 				max_price = Math.max(max_price, price);

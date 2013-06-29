@@ -1,10 +1,11 @@
 package com.condox.vrestate.client.view;
 
-import com.condox.vrestate.client.Options;
-import com.condox.vrestate.client.document.Document;
-import com.condox.vrestate.client.document.ViewOrder.ProductType;
+
+import com.condox.clientshared.abstractview.IGeoItem;
+import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.document.Document;
+import com.condox.clientshared.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.view.GeoItems.BuildingGeoItem;
-import com.condox.vrestate.client.view.GeoItems.IGeoItem;
 
 public class BuildingView extends _SB_View {
 

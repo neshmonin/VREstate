@@ -1,7 +1,8 @@
 package com.condox.vrestate.client.interactor;
 
-import com.condox.vrestate.client.Log;
-import com.condox.vrestate.client.Options;
+
+import com.condox.clientshared.abstractview.Log;
+import com.condox.clientshared.communication.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.I_SB_View;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -181,7 +182,7 @@ public class SB_Interactor extends OverlayHelpers
 		else
 		{
 	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getTransitionSpeed());
-	        this.view.getCamera().Apply();
+	        this.view.ApplyCamera();
 	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getRegularSpeed());
 		}
 	}
