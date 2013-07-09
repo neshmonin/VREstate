@@ -69,9 +69,6 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I
 					+ Options.getSiteId() + "&track=true&SID=" + User.SID;
 		}
 		GET.send(url, this);
-
-		UpdatesFromServer.RegisterHandler(Document.get());
-		UpdatesFromServer.RenewCheckChangesThread();
 	}
 
 	I_AbstractView firstView = null;
@@ -122,6 +119,10 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I
 			}
 
 			_AbstractView.Push(firstView);
+
+			Document.abstractView = _AbstractView.getCurrentView();
+			UpdatesFromServer.RegisterHandler(Document.get());
+			UpdatesFromServer.RenewCheckChangesThread();
 		}
 		// =================================================================
 		// KmlIcon icon = GE.getPlugin().createIcon("");

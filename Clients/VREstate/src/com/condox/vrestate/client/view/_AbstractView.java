@@ -17,6 +17,7 @@ import com.condox.clientshared.document.I_VRObject;
 import com.condox.clientshared.document.Site;
 import com.condox.clientshared.document.Suite;
 import com.condox.clientshared.document.ViewOrder;
+import com.condox.clientshared.utils.StringFormatter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.I_AbstractInteractor;
 import com.condox.vrestate.client.view.Camera.Camera;
@@ -27,6 +28,7 @@ import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem.GeoStatus;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
+import com.nitrous.gwt.earth.client.api.KmlObject;
 import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
 import com.nitrous.gwt.earth.client.api.KmlUnits;
 import com.nitrous.gwt.earth.client.api.event.FrameEndListener;
@@ -375,6 +377,7 @@ public abstract class _AbstractView implements I_AbstractView {
 	private static Map<Integer, SiteGeoItem> siteGeoItems = new HashMap<Integer, SiteGeoItem>();
 	private static Map<Integer, BuildingGeoItem> buildingGeoItems = new HashMap<Integer, BuildingGeoItem>();
 	private static Map<Integer, SuiteGeoItem> suiteGeoItems = new HashMap<Integer, SuiteGeoItem>();
+	public static KmlObject wiresKmlObject = null;
 
 	// This static function creates all the GeoItems for the given
 	// Site and all obtained hierarchy of elements (BuildingGeo-s, SuiteGeo-s,
@@ -394,12 +397,15 @@ public abstract class _AbstractView implements I_AbstractView {
 
 		int count = 0;
 		int howMany = Document.get().getSuites().size();
+		String kmlGeoItems = "";
 		for (Suite suite : Document.get().getSuites().values()) {
-			addSuiteGeoItem(suite, false);
+			kmlGeoItems += addSuiteGeoItem(suite, false);
 
 			count++;
 			progressBar.UpdateProgress(count * 100.0 / howMany);
 		}
+
+		wiresKmlObject = GE_addKml(kmlGeoItems);
 
 		if (Document.targetViewOrder != null) {
 			if (Document.targetViewOrder.getProductType() == ViewOrder.ProductType.PrivateListing ||
@@ -414,6 +420,22 @@ public abstract class _AbstractView implements I_AbstractView {
 		}
 		
 		progressBar.CleanupProgress();
+	}
+	
+	private static KmlObject GE_addKml(String kmlGeoItems) {
+		String kmlWires = StringFormatter.format(
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<kml xmlns=\"http://www.opengis.net/kml/2.2\">" +
+					"<Document>" +
+						"{0}" +
+					"</Document>" +
+				"</kml>",
+				kmlGeoItems);
+
+		KmlObject wires = GE.getPlugin().parseKml(kmlWires);
+		GE.getPlugin().getFeatures().appendChild(wires);
+		
+		return wires;
 	}
 	
 	@Override
@@ -435,14 +457,14 @@ public abstract class _AbstractView implements I_AbstractView {
 				else {
 					// creating new SuiteGeoItem
 					suite.CalcLineCoords();
-					_AbstractView.addSuiteGeoItem(suite, true);
+					GE_addKml(_AbstractView.addSuiteGeoItem(suite, true));
 				}
 				break;
 			}
 		}
 	}
 
-	public static void addSuiteGeoItem(Suite suite, boolean redraw) {
+	public static String addSuiteGeoItem(Suite suite, boolean redraw) {
 		SuiteGeoItem suiteGeo = new SuiteGeoItem(suite);
 		if (suiteGeoItems.containsKey(suite.getId()))
 			Log.write("_AbstractView.addSiteGeoItem -> duplicate suiteGeoItem: suiteId="
@@ -453,6 +475,8 @@ public abstract class _AbstractView implements I_AbstractView {
 		suiteGeoItems.put(suite.getId(), suiteGeo);
 		if (redraw)
 			suiteGeo.ShowIfFilteredIn();
+		
+		return suiteGeo.kmlStyle + suiteGeo.kmlPlacemark;
 	}
 
 	public static SiteGeoItem getSiteGeoItem(int id) {

@@ -17,6 +17,7 @@ import com.condox.clientshared.document.SuiteType;
 import com.condox.vrestate.client.view.ProgressBar;
 import com.condox.vrestate.client.view._AbstractView;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
+import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem.GeoStatus;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.IFrameElement;
@@ -286,6 +287,9 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 
 	@Override
 	public boolean isFilteredIn(SuiteGeoItem suiteGI) {
+		if (suiteGI.getGeoStatus() == GeoStatus.Sold)
+			return false;
+
 		for (I_FilterSection section : sections)
 			if (!section.isFilteredIn(suiteGI))
 				return false;

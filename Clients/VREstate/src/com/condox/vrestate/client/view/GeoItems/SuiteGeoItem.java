@@ -8,6 +8,8 @@ import com.condox.clientshared.document.Document;
 import com.condox.clientshared.document.Position;
 import com.condox.clientshared.document.Suite;
 import com.condox.clientshared.document.ViewOrder;
+import com.condox.clientshared.document.Suite.Orientation;
+import com.condox.clientshared.utils.StringFormatter;
 import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view._AbstractView;
@@ -17,8 +19,8 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.nitrous.gwt.earth.client.api.KmlAltitudeMode;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
-import com.nitrous.gwt.earth.client.api.KmlLineString;
 import com.nitrous.gwt.earth.client.api.KmlMultiGeometry;
+import com.nitrous.gwt.earth.client.api.KmlObject;
 import com.nitrous.gwt.earth.client.api.KmlPlacemark;
 import com.nitrous.gwt.earth.client.api.KmlPoint;
 import com.nitrous.gwt.earth.client.api.KmlStyle;
@@ -39,6 +41,8 @@ public class SuiteGeoItem implements IGeoItem {
 
 	private final double initialRange_m = 30;
 	private final double initialTilt_d = 75;
+	public String kmlPlacemark = "";
+	public String kmlStyle = "";
 
 	public Suite suite = null;
 	GeoStatus geoStatus = GeoStatus.NotSupported;
@@ -67,81 +71,98 @@ public class SuiteGeoItem implements IGeoItem {
 			}
 		}
 		
+		String colorKml = "";
+		String widthKml = "";
 		float scale = 1.0F;
-		KmlStyle style = GE.getPlugin().createStyle("");
+		KmlStyle style = GE.getPlugin().createStyle("");		
+
 		switch (getGeoStatus()) {
 		case Available:
-			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
+			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=65280&shdClr=65280&frame=0";
-			style.getLineStyle().getColor().set("FF00FF00"); // GREEN
-			style.getLineStyle().setWidth(2.0F);
+			colorKml = "FF00FF00"; // GREEN
+			widthKml = "2";
 			break;
 		case OnHold:
-			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
+			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=16776960&shdClr=16776960&frame=0";
-			style.getLineStyle().getColor().set("FF00FFFF"); // YELLOW
-			style.getLineStyle().setWidth(2.0F);
+			colorKml = "FF00FFFF"; // YELLOW
+			widthKml = "2";
 			break;
 		case Sold:
 			if (Options.getShowSold()) {
-				href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
+				href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=16711680&shdClr=0&frame=0";
-				style.getLineStyle().getColor().set("FF0000FF"); // RED
-				style.getLineStyle().setWidth(2.0F);
+				colorKml = "FF0000FF"; // RED
+				widthKml = "2";
 			}
 			else
 			{
-				href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text=.&txtClr=0&shdClr=0&frame=0";
-				style.getLineStyle().getColor().set("00000000"); // transparent
-				style.getLineStyle().setWidth(2.0F);
+				href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text=.&txtClr=0&shdClr=0&frame=0";
+				colorKml = "00000000"; // transparent
+				widthKml = "2";
 			}
 			break;
 		case ResaleAvailable:
-			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
+			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=1048575&shdClr=0&frame=0";
-			style.getLineStyle().getColor().set("FFFFFF00"); // BLUE ??
-			style.getLineStyle().setWidth(2.0F);
+			colorKml = "FFFFFF00"; // LIGHT BLUE
+			widthKml = "2";
 			break;
 		case AvailableRent:
-			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
+			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=14854399&shdClr=0&frame=0";
-			style.getLineStyle().getColor().set("FFE2A8FF"); // PINK
-			style.getLineStyle().setWidth(2.0F);
+			colorKml = "FFE2A8FF"; // PINK
+			widthKml = "2";
 			break;
 		case Selected:
 			href = Options.HOME_URL + "gen/txt?height=30&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=16764108&shdClr=0&frame=0";
-			style.getLineStyle().getColor().set("FFCCCCFF"); // LIGHT-RED
-			style.getLineStyle().setWidth(4.0F);
+			colorKml = "FFCCCCFF"; // LIGHT RED
+			widthKml = "4";
 			scale = 1.0F;
 			break;
 		case Layout:
-			href = Options.HOME_URL + "gen/txt?height=20&shadow=2&text="
+			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=16777215&shdClr=0&frame=0";
-			style.getLineStyle().getColor().set("FFFFFFFF"); // WHITE
-			style.getLineStyle().setWidth(3.0F);
+			colorKml = "FFFFFFFF"; // WHITE
+			widthKml = "3";
 			break;
 		default:
 			break;
 		}
 	
+		kmlStyle = StringFormatter.format(
+				"<Style id=\"s{0}\">" +
+					"<LineStyle>" +
+						"<color>{1}</color>" +
+						"<width>{2}</width>" +
+					"</LineStyle>" +
+				"</Style>",
+				suite.getId(),
+				colorKml,
+				widthKml);
+
 		if (href == null) return;
 
 		KmlIcon icon = GE.getPlugin().createIcon("");
-	
+		
 		icon.setHref(href);
 		style.getIconStyle().setIcon(icon);
 		style.getIconStyle().setScale(scale);
 
-		if (extended_data_label == null)
-		{
+		String altitudeMode = "relativeToGround";
+
+		if (extended_data_label != null)
+			extended_data_label.setStyleSelector(style);
+		else {
 			extended_data_label = GE.getPlugin().createPlacemark("");
 			// Snippet
 			JSONObject obj = new JSONObject();
@@ -158,8 +179,14 @@ public class SuiteGeoItem implements IGeoItem {
 			KmlPoint point = GE.getPlugin().createPoint("");
 	
 			Position position = suite.getPosition();
-			position.setTilt(initialTilt_d);
-			position.setRange(initialRange_m);
+			if (suite.orientation == Orientation.Horizontal) {
+				position.setTilt(85);
+				position.setRange(50);
+			}
+			else {
+				position.setTilt(initialTilt_d);
+				position.setRange(initialRange_m);
+			}
 			
 			point.setLatitude(position.getLatitude());
 			point.setLongitude(position.getLongitude());
@@ -167,8 +194,9 @@ public class SuiteGeoItem implements IGeoItem {
 			Building parent = suite.getParent();
 			if ((parent != null) && (parent.hasAltitudeAdjustment())) {
 				point.setAltitude(position.getAltitude()
-						+ parent.getAltitudeAdjustment() + parent.getPosition().getAltitude());
+						+ parent.getAltitudeAdjustment() + parent.getPosition().getAltitude() + 1);
 				point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_ABSOLUTE);
+				altitudeMode = "absolute";
 			} else {
 				point.setAltitude(position.getAltitude());
 				point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND);
@@ -176,37 +204,56 @@ public class SuiteGeoItem implements IGeoItem {
 			
 			geometry1.getGeometries().appendChild(point);
 			extended_data_label.setGeometry(geometry1);
-			GE.getPlugin().getFeatures().appendChild(extended_data_label);
-		
-			extended_data_lines = GE.getPlugin().createPlacemark("");
-			
-			KmlMultiGeometry geometry2 = GE.getPlugin().createMultiGeometry("");
-			for (int j = 0; j < suite.getPoints().size(); j += 6) {
-				KmlLineString line_string = GE.getPlugin().createLineString("");
-				line_string
-						.setAltitudeMode(KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND);
-				if ((parent != null) && (parent.hasAltitudeAdjustment()))
-					line_string
-							.setAltitudeMode(KmlAltitudeMode.ALTITUDE_ABSOLUTE);
-		
-				line_string.getCoordinates().pushLatLngAlt(suite.getPoints().get(j + 0),
-						suite.getPoints().get(j + 1), suite.getPoints().get(j + 2));
-				line_string.getCoordinates().pushLatLngAlt(suite.getPoints().get(j + 3),
-						suite.getPoints().get(j + 4), suite.getPoints().get(j + 5));
-				geometry2.getGeometries().appendChild(line_string);
-			}
-			extended_data_lines.setGeometry(geometry2);
-			extended_data_lines.setStyleSelector(style);
 			extended_data_label.setStyleSelector(style);
-			GE.getPlugin().getFeatures().appendChild(extended_data_lines);
-		}
-		else
-		{
-			extended_data_lines.setStyleSelector(style);
-			extended_data_label.setStyleSelector(style);
-		}
-			
 
+			GE.getPlugin().getFeatures().appendChild(extended_data_label);
+		}
+	
+		/****************************************************/
+		String kmlLineStrings = "";
+		for (int j = 0; j < suite.getPoints().size(); j += 6) {
+			kmlLineStrings += StringFormatter.format(
+					"<LineString>" +
+						"<altitudeMode>{0}</altitudeMode>"+
+						"<coordinates>" +
+							"{1},{2},{3} {4},{5},{6} " +
+						"</coordinates>" +
+					"</LineString>", 
+					altitudeMode,
+					suite.getPoints().get(j + 1), 
+					suite.getPoints().get(j + 0),
+					suite.getPoints().get(j + 2),
+					suite.getPoints().get(j + 4),
+					suite.getPoints().get(j + 3),
+					suite.getPoints().get(j + 5)
+					);
+		}
+		
+		kmlPlacemark = StringFormatter.format(
+				"<Placemark id=\"{0}\">"+
+					"<styleUrl>#s{1}</styleUrl>"+
+					"<visibility>1</visibility>"+
+					"<MultiGeometry>" +
+						"{2}"+
+					"</MultiGeometry>" +
+				"</Placemark>", 
+				suite.getId(), 
+				suite.getId(), 
+				kmlLineStrings);
+
+		//String kmlWires = StringFormatter.format(
+		//		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+		//		"<kml xmlns=\"http://www.opengis.net/kml/2.2\">" +
+		//			"<Document>" +
+		//				"{0}" +
+		//			"</Document>" +
+		//		"</kml>", kmlStyle + kmlPlacemark);
+		
+		//extended_data_lines = (KmlPlacemark) GE.getPlugin().parseKml(kmlWires);
+
+		/****************************************************/
+
+		//GE.getPlugin().getFeatures().appendChild(GE.getPlugin().parseKml(kmlWires));
 	}
 	
 	public GeoStatus getGeoStatus() {
@@ -234,10 +281,16 @@ public class SuiteGeoItem implements IGeoItem {
 		if (!isFilteredIn && filteredOutNotificationHandler != null)
 			filteredOutNotificationHandler.onFilteredOut();
 
-		if (extended_data_lines.getVisibility() != isFilteredIn)
-			extended_data_lines.setVisibility(isFilteredIn);
+		//if (extended_data_lines.getVisibility() != isFilteredIn)
+		//	extended_data_lines.setVisibility(isFilteredIn);
 		if (extended_data_label.getVisibility() != isFilteredIn)
 			extended_data_label.setVisibility(isFilteredIn);
+		Integer intId = suite.getId();
+		KmlObject kmlObject = GE.getPlugin().getElementById(intId.toString());
+		if (kmlObject != null) {
+			KmlPlacemark wiresPlacemark = (KmlPlacemark) kmlObject; 
+			wiresPlacemark.setVisibility(isFilteredIn);
+		}
 		
 		return isFilteredIn;
 	}
@@ -254,14 +307,14 @@ public class SuiteGeoItem implements IGeoItem {
 	private boolean isVisible(double heading_d) {
 		if (href == null) return false;
 		
+		if (suite.orientation == Orientation.Horizontal)
+			return true; // always visible
+		
 		double suiteHeading = suite.getPosition().getHeading();
-		if (suiteHeading == 1111)
-			return true;
-
 		heading_d += 180;
 		if (heading_d > 360)
 			heading_d -= 360;
-		double diff = Math.abs(heading_d - suite.getPosition().getHeading());
+		double diff = Math.abs(heading_d - suiteHeading);
 		return (diff < 50) || (diff > 310);
 	}
 
@@ -299,11 +352,11 @@ public class SuiteGeoItem implements IGeoItem {
 		return extended_data_label;
 	}
 
-	private KmlPlacemark extended_data_lines = null;
+	//private KmlPlacemark extended_data_lines = null;
 	
-	public KmlPlacemark getExtendedDataLines() {
-		return extended_data_lines;
-	}
+	//public KmlPlacemark getExtendedDataLines() {
+	//	return extended_data_lines;
+	//}
 	
 	public String getFloor_name() {
 		return suite.getFloorName();
