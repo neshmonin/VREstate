@@ -1,4 +1,5 @@
-﻿using Vre.Server.BusinessLogic;
+﻿using System.Collections.Generic;
+using Vre.Server.BusinessLogic;
 
 namespace Vre.Server.Mls
 {
@@ -32,6 +33,7 @@ namespace Vre.Server.Mls
 	    public char Status;
         public double CurrentPrice;
 
+		public readonly Dictionary<string, string> RawData = new Dictionary<string, string>();
 
         public void SetSuite(Suite s)
         {

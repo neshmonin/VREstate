@@ -20,7 +20,7 @@ namespace Vre.Server.RemoteService
         public const string ServicePathPrefix = ServicePathElement0 + "/";
         private const string ServicePathElement0 = "data";
 
-        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction, Inventory, NamedSearchFilter }
+        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction, Inventory, NamedSearchFilter, MlsInfo }
 
         private static void configure()
         {
@@ -158,7 +158,21 @@ namespace Vre.Server.RemoteService
                     }
                     return;
 
-                case ModelObject.View:
+				case ModelObject.MlsInfo:
+					if (null == strObjectId)
+					{
+						if (-1 == objectId)
+							throw new NotImplementedException();
+						else
+							throw new FileNotFoundException();
+					}
+					else
+					{
+						getMlsInfo(request.UserInfo.Session, request.Request.Query, strObjectId, request.Response);
+					}
+					return;
+
+				case ModelObject.View:
                     getView(request, csrq);
                     return;
 
@@ -330,6 +344,7 @@ namespace Vre.Server.RemoteService
             else if (elements[1].Equals("ft")) mo = ModelObject.FinancialTransaction;
             else if (elements[1].Equals("inventory")) mo = ModelObject.Inventory;
 			else if (elements[1].Equals("nsf")) mo = ModelObject.NamedSearchFilter;
+			else if (elements[1].Equals("mlsInfo")) mo = ModelObject.MlsInfo;
 			else throw new ArgumentException("Object path is invalid (2).");
 
             strId = null;
@@ -340,7 +355,7 @@ namespace Vre.Server.RemoteService
             }
             else
             {
-                if (mo != ModelObject.ViewOrder)
+                if ((mo != ModelObject.ViewOrder) && (mo != ModelObject.MlsInfo))
                 {
                     if (!int.TryParse(elements[2], out id)) throw new ArgumentException("Object path is invalid (3).");
                 }
@@ -773,7 +788,39 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getViewOrder(ClientSession session, ServiceQuery query, string strObjectId, IResponseData resp)
+		private static void getMlsInfo(ClientSession session, ServiceQuery query, string strObjectId, IResponseData resp)
+		{
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
+			{
+				ViewOrder viewOrder = RetrieveViewOrder(session.DbSession, strObjectId, false);
+
+				resp.Data = convertViewOrderdata(session, viewOrder, query.GetParam("verbose", false));
+
+				resp.Data = new ClientData();
+				resp.Data.Add("voId", viewOrder.AutoID);
+				resp.Data.Add("mlsId", viewOrder.MlsId);
+
+				MlsInfo extraInfo;
+				using (var dao = new MlsInfoDao(session.DbSession))
+					extraInfo = dao.GetByMlsNum(viewOrder.MlsId);
+
+				// TODO: converting text->json->text
+				if (extraInfo != null)
+					resp.Data.Add("data", extraInfo.RawInfoAsClientData);
+
+				User u;
+				using (var dao = new UserDao(session.DbSession))
+					u = dao.GetById(viewOrder.OwnerId);
+
+				resp.Data.Add("brokerInfo", u.PersonalInfo);
+				if (u.BrokerInfo != null) resp.Data.Add("brokerage", u.BrokerInfo.GetClientData());
+
+				tran.Commit();
+			}
+			resp.ResponseCode = HttpStatusCode.OK;
+		}
+
+		private static void getViewOrder(ClientSession session, ServiceQuery query, string strObjectId, IResponseData resp)
         {
             ViewOrder viewOrder = RetrieveViewOrder(session.DbSession, strObjectId, true);
 
@@ -789,32 +836,38 @@ namespace Vre.Server.RemoteService
 
             if (verbose)
             {
-                string label = null;
-                switch (viewOrder.TargetObjectType)
-                {
-                    case ViewOrder.SubjectType.Building:
-                        {
-                            Building b;
-                            using (BuildingDao dao = new BuildingDao(session.DbSession))
-                                b = dao.GetById(viewOrder.TargetObjectId);
-                            label = AddressHelper.ConvertToReadableAddress(b, null);
-                        }
-                        break;
-
-                    case ViewOrder.SubjectType.Suite:
-                        {
-                            Suite s;
-                            using (SuiteDao dao = new SuiteDao(session.DbSession))
-                                s = dao.GetById(viewOrder.TargetObjectId);
-                            label = AddressHelper.ConvertToReadableAddress(s.Building, s);
-                        }
-                        break;
-                }
+				string label = retrieveViewOrderAddress(session, viewOrder);
                 if (label != null) result.Add("label", label);
             }
 
             return result;
         }
+
+		private static string retrieveViewOrderAddress(ClientSession session, ViewOrder viewOrder)
+		{
+			string label = null;
+			switch (viewOrder.TargetObjectType)
+			{
+				case ViewOrder.SubjectType.Building:
+					{
+						Building b;
+						using (BuildingDao dao = new BuildingDao(session.DbSession))
+							b = dao.GetById(viewOrder.TargetObjectId);
+						label = AddressHelper.ConvertToReadableAddress(b, null);
+					}
+					break;
+
+				case ViewOrder.SubjectType.Suite:
+					{
+						Suite s;
+						using (SuiteDao dao = new SuiteDao(session.DbSession))
+							s = dao.GetById(viewOrder.TargetObjectId);
+						label = AddressHelper.ConvertToReadableAddress(s.Building, s);
+					}
+					break;
+			}
+			return label;
+		}
 
         private static void getViewOrderList(ClientSession session, ServiceQuery query, IResponseData resp, bool includeDeleted)
         {
@@ -890,7 +943,7 @@ namespace Vre.Server.RemoteService
 
             using (var tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
-				viewOrder = RetrieveViewOrder(session.DbSession, request.Request.Query["id"], request.Request, false);
+				viewOrder = RetrieveViewOrder(request, false);
 				
                 viewOrderValid = (viewOrder.Enabled && (viewOrder.ExpiresOn > DateTime.UtcNow));
 
@@ -1348,7 +1401,7 @@ namespace Vre.Server.RemoteService
             ISession session, ref IResponseData response,
             ref IList<Building> buildings, ref IList<Suite> suites)
         {
-            generateViewResponse(session, null, null, null, suites, null, Guid.Empty, response,
+            generateViewResponse(session, null, buildings, null, suites, null, Guid.Empty, response,
                 new ViewSettings(true), true, true);
         }
 
@@ -1918,35 +1971,43 @@ namespace Vre.Server.RemoteService
 			using (ViewOrderDao dao = new ViewOrderDao(session))
 				viewOrder = dao.GetById(rqid);
 
-			if ((null == viewOrder) || (viewOrder.Deleted && !canBeDeleted)) throw new FileNotFoundException("Undefined view order");
+			if ((null == viewOrder) || (viewOrder.Deleted && !canBeDeleted))
+				throw new FileNotFoundException("Undefined view order");
 
 			return viewOrder;
 		}
 
-        internal static ViewOrder RetrieveViewOrder(ISession session, string id, IRequestData request, bool canBeDeleted)
+        internal static ViewOrder RetrieveViewOrder(IServiceRequest request, bool canBeDeleted)
         {
-			ViewOrder result = RetrieveViewOrder(session, id, canBeDeleted);
-			if (result != null)
+			var sqry = request.Request.Query;
+			var dbSession = request.UserInfo.Session.DbSession;
+
+			var result = RetrieveViewOrder(dbSession, sqry["id"], canBeDeleted);
+
+			if ((result != null) && (result.Product == ViewOrder.ViewOrderProduct.Building3DLayout))
 			{
-				string debugServerEndpoint = request.Query["gwt.codesvr"];
-				bool debugMode = ((debugServerEndpoint != null) && debugServerEndpoint.StartsWith("127.0.0.1"));
+				string debugServerEndpoint = sqry["gwt.codesvr"];
+				bool debugMode = 
+					((debugServerEndpoint != null) 
+					&& debugServerEndpoint.StartsWith("127.0.0.1"));
 
 				if (debugMode)
-					debugMode = _debugClientFilter.IsInRange(request.EndPoint.Address);
+					debugMode = _debugClientFilter.IsInRange(request.Request.EndPoint.Address);
 
-				if (!debugMode)
+				if (!debugMode && (request.UserInfo.Session.User.UserRole == User.Role.Visitor))
 				{
 					User u;
-					using (var dao = new UserDao(session)) u = dao.GetById(result.OwnerId);
+					using (var dao = new UserDao(dbSession)) u = dao.GetById(result.OwnerId);
 					if (u.RefererRestriction != null)
 					{
-						if (null == request.Referer)
+						var referer = request.Request.Referer;
+						if (null == referer)
 						{
 							ServiceInstances.Logger.Error("RQZ-0");
 							throw new FileNotFoundException("Undefined view order");
 						}
 
-						string testReferer = request.Referer.ToString();
+						string testReferer = referer.ToString();
 						foreach (string suri in u.RefererRestriction)
 						{
 							if (suri.StartsWith("^"))

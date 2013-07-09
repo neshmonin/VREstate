@@ -496,6 +496,8 @@ namespace Vre.Server.BusinessLogic
 					changed = true;
 				}
 
+				// TODO: Take special care of manually created ViewOrders (e.g. BuyingAgent's orders)?
+
 				if (!string.IsNullOrEmpty(item.VTourUrl))
 				{
 					if (string.IsNullOrEmpty(vo.VTourUrl) || !vo.VTourUrl.Equals(item.VTourUrl))
@@ -523,6 +525,9 @@ namespace Vre.Server.BusinessLogic
 					}
 				}
 
+				// Update extra information
+				ImportUpdateMlsInfo(item);
+				
 				if (!changed) return;
 				adj++;
 				tran.Commit();
@@ -572,6 +577,9 @@ namespace Vre.Server.BusinessLogic
 					InfoUrl = string.Format("http://realtor.ca/Disclaimer.aspx?Mode=5&id={0}", item.MlsId)
 				};
 				// todo: what's default listing lifetime?!
+
+				// Import extra information
+				ImportUpdateMlsInfo(item);
 
 				using (var tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
 				{
@@ -676,6 +684,31 @@ namespace Vre.Server.BusinessLogic
 			}
 
 			return result;
+		}
+
+		private void ImportUpdateMlsInfo(MlsItem item)
+		{
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(_session))
+			{
+				MlsInfo info;
+				using (var dao = new MlsInfoDao(_session.DbSession))
+				{
+					info = dao.GetByMlsNum(item.MlsId);
+
+					if (info != null)
+					{
+						info.Update(item);
+						if (info.Deleted) info.Undelete();
+						dao.Update(info);
+					}
+					else
+					{
+						info = new MlsInfo(item);
+						dao.Create(info);
+					}
+				}
+				tran.Commit();
+			}
 		}
 	}
 }

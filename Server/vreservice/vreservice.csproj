@@ -131,6 +131,7 @@
     <Compile Include="BusinessObjects\FileStorageItem.cs" />
     <Compile Include="BusinessObjects\FinancialTransactionExt.cs" />
     <Compile Include="BusinessObjects\Localization.cs" />
+    <Compile Include="BusinessObjects\MlsInfo.cs" />
     <Compile Include="BusinessObjects\ReverseRequest.cs" />
     <Compile Include="ChangeLog\ChangeLog.cs" />
     <Compile Include="CommandMode\CommandHandler.cs" />
@@ -141,6 +142,7 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Dao\AccountDao.cs" />
     <Compile Include="Dao\BuildingDao.cs" />
+    <Compile Include="Dao\MlsInfoDao.cs" />
     <Compile Include="Dao\NamedSearchFilterDao.cs" />
     <Compile Include="Dao\FinancialTransactionDao.cs" />
     <Compile Include="Dao\ViewOrderDao.cs" />
@@ -268,6 +270,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Mappings\NamedSearchFilter.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\MlsInfo.hbm.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <Content Include="SQL\Constraint\Account.sql" />
