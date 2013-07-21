@@ -164,6 +164,13 @@ namespace Vre.Server.RemoteService
 
     internal class ClientSession : IDisposable
     {
+		private static bool _allowExtendedLogging;
+
+		static ClientSession()
+		{
+			_allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
+		}
+
         private readonly object _dbSessionLock = new object();
         private readonly object _subscriptionMgmtLock = new object();
         private readonly object _eventThreadLock = new object();
@@ -538,6 +545,9 @@ namespace Vre.Server.RemoteService
                 Thread.CurrentThread.Name = "HttpPush#" + Thread.CurrentThread.ManagedThreadId.ToString();
                 _eventThreadName = Thread.CurrentThread.Name;
 
+				if (_allowExtendedLogging)
+					ServiceInstances.Logger.Debug("Started for {0}", User);
+
                 IList<Building> buildings = null;
                 IList<Suite> suites = null;
 
@@ -563,8 +573,17 @@ namespace Vre.Server.RemoteService
                         break;
                 }
 
-                if ((buildings != null) && (suites != null))
-                    DataService.GenerateEventDataResponse(this.DbSession, ref ctx, ref buildings, ref suites);
+				if ((buildings != null) && (suites != null))
+				{
+					DataService.GenerateEventDataResponse(this.DbSession, ref ctx, ref buildings, ref suites);
+					if (_allowExtendedLogging)
+					{
+						if ((buildings.Count > 0) || (suites.Count > 0))
+							ServiceInstances.Logger.Debug("Responding with data for {0}", User);
+						else
+							ServiceInstances.Logger.Debug("Responding default for {0}", User);
+					}
+				}
 
                 if (dbSessionResumed) { Disconnect(false); dbSessionResumed = false; }
 
@@ -575,12 +594,18 @@ namespace Vre.Server.RemoteService
             {
                 Disconnect(true);  // no need for check; if we get this exception - session WAS resumed.
                 ctx.ProcessResponse(ex);
-            }
+
+				if (_allowExtendedLogging)
+					ServiceInstances.Logger.Error("Processing for {0} failed: {1}", User, ex);
+			}
             catch (Exception ex)
             {
                 if (dbSessionResumed) Disconnect(false);
                 ctx.ProcessResponse(ex);
-            }
+
+				if (_allowExtendedLogging)
+					ServiceInstances.Logger.Error("Processing for {0} failed: {1}", User, ex);
+			}
             finally
             {
                 Interlocked.Decrement(ref _eventThreadCounter);
