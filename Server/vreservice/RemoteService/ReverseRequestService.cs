@@ -463,26 +463,28 @@ namespace Vre.Server.RemoteService
         #endregion
 
         #region ViewOrder
-        public static string CreateViewOrder(IServiceRequest srq, User targetUser, string note,
+        public static ViewOrder CreateViewOrder(IServiceRequest srq, User targetUser, string note,
             ViewOrder.ViewOrderProduct product, ViewOrder.ViewOrderOptions options, string mlsId, string mlsUrl,
-            ViewOrder.SubjectType type, int targetObjectId, string productUrl, DateTime expiresOn,
+            ViewOrder.SubjectType type, int targetObjectId, 
+			string productUrl, DateTime expiresOn,
             string paymentSystemRefId)
         {
             if (!_configured) configure();
 
-            string result = null;
             ViewOrder viewOrder;
+			FinancialTransaction ft;
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(srq.UserInfo.Session.DbSession))
             {
                 switch (product)
                 {
                     case ViewOrder.ViewOrderProduct.PrivateListing:
-                        using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))
-                        {
-                            if (dao.GetActive(type, targetObjectId).Count > 0)
-                                throw new ObjectExistsException("Listing cannot be created.");  // TODO: should this be exposed?!
-                        }
+						// CAN have multiple private listings.
+						//using (ViewOrderDao dao = new ViewOrderDao(srq.UserInfo.Session.DbSession))
+						//{
+						//    if (dao.GetActive(type, targetObjectId).Count > 0)
+						//        throw new ObjectExistsException("Listing cannot be created.");  // TODO: should this be exposed?!
+						//}
                         break;
 
                     case ViewOrder.ViewOrderProduct.PublicListing:
@@ -512,7 +514,7 @@ namespace Vre.Server.RemoteService
 
                 // Generate financial transaction
                 //
-                FinancialTransaction ft = new FinancialTransaction(srq.UserInfo.Session.User.AutoID,
+                ft = new FinancialTransaction(srq.UserInfo.Session.User.AutoID,
                     FinancialTransaction.AccountType.User, targetUser.AutoID,
                     FinancialTransaction.OperationType.Debit, 0m,
                     FinancialTransaction.TranSubject.View,
@@ -528,24 +530,22 @@ namespace Vre.Server.RemoteService
                     dao.Update(ft);
                 }
 
-                result = ft.SystemRefId;
-
                 srq.Response.ResponseCode = HttpStatusCode.OK;
                 srq.Response.Data = new ClientData();
                 srq.Response.Data.Add("viewOrder-url", ConstructViewOrderUrl(viewOrder));
                 srq.Response.Data.Add("viewOrder-id", viewOrder.AutoID);
                 // TODO: generate button into listing response
                 //srq.Response.Data.Add("button-url", string.Format(_listingUrlTemplate, request.Id.ToString("N")));
-                srq.Response.Data.Add("ref", result);
+				srq.Response.Data.Add("ref", ft.SystemRefId);
 
                 tran.Commit();
             }
 
             ServiceInstances.Logger.Info(
                 "User {0} created a view order for user {1}: ({2}) for {3} id={4}, reference URL={5}, expires on {6} UTC, RID={7}, STRN={8}",
-                srq.UserInfo.Session.User, targetUser, product, type, targetObjectId, productUrl, expiresOn, viewOrder.AutoID, result);
+				srq.UserInfo.Session.User, targetUser, product, type, targetObjectId, productUrl, expiresOn, viewOrder.AutoID, ft.SystemRefId);
 
-            return result;
+            return viewOrder;
         }
 
         public static string ConstructViewOrderUrl(ViewOrder viewOrder)
