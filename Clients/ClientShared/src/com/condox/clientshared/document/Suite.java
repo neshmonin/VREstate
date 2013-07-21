@@ -29,6 +29,11 @@ public class Suite implements I_VRObject {
 	private String vTourUrl = null;
 	private String infoUrl = null;
 	private String floorplan_url = "";
+	public enum Orientation {
+		Normal,
+		Horizontal
+	}
+	public Orientation orientation = Orientation.Normal;
 
 	void ParseDynamic(JSONObject obj) {
 		JSONString _name = obj.get("name").isString();
@@ -95,6 +100,9 @@ public class Suite implements I_VRObject {
 		int type_id = (int) obj.get("suiteTypeId").isNumber().doubleValue();
 
 		suite_type = Document.get().getSuiteTypes().get(type_id);
+		if (suite_type.getName().endsWith("-HORIZ-"))
+			orientation = Orientation.Horizontal;
+		
 		price = -1;
 		if ((obj.get("currentPrice") != null)
 				&& (obj.get("currentPrice").isNumber() != null)
