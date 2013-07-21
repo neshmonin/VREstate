@@ -7,33 +7,54 @@ namespace Vre.Server
     public class ModelImportSettings
     {
         private Dictionary<string, string> _settings = new Dictionary<string, string>();
+		private string _settingsFileName;
 
         public ModelImportSettings(string settingsFileName)
         {
             int lineNum = 0;
-            BasePath = Path.GetDirectoryName(settingsFileName);
-            using (StreamReader rdr = File.OpenText(settingsFileName))
-            {
-                while (!rdr.EndOfStream)
-                {
-                    lineNum++;
-                    string line = rdr.ReadLine().Trim();
+			_settingsFileName = settingsFileName;
+            BasePath = Path.GetDirectoryName(_settingsFileName);
+			if (File.Exists(_settingsFileName))
+			{
+				using (StreamReader rdr = File.OpenText(_settingsFileName))
+				{
+					while (!rdr.EndOfStream)
+					{
+						lineNum++;
+						string line = rdr.ReadLine().Trim();
 
-                    if (0 == line.Length) continue;  // empty
-                    if (line.StartsWith(";")) continue;  // comment
+						if (0 == line.Length) continue;  // empty
+						if (line.StartsWith(";")) continue;  // comment
 
-                    string[] parts = line.Split('=');
-                    if (parts.Length != 2)
-                        throw new ApplicationException("Line " + lineNum + " format is not valid.");
+						string[] parts = line.Split('=');
+						if (parts.Length != 2)
+							throw new ApplicationException("Line " + lineNum + " format is not valid.");
 
-                    string key = parts[0].Trim();
-                    if (_settings.ContainsKey(key))
-                        throw new ApplicationException("Line " + lineNum + " contains duplicate setting key.");
+						string key = parts[0].Trim();
+						if (_settings.ContainsKey(key))
+							throw new ApplicationException("Line " + lineNum + " contains duplicate setting key.");
 
-                    _settings.Add(key, parts[1].Trim());
-                }
-            }
+						_settings.Add(key, parts[1].Trim());
+					}
+				}
+			}
         }
+
+		public void Save()
+		{
+			using (var wrt = File.CreateText(_settingsFileName))
+			{
+				wrt.WriteLine("; 3D Condo Explorer model import settings");
+				if (string.IsNullOrWhiteSpace(BuildingToImportName))
+					wrt.WriteLine("; {0} - complete site", SiteName);
+				else
+					wrt.WriteLine("; {0} - single building", BuildingToImportName);
+				wrt.WriteLine();
+
+				foreach (var kvp in _settings)
+					wrt.WriteLine("{0} = {1}", kvp.Key, kvp.Value);
+			}
+		}
 
         private string getSetting(string key, string defaultValue)
         {
@@ -42,30 +63,108 @@ namespace Vre.Server
             return defaultValue;
         }
 
+		private void putSetting(string key, string value)
+		{
+			if (!string.IsNullOrWhiteSpace(value)) _settings[key] = value;
+			else _settings.Remove(key);
+		}
+
         public string BasePath { get; private set; }
 
-        public string ModelFileName { get { return getSetting("ModelFileName", "wires.kmz"); } }
-        public string SuiteTypeInfoFileName { get { return getSetting("SuiteTypeInfoFileName", "suitetypes.csv"); } }
-        public string FloorplanDirectoryName { get { return getSetting("FloorplanDirectoryName", "floorplans"); } }
+        public string ModelFileName 
+		{ 
+			get { return getSetting("ModelFileName", "wires.kmz"); }
+			set { putSetting("ModelFileName", value); }
+		}
+        public string SuiteTypeInfoFileName 
+		{ 
+			get { return getSetting("SuiteTypeInfoFileName", "suitetypes.csv"); }
+			set { putSetting("SuiteTypeInfoFileName", value); }
+		}
+        public string FloorplanDirectoryName 
+		{ 
+			get { return getSetting("FloorplanDirectoryName", "floorplans"); }
+			set { putSetting("FloorplanDirectoryName", value); }
+		}
 
-        public string EstateDeveloperName { get { return getSetting("EstateDeveloperName", null); } }
-        public string SiteName { get { return getSetting("SiteName", null); } }
+        public string EstateDeveloperName 
+		{ 
+			get { return getSetting("EstateDeveloperName", null); }
+			set { putSetting("EstateDeveloperName", value); }
+		}
+        public string SiteName 
+		{ 
+			get { return getSetting("SiteName", null); }
+			set { putSetting("SiteName", value); }
+		}
 
-        public string DisplayModelFileName { get { return getSetting("DisplayModelFileName", null); } }
-        public string OverlayModelFileName { get { return getSetting("OverlayModelFileName", null); } }
-        public string PoiModelFileName { get { return getSetting("PoiModelFileName", null); } }
+        public string DisplayModelFileName 
+		{
+			get { return getSetting("DisplayModelFileName", null); }
+			set { putSetting("DisplayModelFileName", value); }
+		}
+        public string OverlayModelFileName 
+		{ 
+			get { return getSetting("OverlayModelFileName", null); }
+			set { putSetting("OverlayModelFileName", value); }
+		}
+        public string PoiModelFileName 
+		{ 
+			get { return getSetting("PoiModelFileName", null); }
+			set { putSetting("PoiModelFileName", value); }
+		}
 
-        public string BubbleWebTemplateFileName { get { return getSetting("BubbleWebTemplateFileName", null); } }
-        public string BubbleKioskTemplateFileName { get { return getSetting("BubbleKioskTemplateFileName", null); } }
+        public string BubbleWebTemplateFileName 
+		{ 
+			get { return getSetting("BubbleWebTemplateFileName", null); }
+			set { putSetting("BubbleWebTemplateFileName", value); }
+		}
+        public string BubbleKioskTemplateFileName 
+		{ 
+			get { return getSetting("BubbleKioskTemplateFileName", null); }
+			set { putSetting("BubbleKioskTemplateFileName", value); }
+		}
 
-        public string NewBuildingStatusName { get { return getSetting("NewBuildingStatus", "Built"); } }
-        public string NewSuiteStatusName { get { return getSetting("NewSuiteStatus", "Sold"); } }
+        public string NewBuildingStatusName 
+		{ 
+			get { return getSetting("NewBuildingStatus", "Built"); }
+			set { putSetting("NewBuildingStatus", value); }
+		}
+        public string NewSuiteStatusName 
+		{ 
+			get { return getSetting("NewSuiteStatus", "Sold"); }
+			set { putSetting("NewSuiteStatus", value); }
+		}
 
-        public string BuildingToImportName { get { return getSetting("BuildingToImportName", null); } }
-        public string BuildingStreetAddress { get { return getSetting("BuildingStreetAddress", null); } }
-        public string BuildingMunicipality { get { return getSetting("BuildingMunicipality", null); } }
-        public string BuildingStateProvince { get { return getSetting("BuildingStateProvince", null); } }
-        public string BuildingPostalCode { get { return getSetting("BuildingPostalCode", null); } }
-        public string BuildingCountry { get { return getSetting("BuildingCountry", null); } }
+        public string BuildingToImportName 
+		{ 
+			get { return getSetting("BuildingToImportName", null); }
+			set { putSetting("BuildingToImportName", value); }
+		}
+        public string BuildingStreetAddress 
+		{ 
+			get { return getSetting("BuildingStreetAddress", null); }
+			set { putSetting("BuildingStreetAddress", value); }
+		}
+        public string BuildingMunicipality 
+		{ 
+			get { return getSetting("BuildingMunicipality", null); }
+			set { putSetting("BuildingMunicipality", value); }
+		}
+        public string BuildingStateProvince 
+		{ 
+			get { return getSetting("BuildingStateProvince", null); }
+			set { putSetting("BuildingStateProvince", value); }
+		}
+        public string BuildingPostalCode 
+		{ 
+			get { return getSetting("BuildingPostalCode", null); }
+			set { putSetting("BuildingPostalCode", value); }
+		}
+        public string BuildingCountry 
+		{ 
+			get { return getSetting("BuildingCountry", null); }
+			set { putSetting("BuildingCountry", value); }
+		}
     }
 }
