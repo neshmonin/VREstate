@@ -95,7 +95,6 @@ namespace Vre.Server.ModelCache
                                             else
                                             {
                                                 _cacheBySite.Add(s.AutoID, mc);
-                                                updateGeoInfo(mc);
                                             }
                                         }
                                     }
@@ -106,8 +105,8 @@ namespace Vre.Server.ModelCache
                 }
 
                 long currUsedMemoryBytes = GC.GetTotalMemory(true);
-                ServiceInstances.Logger.Info("MC: Reading model files done; memory used: {0} bytes (delta={1}), {2} building models, {3} site models, {4} geo-proximity cache entries.", 
-                    currUsedMemoryBytes, currUsedMemoryBytes - origUsedMemoryBytes, _cacheByBuilding.Count, _cacheBySite.Count, _buildingGeoXref.Count);
+                ServiceInstances.Logger.Info("MC: Reading model files done; memory used: {0} bytes (delta={1}), {2} building models, {3} site models.", 
+                    currUsedMemoryBytes, currUsedMemoryBytes - origUsedMemoryBytes, _cacheByBuilding.Count, _cacheBySite.Count);
 
 // TODO: TEMP TESTING!!!
 //new Thread(aaTestThread) { IsBackground = true }.Start();
@@ -184,131 +183,131 @@ namespace Vre.Server.ModelCache
         }
         #endregion
 
-        /// <summary>
-        /// Generic auto type-resolving version
-        /// </summary>
-        public bool FillWithModelInfo(UpdateableBase target, bool withSubObjects)
-        {
-            bool result = false;
+		///// <summary>
+		///// Generic auto type-resolving version
+		///// </summary>
+		//public bool FillWithModelInfo(UpdateableBase target, bool withSubObjects)
+		//{
+		//    bool result = false;
 
-            Site site = target as Site;
-            if (site != null)
-            {
-                result = FillWithModelInfo(site, withSubObjects);
-            }
-            else
-            {
-                Building building = target as Building;
-                if (building != null)
-                {
-                    result = FillWithModelInfo(building, withSubObjects);
-                }
-                else
-                {
-                    Suite suite = target as Suite;
-                    if (suite != null)
-                    {
-                        result = FillWithModelInfo(suite, withSubObjects);
-                    }
-                    else
-                    {
-                        SuiteType suiteType = target as SuiteType;
-                        if (suiteType != null)
-                        {
-                            result = FillWithModelInfo(suiteType, withSubObjects);
-                        }
-                    }
-                }
-            }
+		//    Site site = target as Site;
+		//    if (site != null)
+		//    {
+		//        result = FillWithModelInfo(site, withSubObjects);
+		//    }
+		//    else
+		//    {
+		//        Building building = target as Building;
+		//        if (building != null)
+		//        {
+		//            result = FillWithModelInfo(building, withSubObjects);
+		//        }
+		//        else
+		//        {
+		//            Suite suite = target as Suite;
+		//            if (suite != null)
+		//            {
+		//                result = FillWithModelInfo(suite, withSubObjects);
+		//            }
+		//            else
+		//            {
+		//                SuiteType suiteType = target as SuiteType;
+		//                if (suiteType != null)
+		//                {
+		//                    result = FillWithModelInfo(suiteType, withSubObjects);
+		//                }
+		//            }
+		//        }
+		//    }
 
-            return result;
-        }
+		//    return result;
+		//}
 
-        public bool FillWithModelInfo(Site site, bool withSubObjects)
-        {
-            bool result = false;
-            ModelCache mc = null;
+		//public bool FillWithModelInfo(Site site, bool withSubObjects)
+		//{
+		//    bool result = false;
+		//    ModelCache mc = null;
 
-            lock (this)
-            {
-                if (null != _watcher)  // initialized
-                {
-                    result = _cacheBySite.TryGetValue(site.AutoID, out mc);
-                }
-            }
+		//    lock (this)
+		//    {
+		//        if (null != _watcher)  // initialized
+		//        {
+		//            result = _cacheBySite.TryGetValue(site.AutoID, out mc);
+		//        }
+		//    }
 
-            if (result) mc.UpdateBo(site, withSubObjects);
+		//    if (result) mc.UpdateBo(site, withSubObjects);
 
-            return result;
-        }
+		//    return result;
+		//}
 
-        public bool FillWithModelInfo(SuiteType suiteType, bool withSubObjects)
-        {
-            bool result = false;
-            ModelCache mc = null;
+		//public bool FillWithModelInfo(SuiteType suiteType, bool withSubObjects)
+		//{
+		//    bool result = false;
+		//    ModelCache mc = null;
 
-            lock (this)
-            {
-                if (null != _watcher)  // initialized
-                {
-                    result = _cacheBySite.TryGetValue(suiteType.ConstructionSite.AutoID, out mc);
-                }
-            }
+		//    lock (this)
+		//    {
+		//        if (null != _watcher)  // initialized
+		//        {
+		//            result = _cacheBySite.TryGetValue(suiteType.ConstructionSite.AutoID, out mc);
+		//        }
+		//    }
 
-            if (result) mc.UpdateBo(suiteType, withSubObjects);
+		//    if (result) mc.UpdateBo(suiteType, withSubObjects);
 
-            return result;
-        }
+		//    return result;
+		//}
 
-        public bool FillWithModelInfo(Building building, bool withSubObjects)
-        {
-            bool result = false;
-            ModelCache mc = null;
+		//public bool FillWithModelInfo(Building building, bool withSubObjects)
+		//{
+		//    bool result = false;
+		//    ModelCache mc = null;
 
-            lock (this)
-            {
-                if (null != _watcher)  // initialized
-                {
-                    if (_cacheByBuilding.TryGetValue(building.AutoID, out mc))
-                    {
-                        result = true;
-                    }
-                    else if (_cacheBySite.TryGetValue(building.ConstructionSite.AutoID, out mc))
-                    {
-                        result = true;
-                    }
-                }
-            }
+		//    lock (this)
+		//    {
+		//        if (null != _watcher)  // initialized
+		//        {
+		//            if (_cacheByBuilding.TryGetValue(building.AutoID, out mc))
+		//            {
+		//                result = true;
+		//            }
+		//            else if (_cacheBySite.TryGetValue(building.ConstructionSite.AutoID, out mc))
+		//            {
+		//                result = true;
+		//            }
+		//        }
+		//    }
 
-            if (result) mc.UpdateBo(building, withSubObjects);
+		//    if (result) mc.UpdateBo(building, withSubObjects);
 
-            return result;
-        }
+		//    return result;
+		//}
 
-        public bool FillWithModelInfo(Suite suite, bool withSubObjects)
-        {
-            bool result = false;
-            ModelCache mc = null;
+		//public bool FillWithModelInfo(Suite suite, bool withSubObjects)
+		//{
+		//    bool result = false;
+		//    ModelCache mc = null;
 
-            lock (this)
-            {
-                if (null != _watcher)  // initialized
-                {
-                    if (_cacheByBuilding.TryGetValue(suite.Building.AutoID, out mc))
-                    {                        
-                        result = true;
-                    }
-                    else if (_cacheBySite.TryGetValue(suite.Building.ConstructionSite.AutoID, out mc))
-                    {
-                        result = true;
-                    }
-                }
-            }
+		//    lock (this)
+		//    {
+		//        if (null != _watcher)  // initialized
+		//        {
+		//            if (_cacheByBuilding.TryGetValue(suite.Building.AutoID, out mc))
+		//            {                        
+		//                result = true;
+		//            }
+		//            else if (_cacheBySite.TryGetValue(suite.Building.ConstructionSite.AutoID, out mc))
+		//            {
+		//                result = true;
+		//            }
+		//        }
+		//    }
 
-            if (result) mc.UpdateBo(suite, withSubObjects);
+		//    if (result) mc.UpdateBo(suite, withSubObjects);
 
-            return result;
-        }
+		//    return result;
+		//}
 
         private void tryAddNewModel(string path)
         {
@@ -358,7 +357,6 @@ namespace Vre.Server.ModelCache
                     ServiceInstances.Logger.Info("Added/replaced model: {0}", path);
                     cl[objectId] = result;
                     _cache[path] = result;
-                    updateGeoInfo(result);
                 }
                 else
                 {
@@ -515,86 +513,6 @@ namespace Vre.Server.ModelCache
             }
 
             return result;
-        }
-        #endregion
-
-        #region geolocation search
-        internal struct BuildingLocation
-        {
-            public double Longitude, Latitude;
-            public int BuildingId;
-            public BuildingLocation(double longitude, double latitude, int buildingId)
-            {
-                Longitude = longitude;
-                Latitude = latitude;
-                BuildingId = buildingId;
-            }
-        }
-
-        private Dictionary<int, BuildingLocation> _buildingGeoXref = new Dictionary<int, BuildingLocation>();
-
-        private void updateGeoInfo(ModelCache mc)
-        {
-            lock (_buildingGeoXref)
-            {
-                foreach (KeyValuePair<int, ModelCache.BuildingInfo> bi in mc._info._buildingInfo)
-                    updateBuildingGeoInfo(bi.Key, bi.Value);
-            }
-        }
-
-        private void updateBuildingGeoInfo(int buildingId, ModelCache.BuildingInfo bi)
-        {
-            lock (_buildingGeoXref)
-            {
-                if (_buildingGeoXref.ContainsKey(buildingId))
-                    _buildingGeoXref[buildingId] = new BuildingLocation(bi._location.Longitude, bi._location.Latitude, buildingId);
-                else
-                    _buildingGeoXref.Add(buildingId, new BuildingLocation(bi._location.Longitude, bi._location.Latitude, buildingId));
-            }
-        }
-
-        public int[] BuildingsByGeoProximity(Building center, double quadradiusM)
-        {
-            lock (_buildingGeoXref)
-            {
-                BuildingLocation blc;
-                if (_buildingGeoXref.TryGetValue(center.AutoID, out blc))
-                {
-                    return BuildingsByGeoProximity(blc.Longitude, blc.Latitude, quadradiusM);
-                }
-                else
-                {
-                    ServiceInstances.Logger.Debug("dSPVO: Building ID={0} has no known cached location.", center.AutoID);
-                    return new int[0];
-                }
-            }
-        }
-
-        public int[] BuildingsByGeoProximity(double longitude, double latitude, double quadradiusM)
-        {
-            List<int> result = new List<int>();
-
-            double dLon = quadradiusM / GeoUtilities.LongitudeDegreeInM(latitude);
-            double dLat = quadradiusM / GeoUtilities.LatitudeDegreeInM(latitude);
-
-            double minLon = longitude - dLon;
-            double maxLon = longitude + dLon;
-            double minLat = latitude - dLat;
-            double maxLat = latitude + dLat;
-
-            lock (_buildingGeoXref)
-            {
-                foreach (BuildingLocation bl in _buildingGeoXref.Values)
-                {
-                    if ((bl.Longitude < maxLon) && (bl.Longitude > minLon)
-                        && (bl.Latitude < maxLat) && (bl.Latitude > minLat)) result.Add(bl.BuildingId);
-                }
-            }
-
-            ServiceInstances.Logger.Debug("BbGP: dLon={0}, dLat={1}, lon={2}, lat={3}, cnt={4}.",
-                dLon, dLat, longitude, latitude, result.Count);
-
-            return result.ToArray();
         }
         #endregion
     }

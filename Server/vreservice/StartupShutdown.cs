@@ -60,8 +60,11 @@ namespace Vre.Server
 
                             ServiceInstances.FileCache = new FileCacheManager();
 
-                            ServiceInstances.ModelCache = new ModelCache.ModelCacheManager(
-                                ServiceInstances.Configuration.GetValue("ModelFileStore", string.Empty));
+							if (ServiceInstances.Configuration.GetValue("UseModelCache", true))
+							{
+								ServiceInstances.ModelCache = new ModelCache.ModelCacheManager(
+									ServiceInstances.Configuration.GetValue("ModelFileStore", string.Empty));
+							}
                         }
                         break;
 

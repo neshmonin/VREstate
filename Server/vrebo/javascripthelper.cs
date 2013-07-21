@@ -28,7 +28,17 @@ namespace Vre.Server
             //return ClientDataToJson(cd);
         }
 
-        /// <summary>
+		/// <summary>
+		/// Convert business object to JSON.
+		/// </summary>
+		public static string ClientDataToJson(IEnumerable<ClientData> cd)
+		{
+			JavaScriptSerializer jss = new JavaScriptSerializer();
+			return jss.Serialize(cd);
+			//return ClientDataToJson(cd);
+		}
+
+		/// <summary>
         /// Convert JSON to ClientData object (to be processed by business object).
         /// </summary>
         public static ClientData JsonToClientData(string json)
