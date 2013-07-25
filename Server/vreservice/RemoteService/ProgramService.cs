@@ -73,6 +73,12 @@ namespace Vre.Server.RemoteService
                     sendSalesMessage(request);
                     return;
                 }
+				else if (command.Equals("getMlsInfo")
+					&& (request.Request.Type == RequestType.Get))
+				{
+					getMlsInfo(request);
+					return;
+				}
             }
 
             throw new ArgumentException("Program command not understood.");
@@ -631,5 +637,44 @@ namespace Vre.Server.RemoteService
             // ...
             return LoginType.Plain;
         }
+
+		private static void getMlsInfo(IServiceRequest request)
+		{
+			var strObjectId = request.Request.Query.GetParam("id", string.Empty);
+			if (string.IsNullOrWhiteSpace(strObjectId)) 
+				throw new ArgumentException("Subject ID missing or invalid");
+
+			using (var session = NHibernateHelper.GetSession())
+			{
+				var resp = request.Response;
+				using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
+				{
+					var viewOrder = DataService.RetrieveViewOrder(session, strObjectId, false);
+
+					resp.Data = DataService.convertViewOrderdata(session, 
+						viewOrder, request.Request.Query.GetParam("verbose", false));
+
+					resp.Data = new ClientData();
+					resp.Data.Add("voId", viewOrder.AutoID);
+					resp.Data.Add("mlsId", viewOrder.MlsId);
+
+					MlsInfo extraInfo;
+					using (var dao = new MlsInfoDao(session))
+						extraInfo = dao.GetByMlsNum(viewOrder.MlsId);
+
+					// TODO: converting text->json->text
+					if (extraInfo != null)
+						resp.Data.Add("data", extraInfo.RawInfoAsClientData);
+
+					User u;
+					using (var dao = new UserDao(session))
+						u = dao.GetById(viewOrder.OwnerId);
+
+					resp.Data.Add("brokerInfo", u.PersonalInfo);
+					if (u.BrokerInfo != null) resp.Data.Add("brokerage", u.BrokerInfo.GetClientData());
+				}
+				resp.ResponseCode = HttpStatusCode.OK;
+			}
+		}
     }
 }

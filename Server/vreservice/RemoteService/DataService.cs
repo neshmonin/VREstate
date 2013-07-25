@@ -20,7 +20,7 @@ namespace Vre.Server.RemoteService
         public const string ServicePathPrefix = ServicePathElement0 + "/";
         private const string ServicePathElement0 = "data";
 
-        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction, Inventory, NamedSearchFilter, MlsInfo }
+        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction, Inventory, NamedSearchFilter }
 
         private static void configure()
         {
@@ -157,20 +157,6 @@ namespace Vre.Server.RemoteService
                         getViewOrder(request.UserInfo.Session, request.Request.Query, strObjectId, request.Response);
                     }
                     return;
-
-				case ModelObject.MlsInfo:
-					if (null == strObjectId)
-					{
-						if (-1 == objectId)
-							throw new NotImplementedException();
-						else
-							throw new FileNotFoundException();
-					}
-					else
-					{
-						getMlsInfo(request.UserInfo.Session, request.Request.Query, strObjectId, request.Response);
-					}
-					return;
 
 				case ModelObject.View:
                     getView(request, csrq);
@@ -344,7 +330,6 @@ namespace Vre.Server.RemoteService
             else if (elements[1].Equals("ft")) mo = ModelObject.FinancialTransaction;
             else if (elements[1].Equals("inventory")) mo = ModelObject.Inventory;
 			else if (elements[1].Equals("nsf")) mo = ModelObject.NamedSearchFilter;
-			else if (elements[1].Equals("mlsInfo")) mo = ModelObject.MlsInfo;
 			else throw new ArgumentException("Object path is invalid (2).");
 
             strId = null;
@@ -355,7 +340,7 @@ namespace Vre.Server.RemoteService
             }
             else
             {
-                if ((mo != ModelObject.ViewOrder) && (mo != ModelObject.MlsInfo))
+                if (mo != ModelObject.ViewOrder)
                 {
                     if (!int.TryParse(elements[2], out id)) throw new ArgumentException("Object path is invalid (3).");
                 }
@@ -782,48 +767,16 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-		private static void getMlsInfo(ClientSession session, ServiceQuery query, string strObjectId, IResponseData resp)
-		{
-			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
-			{
-				ViewOrder viewOrder = RetrieveViewOrder(session.DbSession, strObjectId, false);
-
-				resp.Data = convertViewOrderdata(session, viewOrder, query.GetParam("verbose", false));
-
-				resp.Data = new ClientData();
-				resp.Data.Add("voId", viewOrder.AutoID);
-				resp.Data.Add("mlsId", viewOrder.MlsId);
-
-				MlsInfo extraInfo;
-				using (var dao = new MlsInfoDao(session.DbSession))
-					extraInfo = dao.GetByMlsNum(viewOrder.MlsId);
-
-				// TODO: converting text->json->text
-				if (extraInfo != null)
-					resp.Data.Add("data", extraInfo.RawInfoAsClientData);
-
-				User u;
-				using (var dao = new UserDao(session.DbSession))
-					u = dao.GetById(viewOrder.OwnerId);
-
-				resp.Data.Add("brokerInfo", u.PersonalInfo);
-				if (u.BrokerInfo != null) resp.Data.Add("brokerage", u.BrokerInfo.GetClientData());
-
-				tran.Commit();
-			}
-			resp.ResponseCode = HttpStatusCode.OK;
-		}
-
 		private static void getViewOrder(ClientSession session, ServiceQuery query, string strObjectId, IResponseData resp)
         {
             ViewOrder viewOrder = RetrieveViewOrder(session.DbSession, strObjectId, true);
 
-            resp.Data = convertViewOrderdata(session, viewOrder, query.GetParam("verbose", false));
+            resp.Data = convertViewOrderdata(session.DbSession, viewOrder, query.GetParam("verbose", false));
 
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static ClientData convertViewOrderdata(ClientSession session, ViewOrder viewOrder, bool verbose)
+        internal static ClientData convertViewOrderdata(ISession session, ViewOrder viewOrder, bool verbose)
         {
             viewOrder.ViewOrderURL = ReverseRequestService.ConstructViewOrderUrl(viewOrder);
             ClientData result = viewOrder.GetClientData();
@@ -837,7 +790,7 @@ namespace Vre.Server.RemoteService
             return result;
         }
 
-		private static string retrieveViewOrderAddress(ClientSession session, ViewOrder viewOrder)
+		private static string retrieveViewOrderAddress(ISession session, ViewOrder viewOrder)
 		{
 			string label = null;
 			switch (viewOrder.TargetObjectType)
@@ -845,7 +798,7 @@ namespace Vre.Server.RemoteService
 				case ViewOrder.SubjectType.Building:
 					{
 						Building b;
-						using (BuildingDao dao = new BuildingDao(session.DbSession))
+						using (BuildingDao dao = new BuildingDao(session))
 							b = dao.GetById(viewOrder.TargetObjectId);
 						label = AddressHelper.ConvertToReadableAddress(b, null);
 					}
@@ -854,7 +807,7 @@ namespace Vre.Server.RemoteService
 				case ViewOrder.SubjectType.Suite:
 					{
 						Suite s;
-						using (SuiteDao dao = new SuiteDao(session.DbSession))
+						using (SuiteDao dao = new SuiteDao(session))
 							s = dao.GetById(viewOrder.TargetObjectId);
 						label = AddressHelper.ConvertToReadableAddress(s.Building, s);
 					}
@@ -906,7 +859,7 @@ namespace Vre.Server.RemoteService
                 if (vo.ExpiresOn < timeLim)
                 {
                     if ((devLock >= 0) && (extractDeveloperFromViewOrder(session, vo).AutoID != devLock)) continue;
-                    result.Add(convertViewOrderdata(session, vo, verbose));
+                    result.Add(convertViewOrderdata(session.DbSession, vo, verbose));
                 }
             }
 

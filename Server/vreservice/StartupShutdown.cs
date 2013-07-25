@@ -83,9 +83,12 @@ namespace Vre.Server
                         new Thread(() => ServiceInstances.FileCache.Initialize()) { IsBackground = true, Priority = ThreadPriority.BelowNormal, Name = "InitializeFileCache" }
                         .Start();
 
-                        // This may take long enough for Service Control Manager to render this as hung on start!
-                        new Thread(() => ServiceInstances.ModelCache.Initialize()) { IsBackground = true, Priority = ThreadPriority.BelowNormal, Name = "InitialModelReader" }
-                        .Start();
+						if (ServiceInstances.ModelCache != null)
+						{
+							// This may take long enough for Service Control Manager to render this as hung on start!
+							new Thread(() => ServiceInstances.ModelCache.Initialize()) { IsBackground = true, Priority = ThreadPriority.BelowNormal, Name = "InitialModelReader" }
+							.Start();
+						}
                     }
 
                     startCommunications();

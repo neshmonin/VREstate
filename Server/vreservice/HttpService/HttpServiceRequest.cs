@@ -24,7 +24,7 @@ namespace Vre.Server.HttpService
                 }
                 else
                 {
-					Session = ClientSession.MakeGuestSession();
+					Session = null;
                     StaleSession = false;
                 }
 
@@ -170,8 +170,8 @@ namespace Vre.Server.HttpService
 
             if (UserInfo.StaleSession)
             {
-                ctx.Response.StatusCode = (int)HttpStatusCode.RequestTimeout;
-                ctx.Response.StatusDescription = "Session ID is invalid or dropped by timeout.";
+                Response.ResponseCode = HttpStatusCode.RequestTimeout;
+                Response.ResponseCodeDescription = "Session ID is invalid or dropped by timeout.";
 
                 ServiceInstances.Logger.Error(string.Format(
                     "HTTP request referred to unknown session ID from {0}.",

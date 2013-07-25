@@ -56,7 +56,7 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
-        public virtual ClientData GetClientData()
+        public override ClientData GetClientData()
         {
             ClientData result = base.GetClientData();
 
