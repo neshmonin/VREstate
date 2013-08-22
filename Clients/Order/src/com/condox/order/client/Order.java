@@ -1,11 +1,9 @@
 package com.condox.order.client;
 
-import com.condox.order.client.context.BaseContext;
-import com.condox.order.client.context.ContextTree;
-import com.condox.order.client.context.IContext;
-import com.condox.order.client.context.IContext.Types;
-import com.condox.order.client.presenter.PresenterFactory;
-import com.condox.order.client.view.ViewContainer;
+import com.condox.clientshared.abstractview.Log;
+import com.condox.order.client.wizard.I_WizardStep;
+import com.condox.order.client.wizard.Wizard;
+import com.condox.order.client.wizard.model.LoginModel;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 
@@ -17,67 +15,41 @@ public class Order implements EntryPoint {
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
-		MainPage mainPage = new MainPage();
-//		LayoutPanels mainPage = new LayoutPanels();
-		RootLayoutPanel.get().clear();
-		RootLayoutPanel.get().add(mainPage);
+		/*RootLayoutPanel rootLayoutPanel = RootLayoutPanel.get();
 		
-		PresenterFactory factory = new PresenterFactory();
-		factory.setViewContainer(new ViewContainer(mainPage.containerPanel));
-		ContextTree tree = new ContextTree(factory);
+		DockLayoutPanel dockLayoutPanel = new DockLayoutPanel(Unit.EM);
+		rootLayoutPanel.add(dockLayoutPanel);
 		
-		IContext root = new BaseContext(Types.LOGIN);
-		tree.next(root);
+		LayoutPanel navigatePanel = new LayoutPanel();
+		dockLayoutPanel.addWest(navigatePanel, 15.0);
 		
+		LayoutPanel containerPanel = new LayoutPanel();
+		dockLayoutPanel.add(containerPanel);
 		
+		Step wizard = new LoginModel(null);	
+		Navigator navigator = new Navigator(navigatePanel);
+		wizard.go(containerPanel, navigator);*/
 		
-		/*MainPage mainPage = new MainPage();
-		RootLayoutPanel.get().clear();
-		RootLayoutPanel.get().add(mainPage);
+		MainPage main = new MainPage();
+		RootLayoutPanel.get().add(main);
+		Wizard wizard = new Wizard(main.containerPanel);
+		I_WizardStep start = new LoginModel(null);
+		wizard.go(start);
 		
-		ViewFactory viewFactory = new ViewFactory();
-		viewFactory.setViewContainer(new MyViewContainer(RootPanel.get(),mainPage.containerPanel));
-		Tree tree = new Tree(viewFactory);
+		/*BuildingModel building = new BuildingModel();
+		FloorModel floor = new FloorModel();
+		SuiteModel suite = new SuiteModel();
+		Log.write("==");
+		building.setValue("value", "building");
+		building.log();
+		Log.write("==");
+		floor.setValue("value", "floor");
+		building.addChild(floor);
+		floor.log();
+		Log.write("==");
+		suite.setValue("value", "suite");
+		floor.addChild(suite);
+		suite.log();*/
 		
-		tree.next(new WelcomeContext());*/
-		
-		
-		/*     root
-		 *      |
-		 *      A  (A1, A2, A3)
-		 *    / | \
-		 *   B  C  D*/
-		
-		/*// temp vars
-		IMyContext context;
-		MyNode node;
-		// root node
-		context = new MyContext();
-		node = new MyNode(context);
-		MyTree tree = new MyTree(node);
-		// A node
-		context = new MyContext();
-		context.setValue("", "A1");
-		tree.goChild(context);
-		// B node
-		context = new MyContext();
-		context.setValue("", "B");
-		tree.goChild(context);
-		// back to parent
-		tree.goParent();
-		tree.getContext().setValue("","A2");
-		
-		context = new MyContext();
-		context.setValue("", "C");
-		tree.goChild(context);
-		
-		tree.goParent();
-		tree.getContext().setValue("", "A1");
-		tree.goChild(null);*/
-		
-	  /*  EventBus eventBus = new SimpleEventBus();
-	    MyTree tree = new MyTree(new MyNode());
-	    AppController appViewer = new AppController(eventBus, tree);
-	    appViewer.go(RootLayoutPanel.get());*/
 	}
 }
