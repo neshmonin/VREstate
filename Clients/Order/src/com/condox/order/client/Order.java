@@ -32,7 +32,8 @@ public class Order implements EntryPoint {
 		
 		MainPage main = new MainPage();
 		RootLayoutPanel.get().add(main);
-		Wizard wizard = new Wizard(main.containerPanel);
+//		Wizard wizard = new Wizard(main.containerPanel);
+		Wizard wizard = new Wizard(null);
 		I_WizardStep start = new LoginModel(null);
 		wizard.go(start);
 		

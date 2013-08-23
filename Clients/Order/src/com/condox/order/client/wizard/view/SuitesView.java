@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.condox.clientshared.document.SuiteInfo;
+import com.condox.order.client.wizard.Wizard;
 import com.condox.order.client.wizard.presenter.SuitesPresenter;
 import com.condox.order.client.wizard.presenter.SuitesPresenter.IDisplay;
 import com.google.gwt.cell.client.ClickableTextCell;
@@ -39,9 +40,8 @@ public class SuitesView extends Composite implements IDisplay {
 	private ListDataProvider<Floor> dataProvider = new ListDataProvider<Floor>();
 	
 	@UiField(provided=true) DataGrid<Floor> dataGrid = new DataGrid<Floor>();
-	@UiField DockLayoutPanel dockPanel;
+	@UiField Button buttonCancel;
 	@UiField Button buttonPrev;
-	@UiField Button buttonNext;
 
 	interface SuitesViewUiBinder extends UiBinder<Widget, SuitesView> {
 	}
@@ -67,6 +67,7 @@ public class SuitesView extends Composite implements IDisplay {
 				this.selected = info;
 //				presenter.onSubmit();
 //				presenter.onPayNow();
+				presenter.onNext();
 				return;
 			}
 		}
@@ -231,10 +232,19 @@ public class SuitesView extends Composite implements IDisplay {
 //				default:
 //					disabled += " disabled=\"true\" ";
 //				}
+				
+				String mls = "";
+				switch (suite.getStatus()) {
+				case Sold:
+					mls += " color:red ";
+					break;
+				default:
+//					mls += " color:red";
+				}
 
 				result += "<button ";
 				result += "type=\"button\"" + " onclick=\"onSelectSuite("
-						+ suite.getId() + ")\"" + "style=\"width:50px\""
+						+ suite.getId() + ")\"" + "style=\"width:50px;"+mls+"\""
 						+ "class=\"btnSelectSuite\"" + disabled + "title=\""
 						+ suite.getTooltip() + "\">";
 				result += suite.getName();
@@ -267,5 +277,9 @@ public class SuitesView extends Composite implements IDisplay {
 	@UiHandler("buttonPrev")
 	void onButtonPrevClick(ClickEvent event) {
 		presenter.onPrev();
+	}
+	@UiHandler("buttonCancel")
+	void onButtonCancelClick(ClickEvent event) {
+		Wizard.cancel();
 	}
 }

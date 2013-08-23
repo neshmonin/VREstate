@@ -7,18 +7,9 @@
 			font-weight: normal;
 		}
 	</ui:style>
-		<g:DockLayoutPanel unit="EM">
-			<g:north size="4.0">
-				<g:HorizontalPanel width="100%" spacing="5">
-					<g:Button ui:field="buttonPrev" text="&lt;&lt; Prev"/>
-					<g:Cell horizontalAlignment="ALIGN_RIGHT">
-						<g:Button ui:field="buttonNext" text="Next &gt;&gt;"/>
-					</g:Cell>
-				</g:HorizontalPanel>
-			</g:north>
-			<g:center>
-				<g:LayoutPanel>
-					<g:layer>
+					<g:VerticalPanel width="100%" height="100%" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+						<g:VerticalPanel>
+							<g:VerticalPanel spacing="10">
 						<g:VerticalPanel width="100%" height="100%" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 			<g:VerticalPanel>
 				<g:Label text="Product"/>
@@ -28,8 +19,20 @@
 				<g:RadioButton name="Listing/Layout" text="Interactive 3D Layout" ui:field="rbLayout"/>
 			</g:VerticalPanel>
 		</g:VerticalPanel>
-					</g:layer>
-				</g:LayoutPanel>
-			</g:center>
-		</g:DockLayoutPanel>
+					</g:VerticalPanel>
+						</g:VerticalPanel>
+									<g:Cell verticalAlignment="ALIGN_BOTTOM">
+				<g:HorizontalPanel width="100%" verticalAlignment="ALIGN_BOTTOM">
+					<g:HorizontalPanel spacing="10">
+						<g:Button text="Cancel" width="100px" ui:field="buttonCancel"/>
+					</g:HorizontalPanel>
+					<g:Cell horizontalAlignment="ALIGN_RIGHT">
+						<g:HorizontalPanel spacing="10">
+						<g:Button text="&lt;&lt; Prev" width="100px" ui:field="buttonPrev"/>
+						<g:Button text="Next &gt;&gt;" width="100px" ui:field="buttonNext"/>
+					</g:HorizontalPanel>
+					</g:Cell>
+				</g:HorizontalPanel>
+			</g:Cell>
+					</g:VerticalPanel>
 </ui:UiBinder> 

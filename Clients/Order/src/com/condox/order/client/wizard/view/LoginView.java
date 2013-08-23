@@ -1,5 +1,6 @@
 package com.condox.order.client.wizard.view;
 
+import com.condox.order.client.wizard.Wizard;
 import com.condox.order.client.wizard.presenter.LoginPresenter;
 import com.condox.order.client.wizard.presenter.LoginPresenter.I_Display;
 import com.google.gwt.core.client.GWT;
@@ -20,6 +21,7 @@ public class LoginView extends Composite implements I_Display {
 	@UiField TextBox textUserPassword;
 	@UiField Button buttonEnter;
 	@UiField Button buttonGuestEnter;
+	@UiField Button buttonCancel;
 	
 	interface LoginViewUiBinder extends UiBinder<Widget, LoginView> {
 	}
@@ -53,5 +55,9 @@ public class LoginView extends Composite implements I_Display {
 		textUserLogin.setValue("web");
 		textUserPassword.setValue("web");
 		presenter.onEnter();
+	}
+	@UiHandler("buttonCancel")
+	void onButtonCancelClick(ClickEvent event) {
+		Wizard.cancel();
 	}
 }

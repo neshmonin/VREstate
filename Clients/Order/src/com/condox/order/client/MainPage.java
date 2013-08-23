@@ -19,9 +19,9 @@ public class MainPage extends Composite {
 	@UiField Image image;
 	@UiField LayoutPanel menuPanel;
 	@UiField PushButton loginMenu;
-	@UiField LayoutPanel containerPanel;
 	@UiField PushButton pushButton;
 	@UiField PushButton pushButton_1;
+	private LayoutPanel containerPanel = new LayoutPanel();
 
 	interface MainPageUiBinder extends UiBinder<Widget, MainPage> {
 	}

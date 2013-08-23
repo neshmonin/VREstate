@@ -1,5 +1,6 @@
 package com.condox.order.client.wizard.view;
 
+import com.condox.order.client.wizard.Wizard;
 import com.condox.order.client.wizard.presenter.ProductPresenter;
 import com.condox.order.client.wizard.presenter.ProductPresenter.I_Display;
 import com.google.gwt.core.client.GWT;
@@ -27,6 +28,7 @@ public class ProductView extends Composite implements I_Display {
 	RadioButton rbListingPrivate;
 	@UiField
 	RadioButton rbListingShared;
+	@UiField Button buttonCancel;
 	@UiField Button buttonPrev;
 	@UiField Button buttonNext;
 
@@ -101,5 +103,9 @@ public class ProductView extends Composite implements I_Display {
 	@Override
 	public void setLayout(boolean value) {
 		rbLayout.setValue(value,true);
+	}
+	@UiHandler("buttonCancel")
+	void onButtonCancelClick(ClickEvent event) {
+		Wizard.cancel();
 	}
 }

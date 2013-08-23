@@ -9,14 +9,9 @@
 		<g:VerticalPanel width="100%" height="100%" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 			<g:VerticalPanel>
 				<g:VerticalPanel spacing="10">
-				<g:HTML wordWrap="true">Only web/web is valid!<br/>Guest session make it.<br/>So:<br/></g:HTML>
-				<g:HTML wordWrap="true">Your name:</g:HTML>
-				<g:TextBox ui:field="textUserLogin"/>
-				<g:HTML wordWrap="true">Your password:</g:HTML>
-				<g:TextBox ui:field="textUserPassword"/>
-				<g:Button width="100%" text="Enter" ui:field="buttonEnter"/>
-				<g:HTML wordWrap="true">Guest session:</g:HTML>
-				<g:Button width="100%" text="Guest enter" ui:field="buttonGuestEnter"/>
+				<g:HTML wordWrap="true">Your are about to end.<br/>So, enter your mail:<br/></g:HTML>
+				<g:TextBox/>
+				<g:HTML wordWrap="true">And press Finish <br/>to receive next instructions:</g:HTML>
 			</g:VerticalPanel>
 			</g:VerticalPanel>
 			<g:Cell verticalAlignment="ALIGN_BOTTOM">
@@ -24,6 +19,12 @@
 					<g:HorizontalPanel spacing="10">
 						<g:Button text="Cancel" width="100px" ui:field="buttonCancel"/>
 					</g:HorizontalPanel>
+					<g:Cell horizontalAlignment="ALIGN_RIGHT">
+						<g:HorizontalPanel spacing="10">
+						<g:Button text="&lt;&lt; Prev" width="100px" ui:field="buttonPrev"/>
+						<g:Button text="Finish &gt;&gt;" width="100px" ui:field="buttonNext"/>
+					</g:HorizontalPanel>
+					</g:Cell>
 				</g:HorizontalPanel>
 			</g:Cell>
 		</g:VerticalPanel>

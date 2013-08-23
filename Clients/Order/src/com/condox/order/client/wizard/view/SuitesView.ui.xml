@@ -6,21 +6,25 @@
 			font-weight: bold;
 		}
 	</ui:style>
-		<g:DockLayoutPanel unit="EM" width="100%" height="100%" ui:field="dockPanel">
-			<g:north size="4.0">
-				<g:VerticalPanel width="100%">
-					<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_LEFT" spacing="5">
-						<g:Button text="&lt;&lt; Prev" ui:field="buttonPrev"/>
-						<g:Cell horizontalAlignment="ALIGN_RIGHT">
-							<g:Button ui:field="buttonNext" text="Next &gt;&gt;" enabled="false"/>
-						</g:Cell>
+	<g:VerticalPanel width="100%" height="100%"
+		horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+		<g:VerticalPanel>
+			<g:VerticalPanel spacing="10">
+				<p1:DataGrid ui:field="dataGrid" height="389px" width="700px" />
+			</g:VerticalPanel>
+		</g:VerticalPanel>
+		<g:Cell verticalAlignment="ALIGN_BOTTOM">
+			<g:HorizontalPanel width="100%" verticalAlignment="ALIGN_BOTTOM">
+				<g:HorizontalPanel spacing="10">
+					<g:Button text="Cancel" width="100px" ui:field="buttonCancel" />
+				</g:HorizontalPanel>
+				<g:Cell horizontalAlignment="ALIGN_RIGHT">
+					<g:HorizontalPanel spacing="10">
+						<g:Button text="&lt;&lt; Prev" width="100px" ui:field="buttonPrev" />
 					</g:HorizontalPanel>
-				</g:VerticalPanel>
-			</g:north>
-			<g:center>
-				<p1:DataGrid ui:field="dataGrid"/>
-			</g:center>
-		</g:DockLayoutPanel>
-		
-		
+				</g:Cell>
+			</g:HorizontalPanel>
+		</g:Cell>
+	</g:VerticalPanel>
+
 </ui:UiBinder> 

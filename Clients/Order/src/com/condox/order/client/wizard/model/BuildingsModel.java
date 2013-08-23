@@ -5,6 +5,7 @@ import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.WizardStep;
 import com.condox.order.client.wizard.presenter.BuildingsPresenter;
 import com.condox.order.client.wizard.view.BuildingsView;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.ListBox;
 
@@ -33,76 +34,6 @@ public class BuildingsModel extends WizardStep {
 
 	ListBox listBox = new ListBox();
 
-	/**
-	 * @wbp.parser.entryPoint
-	 */
-	/*
-	 * @Override public void go(final HasWidgets container, final Navigator
-	 * navigator) {
-	 * 
-	 * // GWT.log("BuildingsModel.go()"); HTMLPanel panel = new HTMLPanel("");
-	 * panel.setSize("100%", "100%");
-	 * 
-	 * VerticalPanel verticalPanel = new VerticalPanel();
-	 * panel.add(verticalPanel); verticalPanel.setSize("100%", "100%");
-	 * verticalPanel
-	 * .setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-	 * verticalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-	 * 
-	 * VerticalPanel verticalPanel_1 = new VerticalPanel();
-	 * verticalPanel_1.setSpacing(10);
-	 * verticalPanel_1.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
-	 * verticalPanel.add(verticalPanel_1);
-	 * 
-	 * HTML htmlNewHtml = new HTML("Selected building:", true);
-	 * verticalPanel_1.add(htmlNewHtml); listBox.setMultipleSelect(true);
-	 * listBox.clear(); listBox.addItem("Building #1");
-	 * listBox.addItem("Building #2"); listBox.addItem("Building #3");
-	 * listBox.addItem("Building #4"); listBox.addItem("Building #5");
-	 * listBox.addItem("Building #6"); listBox.addItem("Building #7");
-	 * listBox.addItem("Building #8"); listBox.addItem("Building #9");
-	 * listBox.addItem("Building #10"); try {
-	 * listBox.setItemSelected(selectedIndex, true); } catch (Exception e) { //
-	 * TODO Auto-generated catch block e.printStackTrace(); }
-	 * verticalPanel_1.add(listBox); listBox.setSize("100%", "168px");
-	 * verticalPanel_1.setCellWidth(listBox, "100%");
-	 * verticalPanel_1.setCellHeight(listBox, "100%");
-	 * listBox.setVisibleItemCount(5);
-	 * 
-	 * HorizontalPanel horizontalPanel = new HorizontalPanel();
-	 * horizontalPanel.setSpacing(5); verticalPanel_1.add(horizontalPanel);
-	 * 
-	 * Button btnNewButton = new Button("New button");
-	 * horizontalPanel.add(btnNewButton); btnNewButton.setText("<< Prev");
-	 * btnNewButton.addClickHandler(new ClickHandler() { public void
-	 * onClick(ClickEvent event) { // prev view prev(container, navigator); }
-	 * }); btnNewButton.setWidth("100%");
-	 * 
-	 * Button btnNewButton_1 = new Button("New button");
-	 * btnNewButton_1.addClickHandler(new ClickHandler() { public void
-	 * onClick(ClickEvent event) { selectedIndex = listBox.getSelectedIndex();
-	 * // next view next(container, navigator); } });
-	 * btnNewButton_1.setText("Next >>"); horizontalPanel.add(btnNewButton_1);
-	 * btnNewButton_1.setWidth("100%");
-	 * 
-	 * container.clear(); container.add(panel);
-	 * 
-	 * // new LoginPresenter().go(container, this); //
-	 * PresenterFactory.createPresenter(this).go(); super.go(container,
-	 * navigator); }
-	 */
-
-	/*
-	 * private void prev(HasWidgets container, Navigator navigator) {
-	 * selectedIndex = listBox.getSelectedIndex(); I_Step prevStep = getPrev();
-	 * if (prevStep != null) prevStep.go(container, navigator); }
-	 * 
-	 * private void next(HasWidgets container, Navigator navigator) { if
-	 * (isValid()) { // next view I_Step nextStep = getNext(); if (nextStep ==
-	 * null) addChild(new SuitesModel(this)); nextStep = getNext();
-	 * nextStep.go(container, navigator); } else
-	 * Window.alert("Not valid! Please, verify!"); }
-	 */
 
 	@Override
 	public int hashCode() {
@@ -146,14 +77,23 @@ public class BuildingsModel extends WizardStep {
 	}
 
 	public void next() {
-//		Log.write("BuildingsModel.next");
 		getNextStep().go(container);
 	}
 
 	@Override
 	protected I_WizardStep createNextStep() {
-		Log.write("new SuitesModel");
-		children.put(this, new SuitesModel(this));
+		I_WizardStep step = this;
+		while (step != null) {
+			try {
+				if (((ProductModel)step).getLayout())
+					children.put(this, new EmailModel(this));
+				if (((ProductModel)step).getListing())
+					children.put(this, new SuitesModel(this));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			step = step.getPrevStep();
+		}		
 		return children.get(this);
 	}
 }

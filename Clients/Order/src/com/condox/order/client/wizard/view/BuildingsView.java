@@ -6,6 +6,7 @@ import java.util.List;
 import com.condox.clientshared.document.BuildingInfo;
 import com.condox.order.client.FilteredListDataProvider;
 import com.condox.order.client.IFilter;
+import com.condox.order.client.wizard.Wizard;
 import com.condox.order.client.wizard.presenter.BuildingsPresenter;
 import com.condox.order.client.wizard.presenter.BuildingsPresenter.IDisplay;
 import com.google.gwt.cell.client.ClickableTextCell;
@@ -170,6 +171,7 @@ public class BuildingsView extends Composite implements IDisplay,
 					public void onSelectionChange(SelectionChangeEvent event) {
 						selectedBuilding = selectionModel.getSelectedObject();
 						presenter.setSelectedBuilding(selectedBuilding);
+						buttonNext.setEnabled(selectedBuilding != null);
 					}
 				});
 		if (selectedBuilding != null) {
@@ -202,25 +204,23 @@ public class BuildingsView extends Composite implements IDisplay,
 	}
 
 	private BuildingsPresenter presenter = null;
-	private BuildingInfo selectedBuilding;
+	private BuildingInfo selectedBuilding = null;
 	private FilteredListDataProvider<BuildingInfo> dataProvider = new FilteredListDataProvider<BuildingInfo>(
 			this);
 
 	@UiField(provided = true)
 	DataGrid<BuildingInfo> dataGrid = new DataGrid<BuildingInfo>();
-	@UiField
-	Hyperlink hyperlink;
-	@UiField
-	TextBox textFilter;
 	SimplePager.Resources pagerResources = GWT
 			.create(SimplePager.Resources.class);
 	@UiField(provided = true)
 	SimplePager pager = new SimplePager(TextLocation.CENTER, pagerResources,
 			false, 0, true);
-	@UiField
-	ListBox city;
+	@UiField Button buttonCancel;
 	@UiField Button buttonPrev;
 	@UiField Button buttonNext;
+	@UiField TextBox textFilter;
+	@UiField ListBox city;
+	
 
 	@Override
 	public void setPresenter(BuildingsPresenter presenter) {
@@ -244,29 +244,6 @@ public class BuildingsView extends Composite implements IDisplay,
 		if (value.getPostal().toLowerCase().contains(filter.toLowerCase()))
 			return true;
 		return false;
-	}
-
-	@UiHandler("textFilter")
-	void onTextFilterKeyUp(KeyUpEvent event) {
-		dataProvider.setFilter(textFilter.getText());
-//		dataGrid.redraw();
-//		if (textFilter.getText().isEmpty())
-////			dataProvider.resetFilter();
-//			textFilter.setText(filterStr);
-	}
-
-	@UiHandler("textFilter")
-	void onTextFilterFocus(FocusEvent event) {
-		if (textFilter.getText().equals(filterStr))
-			textFilter.setText("");
-		else
-			textFilter.selectAll();
-	}
-
-	@UiHandler("textFilter")
-	void onTextFilterBlur(BlurEvent event) {
-		if (textFilter.getText().isEmpty())
-			textFilter.setText(filterStr);
 	}
 	
 	private PopupPanel loading = new PopupPanel();
@@ -296,5 +273,9 @@ public class BuildingsView extends Composite implements IDisplay,
 	@UiHandler("buttonNext")
 	void onButtonNextClick(ClickEvent event) {
 		presenter.onNext();
+	}
+	@UiHandler("buttonCancel")
+	void onButtonCancelClick(ClickEvent event) {
+		Wizard.cancel();
 	}
 }

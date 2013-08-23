@@ -1,5 +1,6 @@
 package com.condox.order.client.wizard.model;
 
+import com.condox.clientshared.abstractview.Log;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.WizardStep;
 import com.condox.order.client.wizard.presenter.SuitesPresenter;
@@ -48,15 +49,15 @@ public class SuitesModel extends WizardStep {
 			getPrevStep().go(container);
 	}
 
-//	public void next() {
-//		Log.write("BuildingsModel::next()");
-//		getNextStep().go(container);
-//	}
+	public void next() {
+		getNextStep().go(container);
+	}
 
-//	@Override
-//	protected I_WizardStep createNextStep() {
-//		return new SuitesModel(this);
-//	}
+	@Override
+	protected I_WizardStep createNextStep() {
+		children.put(this, new ListingOptionsModel(this));
+		return children.get(this);
+	}
 	
 	
 }

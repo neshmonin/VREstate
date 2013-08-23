@@ -36,8 +36,5 @@
 							</g:layer>
 						</g:LayoutPanel>
 					</g:west>
-					<g:center>
-						<g:LayoutPanel ui:field="containerPanel" styleName="my-container"/>
-					</g:center>
 				</g:DockLayoutPanel>
 </ui:UiBinder> 
