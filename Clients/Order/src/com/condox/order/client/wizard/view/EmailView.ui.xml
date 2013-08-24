@@ -10,7 +10,7 @@
 			<g:VerticalPanel>
 				<g:VerticalPanel spacing="10">
 				<g:HTML wordWrap="true">Your are about to end.<br/>So, enter your mail:<br/></g:HTML>
-				<g:TextBox/>
+				<g:TextBox ui:field="textMail" />
 				<g:HTML wordWrap="true">And press Finish <br/>to receive next instructions:</g:HTML>
 			</g:VerticalPanel>
 			</g:VerticalPanel>
@@ -22,7 +22,7 @@
 					<g:Cell horizontalAlignment="ALIGN_RIGHT">
 						<g:HorizontalPanel spacing="10">
 						<g:Button text="&lt;&lt; Prev" width="100px" ui:field="buttonPrev"/>
-						<g:Button text="Finish &gt;&gt;" width="100px" ui:field="buttonNext"/>
+						<g:Button text="Finish &gt;&gt;" width="100px" ui:field="buttonNext" enabled="false"/>
 					</g:HorizontalPanel>
 					</g:Cell>
 				</g:HorizontalPanel>

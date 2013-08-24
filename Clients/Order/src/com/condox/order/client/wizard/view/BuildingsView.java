@@ -278,4 +278,23 @@ public class BuildingsView extends Composite implements IDisplay,
 	void onButtonCancelClick(ClickEvent event) {
 		Wizard.cancel();
 	}
+	
+	@UiHandler("textFilter")
+	void onTextFilterKeyUp(KeyUpEvent event) {
+		dataProvider.setFilter(textFilter.getText());
+	}
+
+	@UiHandler("textFilter")
+	void onTextFilterFocus(FocusEvent event) {
+		if (textFilter.getText().equals(filterStr))
+			textFilter.setText("");
+		else
+			textFilter.selectAll();
+	}
+
+	@UiHandler("textFilter")
+	void onTextFilterBlur(BlurEvent event) {
+		if (textFilter.getText().isEmpty())
+			textFilter.setText(filterStr);
+	}
 }

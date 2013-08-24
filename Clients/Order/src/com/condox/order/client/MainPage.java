@@ -1,5 +1,8 @@
 package com.condox.order.client;
 
+import com.condox.order.client.wizard.I_WizardStep;
+import com.condox.order.client.wizard.Wizard;
+import com.condox.order.client.wizard.model.LoginModel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -37,4 +40,11 @@ public class MainPage extends Composite {
 	void onPushButton_1Click(ClickEvent event) {
 		Window.open("http://www.3dcondox.com/contact1.html", "_blank", "");
 	}
+	@UiHandler("loginMenu")
+	void onLoginMenuClick(ClickEvent event) {
+		Wizard wizard = new Wizard(null);
+		I_WizardStep start = new LoginModel(null);
+		wizard.go(start);
+	}
+	
 }
