@@ -156,9 +156,10 @@ public class SuiteGeoItem implements IGeoItem {
 		
 		icon.setHref(href);
 		style.getIconStyle().setIcon(icon);
-		style.getIconStyle().setScale(scale);
+		if (suite.orientation == Orientation.Horizontal)
+			style.getIconStyle().setScale(3.0F);
 
-		String altitudeMode = "relativeToGround";
+		Building parent = suite.getParent();
 
 		if (extended_data_label != null)
 			extended_data_label.setStyleSelector(style);
@@ -180,8 +181,8 @@ public class SuiteGeoItem implements IGeoItem {
 	
 			Position position = suite.getPosition();
 			if (suite.orientation == Orientation.Horizontal) {
-				position.setTilt(85);
-				position.setRange(50);
+				position.setTilt(65);
+				position.setRange(30);
 			}
 			else {
 				position.setTilt(initialTilt_d);
@@ -190,13 +191,16 @@ public class SuiteGeoItem implements IGeoItem {
 			
 			point.setLatitude(position.getLatitude());
 			point.setLongitude(position.getLongitude());
+			if (suite.orientation == Orientation.Horizontal){
+				position.setAltitude(position.getAltitude() + 2);
+				point.setExtrude(true);
+			}
 			
-			Building parent = suite.getParent();
-			if ((parent != null) && (parent.hasAltitudeAdjustment())) {
+			if ((parent != null) && (parent.hasAltitudeAdjustment())
+					&& (suite.orientation != Orientation.Horizontal)) {
 				point.setAltitude(position.getAltitude()
 						+ parent.getAltitudeAdjustment() + parent.getPosition().getAltitude() + 1);
 				point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_ABSOLUTE);
-				altitudeMode = "absolute";
 			} else {
 				point.setAltitude(position.getAltitude());
 				point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND);
@@ -211,6 +215,10 @@ public class SuiteGeoItem implements IGeoItem {
 	
 		/****************************************************/
 		String kmlLineStrings = "";
+		String altitudeMode = "relativeToGround";
+		if ((parent != null) && (parent.hasAltitudeAdjustment()))
+			altitudeMode = "absolute";
+
 		for (int j = 0; j < suite.getPoints().size(); j += 6) {
 			kmlLineStrings += StringFormatter.format(
 					"<LineString>" +

@@ -159,8 +159,8 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I
 	}
 
 	@Override
-	public void onLoginFailed() {
-		Log.write("Failed to Login");
+	public void onLoginFailed(Throwable exception) {
+		Log.write("Failed to Login: " + exception.toString());
 	}
 }
 // private static final String EARTH_API_KEY =

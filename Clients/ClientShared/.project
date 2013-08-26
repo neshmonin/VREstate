@@ -31,4 +31,11 @@
 		<nature>com.google.gwt.eclipse.core.gwtNature</nature>
 		<nature>org.eclipse.wst.common.project.facet.core.nature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>war/WEB-INF/lib/jsonwrapper-0.2.jar</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/VREstate/war/WEB-INF/lib/jsonwrapper-0.2.jar</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

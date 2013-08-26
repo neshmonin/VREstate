@@ -39,7 +39,6 @@ public class BuildingGeoItem implements IGeoItem {
 		obj.put("id", id);
 		placemark.setSnippet(obj.toString());
 
-		// Иконка для плейсмарка
 		KmlStyle style = GE.getPlugin().createStyle("");
 		String href = Options.HOME_URL + "gen/txt?height=40&shadow=2&text="
 				+ building.getName() + "&txtClr=16777215&shdClr=0&frame=0";
@@ -56,8 +55,7 @@ public class BuildingGeoItem implements IGeoItem {
 		if (position != null) {
 			position.setTilt(initialTilt_d);
 			position.setRange(initialRange_m);
-			KmlMultiGeometry geometry = GE.getPlugin().createMultiGeometry(
-					"");
+			KmlMultiGeometry geometry = GE.getPlugin().createMultiGeometry("");
 
 			point.setLatLngAlt(position.getLatitude(),
 					position.getLongitude(),

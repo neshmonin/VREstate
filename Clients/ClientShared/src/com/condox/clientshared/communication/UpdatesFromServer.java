@@ -27,9 +27,8 @@ public class UpdatesFromServer implements RequestCallback{
 	}
 
 	public static void RenewCheckChangesThread() {
-		counter++;
 		String url = Options.HOME_URL + "ev?sid=" + User.SID
-				+ "&generation=" + counter;
+				+ "&generation=" + counter++;
 		if (Options.context != "") {
 			if (url.endsWith("?"))
 				url += Options.context;
@@ -79,25 +78,32 @@ public class UpdatesFromServer implements RequestCallback{
 	public void onResponseReceived(Request request,
 			Response response) {
 		String received = response.getText();
+		int respondStatus = response.getStatusCode();
 		if (received == null || received.length() == 0)
-			Log.write("CheckChanges RespondStatus="+response.getStatusCode()+"; Received: <empty>!");
-		else {
-			Log.write("CheckChanges RespondStatus="+response.getStatusCode()+"; Received: " + received);
-			JSONValue JSONreceived = JSONParser.parseLenient(received);
-			if (JSONreceived != null) {
-				for (I_CheckChanges handler : changeHandlers) {
-					handler.onCheckChanges(response);
+			Log.write("CheckChanges RespondStatus="+respondStatus+"; Received: <empty>!");
+		else
+			Log.write("CheckChanges RespondStatus="+respondStatus+"; Received: " + received);
+		
+		if(respondStatus != 200)
+			User.Reconnect();
+		else
+		{
+			if (received != null && received.length() != 0) {
+				JSONValue JSONreceived = JSONParser.parseLenient(received);
+				if (JSONreceived != null) {
+					for (I_CheckChanges handler : changeHandlers) {
+						handler.onCheckChanges(response);
+					}
 				}
 			}
+	
+			Update();
+			RenewCheckChangesThread();
 		}
-
-		Update();
-		RenewCheckChangesThread();
 	}
 
 	@Override
 	public void onError(Request request, Throwable exception) {
 		Log.write("Request Failed: " + exception.getMessage());
 	}
-	
 };
