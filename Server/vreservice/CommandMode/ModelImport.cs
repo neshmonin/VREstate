@@ -304,7 +304,7 @@ namespace Vre.Server.Command
                     missingBuildings.Remove(dbb.Name);
                 }
 
-                importBuilding(mb, dbb, created,
+                importBuilding(modelSite, mb, dbb, created,
                     isSiteModel ? null : infoModelFileName,
                     isSiteModel ? null : displayModelFileName,
                     isSiteModel ? null : overlayModelFileName,
@@ -394,17 +394,23 @@ namespace Vre.Server.Command
                     dbSite.BubbleKioskTemplateUrl = storeModelFile(dbSite, bubbleKioskTemplateFileName, "sbkt");
                 }
 
+				// Geoinformation import/update
+				// TODO: Should do this for a building model too?!
+				Model.Kmz.ViewPoint vp = modelSite.LocationCart.AsViewPoint();
+				dbSite.Location = new GeoPoint(vp.Longitude, vp.Latitude, vp.Altitude);
+
+				dbSite.MarkUpdated();
                 _clientSession.DbSession.Update(dbSite);
             }
         }
 
-        private void importBuilding(Vre.Server.Model.Kmz.Building modelBuilding, Building dbBuilding, bool isCreated,
+        private void importBuilding(Vre.Server.Model.Kmz.ConstructionSite modelSite,
+			Vre.Server.Model.Kmz.Building modelBuilding, Building dbBuilding, bool isCreated,
             string infoModelFileName, string displayModelFileName, string overlayModelFileName, string poiModelFileName,
             string bubbleWebTemplateFileName, string bubbleKioskTemplateFileName,
             Parameters extras)
         {
             List<string> missingSuites = new List<string>(dbBuilding.Suites.Count);
-            bool modified = false;
 
             Suite.SalesStatus newSuiteStatus;
             if (!Enum.TryParse<Suite.SalesStatus>(extras.GetOption("suiteStatus"), out newSuiteStatus))
@@ -450,8 +456,9 @@ namespace Vre.Server.Command
                     missingSuites.Remove(dbs.SuiteName);
                 }
 
-                importSuite(ms, dbs, created);
+                importSuite(modelSite, ms, dbs, created);
 
+				dbs.MarkUpdated();
                 _clientSession.DbSession.Update(dbs);
             }
 
@@ -521,25 +528,40 @@ namespace Vre.Server.Command
                     //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
                     dbBuilding.BubbleKioskTemplateUrl = storeModelFile(dbBuilding, bubbleKioskTemplateFileName, "bbkt");
                 }
-
-                modified = true;                
             }
 
-            // Try setting altitude if it exactly zero.
+			// Calculate and set geoinformation
+			//
+			var vpCenter = modelBuilding.LocationCart.AsViewPoint();
+			double mLon = 0.0, mLat = 0.0, mAlt = 0.0, maxSuiteAlt = 0.0;
+			int suiteCnt = 0;
+			foreach (var suiteModelInfo in modelBuilding.Suites)
+			{
+				var vp = suiteModelInfo.LocationCart.AsViewPoint();
+				mLon += vp.Longitude;
+				mLat += vp.Latitude;
+				mAlt += vp.Altitude;
+				if (maxSuiteAlt < vp.Altitude) maxSuiteAlt = vp.Altitude;
+				suiteCnt++;
+			}
+
+			dbBuilding.Location = new GeoPoint(vpCenter.Longitude, vpCenter.Latitude, vpCenter.Altitude);
+			dbBuilding.Center = new GeoPoint(
+				mLon / (double)suiteCnt,
+				mLat / (double)suiteCnt,
+				mAlt / (double)suiteCnt);
+			dbBuilding.MaxSuiteAltitude = maxSuiteAlt;
+
+			// Set/adjust altitude.
             //
-            if (dbBuilding.AltitudeAdjustment == 0.0)
+            try
             {
-                try
-                {
-                    Model.Kmz.ViewPoint vp = modelBuilding.LocationCart.AsViewPoint();
-                    dbBuilding.AltitudeAdjustment =
-                        queryForLocationAltitude(vp.Longitude, vp.Latitude) - vp.Altitude;
-                    modified = true;
-                }
-                catch (Exception ex)
-                {
-                    _log.AppendFormat("ERROR: Failed querying altitude for {0}: {1}\r\n", dbBuilding.Name, ex.Message);
-                }
+                dbBuilding.AltitudeAdjustment =
+                    queryForLocationAltitude(vpCenter.Longitude, vpCenter.Latitude) - vpCenter.Altitude;
+            }
+            catch (Exception ex)
+            {
+                _log.AppendFormat("ERROR: Failed querying altitude for {0}: {1}\r\n", dbBuilding.Name, ex.Message);
             }
 
             if (isCreated && (infoModelFileName != null))  // new single building imported; attempt to write address
@@ -610,13 +632,12 @@ namespace Vre.Server.Command
 
                 _log.AppendFormat("Effective building address is set to: {0}\r\n", 
                     AddressHelper.ConvertToReadableAddress(dbBuilding, null));
-
-                modified = true;
             }
 
 			if (isCreated) tryImportExistingListings(dbBuilding);
 
-            if (modified) _clientSession.DbSession.Update(dbBuilding);
+			dbBuilding.MarkUpdated();
+			_clientSession.DbSession.Update(dbBuilding);
         }
 
         private string storeModelFile(UpdateableBase dbObject, string modelFileName, string storePrefix)
@@ -638,7 +659,10 @@ namespace Vre.Server.Command
             else return input.Substring(0, maxlen);
         }
 
-        private void importSuite(Vre.Server.Model.Kmz.Suite modelSuite, Suite dbSuite, bool isCreated)
+        private void importSuite(
+			Vre.Server.Model.Kmz.ConstructionSite modelSite, 
+			Vre.Server.Model.Kmz.Suite modelSuite, 
+			Suite dbSuite, bool isCreated)
         {
             // this must be the first call on new suite as it re-reads suite from DB;
             // all subsequent changes shall be lost!
@@ -655,10 +679,19 @@ namespace Vre.Server.Command
 
             dbSuite.ShowPanoramicView = modelSuite.ShowPanoramicView;
 
-            setSuiteType(dbSuite, modelSuite.ClassName);
+			// Geoinformation
+			//
+			var vp = modelSuite.LocationGeo;// modelInfo.LocationCart.AsViewPoint();
+			dbSuite.Location = new ViewPoint(vp.Longitude, vp.Latitude, vp.Altitude, vp.Heading);
+			dbSuite.FloorName = Utilities.NormalizeFloorNumber(modelSuite.Floor);
+			dbSuite.CeilingHeight = new ValueWithUM(modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
+
+            setSuiteType(dbSuite, modelSite, modelSuite.ClassName);
         }
 
-        private void setSuiteType(Suite dbSuite, string newClassName)
+        private void setSuiteType(Suite dbSuite, 
+			Vre.Server.Model.Kmz.ConstructionSite modelSite,
+			string newClassName)
         {
             bool newType = false, updated = false;
             SuiteType stype = null;
@@ -685,6 +718,16 @@ namespace Vre.Server.Command
                 stype.BedroomCount = _extraSuiteInfo.GetBedroomCount(cn);
                 stype.DenCount = _extraSuiteInfo.GetDenCount(cn);
                 stype.FloorArea = new ValueWithUM(_extraSuiteInfo.GetIndoorFloorAreaSqFt(cn), ValueWithUM.Unit.SqFeet);
+
+				// Add geoinformation
+				//
+				var wireframeModel = processGeometries(modelSite.Geometries[newClassName]);
+				int idx = 0;
+				ClientData[] cdmodel = new ClientData[wireframeModel.Length];
+				foreach (Wireframe wf in wireframeModel) cdmodel[idx++] = wf.GetClientData();
+				var cd = new ClientData();
+				cd.Add("geometries", cdmodel);
+				stype.WireframeModel = JavaScriptHelper.ClientDataToJson(cd);
 
                 if (newType)
                 {
@@ -725,7 +768,44 @@ namespace Vre.Server.Command
             stype.debug_addSuite(dbSuite);
         }
 
-        internal static double queryForLocationAltitude(double longitude, double latitude)
+		private static Wireframe[] processGeometries(Model.Kmz.Geometry[] geometries)
+		{
+			int idx = 0;
+			Wireframe[] result = new Wireframe[geometries.Length];
+
+			bool errors = false;
+			foreach (Model.Kmz.Geometry geom in geometries)
+			{
+				if ((null == geom.Points) || (null == geom.Lines))
+				{
+					// TODO!!!
+					errors = true;
+					continue;
+				}
+
+				List<Wireframe.Point3D> points = new List<Wireframe.Point3D>(geom.Points.Count());
+				foreach (Model.Kmz.Geometry.Point3D pt in geom.Points)
+					points.Add(new Wireframe.Point3D(pt.X, pt.Y, pt.Z));
+
+				List<Wireframe.Segment> segments = new List<Wireframe.Segment>(geom.Lines.Count());
+				foreach (Model.Kmz.Geometry.Line ln in geom.Lines)
+					segments.Add(new Wireframe.Segment(ln.Start, ln.End));
+
+				result[idx++] = new Wireframe(points, segments);
+			}
+			if (idx < result.Length)  // in case we skipped something adjust array to eliminate nulls in array
+			{
+				Wireframe[] res_adj = new Wireframe[idx];
+				Array.Copy(result, 0, res_adj, 0, idx);
+				result = res_adj;
+			}
+
+			if (errors) ServiceInstances.Logger.Error("Geometry has one or more errors (model invalid); improper segments skipped.");
+
+			return result;
+		}
+
+		internal static double queryForLocationAltitude(double longitude, double latitude)
         {
             double result;
 

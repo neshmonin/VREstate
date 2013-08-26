@@ -169,114 +169,166 @@ namespace Vre.Server.ModelCache
                 _classInfo = new Dictionary<string, SuiteClassInfo>();
 
                 using (NHibernate.ISession dbSession = NHibernateHelper.GetSession())
-                {
-                    if (singleBuilding)
-                    {
-                        Building building;
-                        using (BuildingDao dao = new BuildingDao(dbSession)) building = dao.GetById(objectId);
-                        if (null == building)
-                        {
-                            ServiceInstances.Logger.Error("Unknown building ID used in model path: {0}", objectId);
-                            throw new ArgumentException("Unknown building ID");
-                        }
+				{
+					using (var tran = NHibernateHelper.OpenNonNestedTransaction(dbSession))
+					{
+						if (singleBuilding)
+						{
+							Building building;
+							using (BuildingDao dao = new BuildingDao(dbSession)) building = dao.GetById(objectId);
+							if (null == building)
+							{
+								ServiceInstances.Logger.Error("Unknown building ID used in model path: {0}", objectId);
+								throw new ArgumentException("Unknown building ID");
+							}
 
-                        // find related model building object by name from DB
-                        //
-                        Model.Kmz.Building buildingModelInfo = null;
-                        debug.AppendFormat("Model {0}; building name-type list:", path);
-                        // TODO: MODEL-DB TEXT COMPARISON
-                        // Here we match model's building name against its name in DB
-                        foreach (Model.Kmz.Building b in modelInfo.Buildings)
-                        {
-                            debug.AppendFormat("\r\n- {0} - {1}", b.Name, b.Type);
-                            if (b.Name.Equals(building.Name)) { buildingModelInfo = b; /* TODO: Removed for debug purposes break; */ }
-                        }
-                        if (null == buildingModelInfo)
-                        {
-                            ServiceInstances.Logger.Error("Unknown building name; model {0} does not have {1}; building not imported.",
-                                path, building.Name);
-                            _debugLogger.Info(debug.ToString());
-                            return;
-                        }
+							// TRANSITION [MODEL CACHE] START
+							if (building.Location != null) return;
+							ServiceInstances.Logger.Info("MODEL INFO TRANSITION: Processing building {0}", building);
+							// TRANSITION [MODEL CACHE] END
 
-                        BuildingInfo bi = new BuildingInfo(buildingModelInfo, building);
-                        _buildingInfo.Add(building.AutoID, bi);
+							// find related model building object by name from DB
+							//
+							Model.Kmz.Building buildingModelInfo = null;
+							debug.AppendFormat("Model {0}; building name-type list:", path);
+							// TODO: MODEL-DB TEXT COMPARISON
+							// Here we match model's building name against its name in DB
+							foreach (Model.Kmz.Building b in modelInfo.Buildings)
+							{
+								debug.AppendFormat("\r\n- {0} - {1}", b.Name, b.Type);
+								if (b.Name.Equals(building.Name)) { buildingModelInfo = b; /* TODO: Removed for debug purposes break; */ }
+							}
+							if (null == buildingModelInfo)
+							{
+								ServiceInstances.Logger.Error("Unknown building name; model {0} does not have {1}; building not imported.",
+									path, building.Name);
+								_debugLogger.Info(debug.ToString());
+								return;
+							}
 
-                        debug.Append("\r\nSuite type list:");
-                        foreach (string className in modelInfo.Geometries.Keys)
-                        {
-                            SuiteClassInfo sc = new SuiteClassInfo(processGeometries(modelInfo.Geometries[className]));
-                            string cn = className;
-                            //if (!cn.Contains('/')) cn = buildingModelInfo.Type + '/' + className;
-                            debug.AppendFormat("\r\n- {0} ({1})", cn, className);
-                            _classInfo.Add(cn, sc);
+							BuildingInfo bi = new BuildingInfo(buildingModelInfo, building, dbSession);
+							_buildingInfo.Add(building.AutoID, bi);
 
-                            // LEGACY: Make sure Building-type-less class names from DB (legacy imported) can still work
-                            int pos;
-                            if ((pos = cn.IndexOf('/')) > 0)
-                            {
-                                cn = cn.Substring(pos + 1);
-                                if (!_classInfo.ContainsKey(cn)) _classInfo.Add(cn, sc);
-                            }
-                        }
-                    }
-                    else  // full site processing (!singleBuilding)
-                    {
-                        // find related DB site object by passed ID (from model's file path)
-                        //
-                        Site site;
-                        using (SiteDao dao = new SiteDao(dbSession)) site = dao.GetById(objectId);
-                        if (null == site)
-                        {
-                            ServiceInstances.Logger.Error("Unknown site ID used in model path: {0}", objectId);
-                            throw new ArgumentException("Unknown site ID");
-                        }
+							debug.Append("\r\nSuite type list:");
+							foreach (string className in modelInfo.Geometries.Keys)
+							{
+								string cn = className;
+								//if (!cn.Contains('/')) cn = buildingModelInfo.Type + '/' + className;
+								debug.AppendFormat("\r\n- {0} ({1})", cn, className);
 
-                        debug.AppendFormat("Model {0}; building name-type list:", path);
-                        foreach (Model.Kmz.Building buildingModelInfo in modelInfo.Buildings)
-                        {
-                            debug.AppendFormat("\r\n- {0} - {1}", buildingModelInfo.Name, buildingModelInfo.Type);
+								var dbClass = building.ConstructionSite.SuiteTypes.SingleOrDefault(t => t.Name.Equals(cn));
+								if (dbClass != null)
+								{
+									var sc = new SuiteClassInfo(
+										processGeometries(modelInfo.Geometries[className]),
+										dbClass, dbSession);
+									_classInfo.Add(cn, sc);
+								}
 
-                            // find related DB building object by name from model
-                            //
-                            Building building = null;
-                            // TODO: MODEL-DB TEXT COMPARISON
-                            // Here we match model's building name against its name in DB
-                            foreach (Building b in site.Buildings) if (b.Name.Equals(buildingModelInfo.Name)) { building = b; break; }
-                            if (null == building)
-                            {
-                                ServiceInstances.Logger.Error("Unknown building name used in model for {0} ({1}): {2}; building from model is skipped.",
-                                    site.Name, site.AutoID, buildingModelInfo.Name);
-                                continue;
-                            }
+								// LEGACY: Make sure Building-type-less class names from DB (legacy imported) can still work
+								int pos;
+								if ((pos = cn.IndexOf('/')) > 0)
+								{
+									cn = cn.Substring(pos + 1);
+									if (!_classInfo.ContainsKey(cn))
+									{
+										dbClass = building.ConstructionSite.SuiteTypes.SingleOrDefault(t => t.Name.Equals(cn));
+										if (dbClass != null)
+										{
+											var sc = new SuiteClassInfo(
+												processGeometries(modelInfo.Geometries[className]),
+												dbClass, dbSession);
+											_classInfo.Add(cn, sc);
+										}
+									}
+								}
+							}
+						}
+						else  // full site processing (!singleBuilding)
+						{
+							// find related DB site object by passed ID (from model's file path)
+							//
+							Site site;
+							using (SiteDao dao = new SiteDao(dbSession)) site = dao.GetById(objectId);
+							if (null == site)
+							{
+								ServiceInstances.Logger.Error("Unknown site ID used in model path: {0}", objectId);
+								throw new ArgumentException("Unknown site ID");
+							}
 
-                            if (_buildingInfo.ContainsKey(building.AutoID))
-                            {
-                                ServiceInstances.Logger.Error("Model ({0} ({1})) contains duplicate building names: '{2}'; second occurrence is skipped.",
-                                    site.Name, site.AutoID, buildingModelInfo.Name);
-                                continue;
-                            }
+							// TRANSITION [MODEL CACHE] START
+							if (site.Location != null) return;
+							ServiceInstances.Logger.Info("MODEL INFO TRANSITION: Processing site {0}", site);
+							site.Location = _location;
+							site.MarkUpdated();
+							dbSession.Update(site);
+							// TRANSITION [MODEL CACHE] END
 
-                            BuildingInfo bi = new BuildingInfo(buildingModelInfo, building);
-                            _buildingInfo.Add(building.AutoID, bi);
-                        }
+							debug.AppendFormat("Model {0}; building name-type list:", path);
+							foreach (Model.Kmz.Building buildingModelInfo in modelInfo.Buildings)
+							{
+								debug.AppendFormat("\r\n- {0} - {1}", buildingModelInfo.Name, buildingModelInfo.Type);
 
-                        debug.Append("\r\nSuite type list:");
-                        foreach (string className in modelInfo.Geometries.Keys)
-                        {
-                            SuiteClassInfo sc = new SuiteClassInfo(processGeometries(modelInfo.Geometries[className]));
-                            debug.AppendFormat("\r\n- {0}", className);
-                            _classInfo.Add(className, sc);
+								// find related DB building object by name from model
+								//
+								Building building = null;
+								// TODO: MODEL-DB TEXT COMPARISON
+								// Here we match model's building name against its name in DB
+								foreach (Building b in site.Buildings) if (b.Name.Equals(buildingModelInfo.Name)) { building = b; break; }
+								if (null == building)
+								{
+									ServiceInstances.Logger.Error("Unknown building name used in model for {0} ({1}): {2}; building from model is skipped.",
+										site.Name, site.AutoID, buildingModelInfo.Name);
+									continue;
+								}
 
-                            // LEGACY: Make sure Building-type-less class names from DB (legacy imported) can still work
-                            int pos;
-                            if ((pos = className.IndexOf('/')) > 0)
-                            {
-                                string cn = className.Substring(pos + 1);
-                                if (!_classInfo.ContainsKey(cn)) _classInfo.Add(cn, sc);
-                            }
-                        }
-                    }  // site-level import
+								if (_buildingInfo.ContainsKey(building.AutoID))
+								{
+									ServiceInstances.Logger.Error("Model ({0} ({1})) contains duplicate building names: '{2}'; second occurrence is skipped.",
+										site.Name, site.AutoID, buildingModelInfo.Name);
+									continue;
+								}
+
+								BuildingInfo bi = new BuildingInfo(buildingModelInfo, building, dbSession);
+								_buildingInfo.Add(building.AutoID, bi);
+							}
+
+							debug.Append("\r\nSuite type list:");
+							foreach (string className in modelInfo.Geometries.Keys)
+							{
+								string cn = className;
+								debug.AppendFormat("\r\n- {0}", cn);
+
+								var dbClass = site.SuiteTypes.SingleOrDefault(t => t.Name.Equals(cn));
+								if (dbClass != null)
+								{
+									var sc = new SuiteClassInfo(
+										processGeometries(modelInfo.Geometries[className]),
+										dbClass, dbSession);
+									_classInfo.Add(cn, sc);
+								}
+
+								// LEGACY: Make sure Building-type-less class names from DB (legacy imported) can still work
+								int pos;
+								if ((pos = className.IndexOf('/')) > 0)
+								{
+									cn = className.Substring(pos + 1);
+									if (!_classInfo.ContainsKey(cn))
+									{
+										dbClass = site.SuiteTypes.SingleOrDefault(t => t.Name.Equals(cn));
+										if (dbClass != null)
+										{
+											var sc = new SuiteClassInfo(
+												processGeometries(modelInfo.Geometries[className]),
+												dbClass, dbSession);
+											_classInfo.Add(cn, sc);
+										}
+									}
+								}
+							}
+						}  // site-level import
+						tran.Commit();
+					}
                 }
 
                 _debugLogger.Info(debug.ToString());
@@ -398,7 +450,7 @@ namespace Vre.Server.ModelCache
             internal string _name;
             internal Dictionary<int, SuiteInfo> _suiteInfo;
 
-            public BuildingInfo(Model.Kmz.Building modelInfo, Building dbBuilding)
+            public BuildingInfo(Model.Kmz.Building modelInfo, Building dbBuilding, NHibernate.ISession dbSession)
             {
                 _name = modelInfo.Name;
                 //Name = modelInfo.Name;
@@ -426,7 +478,7 @@ namespace Vre.Server.ModelCache
                         continue;
                     }
 
-                    SuiteInfo si = new SuiteInfo(suiteModelInfo);
+                    SuiteInfo si = new SuiteInfo(suiteModelInfo, dbSuite, dbSession);
 
                     if (_suiteInfo.ContainsKey(dbSuite.AutoID))
                     {
@@ -448,7 +500,15 @@ namespace Vre.Server.ModelCache
                     mLon / (double)suiteCnt,
                     mLat / (double)suiteCnt,
                     mAlt / (double)suiteCnt);
-            }
+
+				// TRANSITION [MODEL CACHE] START
+				dbBuilding.Location = _location;
+				dbBuilding.Center = _center;
+				dbBuilding.MaxSuiteAltitude = _maxSuiteAlt;
+				dbBuilding.MarkUpdated();
+				dbSession.Update(dbBuilding);
+				// TRANSITION [MODEL CACHE] END
+			}
 
             public void UpdateBo(Building target, bool withSubObjects)
             {
@@ -495,7 +555,7 @@ namespace Vre.Server.ModelCache
             private double _ceilingHeightFt;
             private string _floor;
 
-            public SuiteInfo(Model.Kmz.Suite modelInfo)
+            public SuiteInfo(Model.Kmz.Suite modelInfo, Suite dbSuite, NHibernate.ISession dbSession)
             {
                 _name = Utilities.NormalizeSuiteNumber(modelInfo.Name);
 
@@ -511,7 +571,15 @@ namespace Vre.Server.ModelCache
                 _floor = Utilities.NormalizeFloorNumber(modelInfo.Floor);
 
                 //modelInfo.Id;  // "ID<five-digit-int>"
-            }
+
+				// TRANSITION [MODEL CACHE] START
+				dbSuite.Location = _location;
+				dbSuite.FloorName = _floor;
+				dbSuite.CeilingHeight = new ValueWithUM(_ceilingHeightFt, ValueWithUM.Unit.Feet);
+				dbSuite.MarkUpdated();
+				dbSession.Update(dbSuite);
+				// TRANSITION [MODEL CACHE] END
+			}
 
             public void UpdateBo(Suite target, bool withSubObjects)
             {
@@ -523,19 +591,30 @@ namespace Vre.Server.ModelCache
             }
         }
 
-        internal class SuiteClassInfo
-        {
-            private Wireframe[] _model;
+		internal class SuiteClassInfo
+		{
+			private Wireframe[] _model;
 
-            public SuiteClassInfo(Wireframe[] model)
-            {
-                _model = model;
-            }
+			public SuiteClassInfo(Wireframe[] model, SuiteType dbClass, NHibernate.ISession dbSession)
+			{
+				_model = model;
 
-            public void UpdateBo(SuiteType target)
-            {
-                target.WireframeModel = _model;
-            }
-        }
+				// TRANSITION [MODEL CACHE] START
+				int idx = 0;
+				ClientData[] cdmodel = new ClientData[_model.Length];
+				foreach (Wireframe wf in _model) cdmodel[idx++] = wf.GetClientData();
+				var cd = new ClientData();
+				cd.Add("geometries", cdmodel);
+				dbClass.WireframeModel = JavaScriptHelper.ClientDataToJson(cd);
+				dbClass.MarkUpdated();
+				dbSession.Update(dbClass);
+				// TRANSITION [MODEL CACHE] END
+			}
+
+			public void UpdateBo(SuiteType target)
+			{
+				//target.WireframeModel = _model;
+			}
+		}
     }
 }

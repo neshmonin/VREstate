@@ -109,5 +109,23 @@ namespace Vre.Server.Dao
                 return q.List<Building>();
             }
         }
+
+		public IList<Building> SearchByProximity(double longitude, double latitude,
+			double dLon, double dLat)
+		{
+			lock (_session)
+			{
+				IQuery q = _session.CreateQuery("FROM Vre.Server.BusinessLogic.Building WHERE "
+					+ "Deleted=false AND Location.Longitude>:lonLeft AND Location.Longitude<:lonRight "
+					+ "AND Location.Latitude>:latLeft AND Location.Latitude<:latRight");
+
+				q.SetDouble("lonLeft", longitude - dLon);
+				q.SetDouble("lonRight", longitude + dLon);
+				q.SetDouble("latLeft", latitude - dLat);
+				q.SetDouble("latRight", latitude + dLat);
+
+				return q.List<Building>();
+			}
+		}
     }
 }

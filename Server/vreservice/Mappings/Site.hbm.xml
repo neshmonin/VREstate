@@ -38,13 +38,11 @@
     <property name="InitialView" column="InitialView" />
     <property name="WireframeLocation" column="WireframeLocation" />
 
-    <!-- Geometry-related elements are read directly from model cached
     <component name="Location">
       <property name="Longitude" column="PosLongitude" />
       <property name="Latitude" column="PosLatitude" />
       <property name="Altitude" column="PosAltitude" />
     </component>
-    -->
 
     </class>
 </hibernate-mapping>

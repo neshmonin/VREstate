@@ -13,6 +13,7 @@ namespace ModelPackageTester
     public partial class ImportForm : Form
     {
         private Kmz _model = null;
+		private ModelImportSettings _settings;
         private string _modelFileName = null;
         private string _stiFileName = null;
         private string _floorPlanPath = null;
@@ -178,6 +179,8 @@ namespace ModelPackageTester
             string modelFileName, string stiFileName, string floorPlanPath, Kmz model,
             string executablePath, bool allowDrop, bool isProduction)
         {
+			_settings = settings;
+
             _modelFileName = modelFileName;
             _stiFileName = stiFileName;
             _floorPlanPath = floorPlanPath;
@@ -187,16 +190,16 @@ namespace ModelPackageTester
 
             string prop, path;
 
-            prop = settings.EstateDeveloperName;
+            prop = _settings.EstateDeveloperName;
             if (prop != null) selectComboItem(cbxDeveloper, prop);
 
-            prop = settings.SiteName;
+            prop = _settings.SiteName;
             if (prop != null) tbSite.Text = prop;
 
-            prop = settings.DisplayModelFileName;
+            prop = _settings.DisplayModelFileName;
             if (prop != null)
             {
-                path = Path.Combine(settings.BasePath, prop);
+                path = Path.Combine(_settings.BasePath, prop);
                 if (File.Exists(path))
                 {
                     _displayModelFileName = path;
@@ -204,10 +207,10 @@ namespace ModelPackageTester
                 }
             }
 
-            prop = settings.OverlayModelFileName;
+            prop = _settings.OverlayModelFileName;
             if (prop != null)
             {
-                path = Path.Combine(settings.BasePath, prop);
+                path = Path.Combine(_settings.BasePath, prop);
                 if (File.Exists(path))
                 {
                     _overlayModelFileName = path;
@@ -215,10 +218,10 @@ namespace ModelPackageTester
                 }
             }
 
-            prop = settings.PoiModelFileName;
+            prop = _settings.PoiModelFileName;
             if (prop != null)
             {
-                path = Path.Combine(settings.BasePath, prop);
+                path = Path.Combine(_settings.BasePath, prop);
                 if (File.Exists(path))
                 {
                     _poiModelFileName = path;
@@ -226,10 +229,10 @@ namespace ModelPackageTester
                 }
             }
 
-            prop = settings.BubbleWebTemplateFileName;
+            prop = _settings.BubbleWebTemplateFileName;
             if (prop != null)
             {
-                path = Path.Combine(settings.BasePath, prop);
+                path = Path.Combine(_settings.BasePath, prop);
                 if (File.Exists(path))
                 {
                     _bubbleWebTemplateFileName = path;
@@ -237,10 +240,10 @@ namespace ModelPackageTester
                 }
             }
 
-            prop = settings.BubbleKioskTemplateFileName;
+            prop = _settings.BubbleKioskTemplateFileName;
             if (prop != null)
             {
-                path = Path.Combine(settings.BasePath, prop);
+                path = Path.Combine(_settings.BasePath, prop);
                 if (File.Exists(path))
                 {
                     _bubbleKioskTemplateFileName = path;
@@ -248,13 +251,13 @@ namespace ModelPackageTester
                 }
             }
 
-            prop = settings.NewBuildingStatusName;
+            prop = _settings.NewBuildingStatusName;
             if (prop != null) selectComboItem(cbxNewBuildingStatus, prop);
 
-            prop = settings.NewSuiteStatusName;
+            prop = _settings.NewSuiteStatusName;
             if (prop != null) selectComboItem(cbxNewSuiteStatus, prop);
 
-            prop = settings.BuildingToImportName;
+            prop = _settings.BuildingToImportName;
             if (prop != null)
             {
                 cbSingleBuilding.Checked = true;
@@ -262,19 +265,19 @@ namespace ModelPackageTester
 
                 selectComboItem(cbxBuildings, prop);
 
-                prop = settings.BuildingStreetAddress;
+                prop = _settings.BuildingStreetAddress;
                 if (prop != null) tbStreetAddress.Text = prop;
 
-                prop = settings.BuildingMunicipality;
+                prop = _settings.BuildingMunicipality;
                 if (prop != null) tbMunicipality.Text = prop;
 
-                prop = settings.BuildingStateProvince;
+                prop = _settings.BuildingStateProvince;
                 if (prop != null) tbStateProvince.Text = prop;
 
-                prop = settings.BuildingPostalCode;
+                prop = _settings.BuildingPostalCode;
                 if (prop != null) tbPostalCode.Text = prop;
 
-                prop = settings.BuildingCountry;
+                prop = _settings.BuildingCountry;
                 if (prop != null) tbCountry.Text = prop;
             }
             else
@@ -289,6 +292,7 @@ namespace ModelPackageTester
         public void Init(string modelFileName, string stiFileName, string floorPlanPath, Kmz model,
             string executablePath, bool allowDrop, bool isProduction)
         {
+			_settings = null;
             _modelFileName = modelFileName;
             _stiFileName = stiFileName;
             _floorPlanPath = floorPlanPath;
@@ -338,6 +342,83 @@ namespace ModelPackageTester
             foreach (Building b in _model.Model.Site.Buildings)
                 cbxBuildings.Items.Add(b.Name);
         }
+
+		private void saveImportSettings()
+		{
+			if (null == _settings)
+			{
+				if (DialogResult.Yes == MessageBox.Show(
+					"Do you want to create a new import settings file?",
+					Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question))
+				{
+					var path = Path.GetDirectoryName(_modelFileName);
+					var name = Path.GetFileName(path);  // gets name of last level folder 
+					if (string.IsNullOrEmpty(name))
+					{
+						if (cbSingleBuilding.Checked) name = cbxBuildings.SelectedItem as string;
+						else name = tbSite.Text.Trim();
+					}
+					_settings = new ModelImportSettings(Path.Combine(path, name + ".import.txt"));
+				}
+				else
+				{
+					return;
+				}
+			}
+
+			string basePath = _settings.BasePath;
+
+			_settings.ModelFileName = makeRelativePath(_modelFileName, basePath);
+			_settings.SuiteTypeInfoFileName = makeRelativePath(_stiFileName, basePath);
+			_settings.FloorplanDirectoryName = makeRelativePath(_floorPlanPath, basePath);
+
+			_settings.EstateDeveloperName = cbxDeveloper.Text.Trim();
+			_settings.SiteName = tbSite.Text.Trim();
+
+			_settings.DisplayModelFileName = makeRelativePath(_displayModelFileName, basePath);
+			_settings.OverlayModelFileName = makeRelativePath(_overlayModelFileName, basePath);
+			_settings.PoiModelFileName = makeRelativePath(_poiModelFileName, basePath);
+			_settings.BubbleWebTemplateFileName = makeRelativePath(_bubbleWebTemplateFileName, basePath);
+			_settings.BubbleKioskTemplateFileName = makeRelativePath(_bubbleKioskTemplateFileName, basePath);
+	
+			_settings.NewBuildingStatusName = cbxNewBuildingStatus.SelectedItem as string;
+			_settings.NewSuiteStatusName = cbxNewSuiteStatus.SelectedItem as string;
+
+			if (cbSingleBuilding.Checked)
+			{
+				_settings.BuildingToImportName = cbxBuildings.SelectedItem as string;
+				_settings.BuildingStreetAddress = tbStreetAddress.Text.Trim();
+				_settings.BuildingMunicipality = tbMunicipality.Text.Trim();
+				_settings.BuildingStateProvince = tbStateProvince.Text.Trim();
+				_settings.BuildingPostalCode = tbPostalCode.Text.Trim();
+				_settings.BuildingCountry = tbCountry.Text.Trim();
+			}
+			else
+			{
+				_settings.BuildingToImportName = null;
+			}
+
+			_settings.Save();
+		}
+
+		private static readonly string _directorySeparatorChar = new string(Path.DirectorySeparatorChar, 1);
+
+		private static string makeRelativePath(string path, string basePath)
+		{
+			string result;
+			if ((path != null) && path.StartsWith(basePath))
+			{
+				result = path.Substring(basePath.Length);
+				if (result.StartsWith(_directorySeparatorChar))
+					result = result.Substring(1);
+			}
+			else
+			{
+				result = path;
+			}
+			if ((result != null) && (0 == result.Length)) result = ".";  // directory case
+			return result;
+		}
 
         private static void selectComboItem(ComboBox target, string desirableItem)
         {
@@ -462,6 +543,8 @@ namespace ModelPackageTester
                 Application.DoEvents();
 
                 tbResults.Text = import();
+
+				if (cbAutoSaveSettings.Checked)	saveImportSettings();
             }
             catch (Exception ex)
             {

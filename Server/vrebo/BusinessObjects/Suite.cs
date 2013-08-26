@@ -43,8 +43,12 @@ namespace Vre.Server.BusinessLogic
         /// </summary>
         public virtual User SellingBy { get; set; }
 
-        /// <summary>For NHibernate; NOT USED: value set by Model Cache</summary>
-        protected virtual string ceilingHeight { get { return CeilingHeight.AsRaw; } set { CeilingHeight = new ValueWithUM(value); } }
+		/// <summary>for use by NHibernate</summary>
+        protected virtual string ceilingHeight 
+		{ 
+			get { return (null == CeilingHeight) ? null : CeilingHeight.AsRaw; } 
+			set { CeilingHeight = (null == value) ? null : new ValueWithUM(value); } 
+		}
 
         protected Suite() { }
 

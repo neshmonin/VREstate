@@ -106,8 +106,7 @@ namespace Vre.Server.RemoteService
                 // Write request always:
                 // - has a sid query parameter (or passed in HTTP header)
                 // - refers to a valid active session
-                // NOW: Session is always available: if there's no SID passed - guest session is auto-created.
-				//if (null == request.UserInfo.Session) throw new ArgumentException("Need a valid session to perform this operation.");
+				if (null == request.UserInfo.Session) throw new ArgumentException("Need a valid session to perform this operation.");
 				
                 DataService.ProcessGetRequest(request);
                 return;

@@ -194,7 +194,46 @@ namespace ModelPackageTester
                 canImport = false;
             }
 
-            btnImport.Enabled = canImport;
+			readWarnings.Append("\r\nStep 6: =========== Testing for capacity limits =============");
+
+			if (_lastModel.Model.Site.Name.Length > 256)
+			{
+				readWarnings.AppendFormat("\r\nGSCL01: Site name ({0}) too long; limit is 256 symbols.",
+					_lastModel.Model.Site.Name);
+				canImport = false;
+			}
+			foreach (var b in _lastModel.Model.Site.Buildings)
+			{
+				if (b.Name.Length > 256)
+				{
+					readWarnings.AppendFormat("\r\nGSCL02: Building name ({0}) too long; limit is 256 symbols.",
+						b.Name);
+					canImport = false;
+				}
+				foreach (var s in b.Suites)
+				{
+					if (s.ClassName.Length > 256)
+					{
+						readWarnings.AppendFormat("\r\nGSCL03: Suite class name ({0}) too long; limit is 256 symbols.",
+							s.ClassName);
+						canImport = false;
+					}
+					if (s.Floor.Length > 32)
+					{
+						readWarnings.AppendFormat("\r\nGSCL04: Suite floor name ({0}) too long; limit is 16 symbols.",
+							s.Floor);
+						canImport = false;
+					}
+					if (s.Name.Length > 32)
+					{
+						readWarnings.AppendFormat("\r\nGSCL05: Suite name ({0}) too long; limit is 16 symbols.",
+							s.Name);
+						canImport = false;
+					}
+				}
+			}
+
+			btnImport.Enabled = canImport;
 
             return readWarnings.ToString();
         }

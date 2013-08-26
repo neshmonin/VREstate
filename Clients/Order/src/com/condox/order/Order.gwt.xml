@@ -8,7 +8,6 @@
 <module rename-to='order'>
   <!-- Inherit the core Web Toolkit stuff.                        -->
   <inherits name='com.google.gwt.user.User'/>
-
   <!-- Inherit the default GWT style sheet.  You can change       -->
   <!-- the theme of your GWT application by uncommenting          -->
   <!-- any one of the following lines.                            -->
@@ -18,8 +17,8 @@
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
   <!-- Other module inherits                                      -->
-	<inherits name="com.google.gwt.json.JSON" />
-	<inherits name="com.condox.clientshared.ClientShared" />
+<inherits name="com.google.gwt.json.JSON" />
+<inherits name="com.condox.clientshared.ClientShared" />
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.condox.order.client.Order'/>

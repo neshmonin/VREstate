@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Web;
 using NHibernate;
@@ -72,6 +73,12 @@ namespace Vre.Server.RemoteService
                     sendSalesMessage(request);
                     return;
                 }
+				else if (command.Equals("getMlsInfo")
+					&& (request.Request.Type == RequestType.Get))
+				{
+					getMlsInfo(request);
+					return;
+				}
             }
 
             throw new ArgumentException("Program command not understood.");
@@ -327,31 +334,17 @@ namespace Vre.Server.RemoteService
             ViewOrder.SubjectType targetType;
             int targetId;
 
-            {
-                string dv = request.Request.Query["daysValid"];
-                if (string.IsNullOrWhiteSpace(dv))
-                {
-                    dv = request.Request.Query["expiresOn"];
-                    if (string.IsNullOrWhiteSpace(dv)) throw new ArgumentException("Missing validation period/expiry");
+			if (request.UserInfo.Session != null)
+			{
+				switch (request.UserInfo.Session.User.UserRole)
+				{
+					case User.Role.BuyingAgent:
+						registerBuyingAgentViewOrder(request, mlsId, propertyType, propertyId, paymentRefId);
+						return;
+				}
+			}
 
-                    if (!DateTime.TryParseExact(dv, "yyyy-MM-ddTHH:mm:ss", null, System.Globalization.DateTimeStyles.None, out expiresOn))
-                        throw new ArgumentException("Validation expiry value is invalid");
-
-                    if (expiresOn.CompareTo(DateTime.UtcNow) < 1) throw new ArgumentException("Validation expiry value is too old");
-                }
-                else
-                {
-                    int idv;
-                    if (!int.TryParse(dv, out idv)) throw new ArgumentException("Validation period value is invalid");
-                    // LEGACY: SERVER LOCAL TIME HERE!
-                    expiresOn = DateTime.Now.Date.AddDays(idv + 1).ToUniversalTime();
-                }
-            }
-            //if (!DateTime.TryParseExact(request.Request.Query["expires"], "yyyy-MM-ddTHH:mm:ss",
-            //    CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out expiresOn))
-            //{
-            //    throw new ArgumentException("The time specified is not valid");
-            //}
+			expiresOn = getViewOrderTimeArgument(request);
 
             string pt = request.Request.Query["product"];
             if (string.IsNullOrWhiteSpace(pt)) throw new ArgumentException("Product type missing");
@@ -469,14 +462,135 @@ namespace Vre.Server.RemoteService
                     if (null == to) throw new FileNotFoundException("Property not found in system.");
                 }
 
-
-                string viewOrderId = ReverseRequestService.CreateViewOrder(request, targetUser, note,
+                ReverseRequestService.CreateViewOrder(request, targetUser, note,
                     product, options, mlsId, mlsUrl, targetType, targetId, productUrl, expiresOn, paymentRefId);
 
                 // request.Response.ResponseCode - set by .CreateListing()
                 tran.Commit();
             }
         }
+
+		private static DateTime getViewOrderTimeArgument(IServiceRequest request)
+		{
+			DateTime expiresOn;
+			string dv = request.Request.Query["daysValid"];
+			if (string.IsNullOrWhiteSpace(dv))
+			{
+				dv = request.Request.Query["expiresOn"];
+				if (string.IsNullOrWhiteSpace(dv)) throw new ArgumentException("Missing validation period/expiry");
+
+				if (!DateTime.TryParseExact(dv, "yyyy-MM-ddTHH:mm:ss", null, System.Globalization.DateTimeStyles.None, out expiresOn))
+					throw new ArgumentException("Validation expiry value is invalid");
+
+				if (expiresOn.CompareTo(DateTime.UtcNow) < 1) throw new ArgumentException("Validation expiry value is too old");
+			}
+			else
+			{
+				int idv;
+				if (!int.TryParse(dv, out idv)) throw new ArgumentException("Validation period value is invalid");
+				// LEGACY: SERVER LOCAL TIME HERE!
+				expiresOn = DateTime.Now.Date.AddDays(idv + 1).ToUniversalTime();
+			}
+			return expiresOn;
+		}
+
+		private static void registerBuyingAgentViewOrder(IServiceRequest request,
+			string mlsId, string propertyType, string propertyId, string paymentRefId)
+		{
+			ISession dbSession = request.UserInfo.Session.DbSession;
+
+			string voIdStr = request.Request.Query["voId"];
+			Guid voId = Guid.Empty;
+			if (!string.IsNullOrEmpty(voIdStr))
+			{
+				switch (UniversalId.TypeInUrlId(voIdStr))
+				{
+					case UniversalId.IdType.ViewOrder:
+					case UniversalId.IdType.Unknown:
+						voId = UniversalId.ExtractAsGuid(voIdStr);
+						break;
+
+					default:
+						throw new ArgumentException("ViewOrder ID provided format is unknown.");
+				}
+			}
+
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(dbSession))
+			{
+				ViewOrder.SubjectType targetType;
+				int targetId;
+
+				// If ViewOrder ID is provided in request - use it...
+				if (voId != Guid.Empty)
+				{
+					ViewOrder vo;
+					using (var dao = new ViewOrderDao(dbSession))
+						vo = dao.GetById(voId);
+
+					if (null == vo)
+						throw new FileNotFoundException("ViewOrder referenced by ID is not found");
+
+					mlsId = vo.MlsId;
+					targetType = vo.TargetObjectType;
+					targetId = vo.TargetObjectId;
+
+					if (string.IsNullOrEmpty(mlsId))
+						throw new ArgumentException("ViewOrder referenced by ID has no MLS# associated");
+				}
+				// ... if not - try MLS# provided ...
+				else if (!string.IsNullOrEmpty(mlsId))
+				{
+					ViewOrder vo;
+					using (var dao = new ViewOrderDao(dbSession))
+						vo = dao.GetByImportedMlsId(mlsId).FirstOrDefault();
+
+					if (null == vo)
+						throw new FileNotFoundException("MLS# provided is not known in system");
+
+					targetType = vo.TargetObjectType;
+					targetId = vo.TargetObjectId;
+				}
+				// ... else - try searching by property ID and type provided
+				else
+				{
+					if (!int.TryParse(propertyId, out targetId))
+						throw new ArgumentException("Property ID is not valid");
+
+					if (propertyType.Equals("suite"))
+						targetType = ViewOrder.SubjectType.Suite;
+					else if (propertyType.Equals("building"))
+						targetType = ViewOrder.SubjectType.Building;
+					else
+						throw new ArgumentException("Unknown property type");
+
+					//mlsId = null;
+					using (var dao = new ViewOrderDao(dbSession))
+						foreach (var vo in dao.GetActive(targetType, targetId))
+							if (!string.IsNullOrEmpty(vo.MlsId)) { mlsId = vo.MlsId; break; }
+
+					if (null == mlsId)
+						throw new FileNotFoundException("No known View Order with specified MLS ID exists for the target.");
+				}
+
+				ViewOrder newVo = ReverseRequestService.CreateViewOrder(request, 
+					request.UserInfo.Session.User, 
+					null,
+					ViewOrder.ViewOrderProduct.PrivateListing,
+					ViewOrder.ViewOrderOptions.VirtualTour3D,  // TODO: Should be configurable?
+					mlsId, null, targetType, targetId,
+					null, DateTime.UtcNow.AddYears(1), paymentRefId);
+
+				newVo.InfoUrl = string.Format("{0}info.html#{1}!{2}",
+					request.Request.ConstructClientRootUri(),
+					"mls",
+					UniversalId.GenerateUrlId(UniversalId.IdType.ViewOrder, newVo.AutoID));
+
+				using (var dao = new ViewOrderDao(request.UserInfo.Session.DbSession))
+					dao.Update(newVo);
+
+				tran.Commit();
+			}
+		}
 
         private static void checkAddress(IServiceRequest request)
         {
@@ -523,5 +637,44 @@ namespace Vre.Server.RemoteService
             // ...
             return LoginType.Plain;
         }
+
+		private static void getMlsInfo(IServiceRequest request)
+		{
+			var strObjectId = request.Request.Query.GetParam("id", string.Empty);
+			if (string.IsNullOrWhiteSpace(strObjectId)) 
+				throw new ArgumentException("Subject ID missing or invalid");
+
+			using (var session = NHibernateHelper.GetSession())
+			{
+				var resp = request.Response;
+				using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
+				{
+					var viewOrder = DataService.RetrieveViewOrder(session, strObjectId, false);
+
+					resp.Data = DataService.convertViewOrderdata(session, 
+						viewOrder, request.Request.Query.GetParam("verbose", false));
+
+					resp.Data = new ClientData();
+					resp.Data.Add("voId", viewOrder.AutoID);
+					resp.Data.Add("mlsId", viewOrder.MlsId);
+
+					MlsInfo extraInfo;
+					using (var dao = new MlsInfoDao(session))
+						extraInfo = dao.GetByMlsNum(viewOrder.MlsId);
+
+					// TODO: converting text->json->text
+					if (extraInfo != null)
+						resp.Data.Add("data", extraInfo.RawInfoAsClientData);
+
+					User u;
+					using (var dao = new UserDao(session))
+						u = dao.GetById(viewOrder.OwnerId);
+
+					resp.Data.Add("brokerInfo", u.PersonalInfo);
+					if (u.BrokerInfo != null) resp.Data.Add("brokerage", u.BrokerInfo.GetClientData());
+				}
+				resp.ResponseCode = HttpStatusCode.OK;
+			}
+		}
     }
 }

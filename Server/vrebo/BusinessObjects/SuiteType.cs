@@ -8,7 +8,7 @@ namespace Vre.Server.BusinessLogic
     {
         public virtual Site ConstructionSite { get; protected set; }
         public virtual string Name { get; set; }
-        public virtual string Model { get; set; }
+        public virtual string WireframeModel { get; set; }
         public virtual IList<SuiteLevel> Levels { get; protected set; }
 
         public virtual ValueWithUM FloorArea { get; set; }  // TODO: Should be computable field!
@@ -29,8 +29,6 @@ namespace Vre.Server.BusinessLogic
 
         protected virtual string floorArea { get { return FloorArea.AsRaw; } set { FloorArea = new ValueWithUM(value); } }
 
-        public virtual Wireframe[] WireframeModel { get; set; }
-
         protected SuiteType() { }
 
         public SuiteType(Site constructionSite, string name) : base()
@@ -38,7 +36,6 @@ namespace Vre.Server.BusinessLogic
             InitializeNew();
             ConstructionSite = constructionSite;
             Name = name;
-            Model = null;
             Levels = new List<SuiteLevel>();
             WireframeModel = null;
             SuitesInvolved = new List<Suite>();
@@ -135,10 +132,9 @@ namespace Vre.Server.BusinessLogic
 
             if (WireframeModel != null)
             {
-                idx = 0;
-                ClientData[] model = new ClientData[WireframeModel.Length];
-                foreach (Wireframe wf in WireframeModel) model[idx++] = wf.GetClientData();
-                result.Add("geometries", model);  // keep model's terminology
+				// TODO: converting text->json->text
+				var cd = JavaScriptHelper.JsonToClientData(WireframeModel);
+				result.Add("geometries", cd["geometries"]);  // keep model's terminology
             }
 
             if (FloorArea != null)

@@ -19,9 +19,10 @@ namespace Vre.Server.BusinessLogic
         /// </summary>
         public ClientData(Dictionary<string, object> source) : base(source)         
         {
-            Dictionary<string, ClientData> itemsToReplace = new Dictionary<string, ClientData>();
-            Dictionary<string, ClientData[]> arraysToReplace = new Dictionary<string, ClientData[]>();
-            Dictionary<string, int[]> intArraysToReplace = new Dictionary<string, int[]>();
+            var itemsToReplace = new Dictionary<string, ClientData>();
+            var arraysToReplace = new Dictionary<string, ClientData[]>();
+            var intArraysToReplace = new Dictionary<string, int[]>();
+			var doubleArraysToReplace = new Dictionary<string, double[]>();
 
             foreach (KeyValuePair<string, object> kvp in this)
             {
@@ -41,16 +42,37 @@ namespace Vre.Server.BusinessLogic
                             // in an array of doubles some elements can be integers, so we run
                             // check on all elements of the array
                             Type t = typeof(int);
-                            for (int i=0; i<idx; i++)
-                                if (suba[i].GetType() != typeof(int))
-                                    t = typeof(double);
+							for (int i = idx - 1; i >= 0; i--)
+							{
+								var tt = suba[i].GetType();
+								if (!tt.Equals(typeof(int)))
+								{
+									t = typeof(double);
+									if (!tt.Equals(typeof(double)) && !tt.Equals(typeof(decimal)))
+										t = typeof(object);
+								}
+							}
 
                             if (t.Equals(typeof(int)))
                             {
-                                int[] items = new int[idx];
+                                var items = new int[idx];
                                 // unboxing
                                 for (idx--; idx >= 0; idx--) items[idx] = (int)suba[idx];
                                 intArraysToReplace.Add(kvp.Key, items);
+                            }
+                            else if (t.Equals(typeof(double)))
+                            {
+                                var items = new double[idx];
+                                // unboxing
+                                for (idx--; idx >= 0; idx--)
+								{
+									var rr = suba[idx];
+									var tt = rr.GetType();
+									if (tt.Equals(typeof(decimal))) items[idx] = (double)(decimal)rr;
+									else if (tt.Equals(typeof(double))) items[idx] = (double)rr;
+									else items[idx] = (double)(int)rr;
+								}
+                                doubleArraysToReplace.Add(kvp.Key, items);
                             }
                             else
                             {
@@ -70,10 +92,11 @@ namespace Vre.Server.BusinessLogic
                     }
                 }
             }
-            foreach (KeyValuePair<string, ClientData> kvp in itemsToReplace) this[kvp.Key] = kvp.Value;
-            foreach (KeyValuePair<string, ClientData[]> kvp in arraysToReplace) this[kvp.Key] = kvp.Value;
-            foreach (KeyValuePair<string, int[]> kvp in intArraysToReplace) this[kvp.Key] = kvp.Value;
-        }
+            foreach (var kvp in itemsToReplace) this[kvp.Key] = kvp.Value;
+            foreach (var kvp in arraysToReplace) this[kvp.Key] = kvp.Value;
+            foreach (var kvp in intArraysToReplace) this[kvp.Key] = kvp.Value;
+			foreach (var kvp in doubleArraysToReplace) this[kvp.Key] = kvp.Value;
+		}
 
         public void Merge(ClientData mergingData) { Merge(mergingData, false); }
 

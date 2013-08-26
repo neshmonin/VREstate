@@ -57,6 +57,8 @@ h1 {
     	background-color: slateblue;
     }
     .gwt-Button {
+    	color: Maroon;
+    	background-color: Maroon;
     }
     .my-LayoutPanel {
     	margin: auto;
@@ -201,5 +203,21 @@ line-height: 50px;
 	font-weight: bold;
 	vertical-align: middle;
 	text-align: center;
+}
+.my-Login {
+	color: green;
+	font-size: 16px;
+	font-weight: bold;
+}
+.my-Button {
+	color: red;
+	font-variant: small-caps;
+	font-size: 18px;
+	font-style: oblique;
+	font-weight: bold;
+	text-decoration: blink;
+}
+.my-node {
+	margin-left: 20px;
 }
 	

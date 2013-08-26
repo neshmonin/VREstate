@@ -12,12 +12,17 @@ namespace Vre.Server.HttpService
         private RemoteServiceProvider _rsp;
         private long _maxRequestBodyLength;
 		private RefererXref _refererXref;
+		private int _floodingRequestHoldOffMs;
 
         public HttpServiceMain() : base("HTTP Listener")
         {
             _rsp = new RemoteServiceProvider();
             _maxRequestBodyLength = ServiceInstances.Configuration.GetValue("MaxHttpRequestBodyLengthBytes", 10240);
 			_refererXref = new RefererXref();
+
+			_floodingRequestHoldOffMs = ServiceInstances.Configuration.GetValue("FloodingHttpRequestHoldOffMs", 1000);
+			if (_floodingRequestHoldOffMs < 0) _floodingRequestHoldOffMs = 0;
+			if (_floodingRequestHoldOffMs > 3600000) _floodingRequestHoldOffMs = 3600000;
         }
 
         protected override IResponseData process(string browserKey, HttpListenerContext ctx, HttpServiceRequest.ProcessResponse proc)
@@ -28,37 +33,39 @@ namespace Vre.Server.HttpService
 
             if (_allowExtendedLogging) ServiceInstances.RequestLogger.Info(prepareCallerInfo(browserKey, ctx, rq));
 
-            if (!rq.UserInfo.StaleSession)
-            {
-                if (rq.UserInfo.Session != null)
-                {
-                    lock (rq.UserInfo.Session)
-                    {
-                        try
-                        {
-							// TODO: Currently ANY request opens a DB session!
-							// NHibernate's connection pooling should take care of this.
-                            rq.UserInfo.Session.Resume();
-                            _rsp.ProcessRequest(this, rq);
-                            rq.UserInfo.Session.Disconnect(false);
-                        }
-                        catch (NHibernate.HibernateException)
-                        {
-                            rq.UserInfo.Session.Disconnect(true);
-                            throw;
-                        }
-                        catch
-                        {
-                            rq.UserInfo.Session.Disconnect(false);
-                            throw;
-                        }
-                    }
-                }
-                else
-                {
-                    _rsp.ProcessRequest(this, rq);
-                }
-            }
+			if (!rq.UserInfo.StaleSession)
+			{
+				if (rq.UserInfo.Session != null)
+				{
+					lock (rq.UserInfo.Session)
+					{
+						try
+						{
+							rq.UserInfo.Session.Resume();
+							_rsp.ProcessRequest(this, rq);
+							rq.UserInfo.Session.Disconnect(false);
+						}
+						catch (NHibernate.HibernateException)
+						{
+							rq.UserInfo.Session.Disconnect(true);
+							throw;
+						}
+						catch
+						{
+							rq.UserInfo.Session.Disconnect(false);
+							throw;
+						}
+					}
+				}
+				else
+				{
+					_rsp.ProcessRequest(this, rq);
+				}
+			}
+			else
+			{
+				if (_floodingRequestHoldOffMs > 0) Thread.Sleep(_floodingRequestHoldOffMs);
+			}
 
             return rq.Response;
         }

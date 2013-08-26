@@ -20,7 +20,7 @@ namespace Vre.Server.RemoteService
         public const string ServicePathPrefix = ServicePathElement0 + "/";
         private const string ServicePathElement0 = "data";
 
-        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction, Inventory, NamedSearchFilter, MlsInfo }
+        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction, Inventory, NamedSearchFilter }
 
         private static void configure()
         {
@@ -157,20 +157,6 @@ namespace Vre.Server.RemoteService
                         getViewOrder(request.UserInfo.Session, request.Request.Query, strObjectId, request.Response);
                     }
                     return;
-
-				case ModelObject.MlsInfo:
-					if (null == strObjectId)
-					{
-						if (-1 == objectId)
-							throw new NotImplementedException();
-						else
-							throw new FileNotFoundException();
-					}
-					else
-					{
-						getMlsInfo(request.UserInfo.Session, request.Request.Query, strObjectId, request.Response);
-					}
-					return;
 
 				case ModelObject.View:
                     getView(request, csrq);
@@ -344,7 +330,6 @@ namespace Vre.Server.RemoteService
             else if (elements[1].Equals("ft")) mo = ModelObject.FinancialTransaction;
             else if (elements[1].Equals("inventory")) mo = ModelObject.Inventory;
 			else if (elements[1].Equals("nsf")) mo = ModelObject.NamedSearchFilter;
-			else if (elements[1].Equals("mlsInfo")) mo = ModelObject.MlsInfo;
 			else throw new ArgumentException("Object path is invalid (2).");
 
             strId = null;
@@ -355,7 +340,7 @@ namespace Vre.Server.RemoteService
             }
             else
             {
-                if ((mo != ModelObject.ViewOrder) && (mo != ModelObject.MlsInfo))
+                if (mo != ModelObject.ViewOrder)
                 {
                     if (!int.TryParse(elements[2], out id)) throw new ArgumentException("Object path is invalid (3).");
                 }
@@ -406,7 +391,6 @@ namespace Vre.Server.RemoteService
                 for (int idx = 0; idx < cnt; idx++)
                 {
                     Site s = siteList[idx];
-                    ServiceInstances.ModelCache.FillWithModelInfo(s, false);
                     ReferencedFileHelper.ConvertUrlsToAbsolute(s);
                     result[idx] = s.GetClientData();
                 }
@@ -462,7 +446,6 @@ namespace Vre.Server.RemoteService
                 for (int idx = 0; idx < cnt; idx++)
                 {
                     Building b = toReturn[idx];
-                    ServiceInstances.ModelCache.FillWithModelInfo(b, false);
                     ReferencedFileHelper.ConvertUrlsToAbsolute(b);
                     result[idx] = b.GetClientData();
                 }
@@ -485,7 +468,6 @@ namespace Vre.Server.RemoteService
             {
                 Building building = manager.GetBuildingById(buildingId);
 
-                ServiceInstances.ModelCache.FillWithModelInfo(building, false);
                 ReferencedFileHelper.ConvertUrlsToAbsolute(building);
                 result = building.GetClientData();
 
@@ -540,7 +522,6 @@ namespace Vre.Server.RemoteService
             }
             if (add)
             {
-                ServiceInstances.ModelCache.FillWithModelInfo(s, false);
                 result.Add(s.GetClientData());
             }
         }
@@ -553,7 +534,6 @@ namespace Vre.Server.RemoteService
             {
                 var suite = dao.GetById(suiteId);
 
-                ServiceInstances.ModelCache.FillWithModelInfo(suite, false);
 	            result = suite.GetClientData();
 
                 if (csrq != ChangeSubscriptionRequest.None)
@@ -596,7 +576,6 @@ namespace Vre.Server.RemoteService
 
             foreach (SuiteType st in list)
             {
-                ServiceInstances.ModelCache.FillWithModelInfo(st, false);
                 ReferencedFileHelper.ConvertUrlsToAbsolute(st);
             }
 
@@ -788,48 +767,16 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-		private static void getMlsInfo(ClientSession session, ServiceQuery query, string strObjectId, IResponseData resp)
-		{
-			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
-			{
-				ViewOrder viewOrder = RetrieveViewOrder(session.DbSession, strObjectId, false);
-
-				resp.Data = convertViewOrderdata(session, viewOrder, query.GetParam("verbose", false));
-
-				resp.Data = new ClientData();
-				resp.Data.Add("voId", viewOrder.AutoID);
-				resp.Data.Add("mlsId", viewOrder.MlsId);
-
-				MlsInfo extraInfo;
-				using (var dao = new MlsInfoDao(session.DbSession))
-					extraInfo = dao.GetByMlsNum(viewOrder.MlsId);
-
-				// TODO: converting text->json->text
-				if (extraInfo != null)
-					resp.Data.Add("data", extraInfo.RawInfoAsClientData);
-
-				User u;
-				using (var dao = new UserDao(session.DbSession))
-					u = dao.GetById(viewOrder.OwnerId);
-
-				resp.Data.Add("brokerInfo", u.PersonalInfo);
-				if (u.BrokerInfo != null) resp.Data.Add("brokerage", u.BrokerInfo.GetClientData());
-
-				tran.Commit();
-			}
-			resp.ResponseCode = HttpStatusCode.OK;
-		}
-
 		private static void getViewOrder(ClientSession session, ServiceQuery query, string strObjectId, IResponseData resp)
         {
             ViewOrder viewOrder = RetrieveViewOrder(session.DbSession, strObjectId, true);
 
-            resp.Data = convertViewOrderdata(session, viewOrder, query.GetParam("verbose", false));
+            resp.Data = convertViewOrderdata(session.DbSession, viewOrder, query.GetParam("verbose", false));
 
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static ClientData convertViewOrderdata(ClientSession session, ViewOrder viewOrder, bool verbose)
+        internal static ClientData convertViewOrderdata(ISession session, ViewOrder viewOrder, bool verbose)
         {
             viewOrder.ViewOrderURL = ReverseRequestService.ConstructViewOrderUrl(viewOrder);
             ClientData result = viewOrder.GetClientData();
@@ -843,7 +790,7 @@ namespace Vre.Server.RemoteService
             return result;
         }
 
-		private static string retrieveViewOrderAddress(ClientSession session, ViewOrder viewOrder)
+		private static string retrieveViewOrderAddress(ISession session, ViewOrder viewOrder)
 		{
 			string label = null;
 			switch (viewOrder.TargetObjectType)
@@ -851,7 +798,7 @@ namespace Vre.Server.RemoteService
 				case ViewOrder.SubjectType.Building:
 					{
 						Building b;
-						using (BuildingDao dao = new BuildingDao(session.DbSession))
+						using (BuildingDao dao = new BuildingDao(session))
 							b = dao.GetById(viewOrder.TargetObjectId);
 						label = AddressHelper.ConvertToReadableAddress(b, null);
 					}
@@ -860,7 +807,7 @@ namespace Vre.Server.RemoteService
 				case ViewOrder.SubjectType.Suite:
 					{
 						Suite s;
-						using (SuiteDao dao = new SuiteDao(session.DbSession))
+						using (SuiteDao dao = new SuiteDao(session))
 							s = dao.GetById(viewOrder.TargetObjectId);
 						label = AddressHelper.ConvertToReadableAddress(s.Building, s);
 					}
@@ -912,7 +859,7 @@ namespace Vre.Server.RemoteService
                 if (vo.ExpiresOn < timeLim)
                 {
                     if ((devLock >= 0) && (extractDeveloperFromViewOrder(session, vo).AutoID != devLock)) continue;
-                    result.Add(convertViewOrderdata(session, vo, verbose));
+                    result.Add(convertViewOrderdata(session.DbSession, vo, verbose));
                 }
             }
 
@@ -1026,24 +973,17 @@ namespace Vre.Server.RemoteService
 
             if (viewOrder.Product == ViewOrder.ViewOrderProduct.PublicListing)
             {
-                var buildingIds = ServiceInstances.ModelCache.BuildingsByGeoProximity(suite.Building, defaultProximityQuadradiusM);
-
-                ServiceInstances.Logger.Debug("dSPVO: got {0} buildings in proximity.", buildingIds.Length);
-
                 var devLock = suite.Building.ConstructionSite.Developer;
                 buildings = new List<Building>();
-                using (var dao = new BuildingDao(session.DbSession))
+				int cnt = 0;
+                foreach (var b in BuildingsByGeoProximity(session.DbSession, suite.Building, defaultProximityQuadradiusM))
                 {
-                    foreach (var id in buildingIds)
-                    {
-                        var b = dao.GetById(id);
-                        if (b != null)  // should never happen?
-                            if (b.ConstructionSite.Developer.Equals(devLock))
-                                buildings.Add(b);
-                    }
+                    if (b.ConstructionSite.Developer.Equals(devLock))
+                        buildings.Add(b);
+					cnt++;
                 }
 
-                ServiceInstances.Logger.Debug("dSPVO: got {0} live buildings.", buildings.Count);
+                ServiceInstances.Logger.Debug("dSPVO: got {0} live buildings (total {1} in proximity).", buildings.Count, cnt);
 
                 using (var dao = new ViewOrderDao(session.DbSession))
                     viewOrders = dao.GetActiveInBuildings(ViewOrder.ViewOrderProduct.PublicListing, 
@@ -1106,14 +1046,10 @@ namespace Vre.Server.RemoteService
             }
 
             List<Building> buildings = new List<Building>();
-            using (BuildingDao dao = new BuildingDao(session.DbSession))
+            foreach (var b in BuildingsByGeoProximity(session.DbSession, cLon, cLat, sqRadM))
             {
-                foreach (int id in ServiceInstances.ModelCache.BuildingsByGeoProximity(cLon, cLat, sqRadM))
-                {
-                    Building b = dao.GetById(id);
-                    if (!b.Deleted && ((null == devLock) || (b.ConstructionSite.Developer.Equals(devLock))))
-                        buildings.Add(b);
-                }
+                if ((null == devLock) || (b.ConstructionSite.Developer.Equals(devLock)))
+                    buildings.Add(b);
             }
 
             var suites = (from b in buildings from s in b.Suites where vs.SuiteStatusMatches(s) select s).ToList();
@@ -1258,7 +1194,6 @@ namespace Vre.Server.RemoteService
 				//    if (s.Status == Suite.SalesStatus.Sold) continue;
 				//}
 
-			    ServiceInstances.ModelCache.FillWithModelInfo(s, false);
 			    ClientData cd = s.GetClientData();
 			    //ClientData cd = s.GetClientData();
 			    //if (maskSaleStatus) cd["status"] = "Selected";
@@ -1274,7 +1209,6 @@ namespace Vre.Server.RemoteService
                 foreach (SuiteType st in suiteTypes)
                 {
                     if (!usedSuiteTypes.Contains(st)) continue;
-                    ServiceInstances.ModelCache.FillWithModelInfo(st, false);
                     ReferencedFileHelper.ConvertUrlsToAbsolute(st);
                     elements.Add(st.GetClientData());
                 }
@@ -1284,7 +1218,6 @@ namespace Vre.Server.RemoteService
                 elements = new List<ClientData>(usedSuiteTypes.Count());
                 foreach (SuiteType st in usedSuiteTypes)
                 {
-                    ServiceInstances.ModelCache.FillWithModelInfo(st, false);
                     ReferencedFileHelper.ConvertUrlsToAbsolute(st);
                     elements.Add(st.GetClientData());
                 }
@@ -1305,7 +1238,6 @@ namespace Vre.Server.RemoteService
 						//}
                         if (minimizeOutput) continue;
                     }
-                    ServiceInstances.ModelCache.FillWithModelInfo(b, false);
                     ReferencedFileHelper.ConvertUrlsToAbsolute(b);
                     ClientData cd = b.GetClientData();
                     //if (maskSaleStatus) cd["status"] = "Selected";
@@ -1319,7 +1251,6 @@ namespace Vre.Server.RemoteService
                 elements = new List<ClientData>(usedBuildings.Count());
                 foreach (Building b in usedBuildings)
                 {
-                    ServiceInstances.ModelCache.FillWithModelInfo(b, false);
                     ReferencedFileHelper.ConvertUrlsToAbsolute(b);
                     ClientData cd = b.GetClientData();
                     //if (maskSaleStatus) cd["status"] = "Selected";
@@ -1338,7 +1269,6 @@ namespace Vre.Server.RemoteService
                     foreach (Site s in sites)
                     {
                         if (!usedSites.Contains(s)) continue;
-                        ServiceInstances.ModelCache.FillWithModelInfo(s, false);
                         ReferencedFileHelper.ConvertUrlsToAbsolute(s);
                         elements.Add(s.GetClientData());
                     }
@@ -1348,7 +1278,6 @@ namespace Vre.Server.RemoteService
                     elements = new List<ClientData>(usedSites.Count());
                     foreach (Site s in usedSites)
                     {
-                        ServiceInstances.ModelCache.FillWithModelInfo(s, false);
                         ReferencedFileHelper.ConvertUrlsToAbsolute(s);
                         elements.Add(s.GetClientData());
                     }
@@ -2210,5 +2139,30 @@ namespace Vre.Server.RemoteService
             }
         }
         #endregion
-    }
+
+		#region Geo Proximity lookup
+		public static IList<Building> BuildingsByGeoProximity(ISession dbSession, Building center, double quadradiusM)
+		{
+			return BuildingsByGeoProximity(dbSession,
+				center.Location.Longitude, center.Location.Latitude, quadradiusM);
+		}
+
+		public static IList<Building> BuildingsByGeoProximity(ISession dbSession,
+			double longitude, double latitude, double quadradiusM)
+		{
+			double dLon = quadradiusM / GeoUtilities.LongitudeDegreeInM(latitude);
+			double dLat = quadradiusM / GeoUtilities.LatitudeDegreeInM(latitude);
+
+			IList<Building> result;
+
+			using (var dao = new BuildingDao(dbSession))
+				result = dao.SearchByProximity(longitude, latitude, dLon, dLat);
+
+			ServiceInstances.Logger.Debug("BbGP: dLon={0}, dLat={1}, lon={2}, lat={3}, cnt={4}.",
+				dLon, dLat, longitude, latitude, result.Count);
+
+			return result;
+		}
+		#endregion
+	}
 }

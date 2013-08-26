@@ -36,7 +36,6 @@
 
     <property name="currentPriceDb" column="CurrentPrice" />
 
-    <!-- Geometry-related elements are read directly from model cached
     <property name="ceilingHeight" column="CeilingHeight" />
     <component name="Location">
       <property name="Longitude" column="PosLongitude" />
@@ -44,7 +43,6 @@
       <property name="Altitude" column="PosAltitude" />
       <property name="HorizontalHeading" column="PosHeading" />
     </component>
-    -->
 
     <set name="OptionsPossible" table="OptionSuiteMM" cascade="all">
       <key column="SuiteID"/>

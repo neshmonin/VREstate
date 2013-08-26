@@ -42,15 +42,20 @@
       cascade="none" fetch="join" insert="true" update="true"
     />
 
-    <!-- Geometry-related elements are read directly from model cached
     <component name="Location">
       <property name="Longitude" column="PosLongitude" />
       <property name="Latitude" column="PosLatitude" />
       <property name="Altitude" column="PosAltitude" />
     </component>
-    -->
+
+    <component name="Center">
+      <property name="Longitude" column="CenterLongitude" />
+      <property name="Latitude" column="CenterLatitude" />
+      <property name="Altitude" column="CenterAltitude" />
+    </component>
 
     <property name="AltitudeAdjustment" column="AltitudeAdjustment" />
+    <property name="MaxSuiteAltitude" column="MaxSuiteAlt" />
 
     <bag name="Suites">
       <key column="BuildingID" />
