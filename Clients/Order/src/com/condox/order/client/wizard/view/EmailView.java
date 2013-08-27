@@ -42,8 +42,9 @@ public class EmailView extends Composite implements I_Display {
 	}
 	@UiHandler("buttonNext")
 	void onButtonNextClick(ClickEvent event) {
-		Window.alert("{Sending data to server}");
-		Wizard.cancel();
+//		Window.alert("{Sending data to server}");
+//		Wizard.cancel();
+		presenter.onNext();
 	}
 	@UiHandler("buttonPrev")
 	void onButtonPrevClick(ClickEvent event) {

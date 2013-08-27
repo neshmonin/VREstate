@@ -15,30 +15,26 @@
 				<g:VerticalPanel spacing="10">
 				<g:CaptionPanel captionText="Listing options">
 					<g:VerticalPanel spacing="10">
-						<g:HorizontalPanel spacing="5">
+						<g:CaptionPanel captionText="MLS #">
+							<g:HorizontalPanel spacing="10" width="100%">
 							<g:Cell verticalAlignment="ALIGN_MIDDLE" width="40px">
 								<g:Label text="MLS#  "/>
 							</g:Cell>
-							<g:TextBox/>
+							<g:TextBox width="138px"/>
 						</g:HorizontalPanel>
-						<g:VerticalPanel width="100%" spacing="5">
-							<g:Label text="Virtual Tour URL:"/>
-							<g:HorizontalPanel width="100%">
-								<g:Cell horizontalAlignment="ALIGN_CENTER">
-									<g:TextBox width="188px" ui:field="textVirtualTourUrl"/>
-								</g:Cell>
-							</g:HorizontalPanel>
-							<g:CheckBox text="Use your old link" ui:field="checkBox"/>
-							<g:Cell width="100%">
-								<g:Button text="Validate this link now..." width="100%" ui:field="button"/>
-							</g:Cell>
+						</g:CaptionPanel>
+						<g:CaptionPanel captionText="Virtual Tour URL">
+							<g:VerticalPanel width="100%" spacing="10">
+								<g:TextBox width="188px" ui:field="textVirtualTourUrl"/>
+								<g:Button text="Validate Virtual Tour URL" width="100%" ui:field="buttonValidateVirtualTour" enabled="false"/>
+							</g:VerticalPanel>
+						</g:CaptionPanel>
+						<g:CaptionPanel captionText="More Info URL">
+							<g:VerticalPanel width="100%" spacing="10">
+							<g:TextBox ui:field="textMoreInfoUrl" width="188px"/>
+							<g:Button width="100%" text="Validate More Info URL" enabled="false" ui:field="buttonValidateMoreInfo"/>
 						</g:VerticalPanel>
-						<g:VerticalPanel width="100%" spacing="5">
-							<g:Label text="More Info URL:"/>
-							<g:Cell horizontalAlignment="ALIGN_CENTER">
-								<g:TextBox width="188px" ui:field="textMoreInfoUrl"/>
-							</g:Cell>
-						</g:VerticalPanel>
+						</g:CaptionPanel>
 					</g:VerticalPanel>
 				</g:CaptionPanel>
 			</g:VerticalPanel>

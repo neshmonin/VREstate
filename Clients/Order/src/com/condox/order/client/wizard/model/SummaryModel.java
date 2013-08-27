@@ -1,18 +1,17 @@
 package com.condox.order.client.wizard.model;
 
-import com.condox.order.client.I_Model;
 import com.condox.order.client.wizard.I_WizardStep;
+import com.condox.order.client.wizard.Wizard;
 import com.condox.order.client.wizard.WizardStep;
-import com.condox.order.client.wizard.presenter.EmailPresenter;
-import com.condox.order.client.wizard.presenter.LoginPresenter;
-import com.condox.order.client.wizard.view.EmailView;
-import com.condox.order.client.wizard.view.LoginView;
+import com.condox.order.client.wizard.presenter.SummaryPresenter;
+import com.condox.order.client.wizard.view.SummaryView;
 import com.google.gwt.user.client.ui.HasWidgets;
 
-public class EmailModel extends WizardStep {
+public class SummaryModel extends WizardStep {
 
-	public EmailModel(I_WizardStep parent) {
+	public SummaryModel(I_WizardStep parent) {
 		super(parent);
+		// TODO Auto-generated constructor stub
 	}
 
 	private String role = "";
@@ -64,13 +63,14 @@ public class EmailModel extends WizardStep {
 	@Override
 	public void go(HasWidgets container) {
 		this.container = container;
-		EmailPresenter presenter = new EmailPresenter(new EmailView(), this);
+		SummaryPresenter presenter = new SummaryPresenter(new SummaryView(), this);
 		presenter.go(container);
 		super.go(container);
 	}
 
 	public void next() {
-		getNextStep().go(container);
+//		getNextStep().go(container);
+		Wizard.cancel();
 	}
 	public void prev() {
 		if (getPrevStep() != null)
@@ -79,8 +79,9 @@ public class EmailModel extends WizardStep {
 
 	@Override
 	protected I_WizardStep createNextStep() {
-		children.put(this, new SummaryModel(this));
-		return children.get(this);
+//		children.put(this, new ProductModel(this));
+//		return children.get(this);
+		return null;
 	}
 	
 	

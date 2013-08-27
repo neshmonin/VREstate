@@ -31,4 +31,8 @@ public class EmailPresenter implements I_Presenter {
 	public void onPrev() {
 		model.prev();
 	}
+
+	public void onNext() {
+		model.next();
+	}
 }
