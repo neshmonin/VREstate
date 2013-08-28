@@ -70,7 +70,7 @@ public class SummaryPresenter implements I_Presenter {
 			}
 			try {
 				if (((ProductModel) step).getListing()) {
-					product = "listing";
+					product = "prl";
 					type = "suite";
 				} else if (((ProductModel) step).getListing()) {
 					product = "layout";
