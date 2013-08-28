@@ -9,7 +9,7 @@ public class EmailPresenter implements I_Presenter {
 
 	public static interface I_Display {
 		void setPresenter(EmailPresenter presenter);
-
+		void setOwnerEmail(String ownerEmail);
 		Widget asWidget();
 	}
 
@@ -26,6 +26,7 @@ public class EmailPresenter implements I_Presenter {
 	public void go(HasWidgets container) {
 		container.clear();
 		container.add(this.display.asWidget());
+		display.setOwnerEmail(model.getOwnerMail());
 	}
 
 	public void onPrev() {
@@ -34,5 +35,9 @@ public class EmailPresenter implements I_Presenter {
 
 	public void onNext() {
 		model.next();
+	}
+	
+	public void setOwnerEmail(String ownerEmail) {
+		model.setOwnerMail(ownerEmail);
 	}
 }

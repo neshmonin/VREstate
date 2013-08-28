@@ -44,6 +44,7 @@ public class EmailView extends Composite implements I_Display {
 	void onButtonNextClick(ClickEvent event) {
 //		Window.alert("{Sending data to server}");
 //		Wizard.cancel();
+		presenter.setOwnerEmail(textMail.getText());
 		presenter.onNext();
 	}
 	@UiHandler("buttonPrev")
@@ -56,10 +57,16 @@ public class EmailView extends Composite implements I_Display {
 	}
 	@UiHandler("textMail")
 	void onValueChange(ValueChangeEvent<String> event) {
-		buttonNext.setEnabled(textMail.getValue().matches("^\\w+@[a-zA-Z_]+?\\.[a-zA-Z0-9]{2,3}$"));
+		buttonNext.setEnabled(textMail.getValue().matches("^[a-zA-Z0-9_.]+@[a-zA-Z0-9_]+?\\.[a-zA-Z]{2,3}$"));
 	}
 	@UiHandler("textMail")
 	void onTextFilterKeyUp(KeyUpEvent event) {
-		buttonNext.setEnabled(textMail.getValue().matches("^\\w+@[a-zA-Z_]+?\\.[a-zA-Z0-9]{2,3}$"));
+		buttonNext.setEnabled(textMail.getValue().matches("^[a-zA-Z0-9_.]+@[a-zA-Z0-9_]+?\\.[a-zA-Z]{2,3}$"));
+	}
+
+	@Override
+	public void setOwnerEmail(String ownerEmail) {
+		// TODO Auto-generated method stub
+		textMail.setValue(ownerEmail);
 	}
 }

@@ -20,7 +20,7 @@ public class SuitesModel extends WizardStep {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + selectedIndex;
+		result = prime * result + getSelectedIndex();
 		return result;
 	}
 
@@ -33,7 +33,7 @@ public class SuitesModel extends WizardStep {
 		if (getClass() != obj.getClass())
 			return false;
 		SuitesModel other = (SuitesModel) obj;
-		if (selectedIndex != other.selectedIndex)
+		if (getSelectedIndex() != other.getSelectedIndex())
 			return false;
 		return true;
 	}
@@ -57,6 +57,14 @@ public class SuitesModel extends WizardStep {
 	protected I_WizardStep createNextStep() {
 		children.put(this, new ListingOptionsModel(this));
 		return children.get(this);
+	}
+
+	public void setSelectedIndex(int selectedIndex) {
+		this.selectedIndex = selectedIndex;
+	}
+
+	public int getSelectedIndex() {
+		return selectedIndex;
 	}
 	
 	

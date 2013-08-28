@@ -12,21 +12,28 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 
 public class LoginView extends Composite implements I_Display {
 
 	private static LoginViewUiBinder uiBinder = GWT
 			.create(LoginViewUiBinder.class);
-	@UiField TextBox textUserLogin;
-	@UiField TextBox textUserPassword;
-	@UiField Button buttonEnter;
-	@UiField Button buttonGuestEnter;
-	@UiField Button buttonCancel;
-	
+	@UiField
+	TextBox textUserLogin;
+	@UiField
+	TextBox textUserPassword;
+	@UiField
+	Button buttonEnter;
+	@UiField
+	Button buttonCancel;
+
 	interface LoginViewUiBinder extends UiBinder<Widget, LoginView> {
 	}
-	
+
 	private LoginPresenter presenter = null;
+	private boolean user = false;
+	private boolean guest = true;
 
 	public LoginView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -39,25 +46,63 @@ public class LoginView extends Composite implements I_Display {
 
 	@Override
 	public String getUserLogin() {
-		return textUserLogin.getValue();
+		if (user)
+			return textUserLogin.getValue();
+		else if (guest)
+			return "web";
+		return "";
+
 	}
 
 	@Override
 	public String getUserPassword() {
-		return textUserPassword.getValue();
+		if (user)
+			return textUserPassword.getValue();
+		else if (guest)
+			return "web";
+		return "";
 	}
+
 	@UiHandler("buttonEnter")
 	void onButtonEnterClick(ClickEvent event) {
 		presenter.onEnter();
 	}
-	@UiHandler("buttonGuestEnter")
-	void onButtonGuestEnterClick(ClickEvent event) {
-		textUserLogin.setValue("web");
-		textUserPassword.setValue("web");
-		presenter.onEnter();
-	}
+
 	@UiHandler("buttonCancel")
 	void onButtonCancelClick(ClickEvent event) {
 		Wizard.cancel();
+	}
+
+	@UiHandler("textUserLogin")
+	void onTextUserLoginValueChange(ValueChangeEvent<String> event) {
+
+	}
+
+	@UiHandler("textUserLogin")
+	void onTextUserLoginKeyUp(KeyUpEvent event) {
+		updateButtonEnter();
+	}
+
+	@UiHandler("textUserPassword")
+	void onTextUserPasswordKeyUp(KeyUpEvent event) {
+		updateButtonEnter();
+	}
+
+	private void updateButtonEnter() {
+		user = !textUserLogin.getValue().isEmpty();
+		user &= !textUserPassword.getValue().isEmpty();
+		guest = textUserLogin.getValue().isEmpty();
+		guest &= textUserPassword.getValue().isEmpty();
+		if (user) {
+			buttonEnter.setEnabled(true);
+			buttonEnter.setText("Enter as user");
+		} else if (guest) {
+			buttonEnter.setEnabled(true);
+			buttonEnter.setText("Enter as guest");
+		} else {
+			buttonEnter.setEnabled(false);
+			buttonEnter.setText("Enter");
+		}
+
 	}
 }

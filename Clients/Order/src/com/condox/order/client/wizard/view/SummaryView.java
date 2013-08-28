@@ -42,6 +42,7 @@ public class SummaryView extends Composite implements I_Display {
 	}
 	@UiHandler("buttonNext")
 	void onButtonNextClick(ClickEvent event) {
+		presenter.onNext();
 		Window.alert("{Sending data to server}");
 		Wizard.cancel();
 	}

@@ -36,5 +36,8 @@
 							</g:layer>
 						</g:LayoutPanel>
 					</g:west>
+<!-- 					<g:south size="1.0"> -->
+<!-- 						<g:LayoutPanel height="150px" ui:field="logPanel"/> -->
+<!-- 					</g:south> -->
 				</g:DockLayoutPanel>
 </ui:UiBinder> 

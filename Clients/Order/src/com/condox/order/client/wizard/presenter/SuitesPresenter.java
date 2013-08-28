@@ -111,6 +111,7 @@ public class SuitesPresenter implements I_Presenter {
 	}
 
 	public void onNext() {
+		model.setSelectedIndex(display.getSelectedSuite().getId());
 		model.next();
 	}
 
