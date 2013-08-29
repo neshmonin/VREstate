@@ -115,6 +115,7 @@ public class EmailPresenter implements I_Presenter {
 			step = step.getPrevStep();
 		}
 		//**********************************************
+		final String mail = ownerEmail;
 		String url = Globals.urlBase
 				+ "program?q=register&entity=viewOrder&ownerEmail="
 				+ ownerEmail + "&paymentPending=" + payment + "&product="
@@ -127,6 +128,31 @@ public class EmailPresenter implements I_Presenter {
 			public void onResponseReceived(Request request, Response response) {
 //				Log.write(response.getText());
 				// TODO Auto-generated method stub
+				if (response.getStatusCode() == 200) {
+					// model.next();
+					String msg = "Please check your email account";
+					msg += "<br/><center>" + mail + "</center>";
+					msg += "(make sure you check the spam folder too).";
+					msg += "<br/>";
+					msg += "<br/>To complete the order you'll need to follow the" +
+					" instructions from a message named" +
+					"<br/> \"Order of interactive 3D product - 3D Condo Explorer\"";
+					HTML html = new HTML();
+					html.setHTML(msg);
+					PopupPanel popup = new PopupPanel();
+					popup.setWidget(html);
+					popup.setSize("300px", "140px");
+					popup.setModal(true);
+					popup.setGlassEnabled(true);
+					popup.setAutoHideEnabled(true);
+					popup.center();
+					Wizard.cancel();
+					
+				} else {
+					String msg = "Sorry, we have currently experience some problems with the server. Please try re-submit your order later";
+					Window.alert(msg);
+//					model.prev();
+				}
 				
 			}
 			@Override
@@ -135,24 +161,6 @@ public class EmailPresenter implements I_Presenter {
 			}
 
 		});
-		// model.next();
-		String msg = "Please check your email account";
-		msg += "<br/><center>" + ownerEmail + "</center>";
-		msg += "(make sure you check the spam folder too).";
-		msg += "<br/>";
-		msg += "<br/>To complete the order you'll need to follow the" +
-				" instructions from a message named" +
-				"<br/> \"Order of interactive 3D product - 3D Condo Explorer\"";
-		HTML html = new HTML();
-		html.setHTML(msg);
-		PopupPanel popup = new PopupPanel();
-		popup.setWidget(html);
-		popup.setSize("300px", "140px");
-		popup.setModal(true);
-		popup.setGlassEnabled(true);
-		popup.setAutoHideEnabled(true);
-		popup.center();
-		Wizard.cancel();
 	}
 
 	public void setOwnerEmail(String ownerEmail) {
