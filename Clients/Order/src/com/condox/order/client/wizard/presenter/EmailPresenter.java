@@ -149,7 +149,7 @@ public class EmailPresenter implements I_Presenter {
 					Wizard.cancel();
 					
 				} else {
-					String msg = "Sorry, we have currently experience some problems with the server. Please try re-submit your order later";
+					String msg = "Sorry, we are currently experiencing some server-side problems. Please try to re-submit your order again later";
 					Window.alert(msg);
 //					model.prev();
 				}
