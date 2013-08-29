@@ -145,7 +145,7 @@ public class SuitesView extends Composite implements IDisplay {
 				return A.getName().compareTo(B.getName());
 			}
 		});
-		dataGrid.setColumnWidth(nameColumn, "200px");
+		dataGrid.setColumnWidth(nameColumn, "100px");
 		dataGrid.addColumn(nameColumn, presenter.getSelectedBuildingStreet());
 
 		// -------------------------
@@ -224,19 +224,28 @@ public class SuitesView extends Composite implements IDisplay {
 			
 			for (SuiteInfo suite : suites) {
 				String disabled = "";
-				
-//				Убрал disabled из квартир
-//				switch (suite.getStatus()) {
-//				case Sold:
-//					break;
-//				default:
-//					disabled += " disabled=\"true\" ";
-//				}
-				
-				String mls = "";
+
+				// Все Sold-квартиры disabled (mail 28.08.2013)
 				switch (suite.getStatus()) {
 				case Sold:
-					mls += " color:red ";
+					disabled += " disabled=\"true\" ";
+					break;
+				default:
+				}
+				
+				String color = "";
+				switch (suite.getStatus()) {
+				case AvailableResale:
+					color += " color:blue ";
+					break;
+				case AvailableRent:
+					color += " color:purple ";
+					break;
+				case Available:
+					color += " color:green ";
+					break;
+				case Sold:
+					color += " color:red ";
 					break;
 				default:
 //					mls += " color:red";
@@ -244,7 +253,7 @@ public class SuitesView extends Composite implements IDisplay {
 
 				result += "<button ";
 				result += "type=\"button\"" + " onclick=\"onSelectSuite("
-						+ suite.getId() + ")\"" + "style=\"width:50px;"+mls+"\""
+						+ suite.getId() + ")\"" + "style=\"width:50px;"+color+"\""
 						+ "class=\"btnSelectSuite\"" + disabled + "title=\""
 						+ suite.getTooltip() + "\">";
 				result += suite.getName();

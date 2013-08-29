@@ -49,7 +49,8 @@ public class BuildingsView extends Composite implements IDisplay,
 	interface BuildingsViewUiBinder extends UiBinder<Widget, BuildingsView> {
 	}
 
-	private String filterStr = "Type here Name, Street or Postal to filter...";
+	private String filterStr = "Start typing your building name or address...";
+//	private String filterStr = "Type here Name, Street or Postal to filter...";
 
 	public BuildingsView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -171,7 +172,7 @@ public class BuildingsView extends Composite implements IDisplay,
 					public void onSelectionChange(SelectionChangeEvent event) {
 						selectedBuilding = selectionModel.getSelectedObject();
 						presenter.setSelectedBuilding(selectedBuilding);
-						buttonNext.setEnabled(selectedBuilding != null);
+//						buttonNext.setEnabled(selectedBuilding != null);
 					}
 				});
 		if (selectedBuilding != null) {
@@ -217,7 +218,6 @@ public class BuildingsView extends Composite implements IDisplay,
 			false, 0, true);
 	@UiField Button buttonCancel;
 	@UiField Button buttonPrev;
-	@UiField Button buttonNext;
 	@UiField TextBox textFilter;
 	@UiField ListBox city;
 	
@@ -269,10 +269,6 @@ public class BuildingsView extends Composite implements IDisplay,
 	@UiHandler("buttonPrev")
 	void onButtonPrevClick(ClickEvent event) {
 		presenter.onPrev();
-	}
-	@UiHandler("buttonNext")
-	void onButtonNextClick(ClickEvent event) {
-		presenter.onNext();
 	}
 	@UiHandler("buttonCancel")
 	void onButtonCancelClick(ClickEvent event) {

@@ -98,6 +98,7 @@ public class BuildingsPresenter implements I_Presenter {
 	}
 
 	public void onNext() {
+		model.setSelected(selected);
 		model.setSelectedId(selected.getId());
 		// TODO ƒобавить проверку на наличие выделенного дома
 		// и при неполадках выводить соотв. сообщение
@@ -107,6 +108,7 @@ public class BuildingsPresenter implements I_Presenter {
 	public void setSelectedBuilding(BuildingInfo selectedBuilding) {
 //		Window.alert("setSelectedBuildingId = " + selectedBuilding.getId());
 		selected = selectedBuilding;
+		model.setSelected(selected);
 		model.setSelectedId(selected.getId());
 	}
 

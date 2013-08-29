@@ -15,11 +15,40 @@ public class ListingOptionsModel extends WizardStep {
 		super(parent);
 		// TODO Auto-generated constructor stub
 	}
-
+	
 	private String role = "";
 	private String uid = "";
 	private String pwd = "";
 	private String sid = "";
+	private String mls = "";
+	private String urlVirtualTour = "";
+	private String urlMoreInfo = "";
+	
+	public void setMls(String mls) {
+		this.mls = mls;
+	}
+
+	public String getMls() {
+		return mls;
+	}
+
+	
+	public void setUrlVirtualTour(String urlVirtualTour) {
+		this.urlVirtualTour = urlVirtualTour;
+	}
+
+	public String getUrlVirtualTour() {
+		return urlVirtualTour;
+	}
+
+	public void setUrlMoreInfo(String urlMoreInfo) {
+		this.urlMoreInfo = urlMoreInfo;
+	}
+
+	public String getUrlMoreInfo() {
+		return urlMoreInfo;
+	}
+
 	// GETTERS
 	public String getRole() {
 		return this.role;
@@ -76,7 +105,7 @@ public class ListingOptionsModel extends WizardStep {
 
 	@Override
 	protected I_WizardStep createNextStep() {
-		children.put(this, new EmailModel(this));
+		children.put(this, new SummaryModel(this));
 		return children.get(this);
 	}
 

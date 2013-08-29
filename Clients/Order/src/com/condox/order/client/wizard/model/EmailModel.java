@@ -1,9 +1,11 @@
 package com.condox.order.client.wizard.model;
 
 import com.condox.order.client.wizard.I_WizardStep;
+import com.condox.order.client.wizard.Wizard;
 import com.condox.order.client.wizard.WizardStep;
 import com.condox.order.client.wizard.presenter.EmailPresenter;
 import com.condox.order.client.wizard.view.EmailView;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasWidgets;
 
 public class EmailModel extends WizardStep {
@@ -66,7 +68,7 @@ public class EmailModel extends WizardStep {
 	}
 
 	public void next() {
-		getNextStep().go(container);
+//		getNextStep().go(container);
 	}
 
 	public void prev() {

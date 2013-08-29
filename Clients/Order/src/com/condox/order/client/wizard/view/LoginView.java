@@ -95,13 +95,13 @@ public class LoginView extends Composite implements I_Display {
 		guest &= textUserPassword.getValue().isEmpty();
 		if (user) {
 			buttonEnter.setEnabled(true);
-			buttonEnter.setText("Enter as user");
+			buttonEnter.setText("Order as a User");
 		} else if (guest) {
 			buttonEnter.setEnabled(true);
-			buttonEnter.setText("Enter as guest");
+			buttonEnter.setText("Order as a Guest");
 		} else {
 			buttonEnter.setEnabled(false);
-			buttonEnter.setText("Enter");
+			buttonEnter.setText("Order");
 		}
 
 	}

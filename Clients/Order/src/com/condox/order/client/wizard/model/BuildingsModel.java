@@ -1,6 +1,7 @@
 package com.condox.order.client.wizard.model;
 
 import com.condox.clientshared.abstractview.Log;
+import com.condox.clientshared.document.BuildingInfo;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.WizardStep;
 import com.condox.order.client.wizard.presenter.BuildingsPresenter;
@@ -16,6 +17,7 @@ public class BuildingsModel extends WizardStep {
 	}
 
 	private int selectedIndex = 0;
+	private BuildingInfo selected = null;
 
 	public int getSelectedId() {
 		return selectedIndex;
@@ -31,6 +33,14 @@ public class BuildingsModel extends WizardStep {
 	 * listBox.getItemCount(); i++) if (listBox.isItemSelected(i)) selected++;
 	 * valid &= (selected == 1); return valid; }
 	 */
+
+	public void setSelected(BuildingInfo selected) {
+		this.selected = selected;
+	}
+
+	public BuildingInfo getSelected() {
+		return selected;
+	}
 
 	ListBox listBox = new ListBox();
 

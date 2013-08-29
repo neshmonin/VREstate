@@ -10,6 +10,9 @@
 		horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 		<g:VerticalPanel>
 			<g:VerticalPanel spacing="10">
+				<g:HorizontalPanel spacing="10">
+					<g:HTML wordWrap="true">Please click a suite button from a list below</g:HTML>
+				</g:HorizontalPanel>
 				<p1:DataGrid ui:field="dataGrid" height="389px" width="700px" />
 			</g:VerticalPanel>
 		</g:VerticalPanel>
@@ -19,7 +22,7 @@
 					<g:Button text="Cancel" width="100px" ui:field="buttonCancel" />
 				</g:HorizontalPanel>
 				<g:Cell horizontalAlignment="ALIGN_RIGHT">
-					<g:HorizontalPanel spacing="10">
+					<g:HorizontalPanel spacing="10" width="230px">
 						<g:Button text="&lt;&lt; Prev" width="100px" ui:field="buttonPrev" />
 					</g:HorizontalPanel>
 				</g:Cell>

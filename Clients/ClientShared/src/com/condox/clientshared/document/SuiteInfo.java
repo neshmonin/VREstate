@@ -1,26 +1,20 @@
 package com.condox.clientshared.document;
 
-
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 
 public class SuiteInfo {
 
 	public enum Status {
-		Sold, 
-		Available, 
-		OnHold, 
-		ResaleAvailable,
-		Selected,
-		Layout,
-		AvailableRent //??
+		Sold, Available, OnHold, ResaleAvailable, Selected, Layout, AvailableRent // ??
+		, AvailableResale
 	}
-	
+
 	private int id = -1;
 	private String name = "";
 	private int level_number = -1;
 	private String floor_name = "";
-	private Status status = Status.Selected;	// by default
+	private Status status = Status.Selected; // by default
 	private String floorplan_url = "";
 	private double area = -1;
 	private int bedrooms = -1;
@@ -36,7 +30,7 @@ public class SuiteInfo {
 		name = obj.get("name").isString().stringValue();
 		level_number = (int) obj.get("levelNumber").isNumber().doubleValue();
 		floor_name = obj.get("floorName").isString().stringValue();
-		
+
 		// TODO
 		String _status = obj.get("status").isString().stringValue();
 		try {
@@ -45,43 +39,41 @@ public class SuiteInfo {
 			e.printStackTrace();
 			status = Status.Available;
 		}
-		
-		
+
 		if (obj.containsKey("floorPlanUrl"))
 			if (obj.get("floorPlanUrl").isString() != null)
-				setFloorplan_url(obj.get("floorPlanUrl").isString().stringValue());
+				setFloorplan_url(obj.get("floorPlanUrl").isString()
+						.stringValue());
 		setArea(obj.get("area").isNumber().doubleValue());
 		setBedrooms((int) obj.get("bedrooms").isNumber().doubleValue());
 		setDens((int) obj.get("dens").isNumber().doubleValue());
 		setBathrooms(obj.get("bathrooms").isNumber().doubleValue());
 		setBalconies((int) obj.get("balconies").isNumber().doubleValue());
 		setTerraces((int) obj.get("terraces").isNumber().doubleValue());
-		
-		if ((obj.get("currentPrice") != null)&&
-			(obj.get("currentPrice").isNumber() != null) &&
-			obj.get("currentPrice").isNumber().doubleValue() != 0)
+
+		if ((obj.get("currentPrice") != null)
+				&& (obj.get("currentPrice").isNumber() != null)
+				&& obj.get("currentPrice").isNumber().doubleValue() != 0)
 			price = (int) obj.get("currentPrice").isNumber().doubleValue();
-		
-		if (price < 0)
-		{
-			 // Workaround for prices	
-			 price = (int) (500 + 500 * Math.random());
-			 price *= 1000;
-		}
+
+		/*
+		 * if (price < 0) { // Workaround for prices price = (int) (500 + 500 *
+		 * Math.random()); price *= 1000; }
+		 */
 	}
-	
+
 	public int getId() {
 		return id;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public int getLevelNumber() {
 		return level_number;
 	}
-	
+
 	public String getFloorName() {
 		return floor_name;
 	}
@@ -89,7 +81,6 @@ public class SuiteInfo {
 	public Status getStatus() {
 		return status;
 	}
-	
 
 	public int getPrice() {
 		return price;
@@ -150,33 +141,33 @@ public class SuiteInfo {
 	public int getTerraces() {
 		return terraces;
 	}
-	
+
 	public String getTooltip() {
 		String tooltip = "Suite " + getName() + "\r\n";
 		if (getLevelNumber() > -1)
 			tooltip += "Level number: " + getLevelNumber() + "\r\n";
-		
-		if(getPrice() > 0)
+
+		if (getPrice() > 0)
 			tooltip += ("Price: $" + getPrice() + "\r\n");
-		
-		if ((getBedrooms() == 0) && (int)getBathrooms() != 0) 
+
+		if ((getBedrooms() == 0) && (int) getBathrooms() != 0)
 			tooltip += "Bedrooms: Studio \r\n";
 		else
 			tooltip += "Bedrooms: " + getBedrooms() + "\r\n";
-		
-		if ((getBedrooms() == 0) && (int)getBathrooms() == 0) {
+
+		if ((getBedrooms() == 0) && (int) getBathrooms() == 0) {
 			tooltip = "";
 			return tooltip;
 		}
-		
-		if ((int)getBathrooms() == getBathrooms())
-			tooltip += "Bathrooms: " + (int)getBathrooms() + "\r\n";
+
+		if ((int) getBathrooms() == getBathrooms())
+			tooltip += "Bathrooms: " + (int) getBathrooms() + "\r\n";
 		else
 			tooltip += "Bathrooms: " + getBathrooms() + "\r\n";
-		
+
 		if (getArea() > 0)
 			tooltip += "Area: " + getArea() + " Sq.Ft.\r\n";
-//		tooltip += "Floorplan: " + getFloorplan_url() + "\r\n";
+		// tooltip += "Floorplan: " + getFloorplan_url() + "\r\n";
 		return tooltip;
 	}
 }

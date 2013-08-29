@@ -7,6 +7,7 @@ import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.model.BuildingsModel;
 import com.condox.order.client.wizard.model.EmailModel;
+import com.condox.order.client.wizard.model.ListingOptionsModel;
 import com.condox.order.client.wizard.model.LoginModel;
 import com.condox.order.client.wizard.model.ProductModel;
 import com.condox.order.client.wizard.model.SuitesModel;
@@ -15,6 +16,7 @@ import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
@@ -49,10 +51,16 @@ public class SummaryPresenter implements I_Presenter {
 	}
 
 	// ******************
+	String user = "";
+	String order = "";
+	String address = "";
+	String mls = "";
+	String urlVirtualTour = "";
+	String urlMoreInfo = "";
 	String sid = "";
 	String buildingId = "";
 	String suiteId = "25205";
-	String product = "pr1";
+	String product = "prl";
 	String type = "suite";
 	I_WizardStep step = null;
 	String ownerEmail = "andrey.masliuk@3dcondx.com";
@@ -65,15 +73,21 @@ public class SummaryPresenter implements I_Presenter {
 		while (step != null) {
 			try {
 				sid = ((LoginModel) step).getUserSid();
+				user = ((LoginModel) step).getUserLogin();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			try {
-				if (((ProductModel) step).getListing()) {
+				if (((ProductModel) step).getListingPrivate()) {
 					product = "prl";
+					order = "Private Interactive 3D Listing";
 					type = "suite";
-				} else if (((ProductModel) step).getListing()) {
-					product = "layout";
+				} else if (((ProductModel) step).getListingShared()) {
+					product = "pul";
+					order = "Public Interactive 3D Listing";
+					type = "suite";
+				} else if (((ProductModel) step).getLayout()) {
+					order = "Interactive 3D Layout";
 					type = "building";
 				}
 			} catch (Exception e) {
@@ -82,12 +96,23 @@ public class SummaryPresenter implements I_Presenter {
 			try {
 				buildingId = String.valueOf(((BuildingsModel) step)
 						.getSelectedId());
+//				address = ((BuildingsModel) step).getSelected().getAddress();
+				address = ((BuildingsModel) step).getSelected().getStreet();
+				address += ", " + ((BuildingsModel) step).getSelected().getCity();
+				address += ", " + ((BuildingsModel) step).getSelected().getPostal();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			try {
 				suiteId = String.valueOf(((SuitesModel) step)
 						.getSelectedIndex());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
+				mls = String.valueOf(((ListingOptionsModel) step).getMls());
+				urlVirtualTour = ((ListingOptionsModel) step).getUrlVirtualTour();
+				urlMoreInfo = String.valueOf(((ListingOptionsModel) step).getUrlMoreInfo());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -103,11 +128,26 @@ public class SummaryPresenter implements I_Presenter {
 				+ "Owner mail: " + ownerEmail + "<br />" + "Selected suite: "
 				+ suiteId;
 		// **********************************
+		user = "web".equals(user)? "GUEST" : user;
+		html = 	"<table>" + 
+					"<tr>" + "<td>" + "User:" + "</td>" + "<td>" + user + "</td>" + "</tr>" + 
+					"<tr>" + "<td>" + "Order:" + "</td>" + "<td>" + order + "</td>" + "</tr>" + 
+					"<tr>" + "<td>" + "Address:" + "</td>" + "<td>" + address + "</td>" + "</tr>" + 
+					"<tr>" + "<td>" + "MLS#:" + "</td>" + "<td>" + mls + "</td>" + "</tr>" + 
+					"<tr>" + "<td>" + "Options:" + "</td>" + "<td>" + "" + "</td>" + "</tr>" + 
+				"</table>";
+		html += "<div style=\"position:relative; left:40px\">" +
+				"Virtual Tour URL:" + (urlVirtualTour.isEmpty()? "&lt;none&gt;" : urlVirtualTour) + 
+				"<br/>More Info URL:" + (urlMoreInfo.isEmpty()? "&lt;none&gt;" : urlMoreInfo) +
+				"</div>";
+		html += "<br/><br/><br/><br/>You will be able to preview the order and, if you like it, you will be charged " +
+				"$49.99(paid via secure connection with your credit card)";
 		return html;
 	}
 
 	public void onNext() {
-		String url = Globals.urlBase
+		model.next();
+		/*String url = Globals.urlBase
 				+ "program?q=register&entity=viewOrder&ownerEmail="
 				+ ownerEmail + "&paymentPending=" + payment + "&product="
 				+ product + "&propertyType=" + type + "&propertyId=" + suiteId
@@ -118,13 +158,14 @@ public class SummaryPresenter implements I_Presenter {
 			@Override
 			public void onResponseReceived(Request request, Response response) {
 				Log.write(response.getText());
-//				RootPanel.get("log").clear();
-//				RootPanel.get("log").add(new HTML(response.getText()));
+				// RootPanel.get("log").clear();
+				// RootPanel.get("log").add(new HTML(response.getText()));
 			}
 
 			@Override
 			public void onError(Request request, Throwable exception) {
-				
-			}});
+
+			}
+		});*/
 	}
 }

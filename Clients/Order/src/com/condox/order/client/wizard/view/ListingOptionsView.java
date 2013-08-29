@@ -33,6 +33,7 @@ public class ListingOptionsView extends Composite implements I_Display {
 	Button buttonValidateVirtualTour;
 	@UiField
 	Button buttonValidateMoreInfo;
+	@UiField TextBox textMLS;
 
 	interface ListingOptionsViewUiBinder extends
 			UiBinder<Widget, ListingOptionsView> {
@@ -82,5 +83,25 @@ public class ListingOptionsView extends Composite implements I_Display {
 	@UiHandler("buttonValidateMoreInfo")
 	void onButtonValidateMoreInfoClick(ClickEvent event) {
 		Window.open(textMoreInfoUrl.getText(), "More Info Testing", "");
+	}
+	@UiHandler("textMLS")
+	void onTextMLSKeyUp(KeyUpEvent event) {
+		String mls = textMLS.getValue();
+		buttonNext.setEnabled(mls.matches("[a-zA-Z][0-9]{7}"));
+	}
+
+	@Override
+	public String getMls() {
+		return textMLS.getValue();
+	}
+
+	@Override
+	public String getVirtualTourURL() {
+		return textVirtualTourUrl.getValue();
+	}
+
+	@Override
+	public String getMoreInfoURL() {
+		return textMoreInfoUrl.getValue();
 	}
 }

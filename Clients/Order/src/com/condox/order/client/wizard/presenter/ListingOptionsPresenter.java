@@ -19,7 +19,9 @@ public class ListingOptionsPresenter implements I_Presenter {
 
 	public static interface I_Display {
 		void setPresenter(ListingOptionsPresenter presenter);
-
+		String getMls();
+		String getVirtualTourURL();
+		String getMoreInfoURL();
 		Widget asWidget();
 	}
 
@@ -47,6 +49,9 @@ public class ListingOptionsPresenter implements I_Presenter {
 	}
 
 	public void onNext() {
+		model.setMls(display.getMls());
+		model.setUrlVirtualTour(display.getVirtualTourURL());
+		model.setUrlMoreInfo(display.getMoreInfoURL());
 		model.next();
 	}
 }

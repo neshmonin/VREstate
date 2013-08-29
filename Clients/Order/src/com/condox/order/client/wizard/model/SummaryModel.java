@@ -69,8 +69,8 @@ public class SummaryModel extends WizardStep {
 	}
 
 	public void next() {
-//		getNextStep().go(container);
-		Wizard.cancel();
+		getNextStep().go(container);
+//		Wizard.cancel();
 	}
 	public void prev() {
 		if (getPrevStep() != null)
@@ -79,9 +79,9 @@ public class SummaryModel extends WizardStep {
 
 	@Override
 	protected I_WizardStep createNextStep() {
-//		children.put(this, new ProductModel(this));
-//		return children.get(this);
-		return null;
+		children.put(this, new EmailModel(this));
+		return children.get(this);
+//		return null;
 	}
 	
 	
