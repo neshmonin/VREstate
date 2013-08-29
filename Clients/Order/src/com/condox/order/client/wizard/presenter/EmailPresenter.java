@@ -11,14 +11,19 @@ import com.condox.order.client.wizard.model.ListingOptionsModel;
 import com.condox.order.client.wizard.model.LoginModel;
 import com.condox.order.client.wizard.model.ProductModel;
 import com.condox.order.client.wizard.model.SuitesModel;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class EmailPresenter implements I_Presenter {
@@ -149,9 +154,26 @@ public class EmailPresenter implements I_Presenter {
 					Wizard.cancel();
 					
 				} else {
-					String msg = "Sorry, we are currently experiencing some server-side problems. Please try to re-submit your order again later";
-					Window.alert(msg);
-//					model.prev();
+					final DialogBox box = new DialogBox();
+					VerticalPanel panel = new VerticalPanel();
+					
+					panel.setWidth("250px");
+					HTML msg = new HTML();
+					msg.setHTML("Sorry, we are currently experiencing some server-side problems. Please try to re-submit your order again later");
+					panel.add(msg);
+					Button ok = new Button("OK");
+					panel.add(ok);
+					ok.addClickHandler(new ClickHandler() {
+
+						@Override
+						public void onClick(ClickEvent event) {
+							box.hide();
+						}});
+					box.add(panel);
+					box.setModal(true);
+					box.setGlassEnabled(true);
+					box.center();
+//					Window.alert(msg);
 				}
 				
 			}
