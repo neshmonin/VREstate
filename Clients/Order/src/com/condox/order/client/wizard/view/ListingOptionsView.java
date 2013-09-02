@@ -104,4 +104,23 @@ public class ListingOptionsView extends Composite implements I_Display {
 	public String getMoreInfoURL() {
 		return textMoreInfoUrl.getValue();
 	}
+
+
+	@Override
+	public void setVirtualTourURL(String value) {
+		textVirtualTourUrl.setValue(value);
+		buttonValidateVirtualTour.setEnabled(!value.isEmpty());
+	}
+
+	@Override
+	public void setMoreInfoURL(String value) {
+		textMoreInfoUrl.setValue(value);
+		buttonValidateMoreInfo.setEnabled(!value.isEmpty());
+	}
+
+	@Override
+	public void setMLS(String value) {
+		textMLS.setValue(value);
+		buttonNext.setEnabled(value.matches("[a-zA-Z][0-9]{7}"));
+	}
 }

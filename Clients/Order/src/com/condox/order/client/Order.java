@@ -36,6 +36,11 @@ public class Order implements EntryPoint {
 		I_WizardStep start = new LoginModel(null);
 		wizard.go(start);
 		
+//		ContactEditor editor = new ContactEditor(new Person());
+		/*PersonEditingWorkflow editor = new PersonEditingWorkflow();
+		Person person = new Person();
+		editor.edit(person);*/
+		
 		/*BuildingModel building = new BuildingModel();
 		FloorModel floor = new FloorModel();
 		SuiteModel suite = new SuiteModel();

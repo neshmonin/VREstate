@@ -23,6 +23,9 @@ public class SuiteInfo {
 	private int balconies = -1;
 	private int terraces = -1;
 	private int price = -1;
+	private String virtualTourURL = "";
+	private String moreInfoURL = "";
+	private String mls = "";
 
 	public void Parse(JSONValue value) {
 		JSONObject obj = value.isObject();
@@ -30,8 +33,16 @@ public class SuiteInfo {
 		name = obj.get("name").isString().stringValue();
 		level_number = (int) obj.get("levelNumber").isNumber().doubleValue();
 		floor_name = obj.get("floorName").isString().stringValue();
+		
 
 		// TODO
+		try {
+			virtualTourURL = obj.get("vTourUrl").isString().stringValue();
+			moreInfoURL = obj.get("infoUrl").isString().stringValue();
+			mls = obj.get("mlsId").isString().stringValue();
+		} catch (Exception e) {
+			
+		}
 		String _status = obj.get("status").isString().stringValue();
 		try {
 			status = Status.valueOf(_status);
@@ -169,5 +180,17 @@ public class SuiteInfo {
 			tooltip += "Area: " + getArea() + " Sq.Ft.\r\n";
 		// tooltip += "Floorplan: " + getFloorplan_url() + "\r\n";
 		return tooltip;
+	}
+	
+	public String getVirtualTourURL() {
+		return virtualTourURL;
+	}
+	
+	public String getMoreInfoURL() {
+		return moreInfoURL;
+	}
+	
+	public String getMLS() {
+		return mls;
 	}
 }

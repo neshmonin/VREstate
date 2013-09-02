@@ -1,6 +1,6 @@
 package com.condox.order.client.wizard.model;
 
-import com.condox.clientshared.abstractview.Log;
+import com.condox.clientshared.document.SuiteInfo;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.WizardStep;
 import com.condox.order.client.wizard.presenter.SuitesPresenter;
@@ -14,7 +14,15 @@ public class SuitesModel extends WizardStep {
 	}
 
 	private int selectedIndex = 0;
-	
+	private SuiteInfo selected = null;
+
+	public void setSelected(SuiteInfo obj) {
+		selected = obj;
+	}
+
+	public SuiteInfo getSelected() {
+		return selected;
+	}
 
 	@Override
 	public int hashCode() {
@@ -66,6 +74,5 @@ public class SuitesModel extends WizardStep {
 	public int getSelectedIndex() {
 		return selectedIndex;
 	}
-	
-	
+
 }

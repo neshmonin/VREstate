@@ -119,7 +119,10 @@ public class ProductModel extends WizardStep {
 	@Override
 	protected I_WizardStep createNextStep() {
 //		Log.write("new BuildingsModel");
-		children.put(this, new BuildingsModel(this));
+		if (Listing)
+			children.put(this, new MLSModel(this));
+		else
+			children.put(this, new BuildingsModel(this));
 		return children.get(this);
 	}
 

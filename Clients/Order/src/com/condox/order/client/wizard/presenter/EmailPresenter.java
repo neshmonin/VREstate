@@ -7,6 +7,7 @@ import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.Wizard;
 import com.condox.order.client.wizard.model.BuildingsModel;
 import com.condox.order.client.wizard.model.EmailModel;
+import com.condox.order.client.wizard.model.ErrorMessage;
 import com.condox.order.client.wizard.model.ListingOptionsModel;
 import com.condox.order.client.wizard.model.LoginModel;
 import com.condox.order.client.wizard.model.ProductModel;
@@ -61,7 +62,7 @@ public class EmailPresenter implements I_Presenter {
 		// TODO —генерировать строку дл€ Summary
 		I_WizardStep step = model;
 		String ownerEmail = "";
-		String payment = "$49.99";
+		String payment = "CAD49.99";
 		String product = "";
 		String type = "";
 		String suiteId = "";
@@ -101,12 +102,12 @@ public class EmailPresenter implements I_Presenter {
 			}
 			try {
 				suiteId = String.valueOf(((SuitesModel) step)
-						.getSelectedIndex());
+						.getSelected().getId());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			try {
-//				mls = String.valueOf(((ListingOptionsModel) step).getMls());
+				suiteId = String.valueOf(((ListingOptionsModel) step).getSuiteId());
 //				urlVirtualTour = ((ListingOptionsModel) step).getUrlVirtualTour();
 //				urlMoreInfo = String.valueOf(((ListingOptionsModel) step).getUrlMoreInfo());
 			} catch (Exception e) {
@@ -154,26 +155,7 @@ public class EmailPresenter implements I_Presenter {
 					Wizard.cancel();
 					
 				} else {
-					final DialogBox box = new DialogBox();
-					VerticalPanel panel = new VerticalPanel();
-					
-					panel.setWidth("250px");
-					HTML msg = new HTML();
-					msg.setHTML("Sorry, we are currently experiencing some server-side problems. Please try to re-submit your order again later");
-					panel.add(msg);
-					Button ok = new Button("OK");
-					panel.add(ok);
-					ok.addClickHandler(new ClickHandler() {
-
-						@Override
-						public void onClick(ClickEvent event) {
-							box.hide();
-						}});
-					box.add(panel);
-					box.setModal(true);
-					box.setGlassEnabled(true);
-					box.center();
-//					Window.alert(msg);
+					new ErrorMessage("Sorry, we are currently experiencing some server-side problems. Please try to re-submit your order again later","error-icon.jpg").center();
 				}
 				
 			}

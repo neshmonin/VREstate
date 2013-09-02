@@ -96,7 +96,7 @@ public class BuildingsModel extends WizardStep {
 		while (step != null) {
 			try {
 				if (((ProductModel)step).getLayout())
-					children.put(this, new EmailModel(this));
+					children.put(this, new SummaryModel(this));
 				if (((ProductModel)step).getListing())
 					children.put(this, new SuitesModel(this));
 			} catch (Exception e) {
