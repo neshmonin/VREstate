@@ -66,6 +66,7 @@ public class ListingOptionsPresenter implements I_Presenter {
 	
 	private void updateData() {
 //		String sid = "";
+		SuiteInfo selectedSuite = null;
 		String virtualTourURL = "";
 		String moreInfoURL = "";
 		String mls = "";
@@ -73,32 +74,38 @@ public class ListingOptionsPresenter implements I_Presenter {
 		I_WizardStep step = model;
 		while (step != null) {
 			try {
-				virtualTourURL = ((ListingOptionsModel)step).getUrlVirtualTour();
-				moreInfoURL = ((ListingOptionsModel)step).getUrlMoreInfo();
-				mls = ((ListingOptionsModel)step).getMls();
-				suiteId = ((ListingOptionsModel)step).getSuiteId();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
-				virtualTourURL = ((SuitesModel) step).getSelected().getVirtualTourURL();
-				moreInfoURL = ((SuitesModel) step).getSelected().getMoreInfoURL();
-				mls = ((SuitesModel) step).getSelected().getMLS();
-//				sid = ((LoginModel) step).getUserSid();
+				if (selectedSuite == null)
+					selectedSuite = ((ListingOptionsModel)step).getSelectedSuite();
+				if (selectedSuite == null)
+					selectedSuite = ((SuitesModel)step).getSelected();
 				
+//				virtualTourURL = ((ListingOptionsModel)step).getUrlVirtualTour();
+//				moreInfoURL = ((ListingOptionsModel)step).getUrlMoreInfo();
+//				mls = ((ListingOptionsModel)step).getMls();
+//				suiteId = ((ListingOptionsModel)step).getSuiteId();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+//			try {
+//				virtualTourURL = ((SuitesModel) step).getSelected().getVirtualTourURL();
+//				moreInfoURL = ((SuitesModel) step).getSelected().getMoreInfoURL();
+//				mls = ((SuitesModel) step).getSelected().getMLS();
+////				sid = ((LoginModel) step).getUserSid();
+//				
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 			step = step.getPrevStep();
 		}
-		
-		model.setUrlVirtualTour(virtualTourURL);
-		model.setUrlMoreInfo(moreInfoURL);
-		model.setMls(mls);
-		model.setSuiteId(suiteId);
+		if (selectedSuite != null) {
+		model.setUrlVirtualTour(selectedSuite.getVirtualTourURL());
+		model.setUrlMoreInfo(selectedSuite.getMoreInfoURL());
+		model.setMls(selectedSuite.getMLS());
+		model.setSuiteId(String.valueOf(selectedSuite.getId()));
 		display.setVirtualTourURL(model.getUrlVirtualTour());
 		display.setMoreInfoURL(model.getUrlMoreInfo());
 		display.setMLS(model.getMls());
+		}
 //		
 ////		String url = "https://vrt.3dcondox.com/data/inventory?";
 //		String url = "https://vrt.3dcondox.com/vre/data/inventory?";

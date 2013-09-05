@@ -32,8 +32,7 @@
 					<g:HTML wordWrap="true" styleName="{style.type-info}">(they'll see your Listing and dosens of neighboring Shared Interactive 3D Listings)</g:HTML>
 				</g:HorizontalPanel>
 				<g:HorizontalPanel>
-					<g:RadioButton name="Listing/Layout" text="Interactive 3D Layout" ui:field="rbLayout"/>
-					<g:HTML wordWrap="true" styleName="{style.type-info}">(they'll see all units of your building)</g:HTML>
+					<g:RadioButton name="Listing/Layout" text="Interactive 3D Layout  (they&apos;ll see all units of your building)" ui:field="rbLayout" enabled="false"/>
 				</g:HorizontalPanel>
 			</g:VerticalPanel>
 		</g:VerticalPanel>

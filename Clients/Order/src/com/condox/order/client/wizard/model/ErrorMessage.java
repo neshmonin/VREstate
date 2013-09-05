@@ -14,14 +14,17 @@ public class ErrorMessage extends DialogBox {
 	public ErrorMessage(String msg, String iconURL) {
 		
 		VerticalPanel verticalPanel = new VerticalPanel();
+		verticalPanel.setSpacing(10);
 		setWidget(verticalPanel);
 		verticalPanel.setWidth("350px");
 		
 		HorizontalPanel horizontalPanel = new HorizontalPanel();
+		horizontalPanel.setSpacing(10);
 		verticalPanel.add(horizontalPanel);
 		
 		Image image = new Image(iconURL);
 		horizontalPanel.add(image);
+		image.setSize("100px", "100px");
 		
 		HTML htmlNewHtml = new HTML(msg, true);
 		htmlNewHtml.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);

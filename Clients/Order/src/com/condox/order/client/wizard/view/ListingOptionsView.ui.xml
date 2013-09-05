@@ -22,7 +22,7 @@
 							<g:Cell verticalAlignment="ALIGN_MIDDLE" width="40px">
 								<g:Label text="MLS#  "/>
 							</g:Cell>
-							<g:TextBox width="138px" ui:field="textMLS"/>
+							<g:TextBox width="138px" ui:field="textMLS" enabled="false"/>
 						</g:HorizontalPanel>
 						<g:CaptionPanel captionText="Virtual Tour URL (optional)">
 							<g:VerticalPanel width="100%" spacing="10" horizontalAlignment="ALIGN_CENTER">

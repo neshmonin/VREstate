@@ -67,6 +67,10 @@ public class ListingOptionsModel extends WizardStep {
 		return urlMoreInfo;
 	}
 
+	public SuiteInfo getSelectedSuite() {
+		return selectedSuite;
+	}
+
 	private HasWidgets container = null;
 	ListingOptionsPresenter presenter = new ListingOptionsPresenter(
 			new ListingOptionsView(), this);
@@ -93,6 +97,7 @@ public class ListingOptionsModel extends WizardStep {
 	}
 
 	private SuiteInfo selectedSuite = null;
+
 	private void updateData() {
 		String sid = "";
 		I_WizardStep step = this;
@@ -114,43 +119,51 @@ public class ListingOptionsModel extends WizardStep {
 			}
 			step = step.getPrevStep();
 		}
-		
+
 		if (selectedSuite != null)
 			mls = selectedSuite.getMLS();
 
-		String url = "https://vrt.3dcondox.com/vre/data/inventory?";
-		url += "mlsId=" + mls;
-		url += "&sid=" + sid;
-		GET.send(url, new RequestCallback() {
+		if (!mls.isEmpty()) {
+			String url = "https://vrt.3dcondox.com/vre/data/inventory?";
+			url += "mlsId=" + mls;
+			url += "&sid=" + sid;
+			GET.send(url, new RequestCallback() {
 
-			@Override
-			public void onResponseReceived(Request request, Response response) {
-				// Log.write("HTTP ok:" + response.getStatusCode());
-				if (response.getStatusCode() == 200) {
-					String json = response.getText();
-					JSONObject obj = JSONParser.parseStrict(json).isObject();
-					JSONArray arr = obj.get("inventory").isArray();
-					SuiteInfo info = new SuiteInfo();
-					info.Parse(arr.get(0));
-					// display.setData(info);
-					urlVirtualTour = info.getVirtualTourURL();
-					urlMoreInfo = info.getMoreInfoURL();
-					suiteId = String.valueOf(info.getId());
-					presenter.go(container);
-				} else
-					new ErrorMessage(
-							"Sorry, this listing cannot be located in the 3D Condo Explorer's Database."
-									+ "Please try another MLS#","warning-icon.png").center();
-				// CreateTable();
-			}
+				@Override
+				public void onResponseReceived(Request request,
+						Response response) {
+					// Log.write("HTTP ok:" + response.getStatusCode());
+					if (response.getStatusCode() == 200) {
+						String json = response.getText();
+						JSONObject obj = JSONParser.parseStrict(json)
+								.isObject();
+						JSONArray arr = obj.get("inventory").isArray();
+						SuiteInfo info = new SuiteInfo();
+						info.Parse(arr.get(0));
+						// display.setData(info);
+						selectedSuite = info;
+						// urlVirtualTour = info.getVirtualTourURL();
+						// urlMoreInfo = info.getMoreInfoURL();
+						// suiteId = String.valueOf(info.getId());
+						// suiteAdd = String.valueOf(info.getId());
+						presenter.go(container);
+					} else
+						new ErrorMessage(
+								"Sorry, this listing cannot be located in the 3D Condo Explorer's Database."
+										+ "Please try another MLS#",
+								"warning-icon.png").center();
+					// CreateTable();
+				}
 
-			@Override
-			public void onError(Request request, Throwable exception) {
-				// Log.write("HTTP errot:" + response.getStatusCode());
-				// TODO Auto-generated method stub
+				@Override
+				public void onError(Request request, Throwable exception) {
+					// Log.write("HTTP errot:" + response.getStatusCode());
+					// TODO Auto-generated method stub
 
-			}
-		});
+				}
+			});
+		} else
+			presenter.go(container);
 	}
 
 }

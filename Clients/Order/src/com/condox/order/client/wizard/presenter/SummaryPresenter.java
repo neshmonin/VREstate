@@ -2,6 +2,7 @@ package com.condox.order.client.wizard.presenter;
 
 import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.GET;
+import com.condox.clientshared.document.SuiteInfo;
 import com.condox.order.client.Globals;
 import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.I_WizardStep;
@@ -53,13 +54,13 @@ public class SummaryPresenter implements I_Presenter {
 	// ******************
 	String user = "";
 	String order = "";
-	String address = "";
+	String address = "&lt;none&gt;";
 	String mls = "";
 	String urlVirtualTour = "";
 	String urlMoreInfo = "";
 	String sid = "";
 	String buildingId = "";
-	String suiteId = "25205";
+	SuiteInfo suite = null;
 	String product = "prl";
 	String type = "suite";
 	I_WizardStep step = null;
@@ -97,15 +98,21 @@ public class SummaryPresenter implements I_Presenter {
 				buildingId = String.valueOf(((BuildingsModel) step)
 						.getSelectedId());
 //				address = ((BuildingsModel) step).getSelected().getAddress();
-				address = ((BuildingsModel) step).getSelected().getStreet();
-				address += ", " + ((BuildingsModel) step).getSelected().getCity();
-				address += ", " + ((BuildingsModel) step).getSelected().getPostal();
+//				address = ((BuildingsModel) step).getSelected().getStreet();
+//				address += ", " + ((BuildingsModel) step).getSelected().getCity();
+//				address += ", " + ((BuildingsModel) step).getSelected().getPostal();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			try {
-				suiteId = String.valueOf(((SuitesModel) step)
-						.getSelectedIndex());
+				if (suite == null)
+					suite = ((SuitesModel) step).getSelected();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
+				if (suite == null)
+					suite = ((ListingOptionsModel) step).getSelectedSuite();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -123,12 +130,16 @@ public class SummaryPresenter implements I_Presenter {
 			}
 			step = step.getPrevStep();
 		}
-		String html = "Summary: <br /> Session id: " + sid + "<br />"
+		/*String html = "Summary: <br /> Session id: " + sid + "<br />"
 				+ "Selected building: " + buildingId + "<br />"
 				+ "Owner mail: " + ownerEmail + "<br />" + "Selected suite: "
-				+ suiteId;
+				+ suiteId;*/
 		// **********************************
 		user = "web".equals(user)? "GUEST" : user;
+//		if (suite != null)
+//			address = suite.getName() + " - " + address;
+		address = suite.getAddress();
+		String html = "";
 		html = 	"<table>" + 
 					"<tr>" + "<td>" + "User:" + "</td>" + "<td>" + user + "</td>" + "</tr>" + 
 					"<tr>" + "<td>" + "Order:" + "</td>" + "<td>" + order + "</td>" + "</tr>" + 
@@ -141,7 +152,7 @@ public class SummaryPresenter implements I_Presenter {
 				"<br/>More Info URL:" + (urlMoreInfo.isEmpty()? "&lt;none&gt;" : urlMoreInfo) +
 				"</div>";
 		html += "<br/><br/><br/><br/>You will be able to preview the order and, if you like it, you will be charged " +
-				"$49.99(paid via secure connection with your credit card)";
+				"$49.99 (paid via secure connection with your credit card)";
 		return html;
 	}
 

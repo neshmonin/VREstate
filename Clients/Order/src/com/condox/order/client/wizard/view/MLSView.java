@@ -9,39 +9,45 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.user.client.ui.Widget;
 
 public class MLSView extends Composite implements I_Display {
 
-	private static MLSViewUiBinder uiBinder = GWT
-			.create(MLSViewUiBinder.class);
+	private static MLSViewUiBinder uiBinder = GWT.create(MLSViewUiBinder.class);
 	private MLSPresenter presenter = null;
 
 	@UiField
 	RadioButton rbMLS;
 	@UiField
 	RadioButton rbNoMLS;
-	@UiField Button buttonCancel;
-	@UiField Button buttonPrev;
-	@UiField Button buttonNext;
-	@UiField TextBox textMLS;
+	@UiField
+	Button buttonCancel;
+	@UiField
+	Button buttonPrev;
+	@UiField
+	Button buttonNext;
+	@UiField
+	TextBox textMLS;
 
 	interface MLSViewUiBinder extends UiBinder<Widget, MLSView> {
 	}
 
 	public MLSView() {
 		initWidget(uiBinder.createAndBindUi(this));
+		setMLSChangeHandler(textMLS.getElement());
+		textMLS.setFocus(true);
 	}
 
 	@UiHandler("buttonPrev")
 	void onButtonPrevClick(ClickEvent event) {
 		presenter.onPrev();
 	}
+
 	@UiHandler("buttonNext")
 	void onButtonNextClick(ClickEvent event) {
 		presenter.onNext();
@@ -67,19 +73,39 @@ public class MLSView extends Composite implements I_Display {
 	@Override
 	public void setMLS(String value) {
 		textMLS.setValue(value);
+		render();
 	}
-	@UiHandler("textMLS")
-	void onTextMLSKeyUp(KeyUpEvent event) {
-		buttonNext.setEnabled(textMLS.getValue().matches("[a-zA-Z][0-9]{7}"));
-	}
+
 	@UiHandler("rbMLS")
 	void onRbMLSValueChange(ValueChangeEvent<Boolean> event) {
-		textMLS.setEnabled(true);
-		buttonNext.setEnabled(textMLS.getValue().matches("[a-zA-Z][0-9]{7}"));
+		render();
+		textMLS.setFocus(true);
 	}
+
 	@UiHandler("rbNoMLS")
 	void onRbNoMLSValueChange(ValueChangeEvent<Boolean> event) {
-		textMLS.setEnabled(false);
-		buttonNext.setEnabled(true);
+		render();
+	}
+
+	private native void setMLSChangeHandler(Element element)/*-{
+		var instance = this;
+		function render() {
+			instance.@com.condox.order.client.wizard.view.MLSView::render()();
+		}
+		element.oninput = render;
+		element.onpaste = render;
+	}-*/;
+
+	private void render() {
+		if (rbMLS.getValue()) {
+			textMLS.setEnabled(true);
+			buttonNext.setEnabled(textMLS.getValue()
+					.matches("[a-zA-Z][0-9]{7}"));
+		}
+		if (rbNoMLS.getValue()) {
+			textMLS.setValue("");
+			textMLS.setEnabled(false);
+			buttonNext.setEnabled(true);
+		}
 	}
 }

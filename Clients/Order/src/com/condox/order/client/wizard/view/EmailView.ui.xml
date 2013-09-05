@@ -16,8 +16,7 @@
 				<g:VerticalPanel spacing="10" horizontalAlignment="ALIGN_CENTER" width="300px">
 				<g:TextBox ui:field="textMail" />
 				<g:Button text="Submit the Order" width="160px" ui:field="buttonNext" enabled="false"/>
-				<g:HTML wordWrap="true" direction="LTR" horizontalAlignment="ALIGN_LEFT">Please have your credit card ready.<br/>You will be charged $49.99 (
-				you still will be able to cancel the order after preview)</g:HTML>
+				<g:HTML wordWrap="true" direction="LTR" horizontalAlignment="ALIGN_LEFT">Please have your credit card ready.<br/>You will be charged $49.99 (you still will be able to cancel the order after preview)</g:HTML>
 			</g:VerticalPanel>
 			</g:VerticalPanel>
 			</g:Cell>

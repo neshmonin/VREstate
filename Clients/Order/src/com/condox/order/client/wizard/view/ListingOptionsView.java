@@ -121,6 +121,7 @@ public class ListingOptionsView extends Composite implements I_Display {
 	@Override
 	public void setMLS(String value) {
 		textMLS.setValue(value);
+		textMLS.setEnabled(value.isEmpty());
 		buttonNext.setEnabled(value.matches("[a-zA-Z][0-9]{7}"));
 	}
 }

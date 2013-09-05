@@ -1,5 +1,6 @@
 package com.condox.clientshared.document;
 
+import com.condox.clientshared.abstractview.Log;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 
@@ -26,6 +27,7 @@ public class SuiteInfo {
 	private String virtualTourURL = "";
 	private String moreInfoURL = "";
 	private String mls = "";
+	private String address = "";
 
 	public void Parse(JSONValue value) {
 		JSONObject obj = value.isObject();
@@ -40,6 +42,7 @@ public class SuiteInfo {
 			virtualTourURL = obj.get("vTourUrl").isString().stringValue();
 			moreInfoURL = obj.get("infoUrl").isString().stringValue();
 			mls = obj.get("mlsId").isString().stringValue();
+			address = obj.get("address").isString().stringValue();
 		} catch (Exception e) {
 			
 		}
@@ -61,11 +64,13 @@ public class SuiteInfo {
 		setBathrooms(obj.get("bathrooms").isNumber().doubleValue());
 		setBalconies((int) obj.get("balconies").isNumber().doubleValue());
 		setTerraces((int) obj.get("terraces").isNumber().doubleValue());
-
-		if ((obj.get("currentPrice") != null)
-				&& (obj.get("currentPrice").isNumber() != null)
-				&& obj.get("currentPrice").isNumber().doubleValue() != 0)
-			price = (int) obj.get("currentPrice").isNumber().doubleValue();
+		try {
+			price = (Double.valueOf(obj.get("currentPrice").isString().stringValue())).intValue();
+//			price = (int) obj.get("currentPrice").isNumber().doubleValue();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+//		Log.write(id + ": "+"$" + price + " - " + status);
 
 		/*
 		 * if (price < 0) { // Workaround for prices price = (int) (500 + 500 *
@@ -152,6 +157,10 @@ public class SuiteInfo {
 	public int getTerraces() {
 		return terraces;
 	}
+	
+	public String getAddress() {
+		return address;
+	}
 
 	public String getTooltip() {
 		String tooltip = "Suite " + getName() + "\r\n";
@@ -179,6 +188,9 @@ public class SuiteInfo {
 		if (getArea() > 0)
 			tooltip += "Area: " + getArea() + " Sq.Ft.\r\n";
 		// tooltip += "Floorplan: " + getFloorplan_url() + "\r\n";
+		
+		if (!getMLS().isEmpty())
+			tooltip += "MLS#: " + getMLS() + "\r\n";
 		return tooltip;
 	}
 	
