@@ -279,6 +279,9 @@ namespace Vre.Server.BusinessLogic
             addUserAcl(User.Role.SuperAdmin, User.Role.Visitor,
                 UserInfoAccessLevel.Administrative, UserInfoAccessLevel.Administrative,
                 UserInfoAccessLevel.Administrative, UserInfoAccessLevel.Administrative);
+			addUserAcl(User.Role.SuperAdmin, User.Role.Anonymous,
+				UserInfoAccessLevel.Administrative, UserInfoAccessLevel.Administrative,
+				UserInfoAccessLevel.Administrative, UserInfoAccessLevel.Administrative);
 
             addUserAcl(User.Role.DeveloperAdmin, User.Role.Buyer,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
@@ -307,6 +310,9 @@ namespace Vre.Server.BusinessLogic
             addUserAcl(User.Role.DeveloperAdmin, User.Role.Visitor,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
                 UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+			addUserAcl(User.Role.DeveloperAdmin, User.Role.Anonymous,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
 
             addUserAcl(User.Role.Kiosk, User.Role.Buyer,
                 UserInfoAccessLevel.None, UserInfoAccessLevel.None,
@@ -335,6 +341,9 @@ namespace Vre.Server.BusinessLogic
             addUserAcl(User.Role.Kiosk, User.Role.Visitor,
                 UserInfoAccessLevel.None, UserInfoAccessLevel.None,
                 UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+			addUserAcl(User.Role.Kiosk, User.Role.Anonymous,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
 
             addUserAcl(User.Role.SalesPerson, User.Role.Buyer,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
@@ -363,6 +372,9 @@ namespace Vre.Server.BusinessLogic
             addUserAcl(User.Role.SalesPerson, User.Role.Visitor,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
                 UserInfoAccessLevel.Sales, UserInfoAccessLevel.Sales);
+			addUserAcl(User.Role.SalesPerson, User.Role.Anonymous,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
 
             addUserAcl(User.Role.SellingAgent, User.Role.Buyer,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
@@ -391,6 +403,9 @@ namespace Vre.Server.BusinessLogic
             addUserAcl(User.Role.SellingAgent, User.Role.Visitor,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
                 UserInfoAccessLevel.Sales, UserInfoAccessLevel.Sales);
+			addUserAcl(User.Role.SellingAgent, User.Role.Anonymous,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
 
 			addUserAcl(User.Role.BuyingAgent, User.Role.Buyer,
 				UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
@@ -419,6 +434,9 @@ namespace Vre.Server.BusinessLogic
 			addUserAcl(User.Role.BuyingAgent, User.Role.Visitor,
 				UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
 				UserInfoAccessLevel.Sales, UserInfoAccessLevel.Sales);
+			addUserAcl(User.Role.BuyingAgent, User.Role.Anonymous,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
 
 			addUserAcl(User.Role.Subcontractor, User.Role.Buyer,
                 UserInfoAccessLevel.None, UserInfoAccessLevel.None,
@@ -447,6 +465,9 @@ namespace Vre.Server.BusinessLogic
             addUserAcl(User.Role.Subcontractor, User.Role.Visitor,
                 UserInfoAccessLevel.None, UserInfoAccessLevel.None,
                 UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+			addUserAcl(User.Role.Subcontractor, User.Role.Anonymous,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
 
             addUserAcl(User.Role.Buyer, User.Role.Buyer,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
@@ -475,6 +496,9 @@ namespace Vre.Server.BusinessLogic
             addUserAcl(User.Role.Buyer, User.Role.Visitor,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
                 UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+			addUserAcl(User.Role.Buyer, User.Role.Anonymous,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
 
             addUserAcl(User.Role.Visitor, User.Role.Buyer,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
@@ -503,6 +527,40 @@ namespace Vre.Server.BusinessLogic
             addUserAcl(User.Role.Visitor, User.Role.Visitor,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
                 UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+			addUserAcl(User.Role.Visitor, User.Role.Anonymous,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+
+			addUserAcl(User.Role.Anonymous, User.Role.Buyer,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+			addUserAcl(User.Role.Anonymous, User.Role.DeveloperAdmin,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+			addUserAcl(User.Role.Anonymous, User.Role.Kiosk,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+			addUserAcl(User.Role.Anonymous, User.Role.SalesPerson,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+			addUserAcl(User.Role.Anonymous, User.Role.SellingAgent,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+			addUserAcl(User.Role.Anonymous, User.Role.BuyingAgent,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+			addUserAcl(User.Role.Anonymous, User.Role.Subcontractor,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+			addUserAcl(User.Role.Anonymous, User.Role.SuperAdmin,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+			addUserAcl(User.Role.Anonymous, User.Role.Anonymous,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+			addUserAcl(User.Role.Anonymous, User.Role.Visitor,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
 
 			// cross-reference check
 			foreach (var t in Enum.GetValues(typeof(User.Role)))
@@ -782,28 +840,40 @@ namespace Vre.Server.BusinessLogic
         #endregion
 
         #region view orders
-        public static void CheckCreateViewOrder(ClientSession session, User targetUser, Building building)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="session">Web session requesting access</param>
+		/// <param name="targetUser">User who shall be the owner of the ViewOrder</param>
+		/// <param name="building">Bulding associated with the property referenced by ViewOrder</param>
+		/// <returns>true if immediate create allowed; false if payment is required</returns>
+        public static bool CheckCreateViewOrder(ClientSession session, User targetUser, Building building)
         {
             // superadmin can make a listing for anyone
-            if (session.User.UserRole == User.Role.SuperAdmin) return;
+            if (session.User.UserRole == User.Role.SuperAdmin) return true;
 
             // developer admin can make a listing for anyone for a building/suite belonging to his estate developer
             if (session.User.UserRole == User.Role.DeveloperAdmin)
             {
-                if (null == building) return;
-                if (building.ConstructionSite.AutoID.Equals(session.User.EstateDeveloperID)) return;
+                if (null == building) return false;
+                if (building.ConstructionSite.AutoID.Equals(session.User.EstateDeveloperID)) return false;
             }
 
             //// selling agent can make a listing for himself
             //if ((session.User.UserRole == User.Role.SellingAgent)
             //    && (targetUser.Equals(session.User))) return;
 
+			// web sale
+			if ((session.User.UserRole == User.Role.Visitor)
+				&& (targetUser.UserRole == User.Role.Anonymous))
+				return false;
+
             throw new PermissionException("This operation is not allowed.");
         }
 
-        public static void CheckUpdateViewOrder(ClientSession session, User targetUser)
+        public static bool CheckUpdateViewOrder(ClientSession session, User targetUser)
         {
-            CheckCreateViewOrder(session, targetUser, null);  // same permissions
+            return CheckCreateViewOrder(session, targetUser, null);  // same permissions
         }
 
         public static void CheckDeleteViewOrder(ClientSession session, User targetUser)

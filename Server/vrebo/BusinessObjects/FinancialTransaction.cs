@@ -7,7 +7,7 @@ namespace Vre.Server.BusinessLogic
 	{
 	    public enum TranSubject : byte
 	    {
-            View = 0
+            ViewOrder = 0
 	    }
         public enum TranTarget : byte
         {
@@ -59,11 +59,30 @@ namespace Vre.Server.BusinessLogic
         /// <summary>
         /// Amount of CreditUnits involved in transaction.
         /// </summary>
-        public decimal CuAmount { get; private set; }
-        /// <summary>
+        public decimal? CuAmount { get; private set; }
+		/// <summary>
+		/// Amount of currency involved in transaction (net value).
+		/// </summary>
+		public Money? CurrencyAmount { get; private set; }
+		/// <summary>
+		/// Amount of taxes applied to currency involved in transaction.
+		/// </summary>
+		public Money? CurrencyTax { get; private set; }
+		/// <summary>
         /// Subject of transaction.
         /// </summary>
         public TranSubject Subject { get; private set; }
+
+		protected virtual string currencyAmountDb
+		{
+			get { return (CurrencyAmount.HasValue ? CurrencyAmount.Value.ToFullString() : null); }
+			set { Money m; if (Money.TryParse(value, out m)) CurrencyAmount = m; else CurrencyAmount = null; }
+		}
+		protected virtual string currencyTaxDb
+		{
+			get { return (CurrencyTax.HasValue ? CurrencyTax.Value.ToFullString() : null); }
+			set { Money m; if (Money.TryParse(value, out m)) CurrencyTax = m; else CurrencyTax = null; }
+		}
 
         /// <summary>
         /// Transaction target object.
@@ -105,6 +124,8 @@ namespace Vre.Server.BusinessLogic
 
             Operation = operation;
             CuAmount = cuAmount;
+			CurrencyAmount = null;
+			CurrencyTax = null;
             Subject = subject;
 
             Target = target;
@@ -116,7 +137,36 @@ namespace Vre.Server.BusinessLogic
             PaymentRefId = null;
         }
 
-        public void SetSystemReferenceId(string refId)
+		public FinancialTransaction(
+			int initiatorId,
+			AccountType account, int accountId,
+			OperationType operation, Money currencyAmount, Money currencyTax,
+			TranSubject subject, TranTarget target, int targetId, string extraTargetInfo)
+		{
+			AutoID = 0;
+			Created = DateTime.UtcNow;
+
+			InitiatorId = initiatorId;
+
+			Account = account;
+			AccountId = accountId;
+
+			Operation = operation;
+			CuAmount = null;
+			CurrencyAmount = currencyAmount;
+			CurrencyTax = currencyTax;
+			Subject = subject;
+
+			Target = target;
+			TargetId = targetId;
+			ExtraTargetInfo = extraTargetInfo;
+
+			SystemRefId = null;
+			PaymentSystem = PaymentSystemType.Unknown;
+			PaymentRefId = null;
+		}
+
+		public void SetSystemReferenceId(string refId)
         {
             if (SystemRefId != null) throw new InvalidOperationException("Cannot alter value");
             SystemRefId = refId;
@@ -146,7 +196,12 @@ namespace Vre.Server.BusinessLogic
 
             Operation = data.GetProperty<OperationType>("operation", OperationType.Credit);
             CuAmount = data.GetProperty("amount", 0m);
-            Subject = data.GetProperty<TranSubject>("subject", TranSubject.View);
+			string c; Money m;
+			c = data.GetProperty("cuAmount", string.Empty);
+			if (c.Length > 0) { if (Money.TryParse(c, out m)) CurrencyAmount = m; }
+			c = data.GetProperty("cuTax", string.Empty);
+			if (c.Length > 0) { if (Money.TryParse(c, out m)) CurrencyTax = m; }
+			Subject = data.GetProperty<TranSubject>("subject", TranSubject.ViewOrder);
 
             Target = data.GetProperty<TranTarget>("target", TranTarget.Suite);
             TargetId = data.GetProperty("targetId", -1);
@@ -173,8 +228,10 @@ namespace Vre.Server.BusinessLogic
             result.Add("accountId", AccountId);
 
             result.Add("operation", ClientData.ConvertProperty<OperationType>(Operation));
-            result.Add("amount", CuAmount);
-            result.Add("subject", ClientData.ConvertProperty<TranSubject>(Subject));
+            if (CuAmount.HasValue) result.Add("amount", CuAmount.Value);
+			if (CurrencyAmount.HasValue) result.Add("cuAmount", CurrencyAmount.Value.ToFullString());
+			if (CurrencyTax.HasValue) result.Add("cuTax", CurrencyTax.Value.ToFullString());
+			result.Add("subject", ClientData.ConvertProperty<TranSubject>(Subject));
 
             result.Add("target", ClientData.ConvertProperty<TranTarget>(Target));
             result.Add("targetId", TargetId);

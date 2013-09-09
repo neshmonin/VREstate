@@ -53,8 +53,9 @@ namespace Vre.Server.HttpService
                 _rawRequest = request.Url;
 				Referer = referer;
                 Path = path;
+				PathSegments = path.Split('/');
                 Query = query;
-				EndPoint = ep;
+				EndPoint = ep;				
 
                 // either HTTPS (SSL) or local connection is required to qualify as secure
                 IsSecureConnection = request.IsSecureConnection | IsCallerSecure(request.RemoteEndPoint.Address);
@@ -81,6 +82,7 @@ namespace Vre.Server.HttpService
 			public Uri Referer { get; private set; }
 			public RequestType Type { get; private set; }
             public string Path { get; private set; }
+			public string[] PathSegments { get; private set; }
             public ServiceQuery Query { get; private set; }
             public ClientData Data { get; private set; }
             public byte[] RawData { get; private set; }
@@ -90,7 +92,7 @@ namespace Vre.Server.HttpService
             {
                 if (null == _serverRootPath)
                 {
-                    string uriText = ServiceInstances.Configuration.GetValue("HttpListenerUri", string.Empty);
+                    string uriText = Configuration.HttpService.ListenerUri.Value;
                     Uri uri = new Uri(uriText.Replace("+", "localhost").Replace("*", "localhost"));
                     _serverRootPath = uri.LocalPath;
                 }

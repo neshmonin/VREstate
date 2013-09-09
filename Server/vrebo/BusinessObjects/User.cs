@@ -11,15 +11,46 @@ namespace Vre.Server.BusinessLogic
 	{
 	    public enum Role : byte
 	    {
+			/// <summary>
+			/// Usual property buyer
+			/// </summary>
             Buyer = 0,
+			/// <summary>
+			/// Superadministrator with full system access
+			/// </summary>
             SuperAdmin = 1,
+			/// <summary>
+			/// Property developer administrator with most rights applied to owning EstateDeveloper object
+			/// </summary>
             DeveloperAdmin = 2,
+			/// <summary>
+			/// Subcontractor
+			/// </summary>
             Subcontractor = 3,
+			/// <summary>
+			/// Sales person 
+			/// </summary>
             SalesPerson = 4,
+			/// <summary>
+			/// Independent selling agent
+			/// </summary>
             SellingAgent = 5,
+			/// <summary>
+			/// Visitor having no account in system; independent and with minimal rights
+			/// </summary>
             Visitor = 6,
+			/// <summary>
+			/// Kiosk installed on property developer's premises
+			/// </summary>
             Kiosk = 7,
-			BuyingAgent = 8
+			/// <summary>
+			/// Independent buying agent
+			/// </summary>
+			BuyingAgent = 8,
+			/// <summary>
+			/// Anonymous account created automatically; has no related login!
+			/// </summary>
+			Anonymous = 9
 	    }
 
         public Role UserRole { get; private set; }
@@ -84,6 +115,7 @@ namespace Vre.Server.BusinessLogic
             Licenses = new List<UserLicense>();
             CreditUnits = 0m;
 			RefererRestriction = null;
+			LastLogin = new DateTime(1900, 01, 01);
         }
 
         /// <summary>
@@ -92,7 +124,9 @@ namespace Vre.Server.BusinessLogic
         /// </summary>
         public static bool IsEstateDeveloperTied(Role role)
         {
-            return ((role != Role.SellingAgent) && (role != Role.BuyingAgent) && (role != Role.SuperAdmin) && (role != Role.Buyer) && (role != Role.Visitor));
+            return ((role != Role.SellingAgent) && (role != Role.BuyingAgent) 
+				&& (role != Role.SuperAdmin) && (role != Role.Buyer) && (role != Role.Visitor)
+				&& (role != Role.Anonymous));
         }
 
         public void UpdatePersonalInfo(string info)
@@ -218,7 +252,7 @@ namespace Vre.Server.BusinessLogic
             if (EstateDeveloperID != null)
                 return string.Format("ID={0},r={1},ED={2}", AutoID, UserRole, EstateDeveloperID);
             else
-                return string.Format("ID={0},r={1}", AutoID, UserRole);
+                return string.Format("ID={0},r={1},e={2}", AutoID, UserRole, PrimaryEmailAddress);
         }
     }
 }

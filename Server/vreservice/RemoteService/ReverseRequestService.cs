@@ -6,18 +6,13 @@ using System.Text;
 using NHibernate;
 using Vre.Server.BusinessLogic;
 using Vre.Server.Dao;
+using System.Web;
+using Vre.Server.Task;
 
 namespace Vre.Server.RemoteService
 {
     internal class ReverseRequestService : IHttpService
     {
-        private static bool _configured = false;
-        private static bool _allowUnsecureService = true;
-        
-        private static TimeSpan _linkExpirationTime;
-
-        private static string _staticLinkUrlTemplate;
-
         private static Dictionary<string, string> _messageTemplates = new Dictionary<string, string>();
 
         private const string _servicePathPrefix = _servicePathElement0 + "/";
@@ -27,19 +22,6 @@ namespace Vre.Server.RemoteService
         public string ServicePathPrefix { get { return _servicePathPrefix; } }
 
         public bool RequiresSession { get { return false; } }
-
-        private static void configure()
-        {
-            _allowUnsecureService = ServiceInstances.Configuration.GetValue("AllowSensitiveDataOverNonSecureConnection", false);
-
-            _linkExpirationTime = new TimeSpan(0, 0, ServiceInstances.Configuration.GetValue("ReverseRequestLinkExpirationSec", 3600));
-
-            _staticLinkUrlTemplate = ServiceInstances.Configuration.GetValue("StaticLinkUrlTemplate", "http://ref.3dcondox.com/go?id={0}");
-
-            //scanTemplates(ServiceInstances.Configuration.GetValue("MessageTemplateRoot", "."));
-
-            _configured = true;
-        }
 
         #region unused request types
         public void ProcessCreateRequest(IServiceRequest request)
@@ -60,14 +42,13 @@ namespace Vre.Server.RemoteService
 
         public void ProcessGetRequest(IServiceRequest request)
         {
-            if (!_configured) configure();
-
-            if (!_allowUnsecureService && !request.Request.IsSecureConnection)
+            if (!Configuration.Security.AllowSensitiveDataOverNonSecureConnection.Value
+				&& !request.Request.IsSecureConnection)
                 throw new PermissionException("Service available only over secure connection.");
             
-            string path = request.Request.Path;
-            int pos = path.IndexOf('/');
-            if ((pos > 0) && (pos < path.Length)) path = path.Substring(pos + 1);
+            string path = request.Request.PathSegments[1];
+			//int pos = path.IndexOf('/');
+			//if ((pos > 0) && (pos < path.Length)) path = path.Substring(pos + 1);
 
             if (path.Length > _maxRequestLinkLength)
                 throw new ArgumentException();
@@ -129,6 +110,10 @@ namespace Vre.Server.RemoteService
                             //    processListingAccess(request, rq, session);
                             //    break;
 
+							case ReverseRequest.RequestType.ViewOrderActivation:
+								processViewOrderActivation(request, rq, session);
+								break;
+
                             // TODO: the rest of requests
 
                             default:
@@ -146,12 +131,19 @@ namespace Vre.Server.RemoteService
         }
 
         #region utility methods
-        private static string generateUrl(ReverseRequest rq)
+        public static string GenerateUrl(ReverseRequest rq)
         {
-            return string.Format(_staticLinkUrlTemplate, UniversalId.GenerateUrlId(UniversalId.IdType.ReverseRequest, rq.Id));
+            return string.Format(Configuration.Urls.StaticLinkTemplate.Value, 
+				UniversalId.GenerateUrlId(UniversalId.IdType.ReverseRequest, rq.Id));
         }
 
-        private static readonly string[] _refParamNameVariations = new string[] { "email1", "email2" };
+		public static string GenerateUrl(ViewOrder viewOrder)
+		{
+			return string.Format(Configuration.Urls.StaticLinkTemplate.Value,
+				UniversalId.GenerateUrlId(UniversalId.IdType.ViewOrder, viewOrder.AutoID));
+		}
+
+		private static readonly string[] _refParamNameVariations = new string[] { "email1", "email2" };
 
         private static string generateReferenceParameterName()
         {
@@ -200,8 +192,6 @@ namespace Vre.Server.RemoteService
         #region Account registration
         public static void InitiateUserRegistration(string login)
         {
-            if (!_configured) configure();
-
             ReverseRequest request;
 
             using (ISession dbSession = NHibernateHelper.GetSession())
@@ -222,20 +212,20 @@ namespace Vre.Server.RemoteService
                         if (null == request)
                         {
                             request = ReverseRequest.CreateRegisterAccount(login, null,
-                                DateTime.UtcNow.Add(_linkExpirationTime),
+								DateTime.UtcNow.AddSeconds(Configuration.HttpService.ReverseRequestLinkExpirationSec.Value),
                                 generateReferenceParameterName(), generateReferenceParameterValue());
 
                             dao.Create(request);
                         }
                         else
                         {
-                            request.ExpiresOn = DateTime.UtcNow.Add(_linkExpirationTime);
+							request.ExpiresOn = DateTime.UtcNow.AddSeconds(Configuration.HttpService.ReverseRequestLinkExpirationSec.Value);
                             dao.Update(request);
                         }
                     }
 
                     ServiceInstances.MessageGen.SendMessage(null, login, "MSG_ACCOUNT_CREATE",
-                        generateUrl(request), request.ExpiresOn);
+                        GenerateUrl(request), request.ExpiresOn);
 
                     //session.DbSession.Flush();
                     tran.Commit();
@@ -331,8 +321,6 @@ namespace Vre.Server.RemoteService
         #region Login change
         public static void InitiateLoginChange(IRequestData srq, ClientSession session, string newLogin)
         {
-            if (!_configured) configure();
-
             ReverseRequest request;
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session))
@@ -352,20 +340,20 @@ namespace Vre.Server.RemoteService
                     if (null == request)
                     {
                         request = ReverseRequest.CreateLoginChange(session.User.AutoID, newLogin,
-                            DateTime.UtcNow.Add(_linkExpirationTime),
+                            DateTime.UtcNow.AddSeconds(Configuration.HttpService.ReverseRequestLinkExpirationSec.Value),
                             generateReferenceParameterName(), generateReferenceParameterValue());
 
                         dao.Create(request);
                     }
                     else
                     {
-                        request.ExpiresOn = DateTime.UtcNow.Add(_linkExpirationTime);
+                        request.ExpiresOn = DateTime.UtcNow.AddSeconds(Configuration.HttpService.ReverseRequestLinkExpirationSec.Value);
                         dao.Update(request);
                     }
                 }
 
                 ServiceInstances.MessageGen.SendMessage(null, session.User, newLogin, "MSG_LOGIN_CHANGE",
-                    generateUrl(request), request.ExpiresOn);
+                    GenerateUrl(request), request.ExpiresOn);
 
                 //session.DbSession.Flush();  // TODO: dunno why this is required!
                 tran.Commit();
@@ -469,8 +457,6 @@ namespace Vre.Server.RemoteService
 			string productUrl, DateTime expiresOn,
             string paymentSystemRefId)
         {
-            if (!_configured) configure();
-
             ViewOrder viewOrder;
 			FinancialTransaction ft;
 
@@ -517,7 +503,7 @@ namespace Vre.Server.RemoteService
                 ft = new FinancialTransaction(srq.UserInfo.Session.User.AutoID,
                     FinancialTransaction.AccountType.User, targetUser.AutoID,
                     FinancialTransaction.OperationType.Debit, 0m,
-                    FinancialTransaction.TranSubject.View,
+                    FinancialTransaction.TranSubject.ViewOrder,
                     FinancialTransaction.TranTarget.Suite, targetObjectId, viewOrder.AutoID.ToString());
 
                 if (!string.IsNullOrWhiteSpace(paymentSystemRefId))
@@ -532,7 +518,7 @@ namespace Vre.Server.RemoteService
 
                 srq.Response.ResponseCode = HttpStatusCode.OK;
                 srq.Response.Data = new ClientData();
-                srq.Response.Data.Add("viewOrder-url", ConstructViewOrderUrl(viewOrder));
+                srq.Response.Data.Add("viewOrder-url", GenerateUrl(viewOrder));
                 srq.Response.Data.Add("viewOrder-id", viewOrder.AutoID);
                 // TODO: generate button into listing response
                 //srq.Response.Data.Add("button-url", string.Format(_listingUrlTemplate, request.Id.ToString("N")));
@@ -542,17 +528,10 @@ namespace Vre.Server.RemoteService
             }
 
             ServiceInstances.Logger.Info(
-                "User {0} created a view order for user {1}: ({2}) for {3} id={4}, reference URL={5}, expires on {6} UTC, RID={7}, STRN={8}",
+                "User {0} created a view order for user {1}: ({2}) for {3} id={4}, reference URL={5}, expires on {6} UTC, VOID={7}, STRN={8}",
 				srq.UserInfo.Session.User, targetUser, product, type, targetObjectId, productUrl, expiresOn, viewOrder.AutoID, ft.SystemRefId);
 
             return viewOrder;
-        }
-
-        public static string ConstructViewOrderUrl(ViewOrder viewOrder)
-        {
-            if (!_configured) configure();
-
-            return string.Format(_staticLinkUrlTemplate, UniversalId.GenerateUrlId(UniversalId.IdType.ViewOrder, viewOrder.AutoID));
         }
 
         //public static void DecodeListing(ClientSession session, string listingId,
@@ -583,13 +562,49 @@ namespace Vre.Server.RemoteService
         //            target = dao.GetById(listing.TargetObjectId);
         //    }
         //}
+
+		private static void processViewOrderActivation(IServiceRequest request, ReverseRequest dbRequest, ISession session)
+		{
+			ViewOrder vo;
+			using (var dao = new ViewOrderDao(session)) vo = dao.GetById(new Guid(dbRequest.Subject));
+
+			if ("next".Equals(request.Request.Query["action"]))
+				//(3 == request.Request.PathSegments.Length) && (request.Request.PathSegments[2].Equals("next")))
+			{
+				User user;
+				using (var dao = new UserDao(session)) user = dao.GetById(dbRequest.UserId.Value);
+
+				makeHttpResponse(request, user, "HTML_VIEWORDER_PENDING", 
+					vo.Product,
+					vo.Options,
+					NotifyExpiringViewOrders.GetSubjectAddress(session, vo)
+				);
+			}
+			else
+			{
+				request.Response.RedirectionUrl = string.Format("{6}/cgi-bin/webscr?cmd=_xclick&"
+					+ "business={0}&"
+					+ "item_name={1}&"
+					+ "item_number={2}&" 
+					+ "amount={3}&"
+					+ "currency_code={4}&"
+					+ "notify_url={5}&"
+					+ "return={7}",
+					HttpUtility.UrlEncode(Configuration.PaymentSystem.PayPal.MerchantId.Value),
+					HttpUtility.UrlEncode(vo.Product.ToString() + " (" + NotifyExpiringViewOrders.GetSubjectAddress(session, vo) + ")"),
+					HttpUtility.UrlEncode(UniversalId.GenerateUrlId(UniversalId.IdType.ReverseRequest, dbRequest.Id)),
+					HttpUtility.UrlEncode(dbRequest.ReferenceParamValue.Substring(3)),
+					HttpUtility.UrlEncode(dbRequest.ReferenceParamValue.Substring(0, 3)),
+					HttpUtility.UrlEncode(request.Request.ConstructClientRootUri() + "/ps/paypal"),
+					Configuration.PaymentSystem.SandboxMode.Value ? "https://www.sandbox.paypal.com" : "https://www.paypal.com",
+					HttpUtility.UrlEncode(HttpUtility.UrlEncode(GenerateUrl(dbRequest) + "&action=next")));
+			}
+		}
         #endregion
 
         #region vieworder control
         public static string CreateViewOrderControlUrl(ISession session, ViewOrder vo)
         {
-            if (!_configured) configure();
-
             bool created = false;
             ReverseRequest request;
 
@@ -614,7 +629,7 @@ namespace Vre.Server.RemoteService
                 }
             }
 
-            return generateUrl(request);
+            return GenerateUrl(request);
         }
 
         private static bool processViewOrderControl(IServiceRequest request, ReverseRequest dbRequest, ISession session)

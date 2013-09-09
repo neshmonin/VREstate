@@ -179,7 +179,10 @@
     <Compile Include="Managers\RolePermissionCheck.cs" />
     <Compile Include="ModelCache\ModelCache.cs" />
     <Compile Include="ModelCache\ModelCacheManager.cs" />
+    <Compile Include="PaymentSystemProc\IPaymentSystemResponseHandler.cs" />
+    <Compile Include="PaymentSystemProc\PayPalResponseHandler.cs" />
     <Compile Include="RemoteService\EventService.cs" />
+    <Compile Include="RemoteService\PaymentSystemResponseService.cs" />
     <Compile Include="Tasks\BaseTask.cs" />
     <Compile Include="Tasks\RetroImportViewOrderTargets.cs" />
     <Compile Include="Tasks\RemoveStaleReverseRequests.cs" />

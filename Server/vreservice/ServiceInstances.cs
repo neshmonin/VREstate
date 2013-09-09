@@ -16,19 +16,6 @@ namespace Vre.Server
 
         public static FileCacheManager FileCache;
 
-        private static Config _configuration = null;
-        public static Config Configuration
-        {
-            get
-            {
-                lock (_lock)
-                {
-                    if (null == _configuration) _configuration = new Config();
-                }
-                return _configuration;
-            }
-        }
-
         private static Logger _logger = null;
         public static Logger Logger
         {
@@ -55,7 +42,20 @@ namespace Vre.Server
             }
         }
 
-        private static FloodPreventor _floodPreventor = null;
+		private static Logger _paymentLogger = null;
+		public static Logger PaymentLogger
+		{
+			get
+			{
+				lock (_lock)
+				{
+					if (null == _paymentLogger) _paymentLogger = LogManager.GetLogger("Vre.Server.Payment");
+				}
+				return _paymentLogger;
+			}
+		}
+
+		private static FloodPreventor _floodPreventor = null;
         public static FloodPreventor FloodStopper
         {
             get
