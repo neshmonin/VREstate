@@ -15,23 +15,26 @@ namespace Vre.Server
         {
             _peerInfo = new Dictionary<string, DateTime>();
 
-            _minAccessPeriodSec = 30;
-            _minAccessPeriodSec = ServiceInstances.Configuration.GetValue("MinAccessPeriodSec", _minAccessPeriodSec);
-            _cleanupTimeoutSec = 600;
-            _cleanupTimeoutSec = ServiceInstances.Configuration.GetValue("AccessCleanupTimeoutSec", _cleanupTimeoutSec);
-
-            // ensure some constraints
-            //
-            // minimal reaccess time is 1 sec
-            if (_minAccessPeriodSec < 1) _minAccessPeriodSec = 1;
-            // reaccess time is no more than 30 minutes
-            if (_minAccessPeriodSec > 900) _minAccessPeriodSec = 900;
-            // cleanup period is large enough
-            if (_cleanupTimeoutSec < (_minAccessPeriodSec * 2)) _cleanupTimeoutSec = _minAccessPeriodSec * 2;
+			setup();
+			Configuration.OnModified += new EventHandler((s, e) => setup());
 
             _cleanupThreadExit = new ManualResetEvent(false);
             new Thread(cleanupThread) { IsBackground = true }.Start();
         }
+
+		private void setup()
+		{
+			var minAccessPeriodSec = Configuration.FloodPrevention.MinAccessPeriodSec.Value;
+			var cleanupTimeoutSec = Configuration.FloodPrevention.AccessCleanupTimeoutSec.Value;
+
+			// ensure some constraints
+			//
+			// cleanup period is large enough
+			if (cleanupTimeoutSec < (minAccessPeriodSec * 2)) cleanupTimeoutSec = minAccessPeriodSec * 2;
+
+			_minAccessPeriodSec = minAccessPeriodSec;
+			_cleanupTimeoutSec = cleanupTimeoutSec;
+		}
 
         public void Dispose()
         {

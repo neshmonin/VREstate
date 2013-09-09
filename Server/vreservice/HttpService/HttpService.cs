@@ -10,28 +10,22 @@ namespace Vre.Server.HttpService
     internal class HttpServiceMain : HttpServiceBase
     {
         private RemoteServiceProvider _rsp;
-        private long _maxRequestBodyLength;
 		private RefererXref _refererXref;
-		private int _floodingRequestHoldOffMs;
 
         public HttpServiceMain() : base("HTTP Listener")
         {
             _rsp = new RemoteServiceProvider();
-            _maxRequestBodyLength = ServiceInstances.Configuration.GetValue("MaxHttpRequestBodyLengthBytes", 10240);
 			_refererXref = new RefererXref();
-
-			_floodingRequestHoldOffMs = ServiceInstances.Configuration.GetValue("FloodingHttpRequestHoldOffMs", 1000);
-			if (_floodingRequestHoldOffMs < 0) _floodingRequestHoldOffMs = 0;
-			if (_floodingRequestHoldOffMs > 3600000) _floodingRequestHoldOffMs = 3600000;
         }
 
         protected override IResponseData process(string browserKey, HttpListenerContext ctx, HttpServiceRequest.ProcessResponse proc)
         {
-            HttpServiceRequest rq = new HttpServiceRequest(ctx, browserKey, 
+            IServiceRequest rq = new HttpServiceRequest(ctx, browserKey, 
 				_refererXref.GetRealReferer(browserKey, ctx.Request.UrlReferrer), 
-				_path, _maxRequestBodyLength, proc);
+				_path, Configuration.HttpService.MaxRequestBodyLengthBytes.Value, proc);
 
-            if (_allowExtendedLogging) ServiceInstances.RequestLogger.Info(prepareCallerInfo(browserKey, ctx, rq));
+            if (Configuration.Debug.AllowExtendedLogging.Value) 
+				ServiceInstances.RequestLogger.Info(prepareCallerInfo(browserKey, ctx, rq));
 
 			if (!rq.UserInfo.StaleSession)
 			{
@@ -64,7 +58,8 @@ namespace Vre.Server.HttpService
 			}
 			else
 			{
-				if (_floodingRequestHoldOffMs > 0) Thread.Sleep(_floodingRequestHoldOffMs);
+				var d = Configuration.FloodPrevention.HttpRequestHoldOffMs.Value;
+				if (d > 0) Thread.Sleep(d);
 			}
 
             return rq.Response;
@@ -112,8 +107,7 @@ namespace Vre.Server.HttpService
 
 		private void cleanerThread()
 		{
-			Thread.CurrentThread.Name = "RefererXrefCleaner#" + Thread.CurrentThread.ManagedThreadId;
-			int cleanupTimeoutSec = ServiceInstances.SessionStore.CleanupTimeoutSec + 10;
+			Thread.CurrentThread.Name = "RefererXrefCleaner#" + Thread.CurrentThread.ManagedThreadId;			
 			_nextStat = DateTime.UtcNow.AddHours(1);
 			_maxSize = 0;
 
@@ -121,6 +115,8 @@ namespace Vre.Server.HttpService
 			{
 				Thread.Sleep(60000);
 				var now = DateTime.UtcNow;
+
+				int cleanupTimeoutSec = Configuration.ClientSession.TimeoutSec.Value + 10;
 
 				int dbgrm = 0;
 				var bks = _lastUsed.Keys.ToArray();

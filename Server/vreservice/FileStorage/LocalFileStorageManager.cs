@@ -6,9 +6,9 @@ namespace Vre.Server.FileStorage
     {
         private string _accessRoot;
 
-        public LocalFileStorageManager() : base("FileStoreRoot")
+        public LocalFileStorageManager() : base(Configuration.PublicFileStore.RootPath)
         {
-            _accessRoot = ServiceInstances.Configuration.GetValue("FileStoreAccessRoot", "");
+			_accessRoot = Configuration.PublicFileStore.AccessRoot.Value;
 
             if (string.IsNullOrWhiteSpace(_accessRoot))
             {

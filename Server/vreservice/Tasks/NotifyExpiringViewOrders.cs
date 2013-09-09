@@ -174,8 +174,7 @@ Ref#{1}", ecnt, refVal));
             }
             else
             {
-                ival = ServiceInstances.Configuration.GetValue("ViewOrderExpiryWarningDays", 3);
-                result = DateTime.UtcNow.AddDays(ival);
+                result = DateTime.UtcNow.AddDays(Configuration.Messaging.ViewOrderExpiryWarningDays.Value);
             }
 
             return result;

@@ -4,7 +4,7 @@ namespace Vre.Server.FileStorage
 {
     internal class IntLocalFileStorageManager : FsFileStorageManagerBase
     {
-        public IntLocalFileStorageManager() : base("InternalFileStoreRoot") { }
+        public IntLocalFileStorageManager() : base(Configuration.InternalFileStore.RootPath) { }
 
         public override StorageType Type { get { return StorageType.Internal; } }
 

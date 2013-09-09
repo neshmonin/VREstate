@@ -33,7 +33,7 @@ namespace Vre.Server.BusinessLogic
 		protected virtual string currentPriceDb
 		{
 			get { return (CurrentPrice.HasValue ? CurrentPrice.Value.ToFullString() : null); }
-			set { Money m; if (Money.TryParse(value, out m)) CurrentPrice = m; }
+			set { Money m; if (Money.TryParse(value, out m)) CurrentPrice = m; else CurrentPrice = null; }
 		}
 
 		public virtual string BubbleTemplateUrl { get; set; }
@@ -195,11 +195,26 @@ namespace Vre.Server.BusinessLogic
             ShowPanoramicView = data.UpdateProperty("showPanoramicView", ShowPanoramicView, ref changed);
             Status = data.UpdateProperty("status", Status, ref changed);
 			if (CurrentPrice.HasValue)
+			{
 				CurrentPrice = new Money(
-					data.UpdateProperty("currentPrice", Convert.ToDecimal(CurrentPrice.Value), ref changed), 
+					data.UpdateProperty("currentPrice", Convert.ToDecimal(CurrentPrice.Value), ref changed),
 					CurrentPrice.Value.Currency);
+			}
+			else
+			{
+				var value = data.GetProperty("currentPrice", -1.0m);
+				if (value >= 0.0m)
+				{
+					Currency c;
+					if (!Currency.TryParse(data.GetProperty("currentPriceCurrency", "CAD"), out c))
+						c = Currency.Cad;
 
-            return changed;
+					CurrentPrice = new Money(value, c);
+					changed = true;
+				}
+			}
+
+			return changed;
         }
 
         public override string ToString()

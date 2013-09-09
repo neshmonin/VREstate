@@ -2,8 +2,8 @@
 --
 -- VR Estate database upgrade script v16 -> v17
 --
--- Script version 1
--- Last Modified on 2013-05-05 by Andrew
+-- Script version 2
+-- Last Modified on 2013-09-05 by Andrew
 --
 -- ==========================================================================
 USE [VRT]
@@ -78,8 +78,9 @@ BEGIN
 				ORDER BY p.[StartingDate] DESC
 				
 			IF (@p IS NOT NULL AND @p > 0) BEGIN
-				UPDATE [Suites] SET [Updated] = GETUTCDATE(), [CurrentPrice] = 'CAD' + CAST(@p AS varchar(10))
+				UPDATE [Suites] SET [Updated] = GETUTCDATE(), [CurrentPrice] = 'CAD' + LTRIM(RTRIM(STR(@p)))
 					WHERE [AutoID] = @sid
+				PRINT CAST(@sid AS varchar(16)) + ' <- ' + LTRIM(RTRIM(STR(@p)))
 			END
 		
 			FETCH NEXT FROM sc INTO @sid, @oid

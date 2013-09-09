@@ -51,9 +51,8 @@ namespace Vre.Server.Command
         {
             try
             {
-                string recipient = ServiceInstances.Configuration.GetValue("AdminMessageRecipients", "admin@3dcondox.com");
-
-                ServiceInstances.EmailSender.Send(recipient, subject, text);
+                ServiceInstances.EmailSender.Send(Configuration.Messaging.AdminMessageRecipients.Value, 
+					subject, text);
             }
             catch (Exception e)
             {

@@ -16,21 +16,14 @@ namespace Vre.Server.HttpService
         private const string _defaultImage = "default.png";
 
         private string _buttonStorePath;
-        private string _defaultRedirectUri;
         private AliasMap _map, _testMap;
         private ButtonStoreFsNameCache _imagePathCache;
-        private bool _allowReallyExtendedLogging;
-        private string _clientViewOrderTemplate, _testViewOrderTemplate;
-        private string _clientRRTemplate, _testRRTemplate;
 
         public RedirectionService() : base("HTTP Redirection")
         {
-            _allowReallyExtendedLogging = _allowExtendedLogging & 
-                ServiceInstances.Configuration.GetValue("DebugAllowReallyExtendedLogging", false);
+			// TODO: Static configuration
 
-            _defaultRedirectUri = ServiceInstances.Configuration.GetValue("RedirectorDefaultUri", "http://3dcondox.com");
-
-            _buttonStorePath = ServiceInstances.Configuration.GetValue("RedirectorButtonsStore", string.Empty);
+			_buttonStorePath = Configuration.Redirector.ButtonStorePath.Value;
             if (string.IsNullOrWhiteSpace(_buttonStorePath))
             {
                 _buttonStorePath = null;
@@ -42,14 +35,8 @@ namespace Vre.Server.HttpService
                 _imagePathCache = new ButtonStoreFsNameCache(_buttonStorePath);
             }
 
-            _map = new AliasMap(ServiceInstances.Configuration.GetValue("RedirectionAliasMapFile", "aliases.config"));
-            _testMap = new AliasMap(ServiceInstances.Configuration.GetValue("RedirectionTestAliasMapFile", "aliases.test.config"));
-
-            _clientViewOrderTemplate = ServiceInstances.Configuration.GetValue("RedirectionClientViewOrderTemplate", "https://vrt.3dcondox.com/VREstate.html?viewOrderId={0}");
-            _testViewOrderTemplate = ServiceInstances.Configuration.GetValue("RedirectionTestClientViewOrderTemplate", "https://vrt.3dcondox.com/vre/VREstate.html?viewOrderId={0}");
-
-            _clientRRTemplate = ServiceInstances.Configuration.GetValue("RedirectionRevReqTemplate", "https://vrt.3dcondox.com/go/{0}");
-            _testRRTemplate = ServiceInstances.Configuration.GetValue("RedirectionTestRevReqTemplate", "https://vrt.3dcondox.com/vre/go/{0}");
+            _map = new AliasMap(Configuration.Redirector.Aliases.ProductionMapFile.Value);
+            _testMap = new AliasMap(Configuration.Redirector.Aliases.TestingMapFile.Value);
         }
 
         protected override IResponseData process(string browserKey, HttpListenerContext ctx, HttpServiceRequest.ProcessResponse proc)
@@ -58,9 +45,9 @@ namespace Vre.Server.HttpService
 
             if (ctx.Request.HttpMethod.Equals("GET", StringComparison.InvariantCultureIgnoreCase))
             {
-                if (_allowExtendedLogging)
+                if (Configuration.Debug.AllowExtendedLogging.Value)
                 {
-                    if (_allowReallyExtendedLogging)
+                    if (Configuration.Debug.AllowReallyExtendedLogging.Value)
                         ServiceInstances.RequestLogger.Info("{0}: {1} {2} {3} {4} {5} {6}", browserKey,
                             ctx.Request.Url, ctx.Request.RemoteEndPoint, ctx.Request.UserAgent,
                             ctx.Request.UserHostAddress, ctx.Request.UserHostName, ctx.Request.UrlReferrer);
@@ -103,12 +90,12 @@ namespace Vre.Server.HttpService
                     }
                     else  // path is empty; test or error; redirect to main site
                     {
-                        result.RedirectionUrl = _defaultRedirectUri;
+                        result.RedirectionUrl = Configuration.Redirector.Urls.DefaultUrl.Value;
                     }
                 }
                 else
                 {
-                    result.RedirectionUrl = _defaultRedirectUri;
+					result.RedirectionUrl = Configuration.Redirector.Urls.DefaultUrl.Value;
                 }
             }
             else
@@ -149,7 +136,7 @@ namespace Vre.Server.HttpService
             }
 
             if (finalUri != null) finalUri = testMode ? _testMap.UriByAlias(finalUri) : _map.UriByAlias(finalUri);
-            if (null == finalUri) finalUri = _defaultRedirectUri;
+			if (null == finalUri) finalUri = Configuration.Redirector.Urls.DefaultUrl.Value;
 
             string queryString = ctx.Request.Url.Query;
             if (queryString.Length > 0)
@@ -185,7 +172,7 @@ namespace Vre.Server.HttpService
 
             if (null == id)
             {
-                finalUri = _defaultRedirectUri;
+				finalUri = Configuration.Redirector.Urls.DefaultUrl.Value;
             }
             else
             {
@@ -193,16 +180,27 @@ namespace Vre.Server.HttpService
                 {
                     default:  // legacy
                     case UniversalId.IdType.ViewOrder:
-                        finalUri = string.Format(testMode ? _testViewOrderTemplate : _clientViewOrderTemplate, id);
+						finalUri = string.Format(testMode 
+							? Configuration.Redirector.Urls.TestingClientViewOrderTemplate.Value
+							: Configuration.Redirector.Urls.ProductionClientViewOrderTemplate.Value, id);
                         break;
 
                     case UniversalId.IdType.ReverseRequest:
-                        finalUri = string.Format(testMode ? _testRRTemplate : _clientRRTemplate, id);
+                        finalUri = string.Format(testMode
+							? Configuration.Redirector.Urls.TestingReverseRequestTemplate.Value
+							: Configuration.Redirector.Urls.ProductionReverseRequestTemplate.Value, id);
                         break;
                 }
             }
 
-            //ctx.Request.UrlReferrer;
+			string queryString = ctx.Request.Url.Query;
+			if (queryString.Length > 0)
+			{
+				if (finalUri.Contains("?")) finalUri += "&" + queryString.Substring(1);
+				else finalUri += queryString;
+			}
+			
+			//ctx.Request.UrlReferrer;
             // TODO: save statistics
             //ctx.Response.Redirect(finalUri);
             return finalUri;
@@ -534,7 +532,7 @@ namespace Vre.Server.HttpService
             _filePath = fileName;
 
             if (!Path.IsPathRooted(_filePath)) 
-                _filePath = Path.Combine(Path.GetDirectoryName(ServiceInstances.Configuration.FilePath), _filePath);
+                _filePath = Path.Combine(Configuration.ConfigurationFilesPath, _filePath);
 
             _map = null;
             _watcher = null;

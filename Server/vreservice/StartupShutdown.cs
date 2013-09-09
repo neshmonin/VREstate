@@ -37,7 +37,7 @@ namespace Vre.Server
 
             try
             {
-                if (!Enum.TryParse<ServerRole>(ServiceInstances.Configuration.GetValue("ServerRole", "VRT"),
+                if (!Enum.TryParse<ServerRole>(Configuration.Service.ServerRole.Value,
                     true, out _serverRole))
                     _serverRole = ServerRole.VRT;
 
@@ -60,10 +60,10 @@ namespace Vre.Server
 
                             ServiceInstances.FileCache = new FileCacheManager();
 
-							if (ServiceInstances.Configuration.GetValue("UseModelCache", true))
+							if (Configuration.ModelCache.Enabled.Value)
 							{
 								ServiceInstances.ModelCache = new ModelCache.ModelCacheManager(
-									ServiceInstances.Configuration.GetValue("ModelFileStore", string.Empty));
+									Configuration.ModelCache.RootPath.Value);
 							}
                         }
                         break;
@@ -79,9 +79,7 @@ namespace Vre.Server
 
                     if (ServerRole.VRT == _serverRole)
                     {
-                        // This may take long enough for Service Control Manager to render this as hung on start!
-                        new Thread(() => ServiceInstances.FileCache.Initialize()) { IsBackground = true, Priority = ThreadPriority.BelowNormal, Name = "InitializeFileCache" }
-                        .Start();
+                        ServiceInstances.FileCache.Initialize();
 
 						if (ServiceInstances.ModelCache != null)
 						{
@@ -97,7 +95,7 @@ namespace Vre.Server
                 Status = "Running.";
 
                 // TODO: DEBUG
-                Testing.RandomUpdater.Start(ServiceInstances.Configuration.GetValue("DebugRandomObjectUpdateTimeSec", 0));
+                Testing.RandomUpdater.Start(Configuration.Debug.RandomObjectUpdateTimeSec.Value);
             }
             catch (Exception ex)
             {
@@ -207,5 +205,13 @@ namespace Vre.Server
 
         //    return result;
         //}
+
+		public static void Test()
+		{
+			var test2 = System.Web.HttpUtility.UrlDecode("");
+			var test1 = System.Web.HttpUtility.UrlDecode(null);
+
+			test2.Equals(test1);
+		}
     }
 }

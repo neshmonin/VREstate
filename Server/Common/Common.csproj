@@ -33,6 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
@@ -43,6 +44,9 @@
       <Link>Properties\versiongen.cs</Link>
     </Compile>
     <Compile Include="CollectionExtensions.cs" />
+    <Compile Include="Configuration\AppFileConfiguration.cs" />
+    <Compile Include="Configuration\ConfigurationParam.cs" />
+    <Compile Include="Configuration\IConfiguration.cs" />
     <Compile Include="CsvUtilities.cs" />
     <Compile Include="IPAddressTools.cs" />
     <Compile Include="ModelImportSettings.cs" />
