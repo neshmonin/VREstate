@@ -83,6 +83,11 @@ public class SummaryModel extends WizardStep {
 		return children.get(this);
 //		return null;
 	}
+
+	@Override
+	public String getNavURL() {
+		return "Summary";
+	}
 	
 	
 }

@@ -81,5 +81,10 @@ public class EmailModel extends WizardStep {
 		children.put(this, new SummaryModel(this));
 		return children.get(this);
 	}
+
+	@Override
+	public String getNavURL() {
+		return "Email";
+	}
 	
 }

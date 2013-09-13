@@ -166,4 +166,9 @@ public class ListingOptionsModel extends WizardStep {
 			presenter.go(container);
 	}
 
+	@Override
+	public String getNavURL() {
+		return "Options";
+	}
+
 }

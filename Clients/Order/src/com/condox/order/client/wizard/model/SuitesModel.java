@@ -50,6 +50,7 @@ public class SuitesModel extends WizardStep {
 	public void go(HasWidgets container) {
 		this.container = container;
 		new SuitesPresenter(new SuitesView(), this).go(container);
+		super.go(container);
 	}
 
 	public void prev() {
@@ -73,6 +74,11 @@ public class SuitesModel extends WizardStep {
 
 	public int getSelectedIndex() {
 		return selectedIndex;
+	}
+
+	@Override
+	public String getNavURL() {
+		return "Suites";
 	}
 
 }

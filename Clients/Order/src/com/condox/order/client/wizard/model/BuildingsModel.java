@@ -78,6 +78,7 @@ public class BuildingsModel extends WizardStep {
 //		Window.alert("BModel id=" + selectedIndex);
 		this.container = container;
 		new BuildingsPresenter(new BuildingsView(), this).go(container);
+		super.go(container);
 	}
 
 	public void prev() {
@@ -105,5 +106,10 @@ public class BuildingsModel extends WizardStep {
 			step = step.getPrevStep();
 		}		
 		return children.get(this);
+	}
+
+	@Override
+	public String getNavURL() {
+		return "Building";
 	}
 }

@@ -77,6 +77,11 @@ public class LoginModel extends WizardStep {
 		children.put(this, new ProductModel(this));
 		return children.get(this);
 	}
+
+	@Override
+	public String getNavURL() {
+		return "Login";
+	}
 	
 	
 }
