@@ -26,7 +26,7 @@ namespace Vre.Server.Task
             // TODO: MLS provider injection point
             prov = new RetsMlsStatusProvider();
 
-            prov.Configure(ServiceInstances.Configuration.GetValue("MLS-STATUS-TREB-Config", string.Empty));
+            prov.Configure(Configuration.Mls.Treb.Status.ConfigString.Value);
             ServiceInstances.Logger.Info("Running MLS retrieval...");
             prov.Run();  // SLOW!!!
 			issues = prov.Parse();
@@ -40,7 +40,7 @@ namespace Vre.Server.Task
             // TODO: MLS provider injection point
             prov = new RetsMlsInfoProvider();
 
-            prov.Configure(ServiceInstances.Configuration.GetValue("MLS-INFO-TREB-Config", string.Empty));
+            prov.Configure(Configuration.Mls.Treb.Info.ConfigString.Value);
             ServiceInstances.Logger.Info("Running MLS retrieval...");
             prov.Run();  // SLOW!!!
 			issues = prov.Parse();

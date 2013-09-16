@@ -15,7 +15,6 @@ namespace Vre.Server.RemoteService
         private const string ServicePathElement0 = "gen";
 
         private static string _imgCachePath = null;
-        private static int _minCachedImagePx, _maxGeneratedImagePx;
         private static HashAlgorithm _hashFunction = MD5.Create();
 
         private const double AvgFontImageHeightToFontHeightRatio = 1.24;
@@ -113,19 +112,19 @@ namespace Vre.Server.RemoteService
             //
             if (null == _imgCachePath)
             {
-                string path = Path.Combine(ServiceInstances.Configuration.GetValue("CacheRoot", "."), "images");
+                string path = Path.Combine(Configuration.GeneratedImageCache.RootPath.Value, "images");
                 if (!Directory.Exists(path)) Directory.CreateDirectory(path);
                 _imgCachePath = path;  // don't do this before so that exception being thrown shall leave this as null
-
-                _minCachedImagePx = ServiceInstances.Configuration.GetValue("MinCachedImagekPx", 10) * 1000;
-                _maxGeneratedImagePx = ServiceInstances.Configuration.GetValue("MaxGeneratedImagekPx", 1000) * 1000;
             }
 
-            int imgpx = calcAvgImagePx(height, text.Length);
-            if (imgpx > _maxGeneratedImagePx) throw new ArgumentOutOfRangeException("Image requested too large.");
+			var minCachedImagePx = Configuration.GeneratedImageCache.MinCachedImagekPx.Value * 1000;
+			var maxGeneratedImagePx = Configuration.GeneratedImageCache.MaxGeneratedImagekPx.Value * 1000;
+			
+			int imgpx = calcAvgImagePx(height, text.Length);
+            if (imgpx > maxGeneratedImagePx) throw new ArgumentOutOfRangeException("Image requested too large.");
             if (searchCache)
             {
-                if (imgpx < _minCachedImagePx) searchCache = false;
+                if (imgpx < minCachedImagePx) searchCache = false;
             }
 
             if (searchCache)

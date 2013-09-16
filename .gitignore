@@ -1,0 +1,16 @@
+Debug
+
+Release
+
+/Server/_build/build.log
+
+/Server/_version/versionflag.cs
+/Server/_version/versiongen.cs
+
+/Server/binaries
+
+/Server/setup/ready
+
+/Server/vreserver.suo
+
+*.user

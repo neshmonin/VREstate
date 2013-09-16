@@ -135,7 +135,22 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
-        public override bool UpdateFromClient(ClientData data)
+		public virtual ClientData GetInventoryClientData(ClientData result, bool supplement)
+		{
+			if (null == result) result = new ClientData();
+			if (!supplement)
+			{
+				result.Add("id", AutoID);
+			}
+
+			result.Add("mlsId", MlsId);
+			result.Add("infoUrl", InfoUrl);
+			result.Add("vTourUrl", VTourUrl);
+
+			return result;
+		}
+		
+		public override bool UpdateFromClient(ClientData data)
         {
             bool result = base.UpdateFromClient(data);
 

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Security;
+using System.Threading;
 
 namespace Vre.Server
 {
@@ -19,14 +20,29 @@ namespace Vre.Server
         private long _currentSize;
         private List<FileInfo> _files;
 
+		public FileCacheManager()
+		{
+			Configuration.OnModified += new EventHandler((s, e) => Initialize());
+		}
+
         public void Initialize()
+		{
+			new Thread(update) 
+			{ IsBackground = true, Priority = ThreadPriority.BelowNormal, Name = "InitializeFileCache" }
+				.Start();
+		}
+
+		private void update()
         {
-            _cacheSpaceLimit = (long)ServiceInstances.Configuration.GetValue("CacheSpaceLimitMb", 10) * 1024L * 1024L;
+            _cacheSpaceLimit = (long)Configuration.FileCache.SpaceLimitMb.Value * 1024L * 1024L;
             _cacheSpaceStep = _cacheSpaceLimit / 10;
-            _cacheRoot = ServiceInstances.Configuration.GetValue("CacheRoot", ".");
+            _cacheRoot = Configuration.FileCache.RootPath.Value;
 
             try
             {
+				if (!Path.IsPathRooted(_cacheRoot))
+					_cacheRoot = Path.Combine(Configuration.ConfigurationFilesPath, _cacheRoot);
+
                 if (!Directory.Exists(_cacheRoot)) Directory.CreateDirectory(_cacheRoot);
             }
             catch (Exception ex)

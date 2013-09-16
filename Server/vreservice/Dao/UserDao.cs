@@ -98,7 +98,17 @@ namespace Vre.Server.Dao
         //    }
         //    return result;
         //}
-    }
+
+		public IList<User> GetByEmailAndRole(User.Role role, string primaryEmail)
+		{
+			lock (_session) return _session.CreateCriteria<User>()
+				.Add(Restrictions.Eq("UserRole", role))
+				.Add(Restrictions.Eq("PrimaryEmailAddress", primaryEmail))
+				.Add(Restrictions.Eq("Deleted", false))
+				.List<User>();
+		}
+
+	}
 
     //internal class BuyerDao : GenericDisposableDao<Buyer, int> 
     //{

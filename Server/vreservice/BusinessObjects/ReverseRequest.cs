@@ -52,7 +52,7 @@ namespace Vre.Server.BusinessLogic
             /// </remarks>
             PasswordRecover = 3,
             /// <summary>
-            /// MSL Registered listing; access results in forwarding to specific building or suite.
+            /// MLS Registered listing; access results in forwarding to specific building or suite.
             /// <para>EXPIRABLE</para>
             /// </summary>
             /// <remarks>
@@ -78,6 +78,19 @@ namespace Vre.Server.BusinessLogic
             /// <para>ViewOrder ID is in <see cref="ReverseRequest.Subject"/></para>
             /// </remarks>
             ViewOrderControl = 6,
+			/// <summary>
+			/// Activate ViewOrder via Payment System Notification
+			/// <para>EXPIRABLE</para>
+			/// </summary>
+			/// <remarks>
+			/// <para>The request # is used as a unique product ID or product number in Payment System</para>
+			/// <para>ViewOrder ID is in <see cref="ReverseRequest.Subject"/></para>
+			/// <para>ViewOrder contains temporary expiration time (very short; for preview only); 
+			/// final bought ViewOrder expiration time is stored in <see cref="ReverseRequest.ReferenceParamName"/>
+			/// in ticks (yeah, not best place).</para>
+			/// <para>The requested net amount to be paid is stored in <see cref="ReverseRequest.ReferenceParamValue"/></para>
+			/// </remarks>
+			ViewOrderActivation = 7,
         }
 
         public virtual Guid Id { get; private set; }
@@ -198,5 +211,23 @@ namespace Vre.Server.BusinessLogic
         //    result.ReferenceParamValue = null;
         //    return result;
         //}
+
+		public static ReverseRequest CreateViewOrderActivation(
+			ViewOrder vo,
+			Money amountPaid, DateTime expirationTime)
+		{
+			var result = new ReverseRequest();
+			result.Id = Guid.NewGuid();
+			result.Request = RequestType.ViewOrderActivation;
+			result.ExpiresOn = vo.ExpiresOn.AddMinutes(-5.0);  // safety gap
+			result.RequestCounter = 0;
+			result.LastRequestTime = _minimalTime;
+			result.UserId = vo.OwnerId;
+			result.Login = null;
+			result.Subject = vo.AutoID.ToString();
+			result.ReferenceParamName = expirationTime.Ticks.ToString();
+			result.ReferenceParamValue = amountPaid.ToFullString();
+			return result;
+		}
     }
 }

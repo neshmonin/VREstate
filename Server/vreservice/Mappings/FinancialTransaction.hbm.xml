@@ -17,6 +17,8 @@
     
     <property name="Operation" column="Operation" />
     <property name="CuAmount" column="CuAmount" />
+    <property name="currencyAmountDb" column="CurrencyAmount" />
+    <property name="currencyTaxDb" column="CurrencyTax" />
     <property name="Subject" column="Subject" />
     
     <property name="Target" column="Target" />

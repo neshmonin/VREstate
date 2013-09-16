@@ -13,12 +13,18 @@ namespace Vre.Server.Messaging
         {
             _messageTemplates = new Dictionary<string, string>();
 
-            string path = ServiceInstances.Configuration.GetValue("MessageTemplateRoot", ".");
-            if (!Path.IsPathRooted(path))
-                path = Path.Combine(Path.GetDirectoryName(ServiceInstances.Configuration.FilePath), path);
-
-            scanTemplates(path);
+			Configuration.OnModified += new EventHandler((o, e) => setup());
+			setup();
         }
+
+		private void setup()
+		{
+			string path = Configuration.Messaging.MessageTemplateRoot.Value;
+			if (!Path.IsPathRooted(path))
+				path = Path.Combine(Configuration.ConfigurationFilesPath, path);
+
+			scanTemplates(path);
+		}
 
         public void SendMessage(IUserMessaging messenger, User user, string templateName, params object[] parameters)
         {
@@ -131,6 +137,8 @@ namespace Vre.Server.Messaging
 
         private void scanTemplates(string rootPath)
         {
+			var templates = new Dictionary<string, string>();
+
             foreach (string file in  // TODO: Localization extension point here: scan for different locales
                 Directory.GetFiles(Path.Combine(rootPath, "en"), "*.*", SearchOption.TopDirectoryOnly))
             {
@@ -139,7 +147,7 @@ namespace Vre.Server.Messaging
                 string name = Path.GetFileNameWithoutExtension(file);
                 if (name.Equals("strings", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    processStrings(file);
+                    processStrings(file, ref templates);
                     continue;
                 }
 
@@ -147,8 +155,10 @@ namespace Vre.Server.Messaging
                 using (StreamReader sr = File.OpenText(file))
                     value = sr.ReadToEnd();
 
-                _messageTemplates.Add(name.ToUpperInvariant(), processTemplate(value));
+				templates.Add(name.ToUpperInvariant(), processTemplate(value));
             }
+
+			_messageTemplates = templates;
 
             //// TODO: Hardcoded!
             //// Non-localized text templates
@@ -165,7 +175,7 @@ namespace Vre.Server.Messaging
             //_messageTemplates.Add("ENUM_ViewOrderOptions_VirtualTour3D", "Virtual 3D Tour");
         }
 
-        private void processStrings(string fileName)
+        private static void processStrings(string fileName, ref Dictionary<string, string> templates)
         {
             using (StreamReader sr = File.OpenText(fileName))
             {
@@ -175,7 +185,7 @@ namespace Vre.Server.Messaging
                     {
                         string[] elements = CsvUtilities.Split(sr.ReadLine());
                         if (elements.Length != 2) continue;
-                        _messageTemplates.Add(elements[0], elements[1]);
+                        templates.Add(elements[0], elements[1]);
                     }
                     catch (ArgumentException) { }
                 }

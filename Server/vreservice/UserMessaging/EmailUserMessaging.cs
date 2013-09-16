@@ -8,27 +8,21 @@ namespace Vre.Server.Messaging
 {
     internal class EmailUserMessaging : IUserMessaging
     {
-        private string _smtpServerHost;
-        private int _smtpServerPort;
-        private bool _smtpUseSsl;
         private Dictionary<Sender, NetworkCredential> _credentials;
         
         public EmailUserMessaging()
         {
-            _smtpServerHost = ServiceInstances.Configuration.GetValue("SmtpServerHost", string.Empty);
-            _smtpServerPort = ServiceInstances.Configuration.GetValue("SmtpServerPort", 25);
-            _smtpUseSsl = ServiceInstances.Configuration.GetValue("SmtpServerUseSsl", false);
-
             System.Security.Cryptography.RSACryptoServiceProvider.UseMachineKeyStore = true;
             System.Security.Cryptography.DSACryptoServiceProvider.UseMachineKeyStore = true;
 
+			// TODO: Static configuration
             _credentials = new Dictionary<Sender, NetworkCredential>();
             _credentials.Add(Sender.Server, new NetworkCredential(
-                ServiceInstances.Configuration.GetValue("SmtpServerLogin", string.Empty),
-                ServiceInstances.Configuration.GetValue("SmtpServerPassword", string.Empty)));
+                Configuration.Messaging.Email.Credentials.Server.Login.Value,
+                Configuration.Messaging.Email.Credentials.Server.Password.Value));
             _credentials.Add(Sender.ECommerce, new NetworkCredential(
-                ServiceInstances.Configuration.GetValue("SmtpECommerceLogin", string.Empty),
-                ServiceInstances.Configuration.GetValue("SmtpECommercePassword", string.Empty)));
+				Configuration.Messaging.Email.Credentials.ECommerce.Login.Value,
+				Configuration.Messaging.Email.Credentials.ECommerce.Password.Value));
         }
 
         public void Dispose() { }
@@ -58,7 +52,7 @@ namespace Vre.Server.Messaging
 
         public void Send(Sender sender, string recipient, string subject, string message)
         {
-            if (string.IsNullOrWhiteSpace(_smtpServerHost))
+            if (string.IsNullOrWhiteSpace(Configuration.Messaging.Email.SmtpServerHost.Value))
                 throw new ApplicationException("SMTP service parameters are not defined in configuration; cannot send emails.");
 
             NetworkCredential nc = _credentials[sender];
@@ -67,10 +61,12 @@ namespace Vre.Server.Messaging
 
             try
             {
-                using (SmtpClient client = new SmtpClient(_smtpServerHost, _smtpServerPort))
+				using (SmtpClient client = new SmtpClient(
+					Configuration.Messaging.Email.SmtpServerHost.Value,
+					Configuration.Messaging.Email.SmtpServerPort.Value))
                 {
                     client.Credentials = nc;
-                    client.EnableSsl = _smtpUseSsl;
+					client.EnableSsl = Configuration.Messaging.Email.SmtpServerUseSsl.Value;
                     client.Send(nc.UserName, recipient, subject, message);
                 }
             }

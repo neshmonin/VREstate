@@ -12,9 +12,7 @@ namespace Vre.Server.Task
         {
             try
             {
-                var recipient = ServiceInstances.Configuration.GetValue("AdminMessageRecipients", "admin@3dcondox.com");
-
-                ServiceInstances.EmailSender.Send(recipient,
+                ServiceInstances.EmailSender.Send(Configuration.Messaging.AdminMessageRecipients.Value,
                     (summary != null) ? string.Format("Task {0}: {1}", Name, summary) : string.Format("Task {0} alert", Name),
                     text);
             }

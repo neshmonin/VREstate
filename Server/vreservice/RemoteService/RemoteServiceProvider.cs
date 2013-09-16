@@ -7,6 +7,7 @@ namespace Vre.Server.RemoteService
     {
         private IHttpService _reverseRequestService = new ReverseRequestService();
         private IHttpService _eventService = new EventService();
+		private IHttpService _paymentResponseService = new PaymentSystemResponseService();
 
         public void ProcessRequest(HttpServiceBase server, IServiceRequest request)
         {
@@ -36,6 +37,14 @@ namespace Vre.Server.RemoteService
                 ProgramService.ProcessClientRequest(request);
                 return;
             }
+			else if (request.Request.Path.StartsWith(_paymentResponseService.ServicePathPrefix))
+			{
+				if (_paymentResponseService.RequiresSession && (null == request.UserInfo.Session))
+					throw new ArgumentException("Need a valid session to perform this operation.");
+
+				_paymentResponseService.ProcessCreateRequest(request);
+				return;
+			}
 
             // Write request always:
             // - has a sid query parameter (or passed in HTTP header)
@@ -111,7 +120,15 @@ namespace Vre.Server.RemoteService
                 DataService.ProcessGetRequest(request);
                 return;
             }
-            else if (request.Request.Path.StartsWith(_eventService.ServicePathPrefix))  // push events
+			else if (request.Request.Path.StartsWith(_paymentResponseService.ServicePathPrefix))
+			{
+				if (_paymentResponseService.RequiresSession && (null == request.UserInfo.Session))
+					throw new ArgumentException("Need a valid session to perform this operation.");
+
+				_paymentResponseService.ProcessGetRequest(request);
+				return;
+			}
+			else if (request.Request.Path.StartsWith(_eventService.ServicePathPrefix))  // push events
             {
                 if (_eventService.RequiresSession && (null == request.UserInfo.Session)) 
                     throw new ArgumentException("Need a valid session to perform this operation.");

@@ -9,6 +9,7 @@ using Vre.Server.Dao;
 using Vre.Server.HttpService;
 using Vre.Server.Messaging;
 using System.Text;
+using Vre.Server.Task;
 
 namespace Vre.Server.RemoteService
 {
@@ -323,14 +324,17 @@ namespace Vre.Server.RemoteService
             DateTime expiresOn;
             ViewOrder.ViewOrderProduct product;
             ViewOrder.ViewOrderOptions options;
-            string paymentRefId = request.Request.Query["pr"];
-            string productUrl = request.Request.Query["evt_url"];
+            string paymentRefId = HttpUtility.UrlDecode(request.Request.Query["pr"]);
+            string productUrl = HttpUtility.UrlDecode(request.Request.Query["evt_url"]);
             string mlsId = request.Request.Query["mls_id"];
-            string mlsUrl = request.Request.Query["mls_url"];
-            string note = request.Request.Query["note"];
+            string mlsUrl = HttpUtility.UrlDecode(request.Request.Query["mls_url"]);
+			string note = HttpUtility.UrlDecode(request.Request.Query["note"]);
             string propertyType = request.Request.Query["propertyType"];
             string propertyId = request.Request.Query["propertyId"];
             string ownerId = request.Request.Query["ownerId"];
+			string anonymousOwnerEmail = request.Request.Query["ownerEmail"];
+			string strNetAmountToPay = request.Request.Query["paymentPending"];
+			Money netAmountToPay = Money.Zero;
             ViewOrder.SubjectType targetType;
             int targetId;
 
@@ -372,22 +376,50 @@ namespace Vre.Server.RemoteService
             {
                 if (string.IsNullOrWhiteSpace(productUrl))
                     throw new ArgumentException("External Virtual Tour reference not provided");
-                productUrl = HttpUtility.UrlDecode(productUrl);
             }
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(request.UserInfo.Session.DbSession))
             {
-                User targetUser;
+                User targetUser = null;
 
-                // use override for view order owner
-                int userId = -1;
-                if (!string.IsNullOrWhiteSpace(ownerId))
-                {
-                    if (!int.TryParse(ownerId, out userId)) userId = -1;
-                }
+                // use override for view order owner: anonymous user
+				if (!string.IsNullOrWhiteSpace(anonymousOwnerEmail))
+				{
+					using (var dao = new UserDao(request.UserInfo.Session.DbSession))
+					{
+						var list = dao.GetByEmailAndRole(User.Role.Anonymous, anonymousOwnerEmail);
+						if (1 == list.Count)
+						{
+							targetUser = list[0];
+						}
+						else if (0 == list.Count)
+						{
+							targetUser = new User(null, User.Role.Anonymous);
+							targetUser.PrimaryEmailAddress = anonymousOwnerEmail;
+							dao.Create(targetUser);
+						}
+						else
+						{
+							throw new ApplicationException("DBC-05384");
+						}
+					}
 
-                using (UserDao dao = new UserDao(request.UserInfo.Session.DbSession))
-                    targetUser = dao.GetById(userId);
+					if (!Money.TryParse(strNetAmountToPay, out netAmountToPay))
+						throw new ArgumentException("'paymentPending' missing or invalid");
+				}
+
+				// use override for view order owner: explicit user ID
+				if (null == targetUser)
+				{
+					int userId = -1;
+					if (!string.IsNullOrWhiteSpace(ownerId))
+					{
+						if (!int.TryParse(ownerId, out userId)) userId = -1;
+					}
+
+					using (UserDao dao = new UserDao(request.UserInfo.Session.DbSession))
+						targetUser = dao.GetById(userId);
+				}
 
                 if (null == targetUser) targetUser = request.UserInfo.Session.User;  // if unknown/not specified - make a view order for caller
 
@@ -395,6 +427,7 @@ namespace Vre.Server.RemoteService
                 // ========================================================
                 // BE CAREFUL WITH PERMISSION CHECKS IN THIS "IF" STATEMENT
                 //
+				bool immediateCreate;
                 if (string.IsNullOrWhiteSpace(propertyType) || string.IsNullOrWhiteSpace(propertyId))
                 {
                     // view by address lookup
@@ -407,7 +440,7 @@ namespace Vre.Server.RemoteService
                         if (s.Status != Suite.SalesStatus.Sold) throw new ObjectExistsException("Suite status in not SOLD");
                         targetType = ViewOrder.SubjectType.Suite;
                         targetId = s.AutoID;
-                        RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, s.Building);
+						immediateCreate = RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, s.Building);
                     }
                     else
                     {
@@ -420,7 +453,7 @@ namespace Vre.Server.RemoteService
                             }
                             targetType = ViewOrder.SubjectType.Building;
                             targetId = b.AutoID;
-                            RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, b);
+							immediateCreate = RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, b);
                         }
                         else
                         {
@@ -441,29 +474,63 @@ namespace Vre.Server.RemoteService
                         targetType = ViewOrder.SubjectType.Suite;
                         Suite s;
                         using (SuiteDao dao = new SuiteDao(request.UserInfo.Session.DbSession)) s = dao.GetById(targetId);
-                        if (s.Status != Suite.SalesStatus.Sold) throw new ObjectExistsException("Suite status in not SOLD");
+						// The following is not applicable any more: multiple VOs per object may co-exist; suite status does not matter
+                        //if (s.Status != Suite.SalesStatus.Sold) throw new ObjectExistsException("Suite status in not SOLD");
                         to = s;
-                        RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, s.Building);
+						immediateCreate = RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, s.Building);
                     }
                     else if (propertyType.Equals("building"))
                     {
                         targetType = ViewOrder.SubjectType.Building;
                         Building b;
                         using (BuildingDao dao = new BuildingDao(request.UserInfo.Session.DbSession)) b = dao.GetById(targetId);
-                        if (product != ViewOrder.ViewOrderProduct.Building3DLayout)
-                        {
-                            if (b.Status != Building.BuildingStatus.Sold) throw new ObjectExistsException("Building status in not SOLD");
-                        }
-                        to = b;
-                        RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, b);
+						// The following is not applicable any more: multiple VOs per object may co-exist; building status does not matter
+						//if (product != ViewOrder.ViewOrderProduct.Building3DLayout)
+						//{
+						//    if (b.Status != Building.BuildingStatus.Sold) throw new ObjectExistsException("Building status in not SOLD");
+						//}
+						to = b;
+						immediateCreate = RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, b);
                     }
                     else throw new ArgumentException("Unknown property type");
 
                     if (null == to) throw new FileNotFoundException("Property not found in system.");
                 }
 
-                ReverseRequestService.CreateViewOrder(request, targetUser, note,
-                    product, options, mlsId, mlsUrl, targetType, targetId, productUrl, expiresOn, paymentRefId);
+				if (immediateCreate)
+				{
+					ReverseRequestService.CreateViewOrder(request, targetUser, note,
+						product, options, mlsId, mlsUrl, targetType, targetId, productUrl, expiresOn, paymentRefId);
+				}
+				else
+				{
+					TimeSpan unpaidViewOrderLifespan = new TimeSpan(0, 
+						Configuration.PaymentSystem.UnpaidViewOrderLifespanMinutes.Value, 
+						0);
+
+					// TODO: verify amount to be paid
+
+					var vo = ReverseRequestService.CreateViewOrder(request, targetUser, note,
+						product, options, mlsId, mlsUrl, targetType, targetId, productUrl, 
+						DateTime.UtcNow.Add(unpaidViewOrderLifespan), null);
+
+					var rr = ReverseRequest.CreateViewOrderActivation(vo, netAmountToPay, expiresOn);
+					request.UserInfo.Session.DbSession.Save(rr);
+
+					ServiceInstances.MessageGen.SendMessage(
+						ServiceInstances.EmailSender, anonymousOwnerEmail,
+						"MSG_PAYMENT_REQUEST", 
+						vo.Product,
+						vo.Options,
+						NotifyExpiringViewOrders.GetSubjectAddress(request.UserInfo.Session.DbSession, vo),
+						ReverseRequestService.GenerateUrl(vo),
+						vo.ExpiresOn.ToLocalTime(), // LEGACY: SERVER LOCAL TIME HERE!
+						netAmountToPay.ToFullString(),
+						ReverseRequestService.GenerateUrl(rr),
+						expiresOn.ToLocalTime() // LEGACY: SERVER LOCAL TIME HERE!
+						);
+
+				}
 
                 // request.Response.ResponseCode - set by .CreateListing()
                 tran.Commit();
@@ -499,6 +566,40 @@ namespace Vre.Server.RemoteService
 		{
 			ISession dbSession = request.UserInfo.Session.DbSession;
 
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(dbSession))
+			{
+				ViewOrder.SubjectType targetType;
+				int targetId;
+
+				retrieveExistingViewOrder(request, ref mlsId, propertyType, propertyId, dbSession, out targetType, out targetId);
+
+				ViewOrder newVo = ReverseRequestService.CreateViewOrder(request, 
+					request.UserInfo.Session.User, 
+					null,
+					ViewOrder.ViewOrderProduct.PrivateListing,
+					ViewOrder.ViewOrderOptions.VirtualTour3D,  // TODO: Should be configurable?
+					mlsId, null, targetType, targetId,
+					null, 
+					DateTime.UtcNow.AddYears(1), // the period is until property is sold or up to one year - whichever comes first
+					paymentRefId);
+
+				newVo.InfoUrl = string.Format("{0}info.html#{1}!{2}",
+					request.Request.ConstructClientRootUri(),
+					"mls",
+					UniversalId.GenerateUrlId(UniversalId.IdType.ViewOrder, newVo.AutoID));
+
+				using (var dao = new ViewOrderDao(request.UserInfo.Session.DbSession))
+					dao.Update(newVo);
+
+				tran.Commit();
+			}
+		}
+
+		private static void retrieveExistingViewOrder(IServiceRequest request,
+			ref string mlsId, string propertyType, string propertyId, 
+			ISession dbSession, 
+			out ViewOrder.SubjectType targetType, out int targetId)
+		{
 			string voIdStr = request.Request.Query["voId"];
 			Guid voId = Guid.Empty;
 			if (!string.IsNullOrEmpty(voIdStr))
@@ -515,80 +616,56 @@ namespace Vre.Server.RemoteService
 				}
 			}
 
-			using (var tran = NHibernateHelper.OpenNonNestedTransaction(dbSession))
+			// If ViewOrder ID is provided in request - use it...
+			if (voId != Guid.Empty)
 			{
-				ViewOrder.SubjectType targetType;
-				int targetId;
+				ViewOrder vo;
+				using (var dao = new ViewOrderDao(dbSession))
+					vo = dao.GetById(voId);
 
-				// If ViewOrder ID is provided in request - use it...
-				if (voId != Guid.Empty)
-				{
-					ViewOrder vo;
-					using (var dao = new ViewOrderDao(dbSession))
-						vo = dao.GetById(voId);
+				if (null == vo)
+					throw new FileNotFoundException("ViewOrder referenced by ID is not found");
 
-					if (null == vo)
-						throw new FileNotFoundException("ViewOrder referenced by ID is not found");
+				mlsId = vo.MlsId;
+				targetType = vo.TargetObjectType;
+				targetId = vo.TargetObjectId;
 
-					mlsId = vo.MlsId;
-					targetType = vo.TargetObjectType;
-					targetId = vo.TargetObjectId;
+				if (string.IsNullOrEmpty(mlsId))
+					throw new ArgumentException("ViewOrder referenced by ID has no MLS# associated");
+			}
+			// ... if not - try MLS# provided ...
+			else if (!string.IsNullOrEmpty(mlsId))
+			{
+				ViewOrder vo;
+				using (var dao = new ViewOrderDao(dbSession))
+					vo = dao.GetByImportedMlsId(mlsId).FirstOrDefault();
 
-					if (string.IsNullOrEmpty(mlsId))
-						throw new ArgumentException("ViewOrder referenced by ID has no MLS# associated");
-				}
-				// ... if not - try MLS# provided ...
-				else if (!string.IsNullOrEmpty(mlsId))
-				{
-					ViewOrder vo;
-					using (var dao = new ViewOrderDao(dbSession))
-						vo = dao.GetByImportedMlsId(mlsId).FirstOrDefault();
+				if (null == vo)
+					throw new FileNotFoundException("MLS# provided is not known in system");
 
-					if (null == vo)
-						throw new FileNotFoundException("MLS# provided is not known in system");
+				targetType = vo.TargetObjectType;
+				targetId = vo.TargetObjectId;
+			}
+			// ... else - try searching by property ID and type provided
+			else
+			{
+				if (!int.TryParse(propertyId, out targetId))
+					throw new ArgumentException("Property ID is not valid");
 
-					targetType = vo.TargetObjectType;
-					targetId = vo.TargetObjectId;
-				}
-				// ... else - try searching by property ID and type provided
+				if (propertyType.Equals("suite"))
+					targetType = ViewOrder.SubjectType.Suite;
+				else if (propertyType.Equals("building"))
+					targetType = ViewOrder.SubjectType.Building;
 				else
-				{
-					if (!int.TryParse(propertyId, out targetId))
-						throw new ArgumentException("Property ID is not valid");
+					throw new ArgumentException("Unknown property type");
 
-					if (propertyType.Equals("suite"))
-						targetType = ViewOrder.SubjectType.Suite;
-					else if (propertyType.Equals("building"))
-						targetType = ViewOrder.SubjectType.Building;
-					else
-						throw new ArgumentException("Unknown property type");
+				//mlsId = null;
+				using (var dao = new ViewOrderDao(dbSession))
+					foreach (var vo in dao.GetActive(targetType, targetId))
+						if (!string.IsNullOrEmpty(vo.MlsId)) { mlsId = vo.MlsId; break; }
 
-					//mlsId = null;
-					using (var dao = new ViewOrderDao(dbSession))
-						foreach (var vo in dao.GetActive(targetType, targetId))
-							if (!string.IsNullOrEmpty(vo.MlsId)) { mlsId = vo.MlsId; break; }
-
-					if (null == mlsId)
-						throw new FileNotFoundException("No known View Order with specified MLS ID exists for the target.");
-				}
-
-				ViewOrder newVo = ReverseRequestService.CreateViewOrder(request, 
-					request.UserInfo.Session.User, 
-					null,
-					ViewOrder.ViewOrderProduct.PrivateListing,
-					ViewOrder.ViewOrderOptions.VirtualTour3D,  // TODO: Should be configurable?
-					mlsId, null, targetType, targetId,
-					null, DateTime.UtcNow.AddYears(1), paymentRefId);
-
-				newVo.InfoUrl = string.Format("{0}info.html#{1}!{2}",
-					request.Request.ConstructClientRootUri(),
-					"mls",
-					UniversalId.GenerateUrlId(UniversalId.IdType.ViewOrder, newVo.AutoID));
-
-				using (var dao = new ViewOrderDao(request.UserInfo.Session.DbSession))
-					dao.Update(newVo);
-
-				tran.Commit();
+				if (null == mlsId)
+					throw new FileNotFoundException("No known View Order with specified MLS ID exists for the target.");
 			}
 		}
 

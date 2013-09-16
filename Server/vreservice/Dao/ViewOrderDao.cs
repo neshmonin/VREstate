@@ -111,6 +111,18 @@ AND s.BuildingID IN (:bids)").AddEntity(typeof(ViewOrder))
 					.List<ViewOrder>();
 		}
 
+		public IList<ViewOrder> GetActiveByBuilding(Building building, bool imported)
+		{
+			return _session.CreateSQLQuery(@"SELECT vo.* FROM ViewOrders vo 
+INNER JOIN Suites s ON s.AutoID=vo.TargetObjectId
+WHERE vo.Imported=:im AND vo.TargetObjectType=:ty AND vo.Deleted=0 AND vo.[Enabled]=1 AND vo.ExpiresOn>GETUTCDATE()
+AND s.BuildingID=:bid").AddEntity(typeof(ViewOrder))
+				.SetBoolean("im", imported)
+				.SetEnum("ty", ViewOrder.SubjectType.Suite)
+				.SetInt32("bid", building.AutoID)
+				.List<ViewOrder>();
+		}
+
         public ViewOrder[] Get(int ownerId)
         {
             return NHibernateHelper.IListToArray<ViewOrder>(_session.CreateQuery(

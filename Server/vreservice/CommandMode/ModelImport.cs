@@ -868,7 +868,7 @@ namespace Vre.Server.Command
 			// TODO: MLS provider injection point
 			prov = new RetsMlsStatusProvider();
 
-			prov.Configure(ServiceInstances.Configuration.GetValue("MLS-STATUS-TREB-Config", string.Empty));
+			prov.Configure(Configuration.Mls.Treb.Status.ConfigString.Value);
 			issues = prov.Parse();
 			if (issues.Length > 0) report.AppendFormat("\r\nMLS Status Retrieval problems:\r\n{0}", issues);
 
@@ -879,7 +879,7 @@ namespace Vre.Server.Command
 			// TODO: MLS provider injection point
 			prov = new RetsMlsInfoProvider();
 
-			prov.Configure(ServiceInstances.Configuration.GetValue("MLS-INFO-TREB-Config", string.Empty));
+			prov.Configure(Configuration.Mls.Treb.Info.ConfigString.Value);
 
 			int mlsCnt = 0, add = 0, err = 0;
 			List<string> processedIds = new List<string>();

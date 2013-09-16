@@ -12,7 +12,7 @@ namespace Vre.Server
     public static class Program
     {
         public static bool Runtime = false;
-        public static Configuration Configuration = null;
+		public static System.Configuration.Configuration Configuration = null;
         public static string ServiceName = "VreServer";
 
         /// <summary>
