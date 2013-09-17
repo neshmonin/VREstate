@@ -173,7 +173,10 @@ public class Camera {
         double newHeading = NormalizeHeading_d(attributes.Heading_d + deltaHeading_d);
         double newTilt = attributes.Tilt_d + deltaTilt_d;
 
-        double absoluteDeltaHeading = HeadingInitial_d - newHeading;   
+
+        double absoluteDeltaHeading = HeadingInitial_d - newHeading;
+        absoluteDeltaHeading -= (absoluteDeltaHeading >  180)? 360 : 0;
+        absoluteDeltaHeading += (absoluteDeltaHeading < -180)? 360 : 0;
         if ((absoluteDeltaHeading < HeadingMax_d && absoluteDeltaHeading > HeadingMin_d)
         	&&
         	(newTilt < TiltMax_d && newTilt > TiltMin_d))
