@@ -161,7 +161,7 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onClick(KmlMouseEvent event) {
-		event.preventDefault();
+//		event.preventDefault();
 
 		// Log.write("SiteInteractor::onClick()");
 
@@ -193,7 +193,7 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onMouseDown(KmlMouseEvent event) {
-		event.preventDefault();
+//		event.preventDefault();
 		x = event.getClientX();
 		y = event.getClientY();
 
@@ -216,7 +216,7 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onMouseUp(KmlMouseEvent event) {
-		event.preventDefault();
+//		event.preventDefault();
 		if (cameraPositionChanged)
 		{
 			cameraPositionChanged = false;
@@ -243,7 +243,7 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onMouseMove(KmlMouseEvent event) {
-		event.preventDefault();
+//		event.preventDefault();
 		int newX = event.getClientX();
 		int newY = event.getClientY();
 
