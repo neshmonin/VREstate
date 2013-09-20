@@ -163,6 +163,11 @@ public abstract class _AbstractView implements I_AbstractView {
 	}
 
 	@Override
+	public boolean isCameraMoved() {
+		return getCamera().isMoved();
+	}
+	
+	@Override
 	public void ApplyCamera() {
 		getCamera().Apply();
 	}

@@ -176,12 +176,13 @@ public class SB_Interactor extends OverlayHelpers
 			int id = (int) obj.get("id").isNumber().doubleValue();
 			this.view.Select(type, id);
 		}
-//		else
-//		{
-//	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getTransitionSpeed());
-//	        this.view.ApplyCamera();
-//	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getRegularSpeed());
-//		}
+		else
+		if (this.view.isCameraMoved())
+		{
+	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getTransitionSpeed());
+	        this.view.ApplyCamera();
+	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getRegularSpeed());
+		}
 	}
 
 	@Override
