@@ -109,10 +109,10 @@ public class Suite implements I_VRObject {
 				&& obj.get("currentPrice").isNumber().doubleValue() != 0)
 			price = (int) obj.get("currentPrice").isNumber().doubleValue();
 
-		if (Options.DEBUG_MODE && price == -1) {
-			price = (int) (500 + 500 * Math.random());
-			price *= 1000;
-		}
+//		if (Options.DEBUG_MODE && price == -1) {
+//			price = (int) (500 + 500 * Math.random());
+//			price *= 1000;
+//		}
 	}
 
 	public void CalcLineCoords() {

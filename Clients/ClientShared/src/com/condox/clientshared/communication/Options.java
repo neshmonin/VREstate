@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.condox.clientshared.abstractview.Log;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.FrameElement;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -15,22 +14,28 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
 
 public class Options implements RequestCallback {
+
+	public static enum MODE {
+		TEST, WORK
+	};
+
+	public static MODE SERVER_MODE;
+
+	public static String URL_VRT;
+	public static String URL_STATIC;
+	public static String URL_MODELS;
+
+	// ======================================================>
 	public enum ROLES {
 		KIOSK, VISITOR
 	};
 
 	public static ROLES ROLE = ROLES.VISITOR;
 
-	public static boolean DEBUG_MODE = false;
-
-	public static String URL_VRT;
-	public static String URL_STATIC;
-	public static String URL_MODEL;
-
 	public static String URL_BUTTONS;
 	public static int BUILDING_ID = -1;
 	public static int SUITE_ID;
-	public static String HOME_URL;
+//	public static String HOME_URL;
 	public static String ZOOM_UNZOOM_URL;
 	public static String ZOOM_IN_URL;
 	public static String ZOOM_OUT_URL;
@@ -46,14 +51,33 @@ public class Options implements RequestCallback {
 	public static boolean SUPPORT_PAN = false;
 	public static String context = "";
 
-
 	public static boolean isViewOrder() {
 		return Options.getViewOrderId() != null;
 	}
 
 	public static void Init() {
+		// ---------------------
+		SERVER_MODE = MODE.TEST;
+
+		switch (SERVER_MODE) {
+		case TEST:
+			URL_VRT = "https://vrt.3dcondox.com/vre/";
+			break;
+		case WORK:
+			URL_VRT = "https://vrt.3dcondox.com/";
+			break;
+		}
+		URL_STATIC = URL_VRT.replaceFirst("https://vrt.", "https://static.");
+		URL_MODELS = URL_VRT.replaceFirst("https://vrt.", "https://models.");
+		// ---------------------
+		
+		
+		
+		
+		
+		
 		Map<String, List<String>> params = Window.Location.getParameterMap();
-		Log.write(params.toString());
+//		Log.write(params.toString());
 
 		Map<String, List<String>> contextMap = new HashMap<String, List<String>>(
 				params);
@@ -86,37 +110,15 @@ public class Options implements RequestCallback {
 			contextMap.remove("BuildingId");
 		}
 
-		if (BUILDING_ID != -1) {
-			if (params.containsKey("test")) {
-				DEBUG_MODE = Boolean.valueOf(params.get("test").get(0));
-				contextMap.remove("test");
-			}
-		} else
-			DEBUG_MODE = (GWT.getModuleBaseURL().contains("/vre/"));
-
-		Log.write("DEBUG_MODE=" + DEBUG_MODE);
-
-		if (DEBUG_MODE) {
-			URL_VRT = "https://vrt.3dcondox.com/vre/";
-			URL_STATIC = "https://static.3dcondox.com/vre/";
-			URL_MODEL = "https://models.3dcondox.com/vre/";
-		} else {
-			URL_VRT = "https://vrt.3dcondox.com/";
-			URL_STATIC = "https://static.3dcondox.com/";
-			URL_MODEL = "https://models.3dcondox.com/";
-		}
-
 		if (params.containsKey("SchemaPath")) {
 			URL_BUTTONS = params.get("SchemaPath").get(0);
 			contextMap.remove("BuildingId");
 		} else
 			URL_BUTTONS = URL_VRT + "buttons/";
 
-		HOME_URL = URL_VRT;
-
 		ZOOM_UNZOOM_URL = URL_BUTTONS + "ZoomUnzoomBar.png";
-		ZOOM_IN_URL = HOME_URL + "buttons/Unzoom.png";
-		ZOOM_OUT_URL = HOME_URL + "buttons/Zoom.png";
+		ZOOM_IN_URL = URL_VRT + "buttons/Unzoom.png";
+		ZOOM_OUT_URL = URL_VRT + "buttons/Zoom.png";
 		URL_BUTTON_PANORAMIC_VIEW = URL_BUTTONS + "PanoramicView.png";
 		URL_BUTTON_EXIT_PANORAMIC_VIEW = URL_BUTTONS + "Back.png";
 		URL_BUTTON_CENTER_PANORAMIC_VIEW = URL_BUTTONS + "Center.png";

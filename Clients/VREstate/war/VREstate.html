@@ -25,6 +25,19 @@
 <script>
 	google.load("earth", "1");
 </script>
+
+
+		<script type="text/javascript" src="zooming/swfobject.js"></script>
+		<script type="text/javascript" src="zooming/swfZoomDetection.js"></script>
+		<script type="text/javascript">
+   			ZOOM_LEVEL = 1.0;
+			swfZoomDetection.init({
+				'onZoomChange': function(obj){ window["ZOOM_LEVEL"] = obj.scale },
+				'getInitIfOne': true,
+				'initCallOnly': false,
+				'frameRate': 25
+			});
+		</script>
 <!--                                           -->
 <!-- This script loads your compiled module.   -->
 <!-- If you add any GWT meta tags, they must   -->
@@ -114,17 +127,6 @@
 			</iframe>
 		</div>
 
-		<script type="text/javascript" src="zooming/swfobject.js"></script>
-		<script type="text/javascript" src="zooming/swfZoomDetection.js"></script>
-		<script type="text/javascript">
-   			ZOOM_LEVEL = 1.0;
-			swfZoomDetection.init({
-				'onZoomChange': function(obj){ window["ZOOM_LEVEL"] = obj.scale },
-				'getInitIfOne': true,
-				'initCallOnly': false,
-				'frameRate': 25
-			});
-		</script>
 	</div>
 </body>
 </html>

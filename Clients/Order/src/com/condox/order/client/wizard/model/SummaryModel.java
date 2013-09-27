@@ -1,7 +1,6 @@
 package com.condox.order.client.wizard.model;
 
 import com.condox.order.client.wizard.I_WizardStep;
-import com.condox.order.client.wizard.Wizard;
 import com.condox.order.client.wizard.WizardStep;
 import com.condox.order.client.wizard.presenter.SummaryPresenter;
 import com.condox.order.client.wizard.view.SummaryView;

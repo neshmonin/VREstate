@@ -9,7 +9,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlMouseEvent;
 import com.nitrous.gwt.earth.client.api.KmlPlacemark;

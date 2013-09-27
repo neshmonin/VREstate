@@ -1,9 +1,6 @@
 package com.condox.order.client.wizard.presenter;
 
-import com.condox.clientshared.abstractview.Log;
-import com.condox.clientshared.communication.GET;
 import com.condox.clientshared.document.SuiteInfo;
-import com.condox.order.client.Globals;
 import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.model.BuildingsModel;
@@ -13,15 +10,7 @@ import com.condox.order.client.wizard.model.LoginModel;
 import com.condox.order.client.wizard.model.ProductModel;
 import com.condox.order.client.wizard.model.SuitesModel;
 import com.condox.order.client.wizard.model.SummaryModel;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SummaryPresenter implements I_Presenter {

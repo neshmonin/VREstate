@@ -10,7 +10,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.PushButton;
@@ -26,7 +25,6 @@ public class MainPage extends Composite {
 	@UiField PushButton pushButton;
 	@UiField PushButton pushButton_1;
 //	@UiField LayoutPanel logPanel;
-	private LayoutPanel containerPanel = new LayoutPanel();
 
 	interface MainPageUiBinder extends UiBinder<Widget, MainPage> {
 	}

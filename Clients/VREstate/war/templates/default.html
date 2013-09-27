@@ -26,26 +26,25 @@ body {
 	line-height: 35px;
 }
 
-#VRT_bedrooms,#VRT_area {
-	font: 100% Arial, Helvetica, sans-serif;
-	line-height: 35px;
+#VRT_bedrooms,#VRT_area,#VRT_bathrooms,#VRT_balconies {
+	font: 110% Arial, Helvetica, sans-serif;
+	line-height: 25px;
 }
 
 #VRT_moreInfo,#VRT_virtualTour {
 	font: 130% Arial, Helvetica, sans-serif;
-	color: #03F;
 	line-height: 35px;
+	color: #03F;
 }
 
 #VRT_price {
 	font: 200% Arial, Helvetica, sans-serif;
+	line-height: 45px;
 	color: #03F;
-	line-height: 35px;
 }
 </style>
 <script type="text/javascript">
-window.onload = function() {
-	document.domain = '3dcondox.com';
+function load() {
 	var hash = window.location.hash.substring(1);
 	var json = decodeURIComponent(hash);
 	json = eval('(' + json + ')');
@@ -69,7 +68,9 @@ window.onload = function() {
 		if (typeof json.VRT_floorplanUrl != 'undefined'){
 			floorplan.style.cursor = 'pointer';
 			floorplan.src = 'img/InternalButton.png';
-			floorplan.onclick = window.parent.VRT_showFloorplan;
+			floorplan.onclick = function () {
+				window.open('panzoom.html#' + json.VRT_floorplanUrl,'_blank');
+			}
 		} else {
 			floorplan.src = 'img/InternalButtonDisabled.png';
 		}
@@ -123,11 +124,11 @@ window.onload = function() {
 			price.innerHTML = json.VRT_price;
 		}
 	}
-	window.parent.VRT_setBalloonSize(600,200);
+	window.parent.VRT_setBalloonSize(550,200);
 }
 </script>
 </head>
-<body>
+<body onload="load()">
 	<div id="VRT_left" style="text-align: center;">
 		<div style="width: 100%; margin-left: auto; margin-right: auto;">
 			<div id="VRT_virtualTour">Virtual tour</div>

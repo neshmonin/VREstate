@@ -1,12 +1,10 @@
 package com.condox.order.client.wizard.model;
 
-import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.document.BuildingInfo;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.WizardStep;
 import com.condox.order.client.wizard.presenter.BuildingsPresenter;
 import com.condox.order.client.wizard.view.BuildingsView;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.ListBox;
 

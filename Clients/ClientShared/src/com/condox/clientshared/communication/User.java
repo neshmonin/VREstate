@@ -17,7 +17,7 @@ public class User implements RequestCallback {
 	public static User Login(I_Login vrEstate) {
 //		String request = Options.HOME_URL + "program?q=login&uid="
 //		+ Options.USER_NAME + "&pwd=" + Options.USER_PASS;
-		String request = Options.HOME_URL + "program?q=login&role=visitor&uid=web&pwd=web";
+		String request = Options.URL_VRT + "program?q=login&role=visitor&uid=web&pwd=web";
 //		request = request.replace("listing/", "");
 
 		theUser = new User(vrEstate);
@@ -42,7 +42,7 @@ public class User implements RequestCallback {
 		keepAliveThread = new Timer() {
 			@Override
 			public void run() {
-				String request = Options.HOME_URL + "program?q=sessionrenew&sid=" + SID;
+				String request = Options.URL_VRT + "program?q=sessionrenew&sid=" + SID;
 				GET.send(request);
 			}
 		};

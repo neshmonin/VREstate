@@ -3,6 +3,7 @@ package com.condox.vrestate.client.view;
 
 import com.condox.clientshared.abstractview.IGeoItem;
 import com.condox.clientshared.abstractview.I_AbstractView;
+import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.document.Building;
 import com.condox.clientshared.document.Document;
@@ -146,6 +147,7 @@ public class SuiteView extends _GEView {
 		content += URL.encode(getSuiteInfo());
 		content += "\" frameborder=0></iframe>";
 		balloon.setCloseButtonEnabled(false);
+		Log.write("content: " + content);
 		balloon.setContentDiv(content);
 		balloon.setFeature(suiteGeo.getExtendedDataLabel());
 		GE.getPlugin().setBalloon(balloon);
@@ -263,7 +265,14 @@ public class SuiteView extends _GEView {
 		$wnd.VRT_showFloorplan = function() {
 			view.@com.condox.vrestate.client.view.SuiteView::ShowFloorPlan()();
 		}
+		$wnd.VRT_getFloorplan = function() {
+			return view.@com.condox.vrestate.client.view.SuiteView::getFloorplan()();
+		}
 	}-*/;
+	
+	private String getFloorplan() {
+		return suiteGeo.suite.getSuiteType().getFloorPlanUrl();
+	}
 
 	private void VRT_showVirtualTour() {
 		String vTourUrl = suiteGeo.suite.getVTourUrl();
@@ -276,7 +285,7 @@ public class SuiteView extends _GEView {
 		if (moreInfo != null && moreInfo.length() > 0)
 			Window.open(moreInfo, "_blank", null);
 		else
-		if (Options.DEBUG_MODE)
+		if (Options.SERVER_MODE.equals(Options.MODE.TEST))
 			Window.open(
 					"http://02ea89a.netsolhost.com/beyondsea/beachcomber.html",
 					"_blank", null);
@@ -284,13 +293,13 @@ public class SuiteView extends _GEView {
 
 	private void ShowPanoramicView() {
 		IGeoItem suiteGeo = _AbstractView.getSuiteGeoItem(theGeoItem.getId());
-		//Log.write("suiteGeo = " + suiteGeo.toString());
+		Log.write("suiteGeo = " + suiteGeo.toString());
 		_AbstractView.Push(new PanoramicView(suiteGeo));
 	}
 
 	private void ShowFloorPlan() {
 		String floorPlanUrl = suiteGeo.suite.getSuiteType().getFloorPlanUrl();
-		//Log.write("floorPlanUrl = " + floorPlanUrl);
+		Log.write("floorPlanUrl = " + floorPlanUrl);
 		if (floorPlanUrl != null)
 			Window.open(floorPlanUrl, "_blank", null);
 	}

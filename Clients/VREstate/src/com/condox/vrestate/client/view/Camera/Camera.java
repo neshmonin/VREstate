@@ -1,7 +1,6 @@
 package com.condox.vrestate.client.view.Camera;
 
 import com.condox.vrestate.client.ge.GE;
-import com.google.gwt.user.client.Window;
 import com.nitrous.gwt.earth.client.api.KmlAltitudeMode;
 import com.nitrous.gwt.earth.client.api.KmlCamera;
 import com.nitrous.gwt.earth.client.api.KmlLookAt;

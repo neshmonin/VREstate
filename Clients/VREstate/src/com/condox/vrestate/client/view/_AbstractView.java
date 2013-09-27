@@ -61,7 +61,7 @@ public abstract class _AbstractView implements I_AbstractView {
 //		ScreenSaver.get().reset();
 		m_timeoutTimer.cancel();
 		if (!m_timeoutTimerDisabled) {
-			if (Options.DEBUG_MODE)
+			if (Options.SERVER_MODE.equals(Options.MODE.TEST))
 				m_timeoutTimer.schedule(2 * 60 * 1000);
 			else
 				m_timeoutTimer.schedule(TIMEOUTINTERVAL);
@@ -303,7 +303,7 @@ public abstract class _AbstractView implements I_AbstractView {
 					KmlUnits.UNITS_FRACTION);
 			GE.getPlugin().getFeatures().appendChild(info_overlay);
 		}
-		String href = Options.HOME_URL + "gen/txt?height=40&shadow=2&text="
+		String href = Options.URL_VRT + "gen/txt?height=40&shadow=2&text="
 				+ getTitleText() + "&txtClr=16777215&shdClr=0&frame=0";
 		icon.setHref(href);
 		info_overlay.setVisibility(value);

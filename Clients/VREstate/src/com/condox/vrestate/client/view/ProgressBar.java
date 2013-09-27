@@ -166,7 +166,7 @@ public class ProgressBar extends OverlayHelpers implements I_UpdatableView, I_Pr
 
 		String progressUrl = getUpdatedDisplayUrl(percent);
 		if (progressUrl != null) {
-			progressUrl = Options.HOME_URL + "buttons/" + progressUrl;
+			progressUrl = Options.URL_VRT + "buttons/" + progressUrl;
 			KmlIcon iconLabel = GE.getPlugin().createIcon("");
 			iconLabel.setHref(progressUrl);
 

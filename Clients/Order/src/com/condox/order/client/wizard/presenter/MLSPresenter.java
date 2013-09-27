@@ -2,7 +2,6 @@ package com.condox.order.client.wizard.presenter;
 
 import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.model.MLSModel;
-import com.condox.order.client.wizard.model.ProductModel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 

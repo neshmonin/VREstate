@@ -1,6 +1,5 @@
 package com.condox.order.client;
 
-import com.condox.clientshared.abstractview.Log;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.Wizard;
 import com.condox.order.client.wizard.model.LoginModel;

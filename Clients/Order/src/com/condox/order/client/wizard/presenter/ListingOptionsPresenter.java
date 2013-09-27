@@ -1,22 +1,10 @@
 package com.condox.order.client.wizard.presenter;
 
-import com.condox.clientshared.communication.GET;
 import com.condox.clientshared.document.SuiteInfo;
-import com.condox.order.client.Globals;
 import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.I_WizardStep;
-import com.condox.order.client.wizard.model.BuildingsModel;
 import com.condox.order.client.wizard.model.ListingOptionsModel;
-import com.condox.order.client.wizard.model.LoginModel;
 import com.condox.order.client.wizard.model.SuitesModel;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -67,10 +55,6 @@ public class ListingOptionsPresenter implements I_Presenter {
 	private void updateData() {
 //		String sid = "";
 		SuiteInfo selectedSuite = null;
-		String virtualTourURL = "";
-		String moreInfoURL = "";
-		String mls = "";
-		String suiteId = "";
 		I_WizardStep step = model;
 		while (step != null) {
 			try {

@@ -13,14 +13,8 @@ public class Wizard implements I_Wizard {
 
 	private static Wizard instance = null;
 	private StackLayoutPanel stackLayoutPanel = new StackLayoutPanel(Unit.EM);
-	private HasWidgets container = null;
-	
 	public Wizard(HasWidgets container) {
-//		stackLayoutPanel.add(new HTMLPanel("New Panel"), new HTML("New Widget"), 2.0);
-//		stackLayoutPanel.setSize("100%", "100%");
-//		container.add(stackLayoutPanel);
-		this.container = container;
-		instance = this;
+instance = this;
 	}
 	
 	public static void cancel() {
