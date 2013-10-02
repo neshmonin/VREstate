@@ -2,7 +2,6 @@ package com.condox.clientshared.document;
 
 import java.util.ArrayList;
 
-import com.condox.clientshared.communication.Options;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
@@ -55,12 +54,24 @@ public class Suite implements I_VRObject {
 				this.status = Status.NotSupported;
 		} else
 			this.status = Status.NotSupported;
-
+		
 		price = -1;
+//		try {
+//			price = Double.valueOf(obj.get("currentPrice").isString().stringValue()).intValue();
+//		} catch (NumberFormatException e) {
+//			e.printStackTrace();
+//		} catch (NullPointerException e) {
+//			e.printStackTrace();	
+//		}
+		
 		if ((obj.get("currentPrice") != null)
-				&& (obj.get("currentPrice").isNumber() != null)
-				&& obj.get("currentPrice").isNumber().doubleValue() != 0)
-			price = (int) obj.get("currentPrice").isNumber().doubleValue();
+				&& (obj.get("currentPrice").isString() != null)
+					&& obj.get("currentPrice").isString().stringValue() != null)
+			price = Double.valueOf(obj.get("currentPrice").isString().stringValue()).intValue();
+//		if ((obj.get("currentPrice") != null)
+//				&& (obj.get("currentPrice").isNumber() != null)
+//				&& obj.get("currentPrice").isNumber().doubleValue() != 0)
+//			price = (int) obj.get("currentPrice").isNumber().doubleValue();
 	}
 
 	public void Parse(JSONValue value) {
@@ -103,11 +114,18 @@ public class Suite implements I_VRObject {
 		if (suite_type.getName().endsWith("-HORIZ-"))
 			orientation = Orientation.Horizontal;
 		
-		price = -1;
-		if ((obj.get("currentPrice") != null)
-				&& (obj.get("currentPrice").isNumber() != null)
-				&& obj.get("currentPrice").isNumber().doubleValue() != 0)
-			price = (int) obj.get("currentPrice").isNumber().doubleValue();
+//		try {
+//			price = Double.valueOf(obj.get("currentPrice").isString().stringValue()).intValue();
+//		} catch (NumberFormatException e) {
+//			e.printStackTrace();
+//		} catch (NullPointerException e) {
+//			e.printStackTrace();	
+//		}
+		
+//		if ((obj.get("currentPrice") != null)
+//				&& (obj.get("currentPrice").isNumber() != null)
+//				&& obj.get("currentPrice").isNumber().doubleValue() != 0)
+//			price = (int) obj.get("currentPrice").isNumber().doubleValue();
 
 //		if (Options.DEBUG_MODE && price == -1) {
 //			price = (int) (500 + 500 * Math.random());

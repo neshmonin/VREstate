@@ -68,9 +68,7 @@ function load() {
 		if (typeof json.VRT_floorplanUrl != 'undefined'){
 			floorplan.style.cursor = 'pointer';
 			floorplan.src = 'img/InternalButton.png';
-			floorplan.onclick = function () {
-				window.open('panzoom.html#' + json.VRT_floorplanUrl,'_blank');
-			}
+			floorplan.onclick = window.parent.VRT_showFloorplan;
 		} else {
 			floorplan.src = 'img/InternalButtonDisabled.png';
 		}
@@ -124,7 +122,7 @@ function load() {
 			price.innerHTML = json.VRT_price;
 		}
 	}
-	window.parent.VRT_setBalloonSize(550,200);
+	window.parent.VRT_setBalloonSize(600,200);
 }
 </script>
 </head>

@@ -56,9 +56,18 @@ public class Options implements RequestCallback {
 	}
 
 	public static void Init() {
+		Map<String, List<String>> params = Window.Location.getParameterMap();
+		Map<String, List<String>> contextMap = new HashMap<String, List<String>>(params);
 		// ---------------------
-		SERVER_MODE = MODE.TEST;
-
+		SERVER_MODE = MODE.WORK;
+		if (params.containsKey("test")) {
+			if (params.get("test").get(0).equals("true"))
+				SERVER_MODE = MODE.TEST;
+			else
+				SERVER_MODE = MODE.WORK;
+			contextMap.remove("test");
+		}
+		// TODO delete "/vre/"
 		switch (SERVER_MODE) {
 		case TEST:
 			URL_VRT = "https://vrt.3dcondox.com/vre/";
@@ -76,11 +85,8 @@ public class Options implements RequestCallback {
 		
 		
 		
-		Map<String, List<String>> params = Window.Location.getParameterMap();
 //		Log.write(params.toString());
 
-		Map<String, List<String>> contextMap = new HashMap<String, List<String>>(
-				params);
 		// --------------------------------------------------//
 		List<String> oneValueList = new ArrayList<String>();
 		oneValueList.add("true");
@@ -190,6 +196,11 @@ public class Options implements RequestCallback {
 			return flag.equalsIgnoreCase("true");
 		}
 		return false;
+	}
+	
+	public static String getUserLogin(String uid, String pwd, String role) {
+		return URL_VRT + "program?q=login&uid=" + uid + "&pwd=" + pwd
+				+ "&role=" + role;
 	}
 
 }

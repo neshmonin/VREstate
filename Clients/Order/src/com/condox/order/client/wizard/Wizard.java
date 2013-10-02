@@ -13,8 +13,9 @@ public class Wizard implements I_Wizard {
 
 	private static Wizard instance = null;
 	private StackLayoutPanel stackLayoutPanel = new StackLayoutPanel(Unit.EM);
+
 	public Wizard(HasWidgets container) {
-instance = this;
+		instance = this;
 	}
 	
 	public static void cancel() {

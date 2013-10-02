@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.condox.clientshared.communication.GET;
+import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.document.SuiteInfo;
-import com.condox.order.client.Globals;
 import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.model.BuildingsModel;
@@ -65,7 +65,7 @@ public class SuitesPresenter implements I_Presenter {
 		}
 		
 //		String url = "https://vrt.3dcondox.com/data/inventory?";
-		String url = Globals.urlBase;
+		String url = Options.URL_VRT;
 		url += "data/inventory?";
 		url += "building=" + buildingId;
 		url += "&sid=" + sid;

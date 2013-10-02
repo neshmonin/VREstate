@@ -1,7 +1,7 @@
 package com.condox.order.client.wizard.presenter;
 
 import com.condox.clientshared.communication.GET;
-import com.condox.order.client.Globals;
+import com.condox.clientshared.communication.Options;
 import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.Wizard;
@@ -115,7 +115,7 @@ public class EmailPresenter implements I_Presenter {
 		}
 		//**********************************************
 		final String mail = ownerEmail;
-		String url = Globals.urlBase
+		String url = Options.URL_VRT
 				+ "program?q=register&entity=viewOrder&ownerEmail="
 				+ ownerEmail + "&paymentPending=" + payment + "&product="
 				+ product + "&propertyType=" + type + "&propertyId=" + suiteId

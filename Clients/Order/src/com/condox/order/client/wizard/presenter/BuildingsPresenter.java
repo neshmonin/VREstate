@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.condox.clientshared.communication.GET;
+import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.document.BuildingInfo;
-import com.condox.order.client.Globals;
 import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.model.BuildingsModel;
@@ -54,7 +54,7 @@ public class BuildingsPresenter implements I_Presenter {
 			step = step.getPrevStep();
 		}
 
-		String url = Globals.urlBase;
+		String url = Options.URL_VRT;
 		url += "data/building?scopeType=address&ad_mu=Toronto&ed=Resale";
 		url += "&sid=" + sid;
 

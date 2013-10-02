@@ -265,15 +265,8 @@ public class SuiteView extends _GEView {
 		$wnd.VRT_showFloorplan = function() {
 			view.@com.condox.vrestate.client.view.SuiteView::ShowFloorPlan()();
 		}
-		$wnd.VRT_getFloorplan = function() {
-			return view.@com.condox.vrestate.client.view.SuiteView::getFloorplan()();
-		}
 	}-*/;
 	
-	private String getFloorplan() {
-		return suiteGeo.suite.getSuiteType().getFloorPlanUrl();
-	}
-
 	private void VRT_showVirtualTour() {
 		String vTourUrl = suiteGeo.suite.getVTourUrl();
 		if (vTourUrl != null && vTourUrl.length() > 0)
@@ -301,8 +294,18 @@ public class SuiteView extends _GEView {
 		String floorPlanUrl = suiteGeo.suite.getSuiteType().getFloorPlanUrl();
 		Log.write("floorPlanUrl = " + floorPlanUrl);
 		if (floorPlanUrl != null)
-			Window.open(floorPlanUrl, "_blank", null);
+			if (floorPlanUrl.toLowerCase().endsWith(".pdf"))
+				Window.open(floorPlanUrl, "_blank", null);
+			else
+				newWindow(floorPlanUrl);
 	}
+	
+	private native void newWindow(String url) /*-{
+		wnd = $wnd.open("","_blank");
+		wnd.document.open();
+		wnd.document.write("Image viewer");
+		wnd.document.close();
+	}-*/;
 
 	@Override
 	public void onViewChanged() {
