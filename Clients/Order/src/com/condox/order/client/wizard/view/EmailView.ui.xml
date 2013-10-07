@@ -11,15 +11,13 @@
 				<g:HTML wordWrap="true" horizontalAlignment="ALIGN_LEFT" width="350px">To complete the order we'll have to send you a verification message with the further instructions.
 <br/>Please provide an email address that you'll be able to check next couple of minutes:</g:HTML>
 			</g:HorizontalPanel>
-			<g:Cell height="100%">
-				<g:VerticalPanel>
+			<g:VerticalPanel>
 				<g:VerticalPanel spacing="10" horizontalAlignment="ALIGN_CENTER" width="300px">
 				<g:TextBox ui:field="textMail" />
 				<g:Button text="Submit the Order" width="160px" ui:field="buttonNext" enabled="false"/>
 				<g:HTML wordWrap="true" direction="LTR" horizontalAlignment="ALIGN_LEFT">Please have your credit card ready.<br/>You will be charged $49.99 (you still will be able to cancel the order after preview)</g:HTML>
 			</g:VerticalPanel>
 			</g:VerticalPanel>
-			</g:Cell>
 			<g:Cell verticalAlignment="ALIGN_BOTTOM">
 				<g:HorizontalPanel width="100%" verticalAlignment="ALIGN_BOTTOM">
 					<g:HorizontalPanel spacing="10">

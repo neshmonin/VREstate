@@ -50,6 +50,7 @@ public class Options implements RequestCallback {
 	// If SUPPORT_PAN is true, user can pan up and down a building
 	public static boolean SUPPORT_PAN = false;
 	public static String context = "";
+	public static boolean TEST_PAY = false;
 
 	public static boolean isViewOrder() {
 		return Options.getViewOrderId() != null;
@@ -145,6 +146,12 @@ public class Options implements RequestCallback {
 				context += "&";
 		}
 		Log.write("context=" + context);
+		
+		if (params.containsKey("testPay")) {
+			if (params.get("testPay").get(0).equals("true"))
+				TEST_PAY = true;
+			contextMap.remove("testPay");
+		}
 	};
 
 	@Override
@@ -201,6 +208,10 @@ public class Options implements RequestCallback {
 	public static String getUserLogin(String uid, String pwd, String role) {
 		return URL_VRT + "program?q=login&uid=" + uid + "&pwd=" + pwd
 				+ "&role=" + role;
+	}
+	
+	public static boolean isTestPay() {
+		return TEST_PAY;
 	}
 
 }

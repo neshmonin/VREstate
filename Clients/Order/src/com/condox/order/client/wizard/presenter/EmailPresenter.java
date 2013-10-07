@@ -55,9 +55,9 @@ public class EmailPresenter implements I_Presenter {
 		// TODO —генерировать строку дл€ Summary
 		I_WizardStep step = model;
 		String ownerEmail = "";
-		String payment = "CAD49.99";
-		String product = "";
-		String type = "";
+		String payment = Options.isTestPay()? "CAD1.00" : "CAD49.99";
+		String product = "prl";
+		String type = "suite";
 		String suiteId = "";
 		String sid = "";
 		while (step != null) {

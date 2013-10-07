@@ -73,7 +73,8 @@ public class LoginModel extends WizardStep {
 
 	@Override
 	protected I_WizardStep createNextStep() {
-		children.put(this, new ProductModel(this));
+//		children.put(this, new ProductModel(this));
+		children.put(this, new MLSModel(this));
 		return children.get(this);
 	}
 

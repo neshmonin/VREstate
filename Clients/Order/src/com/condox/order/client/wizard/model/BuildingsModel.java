@@ -103,6 +103,7 @@ public class BuildingsModel extends WizardStep {
 			}
 			step = step.getPrevStep();
 		}		
+		children.put(this, new SuitesModel(this));
 		return children.get(this);
 	}
 

@@ -42,7 +42,7 @@ public class SummaryPresenter implements I_Presenter {
 
 	// ******************
 	String user = "";
-	String order = "";
+	String order = "Private Interactive 3D Listing";
 	String address = "&lt;none&gt;";
 	String mls = "";
 	String urlVirtualTour = "";
