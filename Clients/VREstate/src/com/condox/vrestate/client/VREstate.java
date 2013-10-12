@@ -14,8 +14,7 @@ import com.condox.clientshared.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.HelicopterView;
 import com.condox.vrestate.client.view.ProgressBar;
-import com.condox.vrestate.client.view.SiteView;
-import com.condox.vrestate.client.view._AbstractView;
+import com.condox.vrestate.client.view.SiteView;import com.condox.vrestate.client.view._AbstractView;
 import com.condox.vrestate.client.view.GeoItems.SiteGeoItem;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.http.client.Request;
@@ -31,8 +30,9 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I
 	 */
 	@Override
 	public void onModuleLoad() {
-		// _AbstractView.init();
-		// init();
+//		Log.write(GWT.getHostPageBaseURL());
+//		Log.write(GWT.getModuleBaseForStaticFiles());
+//		Log.write(GWT.getModuleBaseURL());
 		Options.Init();
 		LoginUser();
 	}
@@ -62,10 +62,10 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I
 	public void LoadView() {
 		String url;
 		if (Options.isViewOrder()) {
-			url = Options.HOME_URL + "data/view?type=viewOrder&id="
-					+ Options.getViewOrderId() + "&track=true&&SID=" + User.SID;
+			url = Options.URL_VRT + "data/view?type=viewOrder&id="
+					+ Options.getViewOrderId() + "&track=true&SID=" + User.SID;
 		} else {
-			url = Options.HOME_URL + "data/view?type=site&id="
+			url = Options.URL_VRT + "data/view?type=site&id="
 					+ Options.getSiteId() + "&track=true&SID=" + User.SID;
 		}
 		GET.send(url, this);

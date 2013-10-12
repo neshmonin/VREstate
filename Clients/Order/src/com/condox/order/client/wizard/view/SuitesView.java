@@ -25,11 +25,10 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.user.client.ui.Button;
 
 public class SuitesView extends Composite implements IDisplay {
 
@@ -145,7 +144,7 @@ public class SuitesView extends Composite implements IDisplay {
 				return A.getName().compareTo(B.getName());
 			}
 		});
-		dataGrid.setColumnWidth(nameColumn, "200px");
+		dataGrid.setColumnWidth(nameColumn, "100px");
 		dataGrid.addColumn(nameColumn, presenter.getSelectedBuildingStreet());
 
 		// -------------------------
@@ -224,27 +223,41 @@ public class SuitesView extends Composite implements IDisplay {
 			
 			for (SuiteInfo suite : suites) {
 				String disabled = "";
-				
-//				Убрал disabled из квартир
-//				switch (suite.getStatus()) {
-//				case Sold:
-//					break;
-//				default:
-//					disabled += " disabled=\"true\" ";
-//				}
-				
-				String mls = "";
+
+				// Все Sold-квартиры disabled (mail 28.08.2013)
 				switch (suite.getStatus()) {
 				case Sold:
-					mls += " color:red ";
+					disabled += " disabled=\"true\" ";
+					break;
+				default:
+				}
+				
+				String color = "";
+				switch (suite.getStatus()) {
+				case AvailableResale:
+					color += " color:blue ";
+					break;
+				case AvailableRent:
+					color += " color:purple ";
+					break;
+				case Available:
+					color += " color:green ";
+					break;
+				case Sold:
+					color += " color:red ";
 					break;
 				default:
 //					mls += " color:red";
 				}
+				
+				if ((suite.getMLS() == null)||(suite.getMLS().isEmpty())) {			
+					disabled = " disabled=\"true\" ";
+					color = " color:red ";
+				}
 
 				result += "<button ";
 				result += "type=\"button\"" + " onclick=\"onSelectSuite("
-						+ suite.getId() + ")\"" + "style=\"width:50px;"+mls+"\""
+						+ suite.getId() + ")\"" + "style=\"width:50px;"+color+"\""
 						+ "class=\"btnSelectSuite\"" + disabled + "title=\""
 						+ suite.getTooltip() + "\">";
 				result += suite.getName();

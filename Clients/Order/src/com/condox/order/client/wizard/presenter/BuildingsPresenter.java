@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.condox.clientshared.communication.GET;
+import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.document.BuildingInfo;
 import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.I_WizardStep;
@@ -53,7 +54,7 @@ public class BuildingsPresenter implements I_Presenter {
 			step = step.getPrevStep();
 		}
 
-		String url = "https://vrt.3dcondox.com/vre/";
+		String url = Options.URL_VRT;
 		url += "data/building?scopeType=address&ad_mu=Toronto&ed=Resale";
 		url += "&sid=" + sid;
 
@@ -98,6 +99,7 @@ public class BuildingsPresenter implements I_Presenter {
 	}
 
 	public void onNext() {
+		model.setSelected(selected);
 		model.setSelectedId(selected.getId());
 		// TODO ƒобавить проверку на наличие выделенного дома
 		// и при неполадках выводить соотв. сообщение
@@ -107,6 +109,7 @@ public class BuildingsPresenter implements I_Presenter {
 	public void setSelectedBuilding(BuildingInfo selectedBuilding) {
 //		Window.alert("setSelectedBuildingId = " + selectedBuilding.getId());
 		selected = selectedBuilding;
+		model.setSelected(selected);
 		model.setSelectedId(selected.getId());
 	}
 

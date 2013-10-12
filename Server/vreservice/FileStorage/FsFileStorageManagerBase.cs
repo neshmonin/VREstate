@@ -20,17 +20,17 @@ namespace Vre.Server.FileStorage
         /// <summary>
         /// Root path of local file system storage
         /// </summary>
-        protected string _storeRoot = null;
+		protected StringConfigurationParam _storeRoot;
 
         /// <summary>
         /// Iinitializes base class members
         /// </summary>
         /// <param name="fileSystemRootConfigParamName">Configuration file parameter holding root path of local file system storage</param>
-        public FsFileStorageManagerBase(string fileSystemRootConfigParamName)
+        public FsFileStorageManagerBase(StringConfigurationParam fileSystemRootConfigParamName)
         {
-            _storeRoot = ServiceInstances.Configuration.GetValue(fileSystemRootConfigParamName, "");
+            _storeRoot = fileSystemRootConfigParamName;
 
-            if (string.IsNullOrWhiteSpace(_storeRoot))
+            if (string.IsNullOrWhiteSpace(_storeRoot.Value))
             {
                 ServiceInstances.Logger.Error("File Store settings ({0}) not defined; local file store is disabled.",
                     fileSystemRootConfigParamName);
@@ -38,9 +38,9 @@ namespace Vre.Server.FileStorage
             }
             else
             {
-                if (!Directory.Exists(_storeRoot))
+                if (!Directory.Exists(_storeRoot.Value))
                 {
-                    try { Directory.CreateDirectory(_storeRoot); }
+                    try { Directory.CreateDirectory(_storeRoot.Value); }
                     catch (Exception ex)
                     {
                         ServiceInstances.Logger.Error(
@@ -106,7 +106,7 @@ namespace Vre.Server.FileStorage
             // avoiding collisions
             //
             string rp = relativePath.ToString();
-            if (File.Exists(Path.Combine(_storeRoot, rp)))
+            if (File.Exists(Path.Combine(_storeRoot.Value, rp)))
             {
                 int idx = rp.LastIndexOf('.');
                 // append with date/time first
@@ -115,7 +115,7 @@ namespace Vre.Server.FileStorage
                     + DateTime.UtcNow.ToString("yyyyMMddHHmmss")
                     + rp.Substring(idx);
 
-                if (File.Exists(Path.Combine(_storeRoot, rp)))
+                if (File.Exists(Path.Combine(_storeRoot.Value, rp)))
                 {
                     idx = rp.LastIndexOf('.');
                     // add GUID - make it really unique
@@ -128,10 +128,10 @@ namespace Vre.Server.FileStorage
 
             // save file
             //
-            string path = Path.GetDirectoryName(Path.Combine(_storeRoot, rp));
+            string path = Path.GetDirectoryName(Path.Combine(_storeRoot.Value, rp));
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             
-            using (FileStream fs = File.Create(Path.Combine(_storeRoot, rp))) data.CopyTo(fs);
+            using (FileStream fs = File.Create(Path.Combine(_storeRoot.Value, rp))) data.CopyTo(fs);
 
             return rp;
         }
@@ -159,7 +159,7 @@ namespace Vre.Server.FileStorage
         /// </summary>
         protected string convertToLocalPath(string relativePath)
         {
-            return Path.Combine(_storeRoot, relativePath);
+            return Path.Combine(_storeRoot.Value, relativePath);
         }
 
         /// <summary>

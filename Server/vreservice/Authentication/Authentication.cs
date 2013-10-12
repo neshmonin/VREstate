@@ -10,21 +10,11 @@ namespace Vre.Server.BusinessLogic
 {
     internal class Authentication : IAuthentication
     {
-        private static int _saltSizeBytes = 64;
-        private static string _hashType = null;
-
         private ISession _session;
         private bool _initiatedSession;
 
         public Authentication(ISession dbSession)
         {
-            if (null == _hashType)
-            {
-                _hashType = ServiceInstances.Configuration.GetValue("HashType", "SHA512");
-                _saltSizeBytes = ServiceInstances.Configuration.GetValue("SaltSizeBytes", _saltSizeBytes);
-                if (_saltSizeBytes <= 0) _saltSizeBytes = 64;
-            }
-
             if (null == dbSession) { _session = NHibernateHelper.GetSession(); _initiatedSession = true; }
             else { _session = dbSession; _initiatedSession = false; }
         }
@@ -90,7 +80,9 @@ namespace Vre.Server.BusinessLogic
                     if (null == item)
                     {
                         if (type == LoginType.Plain)
-                            item = new Credentials(intLogin, password, userId, _hashType, _saltSizeBytes);
+                            item = new Credentials(intLogin, password, userId, 
+								Configuration.Security.PasswordHashType.Value,
+								Configuration.Security.PasswordSaltSizeBytes.Value);
                         else
                             item = new Credentials(type, intLogin, userId);
 
@@ -123,7 +115,10 @@ namespace Vre.Server.BusinessLogic
                     {
                         if (item.VerifyPassword(currentPassword))
                         {
-                            item.SetPassword(_hashType, _saltSizeBytes, newPassword);
+                            item.SetPassword(
+								Configuration.Security.PasswordHashType.Value,
+								Configuration.Security.PasswordSaltSizeBytes.Value, 
+								newPassword);
                             dao.Update(item);
                             result = true;
                         }
@@ -225,7 +220,7 @@ namespace Vre.Server.BusinessLogic
             bool result = false;
 
             loginType = LoginType.Plain;
-            role = User.Role.Visitor;
+            role = User.Role.Anonymous;
             estateDeveloperId = -1;
             login = null;
 

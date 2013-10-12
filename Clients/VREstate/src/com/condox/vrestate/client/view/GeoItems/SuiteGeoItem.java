@@ -73,19 +73,18 @@ public class SuiteGeoItem implements IGeoItem {
 		
 		String colorKml = "";
 		String widthKml = "";
-		float scale = 1.0F;
 		KmlStyle style = GE.getPlugin().createStyle("");		
 
 		switch (getGeoStatus()) {
 		case Available:
-			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
+			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=65280&shdClr=65280&frame=0";
 			colorKml = "FF00FF00"; // GREEN
 			widthKml = "2";
 			break;
 		case OnHold:
-			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
+			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=16776960&shdClr=16776960&frame=0";
 			colorKml = "FF00FFFF"; // YELLOW
@@ -93,7 +92,7 @@ public class SuiteGeoItem implements IGeoItem {
 			break;
 		case Sold:
 			if (Options.getShowSold()) {
-				href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
+				href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=16711680&shdClr=0&frame=0";
 				colorKml = "FF0000FF"; // RED
@@ -101,35 +100,34 @@ public class SuiteGeoItem implements IGeoItem {
 			}
 			else
 			{
-				href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text=.&txtClr=0&shdClr=0&frame=0";
+				href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text=.&txtClr=0&shdClr=0&frame=0";
 				colorKml = "00000000"; // transparent
 				widthKml = "2";
 			}
 			break;
 		case ResaleAvailable:
-			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
+			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=1048575&shdClr=0&frame=0";
 			colorKml = "FFFFFF00"; // LIGHT BLUE
 			widthKml = "2";
 			break;
 		case AvailableRent:
-			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
+			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=14854399&shdClr=0&frame=0";
 			colorKml = "FFE2A8FF"; // PINK
 			widthKml = "2";
 			break;
 		case Selected:
-			href = Options.HOME_URL + "gen/txt?height=30&shadow=2&text="
+			href = Options.URL_VRT + "gen/txt?height=30&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=16764108&shdClr=0&frame=0";
 			colorKml = "FFCCCCFF"; // LIGHT RED
 			widthKml = "4";
-			scale = 1.0F;
 			break;
 		case Layout:
-			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
+			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=16777215&shdClr=0&frame=0";
 			colorKml = "FFFFFFFF"; // WHITE

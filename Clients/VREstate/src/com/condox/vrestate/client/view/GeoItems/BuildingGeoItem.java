@@ -40,7 +40,7 @@ public class BuildingGeoItem implements IGeoItem {
 		placemark.setSnippet(obj.toString());
 
 		KmlStyle style = GE.getPlugin().createStyle("");
-		String href = Options.HOME_URL + "gen/txt?height=40&shadow=2&text="
+		String href = Options.URL_VRT + "gen/txt?height=40&shadow=2&text="
 				+ building.getName() + "&txtClr=16777215&shdClr=0&frame=0";
 		KmlIcon icon = GE.getPlugin().createIcon("");
 		icon.setHref(href);
@@ -75,12 +75,12 @@ public class BuildingGeoItem implements IGeoItem {
 		String new_href = old_href;
 
 		if (selecting)
-			new_href = Options.HOME_URL
+			new_href = Options.URL_VRT
 					+ "gen/txt?height=40&shadow=2&text="
 					+ building.getName()
 					+ "&txtClr=16777215&shdClr=0&frame=1";
 		else
-			new_href = Options.HOME_URL
+			new_href = Options.URL_VRT
 					+ "gen/txt?height=40&shadow=2&text="
 					+ building.getName()
 					+ "&txtClr=16777215&shdClr=0&frame=0";

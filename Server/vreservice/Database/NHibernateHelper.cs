@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using NHibernate;
-using NHibernate.Cfg;
 using System.Text;
 using Vre.Server.RemoteService;
 
@@ -25,21 +24,13 @@ namespace Vre.Server
         private static readonly Lazy<ISessionFactory> _sessionFactory = new Lazy<ISessionFactory>(() => getSessionFactory());
         private static System.Data.IsolationLevel _transactionIsolationLevel = System.Data.IsolationLevel.Unspecified;
 
-        private static string connectionString
-        {
-            get
-            {
-                return ServiceInstances.Configuration.GetValue("connectionString", string.Empty);
-            }
-        }
-
         private static System.Data.IsolationLevel transactionIsolationLevel
         {
             get
             {
                 if (System.Data.IsolationLevel.Unspecified == _transactionIsolationLevel)
                 {
-                    string til = ServiceInstances.Configuration.GetValue("DbTransactionIsolationLevel", "serializable").ToLower();
+                    string til = Configuration.Database.TransactionIsolationLevel.Value.ToLower();
                     if (til.Equals("chaos")) _transactionIsolationLevel = System.Data.IsolationLevel.Chaos;
                     else if (til.Equals("readcommitted")) _transactionIsolationLevel = System.Data.IsolationLevel.ReadCommitted;
                     else if (til.Equals("readuncommitted")) _transactionIsolationLevel = System.Data.IsolationLevel.ReadUncommitted;
@@ -59,7 +50,7 @@ namespace Vre.Server
             {
                 bool start = true;
                 StringBuilder result = new StringBuilder();
-                foreach (string p in connectionString.Split(';'))
+                foreach (string p in Configuration.Database.ConnectionString.Value.Split(';'))
                 {
                     if (p.StartsWith("user", StringComparison.InvariantCultureIgnoreCase) ||
                         p.StartsWith("uid", StringComparison.InvariantCultureIgnoreCase) ||
@@ -75,9 +66,9 @@ namespace Vre.Server
 
         private static ISessionFactory getSessionFactory()
         {
-            Configuration nHconfiguration = new Configuration();
+			var nHconfiguration = new NHibernate.Cfg.Configuration();
             string nHibernateConfigPath = Path.Combine(
-                Path.GetDirectoryName(ServiceInstances.Configuration.FilePath), 
+                Vre.Server.Configuration.ConfigurationFilesPath,
                 NHibernateConfigurationFileName);
             if (System.IO.File.Exists(nHibernateConfigPath) == false)
             {
@@ -87,7 +78,8 @@ namespace Vre.Server
             }
 
             nHconfiguration.Configure(nHibernateConfigPath);
-            nHconfiguration.SetProperty("connection.connection_string", connectionString);
+			nHconfiguration.SetProperty("connection.connection_string", 
+				Configuration.Database.ConnectionString.Value);
 
             nHconfiguration.AddAssembly(typeof(DatabaseSettings).Assembly);
             //nHconfiguration.AddAssembly(typeof(Vre.Server.BusinessLogic.User).Assembly);

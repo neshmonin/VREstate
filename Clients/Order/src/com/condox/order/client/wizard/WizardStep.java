@@ -3,6 +3,7 @@ package com.condox.order.client.wizard;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.condox.clientshared.abstractview.Log;
 import com.google.gwt.user.client.ui.HasWidgets;
 
 public abstract class WizardStep implements I_WizardStep {
@@ -37,7 +38,24 @@ public abstract class WizardStep implements I_WizardStep {
 
 	@Override
 	public void go(HasWidgets container) {
+		I_WizardStep item = this;
+		String str = item.getNavURL();
+		item = item.getPrevStep();
+		while (item != null) {
+			str = item.getNavURL() + " &#187; " + str;
+			item = item.getPrevStep();
+		}
+//		str = "&#187;";
+		Log.write(str);
+//		Document.get().getElementById("navBar").setInnerHTML(str);
+		setNavText(str);
 	}
+	
+	private native void setNavText(String str) /*-{
+		$doc.getElementById('navBar').rows[0].cells[0].innerHTML = str;
+	}-*/;
+	
+	public abstract String getNavURL();
 
 	// ************************
 	public void next(I_WizardStep nextStep) {

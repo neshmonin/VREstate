@@ -6,12 +6,16 @@
 			font-weight: bold;
 		}
 	</ui:style>
-		<g:VerticalPanel width="100%" height="100%" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+		<g:VerticalPanel width="100%" height="100%" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_TOP">
+			<g:HorizontalPanel spacing="20">
+				<g:HTML wordWrap="true" horizontalAlignment="ALIGN_LEFT" width="350px">To complete the order we'll have to send you a verification message with the further instructions.
+<br/>Please provide an email address that you'll be able to check next couple of minutes:</g:HTML>
+			</g:HorizontalPanel>
 			<g:VerticalPanel>
-				<g:VerticalPanel spacing="10">
-				<g:HTML wordWrap="true">Your are about to end.<br/>So, enter your mail:<br/></g:HTML>
+				<g:VerticalPanel spacing="10" horizontalAlignment="ALIGN_CENTER" width="300px">
 				<g:TextBox ui:field="textMail" />
-				<g:HTML wordWrap="true">And press Finish <br/>to receive next instructions:</g:HTML>
+				<g:Button text="Submit the Order" width="160px" ui:field="buttonNext" enabled="false"/>
+				<g:HTML wordWrap="true" direction="LTR" horizontalAlignment="ALIGN_LEFT">Please have your credit card ready.<br/>You will be charged $49.99 (you still will be able to cancel the order after preview)</g:HTML>
 			</g:VerticalPanel>
 			</g:VerticalPanel>
 			<g:Cell verticalAlignment="ALIGN_BOTTOM">
@@ -20,9 +24,8 @@
 						<g:Button text="Cancel" width="100px" ui:field="buttonCancel"/>
 					</g:HorizontalPanel>
 					<g:Cell horizontalAlignment="ALIGN_RIGHT">
-						<g:HorizontalPanel spacing="10">
+						<g:HorizontalPanel spacing="10" width="230px" horizontalAlignment="ALIGN_LEFT">
 						<g:Button text="&lt;&lt; Prev" width="100px" ui:field="buttonPrev"/>
-						<g:Button text="Finish &gt;&gt;" width="100px" ui:field="buttonNext" enabled="false"/>
 					</g:HorizontalPanel>
 					</g:Cell>
 				</g:HorizontalPanel>

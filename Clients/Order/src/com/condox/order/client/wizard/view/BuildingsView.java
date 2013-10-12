@@ -13,6 +13,7 @@ import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -28,8 +29,8 @@ import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -37,8 +38,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.event.dom.client.ClickEvent;
 
 public class BuildingsView extends Composite implements IDisplay,
 		IFilter<BuildingInfo> {
@@ -49,7 +48,8 @@ public class BuildingsView extends Composite implements IDisplay,
 	interface BuildingsViewUiBinder extends UiBinder<Widget, BuildingsView> {
 	}
 
-	private String filterStr = "Type here Name, Street or Postal to filter...";
+	private String filterStr = "Start typing your building name or address...";
+//	private String filterStr = "Type here Name, Street or Postal to filter...";
 
 	public BuildingsView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -171,7 +171,7 @@ public class BuildingsView extends Composite implements IDisplay,
 					public void onSelectionChange(SelectionChangeEvent event) {
 						selectedBuilding = selectionModel.getSelectedObject();
 						presenter.setSelectedBuilding(selectedBuilding);
-						buttonNext.setEnabled(selectedBuilding != null);
+//						buttonNext.setEnabled(selectedBuilding != null);
 					}
 				});
 		if (selectedBuilding != null) {
@@ -217,7 +217,6 @@ public class BuildingsView extends Composite implements IDisplay,
 			false, 0, true);
 	@UiField Button buttonCancel;
 	@UiField Button buttonPrev;
-	@UiField Button buttonNext;
 	@UiField TextBox textFilter;
 	@UiField ListBox city;
 	
@@ -269,10 +268,6 @@ public class BuildingsView extends Composite implements IDisplay,
 	@UiHandler("buttonPrev")
 	void onButtonPrevClick(ClickEvent event) {
 		presenter.onPrev();
-	}
-	@UiHandler("buttonNext")
-	void onButtonNextClick(ClickEvent event) {
-		presenter.onNext();
 	}
 	@UiHandler("buttonCancel")
 	void onButtonCancelClick(ClickEvent event) {

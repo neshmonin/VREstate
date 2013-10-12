@@ -1,0 +1,22 @@
+<html>
+	<head>
+		<script type="text/javascript" src="../script/core/Simple_Viewer_beta_1.1.js"></script>
+		<!-- Toolabr extension -->
+		<script type="text/javascript" src="../script/extension/toolbar-ext.js"></script>
+		<link rel="stylesheet" type="text/css" href="../script/extension/toolbar-ext.css" />
+	</head>
+	<body>
+		<h4>Image viewer toolbar extension</h4>
+		<div id="parentElement" ></div>
+		<script type="text/javascript">
+			viewer.toolbarImages="../images/toolbar"
+			viewer.onload =  viewer.toolbar;
+			
+			var viewerObject = new viewer({
+				parent: document.getElementById('parentElement'),
+				imageSource: '../images/sunset.jpg',
+				frame: ['400px','250px']
+			});
+		</script>
+	</body>
+</html>

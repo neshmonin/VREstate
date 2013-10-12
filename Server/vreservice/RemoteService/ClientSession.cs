@@ -14,21 +14,10 @@ namespace Vre.Server.RemoteService
     {
         private ConcurrentDictionary<string, ClientSession> _sessionList;
         private ManualResetEvent _staleSessionDropThreadExit;
-        private int _cleanupTimeoutSec;
 
         public ClientSessionStore()
         {
             _sessionList = new ConcurrentDictionary<string, ClientSession>();
-
-            _cleanupTimeoutSec = 600; // ten minutes
-            _cleanupTimeoutSec = ServiceInstances.Configuration.GetValue("ClientSessionTimeoutSec", _cleanupTimeoutSec);
-
-            // ensure some constraints
-            //
-            // minimal session timeout is 1 minute
-            if (_cleanupTimeoutSec < 60) _cleanupTimeoutSec = 60;
-            // session timeout is no more than 1 hour; if more is required, client should make a session renew request
-            if (_cleanupTimeoutSec > 3600) _cleanupTimeoutSec = 3600;
 
             _staleSessionDropThreadExit = new ManualResetEvent(false);
             new Thread(staleSessionDropThread).Start();
@@ -39,9 +28,13 @@ namespace Vre.Server.RemoteService
             _staleSessionDropThreadExit.Set();
         }
 
-		public int CleanupTimeoutSec { get { return _cleanupTimeoutSec; } }
-
-        public int ClientKeepalivePeriodSec { get { return _cleanupTimeoutSec / 2; } }
+        public int ClientKeepalivePeriodSec 
+		{ 
+			get 
+			{ 
+				return Configuration.ClientSession.TimeoutSec.Value / 2; 
+			}
+		}
 
         public string LoginUser(IPEndPoint ep, LoginType loginType, 
             User.Role role, int estatedeveloperId, string login, string password)
@@ -137,7 +130,8 @@ namespace Vre.Server.RemoteService
                 DateTime now = DateTime.UtcNow;
 
                 foreach (KeyValuePair<string, ClientSession> kvp in _sessionList)
-                    if (now.Subtract(kvp.Value.LastUsed).TotalSeconds > _cleanupTimeoutSec) 
+                    if (now.Subtract(kvp.Value.LastUsed).TotalSeconds >
+						Configuration.ClientSession.TimeoutSec.Value) 
                         if (_sessionList.TryRemove(kvp.Key, out cs))
                         {
                             cs.Dispose();
@@ -154,7 +148,8 @@ namespace Vre.Server.RemoteService
 
                 foreach (KeyValuePair<string, ClientSession> kvp in _sessionList)
                     // TODO: Detect kvp.Value.DbSession is stale
-                    if (now.Subtract(kvp.Value.LastUsed).TotalSeconds > _cleanupTimeoutSec)
+                    if (now.Subtract(kvp.Value.LastUsed).TotalSeconds >
+						Configuration.ClientSession.TimeoutSec.Value)
                     {
                         //kvp.Value.Disconnect(true);
                     }
@@ -164,13 +159,6 @@ namespace Vre.Server.RemoteService
 
     internal class ClientSession : IDisposable
     {
-		private static bool _allowExtendedLogging;
-
-		static ClientSession()
-		{
-			_allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
-		}
-
         private readonly object _dbSessionLock = new object();
         private readonly object _subscriptionMgmtLock = new object();
         private readonly object _eventThreadLock = new object();
@@ -545,7 +533,7 @@ namespace Vre.Server.RemoteService
                 Thread.CurrentThread.Name = "HttpPush#" + Thread.CurrentThread.ManagedThreadId.ToString();
                 _eventThreadName = Thread.CurrentThread.Name;
 
-				if (_allowExtendedLogging)
+				if (Configuration.Debug.AllowExtendedLogging.Value)
 					ServiceInstances.Logger.Debug("Started for {0}", User);
 
                 IList<Building> buildings = null;
@@ -576,7 +564,7 @@ namespace Vre.Server.RemoteService
 				if ((buildings != null) && (suites != null))
 				{
 					DataService.GenerateEventDataResponse(this.DbSession, ref ctx, ref buildings, ref suites);
-					if (_allowExtendedLogging)
+					if (Configuration.Debug.AllowExtendedLogging.Value)
 					{
 						if ((buildings.Count > 0) || (suites.Count > 0))
 							ServiceInstances.Logger.Debug("Responding with data for {0}", User);
@@ -595,7 +583,7 @@ namespace Vre.Server.RemoteService
                 Disconnect(true);  // no need for check; if we get this exception - session WAS resumed.
                 ctx.ProcessResponse(ex);
 
-				if (_allowExtendedLogging)
+				if (Configuration.Debug.AllowExtendedLogging.Value)
 					ServiceInstances.Logger.Error("Processing for {0} failed: {1}", User, ex);
 			}
             catch (Exception ex)
@@ -603,7 +591,7 @@ namespace Vre.Server.RemoteService
                 if (dbSessionResumed) Disconnect(false);
                 ctx.ProcessResponse(ex);
 
-				if (_allowExtendedLogging)
+				if (Configuration.Debug.AllowExtendedLogging.Value)
 					ServiceInstances.Logger.Error("Processing for {0} failed: {1}", User, ex);
 			}
             finally

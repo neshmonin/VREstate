@@ -90,6 +90,33 @@ public class Camera {
         HeadingInitial_d = copyFrom.HeadingInitial_d;
         TiltInitial_d = copyFrom.TiltInitial_d;
     }
+    
+    boolean moved = true;
+    public boolean isMoved() {
+    	
+//    	if (CameraType == Type.LookAt) {
+//    		KmlLookAt lookAt = GE.getView().copyAsLookAt(KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND);
+//    		moved = moved || (Math.abs(lookAt.getLatitude() - attributes.Lat_d) > 0.001d); 
+//    		moved = moved || (Math.abs(lookAt.getLongitude() - attributes.Lon_d) > 0.001d); 
+//    		moved = moved || (Math.abs(lookAt.getHeading() - attributes.Heading_d) > 0.001d); 
+//    		moved = moved || (Math.abs(lookAt.getRange() - attributes.Range_m) > 0.001d); 
+//    		moved = moved || (Math.abs(lookAt.getTilt() - attributes.Tilt_d) > 0.001d); 
+//    		moved = moved || (Math.abs(lookAt.getAltitude() - attributes.Alt_m) > 0.001d); 
+//    	}
+//    	else 
+//    	if (CameraType == Type.Camera) {
+//    		KmlCamera camera = GE.getView().copyAsCamera(KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND);
+//    		moved |= camera.getLatitude() != attributes.Lat_d;
+//    		moved |= camera.getLongitude() != attributes.Lon_d;
+//    		moved |= camera.getAltitude() != attributes.Alt_m;
+//    		moved |= camera.getHeading() != attributes.Heading_d;
+//    		moved |= camera.getRoll() != attributes.Roll_d;
+//    		moved |= camera.getTilt() != attributes.Tilt_d;
+//    	}
+    	moved = !moved;
+    	return moved;    		
+    	
+    }
 
     public void Apply()
     {
@@ -173,7 +200,10 @@ public class Camera {
         double newHeading = NormalizeHeading_d(attributes.Heading_d + deltaHeading_d);
         double newTilt = attributes.Tilt_d + deltaTilt_d;
 
-        double absoluteDeltaHeading = HeadingInitial_d - newHeading;   
+
+        double absoluteDeltaHeading = HeadingInitial_d - newHeading;
+        absoluteDeltaHeading -= (absoluteDeltaHeading >  180)? 360 : 0;
+        absoluteDeltaHeading += (absoluteDeltaHeading < -180)? 360 : 0;
         if ((absoluteDeltaHeading < HeadingMax_d && absoluteDeltaHeading > HeadingMin_d)
         	&&
         	(newTilt < TiltMax_d && newTilt > TiltMin_d))

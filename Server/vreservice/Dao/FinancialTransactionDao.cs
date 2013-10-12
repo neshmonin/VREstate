@@ -26,5 +26,15 @@ namespace Vre.Server.Dao
                 .SetString("rid", systemRefId)
                 .List<FinancialTransaction>());
         }
-    }
+
+		public FinancialTransaction[] Get(FinancialTransaction.PaymentSystemType type, string paymentRefId)
+		{
+			return NHibernateHelper.IListToArray<FinancialTransaction>(_session.CreateQuery(
+				"FROM Vre.Server.BusinessLogic.FinancialTransaction WHERE PaymentSystem=:type AND PaymentRefId=:pid "
+				+ "ORDER BY Created DESC")
+				.SetEnum("type", type)
+				.SetString("pid", paymentRefId)
+				.List<FinancialTransaction>());
+		}
+	}
 }

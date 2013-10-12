@@ -16,7 +16,9 @@ namespace Vre.Server.RemoteService
 	    {
 	    }
 
-	    public ServiceQuery(NameValueCollection fromRequestPri, NameValueCollection fromRequestSec)
+		public ServiceQuery(NameValueCollection source) : base(source) { }
+
+		public ServiceQuery(NameValueCollection fromRequestPri, NameValueCollection fromRequestSec)
             : base(fromRequestSec)
         {
             Add(fromRequestPri);  // duplicated keys get overwritten
@@ -82,7 +84,8 @@ namespace Vre.Server.RemoteService
 		Uri Referer { get; }
         RequestType Type { get; }
         string Path { get; }
-        ServiceQuery Query { get; }
+		string[] PathSegments { get; }
+		ServiceQuery Query { get; }
         ClientData Data { get; }
         byte[] RawData { get; }
         /// <summary>

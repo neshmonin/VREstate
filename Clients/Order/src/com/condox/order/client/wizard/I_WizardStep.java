@@ -6,4 +6,5 @@ public interface I_WizardStep {
 	I_WizardStep getPrevStep();
 	I_WizardStep getNextStep();
 	void go(HasWidgets container);
+	String getNavURL();
 }

@@ -654,7 +654,7 @@ namespace Vre.Server.BusinessLogic
 
 			if (!_importersList.TryGetValue(ownerEd, out result))
 			{
-				var matchNName = ServiceInstances.Configuration.GetValue("MlsImportUserNickNameOwner", "mlsImport");
+				var matchNName = Configuration.Mls.ImportUserNickNameOwner.Value;
 
 				IList<User> ownerUsers;
 				using (var dao = new UserDao(_session.DbSession))

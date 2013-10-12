@@ -17,7 +17,7 @@ public class User implements RequestCallback, I_Login {
 	I_Login externalInterface = null;
 
 	public static User Login(I_Login loginInterface) {
-		String request = Options.HOME_URL + "program?q=login&role=visitor&uid=web&pwd=web"
+		String request = Options.URL_VRT + "program?q=login&role=visitor&uid=web&pwd=web"
 											+ "&generation=" + counter++;
 
 		theUser = new User(loginInterface);
@@ -50,7 +50,7 @@ public class User implements RequestCallback, I_Login {
 			keepAliveThread = new Timer() {
 				@Override
 				public void run() {
-					String request = Options.HOME_URL + "program?q=sessionrenew&sid=" + SID
+					String request = Options.URL_VRT + "program?q=sessionrenew&sid=" + SID
 										+ "&generation=" + counter++;
 					GET.send(request);
 				}

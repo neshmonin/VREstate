@@ -24,13 +24,14 @@ public class MainPage extends Composite {
 	@UiField PushButton loginMenu;
 	@UiField PushButton pushButton;
 	@UiField PushButton pushButton_1;
-	private LayoutPanel containerPanel = new LayoutPanel();
+//	@UiField LayoutPanel logPanel;
 
 	interface MainPageUiBinder extends UiBinder<Widget, MainPage> {
 	}
 
 	public MainPage() {
 		initWidget(uiBinder.createAndBindUi(this));
+//		logPanel.getElement().setId("log");
 	}
 	@UiHandler("pushButton")
 	void onPushButtonClick(ClickEvent event) {

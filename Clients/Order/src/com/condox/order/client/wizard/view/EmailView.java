@@ -1,22 +1,19 @@
 package com.condox.order.client.wizard.view;
 
-import java.util.regex.Pattern;
-
 import com.condox.order.client.wizard.Wizard;
 import com.condox.order.client.wizard.presenter.EmailPresenter;
 import com.condox.order.client.wizard.presenter.EmailPresenter.I_Display;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
 public class EmailView extends Composite implements I_Display {
 
@@ -42,8 +39,10 @@ public class EmailView extends Composite implements I_Display {
 	}
 	@UiHandler("buttonNext")
 	void onButtonNextClick(ClickEvent event) {
-		Window.alert("{Sending data to server}");
-		Wizard.cancel();
+//		Window.alert("{Sending data to server}");
+//		Wizard.cancel();
+		presenter.setOwnerEmail(textMail.getText());
+		presenter.onNext();
 	}
 	@UiHandler("buttonPrev")
 	void onButtonPrevClick(ClickEvent event) {
@@ -55,10 +54,16 @@ public class EmailView extends Composite implements I_Display {
 	}
 	@UiHandler("textMail")
 	void onValueChange(ValueChangeEvent<String> event) {
-		buttonNext.setEnabled(textMail.getValue().matches("^\\w+@[a-zA-Z_]+?\\.[a-zA-Z0-9]{2,3}$"));
+		buttonNext.setEnabled(textMail.getValue().matches("^[a-zA-Z0-9_.]+@[a-zA-Z0-9_]+?\\.[a-zA-Z]{2,3}$"));
 	}
 	@UiHandler("textMail")
 	void onTextFilterKeyUp(KeyUpEvent event) {
-		buttonNext.setEnabled(textMail.getValue().matches("^\\w+@[a-zA-Z_]+?\\.[a-zA-Z0-9]{2,3}$"));
+		buttonNext.setEnabled(textMail.getValue().matches("^[a-zA-Z0-9_.]+@[a-zA-Z0-9_]+?\\.[a-zA-Z]{2,3}$"));
+	}
+
+	@Override
+	public void setOwnerEmail(String ownerEmail) {
+		// TODO Auto-generated method stub
+		textMail.setValue(ownerEmail);
 	}
 }

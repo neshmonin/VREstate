@@ -1,4 +1,5 @@
-#Sun Jun 23 18:17:30 EDT 2013
+#Fri Oct 11 13:36:28 EDT 2013
 eclipse.preferences.version=1
+jarsExcludedFromWebInfLib=C\:/Internet Downloads/Eclipse Helios for Java/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122040-rel-r36/gwt-2.5.0/gwt-dev.jar|C\:/Internet Downloads/Eclipse Helios for Java/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122040-rel-r36/gwt-2.5.0/gwt-user.jar|C\:/Internet Downloads/Eclipse Helios for Java/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122040-rel-r36/gwt-2.5.0/validation-api-1.0.0.GA-sources.jar|C\:/Internet Downloads/Eclipse Helios for Java/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122040-rel-r36/gwt-2.5.0/validation-api-1.0.0.GA.jar
 warSrcDir=war
 warSrcDirIsOutput=true

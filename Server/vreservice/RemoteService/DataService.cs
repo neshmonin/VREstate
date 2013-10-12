@@ -12,9 +12,6 @@ namespace Vre.Server.RemoteService
 {
     internal class DataService
     {
-        private static bool _configured = false;
-        private static bool _allowUnsecureService = true;
-        private static string _disabledViewOrderRecoverUrl = null;
 		private static IPRangeFilter _debugClientFilter = null;
 
         public const string ServicePathPrefix = ServicePathElement0 + "/";
@@ -22,16 +19,19 @@ namespace Vre.Server.RemoteService
 
         enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction, Inventory, NamedSearchFilter }
 
+		static DataService()
+		{
+			configure();
+			Configuration.OnModified += new EventHandler((s, e) => configure());
+		}
+
         private static void configure()
         {
-            _allowUnsecureService = ServiceInstances.Configuration.GetValue("AllowSensitiveDataOverNonSecureConnection", false);
-            _disabledViewOrderRecoverUrl = ServiceInstances.Configuration.GetValue("DisabledViewOrderRecoverUrl", "http://3dcondox.com/order?recoverId={0}");
+			var filter = new IPRangeFilter();
+			filter.AddIncludeRanges(Configuration.Debug.DebugClientIpRangeInclude.Value);
+			filter.AddExcludeRanges(Configuration.Debug.DebugClientIpRangeExclude.Value);
 
-			_debugClientFilter = new IPRangeFilter();
-			_debugClientFilter.AddIncludeRanges(ServiceInstances.Configuration.GetValue("DebugClientIpRangeInclude", string.Empty));
-			_debugClientFilter.AddExcludeRanges(ServiceInstances.Configuration.GetValue("DebugClientIpRangeExclude", string.Empty));
-
-            _configured = true;
+			_debugClientFilter = filter;
         }
 
         public static void ProcessGetRequest(IServiceRequest request)
@@ -42,9 +42,8 @@ namespace Vre.Server.RemoteService
             bool includeDeleted;
             ChangeSubscriptionRequest csrq;
 
-            if (!_configured) configure();
-
-            if (!_allowUnsecureService && !request.UserInfo.Session.TrustedConnection) 
+            if (!Configuration.Security.AllowSensitiveDataOverNonSecureConnection.Value
+				&& !request.UserInfo.Session.TrustedConnection) 
                 throw new PermissionException("Service available only over secure connection.");
 
             getPathElements(request.Request.Path, out mo, out objectId, out strObjectId);
@@ -177,9 +176,16 @@ namespace Vre.Server.RemoteService
                     if (-1 == objectId)
                     {
                         int buildingId = request.Request.Query.GetParam("building", -1);
-                        if (-1 == buildingId) throw new ArgumentException("Building ID is missing.");
-
-                        getInventoryList(request.UserInfo.Session, buildingId, csrq, request.Response);
+						string mlsId = request.Request.Query.GetParam("mlsId", string.Empty);
+						if (buildingId > 0)
+						{
+							getInventoryList(request.UserInfo.Session, buildingId, csrq, request.Response);
+						}
+						else if (!string.IsNullOrEmpty(mlsId))
+						{
+							getInventory(request.UserInfo.Session, mlsId, csrq, request.Response);
+						}
+                        else throw new ArgumentException("Entity ID is missing.");
                     }
                     else
                     {
@@ -207,8 +213,6 @@ namespace Vre.Server.RemoteService
             ModelObject mo;
             int objectId;
             string strObjectId;
-
-            if (!_configured) configure();
 
             if (!request.UserInfo.Session.TrustedConnection) throw new PermissionException("Service available only over secure connection.");
 
@@ -248,8 +252,6 @@ namespace Vre.Server.RemoteService
             int objectId;
             string strObjectId;
 
-            if (!_configured) configure();
-
             if (!request.UserInfo.Session.TrustedConnection) throw new PermissionException("Service available only over secure connection.");
 
             getPathElements(request.Request.Path, out mo, out objectId, out strObjectId);
@@ -279,8 +281,6 @@ namespace Vre.Server.RemoteService
             ModelObject mo;
             int objectId;
             string strObjectId;
-
-            if (!_configured) configure();
 
             if (!request.UserInfo.Session.TrustedConnection) throw new PermissionException("Service available only over secure connection.");
 
@@ -713,6 +713,10 @@ namespace Vre.Server.RemoteService
                 b = dao.GetById(buildingId);
             if (null == b) throw new FileNotFoundException("Building does not exist");
 
+			IList<ViewOrder> relatedVos;
+			using (var dao = new ViewOrderDao(session.DbSession))
+				relatedVos = dao.GetActiveByBuilding(b, true);
+
             List<ClientData> result = new List<ClientData>(b.Suites.Count);
             foreach (Suite s in b.Suites)
             {
@@ -721,8 +725,13 @@ namespace Vre.Server.RemoteService
                     //&& (!string.IsNullOrWhiteSpace(s.SuiteType.FloorPlanUrl)) && (!s.SuiteType.FloorPlanUrl.StartsWith("http://"))
                     )
                     ReferencedFileHelper.ConvertUrlsToAbsolute(s.SuiteType);
-                    
-				result.Add(s.GetInventoryClientData(null, false));
+
+				var cd = s.GetInventoryClientData(null, false);
+	
+				var vo = relatedVos.FirstOrDefault(v => v.TargetObjectId == s.AutoID);
+				if (vo != null) vo.GetInventoryClientData(cd, true);
+
+				result.Add(cd);
             }
 
             if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, b.Suites, csrq);
@@ -732,7 +741,35 @@ namespace Vre.Server.RemoteService
             resp.ResponseCode = HttpStatusCode.OK;
         }
 
-        private static void getFinancialTransactionList(ClientSession session, ServiceQuery query, IResponseData resp)
+		private static void getInventory(ClientSession session, string mlsId, ChangeSubscriptionRequest csrq, IResponseData resp)
+		{
+			Suite s;
+			ViewOrder vo;
+
+			using (var dao = new ViewOrderDao(session.DbSession))
+				vo = dao.GetByImportedMlsId(mlsId).FirstOrDefault(v => v.TargetObjectType == ViewOrder.SubjectType.Suite);
+			if (null == vo) throw new FileNotFoundException("Unknown MLS number.");
+
+			using (var dao = new SuiteDao(session.DbSession))
+				s = dao.GetById(vo.TargetObjectId);
+			if (null == s) throw new FileNotFoundException("Internal error #D83C952A");
+
+			var cd = s.GetInventoryClientData(null, false);
+			vo.GetInventoryClientData(cd, true);
+
+			cd.Add("address", AddressHelper.ConvertToReadableAddress(s.Building, s));
+
+            ClientData[] result = new ClientData[1];
+			result[0] = cd;
+
+			if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, s, csrq);
+
+			resp.Data = new ClientData();
+			resp.Data.Add("inventory", result);
+			resp.ResponseCode = HttpStatusCode.OK;
+		}
+
+		private static void getFinancialTransactionList(ClientSession session, ServiceQuery query, IResponseData resp)
         {
             ClientData[] result;
 
@@ -778,7 +815,7 @@ namespace Vre.Server.RemoteService
 
         internal static ClientData convertViewOrderdata(ISession session, ViewOrder viewOrder, bool verbose)
         {
-            viewOrder.ViewOrderURL = ReverseRequestService.ConstructViewOrderUrl(viewOrder);
+            viewOrder.ViewOrderURL = ReverseRequestService.GenerateUrl(viewOrder);
             ClientData result = viewOrder.GetClientData();
 
             if (verbose)
@@ -1300,12 +1337,13 @@ namespace Vre.Server.RemoteService
                         cd.Add("options", ClientData.ConvertProperty(vo.Options));
                         cd.Add("infoUrl", vo.InfoUrl);
                         cd.Add("vTourUrl", vo.VTourUrl);
-						cd.Add("shareLink", ReverseRequestService.ConstructViewOrderUrl(vo));
+						cd.Add("shareLink", ReverseRequestService.GenerateUrl(vo));
 
                         if (!vo.Enabled || (vo.ExpiresOn < now))
                         {
 	                        cd.Add("reason", !vo.Enabled ? "disabled" : "expired");
-	                        cd.Add("recoverUrl", string.Format(_disabledViewOrderRecoverUrl, vo.AutoID.ToString("N")));
+	                        cd.Add("recoverUrl", 
+								string.Format(Configuration.Urls.DisabledViewOrderRecover.Value, vo.AutoID.ToString("N")));
                         }
 
 	                    elements.Add(cd);
@@ -1500,7 +1538,7 @@ namespace Vre.Server.RemoteService
 		                    {
 			                    updatedCnt++;
 
-			                    if (price.HasValue && (price.Value.CompareTo(suite.CurrentPrice.Value) != 0))
+			                    if (suite.CurrentPrice.HasValue && (suite.CurrentPrice.Value.CompareTo(price.Value) != 0))
 				                    manager.LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice));
 		                    }
 		                    else
@@ -1632,7 +1670,7 @@ namespace Vre.Server.RemoteService
                     FinancialTransaction ft = new FinancialTransaction(session.User.AutoID,
                         FinancialTransaction.AccountType.User, viewOrder.OwnerId,
                         FinancialTransaction.OperationType.Debit, 0m,
-                        FinancialTransaction.TranSubject.View,
+                        FinancialTransaction.TranSubject.ViewOrder,
                         tt, viewOrder.TargetObjectId, viewOrder.AutoID.ToString());
 
                     if (!string.IsNullOrWhiteSpace(paymentSystemRefId))

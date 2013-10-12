@@ -30,11 +30,14 @@ public class GET implements RequestCallback{
 		if (Options.context != "") {
 			if (url.endsWith("?"))
 				url += Options.context;
-			else if (url.contains("?"))
-				url += "&" + Options.context;
+			else 
+			if (url.contains("?"))
+			{
+				if (!url.endsWith("&"))
+					url += "&";
+				url += Options.context;
+			}
 		}
-		
-		//url += "&track=true";
 		
 		RequestBuilder request = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
 		theGET = new GET(cb);

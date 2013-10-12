@@ -1,6 +1,6 @@
 package com.condox.order.client.wizard.model;
 
-import com.condox.clientshared.abstractview.Log;
+import com.condox.clientshared.document.SuiteInfo;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.WizardStep;
 import com.condox.order.client.wizard.presenter.SuitesPresenter;
@@ -14,13 +14,21 @@ public class SuitesModel extends WizardStep {
 	}
 
 	private int selectedIndex = 0;
-	
+	private SuiteInfo selected = null;
+
+	public void setSelected(SuiteInfo obj) {
+		selected = obj;
+	}
+
+	public SuiteInfo getSelected() {
+		return selected;
+	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + selectedIndex;
+		result = prime * result + getSelectedIndex();
 		return result;
 	}
 
@@ -33,7 +41,7 @@ public class SuitesModel extends WizardStep {
 		if (getClass() != obj.getClass())
 			return false;
 		SuitesModel other = (SuitesModel) obj;
-		if (selectedIndex != other.selectedIndex)
+		if (getSelectedIndex() != other.getSelectedIndex())
 			return false;
 		return true;
 	}
@@ -42,6 +50,7 @@ public class SuitesModel extends WizardStep {
 	public void go(HasWidgets container) {
 		this.container = container;
 		new SuitesPresenter(new SuitesView(), this).go(container);
+		super.go(container);
 	}
 
 	public void prev() {
@@ -58,6 +67,18 @@ public class SuitesModel extends WizardStep {
 		children.put(this, new ListingOptionsModel(this));
 		return children.get(this);
 	}
-	
-	
+
+	public void setSelectedIndex(int selectedIndex) {
+		this.selectedIndex = selectedIndex;
+	}
+
+	public int getSelectedIndex() {
+		return selectedIndex;
+	}
+
+	@Override
+	public String getNavURL() {
+		return "Suites";
+	}
+
 }

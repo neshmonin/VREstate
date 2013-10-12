@@ -27,7 +27,7 @@ public class UpdatesFromServer implements RequestCallback{
 	}
 
 	public static void RenewCheckChangesThread() {
-		String url = Options.HOME_URL + "ev?sid=" + User.SID
+		String url = Options.URL_VRT + "ev?sid=" + User.SID
 				+ "&generation=" + counter++;
 		if (Options.context != "") {
 			if (url.endsWith("?"))

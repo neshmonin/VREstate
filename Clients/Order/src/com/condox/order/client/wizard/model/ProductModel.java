@@ -71,6 +71,7 @@ public class ProductModel extends WizardStep {
 //		super.go(container, navigator);
 		this.container = container;
 		new ProductPresenter(new ProductView(), this).go(container);
+		super.go(container);
 	}
 	
 	public void prev() {
@@ -119,8 +120,16 @@ public class ProductModel extends WizardStep {
 	@Override
 	protected I_WizardStep createNextStep() {
 //		Log.write("new BuildingsModel");
-		children.put(this, new BuildingsModel(this));
+		if (Listing)
+			children.put(this, new MLSModel(this));
+		else
+			children.put(this, new BuildingsModel(this));
 		return children.get(this);
+	}
+
+	@Override
+	public String getNavURL() {
+		return "Product type";
 	}
 
 	/*@Override

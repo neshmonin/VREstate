@@ -33,6 +33,9 @@ namespace Vre.Server.Task
                         {
                             foreach (ViewOrder vo in vodao.GetExpiringBeforeNotNotified(getcutOffTime(param), 0))
                             {
+								// Ignore temporary ViewOrders such as non-paid pre-created
+								if (vo.ExpiresOn.Subtract(vo.Created).TotalHours < 24.0) continue;
+
                                 notifyViewOrderStatus(ref ccnt, ref ecnt, refVal, testMode,
                                     session, vo, "MSG_VIEWORDER_EXPIRING");
                             }  // view order loop
@@ -40,7 +43,10 @@ namespace Vre.Server.Task
                             DateTime cutOff = DateTime.UtcNow;
                             foreach (ViewOrder vo in vodao.GetExpiringBeforeNotNotified(cutOff, -2))
                             {
-                                if ((int)cutOff.Subtract(vo.ExpiresOn).TotalDays == vo.NotificationsSent)
+								// Ignore temporary ViewOrders such as non-paid pre-created
+								if (vo.ExpiresOn.Subtract(vo.Created).TotalHours < 24.0) continue;
+
+								if ((int)cutOff.Subtract(vo.ExpiresOn).TotalDays == vo.NotificationsSent)
                                 {
                                     notifyViewOrderStatus(ref ccnt, ref ecnt, refVal, testMode,
                                         session, vo, "MSG_VIEWORDER_EXPIRED");
@@ -174,8 +180,7 @@ Ref#{1}", ecnt, refVal));
             }
             else
             {
-                ival = ServiceInstances.Configuration.GetValue("ViewOrderExpiryWarningDays", 3);
-                result = DateTime.UtcNow.AddDays(ival);
+                result = DateTime.UtcNow.AddDays(Configuration.Messaging.ViewOrderExpiryWarningDays.Value);
             }
 
             return result;

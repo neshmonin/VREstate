@@ -34,15 +34,10 @@ namespace Vre.Server.HttpService
         private List<string> _referringHostList;
 
         protected string _path;
-        protected int _fileBufferSize = 16384;
-
-        protected bool _allowExtendedLogging;
 
         protected string _name;
 
         protected HashSet<string> _allowedFileExtensions = new HashSet<string>();
-        protected string _filesRootFolder = null;
-		protected string _viewClientPath = null;
 
 		private DateTime _createTime;
 		
@@ -54,23 +49,13 @@ namespace Vre.Server.HttpService
 	        _createTime = DateTime.UtcNow;
 
             if (0 == ContentTypeByExtension.Count) initializeContentType();
-            _fileBufferSize = ServiceInstances.Configuration.GetValue("FileStreamingBufferSize", 16384);
-            _allowExtendedLogging = ServiceInstances.Configuration.GetValue("DebugAllowExtendedLogging", false);
 
-            //_listenerHostName = ServiceInstances.Configuration.GetValue(
+			// TODO: Static configuration
+			_allowedFileExtensions = new HashSet<string>(CsvUtilities.Split(Configuration.HttpService.FileService.AllowedExtensions.Value));
 
-            _filesRootFolder = ServiceInstances.Configuration.GetValue("FilesRoot",
-                Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+            _listeningHostAliasList = new List<string>(CsvUtilities.Split(Configuration.HttpService.ListeningHostAliasList.Value));
 
-			_viewClientPath = ServiceInstances.Configuration.GetValue("ViewClientPath", "VREstate.html");
-
-			_allowedFileExtensions = new HashSet<string>(CsvUtilities.Split(ServiceInstances.Configuration.GetValue("AllowedServedFileExtensions", string.Empty)));
-
-            _listeningHostAliasList = new List<string>(CsvUtilities.Split(ServiceInstances.Configuration.GetValue("ListeningHostAliasList",
-                "localhost:8026,168.144.195.160,ref.3dcondox.com,vrt.3dcondox.com,order.3dcondox.com,static.3dcondox.com,models.3dcondox.com")));
-
-            _referringHostList = new List<string>(CsvUtilities.Split(ServiceInstances.Configuration.GetValue("ReferringHostAliasList",
-                "vrt.3dcondox.com,order.3dcondox.com,static.3dcondox.com,models.3dcondox.com")));
+            _referringHostList = new List<string>(CsvUtilities.Split(Configuration.HttpService.ReferringHostAliasList.Value));
         }
 
         public void PerformStartup()
@@ -82,7 +67,7 @@ namespace Vre.Server.HttpService
 
             _httpListener = new HttpListener();
 
-            string uriText = ServiceInstances.Configuration.GetValue("HttpListenerUri", string.Empty);
+			string uriText = Configuration.HttpService.ListenerUri.Value;
             if (string.IsNullOrEmpty(uriText))
             {
                 ServiceInstances.Logger.Warn("HTTP service listening point is not set. HTTP service is not started.");
@@ -115,7 +100,7 @@ namespace Vre.Server.HttpService
             ServiceInstances.Logger.Info("Allowed hosts list: {0}", CsvUtilities.ToString(_listeningHostAliasList));
             ServiceInstances.Logger.Info("Referring hosts list: {0}", CsvUtilities.ToString(_referringHostList));
 
-            if (_allowExtendedLogging)
+            if (Configuration.Debug.AllowExtendedLogging.Value)
                 ServiceInstances.RequestLogger.Info("{0} started", _name);
 
             Status = "Running";
@@ -231,7 +216,7 @@ namespace Vre.Server.HttpService
                 long el = ((System.Diagnostics.Stopwatch.GetTimestamp() - st) * 1000) / System.Diagnostics.Stopwatch.Frequency;
 				enqueueQueryStat(el);
 				if (el >= 1000) ServiceInstances.Logger.Warn("Request processed in {0} ms !!!@@@", el);
-				else if (_allowExtendedLogging) ServiceInstances.Logger.Debug("Request processed in {0} ms", el);
+				else if (Configuration.Debug.AllowExtendedLogging.Value) ServiceInstances.Logger.Debug("Request processed in {0} ms", el);
             }
         }
 
@@ -295,13 +280,13 @@ namespace Vre.Server.HttpService
                 else if (data.DataPhysicalLocation != null)
                 {
                     // stream file to response
-                    byte[] buffer = new byte[_fileBufferSize];
+                    byte[] buffer = new byte[Configuration.HttpService.FileService.StreamingBufferSize.Value];
                     using (Stream fs = File.Open(data.DataPhysicalLocation, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
                         int read;
                         do
                         {
-                            read = fs.Read(buffer, 0, _fileBufferSize);
+                            read = fs.Read(buffer, 0, buffer.Length);
                             response.OutputStream.Write(buffer, 0, read);
                         } while (read > 0);
                     }
@@ -315,7 +300,7 @@ namespace Vre.Server.HttpService
             if (e is ObjectExistsException)
             {
                 response.StatusCode = (int)HttpStatusCode.Conflict;
-                if (_allowExtendedLogging)
+                if (Configuration.Debug.AllowExtendedLogging.Value)
                 {
                     response.StatusDescription = "Entity already exists: " + e.Message;
                     ServiceInstances.Logger.Error("Entity already exists: {0}", e);
@@ -329,7 +314,7 @@ namespace Vre.Server.HttpService
             else if (e is ExpiredException)
             {
                 response.StatusCode = (int)HttpStatusCode.Gone;
-                if (_allowExtendedLogging)
+				if (Configuration.Debug.AllowExtendedLogging.Value)
                 {
                     response.StatusDescription = e.Message != null ? e.Message : "Content expired.";
                     ServiceInstances.Logger.Error("Requested entity is expired: {0}", e);
@@ -343,7 +328,7 @@ namespace Vre.Server.HttpService
             else if (e is FileNotFoundException)
             {
                 response.StatusCode = (int)HttpStatusCode.NotFound;
-                if (_allowExtendedLogging)
+				if (Configuration.Debug.AllowExtendedLogging.Value)
                 {
                     response.StatusDescription = "Content does not exist: " + e.Message;
                     ServiceInstances.Logger.Error("HTTP request for unknown entity: {0}", e);
@@ -358,7 +343,7 @@ namespace Vre.Server.HttpService
             {
                 response.StatusCode = (int)HttpStatusCode.Forbidden;
                 response.StatusDescription = e.Message;// "Current user has no permission to view this object.";
-                if (_allowExtendedLogging)
+				if (Configuration.Debug.AllowExtendedLogging.Value)
                 {
                     ServiceInstances.Logger.Error("Attempt to retrieve object not granted: {0}", e);
                 }
@@ -371,7 +356,7 @@ namespace Vre.Server.HttpService
             {
                 response.StatusCode = (int)HttpStatusCode.PreconditionFailed;
                 response.StatusDescription = e.Message;
-                if (_allowExtendedLogging)
+				if (Configuration.Debug.AllowExtendedLogging.Value)
                 {
                     ServiceInstances.Logger.Error("Cannot perform operation: {0}", e);
                 }
@@ -384,7 +369,7 @@ namespace Vre.Server.HttpService
             {
                 response.StatusCode = (int)HttpStatusCode.Conflict;
                 response.StatusDescription = e.Message;
-                if (_allowExtendedLogging)
+				if (Configuration.Debug.AllowExtendedLogging.Value)
                 {
                     ServiceInstances.Logger.Error("Stale object: {0}", e);
                 }
@@ -396,7 +381,7 @@ namespace Vre.Server.HttpService
             else if (e is ArgumentException)
             {
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
-                if (_allowExtendedLogging)
+				if (Configuration.Debug.AllowExtendedLogging.Value)
                 {
                     response.StatusDescription = "Argument error: " + e.Message;
                     ServiceInstances.Logger.Error("{0}", e);
@@ -411,7 +396,7 @@ namespace Vre.Server.HttpService
             {
                 response.StatusCode = (int)HttpStatusCode.NotImplemented;
                 response.StatusDescription = "Service not implemented.";
-                if (_allowExtendedLogging)
+				if (Configuration.Debug.AllowExtendedLogging.Value)
                 {
                     ServiceInstances.Logger.Error("Service not implemented: {0}", e);
                 }
@@ -423,20 +408,20 @@ namespace Vre.Server.HttpService
             else if (e is InvalidDataException)
             {
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
-                if (_allowExtendedLogging)
+				if (Configuration.Debug.AllowExtendedLogging.Value)
                 {
                     response.StatusDescription = "The data passed to server is not valid: " + e.Message;
-                    ServiceInstances.Logger.Error("Request processing fauled: {0}", e);
+                    ServiceInstances.Logger.Error("Request processing failed: {0}", e);
                 }
                 else
                 {
                     response.StatusDescription = "The data passed to server is not valid.";
-                    ServiceInstances.Logger.Error("Request processing fauled: {0}", e.Message);
+                    ServiceInstances.Logger.Error("Request processing failed: {0}", e.Message);
                 }
             }
             else if (e is HttpListenerException)
             {
-                if (_allowExtendedLogging)
+				if (Configuration.Debug.AllowExtendedLogging.Value)
                 {
                     ServiceInstances.Logger.Error("HTTP request processing failed: {0}", e);
                 }
@@ -466,7 +451,7 @@ namespace Vre.Server.HttpService
             else if (file.Equals("base")) rq_redirect(0, response);
             else
             {
-				if (file.Equals("view")) file = _viewClientPath;
+				if (file.Equals("view")) file = Configuration.HttpService.ViewClientPath.Value;
 
                 // validate path
                 if (!IsPathValid(file, true)) throw new FileNotFoundException("Path is invalid.");
@@ -476,9 +461,9 @@ namespace Vre.Server.HttpService
                 if (!_allowedFileExtensions.Contains(response.DataStreamContentType)) throw new FileNotFoundException("File type not known.");
 
                 // getfullpath shall resolve any back-steps (..)
-                response.DataPhysicalLocation = Path.GetFullPath(Path.Combine(_filesRootFolder, file));
+                response.DataPhysicalLocation = Path.GetFullPath(Path.Combine(Configuration.HttpService.FileService.RootPath.Value, file));
                 // do not allow going into up-level directories
-                if (!response.DataPhysicalLocation.StartsWith(_filesRootFolder)) throw new FileNotFoundException("File not found.");
+				if (!response.DataPhysicalLocation.StartsWith(Configuration.HttpService.FileService.RootPath.Value)) throw new FileNotFoundException("File not found.");
                 // verify file presence
                 if (!File.Exists(response.DataPhysicalLocation)) throw new FileNotFoundException("File not found.");
 
@@ -488,7 +473,7 @@ namespace Vre.Server.HttpService
 
         private static void initializeContentType()
         {
-            string mimeFile = Path.Combine(Path.GetDirectoryName(ServiceInstances.Configuration.FilePath), "mimetypes.csv");
+            string mimeFile = Path.Combine(Configuration.ConfigurationFilesPath, "mimetypes.csv");
 
             try
             {
@@ -644,7 +629,7 @@ namespace Vre.Server.HttpService
             return result.ToString();
         }
 
-        protected static string prepareCallerInfo(string browserKey, HttpListenerContext ctx, HttpServiceRequest rq)
+        protected static string prepareCallerInfo(string browserKey, HttpListenerContext ctx, IServiceRequest rq)
         {
             ClientSession cs = (rq != null) ? rq.UserInfo.Session : null;
             string url = Utilities.SanitizeUrl(ctx.Request.Url.ToString());
