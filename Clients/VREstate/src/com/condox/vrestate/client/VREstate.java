@@ -14,25 +14,33 @@ import com.condox.clientshared.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.HelicopterView;
 import com.condox.vrestate.client.view.ProgressBar;
-import com.condox.vrestate.client.view.SiteView;import com.condox.vrestate.client.view._AbstractView;
+import com.condox.vrestate.client.view.SiteView;
+import com.condox.vrestate.client.view._AbstractView;
 import com.condox.vrestate.client.view.GeoItems.SiteGeoItem;
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.user.client.ui.HTML;
+import com.nitrous.gwt.earth.client.api.KmlContainer;
 import com.nitrous.gwt.earth.client.api.KmlObject;
+import com.nitrous.gwt.earth.client.api.KmlObjectList;
+import com.nitrous.gwt.earth.client.api.KmlPlacemark;
 import com.nitrous.gwt.earth.client.api.event.KmlLoadCallback;
 
-public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I_Login {
+public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
+		I_Login {
 
 	/**
 	 * @wbp.parser.entryPoint
 	 */
 	@Override
 	public void onModuleLoad() {
-//		Log.write(GWT.getHostPageBaseURL());
-//		Log.write(GWT.getModuleBaseForStaticFiles());
-//		Log.write(GWT.getModuleBaseURL());
+		// Log.write(GWT.getHostPageBaseURL());
+		// Log.write(GWT.getModuleBaseForStaticFiles());
+		// Log.write(GWT.getModuleBaseURL());
 		Options.Init();
 		LoginUser();
 	}
@@ -85,7 +93,8 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I
 				boolean useSiteModel = true;
 				for (Building bldng : Document.get().getBuildings().values()) {
 					if (bldng.getDisplayModelUrl() != "") {
-						GE.getPlugin().fetchKml(bldng.getDisplayModelUrl(),this);
+						GE.getPlugin().fetchKml(bldng.getDisplayModelUrl(),
+								this);
 						useSiteModel = false;
 					}
 					if (bldng.getOverlayUrl() != "")
@@ -95,7 +104,8 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I
 				}
 				if (useSiteModel)
 					if (site.getDisplayModelUrl() != "")
-						GE.getPlugin().fetchKml(site.getDisplayModelUrl(), this);
+						GE.getPlugin()
+								.fetchKml(site.getDisplayModelUrl(), this);
 			}
 
 			_AbstractView.CreateAllGeoItems();
@@ -149,8 +159,101 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I
 
 	@Override
 	public void onLoaded(KmlObject feature) {
-		if (feature != null)
-			GE.getPlugin().getFeatures().appendChild(feature);
+		if (feature != null) {
+			GE.getPlugin().getFeatures()
+					.appendChild(cut_empty_icons(remove_dublicates(feature)));
+		}
+	}
+
+	private KmlObject remove_dublicates(KmlObject feature) {
+		if ("KmlDocument".equals(feature.getType())) {
+			KmlContainer container = (KmlContainer) feature;
+
+			// To be added
+			KmlObjectList new_placemarks = container
+					.getElementsByType("KmlPlacemark");
+
+			// Already contained by GE
+			KmlObjectList curr_placemarks = GE.getPlugin().getElementsByType(
+					"KmlPlacemark");
+
+			// new placemarks
+			int i = 0;
+			int j = 0;
+			while (i < new_placemarks.getLength()) {
+				j = i + 1;
+				while (j < new_placemarks.getLength()) {
+					KmlPlacemark first = (KmlPlacemark) new_placemarks.item(i);
+					KmlPlacemark second = (KmlPlacemark) new_placemarks.item(j);
+					if (first.getName().equals(second.getName())) {
+//						container.getFeatures().removeChild(second);
+						second.setVisibility(false);
+						new_placemarks = container
+								.getElementsByType("KmlPlacemark");
+						i = 0;
+						j = 0;
+						break;
+					}
+
+					j++;
+				}
+				if (i == 0 && j == 0)
+					break;
+				i++;
+			}
+
+			// Log.write(container.getKml());
+			// new vs old placemarks
+			i = 0;
+			j = 0;
+			while (i < new_placemarks.getLength()) {
+				while (j < curr_placemarks.getLength()) {
+					KmlPlacemark first = (KmlPlacemark) new_placemarks.item(i);
+					KmlPlacemark second = (KmlPlacemark) curr_placemarks
+							.item(j);
+					// Log.write("i: " + i + ", j: " + j);
+					if (first.getName().equals(second.getName())) {
+						// I don't know why it doesn't work...
+						// container.getFeatures().removeChild(first);
+						first.setVisibility(false);
+						new_placemarks = container
+								.getElementsByType("KmlPlacemark");
+						i = 0;
+						j = 0;
+						break;
+					}
+					j++;
+				}
+				if (i == 0 && j == 0)
+					break;
+				i++;
+			}
+			return container;
+		} else
+			return feature;
+	}
+	
+	private KmlObject cut_empty_icons(KmlObject feature) {
+		KmlContainer container = (KmlContainer)feature; 
+		KmlObjectList list = container.getElementsByType("KmlPlacemark");
+		for (int i = 0; i < list.getLength(); i++) {
+			KmlPlacemark placemark = (KmlPlacemark) list.item(i);
+			String html = placemark.getDescription();
+			// GWT.log(html);
+			Element elem = new HTML().getElement();
+			elem.setInnerHTML(html);
+			NodeList<Element> imgs = elem.getElementsByTagName("img");
+			for (int j = 0; j < imgs.getLength(); j++) {
+				Element img = imgs.getItem(j);
+				if ("none".equals(img.getStyle().getDisplay()))
+					img.getParentElement().removeChild(img);
+			}
+			html = elem.getInnerHTML();
+
+			// GWT.log(html);
+			placemark.setDescription(html);
+		}
+		return container;
 	}
 
 	@Override
