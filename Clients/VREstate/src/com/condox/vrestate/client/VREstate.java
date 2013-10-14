@@ -18,10 +18,12 @@ import com.condox.vrestate.client.view.SiteView;
 import com.condox.vrestate.client.view._AbstractView;
 import com.condox.vrestate.client.view.GeoItems.SiteGeoItem;
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.user.client.ui.HTML;
 import com.nitrous.gwt.earth.client.api.KmlContainer;
 import com.nitrous.gwt.earth.client.api.KmlObject;
 import com.nitrous.gwt.earth.client.api.KmlObjectList;
@@ -159,39 +161,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 	public void onLoaded(KmlObject feature) {
 		if (feature != null) {
 			GE.getPlugin().getFeatures()
-					.appendChild(remove_dublicates(feature));
-			// // GWT.log("type: " + feature.getType());
-			// if ("KmlDocument".equals(feature.getType())) {
-			// KmlObjectList curr_placemarks = GE.getPlugin()
-			// .getElementsByType("KmlPlacemark");
-			// KmlDocument doc = (KmlDocument) feature;
-			// KmlObjectList placemarks = doc
-			// .getElementsByType("KmlPlacemark");
-			// GWT.log("curr_placemarks count: " + curr_placemarks.getLength());
-			// GWT.log("placemarks count: " + placemarks.getLength());
-			// int a = 0;
-			// while (a < placemarks.getLength()) {
-			// for (int b = 0; b < curr_placemarks.getLength(); b++) {
-			// GWT.log("a = " + a + ", b = " + b);
-			// KmlPlacemark A = (KmlPlacemark) placemarks.item(a);
-			// KmlPlacemark B = (KmlPlacemark) curr_placemarks.item(b);
-			// GWT.log("A: " + A.getKml());
-			// GWT.log("B: " + B.getKml());
-			// if (A.getName().equals(B.getName())) {
-			// GWT.log("equals!");
-			// GWT.log("doc: " + doc.getKml());
-			// // I don't know a right way here...
-			// doc = (KmlDocument) GE.parseKml(doc.getKml()
-			// .replace(A.getKml(), ""));
-			// GWT.log("doc: " + doc.getKml());
-			// break;
-			// }
-			// }
-			// a++;
-			// }
-			// GE.getPlugin().getFeatures().appendChild(doc);
-			// } else
-			// GE.getPlugin().getFeatures().appendChild(feature);
+					.appendChild(cut_empty_icons(remove_dublicates(feature)));
 		}
 	}
 
@@ -261,6 +231,29 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 			return container;
 		} else
 			return feature;
+	}
+	
+	private KmlObject cut_empty_icons(KmlObject feature) {
+		KmlContainer container = (KmlContainer)feature; 
+		KmlObjectList list = container.getElementsByType("KmlPlacemark");
+		for (int i = 0; i < list.getLength(); i++) {
+			KmlPlacemark placemark = (KmlPlacemark) list.item(i);
+			String html = placemark.getDescription();
+			// GWT.log(html);
+			Element elem = new HTML().getElement();
+			elem.setInnerHTML(html);
+			NodeList<Element> imgs = elem.getElementsByTagName("img");
+			for (int j = 0; j < imgs.getLength(); j++) {
+				Element img = imgs.getItem(j);
+				if ("none".equals(img.getStyle().getDisplay()))
+					img.getParentElement().removeChild(img);
+			}
+			html = elem.getInnerHTML();
+
+			// GWT.log(html);
+			placemark.setDescription(html);
+		}
+		return container;
 	}
 
 	@Override
