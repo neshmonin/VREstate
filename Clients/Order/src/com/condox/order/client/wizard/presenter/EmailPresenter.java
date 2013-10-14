@@ -22,6 +22,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class EmailPresenter implements I_Presenter {
 
+	public String payment = Options.isTestPay()? "CAD1.00" : "CAD49.99";
+	
 	public static interface I_Display {
 		void setPresenter(EmailPresenter presenter);
 
@@ -52,64 +54,52 @@ public class EmailPresenter implements I_Presenter {
 
 	public void onNext() {
 		// **********************************
-		// TODO —генерировать строку дл€ Summary
 		I_WizardStep step = model;
 		String ownerEmail = "";
-		String payment = Options.isTestPay()? "CAD1.00" : "CAD49.99";
 		String product = "prl";
 		String type = "suite";
 		String suiteId = "";
 		String sid = "";
 		while (step != null) {
-			try {
+			switch (step.getStepType()) {
+			case LoginModel:
 				sid = ((LoginModel) step).getUserSid();
-//				user = ((LoginModel) step).getUserLogin();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
-				if (((ProductModel) step).getListingPrivate()) {
+				break;
+			case ProductModel:
+				ProductModel productModelStep = (ProductModel) step;
+				if (productModelStep.getListingPrivate()) {
 					product = "prl";
 //					order = "Private Interactive 3D Listing";
 					type = "suite";
-				} else if (((ProductModel) step).getListingShared()) {
+				} else if (productModelStep.getListingShared()) {
 					product = "pul";
 //					order = "Public Interactive 3D Listing";
 					type = "suite";
-				} else if (((ProductModel) step).getLayout()) {
+				} else if (productModelStep.getLayout()) {
 //					order = "Interactive 3D Layout";
 					type = "building";
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
-//				buildingId = String.valueOf(((BuildingsModel) step)
-//						.getSelectedId());
-//				address = ((BuildingsModel) step).getSelected().getAddress();
-//				address = ((BuildingsModel) step).getSelected().getStreet();
-//				address += ", " + ((BuildingsModel) step).getSelected().getCity();
-//				address += ", " + ((BuildingsModel) step).getSelected().getPostal();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+				break;
+		//	case BuildingsModel:
+		//		buildingId = String.valueOf(((BuildingsModel) step)
+		//				.getSelectedId());
+		//		address = ((BuildingsModel) step).getSelected().getAddress();
+		//		address = ((BuildingsModel) step).getSelected().getStreet();
+		//		address += ", " + ((BuildingsModel) step).getSelected().getCity();
+		//		address += ", " + ((BuildingsModel) step).getSelected().getPostal();
+		//		break;
+			case SuitesModel:
 				suiteId = String.valueOf(((SuitesModel) step)
 						.getSelected().getId());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+				break;
+			case ListingOptionsModel:
 				suiteId = String.valueOf(((ListingOptionsModel) step).getSuiteId());
-//				urlVirtualTour = ((ListingOptionsModel) step).getUrlVirtualTour();
-//				urlMoreInfo = String.valueOf(((ListingOptionsModel) step).getUrlMoreInfo());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+				//urlVirtualTour = ((ListingOptionsModel) step).getUrlVirtualTour();
+				//urlMoreInfo = String.valueOf(((ListingOptionsModel) step).getUrlMoreInfo());
+				break;
+			case EmailModel:
 				ownerEmail = String.valueOf(((EmailModel) step).getOwnerMail());
-			} catch (Exception e) {
-				e.printStackTrace();
+				break;
 			}
 			step = step.getPrevStep();
 		}

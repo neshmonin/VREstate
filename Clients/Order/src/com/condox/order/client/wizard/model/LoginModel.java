@@ -82,6 +82,9 @@ public class LoginModel extends WizardStep {
 	public String getNavURL() {
 		return "Login";
 	}
-	
-	
+
+	@Override
+	public StepTypes getStepType() {
+		return StepTypes.LoginModel;
+	}
 }

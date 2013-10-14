@@ -8,6 +8,7 @@ import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.document.BuildingInfo;
 import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.I_WizardStep;
+import com.condox.order.client.wizard.I_WizardStep.StepTypes;
 import com.condox.order.client.wizard.model.BuildingsModel;
 import com.condox.order.client.wizard.model.LoginModel;
 import com.google.gwt.http.client.Request;
@@ -46,11 +47,9 @@ public class BuildingsPresenter implements I_Presenter {
 		String sid = "";
 		I_WizardStep step = model;
 		while (step != null) {
-			try {
+			if (step.getStepType() == StepTypes.LoginModel)
 				sid = ((LoginModel) step).getUserSid();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+
 			step = step.getPrevStep();
 		}
 
