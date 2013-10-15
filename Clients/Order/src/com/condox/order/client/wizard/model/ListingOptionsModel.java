@@ -99,20 +99,16 @@ public class ListingOptionsModel extends WizardStep {
 		String sid = "";
 		I_WizardStep step = this;
 		while (step != null) {
-			try {
+			switch (step.getStepType()) {
+			case LoginModel:
 				sid = ((LoginModel) step).getUserSid();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+				break;
+			case MLSModel:
 				mls = ((MLSModel) step).getMLS();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+				break;
+			case SuitesModel:
 				selectedSuite = ((SuitesModel) step).getSelected();
-			} catch (Exception e) {
-				e.printStackTrace();
+				break;
 			}
 			step = step.getPrevStep();
 		}
@@ -168,4 +164,8 @@ public class ListingOptionsModel extends WizardStep {
 		return "Options";
 	}
 
+	@Override
+	public StepTypes getStepType() {
+		return StepTypes.ListingOptionsModel;
+	}
 }

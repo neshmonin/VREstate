@@ -81,4 +81,8 @@ public class SuitesModel extends WizardStep {
 		return "Suites";
 	}
 
+	@Override
+	public StepTypes getStepType() {
+		return StepTypes.SuitesModel;
+	}
 }

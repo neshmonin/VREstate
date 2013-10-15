@@ -185,21 +185,30 @@ namespace Vre.Server.RemoteService
                 if (!string.IsNullOrWhiteSpace(building)) // throw new ArgumentException("Address: building (house) number is not provided");
                     building = building.Trim().ToUpperInvariant();
 
-                if (!string.IsNullOrWhiteSpace(building)) { freetextAddress.Append(building); freetextAddress.Append(" "); }
-                else { freetextAddress.Append("* "); }
+                if (!string.IsNullOrWhiteSpace(building)) appendAddressData(ref freetextAddress, building);
+				else appendAddressData(ref freetextAddress, "*");
 
-                if (!string.IsNullOrWhiteSpace(street)) { freetextAddress.Append(street); freetextAddress.Append(" "); }
-                if (!string.IsNullOrWhiteSpace(streetSuffix)) { freetextAddress.Append(streetSuffix); freetextAddress.Append(" "); }
-                if (!string.IsNullOrWhiteSpace(streetType)) { freetextAddress.Append(streetType); freetextAddress.Append(" "); }
-                if (!string.IsNullOrWhiteSpace(streetDirection)) { freetextAddress.Append(streetDirection); freetextAddress.Append(" "); }
+                if (!string.IsNullOrWhiteSpace(street)) appendAddressData(ref freetextAddress, street);
+                if (!string.IsNullOrWhiteSpace(streetSuffix)) appendAddressData(ref freetextAddress, streetSuffix);
+                if (!string.IsNullOrWhiteSpace(streetType)) appendAddressData(ref freetextAddress, streetType);
+                if (!string.IsNullOrWhiteSpace(streetDirection)) appendAddressData(ref freetextAddress, streetDirection);
 
-                freetextAddress.Append("*");
+				freetextAddress.Append('*');
             }
 
+			ServiceInstances.Logger.Debug("Address to parse: c=<{0}>, pc=<{1}>, sp=<{2}>, m=<{3}>, a=<{4}>",
+				country, postalCode, state, municipality, freetextAddress);
+
             using (BuildingDao dao = new BuildingDao(dbSession))
-                return dao.SearchByAddress(country, postalCode, state, municipality,
+                return dao.SearchByAddress(country, null/*postalCode*/, state, municipality,
                     (freetextAddress.Length > 0) ? freetextAddress.ToString() : null);
         }
+
+		private static void appendAddressData(ref StringBuilder freeTextAddress, string field)
+		{
+			if (freeTextAddress.Length > 0) freeTextAddress.Append(' ');
+			freeTextAddress.Append(field);
+		}
 
         public static ClientData ConvertToNormalizedAddress(Building building, Suite suite)
         {

@@ -58,65 +58,52 @@ public class SummaryPresenter implements I_Presenter {
 
 	public String getSummary() {
 		// **********************************
-		// TODO —генерировать строку дл€ Summary
 		step = model;
 		while (step != null) {
-			try {
+			switch (step.getStepType()) {
+			case LoginModel:
 				sid = ((LoginModel) step).getUserSid();
 				user = ((LoginModel) step).getUserLogin();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
-				if (((ProductModel) step).getListingPrivate()) {
+				break;
+			case ProductModel:
+				ProductModel productModelStep = (ProductModel) step;
+				if (productModelStep.getListingPrivate()) {
 					product = "prl";
 					order = "Private Interactive 3D Listing";
 					type = "suite";
-				} else if (((ProductModel) step).getListingShared()) {
+				} else if (productModelStep.getListingShared()) {
 					product = "pul";
 					order = "Public Interactive 3D Listing";
 					type = "suite";
-				} else if (((ProductModel) step).getLayout()) {
+				} else if (productModelStep.getLayout()) {
 					order = "Interactive 3D Layout";
 					type = "building";
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+				break;
+			case BuildingsModel:
 				buildingId = String.valueOf(((BuildingsModel) step)
 						.getSelectedId());
 //				address = ((BuildingsModel) step).getSelected().getAddress();
 //				address = ((BuildingsModel) step).getSelected().getStreet();
 //				address += ", " + ((BuildingsModel) step).getSelected().getCity();
 //				address += ", " + ((BuildingsModel) step).getSelected().getPostal();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+				break;
+			case SuitesModel:
 				if (suite == null)
 					suite = ((SuitesModel) step).getSelected();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+				break;
+			case ListingOptionsModel:
 				if (suite == null)
 					suite = ((ListingOptionsModel) step).getSelectedSuite();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
 				mls = String.valueOf(((ListingOptionsModel) step).getMls());
 				urlVirtualTour = ((ListingOptionsModel) step).getUrlVirtualTour();
 				urlMoreInfo = String.valueOf(((ListingOptionsModel) step).getUrlMoreInfo());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+				break;
+			case EmailModel:
 				ownerEmail = String.valueOf(((EmailModel) step).getOwnerMail());
-			} catch (Exception e) {
-				e.printStackTrace();
+				break;
 			}
+
 			step = step.getPrevStep();
 		}
 		/*String html = "Summary: <br /> Session id: " + sid + "<br />"

@@ -3,6 +3,7 @@ package com.condox.order.client.wizard.presenter;
 import com.condox.clientshared.document.SuiteInfo;
 import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.I_WizardStep;
+import com.condox.order.client.wizard.I_WizardStep.StepTypes;
 import com.condox.order.client.wizard.model.ListingOptionsModel;
 import com.condox.order.client.wizard.model.SuitesModel;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -57,38 +58,31 @@ public class ListingOptionsPresenter implements I_Presenter {
 		SuiteInfo selectedSuite = null;
 		I_WizardStep step = model;
 		while (step != null) {
-			try {
-				if (selectedSuite == null)
+			if (selectedSuite == null) {
+				if (step.getStepType() == StepTypes.ListingOptionsModel) {
 					selectedSuite = ((ListingOptionsModel)step).getSelectedSuite();
-				if (selectedSuite == null)
+//					virtualTourURL = ((ListingOptionsModel)step).getUrlVirtualTour();
+//					moreInfoURL = ((ListingOptionsModel)step).getUrlMoreInfo();
+//					mls = ((ListingOptionsModel)step).getMls();
+//					suiteId = ((ListingOptionsModel)step).getSuiteId();
+				}
+				else if (step.getStepType() == StepTypes.SuitesModel) {
 					selectedSuite = ((SuitesModel)step).getSelected();
-				
-//				virtualTourURL = ((ListingOptionsModel)step).getUrlVirtualTour();
-//				moreInfoURL = ((ListingOptionsModel)step).getUrlMoreInfo();
-//				mls = ((ListingOptionsModel)step).getMls();
-//				suiteId = ((ListingOptionsModel)step).getSuiteId();
-			} catch (Exception e) {
-				e.printStackTrace();
+//					virtualTourURL = ((SuitesModel) step).getSelected().getVirtualTourURL();
+//					moreInfoURL = ((SuitesModel) step).getSelected().getMoreInfoURL();
+//					mls = ((SuitesModel) step).getSelected().getMLS();
+				}
 			}
-//			try {
-//				virtualTourURL = ((SuitesModel) step).getSelected().getVirtualTourURL();
-//				moreInfoURL = ((SuitesModel) step).getSelected().getMoreInfoURL();
-//				mls = ((SuitesModel) step).getSelected().getMLS();
-////				sid = ((LoginModel) step).getUserSid();
-//				
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
 			step = step.getPrevStep();
 		}
 		if (selectedSuite != null) {
-		model.setUrlVirtualTour(selectedSuite.getVirtualTourURL());
-		model.setUrlMoreInfo(selectedSuite.getMoreInfoURL());
-		model.setMls(selectedSuite.getMLS());
-		model.setSuiteId(String.valueOf(selectedSuite.getId()));
-		display.setVirtualTourURL(model.getUrlVirtualTour());
-		display.setMoreInfoURL(model.getUrlMoreInfo());
-		display.setMLS(model.getMls());
+			model.setUrlVirtualTour(selectedSuite.getVirtualTourURL());
+			model.setUrlMoreInfo(selectedSuite.getMoreInfoURL());
+			model.setMls(selectedSuite.getMLS());
+			model.setSuiteId(String.valueOf(selectedSuite.getId()));
+			display.setVirtualTourURL(model.getUrlVirtualTour());
+			display.setMoreInfoURL(model.getUrlMoreInfo());
+			display.setMLS(model.getMls());
 		}
 //		
 ////		String url = "https://vrt.3dcondox.com/data/inventory?";

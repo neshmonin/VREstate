@@ -93,7 +93,7 @@ namespace Vre.Server.Dao
                 }
                 if (addressFreeText != null) 
                 { 
-                    qs.Append(" AND AddressLine1+' '+AddressLine2 LIKE :fa"); filterCriteriaCnt++; 
+                    qs.Append(" AND AddressLine1 LIKE :fa"); filterCriteriaCnt++; 
                 }
 
                 if (0 == filterCriteriaCnt) throw new ArgumentException("Need at least one address criterion");

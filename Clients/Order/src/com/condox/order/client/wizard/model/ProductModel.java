@@ -132,9 +132,8 @@ public class ProductModel extends WizardStep {
 		return "Product type";
 	}
 
-	/*@Override
-	public String getCaption() {
-		return " Select order type >>";
-	}*/
-	
+	@Override
+	public StepTypes getStepType() {
+		return StepTypes.ProductModel;
+	}
 }

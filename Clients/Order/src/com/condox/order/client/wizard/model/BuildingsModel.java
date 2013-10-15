@@ -93,13 +93,11 @@ public class BuildingsModel extends WizardStep {
 	protected I_WizardStep createNextStep() {
 		I_WizardStep step = this;
 		while (step != null) {
-			try {
+			if (step.getStepType() == StepTypes.ProductModel) {
 				if (((ProductModel)step).getLayout())
 					children.put(this, new SummaryModel(this));
 				if (((ProductModel)step).getListing())
 					children.put(this, new SuitesModel(this));
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 			step = step.getPrevStep();
 		}		
@@ -110,5 +108,10 @@ public class BuildingsModel extends WizardStep {
 	@Override
 	public String getNavURL() {
 		return "Building";
+	}
+
+	@Override
+	public StepTypes getStepType() {
+		return StepTypes.BuildingsModel;
 	}
 }

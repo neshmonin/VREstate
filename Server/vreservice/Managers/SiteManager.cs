@@ -434,6 +434,65 @@ namespace Vre.Server.BusinessLogic
 							}
 						}
 					}
+					else
+					{
+						// check if MLS info needs to be imported
+						ImportUpdateMlsInfo(item, true);
+					}
+				}
+				catch (Exception ex)
+				{
+					if (voId.Equals(Guid.Empty))
+						issues.AppendFormat("MLS#{0} processing error: {1}",
+														item.MlsId, ex);
+					else
+						issues.AppendFormat("MLS#{0} (VOID={1}) processing error: {2}",
+														item.MlsId, voId, ex);
+					err++;
+				}
+			}
+
+			if (err > 0) issues.AppendFormat("Total {0} listing processing errors.", err);
+
+			return issues.ToString();
+		}
+
+		public string RetroImportExistingViewOrders(
+			ICollection<MlsItem> newItems, 
+			ref IDictionary<Guid, string> voIds,
+			ref int add, ref int err)
+		{
+			var issues = new StringBuilder();
+			int skp = 0;
+
+			foreach (var item in newItems)
+			{
+				var voId = Guid.Empty;
+
+				try
+				{
+					if (!voIds.Values.Contains(item.MlsId))
+					{
+						if (!string.IsNullOrEmpty(item.StreetNumber))
+						{
+							IEnumerable<UpdateableBase> results = FindMlsItemTarget(item, issues);
+							if (null == results)
+							{
+								err++;
+							}
+							else
+							{
+								foreach (var id in ImportListing(
+									item, results, ref err, ref skp, ref add, ref issues))
+									voIds.Add(new KeyValuePair<Guid, string>(id, item.MlsId));
+							}
+						}
+					}
+					else
+					{
+						// check if MLS info needs to be imported
+						ImportUpdateMlsInfo(item, true);
+					}
 				}
 				catch (Exception ex)
 				{
@@ -526,7 +585,7 @@ namespace Vre.Server.BusinessLogic
 				}
 
 				// Update extra information
-				ImportUpdateMlsInfo(item);
+				ImportUpdateMlsInfo(item, false);
 				
 				if (!changed) return;
 				adj++;
@@ -534,13 +593,14 @@ namespace Vre.Server.BusinessLogic
 			}
 		}
 
-		private void ImportListing(MlsItem item, IEnumerable<UpdateableBase> targets,
+		private IList<Guid> ImportListing(MlsItem item, IEnumerable<UpdateableBase> targets,
 			ref int err, ref int skp, ref int add, ref StringBuilder issues)
 		{
 			var procesedEds = new List<EstateDeveloper>();
-			foreach (var result in targets)
+			var result = new List<Guid>();
+			foreach (var target in targets)
 			{
-				var suite = result as Suite;
+				var suite = target as Suite;
 
 				if (null == suite)
 				{
@@ -570,7 +630,7 @@ namespace Vre.Server.BusinessLogic
 
 				var vo = new ViewOrder(importer.AutoID,
 					ViewOrder.ViewOrderProduct.PublicListing, ViewOrder.ViewOrderOptions.ExternalTour,
-					item.MlsId, ViewOrder.SubjectType.Suite, result.AutoID, item.VTourUrl,
+					item.MlsId, ViewOrder.SubjectType.Suite, target.AutoID, item.VTourUrl,
 					DateTime.UtcNow.AddDays(365))
 				{
 					Imported = true,
@@ -579,7 +639,7 @@ namespace Vre.Server.BusinessLogic
 				// todo: what's default listing lifetime?!
 
 				// Import extra information
-				ImportUpdateMlsInfo(item);
+				ImportUpdateMlsInfo(item, false);
 
 				using (var tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
 				{
@@ -610,6 +670,8 @@ namespace Vre.Server.BusinessLogic
 				}
 				ServiceInstances.Logger.Info("Imported MLS#{0} for {1} ({2}); VOID={3}",
 					item.MlsId, ed.Name, item.CompiledAddress, vo.AutoID);
+
+				result.Add(vo.AutoID);
 			}
 
 			if (0 == procesedEds.Count)
@@ -618,6 +680,8 @@ namespace Vre.Server.BusinessLogic
 											 item.MlsId, item.CompiledAddress);
 				skp++; // not a known address
 			}
+
+			return result;
 		}
 
 		private IEnumerable<UpdateableBase> FindMlsItemTarget(MlsItem item, StringBuilder issues)
@@ -635,6 +699,15 @@ namespace Vre.Server.BusinessLogic
 			IEnumerable<UpdateableBase> results;
 			try
 			{
+				ServiceInstances.Logger.Debug("MLS Item to parse: id=<{0}>, pc=<{1}>, sp=<{2}>, m=<{3}>, "
+					+ "sn=<{4}>, st=<{5}>, sd=<{6}>, bn=<{7}>, stn=<{8}>, addr=<{9}>",
+					item.MlsId,
+					item.PostalCode, item.StateProvince, item.Municipality,
+					item.StreetName, item.StreetType, item.StreetDirection,
+					item.StreetNumber, 
+					item.SuiteName,
+					item.CompiledAddress);
+
 				results = AddressHelper.ParseGeographicalAddressToModel(sq, _session.DbSession, true);
 			}
 			catch (ArgumentException ae)
@@ -686,7 +759,7 @@ namespace Vre.Server.BusinessLogic
 			return result;
 		}
 
-		private void ImportUpdateMlsInfo(MlsItem item)
+		private void ImportUpdateMlsInfo(MlsItem item, bool importOnly)
 		{
 			using (var tran = NHibernateHelper.OpenNonNestedTransaction(_session))
 			{
@@ -697,17 +770,23 @@ namespace Vre.Server.BusinessLogic
 
 					if (info != null)
 					{
-						info.Update(item);
-						if (info.Deleted) info.Undelete();
-						dao.Update(info);
+						if (!importOnly)
+						{
+							info.Update(item);
+							if (info.Deleted) info.Undelete();
+							dao.Update(info);
+							ServiceInstances.Logger.Info("Updated MLS info for {0}", item.MlsId);
+						}
 					}
 					else
 					{
 						info = new MlsInfo(item);
 						dao.Create(info);
+						ServiceInstances.Logger.Info("Added MLS info for {0}", item.MlsId);
 					}
 				}
 				tran.Commit();
+				_session.DbSession.Flush();  // required to ensure "info" gets flushed before it is GC-ed
 			}
 		}
 	}

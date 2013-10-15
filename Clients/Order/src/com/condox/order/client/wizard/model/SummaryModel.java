@@ -87,6 +87,9 @@ public class SummaryModel extends WizardStep {
 	public String getNavURL() {
 		return "Summary";
 	}
-	
-	
+
+	@Override
+	public StepTypes getStepType() {
+		return StepTypes.SummaryModel;
+	}
 }

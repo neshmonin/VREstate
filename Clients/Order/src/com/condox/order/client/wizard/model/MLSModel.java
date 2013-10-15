@@ -80,4 +80,9 @@ public class MLSModel extends WizardStep {
 	public String getNavURL() {
 		return "MLS#";
 	}
+
+	@Override
+	public StepTypes getStepType() {
+		return StepTypes.MLSModel;
+	}
 }

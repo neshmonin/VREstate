@@ -274,8 +274,10 @@ namespace Vre.Server.RemoteService
 			voProduct.Prolong(new DateTime(long.Parse(request.ReferenceParamName)));
 			dbSession.Update(voProduct);
 
-			// Delete reverse request
-			dbSession.Delete(request);
+			// Update reverse request
+			request.ReferenceParamValue = string.Empty;
+			request.ProlongBy(new TimeSpan(1, 0, 0));  // make sure it exists for a while to tell customer "everything is OK"
+			dbSession.Update(request);
 
 			// Create Financial Transaction
 			var ft = new FinancialTransaction(productOwner.AutoID,

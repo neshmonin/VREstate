@@ -84,5 +84,9 @@ public class EmailModel extends WizardStep {
 	public String getNavURL() {
 		return "Email";
 	}
-	
+
+	@Override
+	public StepTypes getStepType() {
+		return StepTypes.EmailModel;
+	}
 }
