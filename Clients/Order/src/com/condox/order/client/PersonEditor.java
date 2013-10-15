@@ -3,7 +3,6 @@ package com.condox.order.client;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.Label;
 
 public class PersonEditor extends DialogBox implements Editor<Person> {
 

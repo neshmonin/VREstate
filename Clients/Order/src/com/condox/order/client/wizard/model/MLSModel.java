@@ -30,6 +30,7 @@ public class MLSModel extends WizardStep {
 	public void go(HasWidgets container) {
 		this.container = container;
 		new MLSPresenter(new MLSView(), this).go(container);
+		super.go(container);
 	}
 
 	public void prev() {
@@ -73,5 +74,15 @@ public class MLSModel extends WizardStep {
 		} else if (!mls.equals(other.mls))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String getNavURL() {
+		return "MLS#";
+	}
+
+	@Override
+	public StepTypes getStepType() {
+		return StepTypes.MLSModel;
 	}
 }

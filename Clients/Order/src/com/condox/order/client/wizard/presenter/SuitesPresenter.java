@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.condox.clientshared.communication.GET;
+import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.document.SuiteInfo;
 import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.I_WizardStep;
-import com.condox.order.client.wizard.model.ListingOptionsModel;
-import com.condox.order.client.wizard.model.LoginModel;
+import com.condox.order.client.wizard.I_WizardStep.StepTypes;
 import com.condox.order.client.wizard.model.BuildingsModel;
+import com.condox.order.client.wizard.model.LoginModel;
 import com.condox.order.client.wizard.model.SuitesModel;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -51,21 +52,17 @@ public class SuitesPresenter implements I_Presenter {
 		String buildingId = "";
 		I_WizardStep step = model;
 		while (step != null) {
-			try {
+			if (step.getStepType() == StepTypes.LoginModel)
 				sid = ((LoginModel) step).getUserSid();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+			else if (step.getStepType() == StepTypes.BuildingsModel)
 				buildingId = String.valueOf(((BuildingsModel)step).getSelectedId());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+
 			step = step.getPrevStep();
 		}
 		
 //		String url = "https://vrt.3dcondox.com/data/inventory?";
-		String url = "https://vrt.3dcondox.com/vre/data/inventory?";
+		String url = Options.URL_VRT;
+		url += "data/inventory?";
 		url += "building=" + buildingId;
 		url += "&sid=" + sid;
 		GET.send(url, new RequestCallback() {

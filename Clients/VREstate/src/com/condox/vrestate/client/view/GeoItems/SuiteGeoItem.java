@@ -73,19 +73,18 @@ public class SuiteGeoItem implements IGeoItem {
 		
 		String colorKml = "";
 		String widthKml = "";
-		float scale = 1.0F;
 		KmlStyle style = GE.getPlugin().createStyle("");		
 
 		switch (getGeoStatus()) {
 		case Available:
-			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
+			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=65280&shdClr=65280&frame=0";
 			colorKml = "FF00FF00"; // GREEN
 			widthKml = "2";
 			break;
 		case OnHold:
-			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
+			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=16776960&shdClr=16776960&frame=0";
 			colorKml = "FF00FFFF"; // YELLOW
@@ -93,7 +92,7 @@ public class SuiteGeoItem implements IGeoItem {
 			break;
 		case Sold:
 			if (Options.getShowSold()) {
-				href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
+				href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=16711680&shdClr=0&frame=0";
 				colorKml = "FF0000FF"; // RED
@@ -101,35 +100,34 @@ public class SuiteGeoItem implements IGeoItem {
 			}
 			else
 			{
-				href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text=.&txtClr=0&shdClr=0&frame=0";
+				href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text=.&txtClr=0&shdClr=0&frame=0";
 				colorKml = "00000000"; // transparent
 				widthKml = "2";
 			}
 			break;
 		case ResaleAvailable:
-			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
+			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=1048575&shdClr=0&frame=0";
 			colorKml = "FFFFFF00"; // LIGHT BLUE
 			widthKml = "2";
 			break;
 		case AvailableRent:
-			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
+			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=14854399&shdClr=0&frame=0";
 			colorKml = "FFE2A8FF"; // PINK
 			widthKml = "2";
 			break;
 		case Selected:
-			href = Options.HOME_URL + "gen/txt?height=30&shadow=2&text="
+			href = Options.URL_VRT + "gen/txt?height=30&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=16764108&shdClr=0&frame=0";
 			colorKml = "FFCCCCFF"; // LIGHT RED
 			widthKml = "4";
-			scale = 1.0F;
 			break;
 		case Layout:
-			href = Options.HOME_URL + "gen/txt?height=25&shadow=2&text="
+			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
 					+ suite.getName()
 					+ "&txtClr=16777215&shdClr=0&frame=0";
 			colorKml = "FFFFFFFF"; // WHITE
@@ -156,9 +154,10 @@ public class SuiteGeoItem implements IGeoItem {
 		
 		icon.setHref(href);
 		style.getIconStyle().setIcon(icon);
-		style.getIconStyle().setScale(scale);
+		if (suite.orientation == Orientation.Horizontal)
+			style.getIconStyle().setScale(3.0F);
 
-		String altitudeMode = "relativeToGround";
+		Building parent = suite.getParent();
 
 		if (extended_data_label != null)
 			extended_data_label.setStyleSelector(style);
@@ -180,8 +179,8 @@ public class SuiteGeoItem implements IGeoItem {
 	
 			Position position = suite.getPosition();
 			if (suite.orientation == Orientation.Horizontal) {
-				position.setTilt(85);
-				position.setRange(50);
+				position.setTilt(65);
+				position.setRange(30);
 			}
 			else {
 				position.setTilt(initialTilt_d);
@@ -190,13 +189,16 @@ public class SuiteGeoItem implements IGeoItem {
 			
 			point.setLatitude(position.getLatitude());
 			point.setLongitude(position.getLongitude());
+			if (suite.orientation == Orientation.Horizontal){
+				position.setAltitude(position.getAltitude() + 2);
+				point.setExtrude(true);
+			}
 			
-			Building parent = suite.getParent();
-			if ((parent != null) && (parent.hasAltitudeAdjustment())) {
+			if ((parent != null) && (parent.hasAltitudeAdjustment())
+					&& (suite.orientation != Orientation.Horizontal)) {
 				point.setAltitude(position.getAltitude()
 						+ parent.getAltitudeAdjustment() + parent.getPosition().getAltitude() + 1);
 				point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_ABSOLUTE);
-				altitudeMode = "absolute";
 			} else {
 				point.setAltitude(position.getAltitude());
 				point.setAltitudeMode(KmlAltitudeMode.ALTITUDE_RELATIVE_TO_GROUND);
@@ -211,6 +213,10 @@ public class SuiteGeoItem implements IGeoItem {
 	
 		/****************************************************/
 		String kmlLineStrings = "";
+		String altitudeMode = "relativeToGround";
+		if ((parent != null) && (parent.hasAltitudeAdjustment()))
+			altitudeMode = "absolute";
+
 		for (int j = 0; j < suite.getPoints().size(); j += 6) {
 			kmlLineStrings += StringFormatter.format(
 					"<LineString>" +

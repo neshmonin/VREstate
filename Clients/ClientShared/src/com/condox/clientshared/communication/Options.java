@@ -15,22 +15,28 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
 
 public class Options implements RequestCallback {
+
+	public static enum MODE {
+		TEST, WORK
+	};
+
+	public static MODE SERVER_MODE;
+
+	public static String URL_VRT;
+	public static String URL_STATIC;
+	public static String URL_MODELS;
+
+	// ======================================================>
 	public enum ROLES {
 		KIOSK, VISITOR
 	};
 
 	public static ROLES ROLE = ROLES.VISITOR;
 
-	public static boolean DEBUG_MODE = false;
-
-	public static String URL_VRT;
-	public static String URL_STATIC;
-	public static String URL_MODEL;
-
 	public static String URL_BUTTONS;
 	public static int BUILDING_ID = -1;
 	public static int SUITE_ID;
-	public static String HOME_URL;
+//	public static String HOME_URL;
 	public static String ZOOM_UNZOOM_URL;
 	public static String ZOOM_IN_URL;
 	public static String ZOOM_OUT_URL;
@@ -45,7 +51,7 @@ public class Options implements RequestCallback {
 	// If SUPPORT_PAN is true, user can pan up and down a building
 	public static boolean SUPPORT_PAN = false;
 	public static String context = "";
-
+	public static boolean TEST_PAY = false;
 
 	public static boolean isViewOrder() {
 		return Options.getViewOrderId() != null;
@@ -53,10 +59,35 @@ public class Options implements RequestCallback {
 
 	public static void Init() {
 		Map<String, List<String>> params = Window.Location.getParameterMap();
-		Log.write(params.toString());
+		Map<String, List<String>> contextMap = new HashMap<String, List<String>>(params);
+		// ---------------------
+		// - GWT.getHostPageBaseURL() 		   = https://vrt.3dcondox.com/vre/
+		// - GWT.getModuleBaseForStaticFiles() = https://vrt.3dcondox.com/vre/vrestate/
+		// - GWT.getModuleBaseURL() 		   = https://vrt.3dcondox.com/vre/vrestate/
+		// - GWT.getModuleName() 			   = vrestate
+		// - GWT.getPermutationStrongName()	   = HostedMode
+		// - GWT.getVersion() 				   = 2.5.0
+		// - GWT.isProdMode() 				   = false
+		URL_VRT = GWT.getHostPageBaseURL();
+		String ModuleName = GWT.getModuleName();
+		// in the Order project, they have vrt.3dcondox.com/order/
+		if (URL_VRT.endsWith(ModuleName + "/"))
+			URL_VRT = URL_VRT.replaceFirst(ModuleName + "/", ""); 
 
-		Map<String, List<String>> contextMap = new HashMap<String, List<String>>(
-				params);
+		SERVER_MODE = MODE.WORK;
+		if (params.containsKey("test")) {
+			if (params.get("test").get(0).equals("true") || URL_VRT.contains("/vre/"))
+				SERVER_MODE = MODE.TEST;
+			else
+				SERVER_MODE = MODE.WORK;
+			contextMap.remove("test");
+		}
+
+		URL_STATIC = URL_VRT.replaceFirst("https://vrt.", "https://static.");
+		URL_MODELS = URL_VRT.replaceFirst("https://vrt.", "https://models.");
+		// ---------------------
+		//Log.write(params.toString());
+
 		// --------------------------------------------------//
 		List<String> oneValueList = new ArrayList<String>();
 		oneValueList.add("true");
@@ -86,37 +117,15 @@ public class Options implements RequestCallback {
 			contextMap.remove("BuildingId");
 		}
 
-		if (BUILDING_ID != -1) {
-			if (params.containsKey("test")) {
-				DEBUG_MODE = Boolean.valueOf(params.get("test").get(0));
-				contextMap.remove("test");
-			}
-		} else
-			DEBUG_MODE = (GWT.getModuleBaseURL().contains("/vre/"));
-
-		Log.write("DEBUG_MODE=" + DEBUG_MODE);
-
-		if (DEBUG_MODE) {
-			URL_VRT = "https://vrt.3dcondox.com/vre/";
-			URL_STATIC = "https://static.3dcondox.com/vre/";
-			URL_MODEL = "https://models.3dcondox.com/vre/";
-		} else {
-			URL_VRT = "https://vrt.3dcondox.com/";
-			URL_STATIC = "https://static.3dcondox.com/";
-			URL_MODEL = "https://models.3dcondox.com/";
-		}
-
 		if (params.containsKey("SchemaPath")) {
 			URL_BUTTONS = params.get("SchemaPath").get(0);
 			contextMap.remove("BuildingId");
 		} else
 			URL_BUTTONS = URL_VRT + "buttons/";
 
-		HOME_URL = URL_VRT;
-
 		ZOOM_UNZOOM_URL = URL_BUTTONS + "ZoomUnzoomBar.png";
-		ZOOM_IN_URL = HOME_URL + "buttons/Unzoom.png";
-		ZOOM_OUT_URL = HOME_URL + "buttons/Zoom.png";
+		ZOOM_IN_URL = URL_VRT + "buttons/Unzoom.png";
+		ZOOM_OUT_URL = URL_VRT + "buttons/Zoom.png";
 		URL_BUTTON_PANORAMIC_VIEW = URL_BUTTONS + "PanoramicView.png";
 		URL_BUTTON_EXIT_PANORAMIC_VIEW = URL_BUTTONS + "Back.png";
 		URL_BUTTON_CENTER_PANORAMIC_VIEW = URL_BUTTONS + "Center.png";
@@ -137,6 +146,12 @@ public class Options implements RequestCallback {
 				context += "&";
 		}
 		Log.write("context=" + context);
+		
+		if (params.containsKey("testPay")) {
+			if (params.get("testPay").get(0).equals("true"))
+				TEST_PAY = true;
+			contextMap.remove("testPay");
+		}
 	};
 
 	@Override
@@ -188,6 +203,15 @@ public class Options implements RequestCallback {
 			return flag.equalsIgnoreCase("true");
 		}
 		return false;
+	}
+	
+	public static String getUserLogin(String uid, String pwd, String role) {
+		return URL_VRT + "program?q=login&uid=" + uid + "&pwd=" + pwd
+				+ "&role=" + role;
+	}
+	
+	public static boolean isTestPay() {
+		return TEST_PAY;
 	}
 
 }

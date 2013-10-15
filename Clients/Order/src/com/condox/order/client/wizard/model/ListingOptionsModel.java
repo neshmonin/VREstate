@@ -1,15 +1,12 @@
 package com.condox.order.client.wizard.model;
 
-import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.GET;
+import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.document.SuiteInfo;
-import com.condox.order.client.I_Model;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.WizardStep;
 import com.condox.order.client.wizard.presenter.ListingOptionsPresenter;
-import com.condox.order.client.wizard.presenter.LoginPresenter;
 import com.condox.order.client.wizard.view.ListingOptionsView;
-import com.condox.order.client.wizard.view.LoginView;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
@@ -102,20 +99,16 @@ public class ListingOptionsModel extends WizardStep {
 		String sid = "";
 		I_WizardStep step = this;
 		while (step != null) {
-			try {
+			switch (step.getStepType()) {
+			case LoginModel:
 				sid = ((LoginModel) step).getUserSid();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+				break;
+			case MLSModel:
 				mls = ((MLSModel) step).getMLS();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+				break;
+			case SuitesModel:
 				selectedSuite = ((SuitesModel) step).getSelected();
-			} catch (Exception e) {
-				e.printStackTrace();
+				break;
 			}
 			step = step.getPrevStep();
 		}
@@ -124,7 +117,7 @@ public class ListingOptionsModel extends WizardStep {
 			mls = selectedSuite.getMLS();
 
 		if (!mls.isEmpty()) {
-			String url = "https://vrt.3dcondox.com/vre/data/inventory?";
+			String url = Options.URL_VRT + "data/inventory?";
 			url += "mlsId=" + mls;
 			url += "&sid=" + sid;
 			GET.send(url, new RequestCallback() {
@@ -166,4 +159,13 @@ public class ListingOptionsModel extends WizardStep {
 			presenter.go(container);
 	}
 
+	@Override
+	public String getNavURL() {
+		return "Options";
+	}
+
+	@Override
+	public StepTypes getStepType() {
+		return StepTypes.ListingOptionsModel;
+	}
 }

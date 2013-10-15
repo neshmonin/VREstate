@@ -94,6 +94,7 @@ public class MLSView extends Composite implements I_Display {
 		}
 		element.oninput = render;
 		element.onpaste = render;
+		setInterval(render, 100);
 	}-*/;
 
 	private void render() {

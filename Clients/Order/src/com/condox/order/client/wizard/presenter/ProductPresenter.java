@@ -9,20 +9,29 @@ public class ProductPresenter implements I_Presenter {
 
 	public static interface I_Display {
 		void setPresenter(ProductPresenter presenter);
+
 		boolean getListing();
+
 		boolean getPrivate();
+
 		boolean getShared();
+
 		boolean getLayout();
+
 		void setListing(boolean value);
+
 		void setPrivate(boolean value);
+
 		void setShared(boolean value);
+
 		void setLayout(boolean value);
+
 		Widget asWidget();
 	}
-	
+
 	private I_Display display = null;
 	private ProductModel model = null;
-	
+
 	public ProductPresenter(I_Display display, ProductModel model) {
 		this.display = display;
 		this.display.setPresenter(this);
@@ -38,11 +47,11 @@ public class ProductPresenter implements I_Presenter {
 		container.clear();
 		container.add(this.display.asWidget());
 	}
-	
+
 	public void onPrev() {
 		model.prev();
 	}
-	
+
 	public void onNext() {
 		model.setListing(display.getListing());
 		model.setListingPrivate(display.getPrivate());

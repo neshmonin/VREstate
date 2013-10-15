@@ -1,7 +1,7 @@
 package com.condox.order.client.wizard.presenter;
 
 import com.condox.clientshared.communication.GET;
-import com.condox.order.client.Globals;
+import com.condox.clientshared.communication.Options;
 import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.model.LoginModel;
 import com.google.gwt.http.client.Request;
@@ -53,7 +53,7 @@ public class LoginPresenter implements I_Presenter {
 		}
 		
 		String role = "visitor";
-		String url = Globals.getUserLogin(uid, pwd, role);
+		String url = Options.getUserLogin(uid, pwd, role);
 		url = URL.encode(url);
 
 		// GET.send(url);

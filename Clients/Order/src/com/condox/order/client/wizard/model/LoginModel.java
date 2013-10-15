@@ -1,6 +1,5 @@
 package com.condox.order.client.wizard.model;
 
-import com.condox.order.client.I_Model;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.WizardStep;
 import com.condox.order.client.wizard.presenter.LoginPresenter;
@@ -74,9 +73,18 @@ public class LoginModel extends WizardStep {
 
 	@Override
 	protected I_WizardStep createNextStep() {
-		children.put(this, new ProductModel(this));
+//		children.put(this, new ProductModel(this));
+		children.put(this, new MLSModel(this));
 		return children.get(this);
 	}
-	
-	
+
+	@Override
+	public String getNavURL() {
+		return "Login";
+	}
+
+	@Override
+	public StepTypes getStepType() {
+		return StepTypes.LoginModel;
+	}
 }

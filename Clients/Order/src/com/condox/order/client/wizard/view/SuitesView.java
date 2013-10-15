@@ -25,11 +25,10 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.user.client.ui.Button;
 
 public class SuitesView extends Composite implements IDisplay {
 
@@ -249,6 +248,11 @@ public class SuitesView extends Composite implements IDisplay {
 					break;
 				default:
 //					mls += " color:red";
+				}
+				
+				if ((suite.getMLS() == null)||(suite.getMLS().isEmpty())) {			
+					disabled = " disabled=\"true\" ";
+					color = " color:red ";
 				}
 
 				result += "<button ";

@@ -1,11 +1,9 @@
 package com.condox.order.client.wizard.model;
 
 import com.condox.order.client.wizard.I_WizardStep;
-import com.condox.order.client.wizard.Wizard;
 import com.condox.order.client.wizard.WizardStep;
 import com.condox.order.client.wizard.presenter.EmailPresenter;
 import com.condox.order.client.wizard.view.EmailView;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasWidgets;
 
 public class EmailModel extends WizardStep {
@@ -81,5 +79,14 @@ public class EmailModel extends WizardStep {
 		children.put(this, new SummaryModel(this));
 		return children.get(this);
 	}
-	
+
+	@Override
+	public String getNavURL() {
+		return "Email";
+	}
+
+	@Override
+	public StepTypes getStepType() {
+		return StepTypes.EmailModel;
+	}
 }

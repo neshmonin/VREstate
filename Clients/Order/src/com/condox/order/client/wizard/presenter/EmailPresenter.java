@@ -1,34 +1,29 @@
 package com.condox.order.client.wizard.presenter;
 
 import com.condox.clientshared.communication.GET;
-import com.condox.order.client.Globals;
+import com.condox.clientshared.communication.Options;
 import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.Wizard;
-import com.condox.order.client.wizard.model.BuildingsModel;
 import com.condox.order.client.wizard.model.EmailModel;
 import com.condox.order.client.wizard.model.ErrorMessage;
 import com.condox.order.client.wizard.model.ListingOptionsModel;
 import com.condox.order.client.wizard.model.LoginModel;
 import com.condox.order.client.wizard.model.ProductModel;
 import com.condox.order.client.wizard.model.SuitesModel;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class EmailPresenter implements I_Presenter {
 
+	public String payment = Options.isTestPay()? "CAD1.00" : "CAD49.99";
+	
 	public static interface I_Display {
 		void setPresenter(EmailPresenter presenter);
 
@@ -59,70 +54,58 @@ public class EmailPresenter implements I_Presenter {
 
 	public void onNext() {
 		// **********************************
-		// TODO —генерировать строку дл€ Summary
 		I_WizardStep step = model;
 		String ownerEmail = "";
-		String payment = "CAD49.99";
-		String product = "";
-		String type = "";
+		String product = "prl";
+		String type = "suite";
 		String suiteId = "";
 		String sid = "";
 		while (step != null) {
-			try {
+			switch (step.getStepType()) {
+			case LoginModel:
 				sid = ((LoginModel) step).getUserSid();
-//				user = ((LoginModel) step).getUserLogin();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
-				if (((ProductModel) step).getListingPrivate()) {
+				break;
+			case ProductModel:
+				ProductModel productModelStep = (ProductModel) step;
+				if (productModelStep.getListingPrivate()) {
 					product = "prl";
 //					order = "Private Interactive 3D Listing";
 					type = "suite";
-				} else if (((ProductModel) step).getListingShared()) {
+				} else if (productModelStep.getListingShared()) {
 					product = "pul";
 //					order = "Public Interactive 3D Listing";
 					type = "suite";
-				} else if (((ProductModel) step).getLayout()) {
+				} else if (productModelStep.getLayout()) {
 //					order = "Interactive 3D Layout";
 					type = "building";
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
-//				buildingId = String.valueOf(((BuildingsModel) step)
-//						.getSelectedId());
-//				address = ((BuildingsModel) step).getSelected().getAddress();
-//				address = ((BuildingsModel) step).getSelected().getStreet();
-//				address += ", " + ((BuildingsModel) step).getSelected().getCity();
-//				address += ", " + ((BuildingsModel) step).getSelected().getPostal();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+				break;
+		//	case BuildingsModel:
+		//		buildingId = String.valueOf(((BuildingsModel) step)
+		//				.getSelectedId());
+		//		address = ((BuildingsModel) step).getSelected().getAddress();
+		//		address = ((BuildingsModel) step).getSelected().getStreet();
+		//		address += ", " + ((BuildingsModel) step).getSelected().getCity();
+		//		address += ", " + ((BuildingsModel) step).getSelected().getPostal();
+		//		break;
+			case SuitesModel:
 				suiteId = String.valueOf(((SuitesModel) step)
 						.getSelected().getId());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+				break;
+			case ListingOptionsModel:
 				suiteId = String.valueOf(((ListingOptionsModel) step).getSuiteId());
-//				urlVirtualTour = ((ListingOptionsModel) step).getUrlVirtualTour();
-//				urlMoreInfo = String.valueOf(((ListingOptionsModel) step).getUrlMoreInfo());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
+				//urlVirtualTour = ((ListingOptionsModel) step).getUrlVirtualTour();
+				//urlMoreInfo = String.valueOf(((ListingOptionsModel) step).getUrlMoreInfo());
+				break;
+			case EmailModel:
 				ownerEmail = String.valueOf(((EmailModel) step).getOwnerMail());
-			} catch (Exception e) {
-				e.printStackTrace();
+				break;
 			}
 			step = step.getPrevStep();
 		}
 		//**********************************************
 		final String mail = ownerEmail;
-		String url = Globals.urlBase
+		String url = Options.URL_VRT
 				+ "program?q=register&entity=viewOrder&ownerEmail="
 				+ ownerEmail + "&paymentPending=" + payment + "&product="
 				+ product + "&propertyType=" + type + "&propertyId=" + suiteId

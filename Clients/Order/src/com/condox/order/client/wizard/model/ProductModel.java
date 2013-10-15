@@ -71,6 +71,7 @@ public class ProductModel extends WizardStep {
 //		super.go(container, navigator);
 		this.container = container;
 		new ProductPresenter(new ProductView(), this).go(container);
+		super.go(container);
 	}
 	
 	public void prev() {
@@ -126,9 +127,13 @@ public class ProductModel extends WizardStep {
 		return children.get(this);
 	}
 
-	/*@Override
-	public String getCaption() {
-		return " Select order type >>";
-	}*/
-	
+	@Override
+	public String getNavURL() {
+		return "Product type";
+	}
+
+	@Override
+	public StepTypes getStepType() {
+		return StepTypes.ProductModel;
+	}
 }

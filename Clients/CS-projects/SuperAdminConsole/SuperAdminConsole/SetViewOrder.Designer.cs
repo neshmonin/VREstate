@@ -311,48 +311,14 @@
             // 
             this.comboBoxCity.AutoCompleteCustomSource.AddRange(new string[] {
             "Toronto",
-            "Mississauga",
-            "Brampton",
-            "Caledon",
-            "Oakville",
-            "Burlington",
-            "Milton",
-            "Halton Hills",
-            "Vaughan",
-            "Markham",
-            "Richmond Hill",
-            "Aurora",
-            "Newmarket",
-            "King",
-            "Pickering",
-            "Ajax",
-            "Withby",
-            "Oshawa",
-            "Clarington",
+            "New York",
             "Orlando"});
             this.comboBoxCity.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.comboBoxCity.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.comboBoxCity.FormattingEnabled = true;
             this.comboBoxCity.Items.AddRange(new object[] {
             "Toronto",
-            "Mississauga",
-            "Brampton",
-            "Caledon",
-            "Oakville",
-            "Burlington",
-            "Milton",
-            "Halton Hills",
-            "Vaughan",
-            "Markham",
-            "Richmond Hill",
-            "Aurora",
-            "Newmarket",
-            "King",
-            "Pickering",
-            "Ajax",
-            "Withby",
-            "Oshawa",
-            "Clarington",
+            "New York",
             "Orlando",
             "- empty addresses -"});
             this.comboBoxCity.Location = new System.Drawing.Point(41, 6);

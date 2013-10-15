@@ -39,9 +39,8 @@ public class BuildingGeoItem implements IGeoItem {
 		obj.put("id", id);
 		placemark.setSnippet(obj.toString());
 
-		// Иконка для плейсмарка
 		KmlStyle style = GE.getPlugin().createStyle("");
-		String href = Options.HOME_URL + "gen/txt?height=40&shadow=2&text="
+		String href = Options.URL_VRT + "gen/txt?height=40&shadow=2&text="
 				+ building.getName() + "&txtClr=16777215&shdClr=0&frame=0";
 		KmlIcon icon = GE.getPlugin().createIcon("");
 		icon.setHref(href);
@@ -56,8 +55,7 @@ public class BuildingGeoItem implements IGeoItem {
 		if (position != null) {
 			position.setTilt(initialTilt_d);
 			position.setRange(initialRange_m);
-			KmlMultiGeometry geometry = GE.getPlugin().createMultiGeometry(
-					"");
+			KmlMultiGeometry geometry = GE.getPlugin().createMultiGeometry("");
 
 			point.setLatLngAlt(position.getLatitude(),
 					position.getLongitude(),
@@ -77,12 +75,12 @@ public class BuildingGeoItem implements IGeoItem {
 		String new_href = old_href;
 
 		if (selecting)
-			new_href = Options.HOME_URL
+			new_href = Options.URL_VRT
 					+ "gen/txt?height=40&shadow=2&text="
 					+ building.getName()
 					+ "&txtClr=16777215&shdClr=0&frame=1";
 		else
-			new_href = Options.HOME_URL
+			new_href = Options.URL_VRT
 					+ "gen/txt?height=40&shadow=2&text="
 					+ building.getName()
 					+ "&txtClr=16777215&shdClr=0&frame=0";

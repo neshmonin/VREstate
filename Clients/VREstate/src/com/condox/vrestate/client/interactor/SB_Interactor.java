@@ -161,10 +161,8 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onClick(KmlMouseEvent event) {
-		event.preventDefault();
-
-		// Log.write("SiteInteractor::onClick()");
-
+//		event.preventDefault();
+//		Window.alert("type:" + event.getTarget().getType());
 		if (cameraPositionChanged || autoZoomUnzoom)
 			return;
 
@@ -175,11 +173,10 @@ public class SB_Interactor extends OverlayHelpers
 
 			String type = obj.get("type").isString().stringValue();
 			int id = (int) obj.get("id").isNumber().doubleValue();
-
-			//Log.write("" + obj.toString());
 			this.view.Select(type, id);
 		}
 		else
+		if (this.view.isCameraMoved())
 		{
 	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getTransitionSpeed());
 	        this.view.ApplyCamera();
@@ -193,7 +190,7 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onMouseDown(KmlMouseEvent event) {
-		event.preventDefault();
+//		event.preventDefault();
 		x = event.getClientX();
 		y = event.getClientY();
 
@@ -216,7 +213,7 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onMouseUp(KmlMouseEvent event) {
-		event.preventDefault();
+//		event.preventDefault();
 		if (cameraPositionChanged)
 		{
 			cameraPositionChanged = false;
@@ -243,7 +240,7 @@ public class SB_Interactor extends OverlayHelpers
 
 	@Override
 	public void onMouseMove(KmlMouseEvent event) {
-		event.preventDefault();
+//		event.preventDefault();
 		int newX = event.getClientX();
 		int newY = event.getClientY();
 

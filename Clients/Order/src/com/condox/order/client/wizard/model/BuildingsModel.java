@@ -1,12 +1,10 @@
 package com.condox.order.client.wizard.model;
 
-import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.document.BuildingInfo;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.WizardStep;
 import com.condox.order.client.wizard.presenter.BuildingsPresenter;
 import com.condox.order.client.wizard.view.BuildingsView;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.ListBox;
 
@@ -78,6 +76,7 @@ public class BuildingsModel extends WizardStep {
 //		Window.alert("BModel id=" + selectedIndex);
 		this.container = container;
 		new BuildingsPresenter(new BuildingsView(), this).go(container);
+		super.go(container);
 	}
 
 	public void prev() {
@@ -94,16 +93,25 @@ public class BuildingsModel extends WizardStep {
 	protected I_WizardStep createNextStep() {
 		I_WizardStep step = this;
 		while (step != null) {
-			try {
+			if (step.getStepType() == StepTypes.ProductModel) {
 				if (((ProductModel)step).getLayout())
 					children.put(this, new SummaryModel(this));
 				if (((ProductModel)step).getListing())
 					children.put(this, new SuitesModel(this));
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 			step = step.getPrevStep();
 		}		
+		children.put(this, new SuitesModel(this));
 		return children.get(this);
+	}
+
+	@Override
+	public String getNavURL() {
+		return "Building";
+	}
+
+	@Override
+	public StepTypes getStepType() {
+		return StepTypes.BuildingsModel;
 	}
 }

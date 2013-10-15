@@ -95,9 +95,9 @@ public class Site implements I_VRObject {
 					.stringValue();
 
 		if (bubbleWebTemplateUrl != null) {
-			if (bubbleWebTemplateUrl.startsWith(Options.URL_MODEL))
+			if (bubbleWebTemplateUrl.startsWith(Options.URL_MODELS))
 				bubbleWebTemplateUrl = bubbleWebTemplateUrl
-						.substring(Options.URL_MODEL.length());
+						.substring(Options.URL_MODELS.length());
 			else if (bubbleWebTemplateUrl.startsWith(Options.URL_VRT))
 				bubbleWebTemplateUrl = bubbleWebTemplateUrl
 						.substring(Options.URL_VRT.length());
@@ -107,9 +107,9 @@ public class Site implements I_VRObject {
 		}
 
 		if (bubbleKioskTemplateUrl != null) {
-			if (bubbleKioskTemplateUrl.startsWith(Options.URL_MODEL))
+			if (bubbleKioskTemplateUrl.startsWith(Options.URL_MODELS))
 				bubbleKioskTemplateUrl = bubbleKioskTemplateUrl
-						.substring(Options.URL_MODEL.length());
+						.substring(Options.URL_MODELS.length());
 			else if (bubbleKioskTemplateUrl.startsWith(Options.URL_VRT))
 				bubbleKioskTemplateUrl = bubbleKioskTemplateUrl
 						.substring(Options.URL_VRT.length());

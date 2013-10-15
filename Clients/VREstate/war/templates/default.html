@@ -26,26 +26,25 @@ body {
 	line-height: 35px;
 }
 
-#VRT_bedrooms,#VRT_area {
-	font: 100% Arial, Helvetica, sans-serif;
-	line-height: 35px;
+#VRT_bedrooms,#VRT_area,#VRT_bathrooms,#VRT_balconies {
+	font: 110% Arial, Helvetica, sans-serif;
+	line-height: 25px;
 }
 
 #VRT_moreInfo,#VRT_virtualTour {
 	font: 130% Arial, Helvetica, sans-serif;
-	color: #03F;
 	line-height: 35px;
+	color: #03F;
 }
 
 #VRT_price {
 	font: 200% Arial, Helvetica, sans-serif;
+	line-height: 45px;
 	color: #03F;
-	line-height: 35px;
 }
 </style>
 <script type="text/javascript">
-window.onload = function() {
-	document.domain = '3dcondox.com';
+function load() {
 	var hash = window.location.hash.substring(1);
 	var json = decodeURIComponent(hash);
 	json = eval('(' + json + ')');
@@ -127,7 +126,7 @@ window.onload = function() {
 }
 </script>
 </head>
-<body>
+<body onload="load()">
 	<div id="VRT_left" style="text-align: center;">
 		<div style="width: 100%; margin-left: auto; margin-right: auto;">
 			<div id="VRT_virtualTour">Virtual tour</div>

@@ -23,7 +23,7 @@ public class PersonEditingWorkflow {
 		 
 		  // Called by some UI action
 		  void save() {
-		    Person edited = driver.flush();
+		    driver.flush();
 		    if (driver.hasErrors()) {
 		      // A sub-editor reported errors
 		    }

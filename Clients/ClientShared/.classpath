@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gwt-dev.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gwt-user.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/validation-api-1.0.0.GA-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/validation-api-1.0.0.GA.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
