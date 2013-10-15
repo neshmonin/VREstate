@@ -167,7 +167,10 @@ namespace Vre.Server.Command
             //_session = NHibernateHelper.GetSession();
             using (_clientSession = ClientSession.MakeSystemSession())//_session))
             {
+				ICollection<int> importedBuildingIds = new List<int>();
+
                 _clientSession.Resume();
+				DatabaseSettingsDao.VerifyDatabase();
                 //_clientSession.DbSession.FlushMode = FlushMode.Always;
                 using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_clientSession.DbSession))
                 {
@@ -222,7 +225,7 @@ namespace Vre.Server.Command
                         }
                     }
 
-                    importSite(kmz.Model.Site, site, siteCreated, infoModelFileName, extras);
+					importSite(kmz.Model.Site, site, siteCreated, infoModelFileName, extras, ref importedBuildingIds);
 
                     if (dryRun)
                     {
@@ -241,11 +244,19 @@ namespace Vre.Server.Command
                         _log.Append("All changes comitted to database.\r\n");
                     }
                 }  // transaction
+
+				// TODO: RETROIMPORT
+				if (!dryRun)
+				{
+					foreach (var id in importedBuildingIds)
+						TryImportExistingListings(_clientSession, id, _log);
+				}
             }  // client session
         }
 
         private void importSite(Vre.Server.Model.Kmz.ConstructionSite modelSite, Site dbSite, bool isCreated,            
-            string infoModelFileName, Parameters extras)
+            string infoModelFileName, Parameters extras,
+			ref ICollection<int> importedBuildingIds)
         {
             string displayModelFileName = extras.GetOption("displaymodel");
             string overlayModelFileName = extras.GetOption("overlaymodel");
@@ -311,7 +322,7 @@ namespace Vre.Server.Command
                     isSiteModel ? null : poiModelFileName,
                     isSiteModel ? null : bubbleWebTemplateFileName,
                     isSiteModel ? null : bubbleKioskTemplateFileName,
-                    extras);
+                    extras, ref importedBuildingIds);
             }
 
             if (isSiteModel)
@@ -398,7 +409,7 @@ namespace Vre.Server.Command
 				// TODO: Should do this for a building model too?!
 				Model.Kmz.ViewPoint vp = modelSite.LocationCart.AsViewPoint();
 				dbSite.Location = new GeoPoint(vp.Longitude, vp.Latitude, vp.Altitude);
-
+				
 				dbSite.MarkUpdated();
                 _clientSession.DbSession.Update(dbSite);
             }
@@ -408,7 +419,8 @@ namespace Vre.Server.Command
 			Vre.Server.Model.Kmz.Building modelBuilding, Building dbBuilding, bool isCreated,
             string infoModelFileName, string displayModelFileName, string overlayModelFileName, string poiModelFileName,
             string bubbleWebTemplateFileName, string bubbleKioskTemplateFileName,
-            Parameters extras)
+            Parameters extras,
+			ref ICollection<int> importedBuildingIds)
         {
             List<string> missingSuites = new List<string>(dbBuilding.Suites.Count);
 
@@ -634,7 +646,7 @@ namespace Vre.Server.Command
                     AddressHelper.ConvertToReadableAddress(dbBuilding, null));
             }
 
-			if (isCreated) tryImportExistingListings(dbBuilding);
+			if (isCreated) importedBuildingIds.Add(dbBuilding.AutoID);
 
 			dbBuilding.MarkUpdated();
 			_clientSession.DbSession.Update(dbBuilding);
@@ -853,10 +865,10 @@ namespace Vre.Server.Command
             return result;
         }
 
-		internal void tryImportExistingListings(Building building)
-		{
-			TryImportExistingListings(_clientSession, building.AutoID, _log);
-		}
+		//internal void tryImportExistingListings(Building building)
+		//{
+		//    TryImportExistingListings(_clientSession, building.AutoID, _log);
+		//}
 
 		internal static void TryImportExistingListings(ClientSession session, int buildingId, StringBuilder report)
 		{
@@ -913,5 +925,66 @@ namespace Vre.Server.Command
 			report.AppendFormat("\r\nUpdate completed: {0} MLS items processed; {1} ViewOrders added; {2} errors.",
 				mlsCnt, add, err);
 		}
-    }
+
+		internal static void TryImportExistingListings(ClientSession session, StringBuilder report)
+		{
+			IMlsInfoProvider prov;
+			string issues;
+
+			// STEP 1
+			//
+			// TODO: MLS provider injection point
+			prov = new RetsMlsStatusProvider();
+
+			prov.Configure(Configuration.Mls.Treb.Status.ConfigString.Value);
+			issues = prov.Parse();
+			if (issues.Length > 0) report.AppendFormat("\r\nMLS Status Retrieval problems:\r\n{0}", issues);
+
+			var activeItems = prov.GetCurrentActiveItems();
+
+			// STEP 2
+			//
+			// TODO: MLS provider injection point
+			prov = new RetsMlsInfoProvider();
+
+			prov.Configure(Configuration.Mls.Treb.Info.ConfigString.Value);
+
+			IDictionary<Guid, string> voIds;
+			using (var vodao = new ViewOrderDao(session.DbSession))
+				// TODO: MLS provider filter injection point
+				voIds = vodao.GetAllActiveIdsAndMlsIdV2();
+
+			int mlsCnt = 0, add = 0, err = 0;
+			List<string> processedIds = new List<string>();
+			foreach (var file in prov.AvailableFiles.OrderBy((a) => a.CreationTimeUtc).Reverse())
+			{
+				issues = prov.Parse(file.FullName);
+				if (issues.Length > 0) report.AppendFormat("\r\nMLS Info Retrieval problems:\r\n{0}", issues);
+
+				var items = prov.GetNewItems();
+				for (int idx = items.Count - 1; idx >= 0; idx--)
+				{
+					if (!activeItems.Contains(items[idx].MlsId))
+					{
+						items.RemoveAt(idx);
+					}
+					else if (processedIds.Contains(items[idx].MlsId))
+					{
+						items.RemoveAt(idx);
+					}
+				}
+
+				using (var manager = new SiteManager(session))
+					issues = manager.RetroImportExistingViewOrders(items, ref voIds, ref add, ref err);
+				if (issues.Length > 0) report.AppendFormat("\r\nMLS Import problems:\r\n{0}", issues);
+
+				foreach (var item in items) processedIds.Add(item.MlsId);
+
+				mlsCnt += items.Count;
+			}
+
+			report.AppendFormat("\r\nUpdate completed: {0} MLS items processed; {1} ViewOrders added; {2} errors.",
+				mlsCnt, add, err);
+		}
+	}
 }
