@@ -95,22 +95,38 @@ namespace Vre.Server.BusinessLogic
 
         public virtual Guid Id { get; private set; }
         public virtual RequestType Request { get; private set; }
-        public virtual DateTime ExpiresOn { get; set; }
-        public virtual int RequestCounter { get; set; }
-        public virtual DateTime LastRequestTime { get; set; }
+        public virtual DateTime ExpiresOn { get; private set; }
+        public virtual int RequestCounter { get; private set; }
+        public virtual DateTime LastRequestTime { get; private set; }
 
         public virtual int? UserId { get; private set; }
         public virtual string Login { get; private set; }
         public virtual string Subject { get; private set; }
 
-        public virtual string ReferenceParamName { get; private set; }
-        public virtual string ReferenceParamValue { get; private set; }
+        public virtual string ReferenceParamName { get; set; }
+        public virtual string ReferenceParamValue { get; set; }
 
         public bool IsAttemptSensitive { get { return ((Request == RequestType.LoginChange) || (Request == RequestType.PasswordRecover)); } }
 
         private static readonly DateTime _minimalTime = new DateTime(2000, 1, 1);
 
         private ReverseRequest() { }
+
+		public void ProlongUntil(DateTime newLimit)
+		{
+			ExpiresOn = newLimit;
+		}
+
+		public void ProlongBy(TimeSpan time)
+		{
+			ExpiresOn = ExpiresOn.Add(time);
+		}
+
+		public void Touch()
+		{
+			RequestCounter++;
+			LastRequestTime = DateTime.UtcNow;
+		}
 
         public static ReverseRequest CreateRegisterAccount(string login, string accountInformation, DateTime expiresOn,
             string refParamName, string refParamValue)
@@ -214,19 +230,21 @@ namespace Vre.Server.BusinessLogic
 
 		public static ReverseRequest CreateViewOrderActivation(
 			ViewOrder vo,
-			Money amountPaid, DateTime expirationTime)
+			Money amountToPay, DateTime expirationTime)
 		{
 			var result = new ReverseRequest();
 			result.Id = Guid.NewGuid();
 			result.Request = RequestType.ViewOrderActivation;
-			result.ExpiresOn = vo.ExpiresOn.AddMinutes(-5.0);  // safety gap
+			// safety gap; allow paying and processing a ViewOrder within 30 minutes
+			// after trial time expires.
+			result.ExpiresOn = vo.ExpiresOn.AddMinutes(30.0);
 			result.RequestCounter = 0;
 			result.LastRequestTime = _minimalTime;
 			result.UserId = vo.OwnerId;
 			result.Login = null;
 			result.Subject = vo.AutoID.ToString();
 			result.ReferenceParamName = expirationTime.Ticks.ToString();
-			result.ReferenceParamValue = amountPaid.ToFullString();
+			result.ReferenceParamValue = amountToPay.ToFullString();
 			return result;
 		}
     }
