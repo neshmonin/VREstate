@@ -296,16 +296,18 @@ public class SuiteView extends _GEView {
 		if (floorPlanUrl != null)
 			if (floorPlanUrl.toLowerCase().endsWith(".pdf"))
 				Window.open(floorPlanUrl, "_blank", null);
-			else
-				newWindow(floorPlanUrl);
+			else {
+				com.google.gwt.dom.client.Document.get().getElementById("floorplaneUrl").setInnerHTML(floorPlanUrl);
+				Window.open("../viewer/viewer.html", "_blank", "");
+//				newWindow("../viewer/viewer.html");
+//				newWindow(floorPlanUrl);
+			}
 	}
 	
-	private native void newWindow(String url) /*-{
-		wnd = $wnd.open("","_blank");
-		wnd.document.open();
-		wnd.document.write("Image viewer");
-		wnd.document.close();
-	}-*/;
+//	private native void newWindow(String floorPlanUrl) /*-{
+//		var wnd = $wnd.open("../viewer/viewer.html", "_blank");
+//		wnd.document.getElementById('floorplaneUrl').innerHTML = floorPlanUrl;
+//	}-*/;
 
 	@Override
 	public void onViewChanged() {
