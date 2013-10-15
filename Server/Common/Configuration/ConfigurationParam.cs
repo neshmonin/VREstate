@@ -39,6 +39,11 @@ namespace Vre
 		}
 
 		protected abstract T getValue();
+
+		public override string ToString()
+		{
+			return Value.ToString();
+		}
 	}
 
 	public class BooleanConfigurationParam : ConfigurationParam<bool>
@@ -87,6 +92,10 @@ namespace Vre
 		protected override string getValue()
 		{
 			return _config.GetValue(_key, _default);
+		}
+		public override string ToString()
+		{
+			return Value;
 		}
 	}
 }
