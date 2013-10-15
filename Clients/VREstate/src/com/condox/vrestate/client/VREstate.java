@@ -166,7 +166,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 	}
 
 	private KmlObject remove_dublicates(KmlObject feature) {
-		if ("KmlDocument".equals(feature.getType())) {
+		try {
 			KmlContainer container = (KmlContainer) feature;
 
 			// To be added
@@ -186,7 +186,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 					KmlPlacemark first = (KmlPlacemark) new_placemarks.item(i);
 					KmlPlacemark second = (KmlPlacemark) new_placemarks.item(j);
 					if (first.getName().equals(second.getName())) {
-//						container.getFeatures().removeChild(second);
+						// container.getFeatures().removeChild(second);
 						second.setVisibility(false);
 						new_placemarks = container
 								.getElementsByType("KmlPlacemark");
@@ -229,31 +229,40 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 				i++;
 			}
 			return container;
-		} else
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			return feature;
-	}
-	
-	private KmlObject cut_empty_icons(KmlObject feature) {
-		KmlContainer container = (KmlContainer)feature; 
-		KmlObjectList list = container.getElementsByType("KmlPlacemark");
-		for (int i = 0; i < list.getLength(); i++) {
-			KmlPlacemark placemark = (KmlPlacemark) list.item(i);
-			String html = placemark.getDescription();
-			// GWT.log(html);
-			Element elem = new HTML().getElement();
-			elem.setInnerHTML(html);
-			NodeList<Element> imgs = elem.getElementsByTagName("img");
-			for (int j = 0; j < imgs.getLength(); j++) {
-				Element img = imgs.getItem(j);
-				if ("none".equals(img.getStyle().getDisplay()))
-					img.getParentElement().removeChild(img);
-			}
-			html = elem.getInnerHTML();
-
-			// GWT.log(html);
-			placemark.setDescription(html);
+			// e.printStackTrace();
 		}
-		return container;
+	}
+
+	private KmlObject cut_empty_icons(KmlObject feature) {
+		try {
+			KmlContainer container = (KmlContainer) feature;
+			KmlObjectList list = container.getElementsByType("KmlPlacemark");
+			for (int i = 0; i < list.getLength(); i++) {
+				KmlPlacemark placemark = (KmlPlacemark) list.item(i);
+				String html = placemark.getDescription();
+				// GWT.log(html);
+				Element elem = new HTML().getElement();
+				elem.setInnerHTML(html);
+				NodeList<Element> imgs = elem.getElementsByTagName("img");
+				for (int j = 0; j < imgs.getLength(); j++) {
+					Element img = imgs.getItem(j);
+					if ("none".equals(img.getStyle().getDisplay()))
+						img.getParentElement().removeChild(img);
+				}
+				html = elem.getInnerHTML();
+
+				// GWT.log(html);
+				placemark.setDescription(html);
+			}
+			return container;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			return feature;
+			// e.printStackTrace();
+		}
 	}
 
 	@Override
