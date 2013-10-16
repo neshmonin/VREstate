@@ -56,3 +56,5 @@ classes
 /Clients/Orders/war/WEB-INF/deploy
 classes
 /Clients/Orders/.gwt/.gwt-log
+/Clients/ClientShared/.gwt
+/Clients/Order/.gwt
