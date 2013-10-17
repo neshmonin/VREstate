@@ -30,6 +30,7 @@ import com.nitrous.gwt.earth.client.api.KmlMouseEvent;
 import com.nitrous.gwt.earth.client.api.KmlObject;
 import com.nitrous.gwt.earth.client.api.KmlObjectList;
 import com.nitrous.gwt.earth.client.api.KmlPlacemark;
+import com.nitrous.gwt.earth.client.api.KmlStyle;
 import com.nitrous.gwt.earth.client.api.event.KmlLoadCallback;
 import com.nitrous.gwt.earth.client.api.event.MouseClickListener;
 
@@ -290,6 +291,11 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 						// TODO Auto-generated method stub
 						
 					}});
+				// placemark size
+				KmlStyle style = placemark.getComputedStyle();
+				style.getIconStyle().setScale(3.0f);
+				placemark.setStyleSelector(style);
+				
 			}
 			return container;
 		} else
