@@ -24,11 +24,14 @@ import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.ui.HTML;
+import com.nitrous.gwt.earth.client.api.GEHtmlStringBalloon;
 import com.nitrous.gwt.earth.client.api.KmlContainer;
+import com.nitrous.gwt.earth.client.api.KmlMouseEvent;
 import com.nitrous.gwt.earth.client.api.KmlObject;
 import com.nitrous.gwt.earth.client.api.KmlObjectList;
 import com.nitrous.gwt.earth.client.api.KmlPlacemark;
 import com.nitrous.gwt.earth.client.api.event.KmlLoadCallback;
+import com.nitrous.gwt.earth.client.api.event.MouseClickListener;
 
 public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 		I_Login {
@@ -160,8 +163,9 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 	@Override
 	public void onLoaded(KmlObject feature) {
 		if (feature != null) {
-			GE.getPlugin().getFeatures()
-					.appendChild(cut_empty_icons(remove_dublicates(feature)));
+			GE.getPlugin()
+					.getFeatures()
+					.appendChild(correct_placemarks(remove_dublicates(feature)));
 		}
 	}
 
@@ -236,33 +240,91 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 		}
 	}
 
-	private KmlObject cut_empty_icons(KmlObject feature) {
-		try {
-			KmlContainer container = (KmlContainer) feature;
-			KmlObjectList list = container.getElementsByType("KmlPlacemark");
-			for (int i = 0; i < list.getLength(); i++) {
-				KmlPlacemark placemark = (KmlPlacemark) list.item(i);
-				String html = placemark.getDescription();
-				// GWT.log(html);
-				Element elem = new HTML().getElement();
-				elem.setInnerHTML(html);
-				NodeList<Element> imgs = elem.getElementsByTagName("img");
-				for (int j = 0; j < imgs.getLength(); j++) {
-					Element img = imgs.getItem(j);
-					if ("none".equals(img.getStyle().getDisplay()))
-						img.getParentElement().removeChild(img);
-				}
-				html = elem.getInnerHTML();
+	private KmlObject correct_placemarks(KmlObject feature) {
+		KmlContainer container = (KmlContainer) feature;
+		if (container != null) {
+			KmlObjectList placemarks = container
+					.getElementsByType("KmlPlacemark");
+			for (int index = 0; index < placemarks.getLength(); index++) {
+				final KmlPlacemark placemark = (KmlPlacemark) placemarks.item(index);
 
-				// GWT.log(html);
+				Element description = new HTML().getElement();
+				description.setInnerHTML(placemark.getDescription());
+
+				correct_empty_icons(description);
+				correct_hrefs(description);
+				String html = description.getInnerHTML();
+				
+				if (html.isEmpty())
+					html += " ";
+				
 				placemark.setDescription(html);
+				
+				placemark.addMouseClickListener(new MouseClickListener(){
+
+					@Override
+					public void onClick(KmlMouseEvent event) {
+						// TODO Auto-generated method stub
+						event.preventDefault();
+						String content = placemark.getDescription();
+						GEHtmlStringBalloon balloon = GE.getPlugin().createHtmlStringBalloon("");
+						balloon.setFeature(placemark);
+						balloon.setContentString(content);
+						GE.getPlugin().setBalloon(balloon);
+					}
+
+					@Override
+					public void onDoubleClick(KmlMouseEvent event) {
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void onMouseDown(KmlMouseEvent event) {
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void onMouseUp(KmlMouseEvent event) {
+						// TODO Auto-generated method stub
+						
+					}});
 			}
 			return container;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
+		} else
 			return feature;
-			// e.printStackTrace();
+	}
+
+	private void correct_empty_icons(Element container) {
+		NodeList<Element> items = container.getElementsByTagName("img");
+		for (int i = 0; i < items.getLength(); i++) {
+			Element item = items.getItem(i);
+			if ("none".equals(item.getStyle().getDisplay()))
+				item.getParentElement().removeChild(item);
 		}
+	}
+
+	private void correct_hrefs(Element container) {
+//		Log.write("before: " + container.getInnerHTML());
+		NodeList<Element> items = container.getElementsByTagName("*");
+		int i = 0;
+		while (i < items.getLength()) {
+			Element item = items.getItem(i);
+//			Log.write(item.getTagName());
+//			if (item.getTagName().equalsIgnoreCase("SCRIPT")) {
+//				item.getParentElement().removeChild(item);
+//				items = container.getElementsByTagName("*");
+//				i = 0;
+//			} else 
+			if (!item.getAttribute("href").isEmpty()) {
+				item.setAttribute("onclick", "return !window.open(this.href)");
+				i++;
+			} else 
+				i++;
+		}
+
+//		Log.write("after: " + container.getInnerHTML());
 	}
 
 	@Override
