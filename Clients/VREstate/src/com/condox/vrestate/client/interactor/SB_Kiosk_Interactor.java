@@ -124,7 +124,7 @@ public class SB_Kiosk_Interactor extends OverlayHelpers
 
 	@Override
 	public void onClick(KmlMouseEvent event) {
-		event.preventDefault();
+//		event.preventDefault();
 
 		if (cameraPositionChanged)
 			return;
@@ -156,7 +156,7 @@ public class SB_Kiosk_Interactor extends OverlayHelpers
 	@Override
 	public void onMouseDown(KmlMouseEvent event) {
 		_AbstractView.ResetTimeOut();
-		event.preventDefault();
+//		event.preventDefault();
 		x = event.getClientX();
 		y = event.getClientY();
 
@@ -175,7 +175,7 @@ public class SB_Kiosk_Interactor extends OverlayHelpers
 	@Override
 	public void onMouseUp(KmlMouseEvent event) {
 		_AbstractView.ResetTimeOut();
-		event.preventDefault();
+//		event.preventDefault();
 		if (cameraPositionChanged)
 		{
 			cameraPositionChanged = false;
@@ -193,7 +193,7 @@ public class SB_Kiosk_Interactor extends OverlayHelpers
 
 	@Override
 	public void onMouseMove(KmlMouseEvent event) {
-		event.preventDefault();
+//		event.preventDefault();
 		int newX = event.getClientX();
 		int newY = event.getClientY();
 		double dZ;
