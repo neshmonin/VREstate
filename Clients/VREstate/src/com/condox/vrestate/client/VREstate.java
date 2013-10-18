@@ -26,6 +26,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.ui.HTML;
 import com.nitrous.gwt.earth.client.api.GEHtmlStringBalloon;
 import com.nitrous.gwt.earth.client.api.KmlContainer;
+import com.nitrous.gwt.earth.client.api.KmlFeature;
 import com.nitrous.gwt.earth.client.api.KmlMouseEvent;
 import com.nitrous.gwt.earth.client.api.KmlObject;
 import com.nitrous.gwt.earth.client.api.KmlObjectList;
@@ -242,12 +243,16 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 	}
 
 	private KmlObject correct_placemarks(KmlObject feature) {
-		KmlContainer container = (KmlContainer) feature;
-		if (container != null) {
+		Log.write("Feature: " + ((KmlFeature)feature).getKml());
+		Log.write("Feature type: " + feature.getType());
+		if ("KmlDocument".equals(feature.getType())) {
+			KmlContainer container = (KmlContainer) feature;
+			Log.write("container: " + container.getKml());
 			KmlObjectList placemarks = container
 					.getElementsByType("KmlPlacemark");
 			for (int index = 0; index < placemarks.getLength(); index++) {
-				final KmlPlacemark placemark = (KmlPlacemark) placemarks.item(index);
+				final KmlPlacemark placemark = (KmlPlacemark) placemarks
+						.item(index);
 
 				Element description = new HTML().getElement();
 				description.setInnerHTML(placemark.getDescription());
@@ -255,20 +260,21 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 				correct_empty_icons(description);
 				correct_hrefs(description);
 				String html = description.getInnerHTML();
-				
+
 				if (html.isEmpty())
 					html += " ";
-				
+
 				placemark.setDescription(html);
-				
-				placemark.addMouseClickListener(new MouseClickListener(){
+
+				placemark.addMouseClickListener(new MouseClickListener() {
 
 					@Override
 					public void onClick(KmlMouseEvent event) {
 						// TODO Auto-generated method stub
 						event.preventDefault();
 						String content = placemark.getDescription();
-						GEHtmlStringBalloon balloon = GE.getPlugin().createHtmlStringBalloon("");
+						GEHtmlStringBalloon balloon = GE.getPlugin()
+								.createHtmlStringBalloon("");
 						balloon.setFeature(placemark);
 						balloon.setContentString(content);
 						GE.getPlugin().setBalloon(balloon);
@@ -277,25 +283,26 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 					@Override
 					public void onDoubleClick(KmlMouseEvent event) {
 						// TODO Auto-generated method stub
-						
+
 					}
 
 					@Override
 					public void onMouseDown(KmlMouseEvent event) {
 						// TODO Auto-generated method stub
-						
+
 					}
 
 					@Override
 					public void onMouseUp(KmlMouseEvent event) {
 						// TODO Auto-generated method stub
-						
-					}});
+
+					}
+				});
 				// placemark size
 				KmlStyle style = placemark.getComputedStyle();
-				style.getIconStyle().setScale(3.0f);
+				style.getIconStyle().setScale(1.5f);
 				placemark.setStyleSelector(style);
-				
+
 			}
 			return container;
 		} else
@@ -312,25 +319,25 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 	}
 
 	private void correct_hrefs(Element container) {
-//		Log.write("before: " + container.getInnerHTML());
+		// Log.write("before: " + container.getInnerHTML());
 		NodeList<Element> items = container.getElementsByTagName("*");
 		int i = 0;
 		while (i < items.getLength()) {
 			Element item = items.getItem(i);
-//			Log.write(item.getTagName());
-//			if (item.getTagName().equalsIgnoreCase("SCRIPT")) {
-//				item.getParentElement().removeChild(item);
-//				items = container.getElementsByTagName("*");
-//				i = 0;
-//			} else 
+			// Log.write(item.getTagName());
+			// if (item.getTagName().equalsIgnoreCase("SCRIPT")) {
+			// item.getParentElement().removeChild(item);
+			// items = container.getElementsByTagName("*");
+			// i = 0;
+			// } else
 			if (!item.getAttribute("href").isEmpty()) {
 				item.setAttribute("onclick", "return !window.open(this.href)");
 				i++;
-			} else 
+			} else
 				i++;
 		}
 
-//		Log.write("after: " + container.getInnerHTML());
+		// Log.write("after: " + container.getInnerHTML());
 	}
 
 	@Override
