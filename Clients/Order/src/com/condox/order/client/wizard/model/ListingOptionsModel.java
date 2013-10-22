@@ -141,7 +141,7 @@ public class ListingOptionsModel extends WizardStep {
 						// suiteAdd = String.valueOf(info.getId());
 						presenter.go(container);
 					} else
-						new ErrorMessage(
+						new ModalMessage(
 								"Sorry, this listing cannot be located in the 3D Condo Explorer's Database."
 										+ "Please try another MLS#",
 								"warning-icon.png").center();

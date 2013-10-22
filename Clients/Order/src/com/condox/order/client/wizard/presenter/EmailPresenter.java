@@ -6,7 +6,7 @@ import com.condox.order.client.I_Presenter;
 import com.condox.order.client.wizard.I_WizardStep;
 import com.condox.order.client.wizard.Wizard;
 import com.condox.order.client.wizard.model.EmailModel;
-import com.condox.order.client.wizard.model.ErrorMessage;
+import com.condox.order.client.wizard.model.ModalMessage;
 import com.condox.order.client.wizard.model.ListingOptionsModel;
 import com.condox.order.client.wizard.model.LoginModel;
 import com.condox.order.client.wizard.model.ProductModel;
@@ -15,9 +15,7 @@ import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class EmailPresenter implements I_Presenter {
@@ -59,6 +57,9 @@ public class EmailPresenter implements I_Presenter {
 		String product = "prl";
 		String type = "suite";
 		String suiteId = "";
+		String moreInfoURL = "";
+		String virtualTourURL = "";
+		String mlsNum = "";
 		String sid = "";
 		while (step != null) {
 			switch (step.getStepType()) {
@@ -94,8 +95,9 @@ public class EmailPresenter implements I_Presenter {
 				break;
 			case ListingOptionsModel:
 				suiteId = String.valueOf(((ListingOptionsModel) step).getSuiteId());
-				//urlVirtualTour = ((ListingOptionsModel) step).getUrlVirtualTour();
-				//urlMoreInfo = String.valueOf(((ListingOptionsModel) step).getUrlMoreInfo());
+				mlsNum = ((ListingOptionsModel) step).getMls();
+				virtualTourURL = ((ListingOptionsModel) step).getUrlVirtualTour();
+				moreInfoURL = String.valueOf(((ListingOptionsModel) step).getUrlMoreInfo());
 				break;
 			case EmailModel:
 				ownerEmail = String.valueOf(((EmailModel) step).getOwnerMail());
@@ -109,7 +111,8 @@ public class EmailPresenter implements I_Presenter {
 				+ "program?q=register&entity=viewOrder&ownerEmail="
 				+ ownerEmail + "&paymentPending=" + payment + "&product="
 				+ product + "&propertyType=" + type + "&propertyId=" + suiteId
-				+ "&daysValid=20&sid=" + sid;
+				+ "&mls_id=" + mlsNum + "&mls_url=" + moreInfoURL + "&evt_url=" + virtualTourURL 
+				+ "&daysValid=1&sid=" + sid;
 		url = URL.encode(url);
 		GET.send(url, new RequestCallback() {
 
@@ -119,26 +122,28 @@ public class EmailPresenter implements I_Presenter {
 				// TODO Auto-generated method stub
 				if (response.getStatusCode() == 200) {
 					// model.next();
-					String msg = "Please check your email account";
-					msg += "<br/><center>" + mail + "</center>";
-					msg += "(make sure you check the spam folder too).";
-					msg += "<br/>";
-					msg += "<br/>To complete the order you'll need to follow the" +
-					" instructions from a message named" +
-					"<br/> \"Order of interactive 3D product - 3D Condo Explorer\"";
-					HTML html = new HTML();
-					html.setHTML(msg);
-					PopupPanel popup = new PopupPanel();
-					popup.setWidget(html);
-					popup.setSize("300px", "140px");
-					popup.setModal(true);
-					popup.setGlassEnabled(true);
-					popup.setAutoHideEnabled(true);
-					popup.center();
+					String msg = 	"The order has been submitted successfuly." +
+									"You have 10 minutes to complete it" +
+									"<br/>Please check you email account " +
+									"<center><b>" + mail + "</b></center> " +
+									"and follow the instructions in the message " +
+									"<b>Order of interactive 3D product - 3D Condo Explorer</b>" +
+									"<br/>" +
+									"<i>Make sure you checked the spam folder too.</i>";
+					new ModalMessage(msg, "10Minutes.jpg").center();
+					//HTML html = new HTML();
+					//html.setHTML(msg);
+					//PopupPanel popup = new PopupPanel();
+					//popup.setWidget(html);
+					//popup.setSize("300px", "140px");
+					//popup.setModal(true);
+					//popup.setGlassEnabled(true);
+					//popup.setAutoHideEnabled(true);
+					//popup.center();
 					Wizard.cancel();
 					
 				} else {
-					new ErrorMessage("Sorry, we are currently experiencing some server-side problems. Please try to re-submit your order again later","error-icon.jpg").center();
+					new ModalMessage("Sorry, we are currently experiencing some server-side problems. Please try to re-submit your order again later","error-icon.jpg").center();
 				}
 				
 			}
