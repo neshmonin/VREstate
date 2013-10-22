@@ -295,7 +295,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 				});
 				// placemark size
 				KmlStyle style = placemark.getComputedStyle();
-				style.getIconStyle().setScale(1.5f);
+				style.getIconStyle().setScale(1.3f);
 				placemark.setStyleSelector(style);
 
 			}
