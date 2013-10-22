@@ -169,11 +169,14 @@ public class SB_Interactor extends OverlayHelpers
 		if (event.getTarget().getType().equals("KmlPlacemark")) {
 			KmlPlacemark placemark = (KmlPlacemark) event.getTarget();
 			String json = placemark.getSnippet();
-			JSONObject obj = JSONParser.parseLenient(json).isObject();
-
-			String type = obj.get("type").isString().stringValue();
-			int id = (int) obj.get("id").isNumber().doubleValue();
-			this.view.Select(type, id);
+			if (!"".equals(json)) {
+				JSONObject obj = JSONParser.parseLenient(json).isObject();
+				if (obj != null) {
+					String type = obj.get("type").isString().stringValue();
+					int id = (int) obj.get("id").isNumber().doubleValue();
+					this.view.Select(type, id);
+				}
+			}
 		}
 		else
 		if (this.view.isCameraMoved())
