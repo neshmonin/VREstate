@@ -10,7 +10,6 @@ import com.condox.clientshared.communication.User;
 import com.condox.clientshared.document.Building;
 import com.condox.clientshared.document.Document;
 import com.condox.clientshared.document.Site;
-import com.condox.clientshared.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.HelicopterView;
 import com.condox.vrestate.client.view.ProgressBar;
@@ -87,26 +86,22 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 		Document.progressBar = new ProgressBar();
 		if (Document.get().Parse(json)) {
 			Site site = (Site) Document.get().getSites().values().toArray()[0];
-			if (!Options.isViewOrder()
-					|| Document.targetViewOrder.getProductType() == ProductType.PublicListing
-					|| Document.targetViewOrder.getProductType() == ProductType.Building3DLayout) {
-				boolean useSiteModel = true;
-				for (Building bldng : Document.get().getBuildings().values()) {
-					if (bldng.getDisplayModelUrl() != "") {
-						GE.getPlugin().fetchKml(bldng.getDisplayModelUrl(),
-								this);
-						useSiteModel = false;
-					}
-					if (bldng.getOverlayUrl() != "")
-						GE.getPlugin().fetchKml(bldng.getOverlayUrl(), this);
-					if (bldng.getPOIUrl() != "")
-						GE.getPlugin().fetchKml(bldng.getPOIUrl(), this);
+			boolean useSiteModel = true;
+			for (Building bldng : Document.get().getBuildings().values()) {
+				if (bldng.getDisplayModelUrl() != "") {
+					GE.getPlugin().fetchKml(bldng.getDisplayModelUrl(),
+							this);
+					useSiteModel = false;
 				}
-				if (useSiteModel)
-					if (site.getDisplayModelUrl() != "")
-						GE.getPlugin()
-								.fetchKml(site.getDisplayModelUrl(), this);
+				if (bldng.getOverlayUrl() != "")
+					GE.getPlugin().fetchKml(bldng.getOverlayUrl(), this);
+				if (bldng.getPOIUrl() != "")
+					GE.getPlugin().fetchKml(bldng.getPOIUrl(), this);
 			}
+			if (useSiteModel)
+				if (site.getDisplayModelUrl() != "")
+					GE.getPlugin()
+							.fetchKml(site.getDisplayModelUrl(), this);
 
 			_AbstractView.CreateAllGeoItems();
 
