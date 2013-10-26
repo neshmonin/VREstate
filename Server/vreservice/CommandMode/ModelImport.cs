@@ -676,18 +676,15 @@ namespace Vre.Server.Command
 			Vre.Server.Model.Kmz.Suite modelSuite, 
 			Suite dbSuite, bool isCreated)
         {
-            // this must be the first call on new suite as it re-reads suite from DB;
-            // all subsequent changes shall be lost!
-			dbSuite.CurrentPrice = new Money(Convert.ToDecimal(modelSuite.InitialPrice), Currency.Cad); // TODO: Currently locked to CAD
+			if (isCreated)
+			{
+				// this must be the first call on new suite as it re-reads suite from DB;
+				// all subsequent changes shall be lost!
+				dbSuite.CurrentPrice = new Money(Convert.ToDecimal(modelSuite.InitialPrice), Currency.Cad); // TODO: Currently locked to CAD
 
-            using (SiteManager mgr = new SiteManager(_clientSession))
-                mgr.LogNewSuitePrice(dbSuite, (float)modelSuite.InitialPrice);
-
-            if (0 == modelSuite.CeilingHeightFt)
-                dbSuite.CeilingHeight = new ValueWithUM(modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
-            else
-                dbSuite.CeilingHeight = new ValueWithUM(
-                    modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
+				using (SiteManager mgr = new SiteManager(_clientSession))
+					mgr.LogNewSuitePrice(dbSuite, (float)modelSuite.InitialPrice);
+			}
 
             dbSuite.ShowPanoramicView = modelSuite.ShowPanoramicView;
 
