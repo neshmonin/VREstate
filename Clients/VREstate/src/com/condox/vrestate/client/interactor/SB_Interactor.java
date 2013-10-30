@@ -178,17 +178,13 @@ public class SB_Interactor extends OverlayHelpers
 				}
 			}
 		}
-		else
-		if (this.view.isCameraMoved())
-		{
-	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getTransitionSpeed());
-	        this.view.ApplyCamera();
-	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getRegularSpeed());
-		}
 	}
 
 	@Override
 	public void onDoubleClick(KmlMouseEvent event) {
+		GE.getPlugin().getOptions().setFlyToSpeed(this.view.getTransitionSpeed());
+		this.view.ApplyCamera();
+		GE.getPlugin().getOptions().setFlyToSpeed(this.view.getRegularSpeed());
 	}
 
 	@Override

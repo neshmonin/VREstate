@@ -127,18 +127,14 @@ public class SB_Kiosk_Interactor extends OverlayHelpers implements
 					this.view.Select(type, id);
 				}
 			}
-		} else if (this.view.isCameraMoved()) { // they click Navigation
-												// Controls
-			GE.getPlugin().getOptions()
-					.setFlyToSpeed(this.view.getTransitionSpeed());
-			this.view.ApplyCamera();
-			GE.getPlugin().getOptions()
-					.setFlyToSpeed(this.view.getRegularSpeed());
 		}
 	}
 
 	@Override
 	public void onDoubleClick(KmlMouseEvent event) {
+		GE.getPlugin().getOptions().setFlyToSpeed(this.view.getTransitionSpeed());
+		this.view.ApplyCamera();
+		GE.getPlugin().getOptions().setFlyToSpeed(this.view.getRegularSpeed());
 	}
 
 	@Override

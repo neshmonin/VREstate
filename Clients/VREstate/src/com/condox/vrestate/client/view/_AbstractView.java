@@ -162,10 +162,10 @@ public abstract class _AbstractView implements I_AbstractView {
 	public void onDestroy() {
 	}
 
-	@Override
-	public boolean isCameraMoved() {
-		return getCamera().isMoved();
-	}
+//	@Override
+//	public boolean isCameraMoved() {
+//		return getCamera().isMoved();
+//	}
 	
 	@Override
 	public void ApplyCamera() {
