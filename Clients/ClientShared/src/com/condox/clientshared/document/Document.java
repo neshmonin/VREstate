@@ -159,7 +159,7 @@ public class Document implements IDocument, I_Progress
 			Suite theSuite = this.suites.get(id);
 			if (theSuite == null) {
 				theSuite = new Suite();
-				theSuite.Parse(JSONsuites.get(index));
+				theSuite.fromJSONValue(JSONsuites.get(index));
 				// ////////
 				// if (!(theSuite.getName().contains("gf") ||
 				// theSuite.getName().contains("ph") ||
@@ -214,7 +214,7 @@ public class Document implements IDocument, I_Progress
 			Building building = this.buildings.get(id);
 			if (building == null) {
 				building = new Building();
-				building.Parse(JSONbuildings.get(index));
+				building.fromJSONValue(JSONbuildings.get(index));
 				this.buildings.put(building.getId(), building);
 			}
 		}
@@ -238,7 +238,7 @@ public class Document implements IDocument, I_Progress
 			Site site = this.sites.get(id);
 			if (site == null) {
 				site = new Site();
-				site.Parse(JSONsites.get(index));
+				site.fromJSONValue(JSONsites.get(index));
 				this.sites.put(site.getId(), site);
 			}
 		}
