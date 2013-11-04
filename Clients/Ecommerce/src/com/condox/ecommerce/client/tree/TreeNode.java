@@ -8,6 +8,10 @@ import com.condox.ecommerce.client.tree.EcommerceTree.State;
 import com.google.gwt.user.client.ui.HasWidgets;
 
 public abstract class TreeNode implements I_TreeNode {
+	
+	public static TreeNode create() {
+		return null;
+	}
 
 	protected I_TreeNode parent = null;
 	@Override

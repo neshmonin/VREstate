@@ -1,12 +1,10 @@
 package com.condox.ecommerce.client.tree;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.condox.ecommerce.client.tree.EcommerceTree.State;
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -24,7 +22,7 @@ abstract class Tree implements I_Tree {
 
 	public Tree(HasWidgets container) {
 		instance = this;
-		registerNodeClass(DefaultNode.simpleName, DefaultNode.class);
+//		registerNodeClass(DefaultNode.simpleName, DefaultNode.class);
 		currentNode = new DefaultNode();
 		configureTree();
 	}
@@ -111,9 +109,11 @@ abstract class Tree implements I_Tree {
 			if (leaf.startsWith(fullPath)) {
 				String nextPath = leaf.substring(fullPath.length());
 				String nextNodeType = nextPath.substring(0, nextPath.indexOf("."));
-				Class<?> nextNodeClass = instance.nodeClasses.get(nextNodeType);
-				I_TreeNode nextNode = GWT.create(nextNodeClass);
-				nextNode.setParent(currentNode);
+//				Class<TreeNode> nextNodeClass = instance.nodeClasses.get(nextNodeType);
+//				Object invoke = 
+				TreeNode nextNode = NodeFactory.create(nextNodeType);
+				if (nextNode != null)
+					nextNode.setParent(currentNode);
 
 				return nextNode;
 			}
@@ -130,12 +130,12 @@ abstract class Tree implements I_Tree {
 		leafs.add(leafFullPath);
 	}
 	
-	protected Map<String, Class<?>> nodeClasses = new HashMap<String, Class<?>>();
-	
-	public void registerNodeClass(String simpleName, Class<?> nodeClass) {
-		//String simpleName = nodeClass.getSimpleName();
-		nodeClasses.put(simpleName, nodeClass);
-	}
+//	protected Map<String, Class<TreeNode>> nodeClasses = new HashMap<String, Class<TreeNode>>();
+//	
+//	public void registerNodeClass(String simpleName, Class<TreeNode> nodeClass) {
+//		//String simpleName = nodeClass.getSimpleName();
+//		nodeClasses.put(simpleName, nodeClass);
+//	}
 	
 	public abstract void configureTree();
 	

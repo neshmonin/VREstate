@@ -1,13 +1,5 @@
 package com.condox.ecommerce.client.tree;
 
-import com.condox.ecommerce.client.tree.model.BuildingsModel;
-import com.condox.ecommerce.client.tree.model.EmailModel;
-import com.condox.ecommerce.client.tree.model.ListingOptionsModel;
-import com.condox.ecommerce.client.tree.model.LoginModel;
-import com.condox.ecommerce.client.tree.model.MLSModel;
-import com.condox.ecommerce.client.tree.model.ProductModel;
-import com.condox.ecommerce.client.tree.model.SuitesModel;
-import com.condox.ecommerce.client.tree.model.SummaryModel;
 import com.google.gwt.user.client.ui.HasWidgets;
 
 public class EcommerceTree extends Tree {
@@ -49,14 +41,14 @@ public class EcommerceTree extends Tree {
 	
 	@Override
 	public void configureTree() {
-		registerNodeClass(BuildingsModel.simpleName, BuildingsModel.class);
-		registerNodeClass(EmailModel.simpleName, EmailModel.class);
-		registerNodeClass(ListingOptionsModel.simpleName, ListingOptionsModel.class);
-		registerNodeClass(LoginModel.simpleName, LoginModel.class);
-		registerNodeClass(MLSModel.simpleName, MLSModel.class);
-		registerNodeClass(ProductModel.simpleName, ProductModel.class);
-		registerNodeClass(SuitesModel.simpleName, SuitesModel.class);
-		registerNodeClass(SummaryModel.simpleName, SummaryModel.class);
+//		registerNodeClass(BuildingsModel.simpleName, BuildingsModel.class);
+//		registerNodeClass(EmailModel.simpleName, EmailModel.class);
+//		registerNodeClass(ListingOptionsModel.simpleName, ListingOptionsModel.class);
+//		registerNodeClass(LoginModel.simpleName, LoginModel.class);
+//		registerNodeClass(MLSModel.simpleName, MLSModel.class);
+//		registerNodeClass(ProductModel.simpleName, ProductModel.class);
+//		registerNodeClass(SuitesModel.simpleName, SuitesModel.class);
+//		registerNodeClass(SummaryModel.simpleName, SummaryModel.class);
 
 		addLeaf("Root/"+
 				"LoginModel.Guest/"+

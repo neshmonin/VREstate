@@ -13,5 +13,5 @@ public class DefaultNode extends TreeNode{
 	public String getNavURL() {
 		return "";
 	}
-	
+
 }
