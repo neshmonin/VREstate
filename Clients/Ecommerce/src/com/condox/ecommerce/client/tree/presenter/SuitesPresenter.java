@@ -92,10 +92,16 @@ public class SuitesPresenter implements I_Presenter {
 	}
 
 	public void onPrev() {
-		EcommerceTree.set(Field.SuiteId, new Data(display.getSelectedSuite().getId()));
-		EcommerceTree.set(Field.SuiteName, new Data(display.getSelectedSuite().getName()));
-		EcommerceTree.set(Field.Address, new Data(display.getSelectedSuite().getAddress()));
-		EcommerceTree.set(Field.MLS, new Data(display.getSelectedSuite().getMLS()));
+		if (display.getSelectedSuite() != null) {
+			EcommerceTree.set(Field.SuiteId, new Data(display
+					.getSelectedSuite().getId()));
+			EcommerceTree.set(Field.SuiteName, new Data(display
+					.getSelectedSuite().getName()));
+			EcommerceTree.set(Field.Address, new Data(display
+					.getSelectedSuite().getAddress()));
+			EcommerceTree.set(Field.MLS, new Data(display.getSelectedSuite()
+					.getMLS()));
+		}
 		model.prev();
 	}
 

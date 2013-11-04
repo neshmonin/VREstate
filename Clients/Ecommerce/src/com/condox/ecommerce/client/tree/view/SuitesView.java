@@ -27,6 +27,7 @@ import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
@@ -178,6 +179,13 @@ public class SuitesView extends Composite implements IDisplay {
 		if (!dataProvider.getDataDisplays().contains(dataGrid)) {
 			dataProvider.addDataDisplay(dataGrid);
 		}
+		
+//		// ================================
+//		String s = "Loading suits list, please wait for few seconds..";
+//		Label loadingLabel = new Label(s);
+//		loadingLabel.setStylePrimaryName("my-loading-label");
+//		// dataGrid.setLoadingIndicator(loadingLabel);
+//		dataGrid.setEmptyTableWidget(loadingLabel);
 		
 	}
 	//**********************************
