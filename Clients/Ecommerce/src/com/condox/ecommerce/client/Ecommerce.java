@@ -11,7 +11,7 @@ import com.google.gwt.user.client.History;
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
-public class Order implements EntryPoint, ValueChangeHandler<String> {
+public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 	/**
 	 * This is the entry point method.
 	 */
