@@ -28,6 +28,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
@@ -77,44 +78,55 @@ public class SuitesView extends Composite implements IDisplay {
 	public void setPresenter(SuitesPresenter presenter) {
 		this.presenter = presenter;
 	}
+	
+	private PopupPanel loading = new PopupPanel();
 
 	@Override
 	public void setData(List<SuiteInfo> data) {
-		this.data = data;
-		dataProvider.getList().clear();
-		Iterator<SuiteInfo> infos = this.data.iterator();
-		while (infos.hasNext()) {
-			SuiteInfo info = infos.next();
-			String floorName = info.getFloorName();
-			Iterator<Floor> floors = dataProvider.getList().iterator();
-			while (floors.hasNext()) {
-				Floor floor = floors.next();
-				if (floor.getName().equals(floorName)) {
+		if (data == null) {
+			loading.clear();
+			loading.setModal(true);
+			loading.setGlassEnabled(true);
+			loading.add(new Label("Loading, please wait..."));
+			loading.center();
+		} else {
+			loading.hide();
+			this.data = data;
+			dataProvider.getList().clear();
+			Iterator<SuiteInfo> infos = this.data.iterator();
+			while (infos.hasNext()) {
+				SuiteInfo info = infos.next();
+				String floorName = info.getFloorName();
+				Iterator<Floor> floors = dataProvider.getList().iterator();
+				while (floors.hasNext()) {
+					Floor floor = floors.next();
+					if (floor.getName().equals(floorName)) {
+						floor.add(info);
+						info = null;
+						break;
+					}
+				}
+				if (info != null) {
+					Floor floor = new Floor();
+					dataProvider.getList().add(floor);
 					floor.add(info);
-					info = null;
-					break;
 				}
 			}
-			if (info != null) {
-				Floor floor = new Floor();
-				dataProvider.getList().add(floor);
-				floor.add(info);
-			}
-		}
-		Collections.sort(dataProvider.getList(),
-				new Comparator<Floor>() {
+			Collections.sort(dataProvider.getList(), new Comparator<Floor>() {
 
-					@Override
-					public int compare(Floor o1, Floor o2) {
-						/*int A = Integer.valueOf(o1.getName());
-						int B = Integer.valueOf(o2.getName());
-						return (A > B) ? 1 : -1;*/
-						String A = o1.getName();
-						String B = o2.getName();
-						return A.compareTo(B);
-					}
-				});
-		CreateDataGrid();
+				@Override
+				public int compare(Floor o1, Floor o2) {
+					/*
+					 * int A = Integer.valueOf(o1.getName()); int B =
+					 * Integer.valueOf(o2.getName()); return (A > B) ? 1 : -1;
+					 */
+					String A = o1.getName();
+					String B = o2.getName();
+					return A.compareTo(B);
+				}
+			});
+			CreateDataGrid();
+		}
 	}
 	private void CreateDataGrid() {
 		// ==============================================
@@ -180,12 +192,12 @@ public class SuitesView extends Composite implements IDisplay {
 			dataProvider.addDataDisplay(dataGrid);
 		}
 		
-//		// ================================
-//		String s = "Loading suits list, please wait for few seconds..";
-//		Label loadingLabel = new Label(s);
-//		loadingLabel.setStylePrimaryName("my-loading-label");
-//		// dataGrid.setLoadingIndicator(loadingLabel);
-//		dataGrid.setEmptyTableWidget(loadingLabel);
+		// ================================
+		String s = "Loading suits list, please wait for few seconds..";
+		Label loadingLabel = new Label(s);
+		loadingLabel.setStylePrimaryName("my-loading-label");
+		// dataGrid.setLoadingIndicator(loadingLabel);
+		dataGrid.setEmptyTableWidget(loadingLabel);
 		
 	}
 	//**********************************

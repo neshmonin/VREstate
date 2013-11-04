@@ -49,6 +49,7 @@ public class SuitesPresenter implements I_Presenter {
 	}
 
 	private void updateData() {
+		display.setData(null);
 		int buildingId = EcommerceTree.get(Field.BuildingID).asInteger();
 		
 		//	Sample: "https://vrt.3dcondox.com/data/inventory?"
