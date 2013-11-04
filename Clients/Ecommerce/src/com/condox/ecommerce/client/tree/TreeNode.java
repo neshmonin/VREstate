@@ -53,7 +53,8 @@ public abstract class TreeNode implements I_TreeNode {
 		String str = item.getNavURL();
 		item = item.getParent();
 		while (item != null) {
-			str = item.getNavURL() + " &#187; " + str;
+			if (!item.getNavURL().isEmpty())
+				str = item.getNavURL() + " &#187; " + str;
 			item = item.getParent();
 		}
 //		str = "&#187;";
