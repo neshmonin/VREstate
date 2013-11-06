@@ -5,13 +5,14 @@ import com.condox.ecommerce.client.tree.Data;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.State;
+import com.condox.ecommerce.client.tree.I_Contained;
+import com.condox.ecommerce.client.tree.I_Container;
 import com.condox.ecommerce.client.tree.model.MLSModel;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class MLSPresenter implements I_Presenter {
 
-	public static interface I_Display {
+	public static interface I_Display extends I_Contained {
 		void setPresenter(MLSPresenter presenter);
 		String getMLS();
 		void setMLS(String value);
@@ -28,10 +29,10 @@ public class MLSPresenter implements I_Presenter {
 	}
 
 	@Override
-	public void go(HasWidgets container) {
+	public void go(I_Container container) {
 		display.setMLS("");
 		container.clear();
-		container.add(this.display.asWidget());
+		container.add((I_Contained)display);
 	}
 	
 	public void onPrev() {

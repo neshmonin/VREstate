@@ -1,6 +1,7 @@
 package com.condox.ecommerce.client;
 
 import com.condox.ecommerce.client.tree.EcommerceTree;
+import com.condox.ecommerce.client.tree.PopupContainer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -41,8 +42,8 @@ public class MainPage extends Composite {
 	}
 	@UiHandler("loginMenu")
 	void onLoginMenuClick(ClickEvent event) {
-		EcommerceTree tree = new EcommerceTree(null);
-		tree.activate();
+		EcommerceTree tree = new EcommerceTree();
+		tree.go(new PopupContainer());
 	}
 	
 }

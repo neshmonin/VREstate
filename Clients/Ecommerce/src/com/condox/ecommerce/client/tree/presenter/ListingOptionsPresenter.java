@@ -5,13 +5,14 @@ import com.condox.ecommerce.client.tree.Data;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.State;
+import com.condox.ecommerce.client.tree.I_Contained;
+import com.condox.ecommerce.client.tree.I_Container;
 import com.condox.ecommerce.client.tree.model.ListingOptionsModel;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ListingOptionsPresenter implements I_Presenter {
 
-	public static interface I_Display {
+	public static interface I_Display extends I_Contained {
 		void setPresenter(ListingOptionsPresenter presenter);
 		void setMLS(String value);
 		void setVirtualTourURL(String value);
@@ -32,9 +33,9 @@ public class ListingOptionsPresenter implements I_Presenter {
 	}
 
 	@Override
-	public void go(HasWidgets container) {
+	public void go(I_Container container) {
 		container.clear();
-		container.add(this.display.asWidget());
+		container.add((I_Contained)display);
 		updateData();
 	}
 

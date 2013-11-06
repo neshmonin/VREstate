@@ -7,20 +7,21 @@ import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.Data;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
+import com.condox.ecommerce.client.tree.I_Contained;
+import com.condox.ecommerce.client.tree.I_Container;
 import com.condox.ecommerce.client.tree.model.EmailModel;
 import com.condox.ecommerce.client.tree.model.ModalMessage;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class EmailPresenter implements I_Presenter {
 
 	public String payment = Options.isTestPay()? "CAD1.00" : "CAD49.99";
 	
-	public static interface I_Display {
+	public static interface I_Display extends I_Contained {
 		void setPresenter(EmailPresenter presenter);
 
 		void setOwnerEmail(String ownerEmail);
@@ -38,9 +39,9 @@ public class EmailPresenter implements I_Presenter {
 	}
 
 	@Override
-	public void go(HasWidgets container) {
+	public void go(I_Container container) {
 		container.clear();
-		container.add(this.display.asWidget());
+		container.add((I_Contained)display);
 		Data emailData = EcommerceTree.get(Field.Email);
 		if (emailData != null)
 			display.setOwnerEmail(emailData.asString());

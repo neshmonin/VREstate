@@ -12,6 +12,8 @@ import com.condox.ecommerce.client.tree.Data;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.State;
+import com.condox.ecommerce.client.tree.I_Contained;
+import com.condox.ecommerce.client.tree.I_Container;
 import com.condox.ecommerce.client.tree.model.SuitesModel;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -19,12 +21,11 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SuitesPresenter implements I_Presenter {
 
-	public interface IDisplay {
+	public interface IDisplay extends I_Contained {
 		void setPresenter(SuitesPresenter presenter);
 
 		void setData(List<SuiteInfo> data);
@@ -86,9 +87,9 @@ public class SuitesPresenter implements I_Presenter {
 	}
 
 	@Override
-	public void go(HasWidgets container) {
+	public void go(I_Container container) {
 		container.clear();
-		container.add(display.asWidget());
+		container.add((I_Contained)display);
 		updateData();
 	}
 

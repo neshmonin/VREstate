@@ -1,11 +1,11 @@
 package com.condox.ecommerce.client.tree.model;
 
 import com.condox.ecommerce.client.tree.EcommerceTree;
+import com.condox.ecommerce.client.tree.I_Container;
 import com.condox.ecommerce.client.tree.I_TreeNode;
 import com.condox.ecommerce.client.tree.TreeNode;
 import com.condox.ecommerce.client.tree.presenter.SummaryPresenter;
 import com.condox.ecommerce.client.tree.view.SummaryView;
-import com.google.gwt.user.client.ui.HasWidgets;
 
 public class SummaryModel extends TreeNode {
 
@@ -57,9 +57,9 @@ public class SummaryModel extends TreeNode {
 		return valid;
 	}
 
-	private HasWidgets container = null;
+	private I_Container container = null;
 	@Override
-	public void go(HasWidgets container) {
+	public void go(I_Container container) {
 		this.container = container;
 		SummaryPresenter presenter = new SummaryPresenter(new SummaryView(), this);
 		presenter.go(container);

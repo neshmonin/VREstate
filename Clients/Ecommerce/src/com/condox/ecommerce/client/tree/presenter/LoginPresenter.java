@@ -8,15 +8,16 @@ import com.condox.ecommerce.client.tree.Data;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.State;
+import com.condox.ecommerce.client.tree.I_Contained;
+import com.condox.ecommerce.client.tree.I_Container;
 import com.condox.ecommerce.client.tree.model.LoginModel;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class LoginPresenter implements I_Presenter, I_Login {
 
-	public static interface I_Display {
+	public static interface I_Display extends I_Contained {
 		void setPresenter(LoginPresenter presenter);
 
 		String getUserLogin();
@@ -36,9 +37,9 @@ public class LoginPresenter implements I_Presenter, I_Login {
 	}
 
 	@Override
-	public void go(HasWidgets container) {
+	public void go(I_Container container) {
 		container.clear();
-		container.add(this.display.asWidget());
+		container.add((I_Contained)display);
 	}
 
 	public void onEnter() {

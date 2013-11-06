@@ -3,12 +3,12 @@ package com.condox.ecommerce.client.tree.model;
 import com.condox.clientshared.document.BuildingInfo;
 import com.condox.ecommerce.client.tree.Data;
 import com.condox.ecommerce.client.tree.EcommerceTree;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
+import com.condox.ecommerce.client.tree.I_Container;
 import com.condox.ecommerce.client.tree.I_TreeNode;
 import com.condox.ecommerce.client.tree.TreeNode;
-import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.presenter.BuildingsPresenter;
 import com.condox.ecommerce.client.tree.view.BuildingsView;
-import com.google.gwt.user.client.ui.HasWidgets;
 
 public class BuildingsModel extends TreeNode {
 
@@ -65,7 +65,7 @@ public class BuildingsModel extends TreeNode {
 	}
 
 	@Override
-	public void go(HasWidgets container) {
+	public void go(I_Container container) {
 		// super.go(container, navigator);
 //		Window.alert("BModel id=" + selectedIndex);
 		this.container = container;

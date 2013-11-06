@@ -4,13 +4,14 @@ import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.State;
+import com.condox.ecommerce.client.tree.I_Contained;
+import com.condox.ecommerce.client.tree.I_Container;
 import com.condox.ecommerce.client.tree.model.SummaryModel;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SummaryPresenter implements I_Presenter {
 
-	public static interface I_Display {
+	public static interface I_Display extends I_Contained {
 		void setPresenter(SummaryPresenter presenter);
 
 		Widget asWidget();
@@ -26,9 +27,9 @@ public class SummaryPresenter implements I_Presenter {
 	}
 
 	@Override
-	public void go(HasWidgets container) {
+	public void go(I_Container container) {
 		container.clear();
-		container.add(this.display.asWidget());
+		container.add((I_Contained)display);
 	}
 
 	public void onPrev() {

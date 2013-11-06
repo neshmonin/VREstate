@@ -3,12 +3,12 @@ package com.condox.ecommerce.client.tree.model;
 import com.condox.clientshared.document.SuiteInfo;
 import com.condox.ecommerce.client.tree.Data;
 import com.condox.ecommerce.client.tree.EcommerceTree;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
+import com.condox.ecommerce.client.tree.I_Container;
 import com.condox.ecommerce.client.tree.I_TreeNode;
 import com.condox.ecommerce.client.tree.TreeNode;
-import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.presenter.SuitesPresenter;
 import com.condox.ecommerce.client.tree.view.SuitesView;
-import com.google.gwt.user.client.ui.HasWidgets;
 
 public class SuitesModel extends TreeNode {
 
@@ -48,9 +48,11 @@ public class SuitesModel extends TreeNode {
 			return false;
 		return true;
 	}
+	
+	private I_Container container = null;
 
 	@Override
-	public void go(HasWidgets container) {
+	public void go(I_Container container) {
 		this.container = container;
 		new SuitesPresenter(new SuitesView(), this).go(container);
 		super.go(container);

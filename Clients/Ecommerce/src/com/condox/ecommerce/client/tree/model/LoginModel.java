@@ -1,13 +1,14 @@
 package com.condox.ecommerce.client.tree.model;
 
+import com.condox.clientshared.abstractview.Log;
 import com.condox.ecommerce.client.tree.Data;
 import com.condox.ecommerce.client.tree.EcommerceTree;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
+import com.condox.ecommerce.client.tree.I_Container;
 import com.condox.ecommerce.client.tree.I_TreeNode;
 import com.condox.ecommerce.client.tree.TreeNode;
-import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.presenter.LoginPresenter;
 import com.condox.ecommerce.client.tree.view.LoginView;
-import com.google.gwt.user.client.ui.HasWidgets;
 
 public class LoginModel extends TreeNode {
 
@@ -25,9 +26,9 @@ public class LoginModel extends TreeNode {
 		return valid;
 	}
 
-	private HasWidgets container = null;
+	private I_Container container = null;
 	@Override
-	public void go(HasWidgets container) {
+	public void go(I_Container container) {
 		this.container = container;
 		LoginPresenter presenter = new LoginPresenter(new LoginView(), this);
 		presenter.go(container);

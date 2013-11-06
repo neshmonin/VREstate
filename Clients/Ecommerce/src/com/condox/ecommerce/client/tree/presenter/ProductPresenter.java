@@ -5,13 +5,14 @@ import com.condox.ecommerce.client.tree.Data;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.State;
+import com.condox.ecommerce.client.tree.I_Contained;
+import com.condox.ecommerce.client.tree.I_Container;
 import com.condox.ecommerce.client.tree.model.ProductModel;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ProductPresenter implements I_Presenter {
 
-	public static interface I_Display {
+	public static interface I_Display extends I_Contained {
 		void setPresenter(ProductPresenter presenter);
 
 		boolean getListing();
@@ -43,14 +44,14 @@ public class ProductPresenter implements I_Presenter {
 	}
 
 	@Override
-	public void go(HasWidgets container) {
+	public void go(I_Container container) {
 		String productType = EcommerceTree.get(Field.ProductType).asString();
 		display.setListing(productType != "Layout");
 		display.setPrivate(productType == "ListingPrivate");
 		display.setShared(productType == "ListingPublic");
 		display.setLayout(productType == "Layout");
 		container.clear();
-		container.add(this.display.asWidget());
+		container.add((I_Contained)display);
 	}
 
 	public void onPrev() {

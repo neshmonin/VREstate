@@ -17,6 +17,6 @@ public interface I_TreeNode {
 	void setParent(I_TreeNode parent);
 	Map<I_TreeNode, I_TreeNode> getChildren();
 	
-	void go(HasWidgets container);
+	void go(I_Container container);
 	String getNavURL();
 }

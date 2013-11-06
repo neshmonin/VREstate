@@ -2,12 +2,12 @@ package com.condox.ecommerce.client.tree.model;
 
 import com.condox.ecommerce.client.tree.Data;
 import com.condox.ecommerce.client.tree.EcommerceTree;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
+import com.condox.ecommerce.client.tree.I_Container;
 import com.condox.ecommerce.client.tree.I_TreeNode;
 import com.condox.ecommerce.client.tree.TreeNode;
-import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.presenter.MLSPresenter;
 import com.condox.ecommerce.client.tree.view.MLSView;
-import com.google.gwt.user.client.ui.HasWidgets;
 
 public class MLSModel extends TreeNode {
 
@@ -15,10 +15,10 @@ public class MLSModel extends TreeNode {
 
 	public MLSModel() {	}
 
-	private HasWidgets container = null;
+	private I_Container container = null;
 
 	@Override
-	public void go(HasWidgets container) {
+	public void go(I_Container container) {
 		this.container = container;
 		new MLSPresenter(new MLSView(), this).go(container);
 		super.go(container);

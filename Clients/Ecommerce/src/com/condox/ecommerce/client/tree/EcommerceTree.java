@@ -1,11 +1,10 @@
 package com.condox.ecommerce.client.tree;
 
-import com.google.gwt.user.client.ui.HasWidgets;
 
 public class EcommerceTree extends Tree {
 	
-	public EcommerceTree(HasWidgets container) {
-		super(container);
+	public EcommerceTree() {
+		super();
 	}
 
 	public enum Field {

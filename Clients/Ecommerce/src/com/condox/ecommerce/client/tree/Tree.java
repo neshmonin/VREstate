@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.condox.clientshared.abstractview.Log;
 import com.condox.ecommerce.client.tree.EcommerceTree.State;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.Button;
@@ -18,9 +19,9 @@ abstract class Tree implements I_Tree {
 
 	private static I_TreeNode currentNode = null;
 	private static Tree instance = null;
-	private StackLayoutPanel stackLayoutPanel = new StackLayoutPanel(Unit.EM);
+//	private StackLayoutPanel stackLayoutPanel = new StackLayoutPanel(Unit.EM);
 
-	public Tree(HasWidgets container) {
+	public Tree() {
 		instance = this;
 //		registerNodeClass(DefaultNode.simpleName, DefaultNode.class);
 		currentNode = new DefaultNode();
@@ -28,34 +29,45 @@ abstract class Tree implements I_Tree {
 	}
 	
 	public static void cancel() {
-		instance.popup.hide();
+//		instance.popup.hide();
+		if (instance.container != null)
+			instance.container.clear();
 	}
 	
-	private DialogBox popup = new DialogBox();
+//	private DialogBox popup = new DialogBox();
 	
-	@Override
-	public void activate() {
+//	@Override
+//	public void activate(I_Container container) {
+//		currentNode = getNextNode();
+////		VerticalPanel vp = new VerticalPanel();
+////		HorizontalPanel hp = new HorizontalPanel();
+////		hp.getElement().setId("navBar");
+////		hp.add(new Button(""));
+////
+////		HTMLPanel container = new HTMLPanel("");
+////		container.setSize("750px", "500px");
+////
+////		vp.add(hp);
+////		vp.add(container);
+////		
+////		popup.setWidget(vp);
+////		popup.center();
+//		
+////		currentNode.go(container);
+//	}
+	
+	private I_Container container = null;
+	
+	public void go(I_Container container) {
+		this.container = container;
 		currentNode = getNextNode();
-		VerticalPanel vp = new VerticalPanel();
-		HorizontalPanel hp = new HorizontalPanel();
-		hp.getElement().setId("navBar");
-		hp.add(new Button(""));
-
-		HTMLPanel container = new HTMLPanel("");
-		container.setSize("750px", "500px");
-
-		vp.add(hp);
-		vp.add(container);
-		
-		popup.setWidget(vp);
-		popup.center();
 		currentNode.go(container);
 	}
 
-	@Override
-	public HasWidgets getContainer() {
-		return (HasWidgets) stackLayoutPanel.getWidget(0);
-	}
+//	@Override
+//	public HasWidgets getContainer() {
+//		return (HasWidgets) stackLayoutPanel.getWidget(0);
+//	}
 
 	public static Data get(EcommerceTree.Field name) {
 		I_TreeNode node = currentNode;

@@ -20,7 +20,7 @@ public abstract class TreeNode implements I_TreeNode {
 	}
 	//
 	
-	protected HasWidgets container = null;
+	protected I_Container container = null;
 	//
 	protected Map<I_TreeNode, I_TreeNode> children = new HashMap<I_TreeNode, I_TreeNode>();
 	@Override
@@ -44,7 +44,7 @@ public abstract class TreeNode implements I_TreeNode {
 	}
 
 	@Override
-	public void go(HasWidgets container) {
+	public void go(I_Container container) {
 		I_TreeNode item = this;
 		String str = item.getNavURL();
 		item = item.getParent();
