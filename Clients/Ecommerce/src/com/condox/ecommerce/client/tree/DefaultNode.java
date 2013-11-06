@@ -1,5 +1,7 @@
 package com.condox.ecommerce.client.tree;
 
+import com.condox.clientshared.tree.TreeNode;
+
 public class DefaultNode extends TreeNode{
 	public static String simpleName = "Root";
 	public DefaultNode(){}

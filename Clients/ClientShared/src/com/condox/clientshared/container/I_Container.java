@@ -1,4 +1,4 @@
-package com.condox.ecommerce.client.tree;
+package com.condox.clientshared.container;
 
 public interface I_Container {
 	public void add(I_Contained child);

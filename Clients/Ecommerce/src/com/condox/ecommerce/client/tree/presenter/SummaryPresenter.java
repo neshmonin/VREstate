@@ -1,11 +1,11 @@
 package com.condox.ecommerce.client.tree.presenter;
 
+import com.condox.clientshared.container.I_Contained;
+import com.condox.clientshared.container.I_Container;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.State;
-import com.condox.ecommerce.client.tree.I_Contained;
-import com.condox.ecommerce.client.tree.I_Container;
 import com.condox.ecommerce.client.tree.model.SummaryModel;
 import com.google.gwt.user.client.ui.Widget;
 

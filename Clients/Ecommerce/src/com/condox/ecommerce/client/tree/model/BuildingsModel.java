@@ -1,16 +1,16 @@
 package com.condox.ecommerce.client.tree.model;
 
+import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.document.BuildingInfo;
-import com.condox.ecommerce.client.tree.Data;
+import com.condox.clientshared.tree.Data;
+import com.condox.clientshared.tree.I_TreeNode;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.I_Container;
-import com.condox.ecommerce.client.tree.I_TreeNode;
-import com.condox.ecommerce.client.tree.TreeNode;
+import com.condox.ecommerce.client.tree.EcommerceTreeNode;
 import com.condox.ecommerce.client.tree.presenter.BuildingsPresenter;
 import com.condox.ecommerce.client.tree.view.BuildingsView;
 
-public class BuildingsModel extends TreeNode {
+public class BuildingsModel extends EcommerceTreeNode {
 
 	public static String simpleName = "BuildingsModel";
 

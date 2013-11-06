@@ -1,5 +1,6 @@
 package com.condox.ecommerce.client.tree;
 
+import com.condox.clientshared.tree.TreeNode;
 import com.condox.ecommerce.client.tree.model.BuildingsModel;
 import com.condox.ecommerce.client.tree.model.EmailModel;
 import com.condox.ecommerce.client.tree.model.ListingOptionsModel;

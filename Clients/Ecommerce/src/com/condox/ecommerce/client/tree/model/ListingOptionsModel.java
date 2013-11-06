@@ -3,13 +3,13 @@ package com.condox.ecommerce.client.tree.model;
 import com.condox.clientshared.communication.GET;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User;
+import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.document.SuiteInfo;
-import com.condox.ecommerce.client.tree.Data;
+import com.condox.clientshared.tree.Data;
+import com.condox.clientshared.tree.I_TreeNode;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.I_Container;
-import com.condox.ecommerce.client.tree.I_TreeNode;
-import com.condox.ecommerce.client.tree.TreeNode;
+import com.condox.ecommerce.client.tree.EcommerceTreeNode;
 import com.condox.ecommerce.client.tree.presenter.ListingOptionsPresenter;
 import com.condox.ecommerce.client.tree.view.ListingOptionsView;
 import com.google.gwt.http.client.Request;
@@ -18,9 +18,8 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.user.client.ui.HasWidgets;
 
-public class ListingOptionsModel extends TreeNode {
+public class ListingOptionsModel extends EcommerceTreeNode {
 
 	public static String simpleName = "ListingOptionsModel";
 

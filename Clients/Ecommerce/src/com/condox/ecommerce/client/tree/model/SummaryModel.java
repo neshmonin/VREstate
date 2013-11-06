@@ -1,13 +1,13 @@
 package com.condox.ecommerce.client.tree.model;
 
+import com.condox.clientshared.container.I_Container;
+import com.condox.clientshared.tree.I_TreeNode;
 import com.condox.ecommerce.client.tree.EcommerceTree;
-import com.condox.ecommerce.client.tree.I_Container;
-import com.condox.ecommerce.client.tree.I_TreeNode;
-import com.condox.ecommerce.client.tree.TreeNode;
+import com.condox.ecommerce.client.tree.EcommerceTreeNode;
 import com.condox.ecommerce.client.tree.presenter.SummaryPresenter;
 import com.condox.ecommerce.client.tree.view.SummaryView;
 
-public class SummaryModel extends TreeNode {
+public class SummaryModel extends EcommerceTreeNode {
 
 	public static String simpleName = "SummaryModel";
 	public SummaryModel() {}

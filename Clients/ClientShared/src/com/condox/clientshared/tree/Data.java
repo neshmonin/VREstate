@@ -1,4 +1,4 @@
-package com.condox.ecommerce.client.tree;
+package com.condox.clientshared.tree;
 
 import com.condox.clientshared.document.I_JSON;
 import com.google.gwt.json.client.JSONObject;

@@ -1,31 +1,20 @@
-package com.condox.ecommerce.client.tree;
+package com.condox.clientshared.tree;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.condox.clientshared.abstractview.Log;
-import com.condox.ecommerce.client.tree.EcommerceTree.State;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.StackLayoutPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.condox.clientshared.container.I_Container;
 
-abstract class Tree implements I_Tree {
+public abstract class Tree implements I_Tree {
 
-	private static I_TreeNode currentNode = null;
+	public static I_TreeNode currentNode = null;
 	private static Tree instance = null;
 //	private StackLayoutPanel stackLayoutPanel = new StackLayoutPanel(Unit.EM);
 
 	public Tree() {
 		instance = this;
-//		registerNodeClass(DefaultNode.simpleName, DefaultNode.class);
-		currentNode = new DefaultNode();
-		configureTree();
+
 	}
 	
 	public static void cancel() {
@@ -68,8 +57,8 @@ abstract class Tree implements I_Tree {
 //	public HasWidgets getContainer() {
 //		return (HasWidgets) stackLayoutPanel.getWidget(0);
 //	}
-
-	public static Data get(EcommerceTree.Field name) {
+	
+	public static Data get(String name) {
 		I_TreeNode node = currentNode;
 		do {
 			Data data = node.getData(name);
@@ -82,11 +71,12 @@ abstract class Tree implements I_Tree {
 		return null;
 	}
 
-	public static void set(EcommerceTree.Field name, Data data) {
+	public static void set(String name, Data data) {
 		currentNode.setData(name, data);
 	}
+	
 
-	public static void transitState(State readyState) {
+	public static void transitState(String readyState) {
 		currentNode.setState(readyState);
 	}
 	
@@ -123,7 +113,8 @@ abstract class Tree implements I_Tree {
 				String nextNodeType = nextPath.substring(0, nextPath.indexOf("."));
 //				Class<TreeNode> nextNodeClass = instance.nodeClasses.get(nextNodeType);
 //				Object invoke = 
-				TreeNode nextNode = NodeFactory.create(nextNodeType);
+//				I_TreeNode nextNode = NodeFactory.create(nextNodeType);
+				I_TreeNode nextNode = instance.createNode(nextNodeType);
 				if (nextNode != null)
 					nextNode.setParent(currentNode);
 
@@ -133,6 +124,8 @@ abstract class Tree implements I_Tree {
 		
 		return null;
 	}
+	
+	public abstract I_TreeNode createNode(String nodeType);
 	
 	protected List<String> leafs = new ArrayList<String>();
 	// Examples of leafFullPath:
@@ -150,5 +143,4 @@ abstract class Tree implements I_Tree {
 //	}
 	
 	public abstract void configureTree();
-	
 }
