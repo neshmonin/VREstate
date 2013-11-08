@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.container.I_Container;
 
 public abstract class Tree implements I_Tree {
@@ -48,6 +49,7 @@ public abstract class Tree implements I_Tree {
 	private I_Container container = null;
 	
 	public void go(I_Container container) {
+		Log.write("tree.go()");
 		this.container = container;
 		currentNode = getNextNode();
 		currentNode.go(container);
@@ -86,7 +88,7 @@ public abstract class Tree implements I_Tree {
 	}
 
 	public static I_TreeNode getNextNode() {
-		// Log.write("" + children.toString());
+		Log.write("Tree.getNextNode()");
 		Map<I_TreeNode, I_TreeNode> children = currentNode.getChildren(); 
 		I_TreeNode theNode = children.get(currentNode);
 		if (theNode == null) {
@@ -100,6 +102,7 @@ public abstract class Tree implements I_Tree {
 	}
 
 	private static I_TreeNode createNextNode() {
+		Log.write("Tree.createNextNode()");
 		I_TreeNode node = currentNode;
 		String fullPath = "";
 		do {
