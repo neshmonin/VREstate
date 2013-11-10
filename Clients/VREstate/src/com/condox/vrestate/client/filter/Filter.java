@@ -287,7 +287,7 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 
 	@Override
 	public boolean isFilteredIn(SuiteGeoItem suiteGI) {
-		if (suiteGI.getGeoStatus() == GeoStatus.Sold)
+		if (suiteGI.getGeoStatus() == GeoStatus.Sold && !Options.getShowSold())
 			return false;
 
 		for (I_FilterSection section : sections)
