@@ -1,6 +1,6 @@
 package com.condox.clientshared.document;
 
-public interface I_VRObject {
+public interface I_VRObject extends I_JSON {
 	public enum VRObjectType {
 		None,
 		Suite,

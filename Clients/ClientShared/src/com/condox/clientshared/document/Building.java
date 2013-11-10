@@ -34,7 +34,13 @@ public class Building implements I_VRObject {
 
 	// ---------------------------------------------
 
-	public void Parse(JSONValue value) {
+	@Override
+	public JSONValue toJSONValue() {
+		return null;
+	}
+
+	@Override
+	public void fromJSONValue(JSONValue value) {
 		JSONObject obj = value.isObject();
 		id = (int) obj.get("id").isNumber().doubleValue();
 		parent_id = (int) obj.get("siteId").isNumber().doubleValue();

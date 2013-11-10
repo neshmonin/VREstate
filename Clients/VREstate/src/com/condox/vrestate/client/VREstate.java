@@ -11,6 +11,8 @@ import com.condox.clientshared.document.Building;
 import com.condox.clientshared.document.Document;
 import com.condox.clientshared.document.Site;
 import com.condox.vrestate.client.ge.GE;
+import com.condox.vrestate.client.my.PopupContainer;
+import com.condox.vrestate.client.my.VREstateTree;
 import com.condox.vrestate.client.view.HelicopterView;
 import com.condox.vrestate.client.view.ProgressBar;
 import com.condox.vrestate.client.view.SiteView;
@@ -36,6 +38,8 @@ import com.nitrous.gwt.earth.client.api.event.MouseClickListener;
 
 public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 		I_Login {
+	
+	public static VREstate instance = null;
 
 	/**
 	 * @wbp.parser.entryPoint
@@ -45,8 +49,22 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 		// Log.write(GWT.getHostPageBaseURL());
 		// Log.write(GWT.getModuleBaseForStaticFiles());
 		// Log.write(GWT.getModuleBaseURL());
+		
 		Options.Init();
-		LoginUser();
+//		LoginUser();
+		
+		instance = this;
+		
+		
+		// my testing
+		VREstateTree tree = new VREstateTree();
+		tree.go(new PopupContainer());
+		
+		// my2 testing
+//		DefaultPresenter Default = new DefaultPresenter(null);
+//		Default.go(null);
+//		VREstatePresenter vrestate = new VREstatePresenter(Default, new VREstateView());
+//		vrestate.go(new PopupContainer());
 	}
 
 	// private native void init() /*-{

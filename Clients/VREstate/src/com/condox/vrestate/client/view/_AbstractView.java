@@ -451,6 +451,12 @@ public abstract class _AbstractView implements I_AbstractView {
 		for (I_VRObject vrObject : changedVRObjects.values()) {
 			int id = vrObject.getId();
 			switch (vrObject.getType()) {
+			case None:
+				break;
+			case Site:
+				break;
+			case Building:
+				break;
 			case Suite:
 				Suite suite = (Suite)vrObject;
 				if (suiteGeoItems.containsKey(id)) {
