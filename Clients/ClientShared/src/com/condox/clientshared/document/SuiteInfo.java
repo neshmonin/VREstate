@@ -4,7 +4,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
-public class SuiteInfo {
+public class SuiteInfo implements I_JSON {
 
 	public enum Status {
 		Sold, Available, OnHold, ResaleAvailable, Selected, Layout, AvailableRent // ??
@@ -29,7 +29,14 @@ public class SuiteInfo {
 	private String mls = "";
 	private String address = "";
 
-	public void Parse(JSONValue value) {
+	@Override
+	public JSONValue toJSONValue() {
+		//JSONObject obj = JSONParser.parseStrict(string).isObject();
+		return null;
+	}
+
+	@Override
+	public void fromJSONValue(JSONValue value) {
 		JSONObject obj = value.isObject();
 		id = (int) obj.get("id").isNumber().doubleValue();
 		name = obj.get("name").isString().stringValue();

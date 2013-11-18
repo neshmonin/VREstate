@@ -13,7 +13,7 @@ public interface I_AbstractView extends I_UpdatableView {
 	double getTransitionSpeed(); // access function, implemented in _AbstractView
 	double getRegularSpeed(); // access function, implemented in _AbstractView
 	double getStartingRange();
-	boolean isCameraMoved();
+//	boolean isCameraMoved();
 	void ApplyCamera();
 
 	abstract void onDestroy();
