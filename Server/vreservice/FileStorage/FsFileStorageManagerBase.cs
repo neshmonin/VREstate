@@ -52,10 +52,7 @@ namespace Vre.Server.FileStorage
             }
         }
 
-        /// <summary>
-        /// Store file in local file system; returns stored file path relative to store root.
-        /// </summary>
-        protected string storeFile(string namespaceHint, string typeHint, string extension, string idHint, Stream data)
+        public virtual string StoreFile(string namespaceHint, string typeHint, string extension, string idHint, Stream data)
         {
             if (null == _storeRoot) throw new NotSupportedException("File Store is disabled");
 
@@ -79,7 +76,7 @@ namespace Vre.Server.FileStorage
             if (!string.IsNullOrWhiteSpace(namespaceHint))
             {
                 relativePath.Append(namespaceHint);
-                relativePath.Append(Path.DirectorySeparatorChar);
+                relativePath.Append('/');
             }
 
             if (!string.IsNullOrWhiteSpace(idHint))
@@ -136,6 +133,16 @@ namespace Vre.Server.FileStorage
             return rp;
         }
 
+		public virtual string ReplaceFile(string currentRelativePath,
+			string namespaceHint, string typeHint, string extension, string idHint, Stream data)
+		{
+			var path = currentRelativePath;
+			if (!Path.IsPathRooted(path)) path = convertToLocalPath(path);
+			if (File.Exists(path)) File.Delete(path);
+
+			return StoreFile(namespaceHint, typeHint, extension, idHint, data);
+		}
+
         public void Dispose() { }
 
         /// <summary>
@@ -154,30 +161,26 @@ namespace Vre.Server.FileStorage
             while (idx >= 0);
         }
 
+		public abstract string ConvertToFullPath(string relativePath);
+
         /// <summary>
         /// Returns full path to file based on relative path returned previously by <see cref="storeFile"/>
         /// </summary>
         protected string convertToLocalPath(string relativePath)
         {
-            return Path.Combine(_storeRoot.Value, relativePath);
+			return Path.Combine(_storeRoot.Value, relativePath.Replace('/', Path.DirectorySeparatorChar));
         }
 
         /// <summary>
         /// Removes file from store; path can be either relative or full.
         /// <para>Throws exception if file does not exist</para>
         /// </summary>
-        protected void removeFile(string path)
+        public virtual void RemoveFile(string path)
         {
             if (!Path.IsPathRooted(path)) path = convertToLocalPath(path);
             if (!File.Exists(path)) throw new FileNotFoundException("File does not exist", path);
             File.Delete(path);
         }
-
-        public abstract string StoreFile(string namespaceHint, string typeHint, string extension, string idHint, Stream data);
-
-        public abstract string ConvertToFullPath(string relativePath);
-
-        public abstract void RemoveFile(string relativePath);
 
         public abstract StorageType Type { get; }
 

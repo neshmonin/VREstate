@@ -27,7 +27,19 @@ namespace Vre.Server.FileStorage
         /// <returns>Relative path to stored file; to be concatenated with <see cref="Root"/></returns>
         string StoreFile(string namespaceHint, string typeHint, string extension, string idHint, Stream data);
 
-        /// <summary>
+		/// <summary>
+		/// Replace a file in storage.
+		/// </summary>
+		/// <param name="currentRelativePath">Relative path of current file in storage.</param>
+		/// <param name="namespaceHint">Namespace hint for name generation, e.g. 'model'; can be empty/null</param>
+		/// <param name="typeHint">Type hint for name generation, e.g. 'w' for wireframe; can be empty/null</param>
+		/// <param name="extension">File extension; empty/null results in 'bin'</param>
+		/// <param name="idHint">Unique identifier hint for name generation; can be empty/null</param>
+		/// <returns>Relative path to stored file; to be concatenated with <see cref="Root"/></returns>
+		string ReplaceFile(string currentRelativePath,
+			string namespaceHint, string typeHint, string extension, string idHint, Stream data);
+		
+		/// <summary>
         /// Returns full path to the file based on relative path returned by <see cref="StoreFile"/>
         /// </summary>
         string ConvertToFullPath(string relativePath);

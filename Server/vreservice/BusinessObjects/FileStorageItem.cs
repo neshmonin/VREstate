@@ -5,74 +5,73 @@ namespace Vre.Server.BusinessLogic
 {
     internal class FileStorageItem : UpdateableBase
     {
-        private byte[] Hash { get; set; }
-        private string Location { get; set; }
+		public enum LocationType : int { Internal = 0, Public = 1 }
+
+        public byte[] Hash { get; private set; }
+		private LocationType Store { get; set; }
+        public string RelativePath { get; private set; }
         private int UseCounter { get; set; }
 
-        public FileStorageItem(string location) : base()
-        {
-            Location = location;
-            UseCounter = 1;
+		private FileStorageItem() { }
 
-            using (Stream file = ServiceInstances.FileStorageManager.OpenFile(Location))
-            {
-                Hash = CalcHash(file);
-            }
+        public FileStorageItem(LocationType store, string location, byte[] hash) : base()
+        {
+			InitializeNew();
+			Store = store;
+            RelativePath = location;
+			Hash = hash;
+            UseCounter = 1;
         }
 
+		/// <summary>
+		/// Increment file's use count
+		/// </summary>
         public void IncrementUseCount()
         {
             UseCounter++;
             MarkUpdated();
         }
 
-        public void DecrementUseCount()
+		/// <summary>
+		/// Decrement file's use count
+		/// </summary>
+		/// <returns>true if file is still in use</returns>
+        public bool DecrementUseCount()
         {
             UseCounter--;
             if (0 == UseCounter)
             {
                 MarkDeleted();
-                ServiceInstances.FileStorageManager.RemoveFile(Location);
+				return false;
             }
             else
             {
                 MarkUpdated();
+				return true;
             }
         }
 
-        public bool CompareWith(Stream candidate)
-        {
-            bool result = true;
-            
-            using (Stream original = ServiceInstances.FileStorageManager.OpenFile(Location))
-            {
-                byte[] obuffer = new byte[8192];
-                byte[] cbuffer = new byte[obuffer.Length];
-                int rd;
+		/// <summary>
+		/// Set use counter to specific value
+		/// </summary>
+		/// <param name="count"></param>
+		/// <returns>true if value was changed</returns>
+		public bool SetUseCount(int count)
+		{
+			if (count != UseCounter)
+			{
+				UseCounter = count;
+				if (count > 0) Undelete();
+				else MarkDeleted();
+				return true;
+			}
+			return false;
+		}
 
-                do
-                {
-                    rd = original.Read(obuffer, 0, obuffer.Length);
-
-                    if (candidate.Read(cbuffer, 0, cbuffer.Length) != rd)
-                    { result = false; break; }
-
-                    for (int idx = rd - 1; idx >= 0; idx--)
-                        if (obuffer[idx] != cbuffer[idx]) { result = false; break; }
-                }
-                while (rd > 0);
-            }
-
-            return result;
-        }
-
-        public static byte[] CalcHash(Stream file)
-        {
-            using (MD5 hash = MD5.Create())
-            {
-                hash.Initialize();
-                return hash.ComputeHash(file);
-            }
-        }
+		public void ReplaceHash(byte[] newHash)
+		{
+			Hash = newHash;
+			MarkUpdated();
+		}
     }
 }

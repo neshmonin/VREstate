@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Vre
 {
-    public class Utilities
+    public static class Utilities
     {
         /// <summary>
         /// Makes suite number normalized for DB storage, display and search.

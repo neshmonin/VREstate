@@ -88,7 +88,11 @@ namespace Vre.Server
             {
                 lock (_lock)
                 {
-                    if (null == _fileStorageManager) _fileStorageManager = new LocalFileStorageManager();
+                    if (null == _fileStorageManager) 
+						_fileStorageManager = //new LocalFileStorageManager();
+							new ManagedFileStorage(
+								BusinessLogic.FileStorageItem.LocationType.Public,
+								new LocalFileStorageManager());
                 }
                 return _fileStorageManager;
             }
@@ -101,7 +105,11 @@ namespace Vre.Server
             {
                 lock (_lock)
                 {
-                    if (null == _internalFileStorageManager) _internalFileStorageManager = new IntLocalFileStorageManager();
+					if (null == _internalFileStorageManager)
+						_internalFileStorageManager = //new IntLocalFileStorageManager();
+							new ManagedFileStorage(
+								BusinessLogic.FileStorageItem.LocationType.Internal,
+								new IntLocalFileStorageManager());
                 }
                 return _internalFileStorageManager;
             }
