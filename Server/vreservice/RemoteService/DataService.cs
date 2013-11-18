@@ -2006,7 +2006,7 @@ namespace Vre.Server.RemoteService
 				{
 					User u;
 					using (var dao = new UserDao(dbSession)) u = dao.GetById(result.OwnerId);
-					if (u.RefererRestriction != null)
+					if (u.RefererRestriction.Length != 0)
 					{
 						var referer = request.Request.Referer;
 						if (null == referer)
