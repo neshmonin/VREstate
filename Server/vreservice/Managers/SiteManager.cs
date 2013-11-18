@@ -328,8 +328,8 @@ namespace Vre.Server.BusinessLogic
 						{
 							ServiceInstances.Logger.Warn("MLS#{0} lists incomplete address ({1}); not processed.",
 								item.MlsId, item.CompiledAddress);
-							issues.AppendFormat("MLS#{0} lists incomplete address ({1}); not processed.\r\n",
-								item.MlsId, item.CompiledAddress);
+							//issues.AppendFormat("MLS#{0} lists incomplete address ({1}); not processed.\r\n",
+							//    item.MlsId, item.CompiledAddress);
 							skp++;
 						}
 						else
