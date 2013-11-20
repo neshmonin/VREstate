@@ -1,5 +1,3 @@
-using System.IO;
-
 namespace Vre.Server.FileStorage
 {
     internal class LocalFileStorageManager : FsFileStorageManagerBase
@@ -23,29 +21,12 @@ namespace Vre.Server.FileStorage
 
         public override StorageType Type { get { return StorageType.Public; } }
 
-        public override string StoreFile(string namespaceHint, string typeHint, string extension, string idHint, Stream data)
-        {
-            string rp = storeFile(namespaceHint, typeHint, extension, idHint, data);
-
-            return rp.Replace(Path.DirectorySeparatorChar, '/');
-        }
-
         public override string ConvertToFullPath(string relativePath)
         {
             if (!relativePath.Contains("://"))//.StartsWith(_accessRoot))
                 return _accessRoot + relativePath;
             else
                 return relativePath;
-        }
-
-        public override void RemoveFile(string relativePath)
-        {
-            removeFile(relativePath.Replace('/', Path.DirectorySeparatorChar));
-        }
-
-        public override Stream OpenFile(string relativePath)
-        {
-            return base.OpenFile(relativePath.Replace('/', Path.DirectorySeparatorChar));
         }
     }
 }

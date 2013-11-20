@@ -364,45 +364,37 @@ namespace Vre.Server.Command
 
                 // Update wireframe file
                 //
-                // TODO: Always remove previous file versions?
-                //if (!string.IsNullOrEmpty(dbSite.WireframeLocation))
-                //    ServiceInstances.InternalFileStorageManager.RemoveFile(dbSite.WireframeLocation);
-
-                using (FileStream fs = File.OpenRead(infoModelFileName))
-                    dbSite.WireframeLocation = ServiceInstances.InternalFileStorageManager.StoreFile(
-                        "wireframes", "s", Path.GetExtension(infoModelFileName), dbSite.AutoID.ToString(), fs);
+				using (FileStream fs = File.OpenRead(infoModelFileName))
+				{
+					if (!string.IsNullOrEmpty(dbSite.WireframeLocation))
+						dbSite.WireframeLocation = 
+							ServiceInstances.InternalFileStorageManager.ReplaceFile(dbSite.WireframeLocation,
+							"wireframes", "s", Path.GetExtension(infoModelFileName), dbSite.AutoID.ToString(), fs);
+					else
+						dbSite.WireframeLocation = 
+							ServiceInstances.InternalFileStorageManager.StoreFile(
+							"wireframes", "s", Path.GetExtension(infoModelFileName), dbSite.AutoID.ToString(), fs);
+				}
                 _filesSaved.Add(dbSite.WireframeLocation);
 
                 if (displayModelFileName != null)
                 {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbSite.DisplayModelUrl = storeModelFile(dbSite, displayModelFileName, "s");
+					dbSite.DisplayModelUrl = storeModelFile(dbSite, dbSite.DisplayModelUrl, displayModelFileName, "s");
                 }
 
                 if (overlayModelFileName != null)
                 {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbSite.OverlayModelUrl = storeModelFile(dbSite, overlayModelFileName, "so");
+					dbSite.OverlayModelUrl = storeModelFile(dbSite, dbSite.OverlayModelUrl, overlayModelFileName, "so");
                 }
 
                 if (bubbleWebTemplateFileName != null)
                 {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbSite.BubbleWebTemplateUrl = storeModelFile(dbSite, bubbleWebTemplateFileName, "sbwt");
+					dbSite.BubbleWebTemplateUrl = storeModelFile(dbSite, dbSite.BubbleWebTemplateUrl, bubbleWebTemplateFileName, "sbwt");
                 }
 
                 if (bubbleKioskTemplateFileName != null)
                 {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbSite.BubbleKioskTemplateUrl = storeModelFile(dbSite, bubbleKioskTemplateFileName, "sbkt");
+					dbSite.BubbleKioskTemplateUrl = storeModelFile(dbSite, dbSite.BubbleKioskTemplateUrl, bubbleKioskTemplateFileName, "sbkt");
                 }
 
 				// Geoinformation import/update
@@ -492,53 +484,42 @@ namespace Vre.Server.Command
             //
             if (infoModelFileName != null)
             {
-                // TODO: Always remove previous file versions?
-                //if (!string.IsNullOrEmpty(dbBuilding.WireframeLocation))
-                //    ServiceInstances.InternalFileStorageManager.RemoveFile(dbBuilding.WireframeLocation);
-
-                using (FileStream fs = File.OpenRead(infoModelFileName))
-                    dbBuilding.WireframeLocation = ServiceInstances.InternalFileStorageManager.StoreFile(
-                        "wireframes", "b", Path.GetExtension(infoModelFileName), dbBuilding.AutoID.ToString(), fs);
+				using (FileStream fs = File.OpenRead(infoModelFileName))
+				{
+					if (!string.IsNullOrEmpty(dbBuilding.WireframeLocation))
+						dbBuilding.WireframeLocation =
+							ServiceInstances.InternalFileStorageManager.ReplaceFile(dbBuilding.WireframeLocation,
+							"wireframes", "b", Path.GetExtension(infoModelFileName), dbBuilding.AutoID.ToString(), fs);
+					else
+						dbBuilding.WireframeLocation = 
+							ServiceInstances.InternalFileStorageManager.StoreFile(
+							"wireframes", "b", Path.GetExtension(infoModelFileName), dbBuilding.AutoID.ToString(), fs);
+				}
                 _filesSaved.Add(dbBuilding.WireframeLocation);
 
                 if (displayModelFileName != null)
                 {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbBuilding.DisplayModelUrl = storeModelFile(dbBuilding, displayModelFileName, "b");
+					dbBuilding.DisplayModelUrl = storeModelFile(dbBuilding, dbBuilding.DisplayModelUrl, displayModelFileName, "b");
                 }
 
                 if (overlayModelFileName != null)
                 {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbBuilding.OverlayModelUrl = storeModelFile(dbBuilding, overlayModelFileName, "bo");
+					dbBuilding.OverlayModelUrl = storeModelFile(dbBuilding, dbBuilding.OverlayModelUrl, overlayModelFileName, "bo");
                 }
 
                 if (poiModelFileName != null)
                 {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbBuilding.PoiModelUrl = storeModelFile(dbBuilding, poiModelFileName, "bp");
+					dbBuilding.PoiModelUrl = storeModelFile(dbBuilding, dbBuilding.PoiModelUrl, poiModelFileName, "bp");
                 }
 
                 if (bubbleWebTemplateFileName != null)
                 {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbBuilding.BubbleWebTemplateUrl = storeModelFile(dbBuilding, bubbleWebTemplateFileName, "bbwt");
+					dbBuilding.BubbleWebTemplateUrl = storeModelFile(dbBuilding, dbBuilding.BubbleWebTemplateUrl, bubbleWebTemplateFileName, "bbwt");
                 }
 
                 if (bubbleKioskTemplateFileName != null)
                 {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbBuilding.BubbleKioskTemplateUrl = storeModelFile(dbBuilding, bubbleKioskTemplateFileName, "bbkt");
+					dbBuilding.BubbleKioskTemplateUrl = storeModelFile(dbBuilding, dbBuilding.BubbleKioskTemplateUrl, bubbleKioskTemplateFileName, "bbkt");
                 }
             }
 
@@ -652,12 +633,19 @@ namespace Vre.Server.Command
 			_clientSession.DbSession.Update(dbBuilding);
         }
 
-        private string storeModelFile(UpdateableBase dbObject, string modelFileName, string storePrefix)
+        private string storeModelFile(UpdateableBase dbObject, string currentPath,
+			string modelFileName, string storePrefix)
         {
             string result;
-            using (FileStream fs = File.OpenRead(modelFileName))
-                result = ServiceInstances.FileStorageManager.StoreFile(
-                    "models", storePrefix, Path.GetExtension(modelFileName), dbObject.AutoID.ToString(), fs);
+			using (FileStream fs = File.OpenRead(modelFileName))
+			{
+				if (!string.IsNullOrWhiteSpace(currentPath))
+					result = ServiceInstances.FileStorageManager.ReplaceFile(currentPath,
+						"models", storePrefix, Path.GetExtension(modelFileName), dbObject.AutoID.ToString(), fs);
+				else
+					result = ServiceInstances.FileStorageManager.StoreFile(
+						"models", storePrefix, Path.GetExtension(modelFileName), dbObject.AutoID.ToString(), fs);
+			}
             _filesSaved.Add(result);
             _log.AppendFormat("File persisted ({0}) from {1}\r\n", result, modelFileName);
             return result;
@@ -676,18 +664,15 @@ namespace Vre.Server.Command
 			Vre.Server.Model.Kmz.Suite modelSuite, 
 			Suite dbSuite, bool isCreated)
         {
-            // this must be the first call on new suite as it re-reads suite from DB;
-            // all subsequent changes shall be lost!
-			dbSuite.CurrentPrice = new Money(Convert.ToDecimal(modelSuite.InitialPrice), Currency.Cad); // TODO: Currently locked to CAD
+			if (isCreated)
+			{
+				// this must be the first call on new suite as it re-reads suite from DB;
+				// all subsequent changes shall be lost!
+				dbSuite.CurrentPrice = new Money(Convert.ToDecimal(modelSuite.InitialPrice), Currency.Cad); // TODO: Currently locked to CAD
 
-            using (SiteManager mgr = new SiteManager(_clientSession))
-                mgr.LogNewSuitePrice(dbSuite, (float)modelSuite.InitialPrice);
-
-            if (0 == modelSuite.CeilingHeightFt)
-                dbSuite.CeilingHeight = new ValueWithUM(modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
-            else
-                dbSuite.CeilingHeight = new ValueWithUM(
-                    modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
+				using (SiteManager mgr = new SiteManager(_clientSession))
+					mgr.LogNewSuitePrice(dbSuite, (float)modelSuite.InitialPrice);
+			}
 
             dbSuite.ShowPanoramicView = modelSuite.ShowPanoramicView;
 
@@ -759,7 +744,7 @@ namespace Vre.Server.Command
                     {
                         // NOTE that each committed update creates duplicated NEW floorplan files in storage
                         // Reconcilation procedure is required to remove those properly!
-                        stype.FloorPlanUrl = storeModelFile(stype, srcPath, "fp");
+						stype.FloorPlanUrl = storeModelFile(stype, stype.FloorPlanUrl, srcPath, "fp");
 
                         _clientSession.DbSession.Update(stype);
                         updated = true;

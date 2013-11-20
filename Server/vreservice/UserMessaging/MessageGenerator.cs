@@ -48,38 +48,53 @@ namespace Vre.Server.Messaging
         private void sendMessageInt(IUserMessaging messenger, User referenceUser,
             string recipient, string template, params object[] parameters)
         {
-            string subject, message;
-            GetMessage(referenceUser, template, out subject, out message, parameters);
+            var message = GetMessage(referenceUser, template, recipient, parameters);
             if (null == messenger) messenger = ServiceInstances.EmailSender;
-            messenger.Send(Sender.ECommerce, recipient, subject, message);
+			message.ReplyTo = Sender.ECommerce;  // TODO: Hard-coded destination
+            messenger.Send(message);
         }
 
-        public void GetMessage(User referenceUser, string templateName,
-            out string subject, out string message, params object[] parameters)
+        public Message GetMessage(User referenceUser, string templateName, string recipient,
+            params object[] parameters)
         {
-            string template = getTemplate(templateName, referenceUser);
+			string subject, body;
+			GetMessage(referenceUser, templateName, out subject, out body, parameters);
 
-            // Process placeholders
-            //
-            message = formatMessage(referenceUser, template, parameters);
+			var result = new Message(recipient, subject, body);
 
-            // Detach subject from body: subject is first line
-            //
-            int pos1 = message.IndexOf('\r');
-            int pos2 = pos1;
-            if ((pos1 < 0) || (pos1 >= message.Length)) { pos1 = message.IndexOf('\n'); pos2 = pos1; }
-            else if ((pos2 < (message.Length - 1)) && (message[pos2 + 1] == '\n')) { pos2++; }
+			var template = getTemplate(templateName + "_HTML", referenceUser, false);
+			if (template != null)
+				result.SetAlternativeHtmlBody(formatMessage(referenceUser, template, parameters));
 
-            subject = VersionGen.ProductName;  // default, should never appear though! :)
-
-            if ((pos1 >= 0) && (pos1 < message.Length))
-            {
-                subject = message.Substring(0, pos1);
-                message = message.Substring(pos2 + 1);
-            }
+			return result;
         }
 
-        public string GetMessage(User referenceUser, string templateName,
+		public void GetMessage(User referenceUser, string templateName,
+			out string subject, out string message, params object[] parameters)
+		{
+			string template = getTemplate(templateName, referenceUser);
+
+			// Process placeholders
+			//
+			message = formatMessage(referenceUser, template, parameters);
+
+			// Detach subject from body: subject is first line
+			//
+			int pos1 = message.IndexOf('\r');
+			int pos2 = pos1;
+			if ((pos1 < 0) || (pos1 >= message.Length)) { pos1 = message.IndexOf('\n'); pos2 = pos1; }
+			else if ((pos2 < (message.Length - 1)) && (message[pos2 + 1] == '\n')) { pos2++; }
+
+			subject = VersionGen.ProductName;  // default, should never appear though! :)
+
+			if ((pos1 >= 0) && (pos1 < message.Length))
+			{
+				subject = message.Substring(0, pos1);
+				message = message.Substring(pos2 + 1);
+			}
+		}
+		
+		public string GetMessage(User referenceUser, string templateName,
             params object[] parameters)
         {
             string template = getTemplate(templateName, referenceUser);
@@ -159,20 +174,6 @@ namespace Vre.Server.Messaging
             }
 
 			_messageTemplates = templates;
-
-            //// TODO: Hardcoded!
-            //// Non-localized text templates
-            //_messageTemplates.Add("TXT_ACCOUNT_CREATED", "Account has been successfully created.");
-            //_messageTemplates.Add("TXT_PASSWORD_UPDATED", "Password has been successfully updated.");
-            //_messageTemplates.Add("TXT_LOGIN_CHANGED", "Login has been successfully changed.");
-            //_messageTemplates.Add("TXT_VIEWORDER_PROLONGED", "Your order has been successfully prolonged.");
-            //_messageTemplates.Add("TXT_VIEWORDER_DELETED", "Your order has been successfully cancelled.");
-            //_messageTemplates.Add("ENUM_ViewOrderProduct_PrivateListing", "Private Listing");
-            //_messageTemplates.Add("ENUM_ViewOrderProduct_PublicListing", "Public Listing");
-            //_messageTemplates.Add("ENUM_ViewOrderProduct_Building3DLayout", "3D Layout");
-            //_messageTemplates.Add("ENUM_ViewOrderOptions_FloorPlan", "Floor Plan");
-            //_messageTemplates.Add("ENUM_ViewOrderOptions_ExternalTour", "External Tour");
-            //_messageTemplates.Add("ENUM_ViewOrderOptions_VirtualTour3D", "Virtual 3D Tour");
         }
 
         private static void processStrings(string fileName, ref Dictionary<string, string> templates)
@@ -220,13 +221,23 @@ namespace Vre.Server.Messaging
             return template;
         }
 
-        private string getTemplate(string name, User relatedUser)
+		private string getTemplate(string name, User relatedUser)
+		{
+			return getTemplate(name, relatedUser, true);
+		}
+
+        private string getTemplate(string name, User relatedUser, bool failIfNotExist)
         {
             string result;
 
             // TODO: Extension point here: add to make use of user's locale if relatedUser is non-null
-            if (!_messageTemplates.TryGetValue(name, out result))
-                throw new ApplicationException("Template name is unknown: " + name);
+			if (!_messageTemplates.TryGetValue(name, out result))
+			{
+				if (failIfNotExist)
+					throw new ApplicationException("Template name is unknown: " + name);
+				else
+					result = null;
+			}
 
             return result;
         }
