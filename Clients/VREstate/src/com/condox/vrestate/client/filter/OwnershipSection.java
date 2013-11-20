@@ -13,6 +13,7 @@ import com.condox.vrestate.client.filter.PriceSection.PriceType;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.StackPanel;
 
@@ -332,5 +333,14 @@ public class OwnershipSection extends SectionContainer {
 	@Override
 	public I_FilterSectionContainer getParentSectionContainer() {
 		return parentSection;
+	}
+
+	@Override
+	public JSONObject toJSONObject() {
+		return null;
+	}
+
+	@Override
+	public void fromJSONObject(JSONObject json) {
 	}
 }

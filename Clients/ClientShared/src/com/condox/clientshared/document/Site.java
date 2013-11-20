@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.condox.clientshared.communication.Options;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 
 public class Site implements I_VRObject {
 
@@ -34,13 +33,12 @@ public class Site implements I_VRObject {
 	// private double max_suite_altitude = 0;
 
 	@Override
-	public JSONValue toJSONValue() {
+	public JSONObject toJSONObject() {
 		return null;
 	}
 
 	@Override
-	public void fromJSONValue(JSONValue value) {
-		JSONObject obj = value.isObject();
+	public void fromJSONObject(JSONObject obj) {
 		id = (int) obj.get("id").isNumber().doubleValue();
 		// parent_id = (int) obj.get("siteId").isNumber().doubleValue();
 		name = obj.get("name").isString().stringValue();

@@ -68,7 +68,7 @@ public class SuitesPresenter implements I_Presenter {
 				JSONArray arr = obj.get("inventory").isArray();
 				for (int index = 0; index < arr.size(); index++) {
 					SuiteInfo info = new SuiteInfo();
-					info.fromJSONValue(arr.get(index));
+					info.fromJSONObject(arr.get(index).isObject());
 					data.add(info);
 				}
 				display.setData(data);

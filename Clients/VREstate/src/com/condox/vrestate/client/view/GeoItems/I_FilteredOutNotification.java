@@ -1,5 +1,5 @@
 package com.condox.vrestate.client.view.GeoItems;
 
-public interface FilteredOutNotification {
+public interface I_FilteredOutNotification {
 	public void onFilteredOut();
 }

@@ -39,7 +39,7 @@ public class Data {
 	
 	public Data(I_JSON object) {
 		Type = DataType.JSON;
-		JSONValue json = object.toJSONValue();
+		JSONValue json = object.toJSONObject();
 		Value = json.toString();
 	}
 	

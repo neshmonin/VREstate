@@ -1,9 +1,8 @@
 package com.condox.clientshared.document;
 
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 
-public class ViewOrder {
+public class ViewOrder implements I_JSON{
 	/*
 	 * { "id": "ffda6616-daa1-4978-8dbf-4acd732de044", "targetObjectType":
 	 * "Suite", "targetObjectId": 7678, "product": "PublicListing", "options":
@@ -28,8 +27,13 @@ public class ViewOrder {
 	private String infoUrl = null;
 	private ProductType productType = ProductType.None;
 
-	public void Parse(JSONValue value) {
-		JSONObject obj = value.isObject();
+	@Override
+	public JSONObject toJSONObject() {
+		return null;
+	}
+
+	@Override
+	public void fromJSONObject(JSONObject obj) {
 		id = obj.get("id").isString().stringValue();
 
 		if (obj.get("product").isString() != null) {

@@ -6,7 +6,7 @@ import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.SuiteView;
 import com.condox.vrestate.client.view._AbstractView;
-import com.condox.vrestate.client.view.GeoItems.FilteredOutNotification;
+import com.condox.vrestate.client.view.GeoItems.I_FilteredOutNotification;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONObject;
@@ -20,7 +20,7 @@ import com.nitrous.gwt.earth.client.api.event.MouseListener;
 public class SuiteInteractor extends OverlayHelpers
 							 implements MouseListener,
 							 			I_AbstractInteractor,
-							 			FilteredOutNotification{
+							 			I_FilteredOutNotification{
 
 	private HandlerRegistration mouse_listener = null;
 	KmlScreenOverlay overlayNextSuite = null;

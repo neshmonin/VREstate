@@ -123,7 +123,7 @@ public class Document implements IDocument, I_Progress
 			SuiteType suite_type = this.suite_types.get(id);
 			if (suite_type == null) {
 				suite_type = new SuiteType();
-				suite_type.Parse(JSONsuite_types.get(index));
+				suite_type.fromJSONObject(JSONsuite_type);
 				this.suite_types.put(suite_type.getId(), suite_type);
 			}
 		}
@@ -159,7 +159,7 @@ public class Document implements IDocument, I_Progress
 			Suite theSuite = this.suites.get(id);
 			if (theSuite == null) {
 				theSuite = new Suite();
-				theSuite.fromJSONValue(JSONsuites.get(index));
+				theSuite.fromJSONObject(JSONsuite);
 				// ////////
 				// if (!(theSuite.getName().contains("gf") ||
 				// theSuite.getName().contains("ph") ||
@@ -214,7 +214,7 @@ public class Document implements IDocument, I_Progress
 			Building building = this.buildings.get(id);
 			if (building == null) {
 				building = new Building();
-				building.fromJSONValue(JSONbuildings.get(index));
+				building.fromJSONObject(JSONbuilding);
 				this.buildings.put(building.getId(), building);
 			}
 		}
@@ -238,7 +238,7 @@ public class Document implements IDocument, I_Progress
 			Site site = this.sites.get(id);
 			if (site == null) {
 				site = new Site();
-				site.fromJSONValue(JSONsites.get(index));
+				site.fromJSONObject(JSONsite);
 				this.sites.put(site.getId(), site);
 			}
 		}
@@ -264,7 +264,7 @@ public class Document implements IDocument, I_Progress
 			ViewOrder viewOrder = this.viewOrders.get(id);
 			if (viewOrder == null) {
 				viewOrder = new ViewOrder();
-				viewOrder.Parse(JSONviewOrders.get(index));
+				viewOrder.fromJSONObject(JSONviewOrder);
 				this.viewOrders.put(viewOrder.getId(), viewOrder);
 				switch (viewOrder.getTargetObjectType()) {
 				case Suite:

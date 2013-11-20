@@ -30,6 +30,7 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.DockPanel;
@@ -82,8 +83,7 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 		HorizontalPanel horizontalPanel = new HorizontalPanel();
 		dockPanel.add(horizontalPanel, DockPanel.SOUTH);
 		horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		horizontalPanel
-				.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+		horizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		horizontalPanel.setSize("104px", "20px");
 
 		btnReset = new Button("New button");
@@ -116,7 +116,6 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 		dockPanel.add(stackPanel, DockPanel.CENTER);
 		stackPanel.setSize("100%", "250px");
 
-
 		dpFilter.getElement().getStyle().setZIndex(Integer.MAX_VALUE);
 
 		dpFilter.addOpenHandler(new OpenHandler<DisclosurePanel>() {
@@ -138,23 +137,12 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 		I_FilterSection propertyTypeSection = 
 			OwnershipSection.CreateSectionPanel(this, "Property Type", stackPanel);
 		if (propertyTypeSection != null) sections.add(propertyTypeSection);
-//		I_FilterSection bedroomsSection = BedroomsSection.CreateSectionPanel("Bedrooms", stackPanel);
-//		if (bedroomsSection != null) sections.add(bedroomsSection);
-//		I_FilterSection bathroomSection = BathroomSection.CreateSectionPanel("Bathrooms", stackPanel);
-//		if (bathroomSection != null) sections.add(bathroomSection);
-//		I_FilterSection areaSection = AreaSection.CreateSectionPanel("Area", stackPanel);
-//		if (areaSection != null) sections.add(areaSection);
-//		I_FilterSection balconySection = BalconySection.CreateSectionPanel("Balconies", stackPanel);
-//		if (balconySection != null) sections.add(balconySection);
 			
 		Iterator<I_FilterSection> iterator = sections.iterator();
 		while (iterator.hasNext())
 			if (iterator.next() == null)
 				iterator.remove();
 
-		//Init();
-
-		//Reset();
 		UpdateSize();
 		setVisible(false);
 		initialized = true;
@@ -404,6 +392,15 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 			
 			instance.UpdateSize();
 		}			
+	}
+
+	@Override
+	public JSONObject toJSONObject() {
+		return null;
+	}
+
+	@Override
+	public void fromJSONObject(JSONObject json) {
 	}
 	
 }

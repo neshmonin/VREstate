@@ -1,8 +1,8 @@
 package com.condox.clientshared.document;
 
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.JSONObject;
 
 public interface I_JSON {
-	JSONValue toJSONValue();
-	void fromJSONValue(JSONValue json);
+	JSONObject toJSONObject();
+	void fromJSONObject(JSONObject json);
 }
