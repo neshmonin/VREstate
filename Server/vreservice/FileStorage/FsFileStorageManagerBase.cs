@@ -64,9 +64,9 @@ namespace Vre.Server.FileStorage
 
             // sanitizing
             //
-            if (!string.IsNullOrWhiteSpace(namespaceHint)) sanitizePathElement(ref namespaceHint, _invalidPathChars);
-            if (!string.IsNullOrWhiteSpace(typeHint)) sanitizePathElement(ref typeHint, _invalidNameChars);
-            if (!string.IsNullOrWhiteSpace(idHint)) sanitizePathElement(ref idHint, _invalidNameChars);
+			if (!string.IsNullOrWhiteSpace(namespaceHint)) namespaceHint = sanitizePathElement(namespaceHint, _invalidPathChars);
+			if (!string.IsNullOrWhiteSpace(typeHint)) typeHint = sanitizePathElement(typeHint, _invalidNameChars);
+			if (!string.IsNullOrWhiteSpace(idHint)) idHint = sanitizePathElement(idHint, _invalidNameChars);
 
             // building relative path
             //
@@ -150,15 +150,16 @@ namespace Vre.Server.FileStorage
         /// </summary>
         /// <param name="element">String to sanitize</param>
         /// <param name="charsToClear">Characters to remove from string</param>
-        protected static void sanitizePathElement(ref string element, char[] charsToClear)
+        protected static string sanitizePathElement(string element, char[] charsToClear)
         {
             int idx;
             do
             {
                 idx = element.IndexOfAny(charsToClear);
-                if (idx >= 0) element.Remove(idx, 1);
+                if (idx >= 0) element = element.Remove(idx, 1);
             }
             while (idx >= 0);
+			return element;
         }
 
 		public abstract string ConvertToFullPath(string relativePath);

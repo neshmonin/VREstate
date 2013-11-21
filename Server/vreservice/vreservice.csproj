@@ -113,6 +113,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\_version\version.cs">
@@ -186,6 +187,7 @@
     <Compile Include="RemoteService\EventService.cs" />
     <Compile Include="RemoteService\PaymentSystemResponseService.cs" />
     <Compile Include="Tasks\BaseTask.cs" />
+    <Compile Include="Tasks\GenerateImportSettings.cs" />
     <Compile Include="Tasks\ManagedStorageTaskBase.cs" />
     <Compile Include="Tasks\ReconcileManagedStorage.cs" />
     <Compile Include="Tasks\ImportFilesIntoManagedStorage.cs" />

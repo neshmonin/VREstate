@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Packaging;
 using System.Linq;
 using System.Net;
 using System.Text;
 using NHibernate;
 using Vre.Server.BusinessLogic;
 using Vre.Server.Dao;
+using Vre.Server.FileStorage;
+using Vre.Server.Mls;
 using Vre.Server.Model;
 using Vre.Server.RemoteService;
-using Vre.Server.Mls;
 
 namespace Vre.Server.Command
 {
@@ -364,38 +366,20 @@ namespace Vre.Server.Command
 
                 // Update wireframe file
                 //
-				using (FileStream fs = File.OpenRead(infoModelFileName))
-				{
-					if (!string.IsNullOrEmpty(dbSite.WireframeLocation))
-						dbSite.WireframeLocation = 
-							ServiceInstances.InternalFileStorageManager.ReplaceFile(dbSite.WireframeLocation,
-							"wireframes", "s", Path.GetExtension(infoModelFileName), dbSite.AutoID.ToString(), fs);
-					else
-						dbSite.WireframeLocation = 
-							ServiceInstances.InternalFileStorageManager.StoreFile(
-							"wireframes", "s", Path.GetExtension(infoModelFileName), dbSite.AutoID.ToString(), fs);
-				}
-                _filesSaved.Add(dbSite.WireframeLocation);
+				dbSite.WireframeLocation = storeModelFile(ServiceInstances.InternalFileStorageManager,
+					dbSite, dbSite.WireframeLocation, infoModelFileName, "s", "wireframes");
 
                 if (displayModelFileName != null)
-                {
 					dbSite.DisplayModelUrl = storeModelFile(dbSite, dbSite.DisplayModelUrl, displayModelFileName, "s");
-                }
 
                 if (overlayModelFileName != null)
-                {
 					dbSite.OverlayModelUrl = storeModelFile(dbSite, dbSite.OverlayModelUrl, overlayModelFileName, "so");
-                }
 
                 if (bubbleWebTemplateFileName != null)
-                {
 					dbSite.BubbleWebTemplateUrl = storeModelFile(dbSite, dbSite.BubbleWebTemplateUrl, bubbleWebTemplateFileName, "sbwt");
-                }
 
                 if (bubbleKioskTemplateFileName != null)
-                {
 					dbSite.BubbleKioskTemplateUrl = storeModelFile(dbSite, dbSite.BubbleKioskTemplateUrl, bubbleKioskTemplateFileName, "sbkt");
-                }
 
 				// Geoinformation import/update
 				// TODO: Should do this for a building model too?!
@@ -484,43 +468,23 @@ namespace Vre.Server.Command
             //
             if (infoModelFileName != null)
             {
-				using (FileStream fs = File.OpenRead(infoModelFileName))
-				{
-					if (!string.IsNullOrEmpty(dbBuilding.WireframeLocation))
-						dbBuilding.WireframeLocation =
-							ServiceInstances.InternalFileStorageManager.ReplaceFile(dbBuilding.WireframeLocation,
-							"wireframes", "b", Path.GetExtension(infoModelFileName), dbBuilding.AutoID.ToString(), fs);
-					else
-						dbBuilding.WireframeLocation = 
-							ServiceInstances.InternalFileStorageManager.StoreFile(
-							"wireframes", "b", Path.GetExtension(infoModelFileName), dbBuilding.AutoID.ToString(), fs);
-				}
-                _filesSaved.Add(dbBuilding.WireframeLocation);
+				dbBuilding.WireframeLocation = storeModelFile(ServiceInstances.InternalFileStorageManager,
+					dbBuilding, dbBuilding.WireframeLocation, infoModelFileName, "b", "wireframes");
 
                 if (displayModelFileName != null)
-                {
 					dbBuilding.DisplayModelUrl = storeModelFile(dbBuilding, dbBuilding.DisplayModelUrl, displayModelFileName, "b");
-                }
 
                 if (overlayModelFileName != null)
-                {
 					dbBuilding.OverlayModelUrl = storeModelFile(dbBuilding, dbBuilding.OverlayModelUrl, overlayModelFileName, "bo");
-                }
 
                 if (poiModelFileName != null)
-                {
 					dbBuilding.PoiModelUrl = storeModelFile(dbBuilding, dbBuilding.PoiModelUrl, poiModelFileName, "bp");
-                }
 
                 if (bubbleWebTemplateFileName != null)
-                {
 					dbBuilding.BubbleWebTemplateUrl = storeModelFile(dbBuilding, dbBuilding.BubbleWebTemplateUrl, bubbleWebTemplateFileName, "bbwt");
-                }
 
                 if (bubbleKioskTemplateFileName != null)
-                {
 					dbBuilding.BubbleKioskTemplateUrl = storeModelFile(dbBuilding, dbBuilding.BubbleKioskTemplateUrl, bubbleKioskTemplateFileName, "bbkt");
-                }
             }
 
 			// Calculate and set geoinformation
@@ -633,23 +597,57 @@ namespace Vre.Server.Command
 			_clientSession.DbSession.Update(dbBuilding);
         }
 
-        private string storeModelFile(UpdateableBase dbObject, string currentPath,
+		private string storeModelFile(UpdateableBase dbObject, string currentPath,
 			string modelFileName, string storePrefix)
+		{
+			return storeModelFile(ServiceInstances.FileStorageManager, dbObject, currentPath,
+				modelFileName, storePrefix, "models");
+		}
+
+        private string storeModelFile(IFileStorageManager man, UpdateableBase dbObject, string currentPath,
+			string modelFileName, string storePrefix, string namespaceHint)
         {
-            string result;
-			using (FileStream fs = File.OpenRead(modelFileName))
+            string result, proposedName;
+			using (var fs = OpenModelFile(modelFileName, out proposedName))
 			{
 				if (!string.IsNullOrWhiteSpace(currentPath))
-					result = ServiceInstances.FileStorageManager.ReplaceFile(currentPath,
-						"models", storePrefix, Path.GetExtension(modelFileName), dbObject.AutoID.ToString(), fs);
+					result = man.ReplaceFile(currentPath, namespaceHint, storePrefix, 
+						Path.GetExtension(proposedName), dbObject.AutoID.ToString(), fs);
 				else
-					result = ServiceInstances.FileStorageManager.StoreFile(
-						"models", storePrefix, Path.GetExtension(modelFileName), dbObject.AutoID.ToString(), fs);
+					result = man.StoreFile(namespaceHint, storePrefix, 
+						Path.GetExtension(proposedName), dbObject.AutoID.ToString(), fs);
 			}
             _filesSaved.Add(result);
             _log.AppendFormat("File persisted ({0}) from {1}\r\n", result, modelFileName);
             return result;
         }
+
+		internal static Stream OpenModelFile(string filename, out string proposedName)
+		{
+			if (!Path.GetExtension(filename).Substring(1).ToUpperInvariant().Equals("KML"))
+			{
+				proposedName = filename;
+				return File.OpenRead(filename);
+			}
+			else
+			{
+				proposedName = "generated.kmz";
+				var result = new MemoryStream();
+				using (var package =
+						Package.Open(result, FileMode.Create))
+				{
+					PackagePart packagePartDocument =
+						package.CreatePart(
+							PackUriHelper.CreatePartUri(new Uri("default.kml", UriKind.Relative)),
+							"", CompressionOption.Maximum);
+
+					using (var fileStream = File.OpenRead(filename))
+						fileStream.CopyTo(packagePartDocument.GetStream());
+				}
+				result.Position = 0;
+				return result;
+			}
+		}
 
         private static string conditionString(string input, int maxlen)
         {
@@ -742,8 +740,6 @@ namespace Vre.Server.Command
                     string srcPath = Path.Combine(_importPath, fpName.Replace('/', '\\'));
                     if (File.Exists(srcPath))
                     {
-                        // NOTE that each committed update creates duplicated NEW floorplan files in storage
-                        // Reconcilation procedure is required to remove those properly!
 						stype.FloorPlanUrl = storeModelFile(stype, stype.FloorPlanUrl, srcPath, "fp");
 
                         _clientSession.DbSession.Update(stype);

@@ -19,6 +19,7 @@ namespace Vre.Server.Command
 			addTask(new RetroImportViewOrderTargets());
 			addTask(new ImportFilesIntoManagedStorage());
 			addTask(new ReconcileManagedStorage());
+			addTask(new GenerateImportSettings());
 		}
 
         private void addTask(ITask task) { _tasks.Add(task.Name, task); }
