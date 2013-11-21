@@ -6,6 +6,7 @@ import com.condox.clientshared.document.SuiteType;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.StackPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -409,5 +410,14 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 	@Override
 	public I_FilterSectionContainer getParentSectionContainer() {
 		return parentSection;
+	}
+
+	@Override
+	public JSONObject toJSONObject() {
+		return null;
+	}
+
+	@Override
+	public void fromJSONObject(JSONObject json) {
 	}
 }

@@ -71,7 +71,7 @@ public class ListingOptionsModel extends EcommerceTreeNode {
 								.isObject();
 						JSONArray arr = obj.get("inventory").isArray();
 						SuiteInfo info = new SuiteInfo();
-						info.fromJSONValue(arr.get(0));
+						info.fromJSONObject(arr.get(0).isObject());
 
 						EcommerceTree.set(Field.MoreInfoURL, new Data(info.getMoreInfoURL()));
 						EcommerceTree.set(Field.VirtualTourURL, new Data(info.getVirtualTourURL()));

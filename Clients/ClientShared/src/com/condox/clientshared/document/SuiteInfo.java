@@ -30,14 +30,12 @@ public class SuiteInfo implements I_JSON {
 	private String address = "";
 
 	@Override
-	public JSONValue toJSONValue() {
-		//JSONObject obj = JSONParser.parseStrict(string).isObject();
+	public JSONObject toJSONObject() {
 		return null;
 	}
 
 	@Override
-	public void fromJSONValue(JSONValue value) {
-		JSONObject obj = value.isObject();
+	public void fromJSONObject(JSONObject obj) {
 		id = (int) obj.get("id").isNumber().doubleValue();
 		name = obj.get("name").isString().stringValue();
 		level_number = (int) obj.get("levelNumber").isNumber().doubleValue();

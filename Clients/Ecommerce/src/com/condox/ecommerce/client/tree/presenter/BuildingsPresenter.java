@@ -67,7 +67,7 @@ public class BuildingsPresenter implements I_Presenter {
 				data.clear();
 				for (int index = 0; index < arr.size(); index++) {
 					BuildingInfo info = new BuildingInfo();
-					info.fromJSONValue(arr.get(index));
+					info.fromJSONObject(arr.get(index).isObject());
 					data.add(info);
 					if (id != null)
 						if (id.equals(info.getId()))

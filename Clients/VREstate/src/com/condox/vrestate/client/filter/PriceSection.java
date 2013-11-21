@@ -270,10 +270,6 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 		return isAny;
 	}
 
-	public JSONObject getJSON() {
-		return null;
-	}
-
 	@Override
 	public void Apply() {
 		stackPanel.setStackText(stackPanel.getWidgetIndex(this), generateLabel());
@@ -288,5 +284,14 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 	@Override
 	public I_FilterSectionContainer getParentSectionContainer() {
 		return parentSection;
+	}
+
+	@Override
+	public JSONObject toJSONObject() {
+		return null;
+	}
+
+	@Override
+	public void fromJSONObject(JSONObject json) {
 	}
 }

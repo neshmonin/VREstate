@@ -8,9 +8,8 @@ import java.util.Map;
 import com.condox.clientshared.utils.JSONParams;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 
-public class SuiteType {
+public class SuiteType implements I_JSON {
 	// ====================================
 	private static Map<Integer, SuiteType> ids = new HashMap<Integer, SuiteType>();
 
@@ -42,7 +41,13 @@ public class SuiteType {
 	private String roomsStr = "";
 	private String floorPlanUrl = null;
 
-	void Parse(JSONValue value) {
+	@Override
+	public JSONObject toJSONObject() {
+		return null;
+	}
+
+	@Override
+	public void fromJSONObject(JSONObject obj) {
 		/*
 		 * ======================================================= {
 		 * "id":1393,"version":[0,0,0,0,0,1,236,30], "siteId":15,
@@ -56,7 +61,6 @@ public class SuiteType {
 		 * "bathrooms":1, "balconies":0, "terraces":0 }
 		 * ===========================================================
 		 */
-		JSONObject obj = value.isObject();
 		id = (int) obj.get("id").isNumber().doubleValue();
 		parent_id = (int) obj.get("siteId").isNumber().doubleValue();
 		// name = obj.get("name").isString().stringValue();

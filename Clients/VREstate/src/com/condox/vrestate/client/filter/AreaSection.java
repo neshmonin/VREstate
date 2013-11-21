@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.StackPanel;
@@ -229,5 +230,14 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 	@Override
 	public I_FilterSectionContainer getParentSectionContainer() {
 		return parentSection;
+	}
+
+	@Override
+	public JSONObject toJSONObject() {
+		return null;
+	}
+
+	@Override
+	public void fromJSONObject(JSONObject json) {
 	}
 }
