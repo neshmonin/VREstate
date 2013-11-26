@@ -1,5 +1,8 @@
 package com.condox.ecommerce.client.tree;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.condox.clientshared.tree.Data;
 import com.condox.clientshared.tree.I_TreeNode;
 import com.condox.clientshared.tree.Tree;
@@ -12,8 +15,44 @@ public class EcommerceTree extends Tree {
 		currentNode = new DefaultNode();
 		configureTree();
 	}
+	//-----------------
+	public enum Nodes {
+		SIGN_IN,
+		FORGOT_PASSWORD,
+		CHANGING_PASSWORD,
+		HELLO,
+		
+		SETTINGS,
+		UPDATE1,
+		UPDATE2,
+		SHOW_HISTORY,
+		
+		NEW_ORDER,
+		NEW_ORDER_USING_MLS,
+		SELECT_BUILDING,
+		SELECT_SUITE,
+		OPTIONS,
+		SUMMARY,
+		AGREEMENT,
+		PROCEED,
+	}
+	
+	private List<String> leafs = new ArrayList<String>();
+	
+	private void config() {
+		
+		leafs.add("SIGN_IN/FORGOT_PASSWORD/CHANGING_PASSWORD/SIGN_IN");
+		leafs.add("SIGN_IN/HELLO/SETTINGS");
+		leafs.add("SIGN_IN/HELLO/UPDATE1");
+		leafs.add("SIGN_IN/HELLO/");
+		leafs.add("SIGN_IN/HELLO/");
+	}
+	//-----------------
 
 	public enum Field {
+		USING_MLS,
+		FILTERING_BY_CITY,
+		//----------
 		UserLogin,
 		UserPassword,
 		User,
@@ -71,6 +110,8 @@ public class EcommerceTree extends Tree {
 				"EmailModel.EmailReady");
 		
 		EcommerceTree.set(Field.ProductType.name(), new Data("ListingPrivate"));
+		EcommerceTree.set(Field.USING_MLS.name(), new Data(true));
+		EcommerceTree.set(Field.FILTERING_BY_CITY.name(), new Data("Toronto"));
 	}
 
 

@@ -26,9 +26,14 @@ import com.google.gwt.user.client.ui.Widget;
 public class BuildingsPresenter implements I_Presenter {
 
 	public interface IDisplay extends I_Contained {
+		
 		void setPresenter(BuildingsPresenter presenter);
 
 		void setData(List<BuildingInfo> data, BuildingInfo selected);
+		
+		String getFilterCity();
+		void setFilterCity(String city);
+		
 
 		Widget asWidget();
 	}
@@ -44,11 +49,12 @@ public class BuildingsPresenter implements I_Presenter {
 		this.model = model;
 	}
 
-	private void updateData() {
+	public void updateData() {
+		EcommerceTree.set(Field.FILTERING_BY_CITY, new Data(display.getFilterCity()));
 		display.setData(null, null);
 
 		String url = Options.URL_VRT;
-		url += "data/building?scopeType=address&ad_mu=Toronto&ed=Resale";
+		url += "data/building?scopeType=address&ad_mu=" + display.getFilterCity() + "&ed=Resale";
 		url += "&sid=" + User.SID;
 
 		GET.send(url, new RequestCallback() {
@@ -87,6 +93,8 @@ public class BuildingsPresenter implements I_Presenter {
 	public void go(I_Container container) {
 		container.clear();
 		container.add(display);
+		String filterCity = EcommerceTree.get(Field.FILTERING_BY_CITY).Value;
+		display.setFilterCity(filterCity);
 		updateData();
 	}
 
@@ -95,6 +103,8 @@ public class BuildingsPresenter implements I_Presenter {
 	}
 
 	public void onNext() {
+		
+		
 		EcommerceTree.set(Field.BuildingID, new Data(selected.getId()));
 		EcommerceTree.set(Field.Address, new Data(selected.getAddress()));
 		

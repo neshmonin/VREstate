@@ -19,6 +19,7 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 	public void onModuleLoad() {
 		Options.Init();
 		History.addValueChangeHandler(this);
+		History.newItem("login");
 	}
 
 	@Override
