@@ -55,6 +55,7 @@ public class EcommerceTree extends Tree {
 		//----------
 		UserLogin,
 		UserPassword,
+		UserId,
 		User,
 		MLS,
 		ProductType,
@@ -70,6 +71,8 @@ public class EcommerceTree extends Tree {
 	public enum State {
 		NotReady,
 		Guest,
+		Agent,
+		History,
 		MLS,
 		Address,
 		PrivateListing,
@@ -108,6 +111,10 @@ public class EcommerceTree extends Tree {
 				"ListingOptionsModel.OptionsReady/"+
 				"SummaryModel.SummaryReady/"+
 				"EmailModel.EmailReady");
+		addLeaf("Root/" + 
+				"LoginModel.Agent/" + 
+				"HelloNode.History/" +
+				"HistoryNode.");
 		
 		EcommerceTree.set(Field.ProductType.name(), new Data("ListingPrivate"));
 		EcommerceTree.set(Field.USING_MLS.name(), new Data(true));

@@ -52,7 +52,6 @@ public abstract class Tree implements I_Tree {
 	private I_Container container = null;
 	
 	public void go(I_Container container) {
-		Log.write("tree.go()");
 		this.container = container;
 		currentNode = getNextNode();
 		currentNode.go(container);

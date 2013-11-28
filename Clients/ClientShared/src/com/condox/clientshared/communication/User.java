@@ -11,22 +11,23 @@ import com.google.gwt.user.client.Timer;
 public class User implements RequestCallback, I_Login {
 
 	public static String SID;
+	public static String id;
 	public static int keepAlivePeriodSec;
 	public static User theUser = null;
+	
+	private static String request;
 
 	I_Login externalInterface = null;
 
-	public static User Login(I_Login loginInterface) {
-		String request = Options.URL_VRT + "program?q=login&role=visitor&uid=web&pwd=web"
-											+ "&generation=" + counter++;
-
+	public static User Login(I_Login loginInterface, String request) {
+		User.request = request;
 		theUser = new User(loginInterface);
-		GET.send(request, theUser);
+		GET.send(User.request + "&generation=" + counter++, theUser);
 		return theUser;
 	}
 
 	public static User ReLogin() {
-		return Login(null);
+		return Login(null, User.request);
 	}
 
 	protected User(I_Login vrEstate) {
@@ -45,6 +46,7 @@ public class User implements RequestCallback, I_Login {
 		JSONParams params = JSONParams.parse(json);
 		try {
 			SID = params.getString("sid");
+			id = String.valueOf(params.getInteger("userId"));
 			keepAlivePeriodSec = params.getInteger("keepalivePeriodSec");
 	
 			keepAliveThread = new Timer() {

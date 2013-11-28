@@ -1,5 +1,6 @@
 package com.condox.vrestate.client.my;
 
+import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
@@ -26,7 +27,10 @@ public class LoginPresenter extends VREstateTreeNode {
 //		this.container = container;
 //		this.container.clear();
 //		this.container.add(display);
-		User.Login(VREstate.instance);
+		String request = Options.URL_VRT + "program?q=login" //+" &role=visitor"
+				+ "&uid=web"
+				+ "&pwd=web";
+		User.Login(VREstate.instance, request);
 	}
 
 	public void onGuestLogin() {
