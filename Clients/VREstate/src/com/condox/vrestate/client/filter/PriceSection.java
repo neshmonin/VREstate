@@ -11,7 +11,9 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
@@ -286,12 +288,30 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 		return parentSection;
 	}
 
+	private int currentRevision = 0;
 	@Override
 	public JSONObject toJSONObject() {
-		return null;
+		JSONObject obj = new JSONObject();
+		obj.put("rev", new JSONNumber(currentRevision));
+		
+		if (isAny()) {
+			
+		}
+		else {
+			int minPriceRange = prices.get(cbMinPrice.getSelectedIndex());
+			int maxPriceRange = prices.get(cbMaxPrice.getSelectedIndex());
+			JSONValue jsonMin = new JSONNumber(minPriceRange);
+			JSONValue jsonMax = new JSONNumber(maxPriceRange);
+			obj.put("minRange", jsonMin);
+			obj.put("maxRange", jsonMax);
+		}
+		
+		return obj;
 	}
 
 	@Override
 	public void fromJSONObject(JSONObject json) {
+		int minPriceRange = (int) json.get("minRange").isNumber().doubleValue();
+		int maxPriceRange = (int) json.get("maxRange").isNumber().doubleValue();
 	}
 }
