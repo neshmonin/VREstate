@@ -77,7 +77,10 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 	// }-*/;
 
 	public void LoginUser() {
-		User.Login(this);
+		String request = Options.URL_VRT + "program?q=login" //+" &role=visitor"
+				+ "&uid=web"
+				+ "&pwd=web";
+		User.Login(this, request);
 	};
 
 	private GE ge = null;

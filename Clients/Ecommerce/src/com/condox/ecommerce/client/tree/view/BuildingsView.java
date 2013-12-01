@@ -38,6 +38,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.event.dom.client.ChangeEvent;
 
 public class BuildingsView extends Composite implements IDisplay,
 		IFilter<BuildingInfo> {
@@ -58,6 +59,7 @@ public class BuildingsView extends Composite implements IDisplay,
 		pager.setPageSize(50);
 //		pager.setRangeLimited(false);
 		city.addItem("Toronto");
+		city.addItem("Mississauga");
 		CreateDataGrid();
 	}
 
@@ -291,5 +293,26 @@ public class BuildingsView extends Composite implements IDisplay,
 	void onTextFilterBlur(BlurEvent event) {
 		if (textFilter.getText().isEmpty())
 			textFilter.setText(filterStr);
+	}
+
+	//-----------------------------
+	private String filterCity = "";
+	
+	@Override
+	public String getFilterCity() {
+		return city.getItemText(city.getSelectedIndex());
+	}
+
+	@Override
+	public void setFilterCity(String city) {
+		for (int i = 0; i < this.city.getItemCount(); i++)
+			if (this.city.getItemText(i).equals(city)) {
+				this.city.setItemSelected(i, true);
+			}
+	}
+	@UiHandler("city")
+	void onCityChange(ChangeEvent event) {
+		if (presenter != null)
+			presenter.updateData();
 	}
 }

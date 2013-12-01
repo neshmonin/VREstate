@@ -21,18 +21,19 @@ public abstract class EcommerceTreeNode extends TreeNode {
 
 	@Override
 	public void go(I_Container container) {
-		I_TreeNode item = this;
-		String str = item.getNavURL();
-		item = item.getParent();
-		while (item != null) {
-			if (!item.getNavURL().isEmpty())
-				str = item.getNavURL() + " &#187; " + str;
-			item = item.getParent();
-		}
-//		str = "&#187;";
-		Log.write(str);
-//		Document.get().getElementById("navBar").setInnerHTML(str);
-		setNavText(str);
+//		I_TreeNode item = this;
+//		String str = item.getNavURL();
+//		item = item.getParent();
+//		while (item != null) {
+//			if (!item.getNavURL().isEmpty())
+//				str = item.getNavURL() + " &#187; " + str;
+//			item = item.getParent();
+//		}
+////		str = "&#187;";
+////		Log.write(str);
+		
+		// TODO correct NavBar
+//		setNavText(str);
 	}
 	
 	private native void setNavText(String str) /*-{

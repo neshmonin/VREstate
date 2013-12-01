@@ -1,11 +1,14 @@
 package com.condox.clientshared.tree;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.container.I_Container;
+import com.google.gwt.user.client.Cookies;
 
 public abstract class Tree implements I_Tree {
 
@@ -49,7 +52,6 @@ public abstract class Tree implements I_Tree {
 	private I_Container container = null;
 	
 	public void go(I_Container container) {
-		Log.write("tree.go()");
 		this.container = container;
 		currentNode = getNextNode();
 		currentNode.go(container);
@@ -60,8 +62,22 @@ public abstract class Tree implements I_Tree {
 //		return (HasWidgets) stackLayoutPanel.getWidget(0);
 //	}
 	
+	private static String getNodePath() {
+		I_TreeNode node = currentNode;
+		String path = node.getStateString();
+		while (node.getParent() != null) {
+			node = node.getParent();
+			path = node.getStateString() + "/" + path;
+		}
+		Log.write("path = " + path);
+		return path;
+	}
+	
 	public static Data get(String name) {
 		I_TreeNode node = currentNode;
+		String cookie = Cookies.getCookie(getNodePath() + ":" + name);
+		if (cookie != null)
+			return new Data(cookie);
 		do {
 			Data data = node.getData(name);
 			if (data != null)
@@ -74,6 +90,16 @@ public abstract class Tree implements I_Tree {
 	}
 
 	public static void set(String name, Data data) {
+		// TODO
+		// correct & remove hardcoded values
+//		Calendar calendar = Calendar.getInstance();
+//		calendar.add(Calendar.DATE, 10);
+		
+		Date date = new Date(System.currentTimeMillis());
+		date.setTime(date.getTime() + 1000*60*60*24*10);
+		
+		
+		Cookies.setCookie(getNodePath() + ":" + name, data.Value, date);
 		currentNode.setData(name, data);
 	}
 	

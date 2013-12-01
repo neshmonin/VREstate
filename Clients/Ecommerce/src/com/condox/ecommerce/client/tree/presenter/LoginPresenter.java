@@ -42,29 +42,36 @@ public class LoginPresenter implements I_Presenter, I_Login {
 		container.add((I_Contained)display);
 	}
 
-	public void onEnter() {
-		final String uid = display.getUserLogin();
-		final String pwd = display.getUserPassword();
+	private String uid = "";
+	private String pwd = "";
+	
+	public void onLogin() {
+		uid = display.getUserLogin();
+		pwd = display.getUserPassword();
 		EcommerceTree.set(Field.UserLogin, new Data(uid));
 		EcommerceTree.set(Field.UserPassword, new Data(pwd));
 		
-		if (!model.isValid()) {
-			Window.alert("Not valid! Please, check and try again!");
-			return;
-		}
+//		if (!model.isValid()) {
+//			Window.alert("Not valid! Please, check and try again!");
+//			return;
+//		}
 		
-		String role = "visitor";
-		String url = Options.getUserLogin(uid, pwd, role);
-		EcommerceTree.transitState(State.Guest); // for role == "visitor"
+		// TODO role=?
+		String request = Options.URL_VRT + "program?q=login" //+" &role=visitor"
+				+ "&uid=" + uid
+				+ "&pwd=" + pwd;
 
-		url = URL.encode(url);
-
-		// GET.send(url);
-		User.Login(this);
+		User.Login(this, request);
 	}
 
 	@Override
-	public void onLoginSucceed(){
+	public void onLoginSucceed() {
+		if (("web".equalsIgnoreCase(uid)) && ("web".equalsIgnoreCase(pwd)))
+			EcommerceTree.transitState(State.Guest);
+		else
+			EcommerceTree.transitState(State.Agent);
+		EcommerceTree.set(Field.UserId, new Data(User.id));
+		
 		model.next();
 	}
 

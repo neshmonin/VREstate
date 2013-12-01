@@ -6,13 +6,13 @@ import com.condox.clientshared.tree.I_TreeNode;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTreeNode;
-import com.condox.ecommerce.client.tree.presenter.LoginPresenter;
-import com.condox.ecommerce.client.tree.view.LoginView;
+import com.condox.ecommerce.client.tree.presenter.HelloPresenter;
+import com.condox.ecommerce.client.tree.view.HelloView;
 
-public class LoginModel extends EcommerceTreeNode {
+public class HelloNode extends EcommerceTreeNode {
 
-	public static String simpleName = "LoginModel";
-	public LoginModel() {}
+	public static String simpleName = "HelloNode";
+	public HelloNode() {}
 
 //	@Override
 	public boolean isValid() {
@@ -20,7 +20,7 @@ public class LoginModel extends EcommerceTreeNode {
 		 * boolean valid = true; valid &= !sid.isEmpty();
 		 */
 		boolean valid = true;
-//		valid &= "web".equals(EcommerceTree.get(Field.UserLogin).asString());
+//		valid &= "web".equals(EcommerceTree.get(Field.UserHello).asString());
 //		valid &= "web".equals(EcommerceTree.get(Field.UserPassword).asString());
 		return valid;
 	}
@@ -29,7 +29,7 @@ public class LoginModel extends EcommerceTreeNode {
 	@Override
 	public void go(I_Container container) {
 		this.container = container;
-		LoginPresenter presenter = new LoginPresenter(new LoginView(), this);
+		HelloPresenter presenter = new HelloPresenter(new HelloView(), this);
 		presenter.go(container);
 		super.go(container);
 	}
@@ -41,11 +41,12 @@ public class LoginModel extends EcommerceTreeNode {
 
 	@Override
 	public String getNavURL() {
-		Data LoginData = EcommerceTree.get(Field.UserLogin);
-		if (LoginData == null)
-			return "Login";
-		
-		return LoginData.asString() == "web" ? "<Guest>" : LoginData.asString();
+//		Data HelloData = EcommerceTree.get(Field.UserHello);
+//		if (HelloData == null)
+//			return "Hello";
+//		
+//		return HelloData.asString() == "web" ? "<Guest>" : HelloData.asString();
+		return "";
 	}
 
 	@Override

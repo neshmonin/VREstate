@@ -3,6 +3,8 @@ package com.condox.ecommerce.client.tree;
 import com.condox.clientshared.tree.TreeNode;
 import com.condox.ecommerce.client.tree.model.BuildingsModel;
 import com.condox.ecommerce.client.tree.model.EmailModel;
+import com.condox.ecommerce.client.tree.model.HelloNode;
+import com.condox.ecommerce.client.tree.model.HistoryNode;
 import com.condox.ecommerce.client.tree.model.ListingOptionsModel;
 import com.condox.ecommerce.client.tree.model.LoginModel;
 import com.condox.ecommerce.client.tree.model.MLSModel;
@@ -14,6 +16,10 @@ public class NodeFactory {
 	public static TreeNode create(String type) {
 		if (DefaultNode.simpleName.equals(type))
 			return new DefaultNode();
+		if (HelloNode.simpleName.equals(type))
+			return new HelloNode();
+		if (HistoryNode.simpleName.equals(type))
+			return new HistoryNode();
 		if (BuildingsModel.simpleName.equals(type))
 			return new BuildingsModel();
 		if (EmailModel.simpleName.equals(type))
@@ -30,7 +36,6 @@ public class NodeFactory {
 			return new SuitesModel();
 		if (SummaryModel.simpleName.equals(type))
 			return new SummaryModel();
-		
 		return null;
 	} 
 }

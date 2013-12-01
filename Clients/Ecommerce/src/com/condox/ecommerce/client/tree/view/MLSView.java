@@ -109,4 +109,16 @@ public class MLSView extends Composite implements I_Display {
 			buttonNext.setEnabled(true);
 		}
 	}
+
+	@Override
+	public void usingMLS(boolean used) {
+		rbMLS.setValue(used);
+		rbNoMLS.setValue(!used);
+	}
+
+
+	@Override
+	public boolean isUsingMLS() {
+		return rbMLS.getValue();
+	}
 }

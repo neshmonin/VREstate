@@ -6,13 +6,13 @@ import com.condox.clientshared.tree.I_TreeNode;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTreeNode;
-import com.condox.ecommerce.client.tree.presenter.LoginPresenter;
-import com.condox.ecommerce.client.tree.view.LoginView;
+import com.condox.ecommerce.client.tree.presenter.HistoryPresenter;
+import com.condox.ecommerce.client.tree.view.HistoryView;
 
-public class LoginModel extends EcommerceTreeNode {
+public class HistoryNode extends EcommerceTreeNode {
 
-	public static String simpleName = "LoginModel";
-	public LoginModel() {}
+	public static String simpleName = "HistoryNode";
+	public HistoryNode() {}
 
 //	@Override
 	public boolean isValid() {
@@ -20,7 +20,7 @@ public class LoginModel extends EcommerceTreeNode {
 		 * boolean valid = true; valid &= !sid.isEmpty();
 		 */
 		boolean valid = true;
-//		valid &= "web".equals(EcommerceTree.get(Field.UserLogin).asString());
+//		valid &= "web".equals(EcommerceTree.get(Field.UserHistory).asString());
 //		valid &= "web".equals(EcommerceTree.get(Field.UserPassword).asString());
 		return valid;
 	}
@@ -29,7 +29,7 @@ public class LoginModel extends EcommerceTreeNode {
 	@Override
 	public void go(I_Container container) {
 		this.container = container;
-		LoginPresenter presenter = new LoginPresenter(new LoginView(), this);
+		HistoryPresenter presenter = new HistoryPresenter(new HistoryView(), this);
 		presenter.go(container);
 		super.go(container);
 	}
@@ -41,11 +41,12 @@ public class LoginModel extends EcommerceTreeNode {
 
 	@Override
 	public String getNavURL() {
-		Data LoginData = EcommerceTree.get(Field.UserLogin);
-		if (LoginData == null)
-			return "Login";
-		
-		return LoginData.asString() == "web" ? "<Guest>" : LoginData.asString();
+//		Data HistoryData = EcommerceTree.get(Field.UserHistory);
+//		if (HistoryData == null)
+//			return "History";
+//		
+//		return HistoryData.asString() == "web" ? "<Guest>" : HistoryData.asString();
+		return "";
 	}
 
 	@Override
