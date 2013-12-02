@@ -26,9 +26,12 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.ui.HTML;
 import com.nitrous.gwt.earth.client.api.GEHtmlStringBalloon;
+import com.nitrous.gwt.earth.client.api.GEPlugin;
 import com.nitrous.gwt.earth.client.api.KmlContainer;
 import com.nitrous.gwt.earth.client.api.KmlFeature;
+import com.nitrous.gwt.earth.client.api.KmlLink;
 import com.nitrous.gwt.earth.client.api.KmlMouseEvent;
+import com.nitrous.gwt.earth.client.api.KmlNetworkLink;
 import com.nitrous.gwt.earth.client.api.KmlObject;
 import com.nitrous.gwt.earth.client.api.KmlObjectList;
 import com.nitrous.gwt.earth.client.api.KmlPlacemark;
@@ -77,10 +80,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 	// }-*/;
 
 	public void LoginUser() {
-		String request = Options.URL_VRT + "program?q=login" //+" &role=visitor"
-				+ "&uid=web"
-				+ "&pwd=web";
-		User.Login(this, request);
+		User.Login(this, "web", "web", User.UserRole.Visitor);
 	};
 
 	private GE ge = null;
@@ -111,23 +111,42 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 		String json = response.getText();
 		Document.progressBar = new ProgressBar();
 		if (Document.get().Parse(json)) {
+			GEPlugin ge = GE.getPlugin();
+			for (String structrure : Document.get().getStructures()) {
+				KmlNetworkLink networkLink = ge.createNetworkLink("");
+				//networkLink.setDescription("NetworkLink open to fetched content");
+				//networkLink.setName("Open NetworkLink");
+				networkLink.setFlyToView(false);
+		 
+				// create a Link object
+				KmlLink link = ge.createLink("");
+				link.setHref(Options.URL_MODELS + structrure);
+		 
+				// attach the Link to the NetworkLink
+				networkLink.setLink(link);
+		 
+				// add the NetworkLink feature to Earth
+				ge.getFeatures().appendChild(networkLink);
+			}
+			
 			Site site = (Site) Document.get().getSites().values().toArray()[0];
+			if (site.getPOIUrl() != "")
+				ge.fetchKml(site.getPOIUrl(), this);
 			boolean useSiteModel = true;
 			for (Building bldng : Document.get().getBuildings().values()) {
 				if (bldng.getDisplayModelUrl() != "") {
-					GE.getPlugin().fetchKml(bldng.getDisplayModelUrl(),
+					ge.fetchKml(bldng.getDisplayModelUrl(),
 							this);
 					useSiteModel = false;
 				}
 				if (bldng.getOverlayUrl() != "")
-					GE.getPlugin().fetchKml(bldng.getOverlayUrl(), this);
+					ge.fetchKml(bldng.getOverlayUrl(), this);
 				if (bldng.getPOIUrl() != "")
-					GE.getPlugin().fetchKml(bldng.getPOIUrl(), this);
+					ge.fetchKml(bldng.getPOIUrl(), this);
 			}
 			if (useSiteModel)
 				if (site.getDisplayModelUrl() != "")
-					GE.getPlugin()
-							.fetchKml(site.getDisplayModelUrl(), this);
+					ge.fetchKml(site.getDisplayModelUrl(), this);
 
 			_AbstractView.CreateAllGeoItems();
 

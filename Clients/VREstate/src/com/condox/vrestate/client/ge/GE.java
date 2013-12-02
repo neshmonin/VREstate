@@ -136,7 +136,7 @@ public class GE extends GoogleEarthWidget{
 	public void Init(VREstate vrEstate) {
 		this.vrEstate = vrEstate;
 		//GoogleEarth.loadApi(new Runnable(){ // for latest versions of gwt-earth
-		GoogleEarth.loadApi(EARTH_API_KEY, new Runnable(){
+		GoogleEarth.loadApi(new Runnable(){
             @Override
             public void run() {
                onApiLoaded(); // start the application                          

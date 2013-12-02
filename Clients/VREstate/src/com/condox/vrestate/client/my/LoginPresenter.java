@@ -27,10 +27,7 @@ public class LoginPresenter extends VREstateTreeNode {
 //		this.container = container;
 //		this.container.clear();
 //		this.container.add(display);
-		String request = Options.URL_VRT + "program?q=login" //+" &role=visitor"
-				+ "&uid=web"
-				+ "&pwd=web";
-		User.Login(VREstate.instance, request);
+		User.Login(VREstate.instance, "web", "web", User.UserRole.Visitor);
 	}
 
 	public void onGuestLogin() {

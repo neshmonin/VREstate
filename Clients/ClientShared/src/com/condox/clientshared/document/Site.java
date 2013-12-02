@@ -20,6 +20,7 @@ public class Site implements I_VRObject {
 	private int parent_id = -1;
 	private String name = "";
 	private String displayModelUrl = "";
+	private String poiModelUrl = "";
 	private String infoUrl = null;
 	// private String moreInfoUrl = null;
 	private Position position = new Position();
@@ -98,6 +99,9 @@ public class Site implements I_VRObject {
 			bubbleKioskTemplateUrl = obj.get("bubbleTemplateUrl").isString()
 					.stringValue();
 
+		if (obj.containsKey("poiModelUrl"))
+			poiModelUrl = obj.get("poiModelUrl").isString().stringValue();
+
 		if (bubbleWebTemplateUrl != null) {
 			if (bubbleWebTemplateUrl.startsWith(Options.URL_MODELS))
 				bubbleWebTemplateUrl = bubbleWebTemplateUrl
@@ -131,6 +135,10 @@ public class Site implements I_VRObject {
 
 	public String getDisplayModelUrl() {
 		return displayModelUrl;
+	}
+
+	public String getPOIUrl() {
+		return poiModelUrl;
 	}
 
 	// --

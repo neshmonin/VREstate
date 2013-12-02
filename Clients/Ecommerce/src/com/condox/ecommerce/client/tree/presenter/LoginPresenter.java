@@ -46,8 +46,8 @@ public class LoginPresenter implements I_Presenter, I_Login {
 	private String pwd = "";
 	
 	public void onLogin() {
-		uid = display.getUserLogin();
-		pwd = display.getUserPassword();
+		uid = display.getUserLogin().trim();
+		pwd = display.getUserPassword().trim();
 		EcommerceTree.set(Field.UserLogin, new Data(uid));
 		EcommerceTree.set(Field.UserPassword, new Data(pwd));
 		
@@ -56,12 +56,12 @@ public class LoginPresenter implements I_Presenter, I_Login {
 //			return;
 //		}
 		
-		// TODO role=?
-		String request = Options.URL_VRT + "program?q=login" //+" &role=visitor"
-				+ "&uid=" + uid
-				+ "&pwd=" + pwd;
+		User.UserRole role = User.UserRole.Agent;
+		if ((uid == null || uid.isEmpty()) ||
+			("web".equalsIgnoreCase(uid) && "web".equalsIgnoreCase(pwd)))
+			role = User.UserRole.Visitor;
 
-		User.Login(this, request);
+		User.Login(this, uid, pwd, role);
 	}
 
 	@Override

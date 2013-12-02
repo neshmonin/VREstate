@@ -6,10 +6,17 @@ import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONException;
+import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 
 public class User implements RequestCallback, I_Login {
 
+	public enum UserRole {
+		Visitor,
+		Agent,
+		SuperAdmin
+	}
+	
 	public static String SID;
 	public static String id;
 	public static int keepAlivePeriodSec;
@@ -19,15 +26,35 @@ public class User implements RequestCallback, I_Login {
 
 	I_Login externalInterface = null;
 
-	public static User Login(I_Login loginInterface, String request) {
-		User.request = request;
+	public static User Login(I_Login loginInterface, 
+			String uid,
+			String pwd,
+			UserRole role) {
+		User.request = Options.URL_VRT + "program?q=login";
+		switch (role) {
+		case Visitor:
+			User.request += "&role=visitor";
+			break;
+		case Agent:
+			User.request += "&role=agent";
+			break;
+		case SuperAdmin:
+			User.request += "&role=superadmin";
+			break;
+		default:
+		}
+		if (uid == null || uid.isEmpty())
+			User.request += "&uid=web&pwd=web";
+		else {
+			User.request += "&uid=" + uid + "&pwd=" + pwd;
+		}
 		theUser = new User(loginInterface);
 		GET.send(User.request + "&generation=" + counter++, theUser);
 		return theUser;
 	}
 
-	public static User ReLogin() {
-		return Login(null, User.request);
+	public static void ReLogin() {
+		GET.send(User.request + "&generation=" + counter++, theUser);
 	}
 
 	protected User(I_Login vrEstate) {
@@ -38,7 +65,7 @@ public class User implements RequestCallback, I_Login {
 	}
 	
 	private Timer keepAliveThread = null;
-	private static int counter = 0;
+	private static int counter = Random.nextInt(Integer.MAX_VALUE);
 	
 	@Override
 	public void onResponseReceived(Request request, Response response) {
