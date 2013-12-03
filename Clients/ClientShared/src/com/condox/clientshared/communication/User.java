@@ -22,6 +22,8 @@ public class User implements RequestCallback, I_Login {
 	public static int keepAlivePeriodSec;
 	public static User theUser = null;
 	
+	private static boolean firstLogin = true;
+	
 	private static String request;
 
 	I_Login externalInterface = null;
@@ -30,6 +32,9 @@ public class User implements RequestCallback, I_Login {
 			String uid,
 			String pwd,
 			UserRole role) {
+		
+		firstLogin = true;
+		
 		User.request = Options.URL_VRT + "program?q=login";
 		switch (role) {
 		case Visitor:
@@ -54,6 +59,9 @@ public class User implements RequestCallback, I_Login {
 	}
 
 	public static void ReLogin() {
+		
+		firstLogin = false;
+		
 		GET.send(User.request + "&generation=" + counter++, theUser);
 	}
 
@@ -86,17 +94,20 @@ public class User implements RequestCallback, I_Login {
 			};
 			keepAliveThread.scheduleRepeating(keepAlivePeriodSec*1000);
 			
-			externalInterface.onLoginSucceed();
+			if (firstLogin)
+				externalInterface.onLoginSucceed();
 		}
 		catch(JSONException e){
-			externalInterface.onLoginFailed(e);
+			if (firstLogin)
+				externalInterface.onLoginFailed(e);
 		}
 	
 	}
 
 	@Override
 	public void onError(Request request, Throwable exception) {
-		externalInterface.onLoginFailed(exception);
+		if (firstLogin)
+			externalInterface.onLoginFailed(exception);
 	}
 
 	private static int reloginTimeSecs = 10;

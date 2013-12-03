@@ -1,4 +1,4 @@
-package com.condox.vrestate.client.my;
+package com.condox.vrestate.client.tree;
 
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User;

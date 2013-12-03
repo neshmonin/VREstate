@@ -1,4 +1,4 @@
-package com.condox.vrestate.client.my;
+package com.condox.vrestate.client.tree;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
