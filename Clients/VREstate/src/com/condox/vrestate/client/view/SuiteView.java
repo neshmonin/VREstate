@@ -147,7 +147,7 @@ public class SuiteView extends _GEView {
 		content += URL.encode(getSuiteInfo());
 		content += "\" frameborder=0></iframe>";
 		balloon.setCloseButtonEnabled(false);
-		Log.write("content: " + content);
+		//Log.write("content: " + content);
 		balloon.setContentDiv(content);
 		balloon.setFeature(suiteGeo.getExtendedDataLabel());
 		GE.getPlugin().setBalloon(balloon);
