@@ -311,7 +311,7 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 
 	@Override
 	public void fromJSONObject(JSONObject json) {
-		int minPriceRange = (int) json.get("minRange").isNumber().doubleValue();
-		int maxPriceRange = (int) json.get("maxRange").isNumber().doubleValue();
+//		int minPriceRange = (int) json.get("minRange").isNumber().doubleValue();
+//		int maxPriceRange = (int) json.get("maxRange").isNumber().doubleValue();
 	}
 }

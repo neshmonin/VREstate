@@ -25,6 +25,8 @@ public abstract class _SB_View extends _GEView implements I_SB_View {
 		if (filter == null) {
 			filter = Filter.get();
 			filter.Reset();
+			filter.loadFromCookies();
+			filter.Apply();
 		}
 	}
 
