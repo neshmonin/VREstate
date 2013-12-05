@@ -6,6 +6,10 @@ import com.condox.clientshared.document.SuiteType;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.StackPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -409,5 +413,136 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 	@Override
 	public I_FilterSectionContainer getParentSectionContainer() {
 		return parentSection;
+	}
+
+	@Override
+	public JSONObject toJSONObject() {
+		JSONObject result = new JSONObject();
+		result.put("name", new JSONString(this.getClass().getName()));
+		
+		if (cbStudio != null) {
+			boolean studio = cbStudio.getValue();
+			result.put("studio", JSONBoolean.getInstance(studio));
+		}
+		
+		if (cbOneBedrooms != null) {
+			boolean one = cbOneBedrooms.getValue();
+			result.put("one", JSONBoolean.getInstance(one));
+		}
+		
+		if (cbOneBedroomsDens != null) {
+			boolean one_dens = cbOneBedroomsDens.getValue();
+			result.put("one_dens", JSONBoolean.getInstance(one_dens));
+		}
+		
+		if (cbTwoBedrooms != null) {
+			boolean two = cbTwoBedrooms.getValue();
+			result.put("two", JSONBoolean.getInstance(two));
+		}
+		
+		if (cbTwoBedroomsDens != null) {
+			boolean two_dens = cbTwoBedroomsDens.getValue();
+			result.put("two_dens", JSONBoolean.getInstance(two_dens));
+		}
+		
+		if (cbThreeBedrooms != null) {
+			boolean three = cbThreeBedrooms.getValue();
+			result.put("three", JSONBoolean.getInstance(three));
+		}
+		
+		if (cbThreeBedroomsDens != null) {
+			boolean three_dens = cbThreeBedroomsDens.getValue();
+			result.put("three_dens", JSONBoolean.getInstance(three_dens));
+		}
+		
+		if (cbFourBedrooms != null) {
+			boolean four = cbFourBedrooms.getValue();
+			result.put("four", JSONBoolean.getInstance(four));
+		}
+		
+		if (cbFourBedroomsDens != null) {
+			boolean four_dens = cbFourBedroomsDens.getValue();
+			result.put("four_dens", JSONBoolean.getInstance(four_dens));
+		}
+		
+		if (cbFiveBedrooms != null) {
+			boolean five = cbFiveBedrooms.getValue();
+			result.put("five", JSONBoolean.getInstance(five));
+		}
+		
+//		cbStudio.setVisible(studio);
+//		cbOneBedrooms.setVisible(one);
+//		cbOneBedroomsDens.setVisible(one_dens);
+//		cbTwoBedrooms.setVisible(two);
+//		cbTwoBedroomsDens.setVisible(two_dens);
+//		cbThreeBedrooms.setVisible(three);
+//		cbThreeBedroomsDens.setVisible(three_dens);
+//		cbFourBedrooms.setVisible(four);
+//		cbFourBedroomsDens.setVisible(four_dens);
+//		cbFiveBedrooms.setVisible(five);
+//		
+//		cbStudio.setEnabled(studio);
+//		cbOneBedrooms.setEnabled(one);
+//		cbOneBedroomsDens.setEnabled(one_dens);
+//		cbTwoBedrooms.setEnabled(two);
+//		cbTwoBedroomsDens.setEnabled(two_dens);
+//		cbThreeBedrooms.setEnabled(three);
+//		cbThreeBedroomsDens.setEnabled(three_dens);
+//		cbFourBedrooms.setEnabled(four);
+//		cbFourBedroomsDens.setEnabled(four_dens);
+//		cbFiveBedrooms.setEnabled(five);
+//		isAny = true;
+		
+		return result;
+	}
+
+	@Override
+	public void fromJSONObject(JSONObject json) {
+		if (json == null) return;
+		
+		if (!json.containsKey("name")) return;
+//		if (!json.containsKey("sections")) return;
+		
+		if (json.get("name").isString() == null) return;
+//		if (json.get("sections").isArray() == null) return;
+		
+		String name = json.get("name").isString().stringValue();
+//		JSONArray arr = json.get("sections").isArray();
+		
+		if (name.equals(getClass().getName())) {
+//			for (I_FilterSection section : sections) {
+//				for (int i = 0; i < arr.size(); i++)
+//					section.fromJSONObject(arr.get(i).isObject());
+//			}
+			if ((json.containsKey("studio")) && (json.get("studio").isBoolean() != null))
+				cbStudio.setValue(json.get("studio").isBoolean().booleanValue(), true);
+			
+			if ((json.containsKey("one")) && (json.get("one").isBoolean() != null))
+				cbOneBedrooms.setValue(json.get("one").isBoolean().booleanValue(), true);
+
+			if ((json.containsKey("one_dens")) && (json.get("one_dens").isBoolean() != null))
+				cbOneBedroomsDens.setValue(json.get("one_dens").isBoolean().booleanValue(), true);
+
+			if ((json.containsKey("two")) && (json.get("two").isBoolean() != null))
+				cbTwoBedrooms.setValue(json.get("two").isBoolean().booleanValue(), true);
+			
+			if ((json.containsKey("two_dens")) && (json.get("two_dens").isBoolean() != null))
+				cbTwoBedroomsDens.setValue(json.get("two_dens").isBoolean().booleanValue(), true);
+
+			if ((json.containsKey("three")) && (json.get("three").isBoolean() != null))
+				cbThreeBedrooms.setValue(json.get("three").isBoolean().booleanValue(), true);
+			
+			if ((json.containsKey("three_dens")) && (json.get("three_dens").isBoolean() != null))
+				cbThreeBedroomsDens.setValue(json.get("three_dens").isBoolean().booleanValue(), true);
+
+			if ((json.containsKey("four")) && (json.get("four").isBoolean() != null))
+				cbFourBedrooms.setValue(json.get("four").isBoolean().booleanValue(), true);
+			
+			if ((json.containsKey("four_dens")) && (json.get("four_dens").isBoolean() != null))
+				cbFourBedroomsDens.setValue(json.get("four_dens").isBoolean().booleanValue(), true);
+
+			if ((json.containsKey("five")) && (json.get("five").isBoolean() != null))
+				cbFiveBedrooms.setValue(json.get("five").isBoolean().booleanValue(), true);
+		}
 	}
 }

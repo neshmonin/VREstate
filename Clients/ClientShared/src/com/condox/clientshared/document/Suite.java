@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
 
 public class Suite implements I_VRObject {
 
@@ -56,26 +55,20 @@ public class Suite implements I_VRObject {
 			this.status = Status.NotSupported;
 		
 		price = -1;
-//		try {
-//			price = Double.valueOf(obj.get("currentPrice").isString().stringValue()).intValue();
-//		} catch (NumberFormatException e) {
-//			e.printStackTrace();
-//		} catch (NullPointerException e) {
-//			e.printStackTrace();	
-//		}
 		
 		if ((obj.get("currentPrice") != null)
 				&& (obj.get("currentPrice").isString() != null)
 					&& obj.get("currentPrice").isString().stringValue() != null)
 			price = Double.valueOf(obj.get("currentPrice").isString().stringValue()).intValue();
-//		if ((obj.get("currentPrice") != null)
-//				&& (obj.get("currentPrice").isNumber() != null)
-//				&& obj.get("currentPrice").isNumber().doubleValue() != 0)
-//			price = (int) obj.get("currentPrice").isNumber().doubleValue();
 	}
 
-	public void Parse(JSONValue value) {
-		JSONObject obj = value.isObject();
+	@Override
+	public JSONObject toJSONObject() {
+		return null;
+	}
+
+	@Override
+	public void fromJSONObject(JSONObject obj) {
 		id = (int) obj.get("id").isNumber().doubleValue();
 
 		ParseDynamic(obj);

@@ -87,6 +87,9 @@ namespace Vre.Server.RemoteService
                     }
                     else
                     {
+						rq.Touch();
+						session.Update(rq);
+
                         if (rq.IsAttemptSensitive)
                         {
                             // TODO: Prevent brute-force
@@ -219,7 +222,7 @@ namespace Vre.Server.RemoteService
                         }
                         else
                         {
-							request.ExpiresOn = DateTime.UtcNow.AddSeconds(Configuration.HttpService.ReverseRequestLinkExpirationSec.Value);
+							request.ProlongUntil(DateTime.UtcNow.AddSeconds(Configuration.HttpService.ReverseRequestLinkExpirationSec.Value));
                             dao.Update(request);
                         }
                     }
@@ -347,7 +350,7 @@ namespace Vre.Server.RemoteService
                     }
                     else
                     {
-                        request.ExpiresOn = DateTime.UtcNow.AddSeconds(Configuration.HttpService.ReverseRequestLinkExpirationSec.Value);
+                        request.ProlongUntil(DateTime.UtcNow.AddSeconds(Configuration.HttpService.ReverseRequestLinkExpirationSec.Value));
                         dao.Update(request);
                     }
                 }
@@ -568,12 +571,13 @@ namespace Vre.Server.RemoteService
 			ViewOrder vo;
 			using (var dao = new ViewOrderDao(session)) vo = dao.GetById(new Guid(dbRequest.Subject));
 
-			if ("next".Equals(request.Request.Query["action"]))
+			User user;
+			using (var dao = new UserDao(session)) user = dao.GetById(dbRequest.UserId.Value);
+
+			if (string.IsNullOrWhiteSpace(dbRequest.ReferenceParamValue)  // is reset by payment system notification processing
+				|| "next".Equals(request.Request.Query["action"]))
 				//(3 == request.Request.PathSegments.Length) && (request.Request.PathSegments[2].Equals("next")))
 			{
-				User user;
-				using (var dao = new UserDao(session)) user = dao.GetById(dbRequest.UserId.Value);
-
 				makeHttpResponse(request, user, "HTML_VIEWORDER_PENDING", 
 					vo.Product,
 					vo.Options,
@@ -582,6 +586,7 @@ namespace Vre.Server.RemoteService
 			}
 			else
 			{
+				// https://developer.paypal.com/webapps/developer/docs/classic/paypal-payments-standard/integration-guide/Appx_websitestandard_htmlvariables
 				request.Response.RedirectionUrl = string.Format("{6}/cgi-bin/webscr?cmd=_xclick&"
 					+ "business={0}&"
 					+ "item_name={1}&"
@@ -589,15 +594,51 @@ namespace Vre.Server.RemoteService
 					+ "amount={3}&"
 					+ "currency_code={4}&"
 					+ "notify_url={5}&"
-					+ "return={7}",
+					+ "return={7}&rm=1&"
+					+ "country=CA&email={8}",
 					HttpUtility.UrlEncode(Configuration.PaymentSystem.PayPal.MerchantId.Value),
 					HttpUtility.UrlEncode(vo.Product.ToString() + " (" + NotifyExpiringViewOrders.GetSubjectAddress(session, vo) + ")"),
 					HttpUtility.UrlEncode(UniversalId.GenerateUrlId(UniversalId.IdType.ReverseRequest, dbRequest.Id)),
 					HttpUtility.UrlEncode(dbRequest.ReferenceParamValue.Substring(3)),
 					HttpUtility.UrlEncode(dbRequest.ReferenceParamValue.Substring(0, 3)),
-					HttpUtility.UrlEncode(request.Request.ConstructClientRootUri() + "/ps/paypal"),
+					HttpUtility.UrlEncode(request.Request.ConstructClientRootUri() + "ps/paypal"),
 					Configuration.PaymentSystem.SandboxMode.Value ? "https://www.sandbox.paypal.com" : "https://www.paypal.com",
-					HttpUtility.UrlEncode(HttpUtility.UrlEncode(GenerateUrl(dbRequest) + "&action=next")));
+					HttpUtility.UrlEncode(GenerateUrl(dbRequest) + "&action=next"),
+					HttpUtility.UrlEncode(user.PrimaryEmailAddress));
+
+				if (!string.IsNullOrEmpty(user.PersonalInfo))
+				{
+					try
+					{
+						// https://cms.paypal.com/uk/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_html_Appx_websitestandard_htmlvariables#id08A6HI0J0VU
+						//var vc = new Thought.vCards.vCard(new StringReader(user.PersonalInfo));
+
+						//vc.DeliveryAddresses[0].
+
+						// address1, address2, city, state, zip, country
+						// first_name, last_name
+						// night_phone_a, night_phone_b, night_phone_c:
+						//  US: "261" "456" "7456"
+						// !US: "7495" "4567456" ""
+					}
+					catch (Exception ex)
+					{
+						ServiceInstances.Logger.Error("ProcessViewOrderActivation: "
+							+ "failed adding user information into payment system: {0}", ex);
+					}
+				}
+				/*
+				if ((user.UserRole == User.Role.Buyer) || (user.UserRole == User.Role.BuyingAgent)
+					|| (user.UserRole == User.Role.SellingAgent))
+				{
+					request.Response.RedirectionUrl = request.Response.RedirectionUrl +
+						string.Format("&",
+						user.PersonalInfo
+				}
+				*/
+
+				ServiceInstances.Logger.Debug("ProcessViewOrderActivation: "
+					+ " payment system URL: " + request.Response.RedirectionUrl);
 			}
 		}
         #endregion

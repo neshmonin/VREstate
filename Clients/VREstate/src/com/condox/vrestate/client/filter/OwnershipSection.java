@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.document.Suite;
 import com.condox.clientshared.document.Suite.Status;
@@ -13,6 +12,9 @@ import com.condox.vrestate.client.filter.PriceSection.PriceType;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.StackPanel;
 
@@ -332,5 +334,39 @@ public class OwnershipSection extends SectionContainer {
 	@Override
 	public I_FilterSectionContainer getParentSectionContainer() {
 		return parentSection;
+	}
+
+	@Override
+	public JSONObject toJSONObject() {
+		JSONObject result = new JSONObject();
+		
+		JSONArray json_sections = new JSONArray();
+		int index = 0;
+		for (I_FilterSection section : sections) {
+			json_sections.set(index++, section.toJSONObject());
+		}
+		
+		result.put("name", new JSONString(this.getClass().getName()));
+		result.put("sections", json_sections);
+		return result;
+	}
+
+	@Override
+	public void fromJSONObject(JSONObject json) {
+		if (!json.containsKey("name")) return;
+		if (!json.containsKey("sections")) return;
+		
+		if (json.get("name").isString() == null) return;
+		if (json.get("sections").isArray() == null) return;
+		
+		String name = json.get("name").isString().stringValue();
+		JSONArray arr = json.get("sections").isArray();
+		
+		if (name.equals(getClass().getName())) {
+			for (I_FilterSection section : sections) {
+				for (int i = 0; i < arr.size(); i++)
+					section.fromJSONObject(arr.get(i).isObject());
+			}
+		}
 	}
 }

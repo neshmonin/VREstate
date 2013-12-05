@@ -1,9 +1,10 @@
 package com.condox.clientshared.document;
 
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
-public class SuiteInfo {
+public class SuiteInfo implements I_JSON {
 
 	public enum Status {
 		Sold, Available, OnHold, ResaleAvailable, Selected, Layout, AvailableRent // ??
@@ -28,8 +29,13 @@ public class SuiteInfo {
 	private String mls = "";
 	private String address = "";
 
-	public void Parse(JSONValue value) {
-		JSONObject obj = value.isObject();
+	@Override
+	public JSONObject toJSONObject() {
+		return null;
+	}
+
+	@Override
+	public void fromJSONObject(JSONObject obj) {
 		id = (int) obj.get("id").isNumber().doubleValue();
 		name = obj.get("name").isString().stringValue();
 		level_number = (int) obj.get("levelNumber").isNumber().doubleValue();
@@ -63,11 +69,20 @@ public class SuiteInfo {
 		setBathrooms(obj.get("bathrooms").isNumber().doubleValue());
 		setBalconies((int) obj.get("balconies").isNumber().doubleValue());
 		setTerraces((int) obj.get("terraces").isNumber().doubleValue());
-		try {
-			price = (Double.valueOf(obj.get("currentPrice").isString().stringValue())).intValue();
-//			price = (int) obj.get("currentPrice").isNumber().doubleValue();
-		} catch (Exception e) {
-			e.printStackTrace();
+		
+		// Processing of price
+		JSONValue jv = obj.get("currentPrice");
+		if (jv != null) {
+			JSONString js = jv.isString();
+			if (js != null) {
+				String priceStr = js.stringValue();
+				try {
+					Double priceDouble = Double.valueOf(priceStr);
+					price = priceDouble.intValue();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
 //		Log.write(id + ": "+"$" + price + " - " + status);
 

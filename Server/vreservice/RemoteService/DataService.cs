@@ -227,6 +227,11 @@ namespace Vre.Server.RemoteService
                     updateBuilding(request.UserInfo.Session, objectId, request.Request.Data, request.Response);
                     return;
 
+				case ModelObject.Suite:
+                    if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
+                    updateSuite(request.UserInfo.Session, objectId, request.Request.Data, request.Response);
+					return;
+
                 case ModelObject.User:
                     if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
                     updateUser(request.UserInfo.Session, objectId, request.Request.Data, request.Response);
@@ -1578,7 +1583,43 @@ namespace Vre.Server.RemoteService
             }
         }
 
-        private static void updateUser(ClientSession session, int userId, ClientData data, IResponseData resp)
+		private static void updateSuite(ClientSession session, int suiteId, ClientData data, IResponseData resp)
+		{
+			bool updated = false;
+			Suite suite;
+
+			using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session))
+			{
+				using (SiteManager manager = new SiteManager(session))
+				{
+					suite = manager.GetSuiteById(suiteId);
+
+					var price = suite.CurrentPrice;
+					if (suite.UpdateFromClient(data))
+					{
+						if (manager.UpdateSuite(suite))
+						{
+							if (suite.CurrentPrice.HasValue && (suite.CurrentPrice.Value.CompareTo(price.Value) != 0))
+								manager.LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice));
+
+							updated = true;
+						}
+					}
+
+				}  // using SiteManager
+
+				if (updated) tran.Commit();
+				else tran.Rollback();
+			}  // transaction
+
+			// make sure building information is refreshed
+			session.DbSession.Refresh(suite);
+
+			resp.ResponseCode = updated ? HttpStatusCode.OK : HttpStatusCode.NotModified;
+			resp.Data = new ClientData { { "updated", updated ? 1 : 0 } };
+		}
+
+		private static void updateUser(ClientSession session, int userId, ClientData data, IResponseData resp)
         {
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
@@ -1965,7 +2006,7 @@ namespace Vre.Server.RemoteService
 				{
 					User u;
 					using (var dao = new UserDao(dbSession)) u = dao.GetById(result.OwnerId);
-					if (u.RefererRestriction != null)
+					if (u.RefererRestriction.Length != 0)
 					{
 						var referer = request.Request.Referer;
 						if (null == referer)

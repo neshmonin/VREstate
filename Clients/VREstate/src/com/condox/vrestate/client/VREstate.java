@@ -10,31 +10,64 @@ import com.condox.clientshared.communication.User;
 import com.condox.clientshared.document.Building;
 import com.condox.clientshared.document.Document;
 import com.condox.clientshared.document.Site;
-import com.condox.clientshared.document.ViewOrder.ProductType;
 import com.condox.vrestate.client.ge.GE;
+import com.condox.vrestate.client.tree.PopupContainer;
+import com.condox.vrestate.client.tree.VREstateTree;
 import com.condox.vrestate.client.view.HelicopterView;
 import com.condox.vrestate.client.view.ProgressBar;
-import com.condox.vrestate.client.view.SiteView;import com.condox.vrestate.client.view._AbstractView;
+import com.condox.vrestate.client.view.SiteView;
+import com.condox.vrestate.client.view._AbstractView;
 import com.condox.vrestate.client.view.GeoItems.SiteGeoItem;
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.user.client.ui.HTML;
+import com.nitrous.gwt.earth.client.api.GEHtmlStringBalloon;
+import com.nitrous.gwt.earth.client.api.GEPlugin;
+import com.nitrous.gwt.earth.client.api.KmlContainer;
+import com.nitrous.gwt.earth.client.api.KmlFeature;
+import com.nitrous.gwt.earth.client.api.KmlLink;
+import com.nitrous.gwt.earth.client.api.KmlMouseEvent;
+import com.nitrous.gwt.earth.client.api.KmlNetworkLink;
 import com.nitrous.gwt.earth.client.api.KmlObject;
+import com.nitrous.gwt.earth.client.api.KmlObjectList;
+import com.nitrous.gwt.earth.client.api.KmlPlacemark;
+import com.nitrous.gwt.earth.client.api.KmlStyle;
 import com.nitrous.gwt.earth.client.api.event.KmlLoadCallback;
+import com.nitrous.gwt.earth.client.api.event.MouseClickListener;
 
-public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I_Login {
+public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
+		I_Login {
+	
+	public static VREstate instance = null;
 
 	/**
 	 * @wbp.parser.entryPoint
 	 */
 	@Override
 	public void onModuleLoad() {
-//		Log.write(GWT.getHostPageBaseURL());
-//		Log.write(GWT.getModuleBaseForStaticFiles());
-//		Log.write(GWT.getModuleBaseURL());
+		// Log.write(GWT.getHostPageBaseURL());
+		// Log.write(GWT.getModuleBaseForStaticFiles());
+		// Log.write(GWT.getModuleBaseURL());
+		
 		Options.Init();
-		LoginUser();
+//		LoginUser();
+		
+		instance = this;
+		
+		
+		// my testing
+		VREstateTree tree = new VREstateTree();
+		tree.go(new PopupContainer());
+		
+		// my2 testing
+//		DefaultPresenter Default = new DefaultPresenter(null);
+//		Default.go(null);
+//		VREstatePresenter vrestate = new VREstatePresenter(Default, new VREstateView());
+//		vrestate.go(new PopupContainer());
 	}
 
 	// private native void init() /*-{
@@ -47,7 +80,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I
 	// }-*/;
 
 	public void LoginUser() {
-		User.Login(this);
+		User.Login(this, "web", "web", User.UserRole.Visitor);
 	};
 
 	private GE ge = null;
@@ -78,25 +111,42 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I
 		String json = response.getText();
 		Document.progressBar = new ProgressBar();
 		if (Document.get().Parse(json)) {
-			Site site = (Site) Document.get().getSites().values().toArray()[0];
-			if (!Options.isViewOrder()
-					|| Document.targetViewOrder.getProductType() == ProductType.PublicListing
-					|| Document.targetViewOrder.getProductType() == ProductType.Building3DLayout) {
-				boolean useSiteModel = true;
-				for (Building bldng : Document.get().getBuildings().values()) {
-					if (bldng.getDisplayModelUrl() != "") {
-						GE.getPlugin().fetchKml(bldng.getDisplayModelUrl(),this);
-						useSiteModel = false;
-					}
-					if (bldng.getOverlayUrl() != "")
-						GE.getPlugin().fetchKml(bldng.getOverlayUrl(), this);
-					if (bldng.getPOIUrl() != "")
-						GE.getPlugin().fetchKml(bldng.getPOIUrl(), this);
-				}
-				if (useSiteModel)
-					if (site.getDisplayModelUrl() != "")
-						GE.getPlugin().fetchKml(site.getDisplayModelUrl(), this);
+			GEPlugin ge = GE.getPlugin();
+			for (String structrure : Document.get().getStructures()) {
+				KmlNetworkLink networkLink = ge.createNetworkLink("");
+				//networkLink.setDescription("NetworkLink open to fetched content");
+				//networkLink.setName("Open NetworkLink");
+				networkLink.setFlyToView(false);
+		 
+				// create a Link object
+				KmlLink link = ge.createLink("");
+				link.setHref(Options.URL_MODELS + structrure);
+		 
+				// attach the Link to the NetworkLink
+				networkLink.setLink(link);
+		 
+				// add the NetworkLink feature to Earth
+				ge.getFeatures().appendChild(networkLink);
 			}
+			
+			Site site = (Site) Document.get().getSites().values().toArray()[0];
+			if (site.getPOIUrl() != "")
+				ge.fetchKml(site.getPOIUrl(), this);
+			boolean useSiteModel = true;
+			for (Building bldng : Document.get().getBuildings().values()) {
+				if (bldng.getDisplayModelUrl() != "") {
+					ge.fetchKml(bldng.getDisplayModelUrl(),
+							this);
+					useSiteModel = false;
+				}
+				if (bldng.getOverlayUrl() != "")
+					ge.fetchKml(bldng.getOverlayUrl(), this);
+				if (bldng.getPOIUrl() != "")
+					ge.fetchKml(bldng.getPOIUrl(), this);
+			}
+			if (useSiteModel)
+				if (site.getDisplayModelUrl() != "")
+					ge.fetchKml(site.getDisplayModelUrl(), this);
 
 			_AbstractView.CreateAllGeoItems();
 
@@ -149,8 +199,180 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback, I
 
 	@Override
 	public void onLoaded(KmlObject feature) {
-		if (feature != null)
-			GE.getPlugin().getFeatures().appendChild(feature);
+		if (feature != null) {
+			GE.getPlugin()
+					.getFeatures()
+					.appendChild(correct_placemarks(remove_dublicates(feature)));
+		}
+	}
+
+	private KmlObject remove_dublicates(KmlObject feature) {
+		try {
+			KmlContainer container = (KmlContainer) feature;
+
+			// To be added
+			KmlObjectList new_placemarks = container
+					.getElementsByType("KmlPlacemark");
+
+			// Already contained by GE
+			KmlObjectList curr_placemarks = GE.getPlugin().getElementsByType(
+					"KmlPlacemark");
+
+			// new placemarks
+			int i = 0;
+			int j = 0;
+			while (i < new_placemarks.getLength()) {
+				j = i + 1;
+				while (j < new_placemarks.getLength()) {
+					KmlPlacemark first = (KmlPlacemark) new_placemarks.item(i);
+					KmlPlacemark second = (KmlPlacemark) new_placemarks.item(j);
+					if (first.getName().equals(second.getName())) {
+						// container.getFeatures().removeChild(second);
+						second.setVisibility(false);
+						new_placemarks = container
+								.getElementsByType("KmlPlacemark");
+						i = 0;
+						j = 0;
+						break;
+					}
+
+					j++;
+				}
+				if (i == 0 && j == 0)
+					break;
+				i++;
+			}
+
+			// Log.write(container.getKml());
+			// new vs old placemarks
+			i = 0;
+			j = 0;
+			while (i < new_placemarks.getLength()) {
+				while (j < curr_placemarks.getLength()) {
+					KmlPlacemark first = (KmlPlacemark) new_placemarks.item(i);
+					KmlPlacemark second = (KmlPlacemark) curr_placemarks
+							.item(j);
+					// Log.write("i: " + i + ", j: " + j);
+					if (first.getName().equals(second.getName())) {
+						// I don't know why it doesn't work...
+						// container.getFeatures().removeChild(first);
+						first.setVisibility(false);
+						new_placemarks = container
+								.getElementsByType("KmlPlacemark");
+						i = 0;
+						j = 0;
+						break;
+					}
+					j++;
+				}
+				if (i == 0 && j == 0)
+					break;
+				i++;
+			}
+			return container;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			return feature;
+			// e.printStackTrace();
+		}
+	}
+
+	private KmlObject correct_placemarks(KmlObject feature) {
+		Log.write("Feature: " + ((KmlFeature)feature).getKml());
+		Log.write("Feature type: " + feature.getType());
+		if ("KmlDocument".equals(feature.getType())) {
+			KmlContainer container = (KmlContainer) feature;
+			Log.write("container: " + container.getKml());
+			KmlObjectList placemarks = container
+					.getElementsByType("KmlPlacemark");
+			for (int index = 0; index < placemarks.getLength(); index++) {
+				final KmlPlacemark placemark = (KmlPlacemark) placemarks
+						.item(index);
+
+				Element description = new HTML().getElement();
+				description.setInnerHTML(placemark.getDescription());
+
+				correct_empty_icons(description);
+				correct_hrefs(description);
+				String html = description.getInnerHTML();
+
+				if (html.isEmpty())
+					html += " ";
+
+				placemark.setDescription(html);
+
+				placemark.addMouseClickListener(new MouseClickListener() {
+
+					@Override
+					public void onClick(KmlMouseEvent event) {
+						// TODO Auto-generated method stub
+						event.preventDefault();
+						String content = placemark.getDescription();
+						GEHtmlStringBalloon balloon = GE.getPlugin()
+								.createHtmlStringBalloon("");
+						balloon.setFeature(placemark);
+						balloon.setContentString(content);
+						GE.getPlugin().setBalloon(balloon);
+					}
+
+					@Override
+					public void onDoubleClick(KmlMouseEvent event) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onMouseDown(KmlMouseEvent event) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onMouseUp(KmlMouseEvent event) {
+						// TODO Auto-generated method stub
+
+					}
+				});
+				// placemark size
+				KmlStyle style = placemark.getComputedStyle();
+				style.getIconStyle().setScale(1.3f);
+				placemark.setStyleSelector(style);
+
+			}
+			return container;
+		} else
+			return feature;
+	}
+
+	private void correct_empty_icons(Element container) {
+		NodeList<Element> items = container.getElementsByTagName("img");
+		for (int i = 0; i < items.getLength(); i++) {
+			Element item = items.getItem(i);
+			if ("none".equals(item.getStyle().getDisplay()))
+				item.getParentElement().removeChild(item);
+		}
+	}
+
+	private void correct_hrefs(Element container) {
+		// Log.write("before: " + container.getInnerHTML());
+		NodeList<Element> items = container.getElementsByTagName("*");
+		int i = 0;
+		while (i < items.getLength()) {
+			Element item = items.getItem(i);
+			// Log.write(item.getTagName());
+			// if (item.getTagName().equalsIgnoreCase("SCRIPT")) {
+			// item.getParentElement().removeChild(item);
+			// items = container.getElementsByTagName("*");
+			// i = 0;
+			// } else
+			if (!item.getAttribute("href").isEmpty()) {
+				item.setAttribute("onclick", "return !window.open(this.href)");
+				i++;
+			} else
+				i++;
+		}
+
+		// Log.write("after: " + container.getInnerHTML());
 	}
 
 	@Override

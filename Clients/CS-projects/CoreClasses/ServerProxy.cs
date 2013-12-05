@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using Vre.Server;
 using Vre.Server.BusinessLogic;
+using System.Diagnostics;
 
 namespace CoreClasses
 {
@@ -296,6 +297,8 @@ namespace CoreClasses
                 request.Timeout = _requestTimeoutSec * 1000;
 
                 request.Method = method;
+                Trace.WriteLine("---------------------------------");
+                Trace.WriteLine("request.Method=" + request.Method);
 
                 if (data != null)
                 {
@@ -306,6 +309,7 @@ namespace CoreClasses
                     using (System.IO.StreamWriter w = new System.IO.StreamWriter(output))
                     {
                         string JSON = JavaScriptHelper.ClientDataToJson(data);
+                        Trace.WriteLine( "JSON=" + JSON);
                         w.Write(JSON);
                     }
                 }
@@ -317,6 +321,7 @@ namespace CoreClasses
 
                     try
                     {
+                        Trace.WriteLine("request.URL=" + request.Address.ToString());
                         response = request.GetResponse() as HttpWebResponse;
                     }
                     catch (WebException ex)
@@ -327,6 +332,11 @@ namespace CoreClasses
 
                     //if (response.ContentType.Equals("application/json"))  TODO !!!
                     respData = JavaScriptHelper.JsonToClientData(response.GetResponseStream());
+                    if (respData != null)
+                    {
+                        string JSON = JavaScriptHelper.ClientDataToJson(respData);
+                        Trace.WriteLine("respData=" + JSON);
+                    }
                     respondStatus = response.StatusCode;
                     respondDescription = response.StatusDescription;
                 }

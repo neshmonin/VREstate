@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Vre
 {
-    public class Utilities
+    public static class Utilities
     {
         /// <summary>
         /// Makes suite number normalized for DB storage, display and search.
@@ -215,5 +215,18 @@ namespace Vre
 
             return url;
         }
+
+		public static void CopyTo(this Stream source, Stream destination)
+		{
+			source.CopyTo(destination, 0x1000);
+		}
+
+		public static void CopyTo(this Stream source, Stream destination, int bufferSize)
+		{
+			var buffer = new byte[bufferSize];
+			int read;
+			while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
+				destination.Write(buffer, 0, read);
+		}
     }
 }

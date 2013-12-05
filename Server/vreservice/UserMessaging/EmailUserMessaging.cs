@@ -27,53 +27,71 @@ namespace Vre.Server.Messaging
 
         public void Dispose() { }
 
-        public void Send(IEnumerable<string> recipients, string subject, string message)
-        {
-            Send(Sender.Server, recipients, subject, message);
-        }
+		public void Send(Message message)
+		{
+			if (string.IsNullOrWhiteSpace(Configuration.Messaging.Email.SmtpServerHost.Value))
+				throw new ApplicationException("SMTP service parameters are not defined in configuration; cannot send emails.");
 
-        public void Send(Sender sender, System.Collections.Generic.IEnumerable<string> recipients, string subject, string message)
-        {
-            StringBuilder recipient = new StringBuilder();
-            bool delimiter = false;
-            foreach (string r in recipients)
-            {
-                if (delimiter) recipient.Append(',');
-                recipient.Append(r);
-                delimiter = true;
-            }
-            Send(sender, recipient.ToString(), subject, message);
-        }
+			MailMessage msg = new MailMessage();
 
-        public void Send(string recipient, string subject, string message)
-        {
-            Send(Sender.Server, recipient, subject, message);
-        }
+			msg.SubjectEncoding = Encoding.UTF8;
+			msg.Subject = message.Subject;
 
-        public void Send(Sender sender, string recipient, string subject, string message)
-        {
-            if (string.IsNullOrWhiteSpace(Configuration.Messaging.Email.SmtpServerHost.Value))
-                throw new ApplicationException("SMTP service parameters are not defined in configuration; cannot send emails.");
+			foreach (var rcp in message.Recipients) msg.To.Add(rcp);
+			if (0 == msg.To.Count)
+				throw new ArgumentException("A message with subject '{0}' was attempted to be sent with no recipients provided.", msg.Subject);
 
-            NetworkCredential nc = _credentials[sender];
-            if (string.IsNullOrWhiteSpace(nc.UserName) || string.IsNullOrWhiteSpace(nc.Password))
-                throw new ApplicationException("Sender credentials for " + sender.ToString() + " are not defined in configuration; cannot send emails.");
+			Sender sender = message.From;
+			if (sender == Sender.None)
+			{
+				sender = Sender.Server;
+				ServiceInstances.Logger.Error("A message to {0} (subject = '{1}') was sent with no sender provided; server assumed.",
+					msg.To, msg.Subject);
+			}
+			NetworkCredential nc = _credentials[sender];
+			if (string.IsNullOrWhiteSpace(nc.UserName) || string.IsNullOrWhiteSpace(nc.Password))
+				throw new ApplicationException("Sender credentials for " + sender.ToString() + " are not defined in configuration; cannot send emails.");
+			msg.From = new MailAddress(nc.UserName, "3D Condo Explorer");  // TODO: Hard-coded
 
-            try
-            {
+			if (message.ReplyTo != Sender.None)
+			{
+				NetworkCredential rtnc = _credentials[sender];
+				if (string.IsNullOrWhiteSpace(rtnc.UserName))
+					ServiceInstances.Logger.Error("Message's reply-to is set to {0}, but it is not defined in configuration; field not set.",
+						message.ReplyTo);
+				else
+					msg.ReplyToList.Add(nc.UserName);
+			}
+
+			foreach (var bb in message.Body)
+			{
+				if (string.IsNullOrWhiteSpace(bb.Key))
+				{
+					msg.BodyEncoding = Encoding.UTF8;
+					msg.Body = bb.Value;
+				}
+				else
+				{
+					msg.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(
+						bb.Value, Encoding.UTF8, bb.Key));
+				}
+			}
+
+			try
+			{
 				using (SmtpClient client = new SmtpClient(
 					Configuration.Messaging.Email.SmtpServerHost.Value,
 					Configuration.Messaging.Email.SmtpServerPort.Value))
-                {
-                    client.Credentials = nc;
+				{
+					client.Credentials = nc;
 					client.EnableSsl = Configuration.Messaging.Email.SmtpServerUseSsl.Value;
-                    client.Send(nc.UserName, recipient, subject, message);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Cannot send email.", ex);
-            }
-        }
-    }
+					client.Send(msg);
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new ApplicationException("Cannot send email.", ex);
+			}
+		}
+	}
 }

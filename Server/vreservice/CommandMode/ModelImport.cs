@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Packaging;
 using System.Linq;
 using System.Net;
 using System.Text;
 using NHibernate;
 using Vre.Server.BusinessLogic;
 using Vre.Server.Dao;
+using Vre.Server.FileStorage;
+using Vre.Server.Mls;
 using Vre.Server.Model;
 using Vre.Server.RemoteService;
-using Vre.Server.Mls;
 
 namespace Vre.Server.Command
 {
@@ -167,7 +169,10 @@ namespace Vre.Server.Command
             //_session = NHibernateHelper.GetSession();
             using (_clientSession = ClientSession.MakeSystemSession())//_session))
             {
+				ICollection<int> importedBuildingIds = new List<int>();
+
                 _clientSession.Resume();
+				DatabaseSettingsDao.VerifyDatabase();
                 //_clientSession.DbSession.FlushMode = FlushMode.Always;
                 using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_clientSession.DbSession))
                 {
@@ -222,7 +227,7 @@ namespace Vre.Server.Command
                         }
                     }
 
-                    importSite(kmz.Model.Site, site, siteCreated, infoModelFileName, extras);
+					importSite(kmz.Model.Site, site, siteCreated, infoModelFileName, extras, ref importedBuildingIds);
 
                     if (dryRun)
                     {
@@ -241,11 +246,19 @@ namespace Vre.Server.Command
                         _log.Append("All changes comitted to database.\r\n");
                     }
                 }  // transaction
+
+				// TODO: RETROIMPORT
+				if (!dryRun)
+				{
+					foreach (var id in importedBuildingIds)
+						TryImportExistingListings(_clientSession, id, _log);
+				}
             }  // client session
         }
 
         private void importSite(Vre.Server.Model.Kmz.ConstructionSite modelSite, Site dbSite, bool isCreated,            
-            string infoModelFileName, Parameters extras)
+            string infoModelFileName, Parameters extras,
+			ref ICollection<int> importedBuildingIds)
         {
             string displayModelFileName = extras.GetOption("displaymodel");
             string overlayModelFileName = extras.GetOption("overlaymodel");
@@ -311,7 +324,7 @@ namespace Vre.Server.Command
                     isSiteModel ? null : poiModelFileName,
                     isSiteModel ? null : bubbleWebTemplateFileName,
                     isSiteModel ? null : bubbleKioskTemplateFileName,
-                    extras);
+                    extras, ref importedBuildingIds);
             }
 
             if (isSiteModel)
@@ -353,52 +366,26 @@ namespace Vre.Server.Command
 
                 // Update wireframe file
                 //
-                // TODO: Always remove previous file versions?
-                //if (!string.IsNullOrEmpty(dbSite.WireframeLocation))
-                //    ServiceInstances.InternalFileStorageManager.RemoveFile(dbSite.WireframeLocation);
-
-                using (FileStream fs = File.OpenRead(infoModelFileName))
-                    dbSite.WireframeLocation = ServiceInstances.InternalFileStorageManager.StoreFile(
-                        "wireframes", "s", Path.GetExtension(infoModelFileName), dbSite.AutoID.ToString(), fs);
-                _filesSaved.Add(dbSite.WireframeLocation);
+				dbSite.WireframeLocation = storeModelFile(ServiceInstances.InternalFileStorageManager,
+					dbSite, dbSite.WireframeLocation, infoModelFileName, "s", "wireframes");
 
                 if (displayModelFileName != null)
-                {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbSite.DisplayModelUrl = storeModelFile(dbSite, displayModelFileName, "s");
-                }
+					dbSite.DisplayModelUrl = storeModelFile(dbSite, dbSite.DisplayModelUrl, displayModelFileName, "s");
 
                 if (overlayModelFileName != null)
-                {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbSite.OverlayModelUrl = storeModelFile(dbSite, overlayModelFileName, "so");
-                }
+					dbSite.OverlayModelUrl = storeModelFile(dbSite, dbSite.OverlayModelUrl, overlayModelFileName, "so");
 
                 if (bubbleWebTemplateFileName != null)
-                {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbSite.BubbleWebTemplateUrl = storeModelFile(dbSite, bubbleWebTemplateFileName, "sbwt");
-                }
+					dbSite.BubbleWebTemplateUrl = storeModelFile(dbSite, dbSite.BubbleWebTemplateUrl, bubbleWebTemplateFileName, "sbwt");
 
                 if (bubbleKioskTemplateFileName != null)
-                {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbSite.BubbleKioskTemplateUrl = storeModelFile(dbSite, bubbleKioskTemplateFileName, "sbkt");
-                }
+					dbSite.BubbleKioskTemplateUrl = storeModelFile(dbSite, dbSite.BubbleKioskTemplateUrl, bubbleKioskTemplateFileName, "sbkt");
 
 				// Geoinformation import/update
 				// TODO: Should do this for a building model too?!
 				Model.Kmz.ViewPoint vp = modelSite.LocationCart.AsViewPoint();
 				dbSite.Location = new GeoPoint(vp.Longitude, vp.Latitude, vp.Altitude);
-
+				
 				dbSite.MarkUpdated();
                 _clientSession.DbSession.Update(dbSite);
             }
@@ -408,7 +395,8 @@ namespace Vre.Server.Command
 			Vre.Server.Model.Kmz.Building modelBuilding, Building dbBuilding, bool isCreated,
             string infoModelFileName, string displayModelFileName, string overlayModelFileName, string poiModelFileName,
             string bubbleWebTemplateFileName, string bubbleKioskTemplateFileName,
-            Parameters extras)
+            Parameters extras,
+			ref ICollection<int> importedBuildingIds)
         {
             List<string> missingSuites = new List<string>(dbBuilding.Suites.Count);
 
@@ -480,54 +468,23 @@ namespace Vre.Server.Command
             //
             if (infoModelFileName != null)
             {
-                // TODO: Always remove previous file versions?
-                //if (!string.IsNullOrEmpty(dbBuilding.WireframeLocation))
-                //    ServiceInstances.InternalFileStorageManager.RemoveFile(dbBuilding.WireframeLocation);
-
-                using (FileStream fs = File.OpenRead(infoModelFileName))
-                    dbBuilding.WireframeLocation = ServiceInstances.InternalFileStorageManager.StoreFile(
-                        "wireframes", "b", Path.GetExtension(infoModelFileName), dbBuilding.AutoID.ToString(), fs);
-                _filesSaved.Add(dbBuilding.WireframeLocation);
+				dbBuilding.WireframeLocation = storeModelFile(ServiceInstances.InternalFileStorageManager,
+					dbBuilding, dbBuilding.WireframeLocation, infoModelFileName, "b", "wireframes");
 
                 if (displayModelFileName != null)
-                {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbBuilding.DisplayModelUrl = storeModelFile(dbBuilding, displayModelFileName, "b");
-                }
+					dbBuilding.DisplayModelUrl = storeModelFile(dbBuilding, dbBuilding.DisplayModelUrl, displayModelFileName, "b");
 
                 if (overlayModelFileName != null)
-                {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbBuilding.OverlayModelUrl = storeModelFile(dbBuilding, overlayModelFileName, "bo");
-                }
+					dbBuilding.OverlayModelUrl = storeModelFile(dbBuilding, dbBuilding.OverlayModelUrl, overlayModelFileName, "bo");
 
                 if (poiModelFileName != null)
-                {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbBuilding.PoiModelUrl = storeModelFile(dbBuilding, poiModelFileName, "bp");
-                }
+					dbBuilding.PoiModelUrl = storeModelFile(dbBuilding, dbBuilding.PoiModelUrl, poiModelFileName, "bp");
 
                 if (bubbleWebTemplateFileName != null)
-                {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbBuilding.BubbleWebTemplateUrl = storeModelFile(dbBuilding, bubbleWebTemplateFileName, "bbwt");
-                }
+					dbBuilding.BubbleWebTemplateUrl = storeModelFile(dbBuilding, dbBuilding.BubbleWebTemplateUrl, bubbleWebTemplateFileName, "bbwt");
 
                 if (bubbleKioskTemplateFileName != null)
-                {
-                    // TODO: Always remove previous file versions?
-                    //if (!string.IsNullOrEmpty(dbBuilding.Model))
-                    //    ServiceInstances.FileStorageManager.RemoveFile(dbBuilding.Model);
-                    dbBuilding.BubbleKioskTemplateUrl = storeModelFile(dbBuilding, bubbleKioskTemplateFileName, "bbkt");
-                }
+					dbBuilding.BubbleKioskTemplateUrl = storeModelFile(dbBuilding, dbBuilding.BubbleKioskTemplateUrl, bubbleKioskTemplateFileName, "bbkt");
             }
 
 			// Calculate and set geoinformation
@@ -634,22 +591,63 @@ namespace Vre.Server.Command
                     AddressHelper.ConvertToReadableAddress(dbBuilding, null));
             }
 
-			if (isCreated) tryImportExistingListings(dbBuilding);
+			if (isCreated) importedBuildingIds.Add(dbBuilding.AutoID);
 
 			dbBuilding.MarkUpdated();
 			_clientSession.DbSession.Update(dbBuilding);
         }
 
-        private string storeModelFile(UpdateableBase dbObject, string modelFileName, string storePrefix)
+		private string storeModelFile(UpdateableBase dbObject, string currentPath,
+			string modelFileName, string storePrefix)
+		{
+			return storeModelFile(ServiceInstances.FileStorageManager, dbObject, currentPath,
+				modelFileName, storePrefix, "models");
+		}
+
+        private string storeModelFile(IFileStorageManager man, UpdateableBase dbObject, string currentPath,
+			string modelFileName, string storePrefix, string namespaceHint)
         {
-            string result;
-            using (FileStream fs = File.OpenRead(modelFileName))
-                result = ServiceInstances.FileStorageManager.StoreFile(
-                    "models", storePrefix, Path.GetExtension(modelFileName), dbObject.AutoID.ToString(), fs);
+            string result, proposedName;
+			using (var fs = OpenModelFile(modelFileName, out proposedName))
+			{
+				if (!string.IsNullOrWhiteSpace(currentPath))
+					result = man.ReplaceFile(currentPath, namespaceHint, storePrefix, 
+						Path.GetExtension(proposedName), dbObject.AutoID.ToString(), fs);
+				else
+					result = man.StoreFile(namespaceHint, storePrefix, 
+						Path.GetExtension(proposedName), dbObject.AutoID.ToString(), fs);
+			}
             _filesSaved.Add(result);
             _log.AppendFormat("File persisted ({0}) from {1}\r\n", result, modelFileName);
             return result;
         }
+
+		internal static Stream OpenModelFile(string filename, out string proposedName)
+		{
+			if (!Path.GetExtension(filename).Substring(1).ToUpperInvariant().Equals("KML"))
+			{
+				proposedName = filename;
+				return File.OpenRead(filename);
+			}
+			else
+			{
+				proposedName = "generated.kmz";
+				var result = new MemoryStream();
+				using (var package =
+						Package.Open(result, FileMode.Create))
+				{
+					PackagePart packagePartDocument =
+						package.CreatePart(
+							PackUriHelper.CreatePartUri(new Uri("default.kml", UriKind.Relative)),
+							"", CompressionOption.Maximum);
+
+					using (var fileStream = File.OpenRead(filename))
+						fileStream.CopyTo(packagePartDocument.GetStream());
+				}
+				result.Position = 0;
+				return result;
+			}
+		}
 
         private static string conditionString(string input, int maxlen)
         {
@@ -664,18 +662,15 @@ namespace Vre.Server.Command
 			Vre.Server.Model.Kmz.Suite modelSuite, 
 			Suite dbSuite, bool isCreated)
         {
-            // this must be the first call on new suite as it re-reads suite from DB;
-            // all subsequent changes shall be lost!
-			dbSuite.CurrentPrice = new Money(Convert.ToDecimal(modelSuite.InitialPrice), Currency.Cad); // TODO: Currently locked to CAD
+			if (isCreated)
+			{
+				// this must be the first call on new suite as it re-reads suite from DB;
+				// all subsequent changes shall be lost!
+				dbSuite.CurrentPrice = new Money(Convert.ToDecimal(modelSuite.InitialPrice), Currency.Cad); // TODO: Currently locked to CAD
 
-            using (SiteManager mgr = new SiteManager(_clientSession))
-                mgr.LogNewSuitePrice(dbSuite, (float)modelSuite.InitialPrice);
-
-            if (0 == modelSuite.CeilingHeightFt)
-                dbSuite.CeilingHeight = new ValueWithUM(modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
-            else
-                dbSuite.CeilingHeight = new ValueWithUM(
-                    modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
+				using (SiteManager mgr = new SiteManager(_clientSession))
+					mgr.LogNewSuitePrice(dbSuite, (float)modelSuite.InitialPrice);
+			}
 
             dbSuite.ShowPanoramicView = modelSuite.ShowPanoramicView;
 
@@ -745,9 +740,7 @@ namespace Vre.Server.Command
                     string srcPath = Path.Combine(_importPath, fpName.Replace('/', '\\'));
                     if (File.Exists(srcPath))
                     {
-                        // NOTE that each committed update creates duplicated NEW floorplan files in storage
-                        // Reconcilation procedure is required to remove those properly!
-                        stype.FloorPlanUrl = storeModelFile(stype, srcPath, "fp");
+						stype.FloorPlanUrl = storeModelFile(stype, stype.FloorPlanUrl, srcPath, "fp");
 
                         _clientSession.DbSession.Update(stype);
                         updated = true;
@@ -853,10 +846,10 @@ namespace Vre.Server.Command
             return result;
         }
 
-		internal void tryImportExistingListings(Building building)
-		{
-			TryImportExistingListings(_clientSession, building.AutoID, _log);
-		}
+		//internal void tryImportExistingListings(Building building)
+		//{
+		//    TryImportExistingListings(_clientSession, building.AutoID, _log);
+		//}
 
 		internal static void TryImportExistingListings(ClientSession session, int buildingId, StringBuilder report)
 		{
@@ -913,5 +906,66 @@ namespace Vre.Server.Command
 			report.AppendFormat("\r\nUpdate completed: {0} MLS items processed; {1} ViewOrders added; {2} errors.",
 				mlsCnt, add, err);
 		}
-    }
+
+		internal static void TryImportExistingListings(ClientSession session, StringBuilder report)
+		{
+			IMlsInfoProvider prov;
+			string issues;
+
+			// STEP 1
+			//
+			// TODO: MLS provider injection point
+			prov = new RetsMlsStatusProvider();
+
+			prov.Configure(Configuration.Mls.Treb.Status.ConfigString.Value);
+			issues = prov.Parse();
+			if (issues.Length > 0) report.AppendFormat("\r\nMLS Status Retrieval problems:\r\n{0}", issues);
+
+			var activeItems = prov.GetCurrentActiveItems();
+
+			// STEP 2
+			//
+			// TODO: MLS provider injection point
+			prov = new RetsMlsInfoProvider();
+
+			prov.Configure(Configuration.Mls.Treb.Info.ConfigString.Value);
+
+			IDictionary<Guid, string> voIds;
+			using (var vodao = new ViewOrderDao(session.DbSession))
+				// TODO: MLS provider filter injection point
+				voIds = vodao.GetAllActiveIdsAndMlsIdV2();
+
+			int mlsCnt = 0, add = 0, err = 0;
+			List<string> processedIds = new List<string>();
+			foreach (var file in prov.AvailableFiles.OrderBy((a) => a.CreationTimeUtc).Reverse())
+			{
+				issues = prov.Parse(file.FullName);
+				if (issues.Length > 0) report.AppendFormat("\r\nMLS Info Retrieval problems:\r\n{0}", issues);
+
+				var items = prov.GetNewItems();
+				for (int idx = items.Count - 1; idx >= 0; idx--)
+				{
+					if (!activeItems.Contains(items[idx].MlsId))
+					{
+						items.RemoveAt(idx);
+					}
+					else if (processedIds.Contains(items[idx].MlsId))
+					{
+						items.RemoveAt(idx);
+					}
+				}
+
+				using (var manager = new SiteManager(session))
+					issues = manager.RetroImportExistingViewOrders(items, ref voIds, ref add, ref err);
+				if (issues.Length > 0) report.AppendFormat("\r\nMLS Import problems:\r\n{0}", issues);
+
+				foreach (var item in items) processedIds.Add(item.MlsId);
+
+				mlsCnt += items.Count;
+			}
+
+			report.AppendFormat("\r\nUpdate completed: {0} MLS items processed; {1} ViewOrders added; {2} errors.",
+				mlsCnt, add, err);
+		}
+	}
 }

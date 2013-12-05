@@ -576,6 +576,19 @@ namespace ModelPackageTester
                 iform.Init(_modelFileName, _stiFileName, _floorPlanPath, _lastModel, getImportExecutablePath(), AllowDrop, _isProduction);
             iform.ShowDialog();
         }
+
+		private void btnLoadImportSettings_Click(object sender, EventArgs e)
+		{
+			OpenFileDialog ofd = new OpenFileDialog();
+			ofd.CheckFileExists = true;
+			ofd.DefaultExt = ".import.txt";
+			ofd.Filter = "Import settings files (*.import.txt)|*.import.txt|All Files (*.*)|*.*";
+			ofd.Multiselect = false;
+			//ofd.InitialDirectory = null;
+			ofd.Title = "Select import settins file";
+
+			if (DialogResult.OK == ofd.ShowDialog()) onImportSettings(ofd.FileName);
+		}
     }
 
     internal class TestKmlWriter

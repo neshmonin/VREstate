@@ -5,9 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 
-public class BuildingInfo {
+public class BuildingInfo implements I_JSON{
 	private static Map<Integer, BuildingInfo> ids = new HashMap<Integer, BuildingInfo>();
 	
 	private int id = -1;
@@ -22,8 +21,13 @@ public class BuildingInfo {
 	private Position position = null;
 	private Double altitude_adjustment = null;
 	
-	public void Parse(JSONValue value) {
-		JSONObject obj = value.isObject();
+	@Override
+	public JSONObject toJSONObject() {
+		return null;
+	}
+
+	@Override
+	public void fromJSONObject(JSONObject obj) {
 		id = (int) obj.get("id").isNumber().doubleValue();
 		// TODO version
 		parent_id = (int) obj.get("siteId").isNumber().doubleValue();
@@ -145,6 +149,5 @@ public class BuildingInfo {
 	public void setExtendedData(Object extended_data) {
 		this.extended_data = extended_data;
 	}
-	
-	
+
 }

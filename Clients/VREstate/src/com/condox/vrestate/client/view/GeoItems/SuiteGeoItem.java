@@ -301,8 +301,8 @@ public class SuiteGeoItem implements IGeoItem {
 		return isFilteredIn;
 	}
 	
-	private FilteredOutNotification filteredOutNotificationHandler = null;
-	public void registerForFilteredOutNotification(FilteredOutNotification handler) {
+	private I_FilteredOutNotification filteredOutNotificationHandler = null;
+	public void registerForFilteredOutNotification(I_FilteredOutNotification handler) {
 		filteredOutNotificationHandler = handler;
 	}
 	

@@ -34,5 +34,25 @@ namespace Vre
 			}
 			return result.ToString();
 		}
-    }
+
+		public static bool Compare(this byte[] left, byte[] right)
+		{
+			if (null == left)
+			{
+				if (null == right) return true;
+				else return false;
+			}
+			else if (null == right)
+			{
+				return false;
+			}
+			else
+			{
+				if (left.Length != right.Length) return false;
+				for (int idx = left.Length - 1; idx >= 0; idx--)
+					if (left[idx] != right[idx]) return false;
+				return true;
+			}
+		}
+	}
 }

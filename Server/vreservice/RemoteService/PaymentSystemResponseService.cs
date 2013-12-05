@@ -52,7 +52,7 @@ namespace Vre.Server.RemoteService
 				param[2] = "@N/A";
 			}
 
-			param[3] = systemRefNo != null ? systemRefNo : "@N/A";
+			param[3] = systemRefNo ?? "@N/A";
 			param[4] = totalAmount.HasValue ? totalAmount.Value.ToFullString() : "@N/A";
 			param[5] = errorText;
 
@@ -96,8 +96,8 @@ namespace Vre.Server.RemoteService
 				param[6] = "@IS NOT";
 			}
 
-			param[7] = systemName != null ? systemName : "@N/A";
-			param[8] = systemRefNo != null ? systemRefNo : "@N/A";
+			param[7] = systemName ?? "@N/A";
+			param[8] = systemRefNo ?? "@N/A";
 			param[9] = totalAmount.HasValue ? totalAmount.Value.ToFullString() : "@N/A";
 			param[10] = errorText;
 
@@ -109,9 +109,10 @@ namespace Vre.Server.RemoteService
 		private static void sendSuccessMessage(NHibernate.ISession dbSession, 
 			ViewOrder product, User owner,
 			string paymentRefNo, string systemRefNo, Money? totalAmount,
-			string displayUrl, string controlUrl)
+			string displayUrl, string controlUrl,
+			string mlsId, string moreInfoUrl, string vTourUrl)
 		{
-			var param = new object[9];
+			var param = new object[14];
 
 			if (product != null)
 			{
@@ -128,12 +129,18 @@ namespace Vre.Server.RemoteService
 				param[3] = "@N/A";
 			}
 
-			param[4] = paymentRefNo != null ? paymentRefNo : "@N/A";
-			param[5] = systemRefNo != null ? systemRefNo : "@N/A";
+			param[4] = paymentRefNo ?? "@N/A";
+			param[5] = systemRefNo ?? "@N/A";
 			param[6] = totalAmount.HasValue ? totalAmount.Value.ToFullString() : "@N/A";
 
-			param[7] = displayUrl != null ? displayUrl : "@N/A";
-			param[8] = controlUrl != null ? controlUrl : "@N/A";
+			param[7] = displayUrl ?? "@N/A";
+			param[8] = controlUrl ?? "@N/A";
+
+			param[9] = mlsId ?? "@N/A";
+			param[10] = moreInfoUrl ?? string.Empty;
+			param[11] = moreInfoUrl ?? "@N/A";
+			param[12] = vTourUrl ?? string.Empty;
+			param[13] = vTourUrl ?? "@N/A";
 
 			ServiceInstances.MessageGen.SendMessage(
 				ServiceInstances.EmailSender, owner.PrimaryEmailAddress,
@@ -274,8 +281,10 @@ namespace Vre.Server.RemoteService
 			voProduct.Prolong(new DateTime(long.Parse(request.ReferenceParamName)));
 			dbSession.Update(voProduct);
 
-			// Delete reverse request
-			dbSession.Delete(request);
+			// Update reverse request
+			request.ReferenceParamValue = string.Empty;
+			request.ProlongBy(new TimeSpan(1, 0, 0));  // make sure it exists for a while to tell customer "everything is OK"
+			dbSession.Update(request);
 
 			// Create Financial Transaction
 			var ft = new FinancialTransaction(productOwner.AutoID,
@@ -302,7 +311,8 @@ namespace Vre.Server.RemoteService
 				ft.SystemRefId, 
 				response.SystemReferenceNumber, response.NetAmount + response.Taxes,
 				ReverseRequestService.GenerateUrl(voProduct),
-				ReverseRequestService.CreateViewOrderControlUrl(dbSession, voProduct));
+				ReverseRequestService.CreateViewOrderControlUrl(dbSession, voProduct),
+				voProduct.MlsId, voProduct.InfoUrl, voProduct.VTourUrl);
 		}
 
 		#region IHttpService implementaion

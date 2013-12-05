@@ -169,23 +169,22 @@ public class SB_Interactor extends OverlayHelpers
 		if (event.getTarget().getType().equals("KmlPlacemark")) {
 			KmlPlacemark placemark = (KmlPlacemark) event.getTarget();
 			String json = placemark.getSnippet();
-			JSONObject obj = JSONParser.parseLenient(json).isObject();
-
-			String type = obj.get("type").isString().stringValue();
-			int id = (int) obj.get("id").isNumber().doubleValue();
-			this.view.Select(type, id);
-		}
-		else
-		if (this.view.isCameraMoved())
-		{
-	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getTransitionSpeed());
-	        this.view.ApplyCamera();
-	        GE.getPlugin().getOptions().setFlyToSpeed(this.view.getRegularSpeed());
+			if (!"".equals(json)) {
+				JSONObject obj = JSONParser.parseLenient(json).isObject();
+				if (obj != null) {
+					String type = obj.get("type").isString().stringValue();
+					int id = (int) obj.get("id").isNumber().doubleValue();
+					this.view.Select(type, id);
+				}
+			}
 		}
 	}
 
 	@Override
 	public void onDoubleClick(KmlMouseEvent event) {
+		GE.getPlugin().getOptions().setFlyToSpeed(this.view.getTransitionSpeed());
+		this.view.ApplyCamera();
+		GE.getPlugin().getOptions().setFlyToSpeed(this.view.getRegularSpeed());
 	}
 
 	@Override

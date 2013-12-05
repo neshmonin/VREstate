@@ -1,5 +1,6 @@
 ﻿using System;
 using Vre.Server.Command;
+using Vre.Server.Messaging;
 
 namespace Vre.Server.Task
 {
@@ -12,9 +13,10 @@ namespace Vre.Server.Task
         {
             try
             {
-                ServiceInstances.EmailSender.Send(Configuration.Messaging.AdminMessageRecipients.Value,
+                ServiceInstances.EmailSender.Send(new Message(
+					Configuration.Messaging.AdminMessageRecipients.Value,
                     (summary != null) ? string.Format("Task {0}: {1}", Name, summary) : string.Format("Task {0} alert", Name),
-                    text);
+                    text));
             }
             catch (Exception e)
             {

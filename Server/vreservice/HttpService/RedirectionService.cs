@@ -156,16 +156,31 @@ namespace Vre.Server.HttpService
             bool testMode = false;
             string id = null;
 
-            foreach (string k in ctx.Request.QueryString.AllKeys)
+			var queryString = new StringBuilder();
+			var queryStringEmpty = true;
+
+            foreach (var k in ctx.Request.QueryString.AllKeys)
             {
+				var v = ctx.Request.QueryString[k];
+				var passThrough = true;
+
                 if (k.Equals("id"))
                 {
-                    id = ctx.Request.QueryString[k];
+                    id = v;
+					passThrough = false;
                 }
                 else if (k.Equals("test"))
                 {
-                    testMode = ctx.Request.QueryString[k].Equals("true");
+                    testMode = v.Equals("true");
                 }
+
+				if (passThrough)
+				{
+					queryString.AppendFormat("{0}{1}={2}", 
+						queryStringEmpty ? string.Empty : "&", k, v);
+
+					queryStringEmpty = false;
+				}
             }
 
             string finalUri;
@@ -193,11 +208,10 @@ namespace Vre.Server.HttpService
                 }
             }
 
-			string queryString = ctx.Request.Url.Query;
 			if (queryString.Length > 0)
 			{
-				if (finalUri.Contains("?")) finalUri += "&" + queryString.Substring(1);
-				else finalUri += queryString;
+				if (finalUri.Contains("?")) finalUri += "&";
+				finalUri += queryString;
 			}
 			
 			//ctx.Request.UrlReferrer;

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Vre.Server.Task;
 using System.Threading;
+using Vre.Server.Messaging;
+using Vre.Server.Task;
 
 namespace Vre.Server.Command
 {
@@ -16,6 +17,9 @@ namespace Vre.Server.Command
             addTask(new NotifyExpiringViewOrders());
             addTask(new RemoveStaleReverseRequests());
 			addTask(new RetroImportViewOrderTargets());
+			addTask(new ImportFilesIntoManagedStorage());
+			addTask(new ReconcileManagedStorage());
+			addTask(new GenerateImportSettings());
 		}
 
         private void addTask(ITask task) { _tasks.Add(task.Name, task); }
@@ -51,8 +55,9 @@ namespace Vre.Server.Command
         {
             try
             {
-                ServiceInstances.EmailSender.Send(Configuration.Messaging.AdminMessageRecipients.Value, 
-					subject, text);
+                ServiceInstances.EmailSender.Send(new Message(
+					Configuration.Messaging.AdminMessageRecipients.Value, 
+					subject, text));
             }
             catch (Exception e)
             {

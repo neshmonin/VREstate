@@ -1,19 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Internet Downloads/Eclipse Helios for Java/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122040-rel-r36/gwt-2.5.0/gwt-user.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Internet%20Downloads/Eclipse%20Helios%20for%20Java/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122040-rel-r36/gwt-2.5.0/doc/javadoc/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="C:/Internet Downloads/Eclipse Helios for Java/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122040-rel-r36/gwt-2.5.0/gwt-dev.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Internet%20Downloads/Eclipse%20Helios%20for%20Java/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122040-rel-r36/gwt-2.5.0/doc/javadoc/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="C:/Internet Downloads/Eclipse Helios for Java/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122040-rel-r36/gwt-2.5.0/validation-api-1.0.0.GA-sources.jar"/>
-	<classpathentry kind="lib" path="C:/Internet Downloads/Eclipse Helios for Java/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122040-rel-r36/gwt-2.5.0/validation-api-1.0.0.GA.jar" sourcepath="C:/Internet Downloads/Eclipse Helios for Java/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201212122040-rel-r36/gwt-2.5.0/validation-api-1.0.0.GA-sources.jar"/>
-	<classpathentry kind="output" path="war/WEB-INF/classes"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

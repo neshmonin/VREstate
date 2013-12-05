@@ -1,5 +1,6 @@
 package com.condox.clientshared.document;
 
+import java.util.List;
 import java.util.Map;
 
 import com.condox.clientshared.communication.I_CheckChanges;
@@ -17,4 +18,6 @@ public interface IDocument extends  I_CheckChanges {
 	Map<Integer, SuiteType> getSuiteTypes();
 
 	Map<String, ViewOrder> getViewOrders();
+
+	List<String> getStructures();
 }

@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.condox.clientshared.communication.Options;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 
 public class Site implements I_VRObject {
 
@@ -21,6 +20,7 @@ public class Site implements I_VRObject {
 	private int parent_id = -1;
 	private String name = "";
 	private String displayModelUrl = "";
+	private String poiModelUrl = "";
 	private String infoUrl = null;
 	// private String moreInfoUrl = null;
 	private Position position = new Position();
@@ -33,8 +33,13 @@ public class Site implements I_VRObject {
 
 	// private double max_suite_altitude = 0;
 
-	void Parse(JSONValue value) {
-		JSONObject obj = value.isObject();
+	@Override
+	public JSONObject toJSONObject() {
+		return null;
+	}
+
+	@Override
+	public void fromJSONObject(JSONObject obj) {
 		id = (int) obj.get("id").isNumber().doubleValue();
 		// parent_id = (int) obj.get("siteId").isNumber().doubleValue();
 		name = obj.get("name").isString().stringValue();
@@ -94,6 +99,9 @@ public class Site implements I_VRObject {
 			bubbleKioskTemplateUrl = obj.get("bubbleTemplateUrl").isString()
 					.stringValue();
 
+		if (obj.containsKey("poiModelUrl"))
+			poiModelUrl = obj.get("poiModelUrl").isString().stringValue();
+
 		if (bubbleWebTemplateUrl != null) {
 			if (bubbleWebTemplateUrl.startsWith(Options.URL_MODELS))
 				bubbleWebTemplateUrl = bubbleWebTemplateUrl
@@ -127,6 +135,10 @@ public class Site implements I_VRObject {
 
 	public String getDisplayModelUrl() {
 		return displayModelUrl;
+	}
+
+	public String getPOIUrl() {
+		return poiModelUrl;
 	}
 
 	// --

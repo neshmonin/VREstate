@@ -113,6 +113,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\_version\version.cs">
@@ -142,6 +143,7 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Dao\AccountDao.cs" />
     <Compile Include="Dao\BuildingDao.cs" />
+    <Compile Include="Dao\FileStorageItemDao.cs" />
     <Compile Include="Dao\MlsInfoDao.cs" />
     <Compile Include="Dao\NamedSearchFilterDao.cs" />
     <Compile Include="Dao\FinancialTransactionDao.cs" />
@@ -170,6 +172,7 @@
     <Compile Include="FileStorage\IntLocalFileStorageManager.cs" />
     <Compile Include="FileStorage\LocalFileStorageManager.cs" />
     <Compile Include="FileStorage\IFileStorageManager.cs" />
+    <Compile Include="FileStorage\ManagedFileStorage.cs" />
     <Compile Include="FloodPreventor.cs" />
     <Compile Include="HttpService\HttpServiceBase.cs" />
     <Compile Include="HttpService\IHttpService.cs" />
@@ -184,6 +187,10 @@
     <Compile Include="RemoteService\EventService.cs" />
     <Compile Include="RemoteService\PaymentSystemResponseService.cs" />
     <Compile Include="Tasks\BaseTask.cs" />
+    <Compile Include="Tasks\GenerateImportSettings.cs" />
+    <Compile Include="Tasks\ManagedStorageTaskBase.cs" />
+    <Compile Include="Tasks\ReconcileManagedStorage.cs" />
+    <Compile Include="Tasks\ImportFilesIntoManagedStorage.cs" />
     <Compile Include="Tasks\RetroImportViewOrderTargets.cs" />
     <Compile Include="Tasks\RemoveStaleReverseRequests.cs" />
     <Compile Include="Tasks\NotifyExpiringViewOrders.cs" />
@@ -276,6 +283,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Mappings\MlsInfo.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\FileStorageItem.hbm.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <Content Include="SQL\Constraint\Account.sql" />

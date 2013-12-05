@@ -213,7 +213,7 @@ namespace VrEstate
             WebRequest request = Kmz.CreateHttpRequest(uri);
             Stream input = request.GetResponse().GetResponseStream();
             MemoryStream memStream = new MemoryStream();
-            CopyStream(input, memStream);
+            input.CopyTo(memStream);
 
             Kmz kmz = Open(memStream, FileAccess.Read);
             kmz.FileName = uri.LocalPath;
@@ -702,7 +702,7 @@ namespace VrEstate
                 WebRequest request = Kmz.CreateHttpRequest(new Uri(fullWebAddress));
                 Stream input = request.GetResponse().GetResponseStream();
                 MemoryStream memStream = new MemoryStream();
-                CopyStream(input, memStream);
+                input.CopyTo(memStream);
                 input.Close();
                 memStream.Position = 0;
                 return memStream;
@@ -751,14 +751,6 @@ namespace VrEstate
         #endregion
 
         #region Private methods
-
-        private static void CopyStream(Stream input, Stream output)
-        {
-            byte[] buffer = new byte[0x1000];
-            int read;
-            while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
-                output.Write(buffer, 0, read);
-        }
 
         private static HttpWebRequest CreateHttpRequest(Uri uri)
         {
