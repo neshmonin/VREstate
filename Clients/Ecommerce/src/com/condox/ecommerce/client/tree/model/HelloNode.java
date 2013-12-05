@@ -1,10 +1,8 @@
 package com.condox.ecommerce.client.tree.model;
 
 import com.condox.clientshared.container.I_Container;
-import com.condox.clientshared.tree.Data;
 import com.condox.clientshared.tree.I_TreeNode;
 import com.condox.ecommerce.client.tree.EcommerceTree;
-import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTreeNode;
 import com.condox.ecommerce.client.tree.presenter.HelloPresenter;
 import com.condox.ecommerce.client.tree.view.HelloView;

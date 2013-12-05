@@ -1,12 +1,9 @@
 package com.condox.ecommerce.client.tree.view;
 
-import java.util.Comparator;
 import java.util.List;
 
-import com.condox.clientshared.document.BuildingInfo;
 import com.condox.ecommerce.client.FilteredListDataProvider;
 import com.condox.ecommerce.client.IFilter;
-import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.presenter.HelloPresenter;
 import com.condox.ecommerce.client.tree.presenter.HelloPresenter.I_Display;
 import com.google.gwt.cell.client.ClickableTextCell;
@@ -20,20 +17,14 @@ import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
 
 public class HelloView extends Composite implements I_Display, IFilter<ViewOrderInfo> {
 
@@ -47,8 +38,8 @@ public class HelloView extends Composite implements I_Display, IFilter<ViewOrder
 	}
 
 	private HelloPresenter presenter = null;
-	private boolean user = false;
-	private boolean guest = true;
+//	private boolean user = false;
+//	private boolean guest = true;
 
 	public HelloView() {
 		initWidget(uiBinder.createAndBindUi(this));
