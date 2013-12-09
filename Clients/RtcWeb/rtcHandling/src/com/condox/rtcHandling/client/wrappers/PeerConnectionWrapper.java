@@ -6,19 +6,18 @@ public class PeerConnectionWrapper {
 	JavaScriptObject pc;
 	JavaScriptObject dataChannel;
 	
-	public PeerConnectionWrapper(RTCConfiguration conf,
-			PeerConnectionCallbacks callbacks, 
+	public PeerConnectionWrapper(PeerConnectionCallbacks callbacks, 
 			DataChannelCallbacks dataChannelCallbacks,
 			boolean initiator) {
-		init(conf, callbacks, dataChannelCallbacks, initiator);
+		init( callbacks, dataChannelCallbacks, initiator);
 	}
 
-	public native void init(RTCConfiguration conf,
-			PeerConnectionCallbacks callbacks,
+	public native void init(PeerConnectionCallbacks callbacks,
 			DataChannelCallbacks dataChannelCallbacks,
 			boolean initiator) /*-{
-		var theInstance = this;
-		var c = conf.@com.condox.rtcHandling.client.wrappers.RTCConfiguration::asJavaScriptObject(*)();
+			
+		var theInstance = this;		
+		var pc_config; 	
 
 		var pc_constraints = {
 		  'optional': [
@@ -26,9 +25,19 @@ public class PeerConnectionWrapper {
 		    {'RtpDataChannels': true}
 		  ]};
 		  
+  		if (navigator.mozGetUserMedia)
+  		{
+  			RTCPeerConnection = mozRTCPeerConnection;
+  			pc_config = {'iceServers':[{'url':'stun:23.21.150.121'}]};
+  		}
+  		else if (navigator.webkitGetUserMedia)
+  		{
+  			RTCPeerConnection = webkitRTCPeerConnection;
+  			pc_config = {'iceServers': [{'url': 'stun:stun.l.google.com:19302'}]};
+  		}
   
-		theInstance.@com.condox.rtcHandling.client.wrappers.PeerConnectionWrapper::pc = new mozRTCPeerConnection(
-				c, pc_constraints);
+		theInstance.@com.condox.rtcHandling.client.wrappers.PeerConnectionWrapper::pc = new RTCPeerConnection(
+				pc_config, pc_constraints);
 
 		var _onicecandidate = function(e) {
 			console.log(JSON.stringify(e));
@@ -115,10 +124,7 @@ public class PeerConnectionWrapper {
 			SDPCreateOfferCallback callback) /*-{
 		var theInstance = this;
 
-		var offerCallback = function(event) {
-			console.log("offerCallback1");
-			console.log(event.toSource());
-			console.log("offerCallback2");
+		var offerCallback = function(event) {			
 			callback.@com.condox.rtcHandling.client.wrappers.SDPCreateOfferCallback::RTCSessionDescriptionCallback(Lcom/condox/rtcHandling/client/wrappers/RTCSessionDescription;)(event);
 		}
 		var errorCallback = function(event) {
@@ -127,7 +133,24 @@ public class PeerConnectionWrapper {
 
 		var mc = mediaConstraints.@com.condox.rtcHandling.client.wrappers.SDPOfferMediaConstraints::asJavaScriptObject(*)();
 
-        var constraints = {'optional': [], 'mandatory': {'MozDontOfferDataChannel': true}};
+		var constraints = {'optional': [], 'mandatory': {'MozDontOfferDataChannel': true}};
+		
+		if (navigator.mozGetUserMedia)
+  		{
+  			RTCPeerConnection = mozRTCPeerConnection;
+  		}
+  		else if (navigator.webkitGetUserMedia)
+  		{
+  			RTCPeerConnection = webkitRTCPeerConnection;
+  			for (var prop in constraints.mandatory) 
+  			{
+      			if (prop.indexOf('Moz') !== -1) 
+      			{
+        			delete constraints.mandatory[prop];
+      			}
+     		}
+  		}
+  		        
         var merged = constraints;
         for (var name in mc.mandatory) {
 		    merged.mandatory[name] = mc.mandatory[name];
@@ -166,31 +189,39 @@ public class PeerConnectionWrapper {
 
 	public native void setRemoteDescription(JavaScriptObject jso)/*-{
 		var theInstance = this;
-		console.debug(jso);
+		if (navigator.mozGetUserMedia)
+  		{
+  			RTCSessionDescription = mozRTCSessionDescription;
+  		}
 		theInstance.@com.condox.rtcHandling.client.wrappers.PeerConnectionWrapper::pc
-				.setRemoteDescription(new mozRTCSessionDescription(jso));
+				.setRemoteDescription(new RTCSessionDescription(jso));
 	}-*/;
 
 	public native void close()/*-{
-		var theInstance = this;
-		try {
-			theInstance.@com.condox.rtcHandling.client.wrappers.PeerConnectionWrapper::pc
-					.close();
-		} catch (err) {
-			console.log('Exeption while closing peer connection');
-			console.debug(err);
-		}
+		var theInstance = this;		
+		theInstance.@com.condox.rtcHandling.client.wrappers.PeerConnectionWrapper::pc.close();		
+		
 	}-*/;
 
 	public native void dumpPCToConsole() /*-{
-		console
-				.debug(this.@com.condox.rtcHandling.client.wrappers.PeerConnectionWrapper::pc);
+		console.debug(this.@com.condox.rtcHandling.client.wrappers.PeerConnectionWrapper::pc);
 	}-*/;
 
 	public native void addIceCandidate(JavaScriptObject jso) /*-{
 		var theInstance = this;
-		theInstance.@com.condox.rtcHandling.client.wrappers.PeerConnectionWrapper::pc
+		
+		if (navigator.mozGetUserMedia)
+  		{  			
+  			theInstance.@com.condox.rtcHandling.client.wrappers.PeerConnectionWrapper::pc
 				.addIceCandidate(new mozRTCIceCandidate(jso));
+  		}
+  		else
+  		{
+  			theInstance.@com.condox.rtcHandling.client.wrappers.PeerConnectionWrapper::pc
+				.addIceCandidate(new webkitRTCIceCandidate (jso));
+  		}
+  		  		
+		
 	}-*/;
 
 }

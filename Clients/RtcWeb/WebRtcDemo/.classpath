@@ -5,8 +5,6 @@
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="/rtcHandling"/>
-	<classpathentry kind="lib" path="S:/Development/GitHub/WebRtcDemo/war/WEB-INF/gwt-log-3.2.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/gwt-log-3.2.0.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/ClientShared"/>
+	<classpathentry kind="lib" path="S:/Development/GitHub/VREstate/Clients/RtcWeb/WebRtcDemo/lib/gwt-log-3.2.0.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
