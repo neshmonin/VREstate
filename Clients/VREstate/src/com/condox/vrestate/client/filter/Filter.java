@@ -30,7 +30,11 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.DockPanel;
@@ -105,6 +109,7 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 			public void onClick(ClickEvent event) {
 				ApplyAndSelect();
 				btnApply.setEnabled(false);
+				saveToCookie();
 			}
 		});
 		btnApply.setEnabled(false);
@@ -152,6 +157,7 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 	public void Init() {
 		for (I_FilterSection section : sections)
 			section.Init();
+		
 	}
 
 	private boolean isOpened = false;
@@ -269,7 +275,6 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 		getFilteredInSuiteGeoItems().putAll(getActiveSuiteGeoItems());
 		for (I_FilterSection section : sections)
 			section.Reset();
-
 		Apply();
 	}
 
@@ -396,11 +401,52 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 
 	@Override
 	public JSONObject toJSONObject() {
-		return null;
+		JSONObject result = new JSONObject();
+		result.put("name", new JSONString(this.getClass().getName()));
+		
+		JSONArray json_sections = new JSONArray();
+		int index = 0;
+		for (I_FilterSection section : sections) {
+			json_sections.set(index++, section.toJSONObject());
+		}
+		result.put("sections", json_sections);
+		
+		return result;
 	}
 
 	@Override
 	public void fromJSONObject(JSONObject json) {
+		if (!json.containsKey("name")) return;
+		if (!json.containsKey("sections")) return;
+		
+		if (json.get("name").isString() == null) return;
+		if (json.get("sections").isArray() == null) return;
+		
+		String name = json.get("name").isString().stringValue();
+		JSONArray arr = json.get("sections").isArray();
+		
+		if (name.equals(getClass().getName())) {
+			for (I_FilterSection section : sections) {
+				for (int i = 0; i < arr.size(); i++)
+					section.fromJSONObject(arr.get(i).isObject());
+			}
+		}
+	}
+	
+	private void saveToCookie() {
+		String json = toJSONObject().toString();
+		Log.write("saveToCookies, JSON: " + json);
+		Cookies.setCookie("vreFilter", json);
+	}
+	
+	public void loadFromCookies() {
+		String json = Cookies.getCookie("vreFilter");
+		if ((json != null) && (!json.isEmpty())) {
+			Log.write("loadFromCookies, JSON: " + json);
+			JSONObject obj = JSONParser.parseLenient(json).isObject();
+			if (obj != null)
+				fromJSONObject(obj);
+		}
 	}
 	
 }

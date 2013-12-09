@@ -1,8 +1,5 @@
 package com.condox.ecommerce.client.tree;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.condox.clientshared.tree.Data;
 import com.condox.clientshared.tree.I_TreeNode;
 import com.condox.clientshared.tree.Tree;
@@ -37,16 +34,16 @@ public class EcommerceTree extends Tree {
 		PROCEED,
 	}
 	
-	private List<String> leafs = new ArrayList<String>();
+//	private List<String> leafs = new ArrayList<String>();
 	
-	private void config() {
-		
-		leafs.add("SIGN_IN/FORGOT_PASSWORD/CHANGING_PASSWORD/SIGN_IN");
-		leafs.add("SIGN_IN/HELLO/SETTINGS");
-		leafs.add("SIGN_IN/HELLO/UPDATE1");
-		leafs.add("SIGN_IN/HELLO/");
-		leafs.add("SIGN_IN/HELLO/");
-	}
+//	private void config() {
+//		
+//		leafs.add("SIGN_IN/FORGOT_PASSWORD/CHANGING_PASSWORD/SIGN_IN");
+//		leafs.add("SIGN_IN/HELLO/SETTINGS");
+//		leafs.add("SIGN_IN/HELLO/UPDATE1");
+//		leafs.add("SIGN_IN/HELLO/");
+//		leafs.add("SIGN_IN/HELLO/");
+//	}
 	//-----------------
 
 	public enum Field {

@@ -1,6 +1,5 @@
 package com.condox.ecommerce.client;
 
-import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.Options;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.PopupContainer;

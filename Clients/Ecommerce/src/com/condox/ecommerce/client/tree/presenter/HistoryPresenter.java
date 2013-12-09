@@ -5,11 +5,9 @@ import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
-import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.State;
 import com.condox.ecommerce.client.tree.model.HistoryNode;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -27,6 +25,7 @@ public class HistoryPresenter implements I_Presenter {
 	}
 
 	private I_Display display = null;
+	@SuppressWarnings("unused")
 	private HistoryNode node = null;
 
 	public HistoryPresenter(I_Display display, HistoryNode node) {

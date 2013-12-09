@@ -296,7 +296,7 @@ public class BuildingsView extends Composite implements IDisplay,
 	}
 
 	//-----------------------------
-	private String filterCity = "";
+//	private String filterCity = "";
 	
 	@Override
 	public String getFilterCity() {

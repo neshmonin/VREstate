@@ -11,7 +11,9 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.StackPanel;
@@ -234,10 +236,66 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 
 	@Override
 	public JSONObject toJSONObject() {
-		return null;
+		JSONObject obj = new JSONObject();
+		
+		String name = getClass().getName();
+		obj.put("name", new JSONString(name));
+		
+		double minAreaRange = areas.get(lbMinArea.getSelectedIndex());
+		double maxAreaRange = areas.get(lbMaxArea.getSelectedIndex() + 1);
+
+		if (minAreaRange == areas.get(0))
+			minAreaRange = Integer.MIN_VALUE;
+		if (maxAreaRange == areas.get(areas.size() - 1))
+			maxAreaRange = Integer.MAX_VALUE;
+		
+		obj.put("minAreaRange", new JSONNumber(minAreaRange));
+		obj.put("maxAreaRange", new JSONNumber(maxAreaRange));
+		
+		return obj;
 	}
 
 	@Override
-	public void fromJSONObject(JSONObject json) {
+	public void fromJSONObject(JSONObject obj) {
+		if (obj == null) return;
+		
+		if (!obj.containsKey("name")) return;
+		if (obj.get("name").isString() == null) return;
+		String name = obj.get("name").isString().stringValue();
+		if (!name.equals(getClass().getName())) return;
+		
+		Double minAreaRange = readDouble(obj,"minAreaRange");
+		Double maxAreaRange = readDouble(obj,"maxAreaRange");
+		if ((minAreaRange == null) ||
+				(maxAreaRange == null))	return;
+		if (minAreaRange > maxAreaRange) return;
+		
+		minAreaRange = Math.max(minAreaRange, areas.get(0));
+		int i = areas.size() - 1;
+		while (minAreaRange < areas.get(i)) i--;
+		lbMinArea.setSelectedIndex(i);
+			
+		maxAreaRange = Math.min(maxAreaRange, areas.get(areas.size() - 1));
+		i = 0;
+		while (maxAreaRange > areas.get(i)) i++;
+		lbMaxArea.setSelectedIndex(i - 1);
+		
+		
+		// TODO !!
+		lbMaxArea.setSelectedIndex(Math.max(
+				lbMinArea.getSelectedIndex(),
+				lbMaxArea.getSelectedIndex()));
+		instance.isAny = lbMinArea.getSelectedIndex() == 0 &&
+				lbMaxArea.getSelectedIndex() == (lbMaxArea.getItemCount()-1);
+		cbAnyArea.setValue(instance.isAny);
+		instance.Apply();
+	}
+	
+	private Double readDouble(JSONObject obj, String key) {
+		if ((obj == null) ||
+			(!obj.containsKey(key)) ||
+			(obj.get(key).isNumber() == null)) 
+			return null;
+		return obj.get(key).isNumber().doubleValue();
 	}
 }

@@ -13,7 +13,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
@@ -288,30 +288,108 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 		return parentSection;
 	}
 
-	private int currentRevision = 0;
+//	private int currentRevision = 0;
 	@Override
 	public JSONObject toJSONObject() {
 		JSONObject obj = new JSONObject();
-		obj.put("rev", new JSONNumber(currentRevision));
 		
-		if (isAny()) {
-			
-		}
-		else {
-			int minPriceRange = prices.get(cbMinPrice.getSelectedIndex());
-			int maxPriceRange = prices.get(cbMaxPrice.getSelectedIndex());
-			JSONValue jsonMin = new JSONNumber(minPriceRange);
-			JSONValue jsonMax = new JSONNumber(maxPriceRange);
-			obj.put("minRange", jsonMin);
-			obj.put("maxRange", jsonMax);
-		}
+		String name = getClass().getName();
+		obj.put("name", new JSONString(name));
+		
+		double minPriceRange = prices.get(cbMinPrice.getSelectedIndex());
+		double maxPriceRange = prices.get(cbMaxPrice.getSelectedIndex() + 1);
+
+		if (minPriceRange == prices.get(0))
+			minPriceRange = Integer.MIN_VALUE;
+		if (maxPriceRange == prices.get(prices.size() - 1))
+			maxPriceRange = Integer.MAX_VALUE;
+		
+		obj.put("minPriceRange", new JSONNumber(minPriceRange));
+		obj.put("maxPriceRange", new JSONNumber(maxPriceRange));
 		
 		return obj;
+
+//		JSONObject obj = new JSONObject();
+//		obj.put("name", new JSONString(this.getClass().getName()));
+//		
+//		int minPriceRange = prices.get(cbMinPrice.getSelectedIndex());
+//		int maxPriceRange = prices.get(cbMaxPrice.getSelectedIndex());
+//		JSONValue jsonMin = new JSONNumber(minPriceRange);
+//		JSONValue jsonMax = new JSONNumber(maxPriceRange);
+//		obj.put("minRange", jsonMin);
+//		obj.put("maxRange", jsonMax);
+//		
+//		return obj;
 	}
 
 	@Override
-	public void fromJSONObject(JSONObject json) {
-		int minPriceRange = (int) json.get("minRange").isNumber().doubleValue();
-		int maxPriceRange = (int) json.get("maxRange").isNumber().doubleValue();
+	public void fromJSONObject(JSONObject obj) {
+		if (obj == null) return;
+		
+		if (!obj.containsKey("name")) return;
+		if (obj.get("name").isString() == null) return;
+		String name = obj.get("name").isString().stringValue();
+		if (!name.equals(getClass().getName())) return;
+		
+		Double minPriceRange = readDouble(obj,"minPriceRange");
+		Double maxPriceRange = readDouble(obj,"maxPriceRange");
+		if ((minPriceRange == null) ||
+				(maxPriceRange == null))	return;
+		if (minPriceRange > maxPriceRange) return;
+		
+		minPriceRange = Math.max(minPriceRange, prices.get(0));
+		int i = prices.size() - 1;
+		while (minPriceRange < prices.get(i)) i--;
+		cbMinPrice.setSelectedIndex(i);
+			
+		maxPriceRange = Math.min(maxPriceRange, prices.get(prices.size() - 1));
+		i = 0;
+		while (maxPriceRange > prices.get(i)) i++;
+		cbMaxPrice.setSelectedIndex(i - 1);
+		
+		
+		// TODO !!
+		cbMaxPrice.setSelectedIndex(Math.max(
+				cbMinPrice.getSelectedIndex(),
+				cbMaxPrice.getSelectedIndex()));
+		instance.isAny = cbMinPrice.getSelectedIndex() == 0 &&
+				cbMaxPrice.getSelectedIndex() == (cbMaxPrice.getItemCount()-1);
+		cbAnyPrice.setValue(instance.isAny);
+		instance.Apply();
+
+//		if (json == null) return;
+//		
+//		if (!json.containsKey("name")) return;
+//		if (!json.containsKey("minRange")) return;
+//		if (!json.containsKey("maxRange")) return;
+//		
+//		if (json.get("name").isString() == null) return;
+//		if (json.get("minRange").isNumber() == null) return;
+//		if (json.get("maxRange").isNumber() == null) return;
+//		
+//		String name = json.get("name").isString().stringValue();
+//		int minPriceRange = (int) json.get("minRange").isNumber().doubleValue();
+//		int maxPriceRange = (int) json.get("maxRange").isNumber().doubleValue();
+//		
+//		if (!name.equals(getClass().getName())) return;
+//		
+////		minPriceRange = Math.max(minPriceRange, prices.get(0));
+////		maxPriceRange = Math.min(maxPriceRange, prices.get(prices.size() - 1));
+////		
+////		int i = 0;
+////		while (minPriceRange > prices.get(i))
+////			i++;
+////		cbMinPrice.setSelectedIndex(i);
+		
 	}
+	
+	private Double readDouble(JSONObject obj, String key) {
+		if ((obj == null) ||
+			(!obj.containsKey(key)) ||
+			(obj.get(key).isNumber() == null)) 
+			return null;
+		return obj.get(key).isNumber().doubleValue();
+	}
+
+	
 }

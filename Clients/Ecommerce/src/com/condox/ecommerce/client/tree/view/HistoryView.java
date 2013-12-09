@@ -22,6 +22,7 @@ public class HistoryView extends Composite implements I_Display {
 	interface HistoryViewUiBinder extends UiBinder<Widget, HistoryView> {
 	}
 
+	@SuppressWarnings("unused")
 	private HistoryPresenter presenter = null;
 
 	public HistoryView() {

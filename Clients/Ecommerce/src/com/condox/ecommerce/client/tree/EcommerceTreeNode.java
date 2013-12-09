@@ -1,9 +1,7 @@
 package com.condox.ecommerce.client.tree;
 
-import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
-import com.condox.clientshared.tree.I_TreeNode;
 import com.condox.clientshared.tree.TreeNode;
 
 public abstract class EcommerceTreeNode extends TreeNode {
