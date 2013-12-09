@@ -6,7 +6,6 @@ import com.condox.rtcHandling.client.wrappers.GetUserMediaUtils;
 import com.condox.rtcHandling.client.wrappers.MediaStream;
 import com.condox.rtcHandling.client.wrappers.PeerConnectionCallbacks;
 import com.condox.rtcHandling.client.wrappers.PeerConnectionWrapper;
-import com.condox.rtcHandling.client.wrappers.RTCConfiguration;
 import com.condox.rtcHandling.client.wrappers.RTCSessionDescription;
 import com.condox.rtcHandling.client.wrappers.SDPCreateOfferCallback;
 import com.condox.rtcHandling.client.wrappers.SDPOfferMediaConstraints;
@@ -123,7 +122,7 @@ public class RtcCallHandler {
 						loggingService.debug("getUserMedia - success");	
 						isChannelReady = true;
 						localStream = mediaStream;	
-						callbacks.onChannelStarted(mediaStream.createMediaObjectBlobUrl());
+						//callbacks.onChannelStarted(mediaStream.createMediaObjectBlobUrl());
 						if (!isCallReceiver)
 						{
 							sendMessage("got user media");
@@ -278,9 +277,9 @@ public class RtcCallHandler {
 	private void maybeStart()
 	{			
 		if (this.localStream != null && !isLocalStreamAdded && isChannelReady)
-		{					
-			RTCConfiguration conf = new RTCConfiguration(new String[] { "stun:23.21.150.121" });			
-			peerConnection = new PeerConnectionWrapper(conf, new PeerConnectionCallbacks()
+		{		
+			loggingService.debug("Before constructor");
+			peerConnection = new PeerConnectionWrapper(new PeerConnectionCallbacks()
 			{
 				
 				@Override
@@ -371,6 +370,9 @@ public class RtcCallHandler {
 					callbacks.onChannelClosed();
 				}
 			}, isCallReceiver);
+			
+			
+			loggingService.debug("After constructor");
 			
 			peerConnection.addStream(localStream);
 			isLocalStreamAdded = true;

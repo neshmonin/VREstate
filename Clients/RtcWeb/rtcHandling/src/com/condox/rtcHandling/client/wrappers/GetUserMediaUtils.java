@@ -14,7 +14,17 @@ public class GetUserMediaUtils {
 		}
 		try {
 			
-			navigator.mozGetUserMedia({
+			if (navigator.mozGetUserMedia)
+			{
+				navigator.getUserMedia = navigator.mozGetUserMedia;
+			}
+			else if (navigator.webkitGetUserMedia)
+			{
+				navigator.getUserMedia = navigator.webkitGetUserMedia;				
+			}
+				
+						
+			navigator.getUserMedia({
 				audio : audio,
 				video : video
 			}, cb, ecb);
