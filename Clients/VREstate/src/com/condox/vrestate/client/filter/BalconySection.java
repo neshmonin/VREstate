@@ -6,7 +6,9 @@ import com.condox.clientshared.document.SuiteType;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.StackPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -190,10 +192,45 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 
 	@Override
 	public JSONObject toJSONObject() {
-		return null;
+		JSONObject obj = new JSONObject();
+		obj.put("name", new JSONString(this.getClass().getName()));
+		
+		saveRadioButton(rbBalconyOrTerrace, obj, "balcony_or_terrace");
+		saveRadioButton(rbBalconyYes, obj, "balcony_yes");
+		saveRadioButton(rbDoNotCare, obj, "do_not_care");
+		saveRadioButton(rbNone, obj, "none");
+		saveRadioButton(rbTerraceYes, obj, "terrace_yes");
+		
+		return obj;
+	}
+	
+	private void saveRadioButton(RadioButton source, JSONObject obj, String key) {
+		if (source == null) return;
+		boolean value = source.getValue();
+		obj.put(key, JSONBoolean.getInstance(value));
 	}
 
 	@Override
-	public void fromJSONObject(JSONObject json) {
+	public void fromJSONObject(JSONObject obj) {
+		if (obj == null) return;
+		
+		if (!obj.containsKey("name")) return;
+		if (obj.get("name").isString() == null) return;
+		String name = obj.get("name").isString().stringValue();
+		
+		if (name.equals(getClass().getName())) {
+			loadRadioButton(rbBalconyOrTerrace, obj, "balcony_or_terrace");
+			loadRadioButton(rbBalconyYes, obj, "balcony_yes");
+			loadRadioButton(rbDoNotCare, obj, "do_not_care");
+			loadRadioButton(rbNone, obj, "none");
+			loadRadioButton(rbTerraceYes, obj, "terrace_yes");
+		}
+	}
+	
+	private void loadRadioButton(RadioButton target, JSONObject obj, String key) {
+		if (!obj.containsKey(key)) return;
+		if (obj.get(key).isBoolean() == null) return;
+		boolean value = obj.get(key).isBoolean().booleanValue();
+		target.setValue(value, true);
 	}
 }

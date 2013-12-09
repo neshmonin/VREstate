@@ -6,7 +6,9 @@ import com.condox.clientshared.document.SuiteType;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.StackPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -375,10 +377,55 @@ public class BathroomSection extends VerticalPanel implements I_FilterSection {
 
 	@Override
 	public JSONObject toJSONObject() {
-		return null;
+		JSONObject obj = new JSONObject();
+		obj.put("name", new JSONString(this.getClass().getName()));
+		
+		saveCheckBox(cbOneBathroom, obj, "one");
+		saveCheckBox(cbOneAndHalfBathroom, obj, "one_and_half");
+		saveCheckBox(cbTwoBathrooms, obj, "two");
+		saveCheckBox(cbTwoAndHalfBathrooms, obj, "two_and_half");
+		saveCheckBox(cbThreeBathrooms, obj, "three");
+		saveCheckBox(cbThreeAndHalfBathrooms, obj, "three_and_half");
+		saveCheckBox(cbFourBathrooms, obj, "four");
+		saveCheckBox(cbFourAndHalfBathrooms, obj, "four_and_half");
+		saveCheckBox(cbFiveBathrooms, obj, "five");
+		
+		return obj;
+	}
+	
+	private void saveCheckBox(CheckBox source, JSONObject obj, String key) {
+		if (source != null) {
+			boolean value = source.getValue();
+			obj.put(key, JSONBoolean.getInstance(value));
+		}
 	}
 
 	@Override
-	public void fromJSONObject(JSONObject json) {
+	public void fromJSONObject(JSONObject obj) {
+		if (obj == null) return;
+		
+		if (!obj.containsKey("name")) return;
+		if (obj.get("name").isString() == null) return;
+		String name = obj.get("name").isString().stringValue();
+		
+		if (name.equals(getClass().getName())) {
+			loadCheckBox(cbOneBathroom, obj, "one");
+			loadCheckBox(cbOneAndHalfBathroom, obj, "one_and_half");
+			loadCheckBox(cbTwoBathrooms, obj, "two");
+			loadCheckBox(cbTwoAndHalfBathrooms, obj, "two_and_half");
+			loadCheckBox(cbThreeBathrooms, obj, "three");
+			loadCheckBox(cbThreeAndHalfBathrooms, obj, "three_and_half");
+			loadCheckBox(cbFourBathrooms, obj, "four");
+			loadCheckBox(cbFourAndHalfBathrooms, obj, "four_and_half");
+			loadCheckBox(cbFiveBathrooms, obj, "five");
+		}
 	}
+	
+	private void loadCheckBox(CheckBox target, JSONObject obj, String key) {
+		if (!obj.containsKey(key)) return;
+		if (obj.get(key).isBoolean() == null) return;
+		boolean value = obj.get(key).isBoolean().booleanValue();
+		target.setValue(value, true);
+	}
+	
 }

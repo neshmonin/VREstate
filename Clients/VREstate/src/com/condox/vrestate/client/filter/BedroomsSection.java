@@ -6,7 +6,6 @@ import com.condox.clientshared.document.SuiteType;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -501,19 +500,10 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 		if (json == null) return;
 		
 		if (!json.containsKey("name")) return;
-//		if (!json.containsKey("sections")) return;
-		
 		if (json.get("name").isString() == null) return;
-//		if (json.get("sections").isArray() == null) return;
-		
 		String name = json.get("name").isString().stringValue();
-//		JSONArray arr = json.get("sections").isArray();
 		
 		if (name.equals(getClass().getName())) {
-//			for (I_FilterSection section : sections) {
-//				for (int i = 0; i < arr.size(); i++)
-//					section.fromJSONObject(arr.get(i).isObject());
-//			}
 			if ((json.containsKey("studio")) && (json.get("studio").isBoolean() != null))
 				cbStudio.setValue(json.get("studio").isBoolean().booleanValue(), true);
 			
