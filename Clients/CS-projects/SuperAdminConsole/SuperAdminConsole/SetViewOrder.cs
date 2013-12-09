@@ -108,6 +108,21 @@ namespace SuperAdminConsole
                     textVTourURL.Text = DEFAULT;
             };
 
+            textMoreInfoUrl.Text = DEFAULT;
+            textMoreInfoUrl.GotFocus += (sender, e) =>
+            {
+                if (textMoreInfoUrl.Text.Equals(DEFAULT))
+                {
+                    textMoreInfoUrl.Text = @"http://";
+                    textMoreInfoUrl.SelectionStart = DEFAULT.Length;
+                }
+            };
+            textMoreInfoUrl.LostFocus += (sender, e) =>
+            {
+                if (textMoreInfoUrl.Text.Trim().Length == 0 || textMoreInfoUrl.Text == @"http://")
+                    textMoreInfoUrl.Text = DEFAULT;
+            };
+
 
             theOrder = order;
             if (theReason != ChangeReason.Creation)
@@ -173,7 +188,7 @@ namespace SuperAdminConsole
             lvwColumnSorter = new ListViewColumnSorter();
             listViewAddresses.ListViewItemSorter = lvwColumnSorter;
             textBoxMLS.ReadOnly = theReason != ChangeReason.Creation;
-            textMoreInfoUrl.ReadOnly = theReason != ChangeReason.Creation;
+            //textMoreInfoUrl.ReadOnly = theReason != ChangeReason.Creation;
             //textBoxNote.Visible = theReason == ChangeReason.Creation;
             label11.Visible = theReason == ChangeReason.Creation;
 

@@ -601,7 +601,7 @@
             this.textMoreInfoUrl.Location = new System.Drawing.Point(96, 163);
             this.textMoreInfoUrl.Name = "textMoreInfoUrl";
             this.textMoreInfoUrl.Size = new System.Drawing.Size(384, 20);
-            this.textMoreInfoUrl.TabIndex = 5;
+            this.textMoreInfoUrl.TabIndex = 11;
             this.textMoreInfoUrl.TextChanged += new System.EventHandler(this.updateStateEvent);
             // 
             // label12
@@ -656,7 +656,7 @@
             this.groupBoxListingOptions.Controls.Add(this.labelPrice);
             this.groupBoxListingOptions.Location = new System.Drawing.Point(9, 6);
             this.groupBoxListingOptions.Name = "groupBoxListingOptions";
-            this.groupBoxListingOptions.Size = new System.Drawing.Size(477, 91);
+            this.groupBoxListingOptions.Size = new System.Drawing.Size(477, 111);
             this.groupBoxListingOptions.TabIndex = 1;
             this.groupBoxListingOptions.TabStop = false;
             this.groupBoxListingOptions.Text = "Listing Options";
@@ -664,7 +664,7 @@
             // radioButtonListingTypeRent
             // 
             this.radioButtonListingTypeRent.AutoSize = true;
-            this.radioButtonListingTypeRent.Location = new System.Drawing.Point(234, 22);
+            this.radioButtonListingTypeRent.Location = new System.Drawing.Point(240, 38);
             this.radioButtonListingTypeRent.Name = "radioButtonListingTypeRent";
             this.radioButtonListingTypeRent.Size = new System.Drawing.Size(48, 17);
             this.radioButtonListingTypeRent.TabIndex = 28;
@@ -676,12 +676,12 @@
             // 
             this.radioButtonListingTypeSale.AutoSize = true;
             this.radioButtonListingTypeSale.Checked = true;
-            this.radioButtonListingTypeSale.Location = new System.Drawing.Point(182, 22);
+            this.radioButtonListingTypeSale.Location = new System.Drawing.Point(240, 15);
             this.radioButtonListingTypeSale.Name = "radioButtonListingTypeSale";
-            this.radioButtonListingTypeSale.Size = new System.Drawing.Size(46, 17);
+            this.radioButtonListingTypeSale.Size = new System.Drawing.Size(84, 17);
             this.radioButtonListingTypeSale.TabIndex = 27;
             this.radioButtonListingTypeSale.TabStop = true;
-            this.radioButtonListingTypeSale.Text = "Sale";
+            this.radioButtonListingTypeSale.Text = "Sale/Resale";
             this.radioButtonListingTypeSale.UseVisualStyleBackColor = true;
             this.radioButtonListingTypeSale.CheckedChanged += new System.EventHandler(this.radioButtonListingTypeSale_CheckedChanged);
             // 
@@ -722,7 +722,7 @@
             // 
             this.labelPercent.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelPercent.AutoSize = true;
-            this.labelPercent.Location = new System.Drawing.Point(381, 59);
+            this.labelPercent.Location = new System.Drawing.Point(381, 86);
             this.labelPercent.Name = "labelPercent";
             this.labelPercent.Size = new System.Drawing.Size(24, 13);
             this.labelPercent.TabIndex = 23;
@@ -742,7 +742,7 @@
             // 
             this.labelTax.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelTax.AutoSize = true;
-            this.labelTax.Location = new System.Drawing.Point(315, 59);
+            this.labelTax.Location = new System.Drawing.Point(315, 86);
             this.labelTax.Name = "labelTax";
             this.labelTax.Size = new System.Drawing.Size(31, 13);
             this.labelTax.TabIndex = 22;
@@ -751,7 +751,7 @@
             // numericUpDownTax
             // 
             this.numericUpDownTax.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.numericUpDownTax.Location = new System.Drawing.Point(346, 56);
+            this.numericUpDownTax.Location = new System.Drawing.Point(346, 83);
             this.numericUpDownTax.Maximum = new decimal(new int[] {
             25,
             0,
@@ -772,7 +772,7 @@
             this.textBoxTotal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxTotal.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.textBoxTotal.ForeColor = System.Drawing.Color.Black;
-            this.textBoxTotal.Location = new System.Drawing.Point(409, 57);
+            this.textBoxTotal.Location = new System.Drawing.Point(409, 84);
             this.textBoxTotal.Name = "textBoxTotal";
             this.textBoxTotal.ReadOnly = true;
             this.textBoxTotal.Size = new System.Drawing.Size(52, 20);
@@ -783,7 +783,7 @@
             // 
             this.numericUpDownPrice.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.numericUpDownPrice.DecimalPlaces = 2;
-            this.numericUpDownPrice.Location = new System.Drawing.Point(246, 56);
+            this.numericUpDownPrice.Location = new System.Drawing.Point(246, 83);
             this.numericUpDownPrice.Name = "numericUpDownPrice";
             this.numericUpDownPrice.Size = new System.Drawing.Size(67, 20);
             this.numericUpDownPrice.TabIndex = 18;
@@ -792,7 +792,7 @@
             // 
             // numericUpDownDaysValid
             // 
-            this.numericUpDownDaysValid.Location = new System.Drawing.Point(64, 56);
+            this.numericUpDownDaysValid.Location = new System.Drawing.Point(64, 83);
             this.numericUpDownDaysValid.Maximum = new decimal(new int[] {
             365,
             0,
@@ -817,7 +817,7 @@
             // labelDays
             // 
             this.labelDays.AutoSize = true;
-            this.labelDays.Location = new System.Drawing.Point(110, 60);
+            this.labelDays.Location = new System.Drawing.Point(110, 87);
             this.labelDays.Name = "labelDays";
             this.labelDays.Size = new System.Drawing.Size(29, 13);
             this.labelDays.TabIndex = 16;
@@ -826,7 +826,7 @@
             // labelValidFor
             // 
             this.labelValidFor.AutoSize = true;
-            this.labelValidFor.Location = new System.Drawing.Point(15, 60);
+            this.labelValidFor.Location = new System.Drawing.Point(15, 87);
             this.labelValidFor.Name = "labelValidFor";
             this.labelValidFor.Size = new System.Drawing.Size(45, 13);
             this.labelValidFor.TabIndex = 15;
@@ -836,7 +836,7 @@
             // 
             this.labelPrice.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelPrice.AutoSize = true;
-            this.labelPrice.Location = new System.Drawing.Point(188, 59);
+            this.labelPrice.Location = new System.Drawing.Point(188, 86);
             this.labelPrice.Name = "labelPrice";
             this.labelPrice.Size = new System.Drawing.Size(59, 13);
             this.labelPrice.TabIndex = 13;
