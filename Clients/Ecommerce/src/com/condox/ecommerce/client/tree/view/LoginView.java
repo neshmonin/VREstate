@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.Hyperlink;
 
 public class LoginView extends Composite implements I_Display {
 
@@ -24,6 +25,7 @@ public class LoginView extends Composite implements I_Display {
 	TextBox textUserPassword;
 	@UiField
 	Button buttonEnter;
+	@UiField Hyperlink hyperlink;
 
 	interface LoginViewUiBinder extends UiBinder<Widget, LoginView> {
 	}
@@ -96,5 +98,10 @@ public class LoginView extends Composite implements I_Display {
 			buttonEnter.setText("Order");
 		}
 
+	}
+	@UiHandler("hyperlink")
+	void onHyperlinkClick(ClickEvent event) {
+		if (presenter != null)
+			presenter.onForgotPassword();
 	}
 }

@@ -1,7 +1,10 @@
 package com.condox.ecommerce.client;
 
+import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.Options;
 import com.condox.ecommerce.client.tree.EcommerceTree;
+import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.node.AbstractNode;
 import com.condox.ecommerce.client.tree.PopupContainer;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -16,9 +19,15 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
-		Options.Init();
-		History.addValueChangeHandler(this);
+//		Options.Init();
+//		History.addValueChangeHandler(this);
 //		History.newItem("login");
+		
+//		AbstractNode node = new AbstractNode();
+//		Log.write(node.getName());
+		EcommerceTree tree = new EcommerceTree();
+		tree.config();
+		tree.next();
 	}
 
 	@Override

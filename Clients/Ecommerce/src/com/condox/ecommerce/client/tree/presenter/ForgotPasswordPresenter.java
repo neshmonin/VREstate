@@ -10,25 +10,26 @@ import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
 import com.condox.ecommerce.client.tree.EcommerceTree.State;
+import com.condox.ecommerce.client.tree.node.ForgotPasswordNode;
 import com.condox.ecommerce.client.tree.node.LoginNode;
 import com.google.gwt.user.client.ui.Widget;
 
-public class LoginPresenter implements I_Presenter/*, I_Login*/ {
+public class ForgotPasswordPresenter implements I_Presenter {
 
 	public static interface I_Display extends I_Contained {
-		void setPresenter(LoginPresenter presenter);
+		void setPresenter(ForgotPasswordPresenter presenter);
 
-		String getUserLogin();
+//		String getUserLogin();
 
-		String getUserPassword();
+//		String getUserPassword();
 
 		Widget asWidget();
 	}
 
 	private I_Display display = null;
-	private LoginNode node = null;
+	private ForgotPasswordNode node = null;
 
-	public LoginPresenter(I_Display newDisplay, LoginNode newNode) {
+	public ForgotPasswordPresenter(I_Display newDisplay, ForgotPasswordNode newNode) {
 		display = newDisplay;
 		display.setPresenter(this);
 		node = newNode;
@@ -40,13 +41,14 @@ public class LoginPresenter implements I_Presenter/*, I_Login*/ {
 		container.add((I_Contained)display);
 	}
 
-	private String uid = "";
-	private String pwd = "";
+//	private String uid = "";
+//	private String pwd = "";
 	
 	// Events
 	public void onLogin() {
-		node.setState(NodeStates.Agent);
+		node.setState(NodeStates.Guest);
 		node.next();
+		
 //		uid = display.getUserLogin().trim();
 //		pwd = display.getUserPassword().trim();
 //		EcommerceTree.set(Field.UserLogin, new Data(uid));
@@ -65,10 +67,16 @@ public class LoginPresenter implements I_Presenter/*, I_Login*/ {
 //		User.Login(this, uid, pwd, role);
 	}
 
-	public void onForgotPassword() {
-		node.setState(NodeStates.ForgotPassword);
+	public void onSubmit() {
+		node.setState(NodeStates.Submit);
 		node.next();
 	}
+
+//	public void onForgotPassword() {
+//		node.setState(NodeStates.ForgotPassword);
+//		node.next();
+//	}
+	
 
 //	@Override
 //	public void onLoginSucceed() {

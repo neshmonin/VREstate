@@ -28,10 +28,10 @@ public class LoginModel extends EcommerceTreeNode {
 	private I_Container container = null;
 	@Override
 	public void go(I_Container container) {
-		this.container = container;
-		LoginPresenter presenter = new LoginPresenter(new LoginView(), this);
-		presenter.go(container);
-		super.go(container);
+//		this.container = container;
+//		LoginPresenter presenter = new LoginPresenter(new LoginView(), this);
+//		presenter.go(container);
+//		super.go(container);
 	}
 
 	public void next() {
