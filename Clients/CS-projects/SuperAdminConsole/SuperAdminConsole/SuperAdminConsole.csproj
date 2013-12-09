@@ -181,6 +181,10 @@
     <Content Include="Icon1.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Server\Common\Common.csproj">
+      <Project>{C579EB0B-5B93-4E2B-ABC5-F0B5B1798702}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\Server\vrebo\vrebo.csproj">
       <Project>{60458EA7-5B11-4E8B-8644-4538CD08FAFD}</Project>
       <Name>vrebo</Name>

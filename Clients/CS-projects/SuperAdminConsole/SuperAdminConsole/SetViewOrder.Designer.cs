@@ -70,12 +70,17 @@
             this.label6 = new System.Windows.Forms.Label();
             this.textStreet = new System.Windows.Forms.TextBox();
             this.tabPageViewOrderOptions = new System.Windows.Forms.TabPage();
+            this.label15 = new System.Windows.Forms.Label();
             this.textBoxNote = new System.Windows.Forms.RichTextBox();
-            this.textBoxInfoUrl = new System.Windows.Forms.TextBox();
+            this.textMoreInfoUrl = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.buttonPayment = new System.Windows.Forms.Button();
             this.groupBoxListingOptions = new System.Windows.Forms.GroupBox();
+            this.radioButtonListingTypeRent = new System.Windows.Forms.RadioButton();
+            this.radioButtonListingTypeSale = new System.Windows.Forms.RadioButton();
+            this.richTextBoxListingPrice = new System.Windows.Forms.RichTextBox();
+            this.label16 = new System.Windows.Forms.Label();
             this.textBoxMLS = new System.Windows.Forms.RichTextBox();
             this.labelPercent = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
@@ -87,10 +92,7 @@
             this.labelDays = new System.Windows.Forms.Label();
             this.labelValidFor = new System.Windows.Forms.Label();
             this.labelPrice = new System.Windows.Forms.Label();
-            this.buttonCheckLink = new System.Windows.Forms.Button();
-            this.textExternalLink = new System.Windows.Forms.TextBox();
-            this.radioButtonExternalLink = new System.Windows.Forms.RadioButton();
-            this.radioButtonFloorplan = new System.Windows.Forms.RadioButton();
+            this.textVTourURL = new System.Windows.Forms.TextBox();
             this.tabPageGenerateViewOrder = new System.Windows.Forms.TabPage();
             this.textBox300Chars = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
@@ -219,12 +221,10 @@
             // 
             // radioButtonSharedListing
             // 
-            this.radioButtonSharedListing.Checked = true;
             this.radioButtonSharedListing.Location = new System.Drawing.Point(40, 127);
             this.radioButtonSharedListing.Name = "radioButtonSharedListing";
             this.radioButtonSharedListing.Size = new System.Drawing.Size(419, 47);
             this.radioButtonSharedListing.TabIndex = 1;
-            this.radioButtonSharedListing.TabStop = true;
             this.radioButtonSharedListing.Text = "Public (or Shared) Listing - will be also visible by the users who initially came" +
     " to see one of the neighboring Public Listings";
             this.radioButtonSharedListing.UseVisualStyleBackColor = true;
@@ -233,10 +233,12 @@
             // radioButtonPrivateListing
             // 
             this.radioButtonPrivateListing.AutoSize = true;
+            this.radioButtonPrivateListing.Checked = true;
             this.radioButtonPrivateListing.Location = new System.Drawing.Point(40, 75);
             this.radioButtonPrivateListing.Name = "radioButtonPrivateListing";
             this.radioButtonPrivateListing.Size = new System.Drawing.Size(291, 17);
             this.radioButtonPrivateListing.TabIndex = 0;
+            this.radioButtonPrivateListing.TabStop = true;
             this.radioButtonPrivateListing.Text = "Private Listing - the only listing  user can see and explore";
             this.radioButtonPrivateListing.UseVisualStyleBackColor = true;
             this.radioButtonPrivateListing.CheckedChanged += new System.EventHandler(this.updateStateEvent);
@@ -318,6 +320,7 @@
             this.comboBoxCity.FormattingEnabled = true;
             this.comboBoxCity.Items.AddRange(new object[] {
             "Toronto",
+            "Mississauga",
             "New York",
             "Orlando",
             "- empty addresses -"});
@@ -553,18 +556,29 @@
             // tabPageViewOrderOptions
             // 
             this.tabPageViewOrderOptions.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPageViewOrderOptions.Controls.Add(this.label15);
             this.tabPageViewOrderOptions.Controls.Add(this.textBoxNote);
-            this.tabPageViewOrderOptions.Controls.Add(this.textBoxInfoUrl);
+            this.tabPageViewOrderOptions.Controls.Add(this.textMoreInfoUrl);
             this.tabPageViewOrderOptions.Controls.Add(this.label12);
             this.tabPageViewOrderOptions.Controls.Add(this.label11);
             this.tabPageViewOrderOptions.Controls.Add(this.buttonPayment);
             this.tabPageViewOrderOptions.Controls.Add(this.groupBoxListingOptions);
+            this.tabPageViewOrderOptions.Controls.Add(this.textVTourURL);
             this.tabPageViewOrderOptions.Location = new System.Drawing.Point(4, 22);
             this.tabPageViewOrderOptions.Name = "tabPageViewOrderOptions";
             this.tabPageViewOrderOptions.Padding = new System.Windows.Forms.Padding(3);
             this.tabPageViewOrderOptions.Size = new System.Drawing.Size(501, 328);
             this.tabPageViewOrderOptions.TabIndex = 1;
             this.tabPageViewOrderOptions.Text = "Options";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(9, 134);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(86, 13);
+            this.label15.TabIndex = 6;
+            this.label15.Text = "Virtual Tour URL";
             // 
             // textBoxNote
             // 
@@ -580,20 +594,20 @@
             this.textBoxNote.Text = "";
             this.textBoxNote.TextChanged += new System.EventHandler(this.updateStateEvent);
             // 
-            // textBoxInfoUrl
+            // textMoreInfoUrl
             // 
-            this.textBoxInfoUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textMoreInfoUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxInfoUrl.Location = new System.Drawing.Point(96, 167);
-            this.textBoxInfoUrl.Name = "textBoxInfoUrl";
-            this.textBoxInfoUrl.Size = new System.Drawing.Size(380, 20);
-            this.textBoxInfoUrl.TabIndex = 5;
-            this.textBoxInfoUrl.TextChanged += new System.EventHandler(this.updateStateEvent);
+            this.textMoreInfoUrl.Location = new System.Drawing.Point(96, 163);
+            this.textMoreInfoUrl.Name = "textMoreInfoUrl";
+            this.textMoreInfoUrl.Size = new System.Drawing.Size(384, 20);
+            this.textMoreInfoUrl.TabIndex = 5;
+            this.textMoreInfoUrl.TextChanged += new System.EventHandler(this.updateStateEvent);
             // 
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(13, 172);
+            this.label12.Location = new System.Drawing.Point(13, 168);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(77, 13);
             this.label12.TabIndex = 4;
@@ -612,18 +626,23 @@
             // 
             this.buttonPayment.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonPayment.BackColor = System.Drawing.SystemColors.Control;
             this.buttonPayment.Location = new System.Drawing.Point(175, 288);
             this.buttonPayment.Name = "buttonPayment";
             this.buttonPayment.Size = new System.Drawing.Size(172, 23);
             this.buttonPayment.TabIndex = 2;
             this.buttonPayment.Text = "Payment...";
-            this.buttonPayment.UseVisualStyleBackColor = true;
+            this.buttonPayment.UseVisualStyleBackColor = false;
             this.buttonPayment.Click += new System.EventHandler(this.buttonPayment_Click);
             // 
             // groupBoxListingOptions
             // 
             this.groupBoxListingOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBoxListingOptions.Controls.Add(this.radioButtonListingTypeRent);
+            this.groupBoxListingOptions.Controls.Add(this.radioButtonListingTypeSale);
+            this.groupBoxListingOptions.Controls.Add(this.richTextBoxListingPrice);
+            this.groupBoxListingOptions.Controls.Add(this.label16);
             this.groupBoxListingOptions.Controls.Add(this.textBoxMLS);
             this.groupBoxListingOptions.Controls.Add(this.labelPercent);
             this.groupBoxListingOptions.Controls.Add(this.label9);
@@ -635,22 +654,63 @@
             this.groupBoxListingOptions.Controls.Add(this.labelDays);
             this.groupBoxListingOptions.Controls.Add(this.labelValidFor);
             this.groupBoxListingOptions.Controls.Add(this.labelPrice);
-            this.groupBoxListingOptions.Controls.Add(this.buttonCheckLink);
-            this.groupBoxListingOptions.Controls.Add(this.textExternalLink);
-            this.groupBoxListingOptions.Controls.Add(this.radioButtonExternalLink);
-            this.groupBoxListingOptions.Controls.Add(this.radioButtonFloorplan);
             this.groupBoxListingOptions.Location = new System.Drawing.Point(9, 6);
             this.groupBoxListingOptions.Name = "groupBoxListingOptions";
-            this.groupBoxListingOptions.Size = new System.Drawing.Size(477, 151);
+            this.groupBoxListingOptions.Size = new System.Drawing.Size(477, 91);
             this.groupBoxListingOptions.TabIndex = 1;
             this.groupBoxListingOptions.TabStop = false;
             this.groupBoxListingOptions.Text = "Listing Options";
+            // 
+            // radioButtonListingTypeRent
+            // 
+            this.radioButtonListingTypeRent.AutoSize = true;
+            this.radioButtonListingTypeRent.Location = new System.Drawing.Point(234, 22);
+            this.radioButtonListingTypeRent.Name = "radioButtonListingTypeRent";
+            this.radioButtonListingTypeRent.Size = new System.Drawing.Size(48, 17);
+            this.radioButtonListingTypeRent.TabIndex = 28;
+            this.radioButtonListingTypeRent.Text = "Rent";
+            this.radioButtonListingTypeRent.UseVisualStyleBackColor = true;
+            this.radioButtonListingTypeRent.CheckedChanged += new System.EventHandler(this.radioButtonListingTypeRent_CheckedChanged);
+            // 
+            // radioButtonListingTypeSale
+            // 
+            this.radioButtonListingTypeSale.AutoSize = true;
+            this.radioButtonListingTypeSale.Checked = true;
+            this.radioButtonListingTypeSale.Location = new System.Drawing.Point(182, 22);
+            this.radioButtonListingTypeSale.Name = "radioButtonListingTypeSale";
+            this.radioButtonListingTypeSale.Size = new System.Drawing.Size(46, 17);
+            this.radioButtonListingTypeSale.TabIndex = 27;
+            this.radioButtonListingTypeSale.TabStop = true;
+            this.radioButtonListingTypeSale.Text = "Sale";
+            this.radioButtonListingTypeSale.UseVisualStyleBackColor = true;
+            this.radioButtonListingTypeSale.CheckedChanged += new System.EventHandler(this.radioButtonListingTypeSale_CheckedChanged);
+            // 
+            // richTextBoxListingPrice
+            // 
+            this.richTextBoxListingPrice.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.richTextBoxListingPrice.EnableAutoDragDrop = true;
+            this.richTextBoxListingPrice.Location = new System.Drawing.Point(384, 20);
+            this.richTextBoxListingPrice.Multiline = false;
+            this.richTextBoxListingPrice.Name = "richTextBoxListingPrice";
+            this.richTextBoxListingPrice.Size = new System.Drawing.Size(77, 21);
+            this.richTextBoxListingPrice.TabIndex = 26;
+            this.richTextBoxListingPrice.Text = "";
+            // 
+            // label16
+            // 
+            this.label16.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(324, 23);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(59, 13);
+            this.label16.TabIndex = 25;
+            this.label16.Text = "Price/Rent";
             // 
             // textBoxMLS
             // 
             this.textBoxMLS.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxMLS.EnableAutoDragDrop = true;
-            this.textBoxMLS.Location = new System.Drawing.Point(371, 13);
+            this.textBoxMLS.Location = new System.Drawing.Point(44, 20);
             this.textBoxMLS.Multiline = false;
             this.textBoxMLS.Name = "textBoxMLS";
             this.textBoxMLS.Size = new System.Drawing.Size(100, 21);
@@ -662,7 +722,7 @@
             // 
             this.labelPercent.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelPercent.AutoSize = true;
-            this.labelPercent.Location = new System.Drawing.Point(379, 124);
+            this.labelPercent.Location = new System.Drawing.Point(381, 59);
             this.labelPercent.Name = "labelPercent";
             this.labelPercent.Size = new System.Drawing.Size(24, 13);
             this.labelPercent.TabIndex = 23;
@@ -672,7 +732,7 @@
             // 
             this.label9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(333, 16);
+            this.label9.Location = new System.Drawing.Point(6, 23);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(36, 13);
             this.label9.TabIndex = 3;
@@ -682,7 +742,7 @@
             // 
             this.labelTax.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelTax.AutoSize = true;
-            this.labelTax.Location = new System.Drawing.Point(313, 124);
+            this.labelTax.Location = new System.Drawing.Point(315, 59);
             this.labelTax.Name = "labelTax";
             this.labelTax.Size = new System.Drawing.Size(31, 13);
             this.labelTax.TabIndex = 22;
@@ -691,7 +751,7 @@
             // numericUpDownTax
             // 
             this.numericUpDownTax.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.numericUpDownTax.Location = new System.Drawing.Point(344, 121);
+            this.numericUpDownTax.Location = new System.Drawing.Point(346, 56);
             this.numericUpDownTax.Maximum = new decimal(new int[] {
             25,
             0,
@@ -712,7 +772,7 @@
             this.textBoxTotal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxTotal.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.textBoxTotal.ForeColor = System.Drawing.Color.Black;
-            this.textBoxTotal.Location = new System.Drawing.Point(407, 122);
+            this.textBoxTotal.Location = new System.Drawing.Point(409, 57);
             this.textBoxTotal.Name = "textBoxTotal";
             this.textBoxTotal.ReadOnly = true;
             this.textBoxTotal.Size = new System.Drawing.Size(52, 20);
@@ -723,7 +783,7 @@
             // 
             this.numericUpDownPrice.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.numericUpDownPrice.DecimalPlaces = 2;
-            this.numericUpDownPrice.Location = new System.Drawing.Point(244, 121);
+            this.numericUpDownPrice.Location = new System.Drawing.Point(246, 56);
             this.numericUpDownPrice.Name = "numericUpDownPrice";
             this.numericUpDownPrice.Size = new System.Drawing.Size(67, 20);
             this.numericUpDownPrice.TabIndex = 18;
@@ -732,7 +792,7 @@
             // 
             // numericUpDownDaysValid
             // 
-            this.numericUpDownDaysValid.Location = new System.Drawing.Point(62, 121);
+            this.numericUpDownDaysValid.Location = new System.Drawing.Point(64, 56);
             this.numericUpDownDaysValid.Maximum = new decimal(new int[] {
             365,
             0,
@@ -757,7 +817,7 @@
             // labelDays
             // 
             this.labelDays.AutoSize = true;
-            this.labelDays.Location = new System.Drawing.Point(108, 125);
+            this.labelDays.Location = new System.Drawing.Point(110, 60);
             this.labelDays.Name = "labelDays";
             this.labelDays.Size = new System.Drawing.Size(29, 13);
             this.labelDays.TabIndex = 16;
@@ -766,7 +826,7 @@
             // labelValidFor
             // 
             this.labelValidFor.AutoSize = true;
-            this.labelValidFor.Location = new System.Drawing.Point(13, 125);
+            this.labelValidFor.Location = new System.Drawing.Point(15, 60);
             this.labelValidFor.Name = "labelValidFor";
             this.labelValidFor.Size = new System.Drawing.Size(45, 13);
             this.labelValidFor.TabIndex = 15;
@@ -776,57 +836,20 @@
             // 
             this.labelPrice.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelPrice.AutoSize = true;
-            this.labelPrice.Location = new System.Drawing.Point(194, 124);
+            this.labelPrice.Location = new System.Drawing.Point(188, 59);
             this.labelPrice.Name = "labelPrice";
-            this.labelPrice.Size = new System.Drawing.Size(49, 13);
+            this.labelPrice.Size = new System.Drawing.Size(59, 13);
             this.labelPrice.TabIndex = 13;
-            this.labelPrice.Text = "Price ($):";
+            this.labelPrice.Text = "To Pay ($):";
             // 
-            // buttonCheckLink
+            // textVTourURL
             // 
-            this.buttonCheckLink.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCheckLink.Enabled = false;
-            this.buttonCheckLink.Location = new System.Drawing.Point(274, 47);
-            this.buttonCheckLink.Name = "buttonCheckLink";
-            this.buttonCheckLink.Size = new System.Drawing.Size(197, 22);
-            this.buttonCheckLink.TabIndex = 11;
-            this.buttonCheckLink.Text = "Validate this Link Now...";
-            this.buttonCheckLink.UseVisualStyleBackColor = true;
-            this.buttonCheckLink.Click += new System.EventHandler(this.buttonCheckLink_Click);
-            // 
-            // textExternalLink
-            // 
-            this.textExternalLink.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textVTourURL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textExternalLink.Location = new System.Drawing.Point(39, 75);
-            this.textExternalLink.Name = "textExternalLink";
-            this.textExternalLink.Size = new System.Drawing.Size(432, 20);
-            this.textExternalLink.TabIndex = 10;
-            this.textExternalLink.TextChanged += new System.EventHandler(this.textExternalLink_TextChanged);
-            // 
-            // radioButtonExternalLink
-            // 
-            this.radioButtonExternalLink.AutoSize = true;
-            this.radioButtonExternalLink.Location = new System.Drawing.Point(19, 54);
-            this.radioButtonExternalLink.Name = "radioButtonExternalLink";
-            this.radioButtonExternalLink.Size = new System.Drawing.Size(104, 17);
-            this.radioButtonExternalLink.TabIndex = 9;
-            this.radioButtonExternalLink.Text = "Virtual Tour URL";
-            this.radioButtonExternalLink.UseVisualStyleBackColor = true;
-            this.radioButtonExternalLink.CheckedChanged += new System.EventHandler(this.radioButtonExternalLink_CheckedChanged);
-            // 
-            // radioButtonFloorplan
-            // 
-            this.radioButtonFloorplan.AutoSize = true;
-            this.radioButtonFloorplan.Checked = true;
-            this.radioButtonFloorplan.Location = new System.Drawing.Point(19, 26);
-            this.radioButtonFloorplan.Name = "radioButtonFloorplan";
-            this.radioButtonFloorplan.Size = new System.Drawing.Size(72, 17);
-            this.radioButtonFloorplan.TabIndex = 8;
-            this.radioButtonFloorplan.TabStop = true;
-            this.radioButtonFloorplan.Text = "Floor Plan";
-            this.radioButtonFloorplan.UseVisualStyleBackColor = true;
-            this.radioButtonFloorplan.CheckedChanged += new System.EventHandler(this.updateStateEvent);
+            this.textVTourURL.Location = new System.Drawing.Point(96, 131);
+            this.textVTourURL.Name = "textVTourURL";
+            this.textVTourURL.Size = new System.Drawing.Size(384, 20);
+            this.textVTourURL.TabIndex = 10;
             // 
             // tabPageGenerateViewOrder
             // 
@@ -966,10 +989,7 @@
         private System.Windows.Forms.Label labelDays;
         private System.Windows.Forms.Label labelValidFor;
         private System.Windows.Forms.Label labelPrice;
-        private System.Windows.Forms.Button buttonCheckLink;
-        private System.Windows.Forms.TextBox textExternalLink;
-        private System.Windows.Forms.RadioButton radioButtonExternalLink;
-        private System.Windows.Forms.RadioButton radioButtonFloorplan;
+        private System.Windows.Forms.TextBox textVTourURL;
         private System.Windows.Forms.TabPage tabPageCheckAddress;
         private System.Windows.Forms.TabControl tabControlAddressPicking;
         private System.Windows.Forms.TabPage tabPagePick;
@@ -1002,7 +1022,7 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox textBox300Chars;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.TextBox textBoxInfoUrl;
+        private System.Windows.Forms.TextBox textMoreInfoUrl;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.RichTextBox textBoxNote;
@@ -1015,5 +1035,10 @@
         private System.Windows.Forms.RadioButton radioButtonPrivateListing;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Button buttonOneMore;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.RichTextBox richTextBoxListingPrice;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.RadioButton radioButtonListingTypeRent;
+        private System.Windows.Forms.RadioButton radioButtonListingTypeSale;
     }
 }

@@ -25,22 +25,25 @@ namespace SuperAdminConsole
 
         private ListViewColumnSorter lvwColumnSorter;
 
-        const string DEFAULT = @"http://3rdpartylink.com";
+        const string DEFAULT = "";
         bool viewOrderUrlGenerated = false;
         bool emailSent = false;
         bool paymentSkip = false;
         public string paymentRefId { private set; get; }
-        public string validatedUrl = string.Empty;
 
-        bool initialFloorPlanOption;
-        string initialExternalLinkOption;
-        string initialMlsUrl;
+        string initialVTourURL;
+        string initialMoreInfoUrl;
         string initialNote;
         string initialMLS;
 
         public string ViewOrderPrice
         {
             get { return string.Format("${0:0.00}", numericUpDownPrice.Value); }
+        }
+
+        public string ListingPrice
+        {
+            get { return string.Format("${0:0.00}", richTextBoxListingPrice.Text); }
         }
 
         public string Tax
@@ -54,6 +57,11 @@ namespace SuperAdminConsole
             {
                 return string.Format("${0:0.00}", TotalToBill);
             }
+        }
+
+        public bool ListingForSale
+        {
+            get { return radioButtonListingTypeSale.Checked;  }
         }
 
         public decimal TotalToBill
@@ -85,19 +93,19 @@ namespace SuperAdminConsole
 
             cleanUp();
 
-            textExternalLink.Text = DEFAULT;
-            textExternalLink.GotFocus += (sender, e) =>
+            textVTourURL.Text = DEFAULT;
+            textVTourURL.GotFocus += (sender, e) =>
             {
-                if (textExternalLink.Text.Equals(DEFAULT))
+                if (textVTourURL.Text.Equals(DEFAULT))
                 {
-                    textExternalLink.Text = @"http://";
-                    textExternalLink.SelectionStart = DEFAULT.Length;
+                    textVTourURL.Text = @"http://";
+                    textVTourURL.SelectionStart = DEFAULT.Length;
                 }
             };
-            textExternalLink.LostFocus += (sender, e) =>
+            textVTourURL.LostFocus += (sender, e) =>
             {
-                if (textExternalLink.Text.Trim().Length == 0 || textExternalLink.Text == @"http://")
-                    textExternalLink.Text = DEFAULT;
+                if (textVTourURL.Text.Trim().Length == 0 || textVTourURL.Text == @"http://")
+                    textVTourURL.Text = DEFAULT;
             };
 
 
@@ -107,17 +115,12 @@ namespace SuperAdminConsole
                 tabControlSteps.SelectTab("tabPageViewOrderOptions");
                 addressVerified = true;
                 ViewOrder.ViewOrderOptions options = theOrder.GetProperty<ViewOrder.ViewOrderOptions>("options", ViewOrder.ViewOrderOptions.FloorPlan);
-                if (options == ViewOrder.ViewOrderOptions.FloorPlan)
-                    radioButtonFloorplan.Checked = true;
-                else
-                {
-                    radioButtonExternalLink.Checked = true;
-                    textExternalLink.Text = theOrder["vTourUrl"] as string;
-                    validatedUrl = textExternalLink.Text;
-                }
+                if (options != ViewOrder.ViewOrderOptions.FloorPlan)
+                    textVTourURL.Text = theOrder["vTourUrl"] as string;
+
                 PostalAddress = theOrder.GetProperty("label", string.Empty);
                 textBoxMLS.Text = theOrder.GetProperty("mlsId", string.Empty);
-                textBoxInfoUrl.Text = theOrder.GetProperty("infoUrl", string.Empty);
+                textMoreInfoUrl.Text = theOrder.GetProperty("infoUrl", string.Empty);
                 textBoxNote.Text = theOrder.GetProperty("note", string.Empty);
             }
 
@@ -162,16 +165,15 @@ namespace SuperAdminConsole
             theUser = user;
             comboBoxCountry.SelectedIndex = 0;
 
-            initialFloorPlanOption = radioButtonFloorplan.Checked;
-            initialExternalLinkOption = textExternalLink.Text;
+            initialVTourURL = textVTourURL.Text;
+            initialMoreInfoUrl = textMoreInfoUrl.Text;
             initialMLS = textBoxMLS.Text;
-            initialMlsUrl = textBoxInfoUrl.Text;
             initialNote = textBoxNote.Text;
 
             lvwColumnSorter = new ListViewColumnSorter();
             listViewAddresses.ListViewItemSorter = lvwColumnSorter;
             textBoxMLS.ReadOnly = theReason != ChangeReason.Creation;
-            textBoxInfoUrl.ReadOnly = theReason != ChangeReason.Creation;
+            textMoreInfoUrl.ReadOnly = theReason != ChangeReason.Creation;
             //textBoxNote.Visible = theReason == ChangeReason.Creation;
             label11.Visible = theReason == ChangeReason.Creation;
 
@@ -180,8 +182,10 @@ namespace SuperAdminConsole
 
         private bool haveOptionsChanged()
         {
-            return initialFloorPlanOption != radioButtonFloorplan.Checked ||
-                   initialExternalLinkOption != textExternalLink.Text;
+            return initialVTourURL != textVTourURL.Text ||
+                   initialMoreInfoUrl != textMoreInfoUrl.Text ||
+                   initialMLS != textBoxMLS.Text ||
+                   initialNote != textBoxNote.Text;
         }
 
         private string generateTitle()
@@ -220,6 +224,7 @@ namespace SuperAdminConsole
                     buttonNext.Enabled = true;
                     buttonFinish.Enabled = false;
                     buttonOneMore.Visible = false;
+                    buttonCancel.Visible = true;
                     break;
                 case "Address":
                     buttonPrev.Visible = true;
@@ -228,6 +233,7 @@ namespace SuperAdminConsole
                     buttonCheckAddress.Enabled = !addressVerified;
                     buttonFinish.Enabled = false;
                     buttonOneMore.Visible = false;
+                    buttonCancel.Visible = true;
                     break;
                 case "Options":
                     groupBoxListingOptions.Visible = radioButtonPrivateListing.Checked || 
@@ -240,33 +246,26 @@ namespace SuperAdminConsole
                     buttonPrev.Visible = paymentRefId == string.Empty && theReason == ChangeReason.Creation;
                     buttonNext.Enabled = paymentRefId != string.Empty || paymentSkip;
                     buttonNext.Visible = theReason == ChangeReason.Creation;
-                    buttonCancel.Visible = paymentRefId == string.Empty;
                     buttonFinish.Visible = true;
 
                     if (theReason == ChangeReason.Update)
                     {
                         buttonPayment.Enabled = haveOptionsChanged() && 
                                                 numericUpDownPrice.Value > 0M &&
-                                                paymentRefId == string.Empty &&
-                                                    (radioButtonFloorplan.Checked ||
-                                                            (validatedUrl != string.Empty &&
-                                                             validatedUrl == textExternalLink.Text));
+                                                paymentRefId == string.Empty;
 
                         buttonFinish.Enabled =  haveOptionsChanged() && 
                                                   (paymentRefId != string.Empty ||
                                                    numericUpDownPrice.Value == 0M) ||
                                                 initialMLS != textBoxMLS.Text ||
-                                                initialMlsUrl != textBoxInfoUrl.Text ||
+                                                initialMoreInfoUrl != textMoreInfoUrl.Text ||
                                                 initialNote != textBoxNote.Text;
                     }
                     else
                     {
                         buttonPayment.Enabled = !paymentSkip &&
                                                 numericUpDownPrice.Value > 0M &&
-                                                 paymentRefId == string.Empty &&
-                                                    (radioButtonFloorplan.Checked ||
-                                                            (validatedUrl != string.Empty &&
-                                                             validatedUrl == textExternalLink.Text));
+                                                 paymentRefId == string.Empty;
                         buttonFinish.Enabled = theReason == ChangeReason.Transfer;
                     }
 
@@ -277,14 +276,7 @@ namespace SuperAdminConsole
                     labelPercent.Visible = numericUpDownPrice.Value != 0.00M;
                     textBoxTotal.Visible = numericUpDownPrice.Value != 0.00M;
 
-                    textExternalLink.Enabled = radioButtonExternalLink.Checked;
                     numericUpDownPrice.Enabled = true;
-                    buttonCheckLink.Enabled = textExternalLink.Enabled &&
-                                              textExternalLink.Text.ToLower().Contains("http") &&
-                                              textExternalLink.Text.ToLower().Contains(@"://") &&
-                                              textExternalLink.Text.Length > 8 &&
-                                              textExternalLink.Text.Contains(".") &&
-                                              validatedUrl != textExternalLink.Text;
 
                     textBoxTotal.Text = ViewOrderPriceWithTax;
                     buttonCancel.Visible = paymentRefId == string.Empty;
@@ -455,8 +447,8 @@ namespace SuperAdminConsole
                 {
                     string noteParam = string.IsNullOrEmpty(textBoxNote.Text) ? "" :
                                 "note=\"" + HttpUtility.UrlEncodeUnicode(textBoxNote.Text) + "\"&";
-                    string infoUrlParam = string.IsNullOrEmpty(textBoxInfoUrl.Text) ? "" :
-                                "mls_url=\"" + HttpUtility.UrlEncodeUnicode(textBoxInfoUrl.Text) + "\"&";
+                    string infoUrlParam = string.IsNullOrEmpty(textMoreInfoUrl.Text) ? "" :
+                                "mls_url=\"" + HttpUtility.UrlEncodeUnicode(textMoreInfoUrl.Text) + "\"&";
                     parameters = string.Format("q=register&entity=viewOrder&product=b3dl&" +
                                                "ownerId={0}&" +
                                                "{1}" +
@@ -482,23 +474,25 @@ namespace SuperAdminConsole
                                                "ownerId={0}&" +
                                                "{1}" +
                                                "daysValid={2}&" +
-                                               "product={10}&" +
-                                               "options={3}" +
-                                               "{4}&" +
-                                               "mls_id={7}&" +
-                                               "mls_url={8}&" +
-                                               "note=\"{9}\"&" +
-                                               "propertyType={5}&" +
-                                               "propertyId={6}",
-                                               theUser.AutoID,
+                                               "product={9}&" +
+                                               "options={3}&" +
+                                               "mls_id={6}&" +
+                                               "mls_url={7}&" +
+                                               "note=\"{8}\"&" +
+                                               "propertyType={4}&" +
+                                               "propertyId={5}",
+                                               theUser.AutoID + (theUser.UserRole != User.Role.SuperAdmin ?
+                                                                        "&ed=" + theUser.EstateDeveloperID : 
+                                                                        string.Empty),
                                                numericUpDownPrice.Value == 0 ? "" : "pr=" + paymentRefId + "&",
                                                DaysValid,
-                                               radioButtonFloorplan.Checked ? "fp" : "evt",
-                                               radioButtonExternalLink.Checked ? "&evt_url=" + HttpUtility.UrlEncodeUnicode(textExternalLink.Text) : string.Empty,
+                                               textVTourURL.Text == string.Empty ? "fp" :
+                                                    "evt&evt_url=" + HttpUtility.UrlEncodeUnicode(textVTourURL.Text),
                                                PropertyType,
                                                PropertyID,
                                                textBoxMLS.Text,
-                                               string.IsNullOrEmpty(textBoxInfoUrl.Text) ? "" : HttpUtility.UrlEncodeUnicode(textBoxInfoUrl.Text),
+                                               string.IsNullOrEmpty(textMoreInfoUrl.Text) ? "" : 
+                                                    HttpUtility.UrlEncodeUnicode(textMoreInfoUrl.Text),
                                                HttpUtility.UrlEncodeUnicode(textBoxNote.Text),
                                                product);
                 }
@@ -535,56 +529,32 @@ namespace SuperAdminConsole
                 Clipboard.SetText(ViewOrderURL);
 
                 string the300xgars = Properties.Settings.Default.the300charsTemplate;
-                textBox300Chars.Text = string.Format(the300xgars, 
-                                                        ViewOrderURL,
-                                                        DaysValid,
-                                                        Properties.Settings.Default.PriceOf3DListing);
+                textBox300Chars.Text = PreprocessTemplate(the300xgars);
             }
             UpdateState();
+        }
+
+        private string PreprocessTemplate(string body)
+        {
+            if (body.Contains("{VIEWORDER_ADDRESS}"))
+                body = body.Replace("{VIEWORDER_ADDRESS}", this.PostalAddress);
+            if (body.Contains("{VIEWORDER_URL}"))
+                body = body.Replace("{VIEWORDER_URL}", ViewOrderURL);
+            if (body.Contains("{DAYS_VALID}"))
+                body = body.Replace("{DAYS_VALID}", DaysValid.ToString());
+            if (body.Contains("{MLS_NUMBER}"))
+                body = body.Replace("{MLS_NUMBER}", MlsNum);
+            if (body.Contains("{PRICE_NO_TAX}"))
+                body = body.Replace("{PRICE_NO_TAX}", Properties.Settings.Default.PriceOf3DListing.ToString());
+            return body;
         }
 
         public string ViewOrderID { private set; get; }
         public string ViewOrderURL { private set; get; }
 
-        private void radioButtonExternalLink_CheckedChanged(object sender, EventArgs e)
+        private void radioButtonVTourURL_CheckedChanged(object sender, EventArgs e)
         {
-            textExternalLink.Focus();
-            UpdateState();
-        }
-
-        private void textExternalLink_TextChanged(object sender, EventArgs e)
-        {
-            validatedUrl = string.Empty;
-            UpdateState();
-        }
-
-        private void buttonCheckLink_Click(object sender, EventArgs e)
-        {
-            Cursor.Current = Cursors.WaitCursor;
-            try
-            {
-                //Creating the HttpWebRequest
-                HttpWebRequest request = WebRequest.Create(textExternalLink.Text) as HttpWebRequest;
-                //Setting the Request method HEAD, you can also use GET too.
-                request.Method = "HEAD";
-                //Getting the Web Response.
-                HttpWebResponse response = request.GetResponse() as HttpWebResponse;
-                //Returns TURE if the Status code == 200
-                if (response.StatusCode == HttpStatusCode.OK)
-                    validatedUrl = textExternalLink.Text;
-            }
-            catch (Exception exception)
-            {
-                //Any exception will returns false.
-                string error = string.Format("The provided External Link cannot be validated. \nError \'{0}\'",
-                    exception.Message);
-                MessageBox.Show(error, "Cannot Validate the Link Provided", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-                validatedUrl = string.Empty;
-                textExternalLink.Focus();
-                textExternalLink.SelectionStart = 7;
-                textExternalLink.SelectionLength = int.MaxValue;
-            }
-            Cursor.Current = Cursors.Default;
+            textVTourURL.Focus();
             UpdateState();
         }
 
@@ -619,14 +589,15 @@ namespace SuperAdminConsole
 
             if (theReason != ChangeReason.Creation)
             {
-                ViewOrder.ViewOrderOptions options = radioButtonFloorplan.Checked ? ViewOrder.ViewOrderOptions.FloorPlan :
-                                                                                    ViewOrder.ViewOrderOptions.ExternalTour;
+                ViewOrder.ViewOrderOptions options = 
+                    textVTourURL.Text == string.Empty ? ViewOrder.ViewOrderOptions.FloorPlan :
+                                                        ViewOrder.ViewOrderOptions.ExternalTour;
                 //bool changed = false;
                 //theOrder.UpdateProperty("options", options, ref changed);
                 theOrder["options"] = (int)options;
-                theOrder["vTourUrl"] = radioButtonExternalLink.Checked ? textExternalLink.Text : string.Empty;
+                theOrder["vTourUrl"] = textVTourURL.Text;
                 theOrder["mlsId"] = textBoxMLS.Text;
-                theOrder["infoUrl"] = textBoxInfoUrl.Text;
+                theOrder["infoUrl"] = textMoreInfoUrl.Text;
                 theOrder["note"] = textBoxNote.Text;
             }
 
@@ -814,9 +785,23 @@ namespace SuperAdminConsole
                 return;
 
             textUnitNo.Text = objSrc.Suite.SuiteName;
+            ClientData suiteCD = objSrc.Suite.GetClientData();
+            textBoxMLS.Text = objSrc.MLS;
+            textVTourURL.Text = objSrc.VTourURL;
+            textMoreInfoUrl.Text = objSrc.MoreInfoURL;
             PostalAddress = objSrc.PostalAddress;
             PropertyType = "suite";
             PropertyID = objSrc.Suite.AutoID;
+            richTextBoxListingPrice.Text = objSrc.Suite.CurrentPrice.HasValue ? objSrc.Suite.CurrentPrice.Value.ToString() : string.Empty;
+            switch (objSrc.Suite.Status)
+            {
+                case Vre.Server.BusinessLogic.Suite.SalesStatus.AvailableRent:
+                    radioButtonListingTypeRent.Checked = true;
+                    break;
+                default:
+                    radioButtonListingTypeSale.Checked = true;
+                    break;
+            }
 
             addressVerified = true;
             tabControlSteps.SelectedIndex = tabControlSteps.SelectedIndex + 1;
@@ -888,24 +873,32 @@ namespace SuperAdminConsole
         private void cleanUp()
         {
             textBoxMLS.Text = string.Empty;
-            textBoxInfoUrl.Text = string.Empty;
+            textMoreInfoUrl.Text = string.Empty;
             textBoxNote.Text = string.Empty;
-            textExternalLink.Text = string.Empty;
+            textVTourURL.Text = string.Empty;
             textBoxViewOrderURL.Text = string.Empty;
             textBox300Chars.Text = string.Empty;
-            radioButtonFloorplan.Checked = true;
+            richTextBoxListingPrice.Text = string.Empty;
             theOrder = null;
             viewOrderUrlGenerated = false;
-            validatedUrl = string.Empty;
             if (m_developer.Name == "Demo")
             {
-                radioButtonExternalLink.Checked = true;
-                textExternalLink.Text = "https://vrt.3dcondox.com/templates/images/Demo-VIRTUALTOUR.png";
-                textBoxInfoUrl.Text = "https://vrt.3dcondox.com/templates/images/Demo-REALTOR_CA.png";
+                textVTourURL.Text = "https://vrt.3dcondox.com/templates/images/Demo-VIRTUALTOUR.png";
+                textMoreInfoUrl.Text = "https://vrt.3dcondox.com/templates/images/Demo-REALTOR_CA.png";
                 numericUpDownDaysValid.Maximum = 3651;
                 numericUpDownDaysValid.Value = 3650;
                 numericUpDownPrice.Value = 0;
             }
+        }
+
+        private void radioButtonListingTypeSale_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateState();
+        }
+
+        private void radioButtonListingTypeRent_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateState();
         }
 
     }
