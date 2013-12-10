@@ -2,23 +2,23 @@ package com.condox.ecommerce.client.tree.presenter;
 
 import com.condox.clientshared.communication.I_Login;
 import com.condox.clientshared.communication.User;
+import com.condox.clientshared.communication.User.UserRole;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
-import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
-import com.condox.ecommerce.client.tree.EcommerceTree.State;
 import com.condox.ecommerce.client.tree.node.LoginNode;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 
-public class LoginPresenter implements I_Presenter/*, I_Login*/ {
+public class LoginPresenter implements I_Presenter, I_Login {
 
 	public static interface I_Display extends I_Contained {
 		void setPresenter(LoginPresenter presenter);
 
-		String getUserLogin();
+		String getUserEmail();
 
 		String getUserPassword();
 
@@ -40,47 +40,45 @@ public class LoginPresenter implements I_Presenter/*, I_Login*/ {
 		container.add((I_Contained)display);
 	}
 
-	private String uid = "";
-	private String pwd = "";
-	
 	// Events
 	public void onLogin() {
-		node.setState(NodeStates.Agent);
-		node.next();
-//		uid = display.getUserLogin().trim();
-//		pwd = display.getUserPassword().trim();
-//		EcommerceTree.set(Field.UserLogin, new Data(uid));
-//		EcommerceTree.set(Field.UserPassword, new Data(pwd));
-//		
-////		if (!model.isValid()) {
-////			Window.alert("Not valid! Please, check and try again!");
-////			return;
-////		}
-//		
-//		User.UserRole role = User.UserRole.Agent;
-//		if ((uid == null || uid.isEmpty()) ||
-//			("web".equalsIgnoreCase(uid) && "web".equalsIgnoreCase(pwd)))
-//			role = User.UserRole.Visitor;
-//
-//		User.Login(this, uid, pwd, role);
+//		node.setState(NodeStates.Agent);
+//		node.next();
+		String email = display.getUserEmail().trim();
+		String password = display.getUserPassword().trim();
+		
+		// TODO for developing only
+		email = "adminan";
+		password = "smelatoronto";
+		User.Login(this, email, password, UserRole.SuperAdmin);
 	}
 
 	public void onForgotPassword() {
+		String email = display.getUserEmail().trim();
+		String password = display.getUserPassword().trim();
+		node.setData(Field.UserEmail, new Data(email));
+		node.setData(Field.UserPassword, new Data(password));
 		node.setState(NodeStates.ForgotPassword);
 		node.next();
 	}
 
-//	@Override
-//	public void onLoginSucceed() {
-////		if (("web".equalsIgnoreCase(uid)) && ("web".equalsIgnoreCase(pwd)))
-////			EcommerceTree.transitState(State.Guest);
-////		else
-////			EcommerceTree.transitState(State.Agent);
-////		EcommerceTree.set(Field.UserId, new Data(User.id));
-////		
-////		model.next();
-//	}
-//
-//	@Override
-//	public void onLoginFailed(Throwable exception) {}
+	public void onLoginSucceed() {
+//		String mail = display.getUserEmail();
+//		String password = display.getUserPassword();
+//		
+//		if (("web".equalsIgnoreCase(mail)) && 
+//				("web".equalsIgnoreCase(password)))
+//			node.setState(NodeStates.Guest);
+//		else if (("".equalsIgnoreCase(mail)) && 
+//				("".equalsIgnoreCase(password)))
+//			node.setState(NodeStates.Guest);
+//		else
+			node.setState(NodeStates.Agent);
+		node.next();
+	}
+
+	@Override
+	public void onLoginFailed(Throwable exception) {
+		Window.alert("Login failed.");
+	}
 }

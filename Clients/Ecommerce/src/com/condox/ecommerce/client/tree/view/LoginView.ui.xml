@@ -16,7 +16,7 @@
 					</g:HorizontalPanel>
 					<g:Label text="Sign In" horizontalAlignment="ALIGN_CENTER"/>
 					<g:Label text="eMail*"/>
-				<g:TextBox ui:field="textUserLogin"/>
+				<g:TextBox ui:field="textUserEmail"/>
 				<g:Label text="Password*"/>
 				<g:TextBox ui:field="textUserPassword"/>
 				<g:Cell horizontalAlignment="ALIGN_CENTER">

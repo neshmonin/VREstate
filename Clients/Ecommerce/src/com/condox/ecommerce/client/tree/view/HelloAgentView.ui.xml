@@ -14,7 +14,7 @@
 			<g:VerticalPanel spacing="10">
 			<g:HorizontalPanel width="100%">
 				<g:Cell width="50%">
-					<g:Label text="Hello John Doe!"/>
+					<g:Label text="Hello John Doe!" ui:field="textNickName"/>
 				</g:Cell>
 					<g:Cell horizontalAlignment="ALIGN_RIGHT" width="50%">
 						<g:Hyperlink text="Logout" targetHistoryToken="" ui:field="hyperlink"/>
@@ -22,19 +22,19 @@
 				</g:HorizontalPanel>
 			<g:HorizontalPanel width="100%">
 				<g:Cell width="50%" horizontalAlignment="ALIGN_CENTER">
-					<g:Button text="Update your profile..." width="80%"/>
+					<g:Button text="Update your profile..." width="80%" enabled="false"/>
 				</g:Cell>
 				<g:Cell width="50%" horizontalAlignment="ALIGN_CENTER">
-					<g:Button text="Settings..." width="80%"/>
+					<g:Button text="Settings..." width="80%" ui:field="buttonSettings"/>
 				</g:Cell>
 			</g:HorizontalPanel>
 			<p1:DataGrid width="400px" height="200px" ui:field="dataGrid"/>
 			<g:HorizontalPanel width="100%">
 				<g:Cell width="50%" horizontalAlignment="ALIGN_CENTER">
-					<g:Button text="New Order..." width="80%"/>
+					<g:Button text="New Order..." width="80%" enabled="false"/>
 				</g:Cell>
 				<g:Cell width="50%" horizontalAlignment="ALIGN_CENTER">
-					<g:Button text="Show history..." width="80%"/>
+					<g:Button text="Show history..." width="80%" enabled="false"/>
 				</g:Cell>
 			</g:HorizontalPanel>
 		</g:VerticalPanel>

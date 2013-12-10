@@ -19,7 +19,7 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
-//		Options.Init();
+		Options.Init();
 //		History.addValueChangeHandler(this);
 //		History.newItem("login");
 		
@@ -42,8 +42,8 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 	}
 	
 	private void startWizard() {
-		EcommerceTree tree = new EcommerceTree();
-		tree.go(new PopupContainer());
-//		tree.activate(new PopupContainer());
+//		EcommerceTree tree = new EcommerceTree();
+//		tree.go(new PopupContainer());
+////		tree.activate(new PopupContainer());
 	}
 }

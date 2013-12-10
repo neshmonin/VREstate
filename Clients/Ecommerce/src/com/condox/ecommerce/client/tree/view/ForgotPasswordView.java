@@ -9,18 +9,19 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.TextBox;
 
 public class ForgotPasswordView extends Composite implements I_Display {
 
 	private static ForgotPasswordViewUiBinder uiBinder = GWT
 			.create(ForgotPasswordViewUiBinder.class);
+	@UiField TextBox textUserEmail;
 
 	interface ForgotPasswordViewUiBinder extends UiBinder<Widget, ForgotPasswordView> {
 	}
 
 	private ForgotPasswordPresenter presenter = null;
-	private boolean user = false;
-	private boolean guest = true;
 
 	public ForgotPasswordView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -31,56 +32,19 @@ public class ForgotPasswordView extends Composite implements I_Display {
 		this.presenter = presenter;
 	}
 
-//	@Override
-//	public String getUserLogin() {
-////		if (user)
-////			return textUserLogin.getValue();
-////		else if (guest)
-////			return "web";
-//		return "adminan";
-//
-//	}
-//
-//	@Override
-//	public String getUserPassword() {
-////		if (user)
-////			return textUserPassword.getValue();
-////		else if (guest)
-////			return "web";
-//		return "smelatoronto";
-//	}
-//
-//	@UiHandler("buttonEnter")
-//	void onButtonEnterClick(ClickEvent event) {
-//		if (presenter != null)
-//			presenter.onSubmit();
-//	}
-//
-//	@UiHandler("textUserPassword")
-//	void onTextUserPasswordKeyUp(KeyUpEvent event) {
-//		updateButtonEnter();
-//	}
-//
-//	private void updateButtonEnter() {
-//		user = !textUserLogin.getValue().isEmpty();
-//		user &= !textUserPassword.getValue().isEmpty();
-//		guest = textUserLogin.getValue().isEmpty();
-//		guest &= textUserPassword.getValue().isEmpty();
-//		if (user) {
-//			buttonEnter.setEnabled(true);
-//			buttonEnter.setText("Order as a User");
-//		} else if (guest) {
-//			buttonEnter.setEnabled(true);
-//			buttonEnter.setText("Order as a Guest");
-//		} else {
-//			buttonEnter.setEnabled(false);
-//			buttonEnter.setText("Order");
-//		}
-//
-//	}
 	@UiHandler("buttonEnter")
 	void onButtonEnterClick(ClickEvent event) {
 		if (presenter != null)
 			presenter.onSubmit();
+	}
+
+	@Override
+	public String getEmail() {
+		return textUserEmail.getValue();
+	}
+
+	@Override
+	public void setEmail(String value) {
+		textUserEmail.setValue(value);
 	}
 }

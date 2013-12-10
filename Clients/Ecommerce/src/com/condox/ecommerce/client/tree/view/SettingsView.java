@@ -1,45 +1,41 @@
 package com.condox.ecommerce.client.tree.view;
 
 import com.condox.ecommerce.client.tree.presenter.LoginPresenter;
-import com.condox.ecommerce.client.tree.presenter.LoginPresenter.I_Display;
+import com.condox.ecommerce.client.tree.presenter.SettingsPresenter;
+import com.condox.ecommerce.client.tree.presenter.SettingsPresenter.I_Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.Hyperlink;
 
-public class LoginView extends Composite implements I_Display {
+public class SettingsView extends Composite implements I_Display {
 
 	private static LoginViewUiBinder uiBinder = GWT
 			.create(LoginViewUiBinder.class);
-	@UiField
-	TextBox textUserEmail;
-	@UiField
-	TextBox textUserPassword;
-	@UiField
-	Button buttonEnter;
-	@UiField Hyperlink hyperlink;
+	@UiField Button buttonClose;
+	@UiField Button button;
+	@UiField Button button_1;
 
-	interface LoginViewUiBinder extends UiBinder<Widget, LoginView> {
+	interface LoginViewUiBinder extends UiBinder<Widget, SettingsView> {
 	}
 
-	private LoginPresenter presenter = null;
+	private SettingsPresenter presenter = null;
 	private boolean user = false;
 	private boolean guest = true;
 
-	public LoginView() {
+	public SettingsView() {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 
 	@Override
-	public void setPresenter(LoginPresenter presenter) {
+	public void setPresenter(SettingsPresenter presenter) {
 		this.presenter = presenter;
 	}
 
@@ -62,10 +58,6 @@ public class LoginView extends Composite implements I_Display {
 //		return "smelatoronto";
 //	}
 //
-	@UiHandler("buttonEnter")
-	void onButtonEnterClick(ClickEvent event) {
-		presenter.onLogin();
-	}
 //
 //	@UiHandler("textUserLogin")
 //	void onTextUserLoginValueChange(ValueChangeEvent<String> event) {
@@ -99,19 +91,17 @@ public class LoginView extends Composite implements I_Display {
 //		}
 //
 //	}
-	@UiHandler("hyperlink")
-	void onHyperlinkClick(ClickEvent event) {
+	@UiHandler("buttonClose")
+	void onButtonCloseClick(ClickEvent event) {
 		if (presenter != null)
-			presenter.onForgotPassword();
+			presenter.onClose();
 	}
-
-	@Override
-	public String getUserEmail() {
-		return textUserEmail.getValue();
+	@UiHandler("button")
+	void onButtonClick(ClickEvent event) {
+		Window.alert("Send PUT-request to server.");
 	}
-
-	@Override
-	public String getUserPassword() {
-		return textUserPassword.getValue();
+	@UiHandler("button_1")
+	void onButton_1Click(ClickEvent event) {
+		Window.alert("Send PUT-request to server.");
 	}
 }
