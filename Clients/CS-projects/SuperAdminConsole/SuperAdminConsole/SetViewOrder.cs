@@ -435,6 +435,7 @@ namespace SuperAdminConsole
         public string PostalAddress { private set; get; }
         public string PropertyType { private set; get; }
         public int PropertyID { private set; get; }
+        public int BuildingID { private set; get; }
         public decimal DaysValid { get { return numericUpDownDaysValid.Value; } }
 
 
@@ -514,32 +515,73 @@ namespace SuperAdminConsole
                 ServerResponse resp = ServerProxy.MakeGenericRequest(ServerProxy.RequestType.Get,
                                                                   "program",
                                                                   parameters, null);
-                if (HttpStatusCode.OK != resp.ResponseCode)
+                if (HttpStatusCode.OK == resp.ResponseCode)
                 {
-                    MessageBox.Show("Cannot Create viewOrder");
+                    string viewOrderID = (resp.Data["viewOrder-id"] as string).Replace("-", string.Empty);
+                    string viewOrderUrl = resp.Data["viewOrder-url"] as string;
+                    // Response: JSON
+                    //  {
+                    //      ”viewOrder-url”:<URL of direct link to created viewOrder>,
+                    //      ”viewOrder-id":<string ID>
+                    //      ”ref”:<ref number>
+                    //  }
+
+                    if (HttpStatusCode.OK == resp.ResponseCode)
+                    {
+                        resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
+                                                                            "suite/" + PropertyID,
+                                                                            "",
+                                                                            null);
+                        if (HttpStatusCode.OK == resp.ResponseCode)
+                        {
+                            ClientData suiteData = resp.Data;
+                            decimal cp = Decimal.Parse(richTextBoxListingPrice.Text);
+			                if (cp >= 0.0m)
+                            {
+                                Money? currentPrice = new Money(cp);
+                                suiteData["currentPrice"] = currentPrice.Value.ToString("F");
+                                suiteData["currentPriceCurrency"] = currentPrice.Value.Currency.Iso3LetterCode;
+                            }
+                            suiteData["status"] = radioButtonListingTypeSale.Checked ? 
+                                ClientData.ConvertProperty<Vre.Server.BusinessLogic.Suite.SalesStatus>(Vre.Server.BusinessLogic.Suite.SalesStatus.ResaleAvailable) :
+                                ClientData.ConvertProperty<Vre.Server.BusinessLogic.Suite.SalesStatus>(Vre.Server.BusinessLogic.Suite.SalesStatus.AvailableRent);
+
+                            resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
+                                                                                "suite/" + PropertyID,
+                                                                                "",
+                                                                                suiteData);
+                            if (HttpStatusCode.OK == resp.ResponseCode)
+                            {
+                                viewOrderUrlGenerated = true;
+                                textBoxViewOrderURL.Text = viewOrderUrl;
+                                ViewOrderID = viewOrderID;
+                                ViewOrderURL = textBoxViewOrderURL.Text;
+                                UpdateState();
+                                MessageBox.Show("The ViewOrder has been generated successfully!\n" +
+                                                "Please send the link to the customer",
+                                                "ViewOrder is Ready!",
+                                                MessageBoxButtons.OK,
+                                                MessageBoxIcon.Information);
+                            }
+                            else
+                            {
+                                ServerResponse undo = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Delete,
+                                                                                    "viewOrder/" + viewOrderID,
+                                                                                    "userId=" + this.theUser.AutoID +
+                                                                                    "&ed=" +
+                                                                                    this.m_developer.Name, null);
+                            }
+                        }
+                    }
+                }
+
+                if (!viewOrderUrlGenerated)
+                {
+                    MessageBox.Show("Cannot Create viewOrder (ResponseCode=" + resp.ResponseCode + ")");
                     DialogResult = System.Windows.Forms.DialogResult.Abort;
                     Close();
                     return;
                 }
-
-                
-                // Response: JSON
-                //
-                //  {
-                //      ”viewOrder-url”:<URL of direct link to created viewOrder>,
-                //      ”button-url”:<URL of graphics for button>
-                //  }
-                // 
-                textBoxViewOrderURL.Text = resp.Data["viewOrder-url"] as string;
-                viewOrderUrlGenerated = true;
-                UpdateState();
-                MessageBox.Show("The ViewOrder has been generated successfully!\n" +
-                                "Please send the link to the customer",
-                                "ViewOrder is Ready!", 
-                                MessageBoxButtons.OK, 
-                                MessageBoxIcon.Information);
-                ViewOrderURL = textBoxViewOrderURL.Text;
-                ViewOrderID = (resp.Data["viewOrder-id"] as string).Replace("-", string.Empty);
 
                 Clipboard.SetText(ViewOrderURL);
 
@@ -777,6 +819,7 @@ namespace SuperAdminConsole
                     Cursor.Current = Cursors.Default;
                 });
                 suitesTableForm.Show(this);
+                BuildingID = building.GetProperty("id", -1);
             }
             else if (radioButton3DLayout.Checked)
             {
