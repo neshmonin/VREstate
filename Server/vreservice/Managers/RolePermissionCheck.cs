@@ -856,7 +856,7 @@ namespace Vre.Server.BusinessLogic
             if (session.User.UserRole == User.Role.DeveloperAdmin)
             {
                 if (null == building) return false;
-                if (building.ConstructionSite.AutoID.Equals(session.User.EstateDeveloperID)) return false;
+                if (building.ConstructionSite.Developer.AutoID.Equals(session.User.EstateDeveloperID)) return false;
             }
 
             //// selling agent can make a listing for himself

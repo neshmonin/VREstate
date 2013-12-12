@@ -1599,7 +1599,8 @@ namespace Vre.Server.RemoteService
 					{
 						if (manager.UpdateSuite(suite))
 						{
-							if (suite.CurrentPrice.HasValue && (suite.CurrentPrice.Value.CompareTo(price.Value) != 0))
+							if (suite.CurrentPrice.HasValue && 
+								(!price.HasValue || (suite.CurrentPrice.Value.CompareTo(price.Value) != 0)))
 								manager.LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice));
 
 							updated = true;
@@ -1835,7 +1836,7 @@ namespace Vre.Server.RemoteService
 
                     using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
                     {
-                        foreach (ViewOrder vo in dao.Get(session.User.AutoID))
+                        foreach (ViewOrder vo in dao.Get(user.AutoID))
                         {
                             vo.MarkDeleted();
                             dao.Update(vo);
