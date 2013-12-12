@@ -1,93 +1,88 @@
 package com.condox.ecommerce.client.tree.presenter;
 
+import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
+import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
+import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.node.SummaryNode;
+import com.google.gwt.user.client.ui.Widget;
 
 public class SummaryPresenter implements I_Presenter {
 
-//	public static interface I_Display extends I_Contained {
-//		void setPresenter(SummaryPresenter presenter);
-//
-//		Widget asWidget();
-//	}
-//
-//	private I_Display display = null;
-//	private SummaryModel model = null;
-//
-//	public SummaryPresenter(I_Display display, SummaryModel model) {
-//		this.model = model;
-//		this.display = display;
-//		this.display.setPresenter(this);
-//	}
+	public static interface I_Display extends I_Contained {
+		void setPresenter(SummaryPresenter presenter);
+
+		void setData(String data);
+		
+		Widget asWidget();
+	}
+
+	private I_Display display = null;
+	private SummaryNode node = null;
+
+	public SummaryPresenter(I_Display newDisplay, SummaryNode newNode) {
+		display = newDisplay;
+		display.setPresenter(this);
+		node = newNode;
+	}
 
 	@Override
 	public void go(I_Container container) {
-//		container.clear();
-//		container.add((I_Contained)display);
+		// TODO update data
+		loadData();
+		container.clear();
+		container.add(display);
+	}
+	
+	// Navigation events
+	public void onCancel() {
+		node.next(NodeStates.Cancel);
 	}
 
-//	public void onPrev() {
-//		model.prev();
-//	}
-//
-//	// ******************
-//	String user = "";
-//	String order = "Private Interactive 3D Listing";
-//	String address = "&lt;none&gt;";
-//	String mls = "";
-//	String urlVirtualTour = "";
-//	String urlMoreInfo = "";
-//	String sid = "";
-//	String product = "prl";
-//	String type = "suite";
-//	String payment = "CAD4.99";
-//
-//	public String getSummary() {
-//		// **********************************
-//		user = EcommerceTree.get(Field.UserLogin).asString();
-//		user = "web".equals(user)? "GUEST" : user;
-//
-//		String productType = EcommerceTree.get(Field.ProductType).asString();
-//		if (productType == "Layout") {
-//			product = "3dl";
-//			order = "Interactive 3D Layout";
-//			type = "building";
-//		}
-//		else if (productType == "ListingPrivate") {
-//			product = "prl";
-//			order = "Private Interactive 3D Listing";
-//			type = "suite";
-//		}
-//		else if (productType == "ListingPublic") {
-//			product = "pul";
-//			order = "Public Interactive 3D Listing";
-//			type = "suite";
-//		}
-//		
-//		mls = EcommerceTree.get(Field.MLS).asString();
-//		urlVirtualTour = EcommerceTree.get(Field.VirtualTourURL).asString();
-//		urlMoreInfo = EcommerceTree.get(Field.MoreInfoURL).asString();
-//		address = EcommerceTree.get(Field.Address).asString();
-//
-//		String html = "";
-//		html = 	"<table>" + 
-//					"<tr>" + "<td>" + "User:" + "</td>" + "<td>" + user + "</td>" + "</tr>" + 
-//					"<tr>" + "<td>" + "Order:" + "</td>" + "<td>" + order + "</td>" + "</tr>" + 
-//					"<tr>" + "<td>" + "Address:" + "</td>" + "<td>" + address + "</td>" + "</tr>" + 
-//					"<tr>" + "<td>" + "MLS#:" + "</td>" + "<td>" + mls + "</td>" + "</tr>" + 
-//					"<tr>" + "<td>" + "Options:" + "</td>" + "<td>" + "" + "</td>" + "</tr>" + 
-//				"</table>";
-//		html += "<div style=\"position:relative; left:40px\">" +
-//				"Virtual Tour URL:" + (urlVirtualTour.isEmpty()? "&lt;none&gt;" : urlVirtualTour) + 
-//				"<br/>More Info URL:" + (urlMoreInfo.isEmpty()? "&lt;none&gt;" : urlMoreInfo) +
-//				"</div>";
-//		html += "<br/><br/><br/><br/>You will be able to preview the order and, if you like it, you will be charged " +
-//				"$49.99 (paid via secure connection with your credit card)";
-//		return html;
-//	}
-//
-//	public void onNext() {
-//		EcommerceTree.transitState(State.SummaryReady);
-//		model.next();
-//	}
+	public void onPrev() {
+		node.next(NodeStates.Prev);
+	}
+	
+	public void onNext() {
+		saveData();
+		node.next(NodeStates.Next);
+	}
+	
+	// Data utils
+	private String getString(Field key) {
+		return (node.getData(key) == null)? "" : node.getData(key).asString();
+	}
+	
+	private void loadData() {
+		String listing = getString(Field.Address);
+		String mls = getString(Field.MLS);
+		String price = getString(Field.Price);
+		String virtual_tour = getString(Field.VirtualTourUrl);
+		String more_info = getString(Field.MoreInfoUrl);
+		
+		String html = 
+				"Listing: " + (listing.isEmpty()? "<<empty>>" : listing) + "<br>" +
+				"MLS# " + mls + "<br>" + " Price  " + (price.isEmpty()? "<<empty>>" : price);
+//				"Third Party Virtual Tour<br>" +
+//				"	" + (virtual_tour.isEmpty()? "<<empty>>" : virtual_tour) + "<br>";
+	
+		html += "More Info Link<br>";
+		if (more_info.isEmpty())
+			html += "<<empty>>";
+		else
+			html += "<<a href=\"" + more_info + "\">>" + more_info + "<</a>>";
+		
+//		display.setData(html);
+		
+	}
+	
+	private void saveData() {
+//		node.setData(Field.SuiteId, new Data(display.getSelectedSuite().getId()));
+//		node.setData(Field.SuiteName, new Data(display.getSelectedSuite().getName()));
+//		node.setData(Field.Address, new Data(display.getSelectedSuite().getAddress()));
+//		node.setData(Field.MLS, new Data(display.getSelectedSuite().getMLS()));
+	}
+
 }

@@ -6,12 +6,20 @@ import java.util.List;
 import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.tree.node.AbstractNode;
+import com.condox.ecommerce.client.tree.node.AgreementNode;
+import com.condox.ecommerce.client.tree.node.BuildingsNode;
 import com.condox.ecommerce.client.tree.node.ChangingPasswordNode;
 import com.condox.ecommerce.client.tree.node.DefaultsNode;
 import com.condox.ecommerce.client.tree.node.ForgotPasswordNode;
 import com.condox.ecommerce.client.tree.node.HelloAgentNode;
 import com.condox.ecommerce.client.tree.node.LoginNode;
+import com.condox.ecommerce.client.tree.node.NewOrderNode;
+import com.condox.ecommerce.client.tree.node.OptionsNode;
+import com.condox.ecommerce.client.tree.node.PickSuiteNode;
 import com.condox.ecommerce.client.tree.node.SettingsNode;
+import com.condox.ecommerce.client.tree.node.ShowHistoryNode;
+import com.condox.ecommerce.client.tree.node.SummaryNode;
+import com.condox.ecommerce.client.tree.node.UsingMLSNode;
 
 
 public class EcommerceTree {
@@ -26,18 +34,52 @@ public class EcommerceTree {
 		Guest,
 		Agent,
 		Logout,
-		Settings
+		Settings,
+		ShowHistory,
+		NewOrder,
+		Cancel,
+		Prev,
+		Next,
+		UsingMLS,
+		NotUsingMLS, Proceed
 	}
 
 	private AbstractNode currNode = null;
 	private List<String> leafs = new ArrayList<String>();
 	
 	public void config() {
-		leafs.add("DefaultsNode/LoginNode.ForgotPassword/ForgotPasswordNode.Close=>DefaultsNode/LoginNode");
-		leafs.add("DefaultsNode/LoginNode.ForgotPassword/ForgotPasswordNode.Submit/ChangingPasswordNode.Ok=>DefaultsNode/LoginNode");
-		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode");
+		// Forgot password node
+//		leafs.add("DefaultsNode/LoginNode.ForgotPassword/ForgotPasswordNode.Close=>DefaultsNode/LoginNode");
+//		leafs.add("DefaultsNode/LoginNode.ForgotPassword/ForgotPasswordNode.Submit/ChangingPasswordNode.Ok=>DefaultsNode/LoginNode");
+		leafs.add("DefaultsNode/LoginNode.ForgotPassword/ChangingPasswordNode.Ok=>DefaultsNode/LoginNode");
+		
+		// Guest node
+		leafs.add("DefaultsNode/LoginNode.Guest/NewOrderNode.Cancel=>DefaultsNode/LoginNode");
+		leafs.add("DefaultsNode/LoginNode.Guest/NewOrderNode.Next/UsingMLSNode.Cancel=>DefaultsNode/LoginNode");
+		leafs.add("DefaultsNode/LoginNode.Guest/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Cancel=>DefaultsNode/LoginNode");
+		
+		// Agent node
 		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.Logout=>DefaultsNode/LoginNode");
 		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.Settings/SettingsNode.Close=>DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.ShowHistory/ShowHistoryNode.Close=>DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Cancel=>DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.Cancel=>DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Cancel=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Prev=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode");
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode.Cancel=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode.Prev=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode"); 
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode.Next/OptionsNode.Cancel=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode.Next/OptionsNode.Prev=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode"); 
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode.Next/OptionsNode.Next/SummaryNode.Cancel=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode.Next/OptionsNode.Next/SummaryNode.Prev=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode.Next/OptionsNode");
 	}
 	
 	public void next() {
@@ -104,6 +146,22 @@ public class EcommerceTree {
 			return new HelloAgentNode();
 		if ("SettingsNode".equals(nodeType))
 			return new SettingsNode();
+		if ("ShowHistoryNode".equals(nodeType))
+			return new ShowHistoryNode();
+		if ("NewOrderNode".equals(nodeType))
+			return new NewOrderNode();
+		if ("UsingMLSNode".equals(nodeType))
+			return new UsingMLSNode();
+		if ("BuildingsNode".equals(nodeType))
+			return new BuildingsNode();
+		if ("PickSuiteNode".equals(nodeType))
+			return new PickSuiteNode();
+		if ("OptionsNode".equals(nodeType))
+			return new OptionsNode();
+		if ("SummaryNode".equals(nodeType))
+			return new SummaryNode();
+		if ("AgreementNode".equals(nodeType))
+			return new AgreementNode();
 		return null;
 		
 	}
@@ -128,6 +186,9 @@ public class EcommerceTree {
 	public enum Field {
 		UserEmail,
 		UserPassword,
-		Test
+		UserRole, 
+		
+		FILTERING_BY_CITY, BuildingID, SuiteId, SuiteName, Address, MLS, Price, VirtualTourUrl, MoreInfoUrl, // TODO review this constants
+		
 	}
 }

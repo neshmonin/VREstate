@@ -18,28 +18,28 @@
 					<g:HorizontalPanel width="100%" spacing="10">
 						<g:VerticalPanel>
 							<g:Label text="New Email"/>
-							<g:TextBox width="250px"/>
+							<g:TextBox width="250px" ui:field="textEmail"/>
 						</g:VerticalPanel>
 						<g:Cell height="100%" verticalAlignment="ALIGN_BOTTOM">
-							<g:Button text="Apply" ui:field="button"/>
+							<g:Button text="Apply" ui:field="buttonChangeEmail"/>
 						</g:Cell>
 					</g:HorizontalPanel>
 					<g:Label horizontalAlignment="ALIGN_CENTER" text="Change Password"/>
 					<g:HorizontalPanel spacing="10" width="100%">
 						<g:VerticalPanel>
 						<g:Label text="Old Password"/>
-						<g:TextBox width="115px"/>
+						<g:TextBox width="115px" ui:field="textOldPassword"/>
 						<g:Label text="New Password"/>
-						<g:TextBox width="115px"/>
+						<g:TextBox width="115px" ui:field="textNewPassword"/>
 					</g:VerticalPanel>
 						<g:Cell verticalAlignment="ALIGN_BOTTOM">
 							<g:VerticalPanel>
 							<g:Label text="Enter again, please"/>
-							<g:TextBox width="115px"/>
+							<g:TextBox width="115px" ui:field="textNewPassword2"/>
 						</g:VerticalPanel>
 						</g:Cell>
 						<g:Cell verticalAlignment="ALIGN_BOTTOM">
-							<g:Button text="Apply" ui:field="button_1"/>
+							<g:Button text="Apply" ui:field="buttonChangePassword"/>
 						</g:Cell>
 					</g:HorizontalPanel>
 			</g:VerticalPanel>

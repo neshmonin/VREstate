@@ -1,7 +1,7 @@
 package com.condox.ecommerce.client.tree.view;
 
-import com.condox.ecommerce.client.tree.presenter.SummaryPresenter;
-import com.condox.ecommerce.client.tree.presenter.SummaryPresenter.I_Display;
+import com.condox.ecommerce.client.tree.presenter.OptionsPresenter;
+import com.condox.ecommerce.client.tree.presenter.OptionsPresenter.I_Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.Composite;
@@ -13,28 +13,32 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.HTML;
 
-public class SummaryView extends Composite implements I_Display {
+public class OptionsView extends Composite implements I_Display {
 
-	private static SummaryViewUiBinder uiBinder = GWT
-			.create(SummaryViewUiBinder.class);
+	private static OptionsViewUiBinder uiBinder = GWT
+			.create(OptionsViewUiBinder.class);
+	@UiField RadioButton rbForSale;
+	@UiField RadioButton rbForRent;
+	@UiField Label strMLS;
 	@UiField Button buttonCancel;
 	@UiField Button buttonPrev;
 	@UiField Button buttonNext;
-	@UiField HTML htmlSummary;
+	@UiField TextBox textPrice;
+	@UiField TextBox textVirtualTourUrl;
+	@UiField TextBox textMoreInfoUrl;
 
-	interface SummaryViewUiBinder extends UiBinder<Widget, SummaryView> {
+	interface OptionsViewUiBinder extends UiBinder<Widget, OptionsView> {
 	}
 
-	private SummaryPresenter presenter = null;
+	private OptionsPresenter presenter = null;
 
-	public SummaryView() {
+	public OptionsView() {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 
 	@Override
-	public void setPresenter(SummaryPresenter presenter) {
+	public void setPresenter(OptionsPresenter presenter) {
 		this.presenter = presenter;
 	}
 
@@ -55,7 +59,23 @@ public class SummaryView extends Composite implements I_Display {
 	}
 
 	@Override
-	public void setData(String data) {
-		htmlSummary.setHTML(data);
+	public String getMLS() {
+		return strMLS.getText();
 	}
+
+	@Override
+	public String getPrice() {
+		return textPrice.getValue();
+	}
+
+	@Override
+	public String getVirtualTourUrl() {
+		return textMoreInfoUrl.getValue();
+	}
+
+	@Override
+	public String getMoreInfoUrl() {
+		return textMoreInfoUrl.getValue();
+	}
+	
 }

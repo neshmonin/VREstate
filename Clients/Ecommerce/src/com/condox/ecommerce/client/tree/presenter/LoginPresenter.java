@@ -42,15 +42,29 @@ public class LoginPresenter implements I_Presenter, I_Login {
 
 	// Events
 	public void onLogin() {
-//		node.setState(NodeStates.Agent);
-//		node.next();
 		String email = display.getUserEmail().trim();
 		String password = display.getUserPassword().trim();
+
+		// TODO
+		UserRole role = null;
 		
-		// TODO for developing only
-		email = "adminan";
-		password = "smelatoronto";
-		User.Login(this, email, password, UserRole.SuperAdmin);
+		if (email.isEmpty() && password.isEmpty()) {
+			email = "web";
+			password = "web";
+			role = UserRole.Visitor;
+			
+			email = "adminan";
+			password = "smelatoronto";
+			role = UserRole.SuperAdmin;
+			
+		} else
+			role = UserRole.SuperAdmin;
+		
+		
+		node.setData(Field.UserEmail, new Data(email));
+		node.setData(Field.UserPassword, new Data(password));
+		node.setData(Field.UserRole, new Data(role.name()));
+		User.Login(this, email, password, role);
 	}
 
 	public void onForgotPassword() {
@@ -63,18 +77,15 @@ public class LoginPresenter implements I_Presenter, I_Login {
 	}
 
 	public void onLoginSucceed() {
-//		String mail = display.getUserEmail();
-//		String password = display.getUserPassword();
-//		
-//		if (("web".equalsIgnoreCase(mail)) && 
-//				("web".equalsIgnoreCase(password)))
-//			node.setState(NodeStates.Guest);
-//		else if (("".equalsIgnoreCase(mail)) && 
-//				("".equalsIgnoreCase(password)))
-//			node.setState(NodeStates.Guest);
-//		else
-			node.setState(NodeStates.Agent);
-		node.next();
+		Data data = node.getData(Field.UserRole);
+		if (data != null) {
+			UserRole role = UserRole.valueOf(data.asString());
+			if (UserRole.Visitor.equals(role))
+				node.setState(NodeStates.Guest);
+			else
+				node.setState(NodeStates.Agent);
+			node.next();
+		}
 	}
 
 	@Override

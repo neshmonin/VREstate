@@ -85,6 +85,12 @@ public abstract class AbstractNode {
 		if (tree != null)
 			tree.next();
 	}
+	
+	public void next(NodeStates state) {
+		setState(state);
+		if (tree != null)
+			tree.next();
+	}
 
 	@Override
 	public int hashCode() {
@@ -92,6 +98,7 @@ public abstract class AbstractNode {
 		int result = 1;
 		result = prime * result
 				+ ((dataRepository == null) ? 0 : dataRepository.hashCode());
+		result = prime * result + ((state == null) ? 0 : state.hashCode());
 		return result;
 	}
 
@@ -109,8 +116,11 @@ public abstract class AbstractNode {
 				return false;
 		} else if (!dataRepository.equals(other.dataRepository))
 			return false;
+		if (state != other.state)
+			return false;
 		return true;
 	}
+
 
 	
 	

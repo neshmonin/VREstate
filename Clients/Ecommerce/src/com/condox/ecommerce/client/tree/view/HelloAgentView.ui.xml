@@ -11,7 +11,7 @@
 	<g:VerticalPanel width="100%" height="100%"
 		horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 		<g:VerticalPanel borderWidth="3" horizontalAlignment="ALIGN_LEFT" verticalAlignment="ALIGN_TOP">
-			<g:VerticalPanel spacing="10">
+			<g:VerticalPanel spacing="10" width="700px">
 			<g:HorizontalPanel width="100%">
 				<g:Cell width="50%">
 					<g:Label text="Hello John Doe!" ui:field="textNickName"/>
@@ -28,13 +28,13 @@
 					<g:Button text="Settings..." width="80%" ui:field="buttonSettings"/>
 				</g:Cell>
 			</g:HorizontalPanel>
-			<p1:DataGrid width="400px" height="200px" ui:field="dataGrid"/>
+			<p1:DataGrid height="300px" ui:field="dataGrid"/>
 			<g:HorizontalPanel width="100%">
 				<g:Cell width="50%" horizontalAlignment="ALIGN_CENTER">
-					<g:Button text="New Order..." width="80%" enabled="false"/>
+					<g:Button text="New Order..." width="80%" ui:field="button_1"/>
 				</g:Cell>
 				<g:Cell width="50%" horizontalAlignment="ALIGN_CENTER">
-					<g:Button text="Show history..." width="80%" enabled="false"/>
+					<g:Button text="Show history..." width="80%" ui:field="buttonShowHistory"/>
 				</g:Cell>
 			</g:HorizontalPanel>
 		</g:VerticalPanel>

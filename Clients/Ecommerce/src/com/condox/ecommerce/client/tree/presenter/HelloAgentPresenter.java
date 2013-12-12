@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.condox.clientshared.communication.GET;
 import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.communication.PUT;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
@@ -112,15 +113,54 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 		node.next();
 	}
 
-	public void onSettings() {
+	public void onShowSettings() {
 		node.setState(NodeStates.Settings);
 		node.next();
 	}
 
+	public void onNewOrder() {
+		node.setState(NodeStates.NewOrder);
+		node.next();
+	}
 
-//	public void onHelloAgent() {
-//		node.setState(NodeStates.Guest);
-//		node.next();
-//	}
+	public void onShowHistory() {
+		node.setState(NodeStates.ShowHistory);
+		node.next();
+	}
 
+	public void setEnabled(ViewOrderInfo object, boolean enabled) {
+		object.setEnabled(enabled);
+		String url = Options.URL_VRT + "data/viewOrder/" + object.getId() + 
+				"?sid=" + User.SID;
+		PUT.send(url, object.getJSON(), new RequestCallback(){
+
+			@Override
+			public void onResponseReceived(Request request, Response response) {
+				loadOrdersList();
+			}
+
+			@Override
+			public void onError(Request request, Throwable exception) {
+				// TODO Auto-generated method stub
+				
+			}});
+	}
+
+	public void delete(ViewOrderInfo object) {
+//		object.setEnabled(enabled);
+//		String url = Options.URL_VRT + "data/viewOrder/" + object.getId() + 
+//				"?sid=" + User.SID;
+//		DELETE.send(url, object.getJSON(), new RequestCallback(){
+//
+//			@Override
+//			public void onResponseReceived(Request request, Response response) {
+//				loadOrdersList();
+//			}
+//
+//			@Override
+//			public void onError(Request request, Throwable exception) {
+//				// TODO Auto-generated method stub
+//				
+//			}});
+	}
 }

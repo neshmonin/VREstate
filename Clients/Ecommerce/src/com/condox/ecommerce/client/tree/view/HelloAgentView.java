@@ -36,6 +36,8 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 	@UiField Hyperlink hyperlink;
 	@UiField Label textNickName;
 	@UiField Button buttonSettings;
+	@UiField Button buttonShowHistory;
+	@UiField Button button_1;
 
 	interface HelloAgentViewUiBinder extends UiBinder<Widget, HelloAgentView> {
 	}
@@ -101,7 +103,7 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 				new ClickableTextCell(anchorRenderer)) {
 			@Override
 			public String getValue(ViewOrderInfo object) {
-				return "disable";
+				return object.isEnabled()? "disable" : "enable";
 			}
 
 		};
@@ -111,9 +113,7 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 			@Override
 			public void update(int index, ViewOrderInfo object,
 					String value) {
-//						selectedBuilding = object;
-//						 presenter.setSelectedBuilding(object);
-//						 presenter.onNext();
+				presenter.setEnabled(object, !object.isEnabled());
 			}
 		});
 		
@@ -134,9 +134,7 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 			@Override
 			public void update(int index, ViewOrderInfo object,
 					String value) {
-//						selectedBuilding = object;
-//						 presenter.setSelectedBuilding(object);
-//						 presenter.onNext();
+				presenter.delete(object);
 			}
 		});
 		
@@ -232,9 +230,20 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 	public void setNickName(String value) {
 		textNickName.setText("Hello, " + value + "!");	// TODO
 	}
+	
+	@UiHandler("buttonShowHistory")
+	void onButtonShowHistoryClick(ClickEvent event) {
+		if (presenter != null)
+			presenter.onShowHistory();
+	}
+	@UiHandler("button_1")
+	void onButton_1Click(ClickEvent event) {
+		if (presenter != null)
+			presenter.onNewOrder();
+	}
 	@UiHandler("buttonSettings")
 	void onButtonSettingsClick(ClickEvent event) {
 		if (presenter != null)
-			presenter.onSettings();
+			presenter.onShowSettings();
 	}
 }

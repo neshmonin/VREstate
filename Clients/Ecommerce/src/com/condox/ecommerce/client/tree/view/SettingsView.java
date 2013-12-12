@@ -20,8 +20,12 @@ public class SettingsView extends Composite implements I_Display {
 	private static LoginViewUiBinder uiBinder = GWT
 			.create(LoginViewUiBinder.class);
 	@UiField Button buttonClose;
-	@UiField Button button;
-	@UiField Button button_1;
+	@UiField Button buttonChangeEmail;
+	@UiField Button buttonChangePassword;
+	@UiField TextBox textEmail;
+	@UiField TextBox textOldPassword;
+	@UiField TextBox textNewPassword;
+	@UiField TextBox textNewPassword2;
 
 	interface LoginViewUiBinder extends UiBinder<Widget, SettingsView> {
 	}
@@ -96,12 +100,20 @@ public class SettingsView extends Composite implements I_Display {
 		if (presenter != null)
 			presenter.onClose();
 	}
-	@UiHandler("button")
-	void onButtonClick(ClickEvent event) {
-		Window.alert("Send PUT-request to server.");
+	@UiHandler("buttonChangeEmail")
+	void onButtonChangeEmailClick(ClickEvent event) {
+		if (presenter != null) {
+			String newEmail = textEmail.getValue();
+			presenter.onChangeEmail(newEmail);
+		}
 	}
-	@UiHandler("button_1")
-	void onButton_1Click(ClickEvent event) {
-		Window.alert("Send PUT-request to server.");
+	@UiHandler("buttonChangePassword")
+	void onButtonChangePasswordClick(ClickEvent event) {
+		if (presenter != null) {
+			String oldPassword = textOldPassword.getValue();
+			String newPassword = textNewPassword.getValue();
+			String newPassword2 = textNewPassword2.getValue();
+			presenter.onChangePassword(oldPassword, newPassword, newPassword2);
+		}
 	}
 }
