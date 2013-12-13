@@ -163,4 +163,8 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 //				
 //			}});
 	}
+
+	public void onUpdateProfile() {
+		node.next(NodeStates.UpdateProfile);
+	}
 }

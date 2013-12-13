@@ -38,6 +38,7 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 	@UiField Button buttonSettings;
 	@UiField Button buttonShowHistory;
 	@UiField Button button_1;
+	@UiField Button button;
 
 	interface HelloAgentViewUiBinder extends UiBinder<Widget, HelloAgentView> {
 	}
@@ -245,5 +246,10 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 	void onButtonSettingsClick(ClickEvent event) {
 		if (presenter != null)
 			presenter.onShowSettings();
+	}
+	@UiHandler("button")
+	void onButtonClick(ClickEvent event) {
+		if (presenter != null)
+			presenter.onUpdateProfile();
 	}
 }

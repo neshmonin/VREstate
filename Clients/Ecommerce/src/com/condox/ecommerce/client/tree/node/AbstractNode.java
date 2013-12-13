@@ -32,10 +32,10 @@ public abstract class AbstractNode {
 	
 	public AbstractNode addChild(AbstractNode newChild) {
 		//---------
-		Log.write("this: " + this);
-		Log.write("children keys: " + children.keySet());
-		Log.write("children values: " + children.values());
-		Log.write("children get(this): " + children.get(this));
+//		Log.write("this: " + this);
+//		Log.write("children keys: " + children.keySet());
+//		Log.write("children values: " + children.values());
+//		Log.write("children get(this): " + children.get(this));
 		//---------
 		if (children.get(this) != null) return children.get(this);
 		newChild.setParent(this);

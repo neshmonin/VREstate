@@ -19,6 +19,8 @@ import com.condox.ecommerce.client.tree.node.PickSuiteNode;
 import com.condox.ecommerce.client.tree.node.SettingsNode;
 import com.condox.ecommerce.client.tree.node.ShowHistoryNode;
 import com.condox.ecommerce.client.tree.node.SummaryNode;
+import com.condox.ecommerce.client.tree.node.UpdateProfile1Node;
+import com.condox.ecommerce.client.tree.node.UpdateProfile2Node;
 import com.condox.ecommerce.client.tree.node.UsingMLSNode;
 
 
@@ -43,7 +45,7 @@ public class EcommerceTree {
 		OneMore,
 		Finish,
 		UsingMLS,
-		NotUsingMLS, Proceed
+		NotUsingMLS, Proceed, UpdateProfile, Apply
 	}
 
 	private AbstractNode currNode = null;
@@ -64,6 +66,25 @@ public class EcommerceTree {
 		// Agent node
 		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.Logout=>"
 				+ "DefaultsNode/LoginNode");
+		
+		// UpdateProdile, Step 1
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.UpdateProfile/UpdateProfile1Node.Close=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode");
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.UpdateProfile/UpdateProfile1Node.Cancel=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode");
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.UpdateProfile/UpdateProfile1Node.Finish=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode");
+		// UpdateProdile, Step 2
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.UpdateProfile/UpdateProfile1Node.Next/UpdateProfile2Node.Close=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode");
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.UpdateProfile/UpdateProfile1Node.Next/UpdateProfile2Node.Cancel=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode");
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.UpdateProfile/UpdateProfile1Node.Next/UpdateProfile2Node.Prev=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode.UpdateProfile/UpdateProfile1Node");
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.UpdateProfile/UpdateProfile1Node.Next/UpdateProfile2Node.Finish=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode");
+				
+		
 		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.Settings/SettingsNode.Close=>"
 				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
 		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.ShowHistory/ShowHistoryNode.Close=>"
@@ -158,6 +179,10 @@ public class EcommerceTree {
 			return new ChangingPasswordNode();
 		if ("HelloAgentNode".equals(nodeType))
 			return new HelloAgentNode();
+		if ("UpdateProfile1Node".equals(nodeType))
+			return new UpdateProfile1Node();
+		if ("UpdateProfile2Node".equals(nodeType))
+			return new UpdateProfile2Node();
 		if ("SettingsNode".equals(nodeType))
 			return new SettingsNode();
 		if ("ShowHistoryNode".equals(nodeType))

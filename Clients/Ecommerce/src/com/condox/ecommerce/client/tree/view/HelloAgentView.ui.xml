@@ -22,7 +22,7 @@
 				</g:HorizontalPanel>
 			<g:HorizontalPanel width="100%">
 				<g:Cell width="50%" horizontalAlignment="ALIGN_CENTER">
-					<g:Button text="Update your profile..." width="80%" enabled="false"/>
+					<g:Button text="Update your profile..." width="80%" ui:field="button"/>
 				</g:Cell>
 				<g:Cell width="50%" horizontalAlignment="ALIGN_CENTER">
 					<g:Button text="Settings..." width="80%" ui:field="buttonSettings"/>
