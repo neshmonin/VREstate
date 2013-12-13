@@ -17,6 +17,10 @@ public class MLSPresenter implements I_Presenter {
 		String getMLS();
 		void setMLS(String value);
 		Widget asWidget();
+		//----------------
+		void usingMLS(boolean checked);
+		
+		boolean isUsingMLS();
 	}
 	
 	private I_Display display = null;
@@ -26,6 +30,10 @@ public class MLSPresenter implements I_Presenter {
 		this.display = display;
 		this.display.setPresenter(this);
 		this.model = model;
+		//-------------
+		boolean usingMLS = EcommerceTree.get(Field.USING_MLS).asBoolean();
+		this.display.usingMLS(usingMLS);
+		
 	}
 
 	@Override
@@ -42,6 +50,9 @@ public class MLSPresenter implements I_Presenter {
 	public void onNext() {
 		String mls = display.getMLS();
 		EcommerceTree.set(Field.MLS, new Data(mls));
+		boolean isUsingMLS = this.display.isUsingMLS();
+		EcommerceTree.set(Field.USING_MLS, new Data(isUsingMLS));
+		
 		if (mls.isEmpty())
 			EcommerceTree.transitState(State.Address);
 		else

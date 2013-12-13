@@ -67,9 +67,11 @@ namespace SuperAdminConsole
             else if (template == Template.ListingPromotion)
             {
                 body = Properties.Settings.Default.listingPromoTemplate;
-                subject = Properties.Settings.Default.defaultPromoSubject;
+                subject = PreprocessTemplate(Properties.Settings.Default.defaultPromoSubject);
                 textBoxAddressTo.Focus();
             }
+
+            textBody.Text = PreprocessTemplate(body);
 
             theTemplate = template;
             textBoxAddressTo.ReadOnly = theUser.UserRole == User.Role.SellingAgent && !string.IsNullOrEmpty(email);
@@ -121,6 +123,21 @@ namespace SuperAdminConsole
         
         private void UpdateState()
         {
+            int indexOfAT = textBoxAddressTo.Text.IndexOf('@');
+            int indexOfDOT = textBoxAddressTo.Text.LastIndexOf('.');
+            buttonSend.Enabled = textBoxAddressTo.Text.Length != 0 &&
+                                       indexOfAT > 0 &&
+                                       indexOfDOT > indexOfAT + 3 &&
+                                       indexOfDOT < textBoxAddressTo.Text.Length - 2;
+        }
+
+        private void textBoxAddressTo_TextChanged(object sender, EventArgs e)
+        {
+            UpdateState();
+        }
+
+        private string PreprocessTemplate(string body)
+        {
             // TODO: get HST and Price from transaction
             decimal taxRate = Properties.Settings.Default.SalesTaxValuePercent / 100M;
             decimal price = 0M;
@@ -131,79 +148,69 @@ namespace SuperAdminConsole
                 tax = trInfo.GrossAmount - price;
             }
 
-            int indexOfAT = textBoxAddressTo.Text.IndexOf('@');
-            int indexOfDOT = textBoxAddressTo.Text.LastIndexOf('.');
-            buttonSend.Enabled = textBoxAddressTo.Text.Length != 0 &&
-                                       indexOfAT > 0 &&
-                                       indexOfDOT > indexOfAT + 3 &&
-                                       indexOfDOT < textBoxAddressTo.Text.Length - 2;
-
             string product = string.Empty;
             switch (theOrder.Product)
             {
                 case ViewOrder.ViewOrderProduct.PrivateListing:
-                    product = "Private Interactive 3D Listing";
+                    product = "Interactive 3D Listing";
                     break;
                 case ViewOrder.ViewOrderProduct.PublicListing:
-                    product = "Public Interactive 3D Listing";
+                    product = "Interactive 3D MLS(TM)";
                     break;
                 case ViewOrder.ViewOrderProduct.Building3DLayout:
                     product = "Interactive 3D Layout";
                     break;
             }
 
-            if (theTemplate == Template.OrderConfirmation)
-            {
-                textBody.Text = string.Format(body, 
-                        textBoxAddressTo.Text,
-                        paymentRefId,
-                        DateTime.Now.ToShortDateString(),
-                        readableName,
-                        theOrder.Options == ViewOrder.ViewOrderOptions.FloorPlan ? "STANDARD FLOOR PLAN" : theOrder.VTourUrl,
-                        theOrder.ViewOrderURL,
-                        (theOrder.ExpiresOn - DateTime.Now).Days,
-                        price,
-                        tax,
-                        trInfo != null ? trInfo.GrossAmount : 0.00M,
-                        product);
-            }
-            else
-            {
-                string mlsId = theOrder.GetClientData().GetProperty("mlsId", string.Empty);
-                if (!string.IsNullOrEmpty(mlsId)) mlsId += " ";
+            string mlsId = theOrder.GetClientData().GetProperty("mlsId", string.Empty);
+            if (!string.IsNullOrEmpty(mlsId)) mlsId += " ";
 
-                string signature = string.IsNullOrEmpty(theUser.NickName) ?
-                                Properties.Settings.Default.defaultSignature :
-                                theUser.NickName;
-                if (!signature.Contains('\r'))
+            string signature = string.IsNullOrEmpty(theUser.NickName) ?
+                            Properties.Settings.Default.defaultSignature :
+                            theUser.NickName;
+            if (!signature.Contains('\r'))
+            {
+                string[] lines = signature.Split('\n');
+                if (lines.Length > 1)
                 {
-                    string[] lines = signature.Split('\n');
-                    if (lines.Length > 1)
-                    {
-                        signature = string.Empty;
-                        foreach (string line in lines)
-                            signature += line + "\r\n";
-                    }
+                    signature = string.Empty;
+                    foreach (string line in lines)
+                        signature += line + "\r\n";
                 }
-
-                textBody.Text = string.Format(body, 
-                        textBoxAddressTo.Text,
-                        readableName,
-                        theOrder.ViewOrderURL,
-                        Properties.Settings.Default.PriceOf3DListing,
-                        (theOrder.ExpiresOn - DateTime.Now).Days + 1,
-                        theOrder.ExpiresOn.ToShortTimeString() + " of " + theOrder.ExpiresOn.ToLongDateString(),
-                        DateTime.Now.ToShortDateString(),
-                        mlsId,
-                        signature,
-                        product);
             }
-        }
 
-        private void textBoxAddressTo_TextChanged(object sender, EventArgs e)
-        {
-            UpdateState();
+            if (body.Contains("{ADDRESS_TO}"))
+                body = body.Replace("{ADDRESS_TO}", textBoxAddressTo.Text);
+            if (body.Contains("{VIEWORDER_ADDRESS}"))
+                body = body.Replace("{VIEWORDER_ADDRESS}", readableName);
+            if (body.Contains("{VIEWORDER_URL}"))
+                body = body.Replace("{VIEWORDER_URL}", theOrder.ViewOrderURL);
+            if (body.Contains("{PRICE_NO_TAX}"))
+                body = body.Replace("{PRICE_NO_TAX}", string.Format("{0:00.00}", Properties.Settings.Default.PriceOf3DListing));
+            if (body.Contains("{DAYS_VALID}"))
+                body = body.Replace("{DAYS_VALID}", ((theOrder.ExpiresOn - DateTime.Now).Days + 1).ToString());
+            if (body.Contains("{VALID_UNTIL_TIME_DAY}"))
+                body = body.Replace("{VALID_UNTIL_TIME_DAY}", theOrder.ExpiresOn.ToShortTimeString() + 
+                                                       " of " + theOrder.ExpiresOn.ToLongDateString());
+            if (body.Contains("{TODAYS_DATE}"))
+                body = body.Replace("{TODAYS_DATE}", DateTime.Now.ToShortDateString());
+            if (body.Contains("{MLS_NUMBER}"))
+                body = body.Replace("{MLS_NUMBER}", mlsId);
+            if (body.Contains("{SIGNATURE}"))
+                body = body.Replace("{SIGNATURE}", signature);
+            if (body.Contains("{PRODUCT_NAME}"))
+                body = body.Replace("{PRODUCT_NAME}", product);
+            if (body.Contains("{PAYMENT_REF}"))
+                body = body.Replace("{PAYMENT_REF}", paymentRefId);
+            if (body.Contains("{VTOUR_URL}"))
+                body = body.Replace("{VTOUR_URL}", theOrder.Options == ViewOrder.ViewOrderOptions.FloorPlan ? 
+                                                    "<none>" : theOrder.VTourUrl);
+            if (body.Contains("{TAX}"))
+                body = body.Replace("{TAX}", string.Format("{0:00.00}", tax));
+            if (body.Contains("{PAID_GROSS}"))
+                body = body.Replace("{PAID_GROSS}", string.Format("{0:00.00}", trInfo != null ? 
+                                                    trInfo.GrossAmount : 0.00M));
+            return body;
         }
-
     }
 }

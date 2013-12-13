@@ -6,27 +6,63 @@ import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONException;
+import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 
 public class User implements RequestCallback, I_Login {
 
+	public enum UserRole {
+		Visitor,
+		Agent,
+		SuperAdmin
+	}
+	
 	public static String SID;
+	public static String id;
 	public static int keepAlivePeriodSec;
 	public static User theUser = null;
+	
+	private static boolean firstLogin = true;
+	
+	private static String request;
 
 	I_Login externalInterface = null;
 
-	public static User Login(I_Login loginInterface) {
-		String request = Options.URL_VRT + "program?q=login&role=visitor&uid=web&pwd=web"
-											+ "&generation=" + counter++;
-
+	public static User Login(I_Login loginInterface, 
+			String uid,
+			String pwd,
+			UserRole role) {
+		
+		firstLogin = true;
+		
+		User.request = Options.URL_VRT + "program?q=login";
+		switch (role) {
+		case Visitor:
+			User.request += "&role=visitor";
+			break;
+		case Agent:
+			User.request += "&role=agent";
+			break;
+		case SuperAdmin:
+			User.request += "&role=superadmin";
+			break;
+		default:
+		}
+		if (uid == null || uid.isEmpty())
+			User.request += "&uid=web&pwd=web";
+		else {
+			User.request += "&uid=" + uid + "&pwd=" + pwd;
+		}
 		theUser = new User(loginInterface);
-		GET.send(request, theUser);
+		GET.send(User.request + "&generation=" + counter++, theUser);
 		return theUser;
 	}
 
-	public static User ReLogin() {
-		return Login(null);
+	public static void ReLogin() {
+		
+		firstLogin = false;
+		
+		GET.send(User.request + "&generation=" + counter++, theUser);
 	}
 
 	protected User(I_Login vrEstate) {
@@ -37,7 +73,7 @@ public class User implements RequestCallback, I_Login {
 	}
 	
 	private Timer keepAliveThread = null;
-	private static int counter = 0;
+	private static int counter = Random.nextInt(Integer.MAX_VALUE);
 	
 	@Override
 	public void onResponseReceived(Request request, Response response) {
@@ -45,6 +81,7 @@ public class User implements RequestCallback, I_Login {
 		JSONParams params = JSONParams.parse(json);
 		try {
 			SID = params.getString("sid");
+			id = String.valueOf(params.getInteger("userId"));
 			keepAlivePeriodSec = params.getInteger("keepalivePeriodSec");
 	
 			keepAliveThread = new Timer() {
@@ -57,17 +94,20 @@ public class User implements RequestCallback, I_Login {
 			};
 			keepAliveThread.scheduleRepeating(keepAlivePeriodSec*1000);
 			
-			externalInterface.onLoginSucceed();
+			if (firstLogin)
+				externalInterface.onLoginSucceed();
 		}
 		catch(JSONException e){
-			externalInterface.onLoginFailed(e);
+			if (firstLogin)
+				externalInterface.onLoginFailed(e);
 		}
 	
 	}
 
 	@Override
 	public void onError(Request request, Throwable exception) {
-		externalInterface.onLoginFailed(exception);
+		if (firstLogin)
+			externalInterface.onLoginFailed(exception);
 	}
 
 	private static int reloginTimeSecs = 10;

@@ -58,3 +58,6 @@ classes
 /Clients/Orders/.gwt/.gwt-log
 /Clients/ClientShared/.gwt
 /Clients/Order/.gwt
+/Clients/RtcWeb/WebRtcDemo/war/web-info
+/Clients/RtcWeb/WebRtcDemo/war/webrtcdemo
+

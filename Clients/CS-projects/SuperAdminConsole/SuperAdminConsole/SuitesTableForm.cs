@@ -14,7 +14,7 @@ namespace SuperAdminConsole
 {
     public partial class SuitesTableForm : Form
     {
-        public Vre.Server.BusinessLogic.Suite Suite
+        public Vre.Server.BusinessLogic.SuiteInventory Suite
         {
             private set;
             get;
@@ -32,6 +32,24 @@ namespace SuperAdminConsole
             get;
         }
 
+        public string MLS
+        {
+            private set;
+            get;
+        }
+
+        public string VTourURL
+        {
+            private set;
+            get;
+        }
+
+        public string MoreInfoURL
+        {
+            private set;
+            get;
+        }
+
         public SuitesTableForm(ClientData building)
         {
             InitializeComponent();
@@ -39,14 +57,13 @@ namespace SuperAdminConsole
             this.Text = "Suites for " + Building.ToString();
             int ID = building.GetProperty("id", 0);
             ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
-                                                              "suite",
+                                                              "inventory",
                                                               "building=" + ID, null);
 
             if (HttpStatusCode.OK != resp.ResponseCode)
                 return;
 
-            //ClientData orders = resp.Data.GetNextLevelDataItem("orders");
-            ClientData[] suites = resp.Data.GetNextLevelDataArray("suites");
+            ClientData[] suites = resp.Data.GetNextLevelDataArray("inventory");
 
             Array.Sort(suites, delegate(ClientData first, ClientData second)
             {
@@ -90,6 +107,7 @@ namespace SuperAdminConsole
 
             foreach (ClientData suite in suites)
             {
+                SuiteInventory theSuite = new SuiteInventory(suite);
                 if (floor != suite["floorName"] as string)
                 {
                     floor = suite["floorName"] as string;
@@ -108,35 +126,37 @@ namespace SuperAdminConsole
                     lbl.TabIndex = tabIndex++;
                     this.Controls.Add(lbl);
                 }
-                Vre.Server.BusinessLogic.Suite theSuite = new Vre.Server.BusinessLogic.Suite(suite, Building);
                 Button btn = new Button();
                 btn.Location = button;
                 btn.Size = new Size(ButtonIncrement - 4, 23);
                 btn.Text = theSuite.SuiteName;
                 btn.Tag = theSuite;
                 btn.Visible = true;
-                btn.Enabled = theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Sold;
+                //btn.Enabled = theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Sold;
                 if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Available)
-                    btn.BackColor = Color.FromArgb(128, 255, 128);
+                    btn.BackColor = Color.FromArgb(200, 255, 200);
+                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.ResaleAvailable)
+                    btn.BackColor = Color.FromArgb(200, 255, 255);
+                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.AvailableRent)
+                    btn.BackColor = Color.FromArgb(255, 220, 255);
                 else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.OnHold)
-                    btn.BackColor = Color.FromArgb(255, 255, 128);
-                else if (theSuite.Status != Vre.Server.BusinessLogic.Suite.SalesStatus.Sold)
+                    btn.BackColor = Color.FromArgb(255, 255, 200);
+                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Sold)
                     // TODO: change to 'theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Resale' when it ready
-                    btn.BackColor = Color.FromArgb(128, 255, 255);
+                    btn.BackColor = Color.FromArgb(255, 250, 250);
 
-                btn.UseVisualStyleBackColor = true;
+                //btn.UseVisualStyleBackColor = true;
                 btn.TabIndex = tabIndex++;
                 btn.Click += new System.EventHandler(delegate(object o, EventArgs e)
                     {
                         Button bttn = o as Button;
-                        Suite = bttn.Tag as Vre.Server.BusinessLogic.Suite;
+                        Suite = bttn.Tag as Vre.Server.BusinessLogic.SuiteInventory;
                         string addressLine1 = building.GetProperty("addressLine1", string.Empty);
                         string addressLine2 = building.GetProperty("addressLine2", string.Empty);
                         string city = building.GetProperty("city", string.Empty);
                         string stateProvince = building.GetProperty("stateProvince", string.Empty);
                         string country = building.GetProperty("country", string.Empty);
                         string postal = building.GetProperty("postalCode", string.Empty);
-
                         PostalAddress = string.Format("{0}-{1}, {2}{3}, {4}, {5}, {6}",
                                                         Suite.SuiteName,
                                                         addressLine1,
@@ -145,6 +165,10 @@ namespace SuperAdminConsole
                                                         stateProvince,
                                                         postal,
                                                         country);
+
+                        MLS = theSuite.MLS;
+                        VTourURL = theSuite.VirtualTourURL;
+                        MoreInfoURL = theSuite.MoreInfoURL;
 
                         this.AcceptButton = bttn;
                         DialogResult = System.Windows.Forms.DialogResult.OK;

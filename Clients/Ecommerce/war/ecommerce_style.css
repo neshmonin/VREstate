@@ -1,0 +1,272 @@
+/* -----------------------------------
+Site:       3DCE - order
+CSS author: Tania darash
+
+----------------------------------- */
+
+@media screen
+{
+	/* -----------------------------------
+	simple reset
+	----------------------------------- */
+	
+	html, body, ul, ol, li, form, fieldset, legend
+	{
+		margin: 0;
+		padding: 0;
+	}
+	
+	fieldset, img { border: 0; }
+	legend { color: #000; }
+	
+	input, textarea, select, button
+	{
+		font-size: 100%;
+		line-height: 1.1;
+		font-family: helvetica, arial, sans-serif;
+	}
+	
+
+	
+	ul li { list-style: none; }
+	
+
+	sup { vertical-align: text-top; }
+	sub { vertical-align: text-bottom; }
+	
+	pre, code
+	{
+		font-family: "Courier New", monospace, serif;
+		font-size: 100%;
+		line-height: 1.2;
+	}
+	
+	/* -----------------------------------
+	elements
+	----------------------------------- */
+	
+	body
+	{
+		color: #fff;
+		background: #020510;
+		font: 80% "DejaVu Sans", "URW Gothic L", "Helvetica Neue", Helvetica, Arial, "Microsoft Sans Serif", sans-serif;
+	}
+	
+	h1, h3, h4, h6
+	{
+		margin: 0 0 .5em;
+		color: #d91a64;
+	}
+	
+	h1 { font-size: 140%; }
+	h3 { font-size: 160%; }
+	h4 { font-size: 140%; }
+	h6 { font-size: 100%; }
+	
+	p
+	{
+		margin: 0 0 1.5em;
+		line-height: 1.4;
+	}
+	
+	a:link { color: #69c7b5; }
+	a:visited { color: #7bccfa; }
+	
+	.content ol
+	{
+		line-height: 1.4;
+		padding: 0 0 1.5em 40px;
+	}
+	
+	.content ul
+	{
+		line-height: 1.4;
+		padding: 0 0 1.5em 20px;
+	}
+	
+	.content li { margin: 0 0 .3em; }
+	
+
+	
+	/* -----------------------------------
+	layout
+	----------------------------------- */
+	
+	.container
+	{
+		width: 1000px;
+		margin: 0 auto;
+		color: #000;
+		background: url(images/body_backgr.jpg) repeat #fff;
+	}
+	
+	.content-container
+	{
+		clear: both;
+		padding: 0;
+	}
+	
+	.section-nav
+	{
+		float: left;
+		width: 200px;
+		background: #020510;
+	}
+	
+	.content
+	{
+		float: left;
+		width: 540px;
+		
+	}
+	
+	.sidebar
+	{
+		float: left;
+		width: 200px;
+	}
+	
+	/* -----------------------------------
+	header
+	----------------------------------- */
+	
+	.header
+	{
+		float: left;
+		width: 1000px;
+		position: relative;
+		padding: 0;
+		background: #020510;
+	}
+	
+	h1
+	{
+		margin: 0;
+		padding: 0 0 20px;
+	}
+	
+	h1 img { display: block; }
+	
+	
+	/* -----------------------------------
+	section-nav
+	----------------------------------- */
+	
+	.section-nav li { display: inline; }
+	
+	.section-nav a
+	{
+		display: block;
+		margin: 2px 0 0;
+		color: #fff;
+		background: #1f1d5a;
+		text-decoration: none;
+		text-transform: uppercase;
+	}
+	
+	.section-nav span
+	{
+		display: block;
+		padding: 7px 10px;
+	}
+	
+	.section-nav a:visited { color: #7bccfa; }
+	.section-nav a:hover { background-color: #2a2a77; }
+
+	
+	/* -----------------------------------
+	footer
+	----------------------------------- */
+	
+	.footer
+	{
+		position: relative;
+		clear: both;
+		margin: 0 0 20px;
+		padding: 20px 30px;
+		color: #fff;
+		background: #1f1d5a;
+		font-size: 90%;
+	}
+	
+	.footer li
+	{
+		display: inline;
+		margin: 0 15px 0 0;
+	}
+	
+	.footer a:link, .footer a:visited { color: #fff; }
+	
+	
+	/* -----------------------------------
+	box
+	----------------------------------- */
+	
+	.box
+	{
+		float: left;
+		width: 540px;
+	margin: 0 0 15px;
+	}
+	
+	.inner
+	{
+		float: left;
+		width: 510px;
+		padding: 0 ;
+	}
+	
+	.sidebar .box 
+	{
+		width: 200px; }
+	
+	.sidebar .inner
+	{
+		width: 170px;
+		background: #f7f7f7;
+		padding:15px;
+	}
+	
+.box h3, .box h4, .box h6 { margin: 0 0 .3em; }
+	.box h3 { font-size: 125%; }
+	.box h4 { font-size: 115%; }
+	.box h6 { font-size: 100%; }
+	
+	.box p
+	{
+		margin: 0;
+		padding: 5px 0 ;
+		line-height: 1.3;
+	}
+.box p li, .box p ol 
+	{
+		padding: 5px;
+	}
+	
+	/* -----------------------------------
+	classes
+	----------------------------------- */
+	
+	.structural
+	{
+		position: absolute;
+		left: -500em;
+	}
+	
+	.align-left
+	{
+		float: left;
+		margin: 0 15px 0 0;
+	}
+	
+	.align-right
+	{
+		float: right;
+		margin: 0 0 0 15px;
+	}
+	
+	.align-left img, .align-right img { display: block; }
+	.gutter { margin-left: 20px; }
+	
+
+

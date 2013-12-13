@@ -1,6 +1,8 @@
 package com.condox.clientshared.document;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.condox.clientshared.abstractview.I_AbstractView;
@@ -32,6 +34,7 @@ public class Document implements IDocument, I_Progress
 	private Map<Integer, Suite> suites = new HashMap<Integer, Suite>();
 	private Map<Integer, SuiteType> suite_types = new HashMap<Integer, SuiteType>();
 	private Map<String, ViewOrder> viewOrders = new HashMap<String, ViewOrder>();
+	private List<String> structures = new ArrayList<String>();
 
 	public static ViewOrder targetViewOrder = null;
 
@@ -45,6 +48,7 @@ public class Document implements IDocument, I_Progress
 		} else {
 			SetupProgress(I_Progress.ProgressType.Loading);
 			UpdateProgress(0.0);
+			ParseStructures(json);
 			ParseSuiteTypes(json);
 			UpdateProgress(10.0);
 			ParseBuildings(json);
@@ -295,6 +299,21 @@ public class Document implements IDocument, I_Progress
 		}
 	}
 
+	/*---------- JSON-Structures -----------
+	  "models/2_str.kmz",
+	  "models/3_str.kmz",
+	  ... 
+	---------- JSON-Structures -----------*/
+	private void ParseStructures(String json) {
+		JSONObject obj = JSONParser.parseLenient(json).isObject();
+		JSONArray JSONstructures = obj.get("structures").isArray();
+		structures.clear();
+		for (int index = 0; index < JSONstructures.size(); index++) {
+			JSONString JSONstructure = JSONstructures.get(index).isString();
+			structures.add(JSONstructure.stringValue());
+		}
+	}
+
 	@Override
 	public Map<Integer, Site> getSites() {
 		return this.sites;
@@ -318,6 +337,11 @@ public class Document implements IDocument, I_Progress
 	@Override
 	public Map<String, ViewOrder> getViewOrders() {
 		return this.viewOrders;
+	}
+
+	@Override
+	public List<String> getStructures() {
+		return this.structures;
 	}
 
 	@Override
@@ -364,6 +388,5 @@ public class Document implements IDocument, I_Progress
 		if (progressBar != null)
 			progressBar.CleanupProgress();
 	}
-
 
 }

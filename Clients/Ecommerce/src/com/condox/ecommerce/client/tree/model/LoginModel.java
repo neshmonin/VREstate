@@ -20,8 +20,8 @@ public class LoginModel extends EcommerceTreeNode {
 		 * boolean valid = true; valid &= !sid.isEmpty();
 		 */
 		boolean valid = true;
-		valid &= "web".equals(EcommerceTree.get(Field.UserLogin).asString());
-		valid &= "web".equals(EcommerceTree.get(Field.UserPassword).asString());
+//		valid &= "web".equals(EcommerceTree.get(Field.UserLogin).asString());
+//		valid &= "web".equals(EcommerceTree.get(Field.UserPassword).asString());
 		return valid;
 	}
 

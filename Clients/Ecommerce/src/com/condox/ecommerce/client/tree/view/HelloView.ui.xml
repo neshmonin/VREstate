@@ -1,0 +1,36 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:p1="urn:import:com.google.gwt.user.cellview.client">
+	<ui:style>
+		.important {
+			margin-left: 50px;
+		}
+	</ui:style>
+		<g:VerticalPanel width="100%" height="100%" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+			<g:VerticalPanel borderWidth="3">
+				<g:VerticalPanel spacing="5" width="720px">
+					<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Hyperlink text="Logout" targetHistoryToken="newHistoryToken"/>
+					</g:HorizontalPanel>
+					<g:Label text="Hello!" horizontalAlignment="ALIGN_LEFT"/>
+					<g:HorizontalPanel width="100%">
+						<g:Cell width="50%" horizontalAlignment="ALIGN_CENTER">
+							<g:Button width="80%" text="Update your profile..."/>
+						</g:Cell>
+						<g:Cell width="50%" horizontalAlignment="ALIGN_CENTER">
+							<g:Button width="80%" text="Settings..."/>
+						</g:Cell>
+					</g:HorizontalPanel>
+					<p1:DataGrid ui:field="dataGrid" height="200px"/>
+					<g:HorizontalPanel width="100%">
+						<g:Cell width="50%" horizontalAlignment="ALIGN_CENTER">
+							<g:Button width="80%" text="New Order..."/>
+						</g:Cell>
+						<g:Cell width="50%" horizontalAlignment="ALIGN_CENTER">
+							<g:Button width="80%" text="Show history..." ui:field="button"/>
+						</g:Cell>
+					</g:HorizontalPanel>
+			</g:VerticalPanel>
+			</g:VerticalPanel>
+		</g:VerticalPanel>
+</ui:UiBinder> 

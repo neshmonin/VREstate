@@ -129,14 +129,12 @@ public class GE extends GoogleEarthWidget{
 
 	// =====================================================
 
-	private String EARTH_API_KEY = "ABQIAAAAm7LIvLNR-PkJLewH4qmS7hREGtQZq9OFJfHndXhPP8gxXzlLARQtA_EfZjc9zs77WO25FrLcaZ4ZVA";
 	VREstate vrEstate = null;
 
-	@SuppressWarnings("deprecation")
 	public void Init(VREstate vrEstate) {
 		this.vrEstate = vrEstate;
 		//GoogleEarth.loadApi(new Runnable(){ // for latest versions of gwt-earth
-		GoogleEarth.loadApi(EARTH_API_KEY, new Runnable(){
+		GoogleEarth.loadApi(new Runnable(){
             @Override
             public void run() {
                onApiLoaded(); // start the application                          

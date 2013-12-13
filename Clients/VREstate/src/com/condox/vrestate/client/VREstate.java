@@ -11,8 +11,8 @@ import com.condox.clientshared.document.Building;
 import com.condox.clientshared.document.Document;
 import com.condox.clientshared.document.Site;
 import com.condox.vrestate.client.ge.GE;
-import com.condox.vrestate.client.my.PopupContainer;
-import com.condox.vrestate.client.my.VREstateTree;
+import com.condox.vrestate.client.tree.PopupContainer;
+import com.condox.vrestate.client.tree.VREstateTree;
 import com.condox.vrestate.client.view.HelicopterView;
 import com.condox.vrestate.client.view.ProgressBar;
 import com.condox.vrestate.client.view.SiteView;
@@ -26,9 +26,12 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.ui.HTML;
 import com.nitrous.gwt.earth.client.api.GEHtmlStringBalloon;
+import com.nitrous.gwt.earth.client.api.GEPlugin;
 import com.nitrous.gwt.earth.client.api.KmlContainer;
 import com.nitrous.gwt.earth.client.api.KmlFeature;
+import com.nitrous.gwt.earth.client.api.KmlLink;
 import com.nitrous.gwt.earth.client.api.KmlMouseEvent;
+import com.nitrous.gwt.earth.client.api.KmlNetworkLink;
 import com.nitrous.gwt.earth.client.api.KmlObject;
 import com.nitrous.gwt.earth.client.api.KmlObjectList;
 import com.nitrous.gwt.earth.client.api.KmlPlacemark;
@@ -77,7 +80,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 	// }-*/;
 
 	public void LoginUser() {
-		User.Login(this);
+		User.Login(this, "web", "web", User.UserRole.Visitor);
 	};
 
 	private GE ge = null;
@@ -108,30 +111,52 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 		String json = response.getText();
 		Document.progressBar = new ProgressBar();
 		if (Document.get().Parse(json)) {
-			Site site = (Site) Document.get().getSites().values().toArray()[0];
+			GEPlugin ge = GE.getPlugin();
+			for (String structrure : Document.get().getStructures()) {
+				KmlNetworkLink networkLink = ge.createNetworkLink("");
+				//networkLink.setDescription("NetworkLink open to fetched content");
+				//networkLink.setName("Open NetworkLink");
+				networkLink.setFlyToView(false);
+		 
+				// create a Link object
+				KmlLink link = ge.createLink("");
+				link.setHref(Options.URL_MODELS + structrure);
+		 
+				// attach the Link to the NetworkLink
+				networkLink.setLink(link);
+		 
+				// add the NetworkLink feature to Earth
+				ge.getFeatures().appendChild(networkLink);
+			}
+			
+			for (Site site : Document.get().getSites().values()) {
+				if (site.getPOIUrl() != "")
+					ge.fetchKml(site.getPOIUrl(), this);
+			}
 			boolean useSiteModel = true;
 			for (Building bldng : Document.get().getBuildings().values()) {
 				if (bldng.getDisplayModelUrl() != "") {
-					GE.getPlugin().fetchKml(bldng.getDisplayModelUrl(),
+					ge.fetchKml(bldng.getDisplayModelUrl(),
 							this);
 					useSiteModel = false;
 				}
 				if (bldng.getOverlayUrl() != "")
-					GE.getPlugin().fetchKml(bldng.getOverlayUrl(), this);
+					ge.fetchKml(bldng.getOverlayUrl(), this);
 				if (bldng.getPOIUrl() != "")
-					GE.getPlugin().fetchKml(bldng.getPOIUrl(), this);
+					ge.fetchKml(bldng.getPOIUrl(), this);
 			}
+
+			Site theSite = (Site) Document.get().getSites().values().toArray()[0];
 			if (useSiteModel)
-				if (site.getDisplayModelUrl() != "")
-					GE.getPlugin()
-							.fetchKml(site.getDisplayModelUrl(), this);
+				if (theSite.getDisplayModelUrl() != "")
+					ge.fetchKml(theSite.getDisplayModelUrl(), this);
 
 			_AbstractView.CreateAllGeoItems();
 
 			switch (Options.ROLE) {
 			case KIOSK: {
 				_AbstractView.enableTimeout(true);
-				int id = site.getId();
+				int id = theSite.getId();
 				SiteGeoItem geoItem = _AbstractView.getSiteGeoItem(id);
 				firstView = new HelicopterView(geoItem);
 				_AbstractView.ResetTimeOut();
@@ -139,7 +164,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 			}
 			case VISITOR: {
 				_AbstractView.enableTimeout(false);
-				int id = site.getId();
+				int id = theSite.getId();
 				SiteGeoItem geoItem = _AbstractView.getSiteGeoItem(id);
 				firstView = new SiteView(geoItem);
 				break;

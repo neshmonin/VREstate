@@ -87,19 +87,12 @@
     <Compile Include="NewAccount.Designer.cs">
       <DependentUpon>NewAccount.cs</DependentUpon>
     </Compile>
-    <Compile Include="NewEstateDeveloper.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="NewEstateDeveloper.Designer.cs">
-      <DependentUpon>NewEstateDeveloper.cs</DependentUpon>
-    </Compile>
     <Compile Include="Note.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Note.Designer.cs">
       <DependentUpon>Note.cs</DependentUpon>
     </Compile>
-    <Compile Include="Settings.cs" />
     <Compile Include="SetViewOrder.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -145,9 +138,6 @@
     <EmbeddedResource Include="NewAccount.resx">
       <DependentUpon>NewAccount.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="NewEstateDeveloper.resx">
-      <DependentUpon>NewEstateDeveloper.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Note.resx">
       <DependentUpon>Note.cs</DependentUpon>
     </EmbeddedResource>
@@ -191,6 +181,10 @@
     <Content Include="Icon1.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Server\Common\Common.csproj">
+      <Project>{C579EB0B-5B93-4E2B-ABC5-F0B5B1798702}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\Server\vrebo\vrebo.csproj">
       <Project>{60458EA7-5B11-4E8B-8644-4538CD08FAFD}</Project>
       <Name>vrebo</Name>

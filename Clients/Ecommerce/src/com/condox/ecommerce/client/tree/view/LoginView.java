@@ -1,19 +1,18 @@
 package com.condox.ecommerce.client.tree.view;
 
-import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.presenter.LoginPresenter;
 import com.condox.ecommerce.client.tree.presenter.LoginPresenter.I_Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.user.client.ui.Widget;
 
 public class LoginView extends Composite implements I_Display {
 
@@ -25,8 +24,6 @@ public class LoginView extends Composite implements I_Display {
 	TextBox textUserPassword;
 	@UiField
 	Button buttonEnter;
-	@UiField
-	Button buttonCancel;
 
 	interface LoginViewUiBinder extends UiBinder<Widget, LoginView> {
 	}
@@ -46,31 +43,26 @@ public class LoginView extends Composite implements I_Display {
 
 	@Override
 	public String getUserLogin() {
-		if (user)
-			return textUserLogin.getValue();
-		else if (guest)
-			return "web";
-		return "";
+//		if (user)
+//			return textUserLogin.getValue();
+//		else if (guest)
+//			return "web";
+		return "adminan";
 
 	}
 
 	@Override
 	public String getUserPassword() {
-		if (user)
-			return textUserPassword.getValue();
-		else if (guest)
-			return "web";
-		return "";
+//		if (user)
+//			return textUserPassword.getValue();
+//		else if (guest)
+//			return "web";
+		return "smelatoronto";
 	}
 
 	@UiHandler("buttonEnter")
 	void onButtonEnterClick(ClickEvent event) {
-		presenter.onEnter();
-	}
-
-	@UiHandler("buttonCancel")
-	void onButtonCancelClick(ClickEvent event) {
-		EcommerceTree.cancel();
+		presenter.onLogin();
 	}
 
 	@UiHandler("textUserLogin")

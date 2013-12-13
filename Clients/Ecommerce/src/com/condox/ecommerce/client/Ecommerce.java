@@ -1,6 +1,5 @@
 package com.condox.ecommerce.client;
 
-import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.Options;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.PopupContainer;
@@ -19,12 +18,13 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 	public void onModuleLoad() {
 		Options.Init();
 		History.addValueChangeHandler(this);
+//		History.newItem("login");
 	}
 
 	@Override
 	public void onValueChange(ValueChangeEvent<String> event) {
 		String token = event.getValue();
-		Log.write(token);
+//		Log.write(token);
 		if ("login".equals(token))
 			startWizard();
 		else if("orderNow".equals(token))

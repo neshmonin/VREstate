@@ -68,7 +68,8 @@ public class Options implements RequestCallback {
 		// - GWT.getPermutationStrongName()	   = HostedMode
 		// - GWT.getVersion() 				   = 2.5.0
 		// - GWT.isProdMode() 				   = false
-		URL_VRT = GWT.getHostPageBaseURL();
+		
+		URL_VRT = GWT.getHostPageBaseURL();		
 		String ModuleName = GWT.getModuleName();
 		// in the Order project, they have vrt.3dcondox.com/order/
 		if (URL_VRT.endsWith(ModuleName + "/"))
