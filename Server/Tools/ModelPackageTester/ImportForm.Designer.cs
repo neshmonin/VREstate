@@ -72,6 +72,7 @@
 			this.label17 = new System.Windows.Forms.Label();
 			this.lblBubbleKioskTemplateFile = new System.Windows.Forms.Label();
 			this.btnBubbleKioskTemplateBrowse = new System.Windows.Forms.Button();
+			this.cbDoMlsImport = new System.Windows.Forms.CheckBox();
 			this.panel1.SuspendLayout();
 			this.panel2.SuspendLayout();
 			this.SuspendLayout();
@@ -168,7 +169,7 @@
 			this.tbResults.Name = "tbResults";
 			this.tbResults.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
 			this.tbResults.Size = new System.Drawing.Size(578, 176);
-			this.tbResults.TabIndex = 4;
+			this.tbResults.TabIndex = 11;
 			// 
 			// btnDisplayModelBrowse
 			// 
@@ -176,7 +177,7 @@
 			this.btnDisplayModelBrowse.Location = new System.Drawing.Point(418, 179);
 			this.btnDisplayModelBrowse.Name = "btnDisplayModelBrowse";
 			this.btnDisplayModelBrowse.Size = new System.Drawing.Size(75, 23);
-			this.btnDisplayModelBrowse.TabIndex = 2;
+			this.btnDisplayModelBrowse.TabIndex = 3;
 			this.btnDisplayModelBrowse.Text = "Browse";
 			this.btnDisplayModelBrowse.UseVisualStyleBackColor = true;
 			this.btnDisplayModelBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
@@ -186,13 +187,14 @@
 			this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+			this.panel1.Controls.Add(this.cbDoMlsImport);
 			this.panel1.Controls.Add(this.btnImport);
 			this.panel1.Controls.Add(this.cbAutoSaveSettings);
 			this.panel1.Controls.Add(this.cbDryRun);
 			this.panel1.Location = new System.Drawing.Point(15, 379);
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(578, 31);
-			this.panel1.TabIndex = 8;
+			this.panel1.TabIndex = 10;
 			// 
 			// btnImport
 			// 
@@ -211,10 +213,10 @@
 			this.cbAutoSaveSettings.Checked = true;
 			this.cbAutoSaveSettings.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.cbAutoSaveSettings.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.cbAutoSaveSettings.Location = new System.Drawing.Point(300, 6);
+			this.cbAutoSaveSettings.Location = new System.Drawing.Point(404, 7);
 			this.cbAutoSaveSettings.Name = "cbAutoSaveSettings";
 			this.cbAutoSaveSettings.Size = new System.Drawing.Size(169, 17);
-			this.cbAutoSaveSettings.TabIndex = 0;
+			this.cbAutoSaveSettings.TabIndex = 3;
 			this.cbAutoSaveSettings.Text = "Auto-save import settings";
 			this.cbAutoSaveSettings.UseVisualStyleBackColor = true;
 			// 
@@ -229,6 +231,7 @@
 			this.cbDryRun.TabIndex = 0;
 			this.cbDryRun.Text = "Dry run";
 			this.cbDryRun.UseVisualStyleBackColor = true;
+			this.cbDryRun.CheckedChanged += new System.EventHandler(this.cbDryRun_CheckedChanged);
 			// 
 			// cbxNewSuiteStatus
 			// 
@@ -237,7 +240,7 @@
 			this.cbxNewSuiteStatus.Location = new System.Drawing.Point(154, 352);
 			this.cbxNewSuiteStatus.Name = "cbxNewSuiteStatus";
 			this.cbxNewSuiteStatus.Size = new System.Drawing.Size(162, 21);
-			this.cbxNewSuiteStatus.TabIndex = 3;
+			this.cbxNewSuiteStatus.TabIndex = 9;
 			// 
 			// label6
 			// 
@@ -268,7 +271,7 @@
 			this.panel2.Location = new System.Drawing.Point(12, 60);
 			this.panel2.Name = "panel2";
 			this.panel2.Size = new System.Drawing.Size(581, 114);
-			this.panel2.TabIndex = 10;
+			this.panel2.TabIndex = 2;
 			// 
 			// tbCountry
 			// 
@@ -394,7 +397,7 @@
 			this.cbxDeveloper.Location = new System.Drawing.Point(154, 5);
 			this.cbxDeveloper.Name = "cbxDeveloper";
 			this.cbxDeveloper.Size = new System.Drawing.Size(258, 21);
-			this.cbxDeveloper.TabIndex = 11;
+			this.cbxDeveloper.TabIndex = 0;
 			this.cbxDeveloper.SelectedIndexChanged += new System.EventHandler(this.cbxDeveloper_TextChanged);
 			this.cbxDeveloper.TextChanged += new System.EventHandler(this.cbxDeveloper_TextChanged);
 			// 
@@ -428,7 +431,7 @@
 			this.btnOverlayModelBrowse.Location = new System.Drawing.Point(418, 208);
 			this.btnOverlayModelBrowse.Name = "btnOverlayModelBrowse";
 			this.btnOverlayModelBrowse.Size = new System.Drawing.Size(75, 23);
-			this.btnOverlayModelBrowse.TabIndex = 2;
+			this.btnOverlayModelBrowse.TabIndex = 4;
 			this.btnOverlayModelBrowse.Text = "Browse";
 			this.btnOverlayModelBrowse.UseVisualStyleBackColor = true;
 			this.btnOverlayModelBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
@@ -465,7 +468,7 @@
 			this.btnPoiModelBrowse.Location = new System.Drawing.Point(418, 237);
 			this.btnPoiModelBrowse.Name = "btnPoiModelBrowse";
 			this.btnPoiModelBrowse.Size = new System.Drawing.Size(75, 23);
-			this.btnPoiModelBrowse.TabIndex = 2;
+			this.btnPoiModelBrowse.TabIndex = 5;
 			this.btnPoiModelBrowse.Text = "Browse";
 			this.btnPoiModelBrowse.UseVisualStyleBackColor = true;
 			this.btnPoiModelBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
@@ -486,7 +489,7 @@
 			this.cbxNewBuildingStatus.Location = new System.Drawing.Point(154, 325);
 			this.cbxNewBuildingStatus.Name = "cbxNewBuildingStatus";
 			this.cbxNewBuildingStatus.Size = new System.Drawing.Size(162, 21);
-			this.cbxNewBuildingStatus.TabIndex = 3;
+			this.cbxNewBuildingStatus.TabIndex = 8;
 			// 
 			// label16
 			// 
@@ -518,7 +521,7 @@
 			this.btnBubbleWebTemplateBrowse.Location = new System.Drawing.Point(418, 266);
 			this.btnBubbleWebTemplateBrowse.Name = "btnBubbleWebTemplateBrowse";
 			this.btnBubbleWebTemplateBrowse.Size = new System.Drawing.Size(75, 23);
-			this.btnBubbleWebTemplateBrowse.TabIndex = 2;
+			this.btnBubbleWebTemplateBrowse.TabIndex = 6;
 			this.btnBubbleWebTemplateBrowse.Text = "Browse";
 			this.btnBubbleWebTemplateBrowse.UseVisualStyleBackColor = true;
 			this.btnBubbleWebTemplateBrowse.Click += new System.EventHandler(this.btnBrowse2_Click);
@@ -553,10 +556,23 @@
 			this.btnBubbleKioskTemplateBrowse.Location = new System.Drawing.Point(418, 296);
 			this.btnBubbleKioskTemplateBrowse.Name = "btnBubbleKioskTemplateBrowse";
 			this.btnBubbleKioskTemplateBrowse.Size = new System.Drawing.Size(75, 23);
-			this.btnBubbleKioskTemplateBrowse.TabIndex = 2;
+			this.btnBubbleKioskTemplateBrowse.TabIndex = 7;
 			this.btnBubbleKioskTemplateBrowse.Text = "Browse";
 			this.btnBubbleKioskTemplateBrowse.UseVisualStyleBackColor = true;
 			this.btnBubbleKioskTemplateBrowse.Click += new System.EventHandler(this.btnBrowse2_Click);
+			// 
+			// cbDoMlsImport
+			// 
+			this.cbDoMlsImport.AutoSize = true;
+			this.cbDoMlsImport.Checked = true;
+			this.cbDoMlsImport.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.cbDoMlsImport.Enabled = false;
+			this.cbDoMlsImport.Location = new System.Drawing.Point(218, 7);
+			this.cbDoMlsImport.Name = "cbDoMlsImport";
+			this.cbDoMlsImport.Size = new System.Drawing.Size(181, 17);
+			this.cbDoMlsImport.TabIndex = 2;
+			this.cbDoMlsImport.Text = "Include retrospective MLS import";
+			this.cbDoMlsImport.UseVisualStyleBackColor = true;
 			// 
 			// ImportForm
 			// 
@@ -653,5 +669,6 @@
         private System.Windows.Forms.Label lblBubbleKioskTemplateFile;
         private System.Windows.Forms.Button btnBubbleKioskTemplateBrowse;
 		private System.Windows.Forms.CheckBox cbAutoSaveSettings;
+		private System.Windows.Forms.CheckBox cbDoMlsImport;
     }
 }

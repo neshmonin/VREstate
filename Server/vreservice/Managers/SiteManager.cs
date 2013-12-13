@@ -785,8 +785,8 @@ namespace Vre.Server.BusinessLogic
 						ServiceInstances.Logger.Info("Added MLS info for {0}", item.MlsId);
 					}
 				}
-				tran.Commit();
 				_session.DbSession.Flush();  // required to ensure "info" gets flushed before it is GC-ed
+				tran.Commit();
 			}
 		}
 	}

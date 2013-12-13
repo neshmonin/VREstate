@@ -82,12 +82,20 @@ namespace Vre.Server.Task
 		private static IEnumerable<string> getAllPublicFilesUsedByDb(
 			ISession dbSession)
 		{
+			using (var dao = new StructureDao(dbSession))
+			{
+				foreach (var s in dao.GetAll())
+				{
+					if (!string.IsNullOrEmpty(s.DisplayModelUrl)) yield return s.DisplayModelUrl;
+				}
+			}
 			using (var dao = new SiteDao(dbSession))
 			{
 				foreach (var s in dao.GetAll())
 				{
 					if (!string.IsNullOrEmpty(s.DisplayModelUrl)) yield return s.DisplayModelUrl;
 					if (!string.IsNullOrEmpty(s.OverlayModelUrl)) yield return s.OverlayModelUrl;
+					if (!string.IsNullOrEmpty(s.PoiModelUrl)) yield return s.PoiModelUrl;
 					if (!string.IsNullOrEmpty(s.BubbleKioskTemplateUrl)) yield return s.BubbleKioskTemplateUrl;
 					if (!string.IsNullOrEmpty(s.BubbleWebTemplateUrl)) yield return s.BubbleWebTemplateUrl;
 				}
@@ -98,7 +106,7 @@ namespace Vre.Server.Task
 				{
 					if (!string.IsNullOrEmpty(b.DisplayModelUrl)) yield return b.DisplayModelUrl;
 					if (!string.IsNullOrEmpty(b.OverlayModelUrl)) yield return b.OverlayModelUrl;
-					if (!string.IsNullOrEmpty(b.PoiModelUrl)) yield return b.PoiModelUrl;
+					//if (!string.IsNullOrEmpty(b.PoiModelUrl)) yield return b.PoiModelUrl;
 					if (!string.IsNullOrEmpty(b.BubbleKioskTemplateUrl)) yield return b.BubbleKioskTemplateUrl;
 					if (!string.IsNullOrEmpty(b.BubbleWebTemplateUrl)) yield return b.BubbleWebTemplateUrl;
 				}

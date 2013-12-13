@@ -313,7 +313,13 @@ namespace Vre.Server.RemoteService
                 case BusinessLogic.User.Role.SellingAgent:
                     return string.Format("sellingagent-{0}", AuthLogin);
 
-                case BusinessLogic.User.Role.Kiosk:
+				case BusinessLogic.User.Role.BuyingAgent:
+					return string.Format("buyingagent-{0}", AuthLogin);
+
+				case BusinessLogic.User.Role.Agent:
+					return string.Format("agent-{0}", AuthLogin);
+
+				case BusinessLogic.User.Role.Kiosk:
                     return string.Format("ed{0}-kiosk-{1}", User.EstateDeveloperID, AuthLogin);
 
                 case BusinessLogic.User.Role.Visitor:

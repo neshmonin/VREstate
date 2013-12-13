@@ -35,6 +35,11 @@ namespace Vre
 			return result.ToString();
 		}
 
+		public static void Foreach<T>(this IEnumerable<T> coll, Action<T> op)
+		{
+			foreach (T e in coll) op(e);
+		}
+
 		public static bool Compare(this byte[] left, byte[] right)
 		{
 			if (null == left)

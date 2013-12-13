@@ -10,7 +10,8 @@ namespace Vre.Server.Command
         {
             _commands = new Dictionary<string, ICommand>();
             addCommand(new ModelImport());
-            addCommand(new TaskRunner());
+			addCommand(new StructureImport());
+			addCommand(new TaskRunner());
         }
 
         private static void addCommand(ICommand cmd) { _commands.Add(cmd.Name, cmd); }

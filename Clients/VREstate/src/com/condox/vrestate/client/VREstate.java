@@ -129,9 +129,10 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 				ge.getFeatures().appendChild(networkLink);
 			}
 			
-			Site site = (Site) Document.get().getSites().values().toArray()[0];
-			if (site.getPOIUrl() != "")
-				ge.fetchKml(site.getPOIUrl(), this);
+			for (Site site : Document.get().getSites().values()) {
+				if (site.getPOIUrl() != "")
+					ge.fetchKml(site.getPOIUrl(), this);
+			}
 			boolean useSiteModel = true;
 			for (Building bldng : Document.get().getBuildings().values()) {
 				if (bldng.getDisplayModelUrl() != "") {
@@ -144,16 +145,18 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 				if (bldng.getPOIUrl() != "")
 					ge.fetchKml(bldng.getPOIUrl(), this);
 			}
+
+			Site theSite = (Site) Document.get().getSites().values().toArray()[0];
 			if (useSiteModel)
-				if (site.getDisplayModelUrl() != "")
-					ge.fetchKml(site.getDisplayModelUrl(), this);
+				if (theSite.getDisplayModelUrl() != "")
+					ge.fetchKml(theSite.getDisplayModelUrl(), this);
 
 			_AbstractView.CreateAllGeoItems();
 
 			switch (Options.ROLE) {
 			case KIOSK: {
 				_AbstractView.enableTimeout(true);
-				int id = site.getId();
+				int id = theSite.getId();
 				SiteGeoItem geoItem = _AbstractView.getSiteGeoItem(id);
 				firstView = new HelicopterView(geoItem);
 				_AbstractView.ResetTimeOut();
@@ -161,7 +164,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 			}
 			case VISITOR: {
 				_AbstractView.enableTimeout(false);
-				int id = site.getId();
+				int id = theSite.getId();
 				SiteGeoItem geoItem = _AbstractView.getSiteGeoItem(id);
 				firstView = new SiteView(geoItem);
 				break;

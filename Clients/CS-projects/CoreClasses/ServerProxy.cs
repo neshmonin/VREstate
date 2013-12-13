@@ -331,6 +331,9 @@ namespace CoreClasses
                     if (null == response) throw new InvalidOperationException("Http request returned invalid result.");
 
                     //if (response.ContentType.Equals("application/json"))  TODO !!!
+                    Trace.WriteLine("response.StatusCode=" +
+                                     response.StatusCode + 
+                                     " (" + response.StatusDescription + ")");
                     respData = JavaScriptHelper.JsonToClientData(response.GetResponseStream());
                     if (respData != null)
                     {
