@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 
 public class LoginView extends Composite implements I_Display {
 
@@ -22,10 +23,10 @@ public class LoginView extends Composite implements I_Display {
 	@UiField
 	TextBox textUserEmail;
 	@UiField
-	TextBox textUserPassword;
-	@UiField
 	Button buttonEnter;
 	@UiField Hyperlink hyperlink;
+	@UiField Button buttonClose;
+	@UiField PasswordTextBox textUserPassword;
 
 	interface LoginViewUiBinder extends UiBinder<Widget, LoginView> {
 	}
@@ -113,5 +114,10 @@ public class LoginView extends Composite implements I_Display {
 	@Override
 	public String getUserPassword() {
 		return textUserPassword.getValue();
+	}
+	@UiHandler("buttonClose")
+	void onButtonCloseClick(ClickEvent event) {
+		if (presenter != null)
+			presenter.onClose();
 	}
 }

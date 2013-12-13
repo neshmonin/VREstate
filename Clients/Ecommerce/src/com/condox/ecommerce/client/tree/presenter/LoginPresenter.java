@@ -99,4 +99,8 @@ public class LoginPresenter implements I_Presenter, I_Login {
 	public void onLoginFailed(Throwable exception) {
 		Window.alert("Login failed.");
 	}
+
+	public void onClose() {
+		node.getTree().close();
+	}
 }

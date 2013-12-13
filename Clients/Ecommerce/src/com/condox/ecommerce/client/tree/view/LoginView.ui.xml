@@ -7,14 +7,21 @@
 			margin-left: 50px;
 			background-color: slateblue;
 		}
+
+		
 	</ui:style>
+		<g:SimplePanel>
 	<g:VerticalPanel spacing="5" horizontalAlignment="ALIGN_CENTER"
 		verticalAlignment="ALIGN_MIDDLE" width="100%" height="100%">
+		<g:HorizontalPanel horizontalAlignment="ALIGN_RIGHT"
+			width="100%">
+			<g:Button text="Close" ui:field="buttonClose" />
+		</g:HorizontalPanel>
 		<g:Label text="Sign In" horizontalAlignment="ALIGN_CENTER" />
 		<g:Label text="eMail*" horizontalAlignment="ALIGN_LEFT" />
 		<g:TextBox ui:field="textUserEmail" />
 		<g:Label text="Password*" horizontalAlignment="ALIGN_LEFT" />
-		<g:TextBox ui:field="textUserPassword" />
+		<g:PasswordTextBox ui:field="textUserPassword"/>
 		<g:Cell horizontalAlignment="ALIGN_CENTER">
 			<g:Hyperlink text="Forgot password?" ui:field="hyperlink" />
 		</g:Cell>
@@ -22,4 +29,5 @@
 			<g:Button width="80%" text="Login" ui:field="buttonEnter" />
 		</g:HorizontalPanel>
 	</g:VerticalPanel>
+		</g:SimplePanel>
 </ui:UiBinder> 

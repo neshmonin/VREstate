@@ -50,6 +50,7 @@ public class EcommerceTree {
 	private List<String> leafs = new ArrayList<String>();
 	
 	public void config() {
+		
 		// Forgot password node
 //		leafs.add("DefaultsNode/LoginNode.ForgotPassword/ForgotPasswordNode.Close=>DefaultsNode/LoginNode");
 //		leafs.add("DefaultsNode/LoginNode.ForgotPassword/ForgotPasswordNode.Submit/ChangingPasswordNode.Ok=>DefaultsNode/LoginNode");
@@ -212,5 +213,9 @@ public class EcommerceTree {
 		
 		FILTERING_BY_CITY, VirtualTourUrl, MoreInfoUrl // TODO review this constants
 		
+	}
+	
+	public void close() {
+		container.clear();
 	}
 }
