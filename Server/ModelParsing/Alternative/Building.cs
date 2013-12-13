@@ -6,44 +6,24 @@ using System.Xml;
 
 namespace Vre.Server.Model.Kmz
 {
-    public class Building
+    public class Building : ArchUnit
     {
         public const string XmlPrefix = "_building_";
-        public string Id { get; private set; }
-        public string Name { get; private set; }
-        public string Type { get; private set; }
-        public IEnumerable<Suite> Suites { get { return _suites; } }
-        /// <summary>
-        /// Currently this is calculated IMPROPERLY
-        /// </summary>
-        public EcefViewPoint LocationCart { get; private set; }
-        /// <summary>
-        /// Calculated in alternative way compared to <see cref="LocationCart"/>; tested to be correct.
-        /// </summary>
-        public ViewPoint LocationGeo { get; private set; }
-        public double UnitInMeters { get; private set; }
+		protected override string UnitTypeName { get { return "Building"; } }
 
-        private List<Suite> _suites;
-        private TMatrix _transformation;
-        internal ConstructionSite _site;
+		public IEnumerable<Suite> Suites { get { return _suites; } }
 
-        public Building(ConstructionSite parent, string id, string buildingName, string buildingType, XmlNode buildingModel, 
-            Dictionary<string, XmlNode> models, TMatrix tMatrix)
-        {
-            StringBuilder fatalErrors = new StringBuilder();
-            Id = id;
-            UnitInMeters = parent.UnitInMeters;
-            Name = buildingName;
-            Type = buildingType;
-            LocationCart = tMatrix.Transform(parent.LocationCart);
-            LocationGeo = tMatrix.Point3D2ViewPoint(tMatrix.Transform(new Geometry.Point3D(0.0, 0.0, 0.0)), parent.LocationGeo);
-            LocationGeo.Heading += tMatrix.Heading_d_patch; if (LocationGeo.Heading >= 360.0) LocationGeo.Heading -= 360.0;
-            _suites = new List<Suite>();
+		private List<Suite> _suites;
 
-            _site = parent;
-            _transformation = tMatrix;
+		public Building(ConstructionSite parent, string id, string unitName, string unitType, XmlNode unitModel,
+			Dictionary<string, XmlNode> models, TMatrix tMatrix)
+			: base(parent, id, unitName, unitType, unitModel, models, tMatrix) { }
 
-            foreach (XmlNode n in buildingModel.ChildNodes)
+        protected override void init(XmlNode unitModel, Dictionary<string, XmlNode> models, StringBuilder fatalErrors)
+		{
+			_suites = new List<Suite>();
+
+            foreach (XmlNode n in unitModel.ChildNodes)
             {
                 XmlAttribute na, nna;
                 XmlNode nn;
@@ -90,11 +70,6 @@ namespace Vre.Server.Model.Kmz
                     }
                 }
             }
-
-            if (fatalErrors.Length > 0)
-                throw new InvalidDataException(string.Format(
-                    "Building Name \'{0}\'({1}) - detected problems: {2}", 
-                    buildingName, buildingType, fatalErrors.ToString()));
         }
     }
 }

@@ -18,6 +18,7 @@ namespace ModelPackageTester
     public partial class MainForm : Form
     {
         private ModelImportSettings _settings = null;
+		private ModelImportSettings.Mode _importMode = ModelImportSettings.Mode.Site;
         private string _modelFileName = null;
         private Kmz _lastModel = null;
         private string _stiFileName = null;
@@ -31,8 +32,8 @@ namespace ModelPackageTester
 
             readWarnings.AppendFormat("    MODEL:   {0}\r\n    TYPES:    {1}\r\n    PLANS:    {2}\r\n",
                                         _modelFileName,
-                                        _stiFileName,
-                                        _floorPlanPath);
+                                        _stiFileName ?? "N/A",
+                                        _floorPlanPath ?? "N/A");
 
             readWarnings.Append("\r\nStep 1: =========== Reading in and parsing the KMZ =============");
             // Parse KMZ into object model
@@ -55,144 +56,169 @@ namespace ModelPackageTester
 
             readWarnings.AppendFormat("\r\n    BUILDING LIST: {0}",
                 CsvUtilities.ToString(_lastModel.Model.Site.Buildings.ConvertTo(b => b.Name)));
+			readWarnings.AppendFormat("\r\n    STRUCTURES LIST: {0}",
+				CsvUtilities.ToString(_lastModel.Model.Site.Structures.ConvertTo(s => s.Name)));
 
-            readWarnings.Append("\r\nStep 2: =========== Reading in and parsing the CSV =============");
-            // Read in CSV
-            //
-            CsvSuiteTypeInfo info = null;
-            try
-            {
-                int len = readWarnings.Length;
-                info = new CsvSuiteTypeInfo(_stiFileName, readWarnings);
-                if (readWarnings.Length != len) canImport = false;
-            }
-            catch (ArgumentException ae)
-            {
-                readWarnings.Append("\r\n");
-                readWarnings.Append(ae.Message);
-                readWarnings.Append("\r\n\r\nTEST NOT PASSED.");
-                return readWarnings.ToString();
-            }
+			if ((_importMode == ModelImportSettings.Mode.Building)
+				|| (_importMode == ModelImportSettings.Mode.Site))
+			{
+				if (0 == _lastModel.Model.Site.Buildings.Count())
+				{
+					readWarnings.Append("\r\nMDCT01: No buildings found in KMZ.");
+					canImport = false;
+				}
 
-            readWarnings.Append("\r\nStep 3: =========== Binding floorplan files to the Model =============");
-            // Test floor plan files presense
-            //
-            foreach (string stn in info.TypeInfoList)
-            {
-                string file = info.GetFloorPlanFileName(stn);
-                if (!string.IsNullOrWhiteSpace(file))
-                {
-                    file = Path.Combine(_floorPlanPath, file.Replace('/', '\\'));
-                    if (!File.Exists(file))
-                    {
-                        readWarnings.AppendFormat("\r\nFPFS00: Suite type \'{0}\' lists floor plan {1} which does not exist.", stn, file);
-                        canImport = false;
-                    }
-                }
-                //else
-                //{
-                //    readWarnings.AppendFormat("\r\nSTMD00: suite type {0} lists no floor plan.", stn);
-                //    canImport = false;
-                //}
-            }
+				readWarnings.Append("\r\nStep 2: =========== Reading in and parsing the CSV =============");
+				// Read in CSV
+				//
+				CsvSuiteTypeInfo info = null;
+				try
+				{
+					int len = readWarnings.Length;
+					info = new CsvSuiteTypeInfo(_stiFileName, readWarnings);
+					if (readWarnings.Length != len) canImport = false;
+				}
+				catch (ArgumentException ae)
+				{
+					readWarnings.Append("\r\n");
+					readWarnings.Append(ae.Message);
+					readWarnings.Append("\r\n\r\nTEST NOT PASSED.");
+					return readWarnings.ToString();
+				}
 
-            readWarnings.Append("\r\nStep 4: =========== Cross-reference testing =============");
+				readWarnings.Append("\r\nStep 3: =========== Binding floorplan files to the Model =============");
+				// Test floor plan files presense
+				//
+				foreach (string stn in info.TypeInfoList)
+				{
+					string file = info.GetFloorPlanFileName(stn);
+					if (!string.IsNullOrWhiteSpace(file))
+					{
+						file = Path.Combine(_floorPlanPath, file.Replace('/', '\\'));
+						if (!File.Exists(file))
+						{
+							readWarnings.AppendFormat("\r\nFPFS00: Suite type \'{0}\' lists floor plan {1} which does not exist.", stn, file);
+							canImport = false;
+						}
+					}
+					//else
+					//{
+					//    readWarnings.AppendFormat("\r\nSTMD00: suite type {0} lists no floor plan.", stn);
+					//    canImport = false;
+					//}
+				}
 
-            // Test common cross-reference issues
-            //
-            List<string> passedTypes = new List<string>();
+				readWarnings.Append("\r\nStep 4: =========== Cross-reference testing =============");
 
-            foreach (Building b in _lastModel.Model.Site.Buildings)
-            {
-                List<string> suiteNames = new List<string>();
-                foreach (Suite s in b.Suites)
-                {
-                    if (!Utilities.TestSuiteFloorNumber(s.Name))
-                    {
-                        readWarnings.AppendFormat("\r\nMDMD03: Building '{0}' contains suite with invalid name '{1}'",
-                            b.Name, s.Name);
-                        canImport = false;
-                    }
+				// Test common cross-reference issues
+				//
+				List<string> passedTypes = new List<string>();
 
-                    if (!Utilities.TestSuiteFloorNumber(s.Floor))
-                    {
-                        readWarnings.AppendFormat("\r\nMDMD04: Building '{0}' contains suite '{1}' with invalid floor name '{2}'",
-                            b.Name, s.Name, s.Floor);
-                        canImport = false;
-                    }
+				foreach (Building b in _lastModel.Model.Site.Buildings)
+				{
+					List<string> suiteNames = new List<string>();
+					foreach (Suite s in b.Suites)
+					{
+						if (!Utilities.TestSuiteFloorNumber(s.Name))
+						{
+							readWarnings.AppendFormat("\r\nMDMD03: Building '{0}' contains suite with invalid name '{1}'",
+								b.Name, s.Name);
+							canImport = false;
+						}
 
-                    if (suiteNames.Contains(s.Name))
-                    {
-                        readWarnings.AppendFormat("\r\nMDMD01: Building '{0}' contains multiple suites with same name '{1}'",
-                            b.Name, s.Name);
-                        canImport = false;
-                    }
-                    suiteNames.Add(s.Name);
+						if (!Utilities.TestSuiteFloorNumber(s.Floor))
+						{
+							readWarnings.AppendFormat("\r\nMDMD04: Building '{0}' contains suite '{1}' with invalid floor name '{2}'",
+								b.Name, s.Name, s.Floor);
+							canImport = false;
+						}
 
-                    if (!s.Name.StartsWith(s.Floor))
-                    {
-                        readWarnings.AppendFormat("\r\nMDMD02: Building '{0}' suite '{1}' is set on wrong floor ({2}).",
-                            b.Name, s.Name, s.Floor);
-                        canImport = false;
-                    }
+						if (suiteNames.Contains(s.Name))
+						{
+							readWarnings.AppendFormat("\r\nMDMD01: Building '{0}' contains multiple suites with same name '{1}'",
+								b.Name, s.Name);
+							canImport = false;
+						}
+						suiteNames.Add(s.Name);
 
-                    string testingType = /*b.Type + "/" + */s.ClassName;
-                    if (!info.HasType(testingType))
-                    {
-                        readWarnings.AppendFormat("\r\nSTMD01: Suite type \'{0}\' in KMZ has no related entry in CSV.", testingType);
-                        canImport = false;
-                    }
-                    else if (!passedTypes.Contains(testingType))
-                    {
-                        if (!_lastModel.Model.Site.Geometries.ContainsKey(testingType))
-                        {
-                            readWarnings.AppendFormat("\r\nMDMD00: Suite type \'{0}\' has no geometry list in model.",
-                                testingType);
-                            canImport = false;
-                        }
-                        // Below shall never happen: geometry building code in ConstructionSite skips unknown data
-                        //else
-                        //{
-                        //    Geometry[] gl = _lastModel.Model.Site.Geometries[testingType];
-                        //    foreach (Geometry geom in gl)
-                        //    {
-                        //        // This is a known problem.
-                        //        // Model may have a geometry node in non-lines format.
-                        //        if ((null == geom.Points) || (null == geom.Lines))
-                        //        {
-                        //            readWarnings.AppendFormat("\r\nMDER00: Suite type \'{0}\' uses unknown format of geometry (Geometry ID={1}). Points and lines are not read.",
-                        //                testingType, geom.Id);
-                        //        }
-                        //    }
-                        //}
-                        passedTypes.Add(testingType);
-                    }
-                }
-            }
-            foreach (string stype in info.TypeInfoList)
-            {
-                if (!passedTypes.Contains(stype))
-                {
-                    readWarnings.AppendFormat("\r\nSTMD07: Suite type \'{0}\' in CSV is never used in model.", stype);
-                    canImport = false;
-                }
-            }
+						if (!s.Name.StartsWith(s.Floor))
+						{
+							readWarnings.AppendFormat("\r\nMDMD02: Building '{0}' suite '{1}' is set on wrong floor ({2}).",
+								b.Name, s.Name, s.Floor);
+							canImport = false;
+						}
 
-            readWarnings.Append("\r\nStep 5: =========== Generating KML preview of the parsed geometry =============");
-            // Generate test preview of parsed model
-            //
-            string kmlFile = Path.Combine(Path.GetDirectoryName(_modelFileName), "wireframe-test-output.kml");
-            try
-            {
-                TestKmlWriter.GenerateCoordinateKml(_lastModel, 0.0, kmlFile);
-                readWarnings.AppendFormat("\r\n\r\nCreated test preview at {0}", kmlFile);
-            }
-            catch (Exception e)
-            {
-                File.Delete(kmlFile);
-                readWarnings.AppendFormat("\r\n{0}\r\n{1}", e.Message, e.StackTrace);
-                canImport = false;
-            }
+						string testingType = /*b.Type + "/" + */s.ClassName;
+						if (!info.HasType(testingType))
+						{
+							readWarnings.AppendFormat("\r\nSTMD01: Suite type \'{0}\' in KMZ has no related entry in CSV.", testingType);
+							canImport = false;
+						}
+						else if (!passedTypes.Contains(testingType))
+						{
+							if (!_lastModel.Model.Site.Geometries.ContainsKey(testingType))
+							{
+								readWarnings.AppendFormat("\r\nMDMD00: Suite type \'{0}\' has no geometry list in model.",
+									testingType);
+								canImport = false;
+							}
+							// Below shall never happen: geometry building code in ConstructionSite skips unknown data
+							//else
+							//{
+							//    Geometry[] gl = _lastModel.Model.Site.Geometries[testingType];
+							//    foreach (Geometry geom in gl)
+							//    {
+							//        // This is a known problem.
+							//        // Model may have a geometry node in non-lines format.
+							//        if ((null == geom.Points) || (null == geom.Lines))
+							//        {
+							//            readWarnings.AppendFormat("\r\nMDER00: Suite type \'{0}\' uses unknown format of geometry (Geometry ID={1}). Points and lines are not read.",
+							//                testingType, geom.Id);
+							//        }
+							//    }
+							//}
+							passedTypes.Add(testingType);
+						}
+					}
+				}
+				foreach (string stype in info.TypeInfoList)
+				{
+					if (!passedTypes.Contains(stype))
+					{
+						readWarnings.AppendFormat("\r\nSTMD07: Suite type \'{0}\' in CSV is never used in model.", stype);
+						canImport = false;
+					}
+				}
+
+				readWarnings.Append("\r\nStep 5: =========== Generating KML preview of the parsed geometry =============");
+				// Generate test preview of parsed model
+				//
+				string kmlFile = Path.Combine(Path.GetDirectoryName(_modelFileName), "wireframe-test-output.kml");
+				try
+				{
+					TestKmlWriter.GenerateCoordinateKml(_lastModel, 0.0, kmlFile);
+					readWarnings.AppendFormat("\r\n\r\nCreated test preview at {0}", kmlFile);
+				}
+				catch (Exception e)
+				{
+					File.Delete(kmlFile);
+					readWarnings.AppendFormat("\r\n{0}\r\n{1}", e.Message, e.StackTrace);
+					canImport = false;
+				}
+			}  // Building and site modes
+			else if (_importMode == ModelImportSettings.Mode.Structure)
+			{
+				if (0 == _lastModel.Model.Site.Structures.Count())
+				{
+					readWarnings.Append("\r\nMDCT01: No structures found in KMZ.");
+					canImport = false;
+				}
+				else if (_lastModel.Model.Site.Structures.Count() != 1)
+				{
+					readWarnings.Append("\r\nMDCT02: Only one structure per KMZ is currently supported.");
+					canImport = false;
+				}
+			}
 
 			readWarnings.Append("\r\nStep 6: =========== Testing for capacity limits =============");
 
@@ -230,6 +256,15 @@ namespace ModelPackageTester
 							s.Name);
 						canImport = false;
 					}
+				}
+			}
+			foreach (var s in _lastModel.Model.Site.Structures)
+			{
+				if (s.Name.Length > 256)
+				{
+					readWarnings.AppendFormat("\r\nGSCL02: Structure name ({0}) too long; limit is 256 symbols.",
+						s.Name);
+					canImport = false;
 				}
 			}
 
@@ -301,6 +336,13 @@ namespace ModelPackageTester
                     Text = Text + " - PRODUCTION";
                     ForeColor = SystemColors.HighlightText;
                     BackColor = SystemColors.Highlight;
+
+					// NO MANUAL MODES FOR PRODUCTION!
+					btnBrowseModel.Enabled = false;
+					btnBrowseFloorPlanFolder.Enabled = false;
+					btnGuessFloorPlanFolder.Enabled = false;
+					btnBrowseSuiteTypeInfo.Enabled = false;
+					btnGuessSuiteTypeInfo.Enabled = false;
                 }
             }
         }
@@ -319,7 +361,8 @@ namespace ModelPackageTester
             else btnGuessFloorPlanFolder.Enabled = true;
 
             checkEnableTestButton();
-        }
+			btnImport.Enabled = false;
+		}
 
         private void guessFloorPlanPath()
         {
@@ -357,7 +400,8 @@ namespace ModelPackageTester
             }
 
             btnGuessFloorPlanFolder.Enabled = false;
-        }
+			btnImport.Enabled = false;
+		}
 
         private void guessSuiteTypeInfoFileName()
         {
@@ -395,7 +439,8 @@ namespace ModelPackageTester
             }
 
             btnGuessSuiteTypeInfo.Enabled = false;
-        }
+			btnImport.Enabled = false;
+		}
 
         private void onNewSuiteTypeInfoFileName(string filename)
         {
@@ -405,7 +450,8 @@ namespace ModelPackageTester
             lblSuiteTypeInfoPath.Text = _stiFileName;
 
             checkEnableTestButton();
-        }
+			btnImport.Enabled = false;
+		}
 
         private void onNewFloorPlanPath(string pathname)
         {
@@ -415,6 +461,7 @@ namespace ModelPackageTester
             lblFloorPlansPath.Text = _floorPlanPath;
 
             checkEnableTestButton();
+			btnImport.Enabled = false;
         }
 
         private void onImportSettings(string filename)
@@ -425,28 +472,48 @@ namespace ModelPackageTester
 
                 string file;
 
-                file = Path.Combine(_settings.BasePath, _settings.ModelFileName);
-                if (File.Exists(file))
-                {
-                    _modelFileName = file;
-                    lblModelPath.Text = _modelFileName;
-                }
+				if ((_settings.ImportMode == ModelImportSettings.Mode.Building)
+					|| (_settings.ImportMode == ModelImportSettings.Mode.Site))
+				{
+					file = Path.Combine(_settings.BasePath, _settings.ModelFileName);
+					if (File.Exists(file)) _modelFileName = file;
+					else _modelFileName = null;
+					lblModelPath.Text = _modelFileName;
 
-                file = Path.Combine(_settings.BasePath, _settings.SuiteTypeInfoFileName);
-                if (File.Exists(file))
-                {
-                    _stiFileName = file;
-                    lblSuiteTypeInfoPath.Text = _stiFileName;
-                }
+					file = Path.Combine(_settings.BasePath, _settings.SuiteTypeInfoFileName);
+					if (File.Exists(file)) _stiFileName = file;
+					else _stiFileName = null;
+					lblSuiteTypeInfoPath.Text = _stiFileName;
 
-                file = Path.Combine(_settings.BasePath, _settings.FloorplanDirectoryName);
-                if (Directory.Exists(file))
-                {
-                    _floorPlanPath = file;
-                    lblFloorPlansPath.Text = _floorPlanPath;
-                }
+					file = Path.Combine(_settings.BasePath, _settings.FloorplanDirectoryName);
+					if (Directory.Exists(file)) _floorPlanPath = file;
+					else _floorPlanPath = null;
+					lblFloorPlansPath.Text = _floorPlanPath;
 
-                checkEnableTestButton();
+					checkEnableTestButton();
+					btnImport.Enabled = false;
+				}
+				else if (_settings.ImportMode == ModelImportSettings.Mode.Structure)
+				{
+					file = Path.Combine(_settings.BasePath, _settings.DisplayModelFileName);
+					if (File.Exists(file)) _modelFileName = file;
+					else _modelFileName = null;
+					lblModelPath.Text = _modelFileName;
+
+					_stiFileName = null;
+					_floorPlanPath = null;
+					lblSuiteTypeInfoPath.Text = string.Empty;
+					lblFloorPlansPath.Text = string.Empty;
+
+					btnTest.Enabled = (lblModelPath.Text.Length > 0);
+					btnImport.Enabled = false;
+				}
+				else
+				{
+					btnTest.Enabled = false;
+					btnImport.Enabled = false;
+				}
+				_importMode = _settings.ImportMode;
             }
             catch (Exception ex)
             {
@@ -457,7 +524,22 @@ namespace ModelPackageTester
 
         private void checkEnableTestButton()
         {
-            btnTest.Enabled = (_modelFileName != null) && (_stiFileName != null) && (_floorPlanPath != null);
+			btnTest.Enabled = (_modelFileName != null);
+			_importMode = (_settings != null) ? _settings.ImportMode :
+				(((_stiFileName != null) && (_floorPlanPath != null)) ? ModelImportSettings.Mode.Site : ModelImportSettings.Mode.Structure);
+			//if (_settings != null)
+			//{
+			//    if ((_settings.ImportMode == ModelImportSettings.Mode.Site)
+			//        || (_settings.ImportMode == ModelImportSettings.Mode.Building))
+			//        btnTest.Enabled = (_modelFileName != null) && (_stiFileName != null) && (_floorPlanPath != null);
+
+			//    else if (_settings.ImportMode == ModelImportSettings.Mode.Structure)
+			//        btnTest.Enabled = (_modelFileName != null);
+			//}
+			//else
+			//{
+			//    btnTest.Enabled = (_modelFileName != null) && (_stiFileName != null) && (_floorPlanPath != null);
+			//}
         }
 
         private void btnBrowseModel_Click(object sender, EventArgs e)
@@ -569,12 +651,28 @@ namespace ModelPackageTester
 
         private void btnImport_Click(object sender, EventArgs e)
         {
-            ImportForm iform = new ImportForm();
-            if (_settings != null)
-                iform.Init(_settings, _modelFileName, _stiFileName, _floorPlanPath, _lastModel, getImportExecutablePath(), AllowDrop, _isProduction);
-            else
-                iform.Init(_modelFileName, _stiFileName, _floorPlanPath, _lastModel, getImportExecutablePath(), AllowDrop, _isProduction);
-            iform.ShowDialog();
+			Form f = null;
+
+			if ((_importMode == ModelImportSettings.Mode.Building)
+				|| (_importMode == ModelImportSettings.Mode.Site))
+			{
+				ImportForm iform = new ImportForm();
+				if (_settings != null)
+					iform.Init(_settings, _modelFileName, _stiFileName, _floorPlanPath, _lastModel, getImportExecutablePath(), AllowDrop, _isProduction);
+				else
+					iform.Init(_modelFileName, _stiFileName, _floorPlanPath, _lastModel, getImportExecutablePath(), AllowDrop, _isProduction);
+				f = iform;
+			}
+			else if (_importMode == ModelImportSettings.Mode.Structure)
+			{
+				StructureImportForm iform = new StructureImportForm();
+				if (_settings != null)
+					iform.Init(_settings, _modelFileName, _lastModel, getImportExecutablePath(), AllowDrop, _isProduction);
+				else
+					iform.Init(_modelFileName, _lastModel, getImportExecutablePath(), AllowDrop, _isProduction);
+				f = iform;
+			}
+            if (f != null) f.ShowDialog();
         }
 
 		private void btnLoadImportSettings_Click(object sender, EventArgs e)

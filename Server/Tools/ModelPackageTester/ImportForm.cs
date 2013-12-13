@@ -7,6 +7,8 @@ using System.Text;
 using System.Windows.Forms;
 using Vre.Server.Model.Kmz;
 using Vre.Server;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace ModelPackageTester
 {
@@ -23,6 +25,78 @@ namespace ModelPackageTester
         private string _poiModelFileName = null;
         private string _bubbleWebTemplateFileName = null;
         private string _bubbleKioskTemplateFileName = null;
+
+		private Dictionary<Control, Cursor> _controlState1 = new Dictionary<Control,Cursor>();
+		private Dictionary<Control, bool> _controlState2 = new Dictionary<Control, bool>();
+		
+		private void importThread(object param)
+		{
+			string result = string.Empty;
+			bool positive = false;
+
+			string logFileName = Path.Combine(
+				Path.GetDirectoryName(_modelFileName),
+				Path.GetFileNameWithoutExtension(_modelFileName) + ".import.log.txt");
+
+			try
+			{
+				ProcessStartInfo psi = new ProcessStartInfo(_executablePath, param as string);
+				psi.WorkingDirectory = _floorPlanPath;
+				psi.Verb = "runas";  // trigger process rights elevation
+
+				File.Delete(logFileName);
+				Process p = Process.Start(psi);
+				p.WaitForExit();
+
+				if (0 == p.ExitCode)
+				{
+					using (FileStream fs = File.OpenRead(logFileName))
+						using (StreamReader rdr = new StreamReader(fs))
+							result = rdr.ReadToEnd();
+					positive = true;
+				}
+				else
+				{
+					result = string.Format("Import tool failed: {0}", p.ExitCode);
+				}
+			}
+			catch (Exception ex)
+			{
+				result = string.Format("Import tool run failed: {0}\r\n{1}",
+					ex.Message, ex.StackTrace);
+			}
+
+			Invoke((Action)delegate { finishWithImport(result, positive); });
+		}
+
+		private void finishWithImport(string result, bool positive)
+		{ 
+            tbResults.Text = result;
+
+			foreach (var kvp in _controlState1.Reverse()) kvp.Key.Cursor = kvp.Value;
+			foreach (var kvp in _controlState2.Reverse()) kvp.Key.Enabled = kvp.Value;
+
+			_controlState1.Clear();
+			_controlState2.Clear();
+
+			if (positive && cbAutoSaveSettings.Checked) saveImportSettings();
+		}
+
+		private static void saveChangeControls(Control root, 
+			Dictionary<Control, Cursor> save1,
+			Dictionary<Control, bool> save2, Cursor newValue)
+		{
+			foreach (var octl in root.Controls)
+			{
+				var ctl = octl as Control;
+				if (null == ctl) continue;
+				if (ctl.Controls.Count > 0) saveChangeControls(ctl, save1, save2, newValue);
+				save1[ctl] = ctl.Cursor;
+				save2[ctl] = ctl.Enabled;
+				ctl.Cursor = newValue;
+				ctl.Enabled = false;
+			}
+		}
 
         private void onNewModelFileName(object sender, string filename)
         {
@@ -53,12 +127,8 @@ namespace ModelPackageTester
             }
         }
 
-        private string import()
+        private string buildImportComandLine()
         {
-            string logFileName = Path.Combine(
-                Path.GetDirectoryName(_modelFileName),
-                Path.GetFileNameWithoutExtension(_modelFileName) + ".import.log.txt");
-
             StringBuilder commandLine = new StringBuilder("importmodel");
 
             commandLine.Append(" infomodel=");
@@ -80,16 +150,16 @@ namespace ModelPackageTester
             insertPath(_stiFileName, ref commandLine);
 
             commandLine.Append(" ed=");
-            insertPath(cbxDeveloper.Text, ref commandLine);
+            insertPath(cbxDeveloper.Text.Trim(), ref commandLine);
 
             commandLine.Append(" site=");
-            insertPath(tbSite.Text, ref commandLine);
+            insertPath(tbSite.Text.Trim(), ref commandLine);
 
             if (cbSingleBuilding.Checked)
             {
                 commandLine.Append(" asbuilding=true");
                 commandLine.Append(" building=");
-                insertPath(cbxBuildings.SelectedItem as string, ref commandLine);
+                insertPath((cbxBuildings.SelectedItem as string).Trim(), ref commandLine);
 
                 commandLine.Append(" ad_sta=");
                 insertPath(tbStreetAddress.Text.Trim(), ref commandLine);
@@ -129,22 +199,12 @@ namespace ModelPackageTester
 
             commandLine.AppendFormat(" suiteStatus={0}", cbxNewSuiteStatus.SelectedItem as string);
 
+			if (!cbDryRun.Checked)
+				commandLine.AppendFormat(" mlsimport={0}", cbDoMlsImport.Checked ? "true" : "false");
+
             commandLine.AppendFormat(" dryrun={0}", cbDryRun.Checked ? "true" : "false");
 
-            ProcessStartInfo psi = new ProcessStartInfo(_executablePath, commandLine.ToString());
-            psi.WorkingDirectory = _floorPlanPath;
-            psi.Verb = "runas";  // trigger process rights elevation
-
-            File.Delete(logFileName);
-            Process p = Process.Start(psi);
-            p.WaitForExit();
-
-            if (0 == p.ExitCode)
-                using (FileStream fs = File.OpenRead(logFileName))
-                    using (StreamReader rdr = new StreamReader(fs))
-                        return rdr.ReadToEnd();
-            else
-                return "Import tool failed: " + p.ExitCode;
+			return commandLine.ToString();
         }
 
         private static void insertPath(string path, ref StringBuilder commandLine)
@@ -257,13 +317,13 @@ namespace ModelPackageTester
             prop = _settings.NewSuiteStatusName;
             if (prop != null) selectComboItem(cbxNewSuiteStatus, prop);
 
-            prop = _settings.BuildingToImportName;
-            if (prop != null)
+            if (_settings.ImportMode == ModelImportSettings.Mode.Building)
             {
                 cbSingleBuilding.Checked = true;
                 cbSingleBuilding_CheckedChanged(this, null);
 
-                selectComboItem(cbxBuildings, prop);
+				prop = _settings.BuildingToImportName;
+				selectComboItem(cbxBuildings, prop);
 
                 prop = _settings.BuildingStreetAddress;
                 if (prop != null) tbStreetAddress.Text = prop;
@@ -386,6 +446,7 @@ namespace ModelPackageTester
 
 			if (cbSingleBuilding.Checked)
 			{
+				_settings.ImportMode = ModelImportSettings.Mode.Building;
 				_settings.BuildingToImportName = cbxBuildings.SelectedItem as string;
 				_settings.BuildingStreetAddress = tbStreetAddress.Text.Trim();
 				_settings.BuildingMunicipality = tbMunicipality.Text.Trim();
@@ -395,6 +456,7 @@ namespace ModelPackageTester
 			}
 			else
 			{
+				_settings.ImportMode = ModelImportSettings.Mode.Site;
 				_settings.BuildingToImportName = null;
 			}
 
@@ -535,26 +597,25 @@ namespace ModelPackageTester
 
         private void btnImport_Click(object sender, EventArgs e)
         {
-            Cursor saved = Cursor.Current;
+			saveChangeControls(this, _controlState1, _controlState2, Cursors.WaitCursor);
+			_controlState1[this] = this.Cursor;
+			this.Cursor = Cursors.WaitCursor;
+            Application.DoEvents();
 
             try
             {
-                Cursor.Current = Cursors.WaitCursor;
-                Application.DoEvents();
-
-                tbResults.Text = import();
-
-				if (cbAutoSaveSettings.Checked)	saveImportSettings();
+				string cmdLn = buildImportComandLine();
+				new Thread(importThread).Start(cmdLn);
             }
             catch (Exception ex)
             {
-                tbResults.Text = ex.Message + "\r\n" + ex.StackTrace;
-            }
-            finally
-            {
-                tbResults.Enabled = true;
-                Cursor.Current = saved;
+				finishWithImport(ex.Message + "\r\n" + ex.StackTrace, false);
             }
         }
+
+		private void cbDryRun_CheckedChanged(object sender, EventArgs e)
+		{
+			cbDoMlsImport.Enabled = !cbDryRun.Checked;
+		}
     }
 }

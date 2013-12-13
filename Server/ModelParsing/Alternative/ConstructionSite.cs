@@ -10,7 +10,8 @@ namespace Vre.Server.Model.Kmz
         public string Id { get; private set; }
         public string Name { get; private set; }
         public IEnumerable<Building> Buildings { get { return _buildings; } }
-        public EcefViewPoint LocationCart { get; private set; }
+		public IEnumerable<Structure> Structures { get { return _structures; } }
+		public EcefViewPoint LocationCart { get; private set; }
         /// <summary>
         /// Fall-back: direct value read from model file.
         /// </summary>
@@ -19,7 +20,8 @@ namespace Vre.Server.Model.Kmz
         public double UnitInMeters { get; private set; }
 
         private List<Building> _buildings;
-        private Dictionary<string, Geometry[]> _geometries;
+		private List<Structure> _structures;
+		private Dictionary<string, Geometry[]> _geometries;
         internal Model _model;
 
         public ConstructionSite(Model parent, string name, XmlNode rootNode,
@@ -33,6 +35,7 @@ namespace Vre.Server.Model.Kmz
             LocationCart = new EcefViewPoint(parent.Location);
             LocationGeo = new ViewPoint(parent.Location);
             _buildings = new List<Building>();
+			_structures = new List<Structure>();
 
             XmlAttribute na = rootNode.Attributes["id"];
             if (na != null) Id = na.Value;
@@ -66,25 +69,33 @@ namespace Vre.Server.Model.Kmz
                     }
                 }
 
-                XmlNode buildingNode = null;
+                XmlNode unitNode = null;
                 string buildingTypeName = string.Empty;
-                if (nodeId != null)
+				string structureTypeName = string.Empty;
+				if (nodeId != null)
                 {
-                    if (!models.TryGetValue(nodeId, out buildingNode))
+                    if (!models.TryGetValue(nodeId, out unitNode))
                     {
-                        buildingNode = null;
+                        unitNode = null;
                     }
                     else
                     {
-                        buildingTypeName = buildingNode.Attributes["name"].Value;
-                        if (buildingTypeName.StartsWith(Building.XmlPrefix))
+                        var unitTypeName = unitNode.Attributes["name"].Value;
+                        if (unitTypeName.StartsWith(Building.XmlPrefix))
                         {
-                            buildingTypeName = buildingTypeName.Substring(Building.XmlPrefix.Length);
+                            buildingTypeName = unitTypeName.Substring(Building.XmlPrefix.Length);
                             if (buildingTypeName.Contains("_"))
                                 fatalErrors.AppendFormat("\r\nBuilding type name '{0}' contains underscores.", 
-                                    buildingNode.Attributes["name"].Value);
+                                    unitNode.Attributes["name"].Value);
                         }
-                        else
+						else if (unitTypeName.StartsWith(Structure.XmlPrefix))
+						{
+							structureTypeName = unitTypeName.Substring(Structure.XmlPrefix.Length);
+							if (structureTypeName.Contains("_"))
+								fatalErrors.AppendFormat("\r\nStructure type name '{0}' contains underscores.",
+									unitNode.Attributes["name"].Value);
+						}
+						else
                         {
                             if (readWarnings != null)
                                 readWarnings.AppendFormat(
@@ -100,15 +111,17 @@ namespace Vre.Server.Model.Kmz
                 nn = n["matrix"];
                 nna = n.Attributes["name"];
 
-                if ((buildingNode != null) && (nn != null) && (nna != null) && !string.IsNullOrEmpty(buildingTypeName))
+                if ((unitNode != null) && (nn != null) && (nna != null))
                 {
                     TMatrix matrix = new TMatrix(tMatrix, nn.InnerText, UnitInMeters);
-                    string buildingName = nna.Value.Replace('_', ' ').Trim();
-
+                    string unitName = nna.Value.Replace('_', ' ').Trim();
                     try
                     {
-                        _buildings.Add(new Building(this, nodeId, buildingName, buildingTypeName, buildingNode, models, matrix));
-                    }
+						if (!string.IsNullOrEmpty(buildingTypeName))
+							_buildings.Add(new Building(this, nodeId, unitName, buildingTypeName, unitNode, models, matrix));
+						else if (!string.IsNullOrEmpty(structureTypeName))
+							_structures.Add(new Structure(this, nodeId, unitName, buildingTypeName, unitNode, models, matrix));
+					}
                     catch (InvalidDataException ide)
                     {
                         fatalErrors.AppendFormat("\r\n{0}", ide.Message);
@@ -116,8 +129,8 @@ namespace Vre.Server.Model.Kmz
                 }
             }
 
-            if (0 == _buildings.Count)
-                throw new InvalidDataException("MDSC07: No \'_building_\' components found in KMZ.");
+            if ((0 == _buildings.Count) && (0 == _structures.Count))
+                throw new InvalidDataException("MDSC07: No '_building_' and no '_structure_' components found in KMZ.");
             if (fatalErrors.Length > 0)
                 throw new InvalidDataException(fatalErrors.ToString());
 
