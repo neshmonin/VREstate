@@ -13154,3 +13154,869 @@ Compiling...
    Compilation completed in 0.00 seconds
 Removing invalidated units
 Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2824 units from cache.
+Compiling...
+   50% complete (ETR: 3 seconds)
+   50% complete (ETR: 3 seconds)
+   50% complete (ETR: 3 seconds)
+   50% complete (ETR: 3 seconds)
+   50% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   70% complete (ETR: 2 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 16.06 seconds
+Removing invalidated units
+Finding entry point classes
+Rebinding com.google.gwt.i18n.client.impl.LocaleInfoImpl
+   Invoking generator com.google.gwt.i18n.rebind.LocaleInfoGenerator
+      Processing interface com.google.gwt.i18n.client.constants.NumberConstantsImpl
+         Generating method body for notANumber()
+         Generating method body for currencyPattern()
+         Generating method body for decimalPattern()
+         Generating method body for decimalSeparator()
+         Generating method body for defCurrencyCode()
+         Generating method body for exponentialSymbol()
+         Generating method body for globalCurrencyPattern()
+         Generating method body for groupingSeparator()
+         Generating method body for infinity()
+         Generating method body for minusSign()
+         Generating method body for monetaryGroupingSeparator()
+         Generating method body for monetarySeparator()
+         Generating method body for percent()
+         Generating method body for percentPattern()
+         Generating method body for perMill()
+         Generating method body for plusSign()
+         Generating method body for scientificPattern()
+         Generating method body for simpleCurrencyPattern()
+         Generating method body for zeroDigit()
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.10 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919038182_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919041472_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919091429_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919097827.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919097827.Template
+         Generating method body for html1()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919097827_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919098864_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919104482_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919117416_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919128840_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919137518_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919145437_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919164939_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919169060_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919180410_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919194311_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919196974_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919199878_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919224006_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919226246_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919228590_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919232877_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919235388_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919241422_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919243348_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919247477_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919248741_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919284118_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919315235_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919351169_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919351256_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919370470_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919410536_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919423697_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919439519_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919484803_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.04 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919487207_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919489694_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919501407_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919519125_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386919678249_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.14 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386921318755_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1386921333031_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2824 units from cache.
+Compiling...
+   10% complete (ETR: 38 seconds)
+   10% complete (ETR: 38 seconds)
+   20% complete (ETR: 22 seconds)
+   30% complete (ETR: 18 seconds)
+   40% complete (ETR: 27 seconds)
+   50% complete (ETR: 19 seconds)
+   60% complete (ETR: 14 seconds)
+   70% complete (ETR: 9 seconds)
+   80% complete (ETR: 5 seconds)
+   90% complete (ETR: 3 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 37.75 seconds
+Removing invalidated units
+Finding entry point classes
+Rebinding com.google.gwt.i18n.client.impl.LocaleInfoImpl
+   Invoking generator com.google.gwt.i18n.rebind.LocaleInfoGenerator
+      Processing interface com.google.gwt.i18n.client.constants.NumberConstantsImpl
+         Generating method body for notANumber()
+         Generating method body for currencyPattern()
+         Generating method body for decimalPattern()
+         Generating method body for decimalSeparator()
+         Generating method body for defCurrencyCode()
+         Generating method body for exponentialSymbol()
+         Generating method body for globalCurrencyPattern()
+         Generating method body for groupingSeparator()
+         Generating method body for infinity()
+         Generating method body for minusSign()
+         Generating method body for monetaryGroupingSeparator()
+         Generating method body for monetarySeparator()
+         Generating method body for percent()
+         Generating method body for percentPattern()
+         Generating method body for perMill()
+         Generating method body for plusSign()
+         Generating method body for scientificPattern()
+         Generating method body for simpleCurrencyPattern()
+         Generating method body for zeroDigit()
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.04 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921397334.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921397334.Template
+         Generating method body for html1()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921397334_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.04 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921402007.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921402007.Template
+         Generating method body for html1()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921402007_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921422885.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921422885.Template
+         Generating method body for html1()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921422885_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921426605.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921426605.Template
+         Generating method body for html1()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921426605_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921713589.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921713589.Template
+         Generating method body for html1()
+         Generating method body for html2()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921713589_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921776823.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921776823.Template
+         Generating method body for html1()
+         Generating method body for html2()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921776823_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921781131.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921781131.Template
+         Generating method body for html1()
+         Generating method body for html2()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921781131_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921784209.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921784209.Template
+         Generating method body for html1()
+         Generating method body for html2()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921784209_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.04 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921792637.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921792637.Template
+         Generating method body for html1()
+         Generating method body for html2()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921792637_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921818087.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921818087.Template
+         Generating method body for html1()
+         Generating method body for html2()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921818087_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921827759.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921827759.Template
+         Generating method body for html1()
+         Generating method body for html2()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921827759_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921891166.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921891166.Template
+         Generating method body for html1()
+         Generating method body for html2()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921891166_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.07 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921895862.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921895862.Template
+         Generating method body for html1()
+         Generating method body for html2()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921895862_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921898022.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921898022.Template
+         Generating method body for html1()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921898022_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921909889.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921909889.Template
+         Generating method body for html1()
+         Generating method body for html2()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921909889_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921911436.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921911436.Template
+         Generating method body for html1()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921911436_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921926946.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921926946.Template
+         Generating method body for html1()
+         Generating method body for html2()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921926946_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921929471.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921929471.Template
+         Generating method body for html1()
+         Generating method body for html2()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921929471_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0.02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921931246.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921931246.Template
+         Generating method body for html1()
+         Generating method body for html2()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView_ChangingPasswordViewUiBinderImpl_designTime1386921931246_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0.01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder
+   Invoking generator com.google.gwt.uibinder.rebind.UiBinderGenerator
+      [ERROR] The element type "br" must be terminated by the matching end-tag "</br>".
+      [ERROR] Error parsing XML (line 20): The element type "br" must be terminated by the matching end-tag "</br>".
+[ERROR] Deferred binding failed for 'com.condox.ecommerce.client.tree.view.ChangingPasswordView.ChangingPasswordViewUiBinder'; expect subsequent failures

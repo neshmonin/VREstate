@@ -8,11 +8,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.DeckPanel;
 
 public class ChangingPasswordView extends Composite implements I_Display {
 
 	private static ChangingPasswordViewUiBinder uiBinder = GWT
 			.create(ChangingPasswordViewUiBinder.class);
+	@UiField DeckPanel deckResult;
 
 	interface ChangingPasswordViewUiBinder extends UiBinder<Widget, ChangingPasswordView> {
 	}
@@ -86,5 +89,10 @@ public class ChangingPasswordView extends Composite implements I_Display {
 	void onButtonEnterClick(ClickEvent event) {
 		if (presenter != null)
 			presenter.onBackToLogin();
+	}
+
+	@Override
+	public void setResult(int result) {
+		deckResult.showWidget(result);
 	}
 }

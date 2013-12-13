@@ -1,21 +1,24 @@
 package com.condox.ecommerce.client.tree.presenter;
 
+import com.condox.clientshared.communication.GET;
+import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
+import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
 import com.condox.ecommerce.client.tree.node.ChangingPasswordNode;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ChangingPasswordPresenter implements I_Presenter {
 
 	public static interface I_Display extends I_Contained {
 		void setPresenter(ChangingPasswordPresenter presenter);
-
-//		String getUserLogin();
-//
-//		String getUserPassword();
-
+		void setResult(int result);
 		Widget asWidget();
 	}
 
@@ -30,56 +33,40 @@ public class ChangingPasswordPresenter implements I_Presenter {
 
 	@Override
 	public void go(I_Container container) {
+		String login = getString(Field.UserEmail);
+		String url = Options.URL_VRT + "program?q=recover"
+				+ "&role=sellingagent"
+//				+ "&ed=<estate developer id>"	// ommited for sellingagent
+				+ "&uid=" + login;
+		GET.send(url, new RequestCallback() {
+
+			@Override
+			public void onResponseReceived(Request request, Response response) {
+				if (response.getStatusCode() == 200)
+					display.setResult(0);
+				else
+					display.setResult(1);
+			}
+
+			@Override
+			public void onError(Request request, Throwable exception) {
+				display.setResult(1);
+			}});
 		container.clear();
 		container.add((I_Contained)display);
 	}
-
+	
+	// Navigation events
 	public void onBackToLogin() {
 		node.setState(NodeStates.Ok);
 		node.next();
 	}
-
-//	private String uid = "";
-//	private String pwd = "";
 	
-	// Events
-//	public void onLogin() {
-//		node.setState(NodeStates.Guest);
-//		node.next();
-////		uid = display.getUserLogin().trim();
-////		pwd = display.getUserPassword().trim();
-////		EcommerceTree.set(Field.UserLogin, new Data(uid));
-////		EcommerceTree.set(Field.UserPassword, new Data(pwd));
-////		
-//////		if (!model.isValid()) {
-//////			Window.alert("Not valid! Please, check and try again!");
-//////			return;
-//////		}
-////		
-////		User.UserRole role = User.UserRole.Agent;
-////		if ((uid == null || uid.isEmpty()) ||
-////			("web".equalsIgnoreCase(uid) && "web".equalsIgnoreCase(pwd)))
-////			role = User.UserRole.Visitor;
-////
-////		User.Login(this, uid, pwd, role);
-//	}
-//
-//	public void onForgotPassword() {
-//		node.setState(NodeStates.ForgotPassword);
-//		node.next();
-//	}
-
-//	@Override
-//	public void onLoginSucceed() {
-////		if (("web".equalsIgnoreCase(uid)) && ("web".equalsIgnoreCase(pwd)))
-////			EcommerceTree.transitState(State.Guest);
-////		else
-////			EcommerceTree.transitState(State.Agent);
-////		EcommerceTree.set(Field.UserId, new Data(User.id));
-////		
-////		model.next();
-//	}
-//
-//	@Override
-//	public void onLoginFailed(Throwable exception) {}
+	// Data utils
+	private String getString(Field key) {
+		Data data = node.getTree().getData(key);
+		String s = (data == null)? "" : data.asString();
+		return s.isEmpty()? "" : s;
+	}	
+	
 }
