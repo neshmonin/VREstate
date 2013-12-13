@@ -40,6 +40,8 @@ public class EcommerceTree {
 		Cancel,
 		Prev,
 		Next,
+		OneMore,
+		Finish,
 		UsingMLS,
 		NotUsingMLS, Proceed
 	}
@@ -59,11 +61,16 @@ public class EcommerceTree {
 		leafs.add("DefaultsNode/LoginNode.Guest/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Cancel=>DefaultsNode/LoginNode");
 		
 		// Agent node
-		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.Logout=>DefaultsNode/LoginNode");
-		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.Settings/SettingsNode.Close=>DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
-		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.ShowHistory/ShowHistoryNode.Close=>DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
-		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Cancel=>DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
-		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.Cancel=>DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.Logout=>"
+				+ "DefaultsNode/LoginNode");
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.Settings/SettingsNode.Close=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.ShowHistory/ShowHistoryNode.Close=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Cancel=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.Cancel=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
 		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Cancel=>"
 				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
 		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Prev=>"
@@ -80,6 +87,12 @@ public class EcommerceTree {
 				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode"); 
 		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode.Next/OptionsNode.Next/SummaryNode.Prev=>"
 				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode.Next/OptionsNode");
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode.Next/OptionsNode.Next/SummaryNode.Next/AgreementNode.Cancel=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode");
+		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode.Next/OptionsNode.Next/SummaryNode.Next/AgreementNode.Prev=>"
+				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode.Next/OptionsNode.Next/SummaryNode");
+//		leafs.add("DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode.Next/OptionsNode.Next/SummaryNode.Next/AgreementNode.Proceed/=>"
+//				+ "DefaultsNode/LoginNode.Agent/HelloAgentNode.NewOrder/NewOrderNode.Next/UsingMLSNode.NotUsingMLS/BuildingsNode.Next/PickSuiteNode.Next/OptionsNode.Next/SummaryNode");
 	}
 	
 	public void next() {
@@ -188,7 +201,16 @@ public class EcommerceTree {
 		UserPassword,
 		UserRole, 
 		
-		FILTERING_BY_CITY, BuildingID, SuiteId, SuiteName, Address, MLS, Price, VirtualTourUrl, MoreInfoUrl, // TODO review this constants
+		BuildingId,
+		BuildingName,
+		
+		SuiteId,
+		SuiteName,
+		SuiteAddress,
+		SuiteMLS,
+		SuitePrice,
+		
+		FILTERING_BY_CITY, VirtualTourUrl, MoreInfoUrl // TODO review this constants
 		
 	}
 }

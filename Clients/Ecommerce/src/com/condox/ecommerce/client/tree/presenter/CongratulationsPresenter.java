@@ -6,13 +6,13 @@ import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
-import com.condox.ecommerce.client.tree.node.SummaryNode;
+import com.condox.ecommerce.client.tree.node.CongratulationsNode;
 import com.google.gwt.user.client.ui.Widget;
 
-public class SummaryPresenter implements I_Presenter {
+public class CongratulationsPresenter implements I_Presenter {
 
 	public static interface I_Display extends I_Contained {
-		void setPresenter(SummaryPresenter presenter);
+		void setPresenter(CongratulationsPresenter presenter);
 
 		void setData(String data);
 		
@@ -20,9 +20,9 @@ public class SummaryPresenter implements I_Presenter {
 	}
 
 	private I_Display display = null;
-	private SummaryNode node = null;
+	private CongratulationsNode node = null;
 
-	public SummaryPresenter(I_Display newDisplay, SummaryNode newNode) {
+	public CongratulationsPresenter(I_Display newDisplay, CongratulationsNode newNode) {
 		display = newDisplay;
 		display.setPresenter(this);
 		node = newNode;

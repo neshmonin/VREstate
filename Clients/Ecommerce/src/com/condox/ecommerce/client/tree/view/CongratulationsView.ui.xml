@@ -7,30 +7,22 @@
 			margin-left: 50px;
 			background-color: slateblue;
 		}
-		.ageement {
-			background-color: saddlebrown;
-		}
 	</ui:style>
 	<g:VerticalPanel width="100%" height="100%"
 		horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
-		<g:VerticalPanel>
-			<g:VerticalPanel spacing="5" width="500px">
-				<g:Label text="Please read terms and conditions of the order you are about to make:" horizontalAlignment="ALIGN_LEFT" />
-				<g:HTML wordWrap="true" height="200px" ui:field="htmlSummary" styleName="{style.ageement}">&lt;Text of the ageement here&gt;</g:HTML>
+		<g:VerticalPanel >
+			<g:VerticalPanel spacing="5" width="300px">
+				<g:Label text="Summary of your order" horizontalAlignment="ALIGN_CENTER" />
+				<g:HTML wordWrap="true" height="200px" ui:field="htmlSummary"/>
 				<g:HorizontalPanel width="100%"
 					horizontalAlignment="ALIGN_CENTER">
 					<g:Cell verticalAlignment="ALIGN_MIDDLE">
 						<g:Button width="75px" ui:field="buttonCancel">Cancel</g:Button>
 					</g:Cell>
-					<g:Cell horizontalAlignment="ALIGN_RIGHT" width="100%">
-						<g:HorizontalPanel spacing="15">
-						<g:Button width="75px" ui:field="buttonAgree" text="I Agree"/>
-					</g:HorizontalPanel>
-					</g:Cell>
-					<g:Cell horizontalAlignment="ALIGN_RIGHT" verticalAlignment="ALIGN_MIDDLE">
+					<g:Cell horizontalAlignment="ALIGN_RIGHT">
 						<g:HorizontalPanel spacing="5">
 							<g:Button text="&lt;&lt; Prev" width="75px" ui:field="buttonPrev">Prev</g:Button>
-							<g:Button width="75px" ui:field="buttonProceed" enabled="false">Proceed</g:Button>
+							<g:Button width="75px" ui:field="buttonNext">Next >></g:Button>
 						</g:HorizontalPanel>
 					</g:Cell>
 				</g:HorizontalPanel>

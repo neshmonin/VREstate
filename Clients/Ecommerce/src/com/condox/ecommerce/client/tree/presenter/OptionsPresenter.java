@@ -2,7 +2,9 @@ package com.condox.ecommerce.client.tree.presenter;
 
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
+import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
 import com.condox.ecommerce.client.tree.node.OptionsNode;
 import com.google.gwt.user.client.ui.Widget;
@@ -55,8 +57,8 @@ public class OptionsPresenter implements I_Presenter {
 	
 	// Data utils
 	private void saveData() {
-//		node.setData(Field.SuiteId, new Data(display.getSelectedSuite().getId()));
-//		node.setData(Field.SuiteName, new Data(display.getSelectedSuite().getName()));
+		node.setData(Field.VirtualTourUrl, new Data(display.getVirtualTourUrl()));
+		node.setData(Field.MoreInfoUrl, new Data(display.getMoreInfoUrl()));
 //		node.setData(Field.Address, new Data(display.getSelectedSuite().getAddress()));
 //		node.setData(Field.MLS, new Data(display.getSelectedSuite().getMLS()));
 	}

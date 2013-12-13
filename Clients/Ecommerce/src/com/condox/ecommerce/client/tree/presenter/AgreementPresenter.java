@@ -1,5 +1,10 @@
 package com.condox.ecommerce.client.tree.presenter;
 
+import com.condox.clientshared.abstractview.Log;
+import com.condox.clientshared.communication.DELETE;
+import com.condox.clientshared.communication.GET;
+import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.communication.User;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
@@ -7,6 +12,11 @@ import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
 import com.condox.ecommerce.client.tree.node.AgreementNode;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.ui.Widget;
 
 public class AgreementPresenter implements I_Presenter {
@@ -43,13 +53,67 @@ public class AgreementPresenter implements I_Presenter {
 	
 	public void onProceed() {
 //		saveData();
-		node.next(NodeStates.Proceed);
+//		node.next(NodeStates.Proceed);
+		String url = Options.URL_VRT;
+		url += "program?";
+		url += "&q=register";
+		url += "&entity=viewOrder";
+		url += "&ownerId=" + User.id;
+//		url += "&pr=" + User.id;
+		url += "&daysValid=1";
+		url += "&product=prl";
+		url += "&options=fp";	// TODO
+		url += "&mls_id=" + getString(Field.SuiteMLS);
+		url += "&propertyType=suite";	// TODO
+		if (getInteger(Field.SuiteId) > 0)
+			url += "&propertyId=" + getInteger(Field.SuiteId);
+		GET.send(url, new RequestCallback(){
+
+			@Override
+			public void onResponseReceived(Request request, Response response) {
+				Log.write(response.getStatusCode() + ": " + response.getStatusText());
+				if (response.getStatusCode() == 200) {
+					JSONObject obj = JSONParser.parseLenient(response.getText()).isObject();
+//					String viewOrderUrl = obj.get("viewOrder-url").isString().stringValue();
+					String viewOrderId = obj.get("viewOrder-id").isString().stringValue();
+					viewOrderId = viewOrderId.replace("-", "");
+					String url = Options.URL_VRT + "viewOrder/" + viewOrderId;
+					DELETE.send(url,"",  new RequestCallback(){
+
+						@Override
+						public void onResponseReceived(Request request,
+								Response response) {
+							Log.write(response.getStatusText());
+						}
+
+						@Override
+						public void onError(Request request, Throwable exception) {
+							// TODO Auto-generated method stub
+							
+						}});
+					
+				}
+			}
+
+			@Override
+			public void onError(Request request, Throwable exception) {
+				// TODO Auto-generated method stub
+				
+			}});
 	}
 	
-//	// Data utils
-//	private String getString(Field key) {
-//		return (node.getData(key) == null)? "" : node.getData(key).asString();
-//	}
+	// Data utils
+	private String getString(Field key) {
+		Data data = node.getTree().getData(key);
+		String s = (data == null)? "" : data.asString();
+		return s;
+	}
+	
+	private int getInteger(Field key) {
+		Data data = node.getTree().getData(key);
+		int s = (data == null)? -1 : data.asInteger();
+		return s;
+	}
 //	
 //	private void loadData() {
 //		String listing = getString(Field.Address);

@@ -20,14 +20,14 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	public void onModuleLoad() {
 		Options.Init();
-//		History.addValueChangeHandler(this);
+		History.addValueChangeHandler(this);
 //		History.newItem("login");
 		
 //		AbstractNode node = new AbstractNode();
 //		Log.write(node.getName());
-		EcommerceTree tree = new EcommerceTree();
-		tree.config();
-		tree.next();
+//		EcommerceTree tree = new EcommerceTree();
+//		tree.config();
+//		tree.next();
 	}
 
 	@Override
@@ -45,5 +45,8 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 //		EcommerceTree tree = new EcommerceTree();
 //		tree.go(new PopupContainer());
 ////		tree.activate(new PopupContainer());
+		EcommerceTree tree = new EcommerceTree();
+		tree.config();
+		tree.next();
 	}
 }

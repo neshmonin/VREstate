@@ -1,7 +1,7 @@
 package com.condox.ecommerce.client.tree.view;
 
-import com.condox.ecommerce.client.tree.presenter.OptionsPresenter;
-import com.condox.ecommerce.client.tree.presenter.OptionsPresenter.I_Display;
+import com.condox.ecommerce.client.tree.presenter.CongratulationsPresenter;
+import com.condox.ecommerce.client.tree.presenter.CongratulationsPresenter.I_Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.Composite;
@@ -13,32 +13,27 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.HTML;
 
-public class OptionsView extends Composite implements I_Display {
+public class CongratulationsView extends Composite implements I_Display {
 
-	private static OptionsViewUiBinder uiBinder = GWT
-			.create(OptionsViewUiBinder.class);
-	@UiField RadioButton rbForSale;
-	@UiField RadioButton rbForRent;
-	@UiField Label strMLS;
+	private static CongratulationsViewUiBinder uiBinder = GWT
+			.create(CongratulationsViewUiBinder.class);
 	@UiField Button buttonCancel;
 	@UiField Button buttonPrev;
 	@UiField Button buttonNext;
-	@UiField TextBox textPrice;
-	@UiField TextBox textVirtualTourUrl;
-	@UiField TextBox textMoreInfoUrl;
 
-	interface OptionsViewUiBinder extends UiBinder<Widget, OptionsView> {
+	interface CongratulationsViewUiBinder extends UiBinder<Widget, CongratulationsView> {
 	}
 
-	private OptionsPresenter presenter = null;
+	private CongratulationsPresenter presenter = null;
 
-	public OptionsView() {
+	public CongratulationsView() {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 
 	@Override
-	public void setPresenter(OptionsPresenter presenter) {
+	public void setPresenter(CongratulationsPresenter presenter) {
 		this.presenter = presenter;
 	}
 
@@ -59,23 +54,6 @@ public class OptionsView extends Composite implements I_Display {
 	}
 
 	@Override
-	public String getMLS() {
-		return strMLS.getText();
+	public void setData(String data) {
 	}
-
-	@Override
-	public String getPrice() {
-		return textPrice.getValue();
-	}
-
-	@Override
-	public String getVirtualTourUrl() {
-		return textVirtualTourUrl.getValue();
-	}
-
-	@Override
-	public String getMoreInfoUrl() {
-		return textMoreInfoUrl.getValue();
-	}
-	
 }

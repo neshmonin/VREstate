@@ -66,7 +66,7 @@ public class BuildingsPresenter implements I_Presenter {
 				JSONArray arr = obj.get("buildings").isArray();
 
 				Integer id = null;
-				Data buildingIdData = node.getData(Field.BuildingID);
+				Data buildingIdData = node.getData(Field.BuildingId);
 				if (buildingIdData != null)
 					id = buildingIdData.asInteger();
 //				Log.write("" + id);
@@ -131,7 +131,8 @@ public class BuildingsPresenter implements I_Presenter {
 	public void selectSuite(BuildingInfo object) {
 		if (object != null) {
 			// TODO add validation
-			node.setData(Field.BuildingID, new Data(object.getId()));
+			node.setData(Field.BuildingId, new Data(object.getId()));
+			node.setData(Field.BuildingName, new Data(object.getName()));
 //			node.setData(Field.Address, new Data(object.getAddress()));
 			node.setState(NodeStates.Next);
 			node.next();

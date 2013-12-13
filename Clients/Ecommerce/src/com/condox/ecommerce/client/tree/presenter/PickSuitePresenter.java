@@ -52,7 +52,7 @@ public class PickSuitePresenter implements I_Presenter {
 	private void updateData() {
 		display.setData(null);
 		// TODO add validation
-		int buildingId = node.getTree().getData(Field.BuildingID).asInteger();
+		int buildingId = node.getTree().getData(Field.BuildingId).asInteger();
 		
 		//	Sample: "https://vrt.3dcondox.com/data/inventory?"
 		String url = Options.URL_VRT;
@@ -116,8 +116,9 @@ public class PickSuitePresenter implements I_Presenter {
 	private void saveData() {
 		node.setData(Field.SuiteId, new Data(display.getSelectedSuite().getId()));
 		node.setData(Field.SuiteName, new Data(display.getSelectedSuite().getName()));
-		node.setData(Field.Address, new Data(display.getSelectedSuite().getAddress()));
-		node.setData(Field.MLS, new Data(display.getSelectedSuite().getMLS()));
+		node.setData(Field.SuiteAddress, new Data(display.getSelectedSuite().getAddress()));
+		node.setData(Field.SuiteMLS, new Data(display.getSelectedSuite().getMLS()));
+		node.setData(Field.SuitePrice, new Data(display.getSelectedSuite().getPrice()));
 	}
 
 

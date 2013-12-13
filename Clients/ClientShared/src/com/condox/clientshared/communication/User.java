@@ -14,7 +14,8 @@ public class User implements RequestCallback, I_Login {
 	public enum UserRole {
 		Visitor,
 		Agent,
-		SuperAdmin
+		SuperAdmin,
+		SellingAgent
 	}
 	
 	public static String SID;
@@ -45,6 +46,9 @@ public class User implements RequestCallback, I_Login {
 			break;
 		case SuperAdmin:
 			User.request += "&role=superadmin";
+			break;
+		case SellingAgent:
+			User.request += "&role=sellingagent";
 			break;
 		default:
 		}

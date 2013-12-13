@@ -10,7 +10,7 @@
 	</ui:style>
 	<g:VerticalPanel width="100%" height="100%"
 		horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
-		<g:VerticalPanel borderWidth="3">
+		<g:VerticalPanel>
 			<g:VerticalPanel spacing="5" width="250px" height="200px">
 				<g:HorizontalPanel spacing="20">
 					<g:Label text="Published with MLS?"/>
