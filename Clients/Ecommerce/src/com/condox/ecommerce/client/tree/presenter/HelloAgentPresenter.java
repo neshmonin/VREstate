@@ -10,6 +10,7 @@ import com.condox.clientshared.communication.User;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
 import com.condox.ecommerce.client.I_Presenter;
+import com.condox.ecommerce.client.ServerProxy;
 import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
 import com.condox.ecommerce.client.tree.node.HelloAgentNode;
 import com.condox.ecommerce.client.tree.view.ViewOrderInfo;
@@ -68,7 +69,8 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 			public void onError(Request request, Throwable exception) {
 				// TODO Auto-generated method stub
 				
-			}});	
+			}});
+//		ServerProxy.getUserInfo(User.id, U, callback);
 	}
 	
 	private void loadOrdersList() {
