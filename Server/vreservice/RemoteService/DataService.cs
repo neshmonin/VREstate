@@ -1950,26 +1950,39 @@ namespace Vre.Server.RemoteService
         {
             EstateDeveloper result = null;
 
-            switch (vo.TargetObjectType)
-            {
-                case ViewOrder.SubjectType.Building:
-                    {
-                        Building b;
-                        using (BuildingDao dao = new BuildingDao(session.DbSession))
-                            b = dao.GetById(vo.TargetObjectId);
-                        result = b.ConstructionSite.Developer;
-                    }
-                    break;
+			try
+			{
+				switch (vo.TargetObjectType)
+				{
+					case ViewOrder.SubjectType.Building:
+						{
+							Building b;
+							using (BuildingDao dao = new BuildingDao(session.DbSession))
+								b = dao.GetById(vo.TargetObjectId);
+							result = b.ConstructionSite.Developer;
+						}
+						break;
 
-                case ViewOrder.SubjectType.Suite:
-                    {
-                        Suite s;
-                        using (SuiteDao dao = new SuiteDao(session.DbSession))
-                            s = dao.GetById(vo.TargetObjectId);
-                        result = s.Building.ConstructionSite.Developer;
-                    }
-                    break;
-            }
+					case ViewOrder.SubjectType.Suite:
+						{
+							Suite s;
+							using (SuiteDao dao = new SuiteDao(session.DbSession))
+								s = dao.GetById(vo.TargetObjectId);
+							result = s.Building.ConstructionSite.Developer;
+						}
+						break;
+				}
+			}
+			catch (Exception ex)
+			{
+				ServiceInstances.Logger.Error("EDfVO: {0}, {1}, {2}, {3}",
+					(session != null) ? session.ToString() : "N/A",
+					(vo != null) ? vo.AutoID.ToString() : "N/A",
+					(vo != null) ? vo.TargetObjectType.ToString() : "N/A",
+					(vo != null) ? vo.TargetObjectId.ToString() : "N/A",
+					ex.Message, ex.StackTrace);
+				result = new EstateDeveloper(EstateDeveloper.Configuration.Online);
+			}
 
             return result;
         }
