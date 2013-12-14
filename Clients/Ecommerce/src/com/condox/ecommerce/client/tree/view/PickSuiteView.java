@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import com.condox.clientshared.communication.User;
+import com.condox.clientshared.communication.User.UserRole;
 import com.condox.clientshared.document.SuiteInfo;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.presenter.PickSuitePresenter;
@@ -243,37 +245,61 @@ public class PickSuiteView extends Composite implements IDisplay {
 			
 			for (SuiteInfo suite : suites) {
 				String disabled = "";
-
-				// ��� Sold-�������� disabled (mail 28.08.2013)
-				switch (suite.getStatus()) {
-				case Sold:
-					disabled += " disabled=\"true\" ";
-					break;
-				default:
-				}
-				
 				String color = "";
-				switch (suite.getStatus()) {
-				case AvailableResale:
-					color += " color:blue ";
-					break;
-				case AvailableRent:
-					color += " color:purple ";
-					break;
-				case Available:
-					color += " color:green ";
-					break;
-				case Sold:
-					color += " color:red ";
-					break;
-				default:
-//					mls += " color:red";
-				}
 				
-				if ((suite.getMLS() == null)||(suite.getMLS().isEmpty())) {			
-					disabled = " disabled=\"true\" ";
-					color = " color:red ";
+				if (User.role.equals(UserRole.SellingAgent)) {
+					switch (suite.getStatus()) {
+					case AvailableResale:
+						color += " color:blue ";
+						break;
+					case AvailableRent:
+						color += " color:purple ";
+						break;
+					case Available:
+						color += " color:green ";
+						break;
+					case Sold:
+						color += " color:red ";
+						break;
+					default:
+//						mls += " color:red";
+					}
+				} else {
+					if ((suite.getMLS() == null)||(suite.getMLS().isEmpty())) {			
+						disabled = " disabled=\"true\" ";
+						color = " color:red ";
+					}
 				}
+
+//				switch (suite.getStatus()) {
+//				case Sold:
+//					disabled += " disabled=\"true\" ";
+//					break;
+//				default:
+//				}
+//				
+//				String color = "";
+//				switch (suite.getStatus()) {
+//				case AvailableResale:
+//					color += " color:blue ";
+//					break;
+//				case AvailableRent:
+//					color += " color:purple ";
+//					break;
+//				case Available:
+//					color += " color:green ";
+//					break;
+//				case Sold:
+//					color += " color:red ";
+//					break;
+//				default:
+////					mls += " color:red";
+//				}
+				
+//				if ((suite.getMLS() == null)||(suite.getMLS().isEmpty())) {			
+//					disabled = " disabled=\"true\" ";
+//					color = " color:red ";
+//				}
 
 				result += "<button ";
 				result += "type=\"button\"" + " onclick=\"onSelectSuite("
