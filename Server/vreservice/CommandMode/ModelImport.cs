@@ -930,6 +930,7 @@ namespace Vre.Server.Command
 
 			int mlsCnt = 0, add = 0, err = 0;
 			List<string> processedIds = new List<string>();
+			List<string> updatedMlsInfos = new List<string>();
 			foreach (var file in prov.AvailableFiles.OrderBy((a) => a.CreationTimeUtc).Reverse())
 			{
 				issues = prov.Parse(file.FullName);
@@ -949,7 +950,7 @@ namespace Vre.Server.Command
 				}
 
 				using (var manager = new SiteManager(session))
-					issues = manager.RetroImportExistingViewOrders(items, buildingId, ref add, ref err);
+					issues = manager.RetroImportExistingViewOrders(items, buildingId, ref add, ref err, ref updatedMlsInfos);
 				if (issues.Length > 0) report.AppendFormat("\r\nMLS Import problems:\r\n{0}", issues);
 
 				foreach (var item in items) processedIds.Add(item.MlsId);
@@ -991,6 +992,7 @@ namespace Vre.Server.Command
 
 			int mlsCnt = 0, add = 0, err = 0;
 			List<string> processedIds = new List<string>();
+			List<string> updatedMlsInfos = new List<string>();
 			foreach (var file in prov.AvailableFiles.OrderBy((a) => a.CreationTimeUtc).Reverse())
 			{
 				issues = prov.Parse(file.FullName);
@@ -1010,7 +1012,7 @@ namespace Vre.Server.Command
 				}
 
 				using (var manager = new SiteManager(session))
-					issues = manager.RetroImportExistingViewOrders(items, ref voIds, ref add, ref err);
+					issues = manager.RetroImportExistingViewOrders(items, ref voIds, ref add, ref err, ref updatedMlsInfos);
 				if (issues.Length > 0) report.AppendFormat("\r\nMLS Import problems:\r\n{0}", issues);
 
 				foreach (var item in items) processedIds.Add(item.MlsId);
