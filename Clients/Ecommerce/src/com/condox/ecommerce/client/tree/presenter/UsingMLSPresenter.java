@@ -33,7 +33,7 @@ public class UsingMLSPresenter implements I_Presenter {
 		container.add((I_Contained)display);
 	}
 
-//	Events
+//	Navigation events
 	public void onCancel() {
 		node.setState(NodeStates.Cancel);
 		node.next();
@@ -45,6 +45,10 @@ public class UsingMLSPresenter implements I_Presenter {
 		else
 			node.setState(NodeStates.NotUsingMLS);
 		node.next();
+	}
+
+	public void onPrev() {
+		node.next(NodeStates.Prev);
 	}
 
 }

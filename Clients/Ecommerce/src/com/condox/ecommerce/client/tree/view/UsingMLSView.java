@@ -19,6 +19,7 @@ public class UsingMLSView extends Composite implements I_Display {
 	@UiField Button buttonCancel;
 	@UiField Button buttonNext;
 	@UiField RadioButton rbMLS;
+	@UiField Button buttonPrev;
 
 	interface UsingMLSViewUiBinder extends UiBinder<Widget, UsingMLSView> {
 	}
@@ -47,5 +48,10 @@ public class UsingMLSView extends Composite implements I_Display {
 	@Override
 	public boolean isUsingMLS() {
 		return rbMLS.getValue();
+	}
+	@UiHandler("buttonPrev")
+	void onButtonPrevClick(ClickEvent event) {
+		if (presenter != null)
+			presenter.onPrev();
 	}
 }

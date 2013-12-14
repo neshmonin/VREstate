@@ -26,8 +26,9 @@ public class NewOrderPresenter implements I_Presenter {
 
 	@Override
 	public void go(I_Container container) {
-		container.clear();
-		container.add((I_Contained)display);
+//		container.clear();
+//		container.add((I_Contained)display);
+		node.next(NodeStates.Next);
 	}
 
 //	Events
