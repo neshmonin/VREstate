@@ -72,4 +72,34 @@ public class Data {
 		JSONObject obj = JSONParser.parseLenient(Value).isObject();
 		return obj;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((Type == null) ? 0 : Type.hashCode());
+		result = prime * result + ((Value == null) ? 0 : Value.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Data other = (Data) obj;
+		if (Type != other.Type)
+			return false;
+		if (Value == null) {
+			if (other.Value != null)
+				return false;
+		} else if (!Value.equals(other.Value))
+			return false;
+		return true;
+	}
+	
+	
 }

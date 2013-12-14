@@ -13,17 +13,20 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 
 public class LoginView extends Composite implements I_Display {
 
 	private static LoginViewUiBinder uiBinder = GWT
 			.create(LoginViewUiBinder.class);
 	@UiField
-	TextBox textUserLogin;
-	@UiField
-	TextBox textUserPassword;
+	TextBox textUserEmail;
 	@UiField
 	Button buttonEnter;
+	@UiField Hyperlink hyperlink;
+	@UiField Button buttonClose;
+	@UiField PasswordTextBox textUserPassword;
 
 	interface LoginViewUiBinder extends UiBinder<Widget, LoginView> {
 	}
@@ -41,60 +44,80 @@ public class LoginView extends Composite implements I_Display {
 		this.presenter = presenter;
 	}
 
-	@Override
-	public String getUserLogin() {
-//		if (user)
-//			return textUserLogin.getValue();
-//		else if (guest)
-//			return "web";
-		return "adminan";
-
-	}
-
-	@Override
-	public String getUserPassword() {
-//		if (user)
-//			return textUserPassword.getValue();
-//		else if (guest)
-//			return "web";
-		return "smelatoronto";
-	}
-
+//	@Override
+//	public String getUserLogin() {
+////		if (user)
+////			return textUserLogin.getValue();
+////		else if (guest)
+////			return "web";
+//		return "adminan";
+//
+//	}
+//
+//	@Override
+//	public String getUserPassword() {
+////		if (user)
+////			return textUserPassword.getValue();
+////		else if (guest)
+////			return "web";
+//		return "smelatoronto";
+//	}
+//
 	@UiHandler("buttonEnter")
 	void onButtonEnterClick(ClickEvent event) {
 		presenter.onLogin();
 	}
-
-	@UiHandler("textUserLogin")
-	void onTextUserLoginValueChange(ValueChangeEvent<String> event) {
-
+//
+//	@UiHandler("textUserLogin")
+//	void onTextUserLoginValueChange(ValueChangeEvent<String> event) {
+//
+//	}
+//
+//	@UiHandler("textUserLogin")
+//	void onTextUserLoginKeyUp(KeyUpEvent event) {
+//		updateButtonEnter();
+//	}
+//
+//	@UiHandler("textUserPassword")
+//	void onTextUserPasswordKeyUp(KeyUpEvent event) {
+//		updateButtonEnter();
+//	}
+//
+//	private void updateButtonEnter() {
+//		user = !textUserLogin.getValue().isEmpty();
+//		user &= !textUserPassword.getValue().isEmpty();
+//		guest = textUserLogin.getValue().isEmpty();
+//		guest &= textUserPassword.getValue().isEmpty();
+//		if (user) {
+//			buttonEnter.setEnabled(true);
+//			buttonEnter.setText("Order as a User");
+//		} else if (guest) {
+//			buttonEnter.setEnabled(true);
+//			buttonEnter.setText("Order as a Guest");
+//		} else {
+//			buttonEnter.setEnabled(false);
+//			buttonEnter.setText("Order");
+//		}
+//
+//	}
+	@UiHandler("hyperlink")
+	void onHyperlinkClick(ClickEvent event) {
+		if (presenter != null)
+			presenter.onForgotPassword();
 	}
 
-	@UiHandler("textUserLogin")
-	void onTextUserLoginKeyUp(KeyUpEvent event) {
-		updateButtonEnter();
+	@Override
+	public String getUserEmail() {
+		return textUserEmail.getValue();
 	}
 
-	@UiHandler("textUserPassword")
-	void onTextUserPasswordKeyUp(KeyUpEvent event) {
-		updateButtonEnter();
+	@Override
+	public String getUserPassword() {
+		return textUserPassword.getValue();
 	}
-
-	private void updateButtonEnter() {
-		user = !textUserLogin.getValue().isEmpty();
-		user &= !textUserPassword.getValue().isEmpty();
-		guest = textUserLogin.getValue().isEmpty();
-		guest &= textUserPassword.getValue().isEmpty();
-		if (user) {
-			buttonEnter.setEnabled(true);
-			buttonEnter.setText("Order as a User");
-		} else if (guest) {
-			buttonEnter.setEnabled(true);
-			buttonEnter.setText("Order as a Guest");
-		} else {
-			buttonEnter.setEnabled(false);
-			buttonEnter.setText("Order");
-		}
-
+	@UiHandler("buttonClose")
+	void onButtonCloseClick(ClickEvent event) {
+		if (presenter != null)
+			presenter.onClose();
 	}
 }

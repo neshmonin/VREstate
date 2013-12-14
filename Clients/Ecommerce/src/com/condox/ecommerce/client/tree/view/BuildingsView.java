@@ -9,6 +9,7 @@ import com.condox.ecommerce.client.IFilter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.presenter.BuildingsPresenter;
 import com.condox.ecommerce.client.tree.presenter.BuildingsPresenter.IDisplay;
+//import com.condox.ecommerce.client.tree.presenter.BuildingsPresenter.IDisplay;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
@@ -149,9 +150,9 @@ public class BuildingsView extends Composite implements IDisplay,
 					public void update(int index, BuildingInfo object,
 							String value) {
 						selectedBuilding = object;
-//						 presenter.selectSuite(object);
-						 presenter.setSelectedBuilding(object);
-						 presenter.onNext();
+						 presenter.selectSuite(object);
+//						 presenter.setSelectedBuilding(object);
+//						 presenter.onNext();
 					}
 				});
 
@@ -171,8 +172,8 @@ public class BuildingsView extends Composite implements IDisplay,
 		selectionModel
 				.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 					public void onSelectionChange(SelectionChangeEvent event) {
-						selectedBuilding = selectionModel.getSelectedObject();
-						presenter.setSelectedBuilding(selectedBuilding);
+//						selectedBuilding = selectionModel.getSelectedObject();
+//						presenter.setSelectedBuilding(selectedBuilding);
 //						buttonNext.setEnabled(selectedBuilding != null);
 					}
 				});
@@ -269,11 +270,13 @@ public class BuildingsView extends Composite implements IDisplay,
 
 	@UiHandler("buttonPrev")
 	void onButtonPrevClick(ClickEvent event) {
-		presenter.onPrev();
+		if (presenter != null)
+			presenter.onPrev();
 	}
 	@UiHandler("buttonCancel")
 	void onButtonCancelClick(ClickEvent event) {
-		EcommerceTree.cancel();
+		if (presenter != null)
+			presenter.onCancel();
 	}
 	
 	@UiHandler("textFilter")
