@@ -5,6 +5,7 @@ import com.condox.ecommerce.client.tree.presenter.PickSuitePresenter;
 import com.condox.ecommerce.client.tree.view.PickSuiteView;
 
 public class PickSuiteNode extends AbstractNode {
+	
 
 	@Override
 	public void go(final EcommerceTree tree) {
