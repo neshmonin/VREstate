@@ -411,9 +411,6 @@ namespace Vre.Server.Command
 
 				// Geoinformation import/update
 				dbSite.Location = modelSite.LocationCart.AsGeoPoint();
-
-				dbSite.MarkUpdated();
-				_clientSession.DbSession.Update(dbSite);
 			}
 			else  // single building model
 			{
@@ -439,10 +436,10 @@ namespace Vre.Server.Command
 					mLon / (double)buildingCnt,
 					mLat / (double)buildingCnt,
 					mAlt / (double)buildingCnt);
-				
-				dbSite.MarkUpdated();
-				_clientSession.DbSession.Update(dbSite);
 			}
+				
+			dbSite.MarkUpdated();
+			_clientSession.DbSession.Update(dbSite);
         }
 
         private void importBuilding(Vre.Server.Model.Kmz.ConstructionSite modelSite,
@@ -576,7 +573,7 @@ namespace Vre.Server.Command
                 _log.AppendFormat("ERROR: Failed querying altitude for {0}: {1}\r\n", dbBuilding.Name, ex.Message);
             }
 
-            if (isCreated && (infoModelFileName != null))  // new single building imported; attempt to write address
+            //if (isCreated && (infoModelFileName != null))  // new single building imported; attempt to write address
             {
                 dbBuilding.Country = conditionString(extras.GetOption("ad_co"), 128);
                 dbBuilding.PostalCode = conditionString(extras.GetOption("ad_po"), 10);
