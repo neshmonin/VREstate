@@ -42,7 +42,7 @@ public class PUT implements RequestCallback {
 		if (currRequest == null || !currRequest.isPending()) {
 			RequestBuilder requestBuilder = requests.get(0);
 			RequestCallback original = requestBuilder.getCallback();
-			requestBuilder.setHeader("Content-type", "application/json;");
+			requestBuilder.setHeader("Content-type", "application/json; charset=UTF-8;");
 			if (original != null)
 				requestBuilder.setCallback(original);
 			else

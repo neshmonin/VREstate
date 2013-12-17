@@ -39,6 +39,7 @@ public class AgreementView extends Composite implements I_Display {
 	@UiHandler("buttonAgree")
 	void onButtonAgreeClick(ClickEvent event) {
 		buttonProceed.setEnabled(true);
+		buttonAgree.setEnabled(false);
 	}
 	@UiHandler("buttonPrev")
 	void onButtonPrevClick(ClickEvent event) {

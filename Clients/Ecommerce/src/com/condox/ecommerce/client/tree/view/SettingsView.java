@@ -8,12 +8,15 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 
 public class SettingsView extends Composite implements I_Display {
 
@@ -23,19 +26,37 @@ public class SettingsView extends Composite implements I_Display {
 	@UiField Button buttonChangeEmail;
 	@UiField Button buttonChangePassword;
 	@UiField TextBox textEmail;
-	@UiField TextBox textOldPassword;
-	@UiField TextBox textNewPassword;
-	@UiField TextBox textNewPassword2;
+	@UiField PasswordTextBox textOldPassword;
+	@UiField PasswordTextBox textNewPassword;
+	@UiField PasswordTextBox textNewPassword2;
 
 	interface LoginViewUiBinder extends UiBinder<Widget, SettingsView> {
 	}
 
 	private SettingsPresenter presenter = null;
-	private boolean user = false;
-	private boolean guest = true;
 
 	public SettingsView() {
 		initWidget(uiBinder.createAndBindUi(this));
+		Timer updateView = new Timer() {
+
+			@Override
+			public void run() {
+				String email = textEmail.getValue();
+				boolean valid = true;
+				// Validating email
+				valid = email.matches("[a-z0-9_-]+(\\.[a-z0-9_-]+)*@[a-z0-9_-]+(\\.[a-z0-9_-]+)+");
+				buttonChangeEmail.setEnabled(valid);
+				//Validating password
+				valid = true;
+				valid &= !textOldPassword.getValue().isEmpty();
+				valid &= !textNewPassword.getValue().isEmpty();
+				valid &= !textNewPassword2.getValue().isEmpty();
+				valid &= textNewPassword.getValue().equals(textNewPassword2.getValue());
+				buttonChangePassword.setEnabled(valid);
+			}
+			
+		};
+		updateView.scheduleRepeating(1000);
 	}
 
 	@Override
@@ -43,58 +64,6 @@ public class SettingsView extends Composite implements I_Display {
 		this.presenter = presenter;
 	}
 
-//	@Override
-//	public String getUserLogin() {
-////		if (user)
-////			return textUserLogin.getValue();
-////		else if (guest)
-////			return "web";
-//		return "adminan";
-//
-//	}
-//
-//	@Override
-//	public String getUserPassword() {
-////		if (user)
-////			return textUserPassword.getValue();
-////		else if (guest)
-////			return "web";
-//		return "smelatoronto";
-//	}
-//
-//
-//	@UiHandler("textUserLogin")
-//	void onTextUserLoginValueChange(ValueChangeEvent<String> event) {
-//
-//	}
-//
-//	@UiHandler("textUserLogin")
-//	void onTextUserLoginKeyUp(KeyUpEvent event) {
-//		updateButtonEnter();
-//	}
-//
-//	@UiHandler("textUserPassword")
-//	void onTextUserPasswordKeyUp(KeyUpEvent event) {
-//		updateButtonEnter();
-//	}
-//
-//	private void updateButtonEnter() {
-//		user = !textUserLogin.getValue().isEmpty();
-//		user &= !textUserPassword.getValue().isEmpty();
-//		guest = textUserLogin.getValue().isEmpty();
-//		guest &= textUserPassword.getValue().isEmpty();
-//		if (user) {
-//			buttonEnter.setEnabled(true);
-//			buttonEnter.setText("Order as a User");
-//		} else if (guest) {
-//			buttonEnter.setEnabled(true);
-//			buttonEnter.setText("Order as a Guest");
-//		} else {
-//			buttonEnter.setEnabled(false);
-//			buttonEnter.setText("Order");
-//		}
-//
-//	}
 	@UiHandler("buttonClose")
 	void onButtonCloseClick(ClickEvent event) {
 		if (presenter != null)
@@ -115,5 +84,9 @@ public class SettingsView extends Composite implements I_Display {
 			String newPassword2 = textNewPassword2.getValue();
 			presenter.onChangePassword(oldPassword, newPassword, newPassword2);
 		}
+	}
+	
+	@UiHandler("textEmail")
+	void onTextEmailChange(ChangeEvent event) {
 	}
 }

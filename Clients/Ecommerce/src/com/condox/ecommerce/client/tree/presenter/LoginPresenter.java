@@ -58,9 +58,9 @@ public class LoginPresenter implements I_Presenter, I_Login {
 			role = UserRole.SuperAdmin;
 			
 			
-			email = "eugene.simonov@3dcondox.com";
-			password = "3dcondoms";
-			role = UserRole.SellingAgent;
+//			email = "eugene.simonov@3dcondox.com";
+//			password = "3dcondoms";
+//			role = UserRole.SellingAgent;
 		} else
 			role = UserRole.SuperAdmin;
 		

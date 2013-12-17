@@ -82,7 +82,7 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 					public void update(int index, ViewOrderInfo object,
 							String value) {
 //						selectedBuilding = object;
-//						 presenter.setSelectedBuilding(object);
+						 presenter.openAddress(object);
 //						 presenter.onNext();
 					}
 				});

@@ -2,6 +2,7 @@ package com.condox.ecommerce.client.tree.presenter;
 
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
+import com.condox.clientshared.document.SuiteInfo;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
@@ -14,14 +15,12 @@ public class OptionsPresenter implements I_Presenter {
 	public static interface I_Display extends I_Contained {
 		void setPresenter(OptionsPresenter presenter);
 
-		String getMLS();
-		// For sale vs For rent
-		
-		String getPrice();
+		SuiteInfo setSuiteInfo(SuiteInfo newInfo);
 		
 		String getVirtualTourUrl();
 		
 		String getMoreInfoUrl();
+		
 		Widget asWidget();
 	}
 
@@ -37,7 +36,12 @@ public class OptionsPresenter implements I_Presenter {
 	@Override
 	public void go(I_Container container) {
 		// TODO update data
-		
+		Data data = node.getTree().getData(Field.SuiteSelected);
+		if (data != null) {
+			SuiteInfo info = new SuiteInfo();
+			info.fromJSONObject(data.asJSONObject());
+			display.setSuiteInfo(info);
+		}
 		container.clear();
 		container.add(display);
 	}

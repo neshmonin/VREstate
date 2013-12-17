@@ -3,14 +3,21 @@ package com.condox.ecommerce.client.tree.presenter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.condox.clientshared.abstractview.Log;
+import com.condox.clientshared.communication.DELETE;
 import com.condox.clientshared.communication.GET;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.PUT;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
+import com.condox.clientshared.tree.Data;
+import com.condox.ecommerce.client.Ecommerce;
+import com.condox.ecommerce.client.Ecommerce.Modes;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.ServerProxy;
+import com.condox.ecommerce.client.UserInfo;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
 import com.condox.ecommerce.client.tree.node.HelloAgentNode;
 import com.condox.ecommerce.client.tree.view.ViewOrderInfo;
@@ -20,6 +27,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 
 public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
@@ -52,16 +60,15 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 	}
 	
 	private void loadPersonalInfo() {
-		String url = Options.URL_VRT + "data/user/" + User.id + "?&sid=" + User.SID;
-		GET.send(url, new RequestCallback(){
+		ServerProxy.getUserInfo(User.id, User.SID, new RequestCallback(){
 
 			@Override
 			public void onResponseReceived(Request request, Response response) {
 				JSONObject obj = JSONParser.parseLenient(response.getText()).isObject();
-				String nickName = obj.get("nickName").isString().stringValue();
-				if (nickName.contains(","))
-					nickName = nickName.substring(0, nickName.indexOf(","));
-				display.setNickName(nickName);
+				UserInfo info = new UserInfo();
+				info.fromJSONObject(obj);
+				node.setData(Field.UserInfo, new Data(info));
+				display.setNickName(info.getNickName());
 				loadOrdersList();
 			}
 
@@ -70,15 +77,10 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 				// TODO Auto-generated method stub
 				
 			}});
-//		ServerProxy.getUserInfo(User.id, U, callback);
 	}
 	
 	private void loadOrdersList() {
-		String url = Options.URL_VRT + "data/viewOrder?userId=" + User.id + 
-				"&ed=Resale" + 
-				"&verbose=true" +
-				"&sid=" + User.SID;
-		GET.send(url, new RequestCallback(){
+		ServerProxy.getOrdersList(User.id, User.SID, new RequestCallback(){
 
 			@Override
 			public void onResponseReceived(Request request, Response response) {
@@ -94,19 +96,14 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 					if (info != null)
 						data.add(info);
 				}
-				// -------------------------
-				// for (int i = 0; i < 20; i++)
-				// data.add(new ViewOrderInfo());
 				display.setData(data);
-//				container.clear();
-//				container.add((I_Contained) display);
 			}
 
 			@Override
 			public void onError(Request request, Throwable exception) {
 				// TODO Auto-generated method stub
 				
-			}});	
+			}});
 	}
 	
 //  Events
@@ -138,6 +135,8 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 
 			@Override
 			public void onResponseReceived(Request request, Response response) {
+				if (Modes.testUpdateOrder.equals(Ecommerce.mode))
+					Log.popup();
 				loadOrdersList();
 			}
 
@@ -149,24 +148,32 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 	}
 
 	public void delete(ViewOrderInfo object) {
-//		object.setEnabled(enabled);
-//		String url = Options.URL_VRT + "data/viewOrder/" + object.getId() + 
-//				"?sid=" + User.SID;
-//		DELETE.send(url, object.getJSON(), new RequestCallback(){
-//
-//			@Override
-//			public void onResponseReceived(Request request, Response response) {
-//				loadOrdersList();
-//			}
-//
-//			@Override
-//			public void onError(Request request, Throwable exception) {
-//				// TODO Auto-generated method stub
-//				
-//			}});
+		String url = Options.URL_VRT + "data/viewOrder/" + object.getId() + 
+				"?sid=" + User.SID;
+		DELETE.send(url, object.getJSON(), new RequestCallback(){
+
+			@Override
+			public void onResponseReceived(Request request, Response response) {
+				if (Modes.testDeleteOrder.equals(Ecommerce.mode))
+					Log.popup();
+				loadOrdersList();
+			}
+
+			@Override
+			public void onError(Request request, Throwable exception) {
+				// TODO Auto-generated method stub
+				
+			}});
 	}
 
 	public void onUpdateProfile() {
 		node.next(NodeStates.UpdateProfile);
+	}
+
+	public void openAddress(ViewOrderInfo object) {
+		if (object != null) {
+			String url = object.getUrl();
+			Window.open(url, "_blank", null);
+		}
 	}
 }

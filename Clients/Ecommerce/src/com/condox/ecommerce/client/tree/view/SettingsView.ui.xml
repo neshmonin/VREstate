@@ -28,14 +28,14 @@
 					<g:HorizontalPanel spacing="10" width="100%">
 						<g:VerticalPanel>
 						<g:Label text="Old Password"/>
-						<g:TextBox width="115px" ui:field="textOldPassword"/>
+						<g:PasswordTextBox width="115px" ui:field="textOldPassword"/>
 						<g:Label text="New Password"/>
-						<g:TextBox width="115px" ui:field="textNewPassword"/>
+						<g:PasswordTextBox width="115px" ui:field="textNewPassword"/>
 					</g:VerticalPanel>
 						<g:Cell verticalAlignment="ALIGN_BOTTOM">
 							<g:VerticalPanel>
 							<g:Label text="Enter again, please"/>
-							<g:TextBox width="115px" ui:field="textNewPassword2"/>
+							<g:PasswordTextBox width="115px" ui:field="textNewPassword2"/>
 						</g:VerticalPanel>
 						</g:Cell>
 						<g:Cell verticalAlignment="ALIGN_BOTTOM">

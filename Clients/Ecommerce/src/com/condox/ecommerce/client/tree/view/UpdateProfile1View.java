@@ -1,10 +1,13 @@
 package com.condox.ecommerce.client.tree.view;
 
+import com.condox.clientshared.abstractview.Log;
+import com.condox.ecommerce.client.UserInfo;
 import com.condox.ecommerce.client.tree.presenter.AgreementPresenter;
 import com.condox.ecommerce.client.tree.presenter.UpdateProfile1Presenter;
 import com.condox.ecommerce.client.tree.presenter.UpdateProfile1Presenter.I_Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.uibinder.client.UiField;
@@ -31,9 +34,28 @@ public class UpdateProfile1View extends Composite implements I_Display {
 	}
 
 	private UpdateProfile1Presenter presenter = null;
+	private UserInfo info = null;
 
 	public UpdateProfile1View() {
 		initWidget(uiBinder.createAndBindUi(this));
+		Timer updateView = new Timer() {
+
+			@Override
+			public void run() {
+				String firstName = textFirstName.getValue();
+				String email = textEmail.getValue();
+				
+				boolean empty = false;
+				empty |= firstName.isEmpty();
+				empty |= email.isEmpty();
+				
+				boolean changed = false;
+				changed |= !firstName.equals(info.getNickName());
+				changed |= !email.equals(info.getEmail());
+				
+				buttonApply.setEnabled(!empty && changed);
+			}};
+		updateView.scheduleRepeating(500);
 	}
 
 	@Override
@@ -52,8 +74,11 @@ public class UpdateProfile1View extends Composite implements I_Display {
 	}
 	@UiHandler("buttonApply")
 	void onButtonApplyClick(ClickEvent event) {
-		if (presenter != null)
+		if (presenter != null) {
+			info.setNickName(textFirstName.getValue());
+			info.setEmail(textEmail.getValue());
 			presenter.onApply();
+		}
 	}
 	@UiHandler("buttonFinish")
 	void onButtonFinishClick(ClickEvent event) {
@@ -64,5 +89,17 @@ public class UpdateProfile1View extends Composite implements I_Display {
 	void onButtonNextClick(ClickEvent event) {
 		if (presenter != null)
 			presenter.onNext();
+	}
+
+	@Override
+	public void setUserInfo(UserInfo newInfo) {
+		info = newInfo;
+		textFirstName.setValue(info.getNickName());
+		textEmail.setValue(info.getEmail());
+	}
+
+	@Override
+	public UserInfo getUserInfo() {
+		return info;
 	}
 }

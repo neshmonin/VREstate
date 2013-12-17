@@ -1,24 +1,120 @@
 package com.condox.ecommerce.client;
 
+import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.Options;
+import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 
 public class ServerProxy {
-	
-	// Get user info
-	public static void getUserInfo(int id, String sid, RequestCallback callback) {
-		String url = Options.URL_VRT + "data/user/" + id + "?&sid=" + sid;
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
-		builder.setRequestData(null);
-		builder.setCallback(callback);
+
+	private static void GET(String url, String data,
+			final RequestCallback callback) {
+		final RequestBuilder builder = new RequestBuilder(RequestBuilder.GET,
+				URL.encode(url));
+		builder.setRequestData(data);
+		builder.setCallback(new RequestCallback() {
+
+			@Override
+			public void onResponseReceived(Request request, Response response) {
+				ResponseLog(response);
+				callback.onResponseReceived(request, response);
+			}
+
+			@Override
+			public void onError(Request request, Throwable exception) {
+				ErrorLog();
+				callback.onError(request, exception);
+			}
+		});
 		try {
+			RequestLog(builder);
 			builder.send();
 		} catch (RequestException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+	}
+
+	private static void PUT(String url, String data,
+			final RequestCallback callback) {
+		final RequestBuilder builder = new RequestBuilder(RequestBuilder.PUT,
+				URL.encode(url));
+		builder.setRequestData(data);
+		builder.setHeader("Content-type", "application/json;");
+		builder.setCallback(new RequestCallback() {
+
+			@Override
+			public void onResponseReceived(Request request, Response response) {
+				ResponseLog(response);
+				callback.onResponseReceived(request, response);
+			}
+
+			@Override
+			public void onError(Request request, Throwable exception) {
+				ErrorLog();
+				callback.onError(request, exception);
+			}
+		});
+		try {
+			RequestLog(builder);
+			builder.send();
+		} catch (RequestException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	// Recover forgotted password
+	public static void recoverPassword(String id, final RequestCallback callback) {
+		Log.write("Recover forgotted password:");
+		String url = Options.URL_VRT + "program?q=recover"
+				+ "&role=sellingagent&uid=" + id;
+		GET(url, null, callback);
+	}
+
+	// Get user info
+	public static void getUserInfo(String id, String sid,
+			final RequestCallback callback) {
+		Log.write("Get User info:");
+		String url = Options.URL_VRT + "data/user/" + id + "?&sid=" + sid;
+		GET(url, null, callback);
+	}
+
+	// Set user info
+	public static void setUserInfo(String id, String info, String sid,
+			final RequestCallback callback) {
+		Log.write("Set User info:");
+		String url = Options.URL_VRT + "data/user/" + id + "?&sid=" + sid;
+		PUT(url, info, callback);
+	}
+
+	// Get orders list
+	public static void getOrdersList(String user_id, String sid,
+			final RequestCallback callback) {
+		Log.write("Get Orders list:");
+		String url = Options.URL_VRT + "data/viewOrder?userId=" + user_id
+				+ "&ed=Resale" + "&verbose=true" + "&sid=" + sid;
+		GET(url, null, callback);
+	}
+
+	// Utils
+	private static void RequestLog(RequestBuilder builder) {
+		Log.write(" Request method: " + builder.getHTTPMethod());
+		Log.write(" Request header (Content-type): " + builder.getHeader("Content-type"));
+		Log.write(" Request url: " + builder.getUrl());
+		Log.write(" Request data: " + builder.getRequestData());
+	}
+
+	private static void ResponseLog(Response response) {
+		Log.write(" Response code: " + response.getStatusCode());
+		Log.write(" Response text: " + response.getText());
+	}
+
+	private static void ErrorLog() {
+		// Log.write(caption);
 	}
 }
