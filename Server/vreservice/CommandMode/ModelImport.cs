@@ -419,24 +419,24 @@ namespace Vre.Server.Command
 				// promote POI to site level if available
 				if (poiModelFileName != null)
 					dbSite.PoiModelUrl = storeModelFile(dbSite, dbSite.PoiModelUrl, poiModelFileName, "sp");
-			}
 
-			// Calculate and set geoinformation
-			//
-			double mLon = 0.0, mLat = 0.0, mAlt = 0.0;
-			int buildingCnt = 0;
-			foreach (var b in dbSite.Buildings)
-			{
-				var vp = b.Location;
-				mLon += vp.Longitude;
-				mLat += vp.Latitude;
-				mAlt += vp.Altitude;
-				buildingCnt++;
+				// Calculate and set geoinformation
+				//
+				double mLon = 0.0, mLat = 0.0, mAlt = 0.0;
+				int buildingCnt = 0;
+				foreach (var b in dbSite.Buildings)
+				{
+					var vp = b.Location;
+					mLon += vp.Longitude;
+					mLat += vp.Latitude;
+					mAlt += vp.Altitude;
+					buildingCnt++;
+				}
+				dbSite.Location = new GeoPoint(
+					mLon / (double)buildingCnt,
+					mLat / (double)buildingCnt,
+					mAlt / (double)buildingCnt);
 			}
-			dbSite.Location = new GeoPoint(
-				mLon / (double)buildingCnt,
-				mLat / (double)buildingCnt,
-				mAlt / (double)buildingCnt);
 				
 			dbSite.MarkUpdated();
 			_clientSession.DbSession.Update(dbSite);
