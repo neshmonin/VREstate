@@ -1,5 +1,6 @@
 package com.condox.clientshared.document;
 
+import com.condox.clientshared.abstractview.Log;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
@@ -63,6 +64,7 @@ public class SuiteInfo implements I_JSON {
 			e.printStackTrace();
 			status = Status.Available;
 		}
+//		Log.write(_status);
 
 		if (obj.containsKey("floorPlanUrl"))
 			if (obj.get("floorPlanUrl").isString() != null)

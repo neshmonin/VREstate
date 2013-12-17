@@ -247,12 +247,12 @@ public class PickSuiteView extends Composite implements IDisplay {
 					switch (suite.getStatus()) {
 //					if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Available)
 //	                    btn.BackColor = Color.FromArgb(200, 255, 200);
-					case Available:
-						color += " background-color:#c8ffc8 ";
-						break;
+//					case Available:
+//						color += " background-color:#ffffff ";
+//						break;
 //	                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.ResaleAvailable)
 //	                    btn.BackColor = Color.FromArgb(200, 255, 255);
-					case AvailableResale:
+					case ResaleAvailable:
 						color += " background-color:#c8ffff ";
 					break;
 //	                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.AvailableRent)
@@ -263,15 +263,15 @@ public class PickSuiteView extends Composite implements IDisplay {
 
 //	                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.OnHold)
 //	                    btn.BackColor = Color.FromArgb(255, 255, 200);
-					case OnHold:
-						color += " background-color:#ffffc8 ";
-						break;
+//					case OnHold:
+//						color += " background-color:#ffffc8 ";
+//						break;
 //	                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Sold)
 //	                    // TODO: change to 'theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Resale' when it ready
 //	                    btn.BackColor = Color.FromArgb(255, 250, 250);
-					case Sold:
-						color += " background-color:#fffafa ";
-						break;
+//					case Sold:
+//						color += " background-color:#fffafa ";
+//						break;
 					default:
 					}
 				}
