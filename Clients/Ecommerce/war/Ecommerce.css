@@ -215,4 +215,7 @@ line-height: 50px;
 .my-node {
 	margin-left: 20px;
 }
+.gwt-TextBox-incorrect {
+	background-color: Red;
+}
 	

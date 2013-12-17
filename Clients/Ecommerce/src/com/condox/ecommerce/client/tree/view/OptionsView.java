@@ -51,6 +51,14 @@ public class OptionsView extends Composite implements I_Display {
 
 			@Override
 			public void run() {
+				int price = Integer.valueOf(textPrice.getValue());
+				price = Math.max(price, 0);
+				boolean valid_sale_price = (!rbForSale.getValue() || price > 10000);
+				boolean valid_rent_price = (!rbForRent.getValue() || price < 10000);
+//				textPrice.setStyleDependentName("incorrect", !(valid_sale_price && valid_rent_price));
+				boolean valid = valid_sale_price && valid_rent_price;
+				buttonNext.setEnabled(valid);
+				
 			}};
 		validate.scheduleRepeating(100);
 	}
@@ -116,8 +124,8 @@ public class OptionsView extends Composite implements I_Display {
 			break;
 		}
 
-		String price = "" + newInfo.getPrice();
-		textPrice.setValue(price);
+		int price = Math.max(newInfo.getPrice(), 0);
+		textPrice.setValue("" + price);
 
 		textVirtualTourUrl.setValue(newInfo.getVirtualTourURL());
 		textMoreInfoUrl.setValue(newInfo.getMoreInfoURL());
