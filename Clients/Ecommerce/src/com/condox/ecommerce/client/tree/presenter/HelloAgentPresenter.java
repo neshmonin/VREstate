@@ -18,7 +18,7 @@ import com.condox.ecommerce.client.ServerProxy;
 import com.condox.ecommerce.client.UserInfo;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.HelloAgentNode;
 import com.condox.ecommerce.client.tree.view.ViewOrderInfo;
 import com.google.gwt.http.client.Request;
@@ -110,22 +110,22 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 	
 //  Events
 	public void onLogout() {
-		node.setState(NodeStates.Logout);
+		node.setState(Actions.Logout);
 		node.next();
 	}
 
 	public void onShowSettings() {
-		node.setState(NodeStates.Settings);
+		node.setState(Actions.Settings);
 		node.next();
 	}
 
 	public void onNewOrder() {
-		node.setState(NodeStates.NewOrder);
+		node.setState(Actions.NewOrder);
 		node.next();
 	}
 
 	public void onShowHistory() {
-		node.setState(NodeStates.ShowHistory);
+		node.setState(Actions.ShowHistory);
 		node.next();
 	}
 
@@ -169,7 +169,7 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 	}
 
 	public void onUpdateProfile() {
-		node.next(NodeStates.UpdateProfile);
+		node.next(Actions.UpdateProfile);
 	}
 
 	public void openAddress(ViewOrderInfo object) {

@@ -9,7 +9,7 @@ import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.LoginNode;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
@@ -79,7 +79,7 @@ public class LoginPresenter implements I_Presenter, I_Login {
 		String password = display.getUserPassword().trim();
 		tree.setData(Field.UserEmail, new Data(email));
 		tree.setData(Field.UserPassword, new Data(password));
-		node.setState(NodeStates.ForgotPassword);
+		node.setState(Actions.ForgotPassword);
 		tree.next();
 	}
 
@@ -88,9 +88,9 @@ public class LoginPresenter implements I_Presenter, I_Login {
 		if (data != null) {
 			UserRole role = UserRole.valueOf(data.asString());
 			if (UserRole.Visitor.equals(role))
-				node.setState(NodeStates.Guest);
+				node.setState(Actions.Guest);
 			else
-				node.setState(NodeStates.Agent);
+				node.setState(Actions.Agent);
 			node.next();
 		}
 	}

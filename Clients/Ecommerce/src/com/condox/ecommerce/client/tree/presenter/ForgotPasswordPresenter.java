@@ -8,7 +8,7 @@ import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.ForgotPasswordNode;
 import com.condox.ecommerce.client.tree.node.LoginNode;
 import com.google.gwt.user.client.Window;
@@ -54,7 +54,7 @@ public class ForgotPasswordPresenter implements I_Presenter {
 		String email = display.getEmail().trim();
 		Window.alert("TODO: send mail with new password.");
 		tree.setData(Field.UserEmail, new Data(email));
-		node.setState(NodeStates.Submit);
+		node.setState(Actions.Submit);
 		node.next();
 	}
 }

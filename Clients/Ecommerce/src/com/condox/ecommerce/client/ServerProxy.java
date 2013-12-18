@@ -100,6 +100,16 @@ public class ServerProxy {
 				+ "&ed=Resale" + "&verbose=true" + "&sid=" + sid;
 		GET(url, null, callback);
 	}
+	
+	// Get suite info from MLS#
+	public static void getSuiteInfoFromMLS(String mls, String sid,
+			final RequestCallback callback) {
+		Log.write("Get suite info from MLS#:");
+		String url = Options.URL_VRT + "data/inventory?mlsId=" + mls
+				+ "&sid=" + sid;
+		GET(url, null, callback);
+	}
+	
 
 	// Utils
 	private static void RequestLog(RequestBuilder builder) {

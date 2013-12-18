@@ -7,7 +7,7 @@ import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.tree.Data;
 import com.condox.clientshared.tree.I_TreeNode;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 
 public abstract class AbstractNode {
 	
@@ -15,7 +15,7 @@ public abstract class AbstractNode {
 	private AbstractNode parent = null;
 	private Map<AbstractNode, AbstractNode> children = new HashMap<AbstractNode, AbstractNode>();
 	protected Map<Field, Data> dataRepository = new HashMap<Field, Data>();
-	private NodeStates state = null;
+	private Actions state = null;
 	
 	public EcommerceTree getTree() {
 		return tree;
@@ -56,11 +56,11 @@ public abstract class AbstractNode {
 		dataRepository.put(key, data);
 	}
 	
-	public NodeStates getState() {
+	public Actions getState() {
 		return state;
 	}
 	
-	public void setState(NodeStates newState) {
+	public void setState(Actions newState) {
 		state = newState;
 	}
 	
@@ -93,7 +93,7 @@ public abstract class AbstractNode {
 			tree.next();
 	}
 	
-	public void next(NodeStates state) {
+	public void next(Actions state) {
 		setState(state);
 		if (tree != null)
 			tree.next();

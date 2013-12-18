@@ -9,7 +9,7 @@ import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.ServerProxy;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.ChangingPasswordNode;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -60,7 +60,7 @@ public class ChangingPasswordPresenter implements I_Presenter {
 	
 	// Navigation events
 	public void onBackToLogin() {
-		node.setState(NodeStates.Ok);
+		node.setState(Actions.Ok);
 		node.next();
 	}
 	

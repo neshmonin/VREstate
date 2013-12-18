@@ -3,7 +3,7 @@ package com.condox.ecommerce.client.tree.presenter;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
 import com.condox.ecommerce.client.I_Presenter;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.NewOrderNode;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -28,17 +28,17 @@ public class NewOrderPresenter implements I_Presenter {
 	public void go(I_Container container) {
 //		container.clear();
 //		container.add((I_Contained)display);
-		node.next(NodeStates.Next);
+		node.next(Actions.Next);
 	}
 
 //	Events
 	public void onCancel() {
-		node.setState(NodeStates.Cancel);
+		node.setState(Actions.Cancel);
 		node.next();
 	}
 
 	public void onNext() {
-		node.setState(NodeStates.Next);
+		node.setState(Actions.Next);
 		node.next();
 	}
 

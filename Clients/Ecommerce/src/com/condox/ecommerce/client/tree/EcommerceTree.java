@@ -29,18 +29,19 @@ public class EcommerceTree {
 
 	public I_Container container = new PopupContainer(); // TODO first version.
 
-	public enum NodeStates {
-		Close, ForgotPassword, Submit, Ok, Guest, Agent, Logout, Settings, ShowHistory, NewOrder, Cancel, Prev, Next, OneMore, Finish, UsingMLS, NotUsingMLS, Proceed, UpdateProfile, Apply, SelectAvatar
+	public enum Actions {
+		PrevMLS, PrevAddress,
+		Close, ForgotPassword, Submit, Ok, Guest, Agent, Logout, Settings, ShowHistory, NewOrder, Cancel, Prev, Next, OneMore, Finish, UsingMLS, UsingAddress, Proceed, UpdateProfile, Apply, SelectAvatar
 	}
 
 	private AbstractNode currNode = new DefaultsNode();
-	private List<String> leafs = new ArrayList<String>();
+//	private List<String> leafs = new ArrayList<String>();
 	private Node configNode = new Node("DefaultNode");
 
 	class Node {
 		private String nodeType = null;
 		private Node parent = null;
-		private Map<NodeStates, Node> actions = new HashMap<NodeStates, Node>();
+		private Map<Actions, Node> actions = new HashMap<Actions, Node>();
 
 		public Node(String newNodeType) {
 			nodeType = newNodeType;
@@ -54,12 +55,12 @@ public class EcommerceTree {
 			return parent != null;
 		};
 
-		public void addAction(NodeStates state, Node nextNode) {
+		public void addAction(Actions state, Node nextNode) {
 			actions.put(state, nextNode);
 			nextNode.setParent(this);
 		}
 
-		public Node getNextNode(NodeStates state) {
+		public Node getNextNode(Actions state) {
 			return actions.get(state);
 		}
 	}
@@ -80,46 +81,61 @@ public class EcommerceTree {
 		final Node agreement = new Node("AgreementNode");
 
 		configNode.addAction(null, login);
-		login.addAction(NodeStates.Agent, agentHello);
+		login.addAction(Actions.Agent, agentHello);
 		// Agent hello
-		agentHello.addAction(NodeStates.Logout, login);
-		agentHello.addAction(NodeStates.UpdateProfile, agentUpdateProfile1);
-		agentHello.addAction(NodeStates.Settings, agentSettings);
-		agentHello.addAction(NodeStates.ShowHistory, agentHistory);
-		agentHello.addAction(NodeStates.NewOrder, /* newOrder */usingMLS);
+		agentHello.addAction(Actions.Logout, login);
+		agentHello.addAction(Actions.UpdateProfile, agentUpdateProfile1);
+		agentHello.addAction(Actions.Settings, agentSettings);
+		agentHello.addAction(Actions.ShowHistory, agentHistory);
+		agentHello.addAction(Actions.NewOrder, /* newOrder */usingMLS);
 		// Update profile, step #1
-		agentUpdateProfile1.addAction(NodeStates.Close, agentHello);
-		agentUpdateProfile1.addAction(NodeStates.Cancel, agentHello);
-		agentUpdateProfile1.addAction(NodeStates.Next, agentUpdateProfile2);
-		agentUpdateProfile1.addAction(NodeStates.Finish, agentHello);
+		agentUpdateProfile1.addAction(Actions.Close, agentHello);
+		agentUpdateProfile1.addAction(Actions.Cancel, agentHello);
+		agentUpdateProfile1.addAction(Actions.Next, agentUpdateProfile2);
+		agentUpdateProfile1.addAction(Actions.Finish, agentHello);
 		// Update profile, step #2
-		agentUpdateProfile2.addAction(NodeStates.Close, agentHello);
-		agentUpdateProfile2.addAction(NodeStates.Cancel, agentHello);
-		agentUpdateProfile2.addAction(NodeStates.Prev, agentUpdateProfile1);
-		agentUpdateProfile2.addAction(NodeStates.Finish, agentHello);
+		agentUpdateProfile2.addAction(Actions.Close, agentHello);
+		agentUpdateProfile2.addAction(Actions.Cancel, agentHello);
+		agentUpdateProfile2.addAction(Actions.Prev, agentUpdateProfile1);
+		agentUpdateProfile2.addAction(Actions.Finish, agentHello);
 		// Settings
-		agentSettings.addAction(NodeStates.Close, agentHello);
+		agentSettings.addAction(Actions.Close, agentHello);
 		// History
-		agentHistory.addAction(NodeStates.Close, agentHello);
+		agentHistory.addAction(Actions.Close, agentHello);
 		// New order
 		// Using MLS
-		usingMLS.addAction(NodeStates.Close, agentHello);
-		usingMLS.addAction(NodeStates.Prev, agentHello);
-		usingMLS.addAction(NodeStates.UsingMLS, options);
-		usingMLS.addAction(NodeStates.NotUsingMLS, pickBuilding);
+		usingMLS.addAction(Actions.Close, agentHello);
+		usingMLS.addAction(Actions.Cancel, agentHello);
+		usingMLS.addAction(Actions.Prev, agentHello);
+		usingMLS.addAction(Actions.UsingMLS, options);
+		usingMLS.addAction(Actions.UsingAddress, pickBuilding);
 		// Pick building
-		pickBuilding.addAction(NodeStates.Close, agentHello);
-		pickBuilding.addAction(NodeStates.Next, pickSuite);
+		pickBuilding.addAction(Actions.Close, agentHello);
+		pickBuilding.addAction(Actions.Cancel, agentHello);
+		pickBuilding.addAction(Actions.Prev, usingMLS);
+		pickBuilding.addAction(Actions.Next, pickSuite);
 		// Pick suite
-		pickSuite.addAction(NodeStates.Close, agentHello);
-		pickSuite.addAction(NodeStates.Next, options);
+		pickSuite.addAction(Actions.Close, agentHello);
+		pickSuite.addAction(Actions.Cancel, agentHello);
+		pickSuite.addAction(Actions.Prev, pickBuilding);
+		pickSuite.addAction(Actions.Next, options);
 		// Options
-		options.addAction(NodeStates.Close, agentHello);
-		options.addAction(NodeStates.Next, summary);
+		options.addAction(Actions.Close, agentHello);
+		options.addAction(Actions.Cancel, agentHello);
+		options.addAction(Actions.UsingMLS, usingMLS);
+		options.addAction(Actions.UsingAddress, pickSuite);
+		options.addAction(Actions.Next, summary);
 		// Summary
-		summary.addAction(NodeStates.Close, agentHello);
-		summary.addAction(NodeStates.Next, agreement);
-
+		summary.addAction(Actions.Close, agentHello);
+		summary.addAction(Actions.Cancel, agentHello);
+		summary.addAction(Actions.Prev, options);
+		summary.addAction(Actions.Next, agreement);
+		// Agreement
+		agreement.addAction(Actions.Close, agentHello);
+		agreement.addAction(Actions.Cancel, agentHello);
+		agreement.addAction(Actions.Prev, summary);
+//		summary.addAction(Actions.Next, agreement);
+		
 		// // Forgot password node
 		// //
 		// leafs.add("DefaultsNode/LoginNode.ForgotPassword/ForgotPasswordNode.Close=>DefaultsNode/LoginNode");
@@ -194,7 +210,7 @@ public class EcommerceTree {
 	public void next() {
 		// if (currNode == null)
 		// currNode = _createNode("DefaultsNode");
-		NodeStates currState = currNode.getState();
+		Actions currState = currNode.getState();
 		configNode = configNode.getNextNode(currState);
 
 		boolean ready = false;
@@ -327,7 +343,7 @@ public class EcommerceTree {
 
 		FILTERING_BY_CITY, VirtualTourUrl, MoreInfoUrl // TODO review this
 														// constants
-		, UserInfo, SuiteSelected
+		, UserInfo, SuiteSelected, UsingMLS
 
 	}
 

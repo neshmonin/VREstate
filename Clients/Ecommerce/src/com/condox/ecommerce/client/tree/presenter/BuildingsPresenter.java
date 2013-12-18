@@ -13,7 +13,7 @@ import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.BuildingsNode;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -121,12 +121,12 @@ public class BuildingsPresenter implements I_Presenter {
 //	}
 
 	public void onPrev() {
-		node.setState(NodeStates.Prev);
+		node.setState(Actions.Prev);
 		node.next();
 	}
 
 	public void onCancel() {
-		node.setState(NodeStates.Cancel);
+		node.setState(Actions.Cancel);
 		node.next();
 	}
 
@@ -136,7 +136,7 @@ public class BuildingsPresenter implements I_Presenter {
 			tree.setData(Field.BuildingId, new Data(object.getId()));
 			tree.setData(Field.BuildingName, new Data(object.getName()));
 //			node.setData(Field.Address, new Data(object.getAddress()));
-			node.setState(NodeStates.Next);
+			node.setState(Actions.Next);
 			node.next();
 		}
 	}

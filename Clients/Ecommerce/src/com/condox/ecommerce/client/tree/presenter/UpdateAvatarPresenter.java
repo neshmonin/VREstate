@@ -7,7 +7,7 @@ import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.UpdateAvatarNode;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
@@ -36,11 +36,11 @@ public class UpdateAvatarPresenter implements I_Presenter {
 	}
 
 	public void onApply() {
-		node.next(NodeStates.Close);
+		node.next(Actions.Close);
 	}
 
 	public void onClose() {
-		node.next(NodeStates.Close);
+		node.next(Actions.Close);
 	}
 
 //	public void onClose() {

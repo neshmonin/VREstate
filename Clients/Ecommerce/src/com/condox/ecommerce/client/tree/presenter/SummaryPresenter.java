@@ -6,7 +6,7 @@ import com.condox.clientshared.document.SuiteInfo;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.SummaryNode;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -39,16 +39,16 @@ public class SummaryPresenter implements I_Presenter {
 	
 	// Navigation events
 	public void onCancel() {
-		node.next(NodeStates.Cancel);
+		node.next(Actions.Cancel);
 	}
 
 	public void onPrev() {
-		node.next(NodeStates.Prev);
+		node.next(Actions.Prev);
 	}
 	
 	public void onNext() {
 		saveData();
-		node.next(NodeStates.Next);
+		node.next(Actions.Next);
 	}
 	
 	// Data utils

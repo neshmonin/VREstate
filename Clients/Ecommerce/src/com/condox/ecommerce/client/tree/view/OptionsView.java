@@ -51,8 +51,16 @@ public class OptionsView extends Composite implements I_Display {
 
 			@Override
 			public void run() {
-				int price = Integer.valueOf(textPrice.getValue());
+				int price = 0;
+				if (!textPrice.getValue().isEmpty())
+					try {
+						price = Integer.valueOf(textPrice.getValue());
+					} catch (NumberFormatException e) {
+						textPrice.setValue("" + price);
+						e.printStackTrace();
+					}
 				price = Math.max(price, 0);
+				textPrice.setValue("" + price);
 				boolean valid_sale_price = (!rbForSale.getValue() || price > 10000);
 				boolean valid_rent_price = (!rbForRent.getValue() || price < 10000);
 //				textPrice.setStyleDependentName("incorrect", !(valid_sale_price && valid_rent_price));
@@ -66,6 +74,13 @@ public class OptionsView extends Composite implements I_Display {
 	@Override
 	public void setPresenter(OptionsPresenter presenter) {
 		this.presenter = presenter;
+		boolean usingMLS = presenter.isUsingMLS();
+		if (usingMLS) {
+			rbForRent.setEnabled(false);
+			rbForSale.setEnabled(false);
+			textMLS.setReadOnly(true);
+			textPrice.setReadOnly(true);
+		}
 	}
 
 	@UiHandler("buttonCancel")
