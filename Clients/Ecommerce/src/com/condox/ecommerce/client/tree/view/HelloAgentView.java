@@ -8,6 +8,7 @@ import com.condox.ecommerce.client.tree.presenter.HelloAgentPresenter;
 import com.condox.ecommerce.client.tree.presenter.HelloAgentPresenter.I_Display;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -61,7 +62,7 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 			@Override
 			public SafeHtml render(String object) {
 				SafeHtmlBuilder sb = new SafeHtmlBuilder();
-				sb.appendHtmlConstant("<a>" + object + "</a>");
+				sb.appendHtmlConstant(/*"<a>" + */object/* + "</a>"*/);
 				return sb.toSafeHtml();
 			}
 		};
@@ -71,7 +72,10 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 				new ClickableTextCell(anchorRenderer)) {
 			@Override
 			public String getValue(ViewOrderInfo object) {
-				return object.getLabel();
+				if (object.isEnabled())
+					return "<a style=\"cursor:pointer;\">" + object.getLabel()+ "</a>";
+				else
+					return "<span style=\"color:grey;\">" + object.getLabel() + "</span>";
 			}
 
 		};
@@ -82,7 +86,8 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 					public void update(int index, ViewOrderInfo object,
 							String value) {
 //						selectedBuilding = object;
-						 presenter.openAddress(object);
+						if (object.isEnabled())
+							presenter.openAddress(object);
 //						 presenter.onNext();
 					}
 				});
@@ -90,24 +95,30 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 		dataGrid.addColumn(AddressColumn, "Address");
 		
 		// MLS# column
-		TextColumn<ViewOrderInfo> MLSColumn = new TextColumn<ViewOrderInfo>() {
+		Column<ViewOrderInfo, String> MLSColumn = new Column<ViewOrderInfo, String>(
+				new TextCell(anchorRenderer)) {
 			@Override
 			public String getValue(ViewOrderInfo object) {
-				return object.getMLS();
+				if (object.isEnabled())
+					return "<a>" + object.getMLS()+ "</a>";
+				else
+					return "<span style=\"color:grey;\">" + object.getMLS() + "</span>";
 			}
 		};
-
 		dataGrid.addColumn(MLSColumn, "MLS#");
-
+		
 		// Disable column
-		Column<ViewOrderInfo, String> DisableColumn = new Column<ViewOrderInfo, String>(
-				new ClickableTextCell(anchorRenderer)) {
-			@Override
-			public String getValue(ViewOrderInfo object) {
-				return object.isEnabled()? "disable" : "enable";
-			}
+				Column<ViewOrderInfo, String> DisableColumn = new Column<ViewOrderInfo, String>(
+						new ClickableTextCell(anchorRenderer)) {
+					@Override
+					public String getValue(ViewOrderInfo object) {
+						String disable = "<a style=\"cursor:pointer;\">disable</a>";
+						String enable = "<a style=\"cursor:pointer;\">enable</a>";
+						
+						return object.isEnabled()?  disable : enable;
+					}
 
-		};
+				};
 		
 		DisableColumn.setFieldUpdater(new FieldUpdater<ViewOrderInfo, String>() {
 			
@@ -125,7 +136,7 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 				new ClickableTextCell(anchorRenderer)) {
 			@Override
 			public String getValue(ViewOrderInfo object) {
-				return "delete";
+				return "<a style=\"cursor:pointer;\">delete</a>";
 			}
 			
 		};
