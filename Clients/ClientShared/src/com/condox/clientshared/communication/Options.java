@@ -136,7 +136,7 @@ public class Options implements RequestCallback {
 				ROLE = ROLES.KIOSK;
 			contextMap.remove("role");
 		}
-		Log.write("ROLE:" + ROLE);
+//		Log.write("ROLE:" + ROLE);
 
 		Iterator<String> keyIterator = contextMap.keySet().iterator();
 		while (keyIterator.hasNext()) {

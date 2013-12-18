@@ -1,5 +1,6 @@
 package com.condox.clientshared.document;
 
+import com.condox.clientshared.abstractview.Log;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
@@ -28,14 +29,19 @@ public class SuiteInfo implements I_JSON {
 	private String moreInfoURL = "";
 	private String mls = "";
 	private String address = "";
+	
+	private JSONObject backup = null;
 
 	@Override
 	public JSONObject toJSONObject() {
-		return null;
+		JSONObject obj = new JSONObject();
+		obj = backup;
+		return obj;
 	}
 
 	@Override
 	public void fromJSONObject(JSONObject obj) {
+		backup = obj;
 		id = (int) obj.get("id").isNumber().doubleValue();
 		name = obj.get("name").isString().stringValue();
 		level_number = (int) obj.get("levelNumber").isNumber().doubleValue();
@@ -58,6 +64,7 @@ public class SuiteInfo implements I_JSON {
 			e.printStackTrace();
 			status = Status.Available;
 		}
+//		Log.write(_status);
 
 		if (obj.containsKey("floorPlanUrl"))
 			if (obj.get("floorPlanUrl").isString() != null)

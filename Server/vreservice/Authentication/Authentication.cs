@@ -304,6 +304,9 @@ namespace Vre.Server.BusinessLogic
 				case User.Role.BuyingAgent:
 					return string.Format("^{0}", login);
 
+				case User.Role.Agent:
+					return string.Format("&{0}", login);
+
 				case User.Role.Kiosk:
                     return string.Format("@{0}k{1}", estateDeveloperId, login);
 
@@ -345,6 +348,13 @@ namespace Vre.Server.BusinessLogic
 			else if (intLogin.StartsWith("^"))
 			{
 				role = User.Role.BuyingAgent;
+				estateDeveloperId = -1;
+				login = intLogin.Substring(1);
+				result = true;
+			}
+			else if (intLogin.StartsWith("&"))
+			{
+				role = User.Role.Agent;
 				estateDeveloperId = -1;
 				login = intLogin.Substring(1);
 				result = true;

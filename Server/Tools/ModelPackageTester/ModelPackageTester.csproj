@@ -72,6 +72,12 @@
     <Compile Include="..\..\_version\versiongen.cs">
       <Link>Properties\versiongen.cs</Link>
     </Compile>
+    <Compile Include="StructureImportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="StructureImportForm.Designer.cs">
+      <DependentUpon>StructureImportForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ImportForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -86,6 +92,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="StructureImportForm.resx">
+      <DependentUpon>StructureImportForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ImportForm.resx">
       <DependentUpon>ImportForm.cs</DependentUpon>
     </EmbeddedResource>

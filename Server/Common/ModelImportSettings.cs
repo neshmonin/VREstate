@@ -6,6 +6,8 @@ namespace Vre.Server
 {
     public class ModelImportSettings
     {
+		public enum Mode { Site, Building, Structure }
+
         private Dictionary<string, string> _settings = new Dictionary<string, string>();
 		private string _settingsFileName;
 
@@ -45,10 +47,20 @@ namespace Vre.Server
 			using (var wrt = File.CreateText(_settingsFileName))
 			{
 				wrt.WriteLine("; 3D Condo Explorer model import settings");
-				if (string.IsNullOrWhiteSpace(BuildingToImportName))
-					wrt.WriteLine("; {0} - complete site", SiteName);
-				else
-					wrt.WriteLine("; {0} - single building", BuildingToImportName);
+				switch (ImportMode)
+				{
+					case Mode.Site:
+						wrt.WriteLine("; {0} - complete site", SiteName);
+						break;
+
+					case Mode.Building:
+						wrt.WriteLine("; {0} - single building", BuildingToImportName);
+						break;
+
+					case Mode.Structure:
+						wrt.WriteLine("; {0} - single structure", StructureName);
+						break;
+				}
 				wrt.WriteLine();
 
 				foreach (var kvp in _settings)
@@ -71,7 +83,27 @@ namespace Vre.Server
 
         public string BasePath { get; private set; }
 
-        public string ModelFileName 
+		public Mode ImportMode
+		{
+			get
+			{
+				var test = getSetting("ImportMode", string.Empty).ToUpperInvariant();
+				if (test.Equals("SITE")) return Mode.Site;
+				else if (test.Equals("BUILDING")) return Mode.Building;
+				else if (test.Equals("STRUCTURE")) return Mode.Structure;
+				else if (BuildingToImportName != null) return Mode.Building;
+				else return Mode.Site;
+			}
+			set { putSetting("ImportMode", value.ToString()); }
+		}
+
+		public string StructureName
+		{
+			get { return getSetting("StructureName", null); }
+			set { putSetting("StructureName", value); }
+		}
+		
+		public string ModelFileName 
 		{ 
 			get { return getSetting("ModelFileName", "wires.kmz"); }
 			set { putSetting("ModelFileName", value); }

@@ -1,0 +1,66 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		.important {
+			color: mediumblue;
+			margin-left: 50px;
+			background-color: slateblue;
+		}
+		.ageement {
+			background-color: saddlebrown;
+		}
+	</ui:style>
+	<g:VerticalPanel width="100%" height="100%"
+		horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+		<g:VerticalPanel>
+			<g:VerticalPanel spacing="5" width="370px">
+				<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT">
+					<g:Button text="x" ui:field="buttonClose"/>
+				</g:HorizontalPanel>
+				<g:Label text="Step 1: Your Contact Info (how people will see it...)" horizontalAlignment="ALIGN_LEFT" />
+				<g:HorizontalPanel width="100%">
+					<g:Cell width="50%">
+						<g:VerticalPanel spacing="5">
+						<g:Label text="First Name*"/>
+						<g:TextBox ui:field="textFirstName"/>
+					</g:VerticalPanel>
+					</g:Cell>
+					<g:Cell width="50%">
+						<g:VerticalPanel spacing="5">
+						<g:Label text="Last Name"/>
+						<g:TextBox ui:field="textLastName" enabled="false"/>
+					</g:VerticalPanel>
+					</g:Cell>
+				</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%">
+					<g:VerticalPanel spacing="5" width="100%">
+						<g:Label text="eMail*"/>
+						<g:TextBox width="349px" ui:field="textEmail"/>
+					</g:VerticalPanel>
+				</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%">
+					<g:VerticalPanel spacing="5">
+						<g:Label text="Phone"/>
+						<g:TextBox ui:field="textPhone" enabled="false"/>
+					</g:VerticalPanel>
+				</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%"
+					horizontalAlignment="ALIGN_LEFT">
+					<g:Cell width="100%">
+						<g:HorizontalPanel spacing="5">
+							<g:Button width="75px" ui:field="buttonApply" enabled="false">Apply</g:Button>
+						<g:Button width="75px" ui:field="buttonCancel" text="Cancel"/>
+					</g:HorizontalPanel>
+					</g:Cell>
+					<g:Cell horizontalAlignment="ALIGN_RIGHT" verticalAlignment="ALIGN_MIDDLE">
+						<g:HorizontalPanel spacing="5">
+							<g:Button text="Next &gt;&gt;" width="75px" ui:field="buttonNext"/>
+							<g:Button width="75px" ui:field="buttonFinish" text="Finish"/>
+						</g:HorizontalPanel>
+					</g:Cell>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+		</g:VerticalPanel>
+	</g:VerticalPanel>
+</ui:UiBinder> 

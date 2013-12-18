@@ -343,6 +343,7 @@ namespace Vre.Server.RemoteService
 			{
 				switch (request.UserInfo.Session.User.UserRole)
 				{
+					case User.Role.Agent:
 					case User.Role.BuyingAgent:
 						registerBuyingAgentViewOrder(request, mlsId, propertyType, propertyId, paymentRefId);
 						return;

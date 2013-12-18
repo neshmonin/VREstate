@@ -15,6 +15,32 @@ using Vre.Server.RemoteService;
 
 namespace Vre.Server.Command
 {
+	public class MiTest
+	{
+		public static void Test()
+		{
+			using (var _clientSession = ClientSession.MakeSystemSession())//_session))
+			{
+				ICollection<int> importedBuildingIds = new List<int>();
+
+				_clientSession.Resume();
+				DatabaseSettingsDao.VerifyDatabase();
+				//_clientSession.DbSession.FlushMode = FlushMode.Always;
+				using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(_clientSession.DbSession))
+				{
+					EstateDeveloper developer;
+					Site site = null;
+
+					using (EstateDeveloperDao dao = new EstateDeveloperDao(_clientSession.DbSession))
+						developer = dao.GetById("Resale");
+
+					foreach (var s in developer.Sites)
+						s.Name.Equals(s.AutoID);
+				}
+			}
+		}
+	}
+
     internal class ModelImport : ICommand
     {
         private CsvSuiteTypeInfo _extraSuiteInfo;
@@ -247,8 +273,7 @@ namespace Vre.Server.Command
                     }
                 }  // transaction
 
-				// TODO: RETROIMPORT
-				if (!dryRun)
+				if (!dryRun && CommandHandler.str2bool(extras.GetOption("mlsimport"), true))
 				{
 					foreach (var id in importedBuildingIds)
 						TryImportExistingListings(_clientSession, id, _log);
@@ -327,68 +352,94 @@ namespace Vre.Server.Command
                     extras, ref importedBuildingIds);
             }
 
-            if (isSiteModel)
-            {
-                // hide missing buildings
-                //
-                foreach (string bn in missingBuildings)
-                {
-                    Building dbb = null;
-                    foreach (Building b in dbSite.Buildings)
-                        if (b.Name.Equals(bn) && !b.Deleted) { dbb = b; break; }
+			if (isSiteModel)
+			{
+				// hide missing buildings
+				//
+				foreach (string bn in missingBuildings)
+				{
+					Building dbb = null;
+					foreach (Building b in dbSite.Buildings)
+						if (b.Name.Equals(bn) && !b.Deleted) { dbb = b; break; }
 
-                    if (dbb != null)
-                    {
-                        using (BuildingDao dao = new BuildingDao(_clientSession.DbSession))
-                            if (!dao.SafeDelete(dbb)) throw new StaleObjectStateException("Building", dbb.AutoID);
-                        _log.AppendFormat("Removed building missing in model ID={0}, Name={1}\r\n", dbb.AutoID, dbb.Name);
-                    }
-                }
+					if (dbb != null)
+					{
+						using (BuildingDao dao = new BuildingDao(_clientSession.DbSession))
+							if (!dao.SafeDelete(dbb)) throw new StaleObjectStateException("Building", dbb.AutoID);
+						_log.AppendFormat("Removed building missing in model ID={0}, Name={1}\r\n", dbb.AutoID, dbb.Name);
+					}
+				}
 
-                // find and hide unused suite types
-                //
-                List<string> missingSuiteTypes = new List<string>(dbSite.SuiteTypes.Count);
-                foreach (SuiteType st in dbSite.SuiteTypes) missingSuiteTypes.Add(st.Name);
-                foreach (string stn in _typeCache.Keys) missingSuiteTypes.Remove(stn);
-                foreach (string stn in missingSuiteTypes)
-                {
-                    SuiteType dbst = null;
-                    foreach (SuiteType st in dbSite.SuiteTypes)
-                        if (st.Name.Equals(stn) && !st.Deleted) { dbst = st; break; }
+				// find and hide unused suite types
+				//
+				List<string> missingSuiteTypes = new List<string>(dbSite.SuiteTypes.Count);
+				foreach (SuiteType st in dbSite.SuiteTypes) missingSuiteTypes.Add(st.Name);
+				foreach (string stn in _typeCache.Keys) missingSuiteTypes.Remove(stn);
+				foreach (string stn in missingSuiteTypes)
+				{
+					SuiteType dbst = null;
+					foreach (SuiteType st in dbSite.SuiteTypes)
+						if (st.Name.Equals(stn) && !st.Deleted) { dbst = st; break; }
 
-                    if (dbst != null)
-                    {
-                        using (SuiteTypeDao dao = new SuiteTypeDao(_clientSession.DbSession))
-                            if (!dao.SafeDelete(dbst)) throw new StaleObjectStateException("SuiteType", dbst.AutoID);
-                        _log.AppendFormat("Removed suite type missing in model ID={0}, Name={1}\r\n", dbst.AutoID, dbst.Name);
-                    }
-                }
+					if (dbst != null)
+					{
+						using (SuiteTypeDao dao = new SuiteTypeDao(_clientSession.DbSession))
+							if (!dao.SafeDelete(dbst)) throw new StaleObjectStateException("SuiteType", dbst.AutoID);
+						_log.AppendFormat("Removed suite type missing in model ID={0}, Name={1}\r\n", dbst.AutoID, dbst.Name);
+					}
+				}
 
-                // Update wireframe file
-                //
+				// Update wireframe file
+				//
 				dbSite.WireframeLocation = storeModelFile(ServiceInstances.InternalFileStorageManager,
 					dbSite, dbSite.WireframeLocation, infoModelFileName, "s", "wireframes");
 
-                if (displayModelFileName != null)
+				if (displayModelFileName != null)
 					dbSite.DisplayModelUrl = storeModelFile(dbSite, dbSite.DisplayModelUrl, displayModelFileName, "s");
 
-                if (overlayModelFileName != null)
+				if (overlayModelFileName != null)
 					dbSite.OverlayModelUrl = storeModelFile(dbSite, dbSite.OverlayModelUrl, overlayModelFileName, "so");
 
-                if (bubbleWebTemplateFileName != null)
+				if (poiModelFileName != null)
+					dbSite.PoiModelUrl = storeModelFile(dbSite, dbSite.PoiModelUrl, poiModelFileName, "sp");
+
+				if (bubbleWebTemplateFileName != null)
 					dbSite.BubbleWebTemplateUrl = storeModelFile(dbSite, dbSite.BubbleWebTemplateUrl, bubbleWebTemplateFileName, "sbwt");
 
-                if (bubbleKioskTemplateFileName != null)
+				if (bubbleKioskTemplateFileName != null)
 					dbSite.BubbleKioskTemplateUrl = storeModelFile(dbSite, dbSite.BubbleKioskTemplateUrl, bubbleKioskTemplateFileName, "sbkt");
 
 				// Geoinformation import/update
-				// TODO: Should do this for a building model too?!
-				Model.Kmz.ViewPoint vp = modelSite.LocationCart.AsViewPoint();
-				dbSite.Location = new GeoPoint(vp.Longitude, vp.Latitude, vp.Altitude);
+				dbSite.Location = modelSite.LocationCart.AsGeoPoint();
+			}
+			else  // single building model
+			{
+				_clientSession.DbSession.Refresh(dbSite);  // update to reflect building(s) imported
+
+				// promote POI to site level if available
+				if (poiModelFileName != null)
+					dbSite.PoiModelUrl = storeModelFile(dbSite, dbSite.PoiModelUrl, poiModelFileName, "sp");
+
+				// Calculate and set geoinformation
+				//
+				double mLon = 0.0, mLat = 0.0, mAlt = 0.0;
+				int buildingCnt = 0;
+				foreach (var b in dbSite.Buildings)
+				{
+					var vp = b.Location;
+					mLon += vp.Longitude;
+					mLat += vp.Latitude;
+					mAlt += vp.Altitude;
+					buildingCnt++;
+				}
+				dbSite.Location = new GeoPoint(
+					mLon / (double)buildingCnt,
+					mLat / (double)buildingCnt,
+					mAlt / (double)buildingCnt);
+			}
 				
-				dbSite.MarkUpdated();
-                _clientSession.DbSession.Update(dbSite);
-            }
+			dbSite.MarkUpdated();
+			_clientSession.DbSession.Update(dbSite);
         }
 
         private void importBuilding(Vre.Server.Model.Kmz.ConstructionSite modelSite,
@@ -477,8 +528,9 @@ namespace Vre.Server.Command
                 if (overlayModelFileName != null)
 					dbBuilding.OverlayModelUrl = storeModelFile(dbBuilding, dbBuilding.OverlayModelUrl, overlayModelFileName, "bo");
 
-                if (poiModelFileName != null)
-					dbBuilding.PoiModelUrl = storeModelFile(dbBuilding, dbBuilding.PoiModelUrl, poiModelFileName, "bp");
+				// UNUSED: POI is now always on site level; 
+                //if (poiModelFileName != null)
+				//	dbBuilding.PoiModelUrl = storeModelFile(dbBuilding, dbBuilding.PoiModelUrl, poiModelFileName, "bp");
 
                 if (bubbleWebTemplateFileName != null)
 					dbBuilding.BubbleWebTemplateUrl = storeModelFile(dbBuilding, dbBuilding.BubbleWebTemplateUrl, bubbleWebTemplateFileName, "bbwt");
@@ -489,7 +541,7 @@ namespace Vre.Server.Command
 
 			// Calculate and set geoinformation
 			//
-			var vpCenter = modelBuilding.LocationCart.AsViewPoint();
+			var vpCenter = modelBuilding.LocationCart.AsGeoPoint();
 			double mLon = 0.0, mLat = 0.0, mAlt = 0.0, maxSuiteAlt = 0.0;
 			int suiteCnt = 0;
 			foreach (var suiteModelInfo in modelBuilding.Suites)
@@ -502,7 +554,7 @@ namespace Vre.Server.Command
 				suiteCnt++;
 			}
 
-			dbBuilding.Location = new GeoPoint(vpCenter.Longitude, vpCenter.Latitude, vpCenter.Altitude);
+			dbBuilding.Location = vpCenter;
 			dbBuilding.Center = new GeoPoint(
 				mLon / (double)suiteCnt,
 				mLat / (double)suiteCnt,
@@ -521,7 +573,7 @@ namespace Vre.Server.Command
                 _log.AppendFormat("ERROR: Failed querying altitude for {0}: {1}\r\n", dbBuilding.Name, ex.Message);
             }
 
-            if (isCreated && (infoModelFileName != null))  // new single building imported; attempt to write address
+            //if (isCreated && (infoModelFileName != null))  // new single building imported; attempt to write address
             {
                 dbBuilding.Country = conditionString(extras.GetOption("ad_co"), 128);
                 dbBuilding.PostalCode = conditionString(extras.GetOption("ad_po"), 10);
@@ -676,8 +728,7 @@ namespace Vre.Server.Command
 
 			// Geoinformation
 			//
-			var vp = modelSuite.LocationGeo;// modelInfo.LocationCart.AsViewPoint();
-			dbSuite.Location = new ViewPoint(vp.Longitude, vp.Latitude, vp.Altitude, vp.Heading);
+			dbSuite.Location = modelSuite.LocationGeo.AsViewPoint();
 			dbSuite.FloorName = Utilities.NormalizeFloorNumber(modelSuite.Floor);
 			dbSuite.CeilingHeight = new ValueWithUM(modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
 
@@ -876,6 +927,7 @@ namespace Vre.Server.Command
 
 			int mlsCnt = 0, add = 0, err = 0;
 			List<string> processedIds = new List<string>();
+			List<string> updatedMlsInfos = new List<string>();
 			foreach (var file in prov.AvailableFiles.OrderBy((a) => a.CreationTimeUtc).Reverse())
 			{
 				issues = prov.Parse(file.FullName);
@@ -895,7 +947,7 @@ namespace Vre.Server.Command
 				}
 
 				using (var manager = new SiteManager(session))
-					issues = manager.RetroImportExistingViewOrders(items, buildingId, ref add, ref err);
+					issues = manager.RetroImportExistingViewOrders(items, buildingId, ref add, ref err, ref updatedMlsInfos);
 				if (issues.Length > 0) report.AppendFormat("\r\nMLS Import problems:\r\n{0}", issues);
 
 				foreach (var item in items) processedIds.Add(item.MlsId);
@@ -937,6 +989,7 @@ namespace Vre.Server.Command
 
 			int mlsCnt = 0, add = 0, err = 0;
 			List<string> processedIds = new List<string>();
+			List<string> updatedMlsInfos = new List<string>();
 			foreach (var file in prov.AvailableFiles.OrderBy((a) => a.CreationTimeUtc).Reverse())
 			{
 				issues = prov.Parse(file.FullName);
@@ -956,7 +1009,7 @@ namespace Vre.Server.Command
 				}
 
 				using (var manager = new SiteManager(session))
-					issues = manager.RetroImportExistingViewOrders(items, ref voIds, ref add, ref err);
+					issues = manager.RetroImportExistingViewOrders(items, ref voIds, ref add, ref err, ref updatedMlsInfos);
 				if (issues.Length > 0) report.AppendFormat("\r\nMLS Import problems:\r\n{0}", issues);
 
 				foreach (var item in items) processedIds.Add(item.MlsId);

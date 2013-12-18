@@ -50,7 +50,11 @@ namespace Vre.Server.BusinessLogic
 			/// <summary>
 			/// Anonymous account created automatically; has no related login!
 			/// </summary>
-			Anonymous = 9
+			Anonymous = 9,
+			/// <summary>
+			/// Independent buying and selling agent; usually belongs to a Brokerage
+			/// </summary>
+			Agent = 10
 	    }
 
         public Role UserRole { get; private set; }
@@ -126,7 +130,7 @@ namespace Vre.Server.BusinessLogic
         /// </summary>
         public static bool IsEstateDeveloperTied(Role role)
         {
-            return ((role != Role.SellingAgent) && (role != Role.BuyingAgent) 
+            return ((role != Role.SellingAgent) && (role != Role.BuyingAgent) && (role != Role.Agent)
 				&& (role != Role.SuperAdmin) && (role != Role.Buyer) && (role != Role.Visitor)
 				&& (role != Role.Anonymous));
         }

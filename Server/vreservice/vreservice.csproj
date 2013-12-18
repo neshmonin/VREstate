@@ -136,6 +136,7 @@
     <Compile Include="BusinessObjects\ReverseRequest.cs" />
     <Compile Include="ChangeLog\ChangeLog.cs" />
     <Compile Include="CommandMode\CommandHandler.cs" />
+    <Compile Include="CommandMode\StructureImport.cs" />
     <Compile Include="CommandMode\ICommand.cs" />
     <Compile Include="CommandMode\ModelImport.cs" />
     <Compile Include="CommandMode\Parameters.cs" />
@@ -143,6 +144,7 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Dao\AccountDao.cs" />
     <Compile Include="Dao\BuildingDao.cs" />
+    <Compile Include="Dao\StructureDao.cs" />
     <Compile Include="Dao\FileStorageItemDao.cs" />
     <Compile Include="Dao\MlsInfoDao.cs" />
     <Compile Include="Dao\NamedSearchFilterDao.cs" />
@@ -167,6 +169,7 @@
     <Compile Include="Database\ObjectChangeInterceptor.cs" />
     <Compile Include="Database\NHibernateHelper.cs" />
     <Compile Include="Experimental\HttpServerPush.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="FileCacheManager.cs" />
     <Compile Include="FileStorage\FsFileStorageManagerBase.cs" />
     <Compile Include="FileStorage\IntLocalFileStorageManager.cs" />
@@ -286,6 +289,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Mappings\FileStorageItem.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\Structure.hbm.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <Content Include="SQL\Constraint\Account.sql" />

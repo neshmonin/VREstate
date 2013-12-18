@@ -2,34 +2,56 @@ package com.condox.ecommerce.client.tree;
 
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 public class PopupContainer implements I_Container {
-	private DialogBox popup = new DialogBox();
+	
+	private DialogBox popup = new DialogBox() {
+		protected void beginDragging(MouseDownEvent event) {
+			event.preventDefault();
+		};
+	};
+	
 	private HTMLPanel container = new HTMLPanel("");
 	
 	public PopupContainer() {
 		VerticalPanel vp = new VerticalPanel();
-		HorizontalPanel hp = new HorizontalPanel();
-		hp.getElement().setId("navBar");
-		hp.add(new Button(""));
 
-		container.setSize("750px", "500px");
+//		Button btnClose = new Button("Close");
+//		btnClose.addClickHandler(new ClickHandler() {
+//
+//			@Override
+//			public void onClick(ClickEvent event) {
+//				popup.hide();
+//			}
+//		});
+//
+//		vp.add(btnClose);
+//		vp.setCellHorizontalAlignment(btnClose,
+//				HasHorizontalAlignment.ALIGN_RIGHT);
 
-		vp.add(hp);
 		vp.add(container);
-		
+
+		popup.setModal(true);
+		popup.setGlassEnabled(true);
 		popup.setWidget(vp);
 	}
 
 	@Override
-	public void add(I_Contained child) {
-		container.add((IsWidget)child);
+	public void add(I_Contained newChild) {
+		Widget child = (Widget)newChild;
+		if (child == null) 
+			clear();
+		else 
+			container.add(child);
 		update();
 	}
 

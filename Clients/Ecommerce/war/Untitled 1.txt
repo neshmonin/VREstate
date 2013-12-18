@@ -1,0 +1,4 @@
+1. Login - UserRole
+2. Settings - ?
+3. History - ?
+4. HelloView->DeleteViewOrder commented

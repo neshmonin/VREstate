@@ -22,7 +22,7 @@ public class PUT implements RequestCallback {
 	}
 
 	public static void send(String url, String requestData, RequestCallback cb) {
-		RequestBuilder request = new RequestBuilder(RequestBuilder.POST,
+		RequestBuilder request = new RequestBuilder(RequestBuilder.PUT,
 				URL.encode(url));
 		thePUT = new PUT(cb);
 		request.setRequestData(requestData);
@@ -42,7 +42,7 @@ public class PUT implements RequestCallback {
 		if (currRequest == null || !currRequest.isPending()) {
 			RequestBuilder requestBuilder = requests.get(0);
 			RequestCallback original = requestBuilder.getCallback();
-//			requestBuilder.setHeader("Content-type", "text/html;");
+			requestBuilder.setHeader("Content-type", "application/json; charset=UTF-8;");
 			if (original != null)
 				requestBuilder.setCallback(original);
 			else

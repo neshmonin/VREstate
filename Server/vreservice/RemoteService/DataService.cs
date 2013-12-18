@@ -12,6 +12,9 @@ namespace Vre.Server.RemoteService
 {
     internal class DataService
     {
+		// TODO: make this variable
+		const double defaultProximityQuadradiusM = 1000.0;
+		
 		private static IPRangeFilter _debugClientFilter = null;
 
         public const string ServicePathPrefix = ServicePathElement0 + "/";
@@ -992,17 +995,16 @@ namespace Vre.Server.RemoteService
 
             if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, building, csrq);
 
+			var center = building.Location;
             generateViewResponse(session.DbSession,
-                null, new Building[] { building }, null, building.Suites, viewOrders, viewOrder.AutoID,
+				StructuresByGeoProximity(session.DbSession, center.Longitude, center.Latitude, defaultProximityQuadradiusM),
+				null, new Building[] { building }, null, building.Suites, viewOrders, viewOrder.AutoID,
                 resp, vs, false);
         }
 
         private static void getViewSuiteViewOrder(ClientSession session, ViewOrder viewOrder, 
 			ViewSettings vs, ChangeSubscriptionRequest csrq, IResponseData resp)
         {
-            // TODO: make this variable
-            const double defaultProximityQuadradiusM = 1000.0;
-
             IList<Building> buildings = null;
             IList<ViewOrder> viewOrders;
             IList<Suite> suites = null;
@@ -1055,7 +1057,9 @@ namespace Vre.Server.RemoteService
             //generateViewResponse(session.DbSession, suites, viewOrders, viewOrder.AutoID,
             //    resp, ViewResponseSoldPropertyLevel.Suite, true);
 
+			var center = suite.Building.Location;
             generateViewResponse(session.DbSession,
+				StructuresByGeoProximity(session.DbSession, center.Longitude, center.Latitude, defaultProximityQuadradiusM),
                 null, buildings, null, suites, viewOrders, viewOrder.AutoID,
                 resp, vs, false);
         }
@@ -1099,6 +1103,7 @@ namespace Vre.Server.RemoteService
 	        if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, buildings, suites, csrq);
 
             generateViewResponse(session.DbSession,
+				StructuresByGeoProximity(session.DbSession, cLon, cLat, sqRadM),
                 null, buildings, null, suites, null, Guid.Empty,
                 resp, vs, false);
         }
@@ -1119,8 +1124,10 @@ namespace Vre.Server.RemoteService
 
             if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, site.Buildings, suites, csrq);
 
+			var center = site.Location;
             generateViewResponse(session.DbSession,
-                new Site[] { site }, site.Buildings, null, suites, null, Guid.Empty, 
+				StructuresByGeoProximity(session.DbSession, center.Longitude, center.Latitude, defaultProximityQuadradiusM),
+				new Site[] { site }, site.Buildings, null, suites, null, Guid.Empty, 
                 resp, vs, false);
         }
 
@@ -1140,8 +1147,10 @@ namespace Vre.Server.RemoteService
 			
 			if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, building, csrq);
 
-            generateViewResponse(session.DbSession, 
-                null, new Building[] { building }, null, suites, null, Guid.Empty,
+			var center = building.Location;
+            generateViewResponse(session.DbSession,
+				StructuresByGeoProximity(session.DbSession, center.Longitude, center.Latitude, defaultProximityQuadradiusM),
+				null, new Building[] { building }, null, suites, null, Guid.Empty,
                 resp, vs, true);
         }
 
@@ -1159,7 +1168,10 @@ namespace Vre.Server.RemoteService
 
             if (csrq != ChangeSubscriptionRequest.None) setChangeSubscription(session, suite, csrq);
 
-            generateViewResponse(session.DbSession, new Suite[] { suite }, resp, vs, true);
+			var center = suite.Building.Location;
+            generateViewResponse(session.DbSession,
+				StructuresByGeoProximity(session.DbSession, center.Longitude, center.Latitude, defaultProximityQuadradiusM),
+				null, null, null, new Suite[] { suite }, null, Guid.Empty, resp, vs, true);
         }
 
         private static void generateViewResponse(ISession dbSession,
@@ -1167,18 +1179,18 @@ namespace Vre.Server.RemoteService
             IResponseData resp,
             ViewSettings vs, bool minimizeOutput)
         {
-            generateViewResponse(dbSession, null, null, null, suites, null, Guid.Empty, resp, vs, minimizeOutput);
+            generateViewResponse(dbSession, null, null, null, null, suites, null, Guid.Empty, resp, vs, minimizeOutput);
         }
 
-        private static void generateViewResponse(ISession dbSession,
-			ICollection<Suite> suites,
-			ICollection<ViewOrder> viewOrders,
-            Guid primaryListingId,
-            IResponseData resp,
-            ViewSettings vs, bool minimizeOutput)
-        {
-            generateViewResponse(dbSession, null, null, null, suites, viewOrders, primaryListingId, resp, vs, minimizeOutput);
-        }
+		//private static void generateViewResponse(ISession dbSession,
+		//    ICollection<Suite> suites,
+		//    ICollection<ViewOrder> viewOrders,
+		//    Guid primaryListingId,
+		//    IResponseData resp,
+		//    ViewSettings vs, bool minimizeOutput)
+		//{
+		//    generateViewResponse(dbSession, null, null, null, suites, viewOrders, primaryListingId, resp, vs, minimizeOutput);
+		//}
 
         private enum ViewResponseSoldPropertyLevel 
         { 
@@ -1197,6 +1209,7 @@ namespace Vre.Server.RemoteService
         }
 
         private static void generateViewResponse(ISession dbSession,
+			ICollection<Structure> structures,
 			ICollection<Site> sites, ICollection<Building> buildings,
 			ICollection<SuiteType> suiteTypes, ICollection<Suite> suites,
 			ICollection<ViewOrder> viewOrders,
@@ -1204,11 +1217,12 @@ namespace Vre.Server.RemoteService
             IResponseData resp,
             ViewSettings vs, bool minimizeOutput)
         {
-            generateViewResponse(dbSession, sites, buildings, suiteTypes, suites, viewOrders, primaryListingId, resp, vs, minimizeOutput,
+            generateViewResponse(dbSession, structures, sites, buildings, suiteTypes, suites, viewOrders, primaryListingId, resp, vs, minimizeOutput,
                 false);
         }
 
         private static void generateViewResponse(ISession dbSession,
+			ICollection<Structure> structures,
 			ICollection<Site> sites, ICollection<Building> buildings,
 			ICollection<SuiteType> suiteTypes, ICollection<Suite> suites,
 			ICollection<ViewOrder> viewOrders,
@@ -1303,6 +1317,11 @@ namespace Vre.Server.RemoteService
             }
             resp.Data.Add("buildings", elements.ToArray());
 
+			if (structures != null)
+			{
+				resp.Data.Add("structures", structures.ConvertTo((s) => s.DisplayModelUrl).ToArray());
+			}
+
             if (!tempEventMode)
             {
                 if (sites != null)
@@ -1373,7 +1392,7 @@ namespace Vre.Server.RemoteService
             ISession session, ref IResponseData response,
             ref IList<Building> buildings, ref IList<Suite> suites)
         {
-            generateViewResponse(session, null, buildings, null, suites, null, Guid.Empty, response,
+            generateViewResponse(session, null, null, buildings, null, suites, null, Guid.Empty, response,
                 new ViewSettings(true), true, true);
         }
 
@@ -1599,7 +1618,8 @@ namespace Vre.Server.RemoteService
 					{
 						if (manager.UpdateSuite(suite))
 						{
-							if (suite.CurrentPrice.HasValue && (suite.CurrentPrice.Value.CompareTo(price.Value) != 0))
+							if (suite.CurrentPrice.HasValue && 
+								(!price.HasValue || (suite.CurrentPrice.Value.CompareTo(price.Value) != 0)))
 								manager.LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice));
 
 							updated = true;
@@ -1835,7 +1855,7 @@ namespace Vre.Server.RemoteService
 
                     using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
                     {
-                        foreach (ViewOrder vo in dao.Get(session.User.AutoID))
+                        foreach (ViewOrder vo in dao.Get(user.AutoID))
                         {
                             vo.MarkDeleted();
                             dao.Update(vo);
@@ -1930,26 +1950,39 @@ namespace Vre.Server.RemoteService
         {
             EstateDeveloper result = null;
 
-            switch (vo.TargetObjectType)
-            {
-                case ViewOrder.SubjectType.Building:
-                    {
-                        Building b;
-                        using (BuildingDao dao = new BuildingDao(session.DbSession))
-                            b = dao.GetById(vo.TargetObjectId);
-                        result = b.ConstructionSite.Developer;
-                    }
-                    break;
+			try
+			{
+				switch (vo.TargetObjectType)
+				{
+					case ViewOrder.SubjectType.Building:
+						{
+							Building b;
+							using (BuildingDao dao = new BuildingDao(session.DbSession))
+								b = dao.GetById(vo.TargetObjectId);
+							result = b.ConstructionSite.Developer;
+						}
+						break;
 
-                case ViewOrder.SubjectType.Suite:
-                    {
-                        Suite s;
-                        using (SuiteDao dao = new SuiteDao(session.DbSession))
-                            s = dao.GetById(vo.TargetObjectId);
-                        result = s.Building.ConstructionSite.Developer;
-                    }
-                    break;
-            }
+					case ViewOrder.SubjectType.Suite:
+						{
+							Suite s;
+							using (SuiteDao dao = new SuiteDao(session.DbSession))
+								s = dao.GetById(vo.TargetObjectId);
+							result = s.Building.ConstructionSite.Developer;
+						}
+						break;
+				}
+			}
+			catch (Exception ex)
+			{
+				ServiceInstances.Logger.Error("EDfVO: {0}, {1}, {2}, {3}",
+					(session != null) ? session.ToString() : "N/A",
+					(vo != null) ? vo.AutoID.ToString() : "N/A",
+					(vo != null) ? vo.TargetObjectType.ToString() : "N/A",
+					(vo != null) ? vo.TargetObjectId.ToString() : "N/A",
+					ex.Message, ex.StackTrace);
+				result = new EstateDeveloper(EstateDeveloper.Configuration.Online);
+			}
 
             return result;
         }
@@ -2238,6 +2271,23 @@ namespace Vre.Server.RemoteService
 				result = dao.SearchByProximity(longitude, latitude, dLon, dLat);
 
 			ServiceInstances.Logger.Debug("BbGP: dLon={0}, dLat={1}, lon={2}, lat={3}, cnt={4}.",
+				dLon, dLat, longitude, latitude, result.Count);
+
+			return result;
+		}
+
+		public static IList<Structure> StructuresByGeoProximity(ISession dbSession,
+			double longitude, double latitude, double quadradiusM)
+		{
+			double dLon = quadradiusM / GeoUtilities.LongitudeDegreeInM(latitude);
+			double dLat = quadradiusM / GeoUtilities.LatitudeDegreeInM(latitude);
+
+			IList<Structure> result;
+
+			using (var dao = new StructureDao(dbSession))
+				result = dao.SearchByProximity(longitude, latitude, dLon, dLat);
+
+			ServiceInstances.Logger.Debug("SbGP: dLon={0}, dLat={1}, lon={2}, lat={3}, cnt={4}.",
 				dLon, dLat, longitude, latitude, result.Count);
 
 			return result;

@@ -189,6 +189,7 @@ namespace Vre.Server.Task
 		{
 			ModelImportSettings mis = new ModelImportSettings(filePath);
 
+			mis.ImportMode = ModelImportSettings.Mode.Building;
 			mis.BuildingCountry = b.Country ?? "Canada";
 			mis.BuildingStateProvince = b.StateProvince ?? "ON";
 			mis.BuildingPostalCode = b.PostalCode;

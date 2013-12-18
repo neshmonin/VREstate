@@ -64,13 +64,16 @@ namespace Vre.Server.HttpService
                 RawData = null;
                 if ((request.ContentLength64 > 0) && (request.ContentLength64 <= bodySizeLimit))
                 {
-                    if (request.ContentType.Equals("application/json"))
+                    if (request.ContentType.Contains("application/json"))
                     {
-                        try
-                        {
-                            Data = JavaScriptHelper.JsonToClientData(request.InputStream);
-                        }
-                        catch { }
+						try
+						{
+							Data = JavaScriptHelper.JsonToClientData(request.InputStream);
+						}
+						catch
+						{
+							Data = null;
+						}
                     }
                     if (null == Data)
                     {
@@ -79,6 +82,7 @@ namespace Vre.Server.HttpService
                     }
                 }
             }
+
 			public Uri Referer { get; private set; }
 			public RequestType Type { get; private set; }
             public string Path { get; private set; }

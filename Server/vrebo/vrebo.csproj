@@ -113,6 +113,7 @@
     <Compile Include="BusinessObjects\Building.cs" />
     <Compile Include="BusinessObjects\ContactInfo.cs" />
     <Compile Include="BusinessObjects\BrokerageInfo.cs" />
+    <Compile Include="BusinessObjects\Structure.cs" />
     <Compile Include="BusinessObjects\FinancialTransaction.cs" />
     <Compile Include="BusinessObjects\NamedSearchFilter.cs" />
     <Compile Include="BusinessObjects\SuiteInventory.cs" />

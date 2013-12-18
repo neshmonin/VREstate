@@ -14,11 +14,13 @@ public class User implements RequestCallback, I_Login {
 	public enum UserRole {
 		Visitor,
 		Agent,
-		SuperAdmin
+		SuperAdmin,
+		SellingAgent
 	}
 	
 	public static String SID;
 	public static String id;
+	public static UserRole role;
 	public static int keepAlivePeriodSec;
 	public static User theUser = null;
 	
@@ -32,6 +34,7 @@ public class User implements RequestCallback, I_Login {
 			String uid,
 			String pwd,
 			UserRole role) {
+		User.role = role;
 		
 		firstLogin = true;
 		
@@ -45,6 +48,9 @@ public class User implements RequestCallback, I_Login {
 			break;
 		case SuperAdmin:
 			User.request += "&role=superadmin";
+			break;
+		case SellingAgent:
+			User.request += "&role=sellingagent";
 			break;
 		default:
 		}

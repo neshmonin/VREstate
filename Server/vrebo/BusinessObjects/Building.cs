@@ -29,6 +29,7 @@ namespace Vre.Server.BusinessLogic
         public virtual BuildingStatus Status { get; set; }
         public virtual string DisplayModelUrl { get; set; }
         public virtual string OverlayModelUrl { get; set; }
+		[Obsolete("POI is on site level always; this attribute shall disappear in future versions.", true)]
         public virtual string PoiModelUrl { get; set; }
         public virtual string BubbleWebTemplateUrl { get; set; }
         public virtual string BubbleKioskTemplateUrl { get; set; }
@@ -64,16 +65,16 @@ namespace Vre.Server.BusinessLogic
         }
 
         public Building(ClientData fromServer, Site site)
-            : this(site, string.Empty)
+            : base(fromServer)
         {
-            AutoID = fromServer.GetProperty("id", -1);
+			ConstructionSite = site;
 
             AltitudeAdjustment = fromServer.GetProperty("altitudeAdjustment", 0.0);
             MaxSuiteAltitude = fromServer.GetProperty("maxSuiteAltitude", 0.0);
 
             DisplayModelUrl = fromServer.GetProperty("displayModelUrl", string.Empty);
             OverlayModelUrl = fromServer.GetProperty("overlayModelUrl", string.Empty);
-            PoiModelUrl = fromServer.GetProperty("poiModelUrl", string.Empty);
+            //PoiModelUrl = fromServer.GetProperty("poiModelUrl", string.Empty);
             BubbleWebTemplateUrl = fromServer.GetProperty("bubbleWebTemplateUrl", string.Empty);
             BubbleKioskTemplateUrl = fromServer.GetProperty("bubbleKioskTemplateUrl", string.Empty);
 
@@ -113,8 +114,8 @@ namespace Vre.Server.BusinessLogic
                 result.Add("displayModelUrl", DisplayModelUrl);
             if (!string.IsNullOrEmpty(OverlayModelUrl))
                 result.Add("overlayModelUrl", OverlayModelUrl);
-            if (!string.IsNullOrEmpty(PoiModelUrl))
-                result.Add("poiModelUrl", PoiModelUrl);
+            //if (!string.IsNullOrEmpty(PoiModelUrl))
+            //    result.Add("poiModelUrl", PoiModelUrl);
             if (!string.IsNullOrEmpty(BubbleWebTemplateUrl))
                 result.Add("bubbleWebTemplateUrl", BubbleWebTemplateUrl);
             if (!string.IsNullOrEmpty(BubbleKioskTemplateUrl))

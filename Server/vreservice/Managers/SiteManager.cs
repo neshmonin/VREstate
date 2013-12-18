@@ -308,6 +308,7 @@ namespace Vre.Server.BusinessLogic
 		{
 			var issues = new StringBuilder();
 			int add = 0, adj = 0, skp = 0, err = 0;
+			List<string> updatedMlsInfos = new List<string>();
 
 			ServiceInstances.Logger.Info("Got {0} items to check.", newItems.Count);
 
@@ -338,7 +339,7 @@ namespace Vre.Server.BusinessLogic
 							if (null == results)
 								err++;
 							else
-								ImportListing(item, results, ref err, ref skp, ref add, ref issues);
+								ImportListing(item, results, ref err, ref skp, ref add, ref issues, ref updatedMlsInfos);
 						}
 					}
 					else if (!importOnly)
@@ -349,7 +350,7 @@ namespace Vre.Server.BusinessLogic
 							if (voIds[id].Equals(item.MlsId))
 							{
 								voId = id;
-								UpdateViewOrderInfo(item, voId, ref skp, ref err, ref adj);
+								UpdateViewOrderInfo(item, voId, ref skp, ref err, ref adj, ref updatedMlsInfos);
 							}
 						}
 					}
@@ -374,7 +375,7 @@ namespace Vre.Server.BusinessLogic
 		}
 
 		public string RetroImportExistingViewOrders(ICollection<MlsItem> newItems, int buildingId,
-			ref int add, ref int err)
+			ref int add, ref int err, ref List<string> updatedMlsInfos)
 		{
 			var issues = new StringBuilder();
 			int skp = 0;
@@ -430,14 +431,18 @@ namespace Vre.Server.BusinessLogic
 									}
 								}
 
-								ImportListing(item, targets, ref err, ref skp, ref add, ref issues);
+								ImportListing(item, targets, ref err, ref skp, ref add, ref issues, ref updatedMlsInfos);
 							}
 						}
 					}
 					else
 					{
 						// check if MLS info needs to be imported
-						ImportUpdateMlsInfo(item, true);
+						if (!updatedMlsInfos.Contains(item.MlsId))
+						{
+							ImportUpdateMlsInfo(item, true);
+							updatedMlsInfos.Add(item.MlsId);
+						}
 					}
 				}
 				catch (Exception ex)
@@ -460,7 +465,7 @@ namespace Vre.Server.BusinessLogic
 		public string RetroImportExistingViewOrders(
 			ICollection<MlsItem> newItems, 
 			ref IDictionary<Guid, string> voIds,
-			ref int add, ref int err)
+			ref int add, ref int err, ref List<string> updatedMlsInfos)
 		{
 			var issues = new StringBuilder();
 			int skp = 0;
@@ -483,7 +488,7 @@ namespace Vre.Server.BusinessLogic
 							else
 							{
 								foreach (var id in ImportListing(
-									item, results, ref err, ref skp, ref add, ref issues))
+									item, results, ref err, ref skp, ref add, ref issues, ref updatedMlsInfos))
 									voIds.Add(new KeyValuePair<Guid, string>(id, item.MlsId));
 							}
 						}
@@ -491,7 +496,11 @@ namespace Vre.Server.BusinessLogic
 					else
 					{
 						// check if MLS info needs to be imported
-						ImportUpdateMlsInfo(item, true);
+						if (!updatedMlsInfos.Contains(item.MlsId))
+						{
+							ImportUpdateMlsInfo(item, true);
+							updatedMlsInfos.Add(item.MlsId);
+						}
 					}
 				}
 				catch (Exception ex)
@@ -512,7 +521,7 @@ namespace Vre.Server.BusinessLogic
 		}
 
 		private void UpdateViewOrderInfo(MlsItem item, Guid voId,
-			ref int skp, ref int err, ref int adj)
+			ref int skp, ref int err, ref int adj, ref List<string> updatedMlsInfos)
 		{
 			using (var tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
 			{
@@ -585,7 +594,11 @@ namespace Vre.Server.BusinessLogic
 				}
 
 				// Update extra information
-				ImportUpdateMlsInfo(item, false);
+				if (!updatedMlsInfos.Contains(item.MlsId))
+				{
+					ImportUpdateMlsInfo(item, false);
+					updatedMlsInfos.Add(item.MlsId);
+				}
 				
 				if (!changed) return;
 				adj++;
@@ -594,7 +607,7 @@ namespace Vre.Server.BusinessLogic
 		}
 
 		private IList<Guid> ImportListing(MlsItem item, IEnumerable<UpdateableBase> targets,
-			ref int err, ref int skp, ref int add, ref StringBuilder issues)
+			ref int err, ref int skp, ref int add, ref StringBuilder issues, ref List<string> updatedMlsInfos)
 		{
 			var procesedEds = new List<EstateDeveloper>();
 			var result = new List<Guid>();
@@ -638,9 +651,6 @@ namespace Vre.Server.BusinessLogic
 				};
 				// todo: what's default listing lifetime?!
 
-				// Import extra information
-				ImportUpdateMlsInfo(item, false);
-
 				using (var tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
 				{
 					using (var dao = new ViewOrderDao(_session.DbSession)) dao.Create(vo);
@@ -668,6 +678,14 @@ namespace Vre.Server.BusinessLogic
 					tran.Commit();
 					add++;
 				}
+
+				// Import extra information
+				if (!updatedMlsInfos.Contains(item.MlsId))
+				{
+					ImportUpdateMlsInfo(item, false);
+					updatedMlsInfos.Add(item.MlsId);
+				}
+	
 				ServiceInstances.Logger.Info("Imported MLS#{0} for {1} ({2}); VOID={3}",
 					item.MlsId, ed.Name, item.CompiledAddress, vo.AutoID);
 
@@ -782,11 +800,10 @@ namespace Vre.Server.BusinessLogic
 					{
 						info = new MlsInfo(item);
 						dao.Create(info);
-						ServiceInstances.Logger.Info("Added MLS info for {0}", item.MlsId);
+						ServiceInstances.Logger.Info("Added MLS info for {0}; id={1}", item.MlsId, info.AutoID);
 					}
 				}
 				tran.Commit();
-				_session.DbSession.Flush();  // required to ensure "info" gets flushed before it is GC-ed
 			}
 		}
 	}
