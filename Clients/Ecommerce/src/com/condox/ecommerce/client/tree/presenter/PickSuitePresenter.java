@@ -42,11 +42,13 @@ public class PickSuitePresenter implements I_Presenter {
 	private IDisplay display = null;
 	private List<SuiteInfo> data = new ArrayList<SuiteInfo>();
 	private PickSuiteNode node = null;
+	private EcommerceTree tree = null;
 
 	public PickSuitePresenter(IDisplay display, PickSuiteNode node) {
 		this.display = display;
 		this.display.setPresenter(this);
 		this.node = node;
+		tree = node.getTree();
 	}
 
 	private void updateData() {
@@ -115,7 +117,7 @@ public class PickSuitePresenter implements I_Presenter {
 
 	// Data utils
 	private void saveData() {
-		node.setData(Field.SuiteSelected, new Data(display.getSuiteSelected()));
+		tree.setData(Field.SuiteSelected, new Data(display.getSuiteSelected()));
 	}
 
 }

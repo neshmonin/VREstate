@@ -1,4 +1,4 @@
-package com.condox.ecommerce.client.tree.node;
+package com.condox.ecommerce.client.tree;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,6 @@ import java.util.Map;
 import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.tree.Data;
 import com.condox.clientshared.tree.I_TreeNode;
-import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
 
@@ -47,13 +46,13 @@ public abstract class AbstractNode {
 		return newChild;
 	}
 	
-	public Data getData(Field key) {
+	protected Data getData(Field key) {
 		if (dataRepository.containsKey(key))
 			return dataRepository.get(key);
 		return null;
 	}
 
-	public void setData(Field key, Data data) {
+	protected void setData(Field key, Data data) {
 		dataRepository.put(key, data);
 	}
 	

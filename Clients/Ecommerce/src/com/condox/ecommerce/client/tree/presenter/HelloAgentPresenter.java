@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.DELETE;
-import com.condox.clientshared.communication.GET;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.PUT;
 import com.condox.clientshared.communication.User;
@@ -17,6 +16,7 @@ import com.condox.ecommerce.client.Ecommerce.Modes;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.ServerProxy;
 import com.condox.ecommerce.client.UserInfo;
+import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
 import com.condox.ecommerce.client.tree.node.HelloAgentNode;
@@ -44,11 +44,13 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 
 	private I_Display display = null;
 	private HelloAgentNode node = null;
+	private EcommerceTree tree = null;
 
 	public HelloAgentPresenter(I_Display newDisplay, HelloAgentNode newNode) {
 		display = newDisplay;
 		display.setPresenter(this);
 		node = newNode;
+		tree = node.getTree();
 	}
 
 	@Override
@@ -67,7 +69,7 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 				JSONObject obj = JSONParser.parseLenient(response.getText()).isObject();
 				UserInfo info = new UserInfo();
 				info.fromJSONObject(obj);
-				node.setData(Field.UserInfo, new Data(info));
+				tree.setData(Field.UserInfo, new Data(info));
 				display.setNickName(info.getNickName());
 				loadOrdersList();
 			}

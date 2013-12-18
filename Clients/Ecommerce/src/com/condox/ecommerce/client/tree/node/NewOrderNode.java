@@ -1,6 +1,7 @@
 package com.condox.ecommerce.client.tree.node;
 
 import com.condox.clientshared.container.I_Container;
+import com.condox.ecommerce.client.tree.AbstractNode;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
 import com.condox.ecommerce.client.tree.presenter.LoginPresenter;

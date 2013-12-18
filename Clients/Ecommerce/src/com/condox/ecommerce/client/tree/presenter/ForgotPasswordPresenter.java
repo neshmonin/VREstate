@@ -28,11 +28,13 @@ public class ForgotPasswordPresenter implements I_Presenter {
 
 	private I_Display display = null;
 	private ForgotPasswordNode node = null;
+	private EcommerceTree tree = null;
 
 	public ForgotPasswordPresenter(I_Display newDisplay, ForgotPasswordNode newNode) {
 		display = newDisplay;
 		display.setPresenter(this);
 		node = newNode;
+		tree = node.getTree();
 	}
 
 	@Override
@@ -51,7 +53,7 @@ public class ForgotPasswordPresenter implements I_Presenter {
 	public void onSubmit() {
 		String email = display.getEmail().trim();
 		Window.alert("TODO: send mail with new password.");
-		node.setData(Field.UserEmail, new Data(email));
+		tree.setData(Field.UserEmail, new Data(email));
 		node.setState(NodeStates.Submit);
 		node.next();
 	}

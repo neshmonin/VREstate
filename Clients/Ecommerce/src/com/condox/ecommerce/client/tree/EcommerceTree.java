@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
-import com.condox.ecommerce.client.tree.node.AbstractNode;
 import com.condox.ecommerce.client.tree.node.AgreementNode;
 import com.condox.ecommerce.client.tree.node.BuildingsNode;
 import com.condox.ecommerce.client.tree.node.ChangingPasswordNode;

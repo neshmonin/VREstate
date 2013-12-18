@@ -1,5 +1,6 @@
 package com.condox.ecommerce.client.tree.node;
 
+import com.condox.ecommerce.client.tree.AbstractNode;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.presenter.UsingMLSPresenter;
 import com.condox.ecommerce.client.tree.view.UsingMLSView;
