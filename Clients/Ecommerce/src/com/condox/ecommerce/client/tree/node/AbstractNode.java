@@ -30,6 +30,10 @@ public abstract class AbstractNode {
 		parent = newParent;
 	}
 	
+	public boolean hasParent() {
+		return parent != null;
+	}
+	
 	public AbstractNode addChild(AbstractNode newChild) {
 		//---------
 //		Log.write("this: " + this);
@@ -51,6 +55,10 @@ public abstract class AbstractNode {
 
 	public void setData(Field key, Data data) {
 		dataRepository.put(key, data);
+	}
+	
+	public NodeStates getState() {
+		return state;
 	}
 	
 	public void setState(NodeStates newState) {
