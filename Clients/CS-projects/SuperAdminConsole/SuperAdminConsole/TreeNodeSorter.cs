@@ -33,6 +33,11 @@ namespace SuperAdminConsole
                 if (ty.Text == "-MLS-")
                     return 1;
 
+                if (tx.Text.StartsWith("ANONYMOUS"))
+                    return 1;
+                if (ty.Text.StartsWith("ANONYMOUS"))
+                    return -1;
+
                 stringX = tx.Text.Substring(tx.Text.IndexOf(' '));
                 stringY = ty.Text.Substring(ty.Text.IndexOf(' '));
             }

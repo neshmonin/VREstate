@@ -132,6 +132,7 @@ namespace SuperAdminConsole
                 btn.Text = theSuite.SuiteName;
                 btn.Tag = theSuite;
                 btn.Visible = true;
+                
                 //btn.Enabled = theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Sold;
                 if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Available)
                     btn.BackColor = Color.FromArgb(200, 255, 200);
@@ -145,6 +146,20 @@ namespace SuperAdminConsole
                     // TODO: change to 'theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Resale' when it ready
                     btn.BackColor = Color.FromArgb(255, 250, 250);
 
+                ToolTip toolTipButton = new ToolTip();
+                string price = "";
+                if (theSuite.CurrentPrice.HasValue)
+                    price = "\nPrice=" + theSuite.CurrentPrice.ToString();
+                string mls = "";
+                if (!string.IsNullOrEmpty(theSuite.MLS))
+                    mls = "\nMLS#=" + theSuite.MLS;
+                string tooltip = string.Format("Bedrooms={0}\nBathrooms={1}\nArea={2}Sq.Ft.{3}{4}",
+                                    theSuite.Bedrooms,
+                                    theSuite.Bathrooms,
+                                    theSuite.Area,
+                                    price,
+                                    mls);
+                toolTipButton.SetToolTip(btn, tooltip);
                 //btn.UseVisualStyleBackColor = true;
                 btn.TabIndex = tabIndex++;
                 btn.Click += new System.EventHandler(delegate(object o, EventArgs e)

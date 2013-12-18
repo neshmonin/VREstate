@@ -351,6 +351,36 @@ namespace SuperAdminConsole
                 treeNode.Tag = user;
                 treeViewAccounts.Nodes.Add(treeNode);
             }
+
+            resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
+                                               "user",
+                                               "role=anonymous",
+                                               null);
+            if (HttpStatusCode.OK != resp.ResponseCode)
+            {
+                MessageBox.Show("Failed querying the list of customers");
+                return;
+            }
+
+            usersJSON = resp.Data;
+            users = usersJSON.GetNextLevelDataArray("users");
+
+            foreach (ClientData cd in users)
+            {
+                User user = new User(cd);
+                string nodeName = string.Format("ANONYMOUS <{0}> {1}", user.AutoID, user.PrimaryEmailAddress);
+                TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
+                                                        new TreeNode("Logs")  };
+                TreeNode treeNode = new TreeNode(nodeName, children);
+                treeNode.Tag = user;
+                treeViewAccounts.Nodes.Add(treeNode);
+            }
+
+            //TreeNode[] lastch = new TreeNode[1] { new TreeNode("ViewOrders") };
+            //TreeNode lastNode = new TreeNode("ANONIMOUS", lastch);
+            //lastNode.Tag = new User(m_currentDeveloper.ID, User.Role.Anonymous);
+            //treeViewAccounts.Nodes.Add(lastNode);
+
             UpdateState();
         }
 
