@@ -21,6 +21,8 @@ import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.node.HelloAgentNode;
 import com.condox.ecommerce.client.tree.view.ViewOrderInfo;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
@@ -28,8 +30,11 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
@@ -159,20 +164,48 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 			}});
 	}
 
-	public void delete(ViewOrderInfo object) {
-		ServerProxy.deleteOrder(object.getId(), User.SID, new RequestCallback(){
+	public void delete(final ViewOrderInfo object) {
+		final PopupPanel confirm = new PopupPanel();
+		confirm.setModal(true);
+		confirm.setGlassEnabled(true);
+		VerticalPanel vp = new VerticalPanel();
+		Label labelConfirm = new Label("Order will be deleted PERMANENTLY!\n Are you sure!");
+		HorizontalPanel hp = new HorizontalPanel();
+		Button buttonYes = new Button("Yes");
+		buttonYes.setWidth("75px");
+		buttonYes.addClickHandler(new ClickHandler(){
 
 			@Override
-			public void onResponseReceived(Request request, Response response) {
-				Log.popup();
-				loadOrdersList();
-			}
-
-			@Override
-			public void onError(Request request, Throwable exception) {
-				// TODO Auto-generated method stub
-				
+			public void onClick(ClickEvent event) {
+				confirm.hide();
+				ServerProxy.deleteOrder(object.getId(), User.SID, new RequestCallback(){
+					
+					@Override
+					public void onResponseReceived(Request request, Response response) {
+						Log.popup();
+						loadOrdersList();
+					}
+					
+					@Override
+					public void onError(Request request, Throwable exception) {
+						// TODO Auto-generated method stub
+						
+					}});
 			}});
+		Button buttonNo = new Button("No");
+		buttonNo.setWidth("75px");
+		buttonNo.addClickHandler(new ClickHandler(){
+
+			@Override
+			public void onClick(ClickEvent event) {
+				confirm.hide();
+			}});
+		hp.add(buttonYes);
+		hp.add(buttonNo);
+		vp.add(labelConfirm);
+		vp.add(hp);
+		confirm.setWidget(vp);
+		confirm.center();
 	}
 
 	public void onUpdateProfile() {
