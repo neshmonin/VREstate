@@ -83,10 +83,10 @@ public class SummaryPresenter implements I_Presenter {
 			more_info = info.getMoreInfoURL();
 			switch (info.getStatus()){
 				case AvailableRent:
-					status = "Status: Rent";
+					status = "For rent - price $" + price + "/m";
 					break;
 				case AvailableResale:
-					status = "Status: Sale";
+					status = "For sale - price $" + price;
 					break;
 			default:
 				break;
@@ -98,14 +98,12 @@ public class SummaryPresenter implements I_Presenter {
 		html += "Listing: " + (listing.isEmpty()? "&lt;empty&gt;" : listing) + "<br>";
 		html +=	"MLS# " + (mls.isEmpty()? "&lt;none&gt;" : mls)  + "<br>";
 		html += status.isEmpty()? "" : status + "<br>";
-		html += "Price  " + (price == 0? "&lt;empty&gt;" : "$" + String.valueOf(price)) + "<br>";
-
 		html +=	"Third Party Virtual Tour<br>";
 		html += "<div style=\"margin-left:20px\">";
 		if (virtual_tour.isEmpty())
 			html += "&lt;none&gt;";
 		else
-			html += "<a href=\"" + virtual_tour + "\">" + virtual_tour + "</a>";
+			html += "<a href=\"" + virtual_tour + "\" target = \"_blank\">" + virtual_tour + "</a>";
 		html += "</div>";
 
 		html +=	"More Info Link<br>";
@@ -113,7 +111,7 @@ public class SummaryPresenter implements I_Presenter {
 		if (more_info.isEmpty())
 			html += "&lt;none&gt;";
 		else
-			html += "<a href=\"" + more_info + "\">" + more_info + "</a>";
+			html += "<a href=\"" + more_info + "\" target = \"_blank\">" + more_info + "</a>";
 		html += "</div>";
 		
 		display.setData(html);
