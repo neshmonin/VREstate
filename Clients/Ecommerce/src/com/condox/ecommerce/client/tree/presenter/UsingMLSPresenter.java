@@ -68,6 +68,8 @@ public class UsingMLSPresenter implements I_Presenter {
 	}
 
 	public void onNext() {
+		tree.setData(Field.UsingMLS, new Data(display.isUsingMLS()));
+
 		if (display.isUsingMLS()) {
 			String mls = display.getMLS();
 			ServerProxy.getSuiteInfoFromMLS(mls, User.SID,
@@ -84,8 +86,6 @@ public class UsingMLSPresenter implements I_Presenter {
 								info.fromJSONObject(arr.get(0).isObject());
 								tree.setData(Field.SuiteSelected,
 										new Data(info));
-								tree.setData(Field.UsingMLS,
-										new Data(display.isUsingMLS()));
 								tree.setData(Field.SuiteMLS,
 										new Data(display.getMLS()));
 								node.next(Actions.UsingMLS);
