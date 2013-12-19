@@ -17,8 +17,8 @@ import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.ServerProxy;
 import com.condox.ecommerce.client.UserInfo;
 import com.condox.ecommerce.client.tree.EcommerceTree;
-import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.node.HelloAgentNode;
 import com.condox.ecommerce.client.tree.view.ViewOrderInfo;
 import com.google.gwt.http.client.Request;
@@ -28,6 +28,8 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
@@ -82,6 +84,13 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 	}
 	
 	private void loadOrdersList() {
+		final PopupPanel loading = new PopupPanel();
+		loading.clear();
+		loading.setModal(true);
+		loading.setGlassEnabled(true);
+		loading.add(new Label("Loading listings, please wait..."));
+		loading.center();
+		
 		ServerProxy.getOrdersList(User.id, User.SID, new RequestCallback(){
 
 			@Override
@@ -98,6 +107,7 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 					if (info != null)
 						data.add(info);
 				}
+				loading.hide();
 				display.setData(data);
 			}
 
@@ -150,14 +160,11 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 	}
 
 	public void delete(ViewOrderInfo object) {
-		String url = Options.URL_VRT + "data/viewOrder/" + object.getId() + 
-				"?sid=" + User.SID;
-		DELETE.send(url, object.getJSON(), new RequestCallback(){
+		ServerProxy.deleteOrder(object.getId(), User.SID, new RequestCallback(){
 
 			@Override
 			public void onResponseReceived(Request request, Response response) {
-				if (Modes.testDeleteOrder.equals(Ecommerce.mode))
-					Log.popup();
+				Log.popup();
 				loadOrdersList();
 			}
 
