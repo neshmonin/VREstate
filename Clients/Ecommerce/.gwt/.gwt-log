@@ -26797,3 +26797,698 @@ Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderI
       Compiling...
          Compilation completed in 0,01 seconds
       Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView.OptionsViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387449797327.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387449797327.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387449797327_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView.OptionsViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,08 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387449812571.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387449812571.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387449812571_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView.OptionsViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,04 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450010218.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450010218.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450010218_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView.OptionsViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450019590.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450019590.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450019590_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView.OptionsViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450025233.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450025233.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450025233_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView.OptionsViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450032348.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450032348.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450032348_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView.OptionsViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450382652.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450382652.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.OptionsView_OptionsViewUiBinderImpl_designTime1387450382652_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2835 units from cache.
+Compiling...
+   30% complete (ETR: 8 seconds)
+   30% complete (ETR: 8 seconds)
+   30% complete (ETR: 8 seconds)
+   30% complete (ETR: 8 seconds)
+   40% complete (ETR: 8 seconds)
+   50% complete (ETR: 6 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 13,90 seconds
+Removing invalidated units
+Finding entry point classes
+Rebinding com.google.gwt.i18n.client.impl.LocaleInfoImpl
+   Invoking generator com.google.gwt.i18n.rebind.LocaleInfoGenerator
+      Processing interface com.google.gwt.i18n.client.constants.NumberConstantsImpl
+         Generating method body for notANumber()
+         Generating method body for currencyPattern()
+         Generating method body for decimalPattern()
+         Generating method body for decimalSeparator()
+         Generating method body for defCurrencyCode()
+         Generating method body for exponentialSymbol()
+         Generating method body for globalCurrencyPattern()
+         Generating method body for groupingSeparator()
+         Generating method body for infinity()
+         Generating method body for minusSign()
+         Generating method body for monetaryGroupingSeparator()
+         Generating method body for monetarySeparator()
+         Generating method body for percent()
+         Generating method body for percentPattern()
+         Generating method body for perMill()
+         Generating method body for plusSign()
+         Generating method body for scientificPattern()
+         Generating method body for simpleCurrencyPattern()
+         Generating method body for zeroDigit()
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,05 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457357729.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457357729.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+         Generating method body for html4()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457357729_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457358819.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457358819.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+         Generating method body for html4()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457358819_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457397137.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457397137.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+         Generating method body for html4()
+         Generating method body for html5()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457397137_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457399830.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457399830.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+         Generating method body for html4()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457399830_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457428183.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457428183.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+         Generating method body for html4()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457428183_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457437460.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457437460.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+         Generating method body for html4()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457437460_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457450014.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457450014.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+         Generating method body for html4()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457450014_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457462736.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457462736.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+         Generating method body for html4()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457462736_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457473250.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457473250.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+         Generating method body for html4()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457473250_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457503300.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457503300.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+         Generating method body for html4()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457503300_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457531841.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457531841.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+         Generating method body for html4()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387457531841_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387458185500.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387458185500.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+         Generating method body for html4()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387458185500_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387458199635.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387458199635.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+         Generating method body for html4()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,00 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387458199635_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387459022196.Template
+   Invoking generator com.google.gwt.safehtml.rebind.SafeHtmlTemplatesGenerator
+      Constructing interface com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387459022196.Template
+         Generating method body for html1()
+         Generating method body for html2()
+         Generating method body for html3()
+         Generating method body for html4()
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView_AgreementViewUiBinderImpl_designTime1387459022196_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Invoking generator com.google.gwt.uibinder.rebind.UiBinderGenerator
+      [ERROR] The entity name must immediately follow the '&' in the entity reference.
+      [ERROR] Error parsing XML (line 19): The entity name must immediately follow the '&' in the entity reference.
+[ERROR] Deferred binding failed for 'com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder'; expect subsequent failures
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2835 units from cache.
+Compiling...
+   20% complete (ETR: 15 seconds)
+   20% complete (ETR: 15 seconds)
+   20% complete (ETR: 15 seconds)
+   30% complete (ETR: 15 seconds)
+   40% complete (ETR: 14 seconds)
+   50% complete (ETR: 12 seconds)
+   60% complete (ETR: 11 seconds)
+   70% complete (ETR: 9 seconds)
+   80% complete (ETR: 6 seconds)
+   90% complete (ETR: 3 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 35,73 seconds
+Removing invalidated units
+Finding entry point classes
+Rebinding com.google.gwt.i18n.client.impl.LocaleInfoImpl
+   Invoking generator com.google.gwt.i18n.rebind.LocaleInfoGenerator
+      Processing interface com.google.gwt.i18n.client.constants.NumberConstantsImpl
+         Generating method body for notANumber()
+         Generating method body for currencyPattern()
+         Generating method body for decimalPattern()
+         Generating method body for decimalSeparator()
+         Generating method body for defCurrencyCode()
+         Generating method body for exponentialSymbol()
+         Generating method body for globalCurrencyPattern()
+         Generating method body for groupingSeparator()
+         Generating method body for infinity()
+         Generating method body for minusSign()
+         Generating method body for monetaryGroupingSeparator()
+         Generating method body for monetarySeparator()
+         Generating method body for percent()
+         Generating method body for percentPattern()
+         Generating method body for perMill()
+         Generating method body for plusSign()
+         Generating method body for scientificPattern()
+         Generating method body for simpleCurrencyPattern()
+         Generating method body for zeroDigit()
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder
+   Invoking generator com.google.gwt.uibinder.rebind.UiBinderGenerator
+      [ERROR] The entity name must immediately follow the '&' in the entity reference.
+      [ERROR] Error parsing XML (line 19): The entity name must immediately follow the '&' in the entity reference.
+[ERROR] Deferred binding failed for 'com.condox.ecommerce.client.tree.view.AgreementView.AgreementViewUiBinder'; expect subsequent failures
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2835 units from cache.
+Compiling...
+   0% complete (ETR: ?)
+Public resources found in...
+Translatable source found in...
+Found 2719 cached/archived units.  Used 2719 / 2835 units from cache.
+Compiling...
+   Compilation completed in 1,18 seconds
+Removing invalidated units
+Finding entry point classes
+Rebinding com.google.gwt.i18n.client.impl.LocaleInfoImpl
+   Invoking generator com.google.gwt.i18n.rebind.LocaleInfoGenerator
+      Processing interface com.google.gwt.i18n.client.constants.NumberConstantsImpl
+         Generating method body for notANumber()
+         Generating method body for currencyPattern()
+         Generating method body for decimalPattern()
+         Generating method body for decimalSeparator()
+         Generating method body for defCurrencyCode()
+         Generating method body for exponentialSymbol()
+         Generating method body for globalCurrencyPattern()
+         Generating method body for groupingSeparator()
+         Generating method body for infinity()
+         Generating method body for minusSign()
+         Generating method body for monetaryGroupingSeparator()
+         Generating method body for monetarySeparator()
+         Generating method body for percent()
+         Generating method body for percentPattern()
+         Generating method body for perMill()
+         Generating method body for plusSign()
+         Generating method body for scientificPattern()
+         Generating method body for simpleCurrencyPattern()
+         Generating method body for zeroDigit()
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,35 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1387468569688_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,14 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1387468573497_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,04 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1387468710416_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1387468760747_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1387468760886_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,03 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1387468826151_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,01 seconds
+      Removing invalidated units
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2835 units from cache.
+Compiling...
+   40% complete (ETR: 7 seconds)
+   40% complete (ETR: 7 seconds)
+   40% complete (ETR: 7 seconds)
+   40% complete (ETR: 7 seconds)
+   40% complete (ETR: 7 seconds)
+   50% complete (ETR: 7 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 3 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 13,27 seconds
+Removing invalidated units
+Finding entry point classes
+Rebinding com.google.gwt.i18n.client.impl.LocaleInfoImpl
+   Invoking generator com.google.gwt.i18n.rebind.LocaleInfoGenerator
+      Processing interface com.google.gwt.i18n.client.constants.NumberConstantsImpl
+         Generating method body for notANumber()
+         Generating method body for currencyPattern()
+         Generating method body for decimalPattern()
+         Generating method body for decimalSeparator()
+         Generating method body for defCurrencyCode()
+         Generating method body for exponentialSymbol()
+         Generating method body for globalCurrencyPattern()
+         Generating method body for groupingSeparator()
+         Generating method body for infinity()
+         Generating method body for minusSign()
+         Generating method body for monetaryGroupingSeparator()
+         Generating method body for monetarySeparator()
+         Generating method body for percent()
+         Generating method body for percentPattern()
+         Generating method body for perMill()
+         Generating method body for plusSign()
+         Generating method body for scientificPattern()
+         Generating method body for simpleCurrencyPattern()
+         Generating method body for zeroDigit()
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,04 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1387477199841_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView.LoginViewUiBinder
+   Adding '3' new generated units
+      Compiling...
+         Compilation completed in 0,04 seconds
+      Removing invalidated units
+Rebinding com.condox.ecommerce.client.tree.view.LoginView_LoginViewUiBinderImpl_designTime1387477200737_GenBundle
+   Adding '1' new generated units
+      Compiling...
+         Compilation completed in 0,02 seconds
+      Removing invalidated units
