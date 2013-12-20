@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.condox.clientshared.abstractview.Log;
-import com.condox.clientshared.communication.DELETE;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.PUT;
 import com.condox.clientshared.communication.User;
@@ -31,6 +30,8 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -169,8 +170,15 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 		confirm.setModal(true);
 		confirm.setGlassEnabled(true);
 		VerticalPanel vp = new VerticalPanel();
-		Label labelConfirm = new Label("Order will be deleted PERMANENTLY!\n Are you sure!");
+		vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+		vp.setSpacing(10);
+		Label labelConfirm1 = new Label("Order will be deleted PERMANENTLY!");
+		Label labelConfirm2 = new Label("Are you sure?");
+		vp.add(labelConfirm1);
+		vp.add(labelConfirm2);
 		HorizontalPanel hp = new HorizontalPanel();
+		hp.setWidth("100%");
+		hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		Button buttonYes = new Button("Yes");
 		buttonYes.setWidth("75px");
 		buttonYes.addClickHandler(new ClickHandler(){
@@ -202,7 +210,6 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 			}});
 		hp.add(buttonYes);
 		hp.add(buttonNo);
-		vp.add(labelConfirm);
 		vp.add(hp);
 		confirm.setWidget(vp);
 		confirm.center();
