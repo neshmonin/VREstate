@@ -1,5 +1,5 @@
 + delete - are you sure?
-enable/disable - remember selected;
++ enable/disable - remember selected;
 + status=> For Sale/ For Rent;
 + SummaryView => links in new window.
 x Update TreeData from everyWhere.

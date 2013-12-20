@@ -2,6 +2,7 @@ package com.condox.ecommerce.client.tree.view;
 
 import java.util.List;
 
+import com.condox.clientshared.abstractview.Log;
 import com.condox.ecommerce.client.FilteredListDataProvider;
 import com.condox.ecommerce.client.IFilter;
 import com.condox.ecommerce.client.tree.presenter.HelloAgentPresenter;
@@ -20,19 +21,25 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.cellview.client.RowStyles;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 public class HelloAgentView extends Composite implements I_Display, IFilter<ViewOrderInfo> {
 
+	//
+	public static String SELECTED_ID = null;
+	//
 	private static HelloAgentViewUiBinder uiBinder = GWT
 			.create(HelloAgentViewUiBinder.class);
-	@UiField(provided=true) DataGrid<ViewOrderInfo> dataGrid = new DataGrid<ViewOrderInfo>();
+	MyDataGridResource resource = GWT.create(MyDataGridResource.class);
+	@UiField (provided = true) DataGrid<ViewOrderInfo> dataGrid = new DataGrid<ViewOrderInfo>(50, resource);
 	private FilteredListDataProvider<ViewOrderInfo> dataProvider = new FilteredListDataProvider<ViewOrderInfo>(this);
 	@UiField Hyperlink hyperlink;
 	@UiField Label textNickName;
@@ -55,8 +62,16 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 	public void setPresenter(HelloAgentPresenter presenter) {
 		this.presenter = presenter;
 	}
+	final SingleSelectionModel<ViewOrderInfo> selectionModel = new SingleSelectionModel<ViewOrderInfo>();
 	private void CreateDataGrid() {
-
+		// Add a selection model to handle user selection.
+		dataGrid.setSelectionModel(selectionModel);
+		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+			public void onSelectionChange(SelectionChangeEvent event) {
+				SELECTED_ID = selectionModel.getSelectedObject().getId();
+			}
+		});
+		
 		SafeHtmlRenderer<String> anchorRenderer = new AbstractSafeHtmlRenderer<String>() {
 
 			@Override
@@ -125,6 +140,7 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 			@Override
 			public void update(int index, ViewOrderInfo object,
 					String value) {
+//				SELECTED_ID = object.getId();
 				presenter.setEnabled(object, !object.isEnabled());
 			}
 		});
@@ -146,6 +162,7 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 			@Override
 			public void update(int index, ViewOrderInfo object,
 					String value) {
+//				SELECTED_ID = selectionModel.getSelectedObject().getId();
 				presenter.delete(object);
 			}
 		});
@@ -162,7 +179,8 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 //			}
 //		};
 //
-//		// Add a selection model to handle user selection.
+//	
+		
 //		final SingleSelectionModel<BuildingInfo> selectionModel = new SingleSelectionModel<BuildingInfo>();
 //		dataGrid.setSelectionModel(selectionModel);
 //		selectionModel
@@ -204,6 +222,8 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 		if (!dataProvider.getDataDisplays().contains(dataGrid))
 			dataProvider.addDataDisplay(dataGrid);
 
+		//		dataGrid.get
+		dataGrid.addStyleDependentName("ecommerce");
 	}
 	
 	private PopupPanel loading = new PopupPanel();
@@ -220,6 +240,12 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 			loading.hide();
 			this.dataProvider.getList().clear();
 			this.dataProvider.getList().addAll(data);
+//			selectionModel.setSelected(data.get(3), true);
+			for (ViewOrderInfo item : data)
+				if (item.getId().equals(SELECTED_ID))
+					selectionModel.setSelected(item, true);
+//				else
+//					selectionModel.setSelected(item, false);
 		}
 //			this.selectedBuilding = selected;
 //			dataGrid.getSelectionModel().setSelected(selected, true);
