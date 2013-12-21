@@ -149,11 +149,13 @@ namespace Vre.Server.RemoteService
             //
             if (sessionId != null)
             {
+				var user = ServiceInstances.SessionStore[sessionId].User;
                 request.Response.ResponseCode = HttpStatusCode.OK;
                 request.Response.Data = new ClientData();
                 request.Response.Data.Add("sid", sessionId);
                 request.Response.Data.Add("keepalivePeriodSec", ServiceInstances.SessionStore.ClientKeepalivePeriodSec);
-                request.Response.Data.Add("userId", ServiceInstances.SessionStore[sessionId].User.AutoID);
+                request.Response.Data.Add("userId", user.AutoID);
+				request.Response.Data.Add("passwordChangeRequired", user.PasswordChangeRequired);
             }
             else
             {

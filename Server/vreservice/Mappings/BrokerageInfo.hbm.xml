@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vrebo" namespace="Vre.Server.BusinessLogic">
   <class name="BrokerageInfo" table="BrokerageInfo" dynamic-update="true" lazy="false">
-    
+
     <id name="AutoID" column="AutoID" unsaved-value="0">
       <generator class="identity" />
     </id>
@@ -10,11 +10,16 @@
       <column name="Version" not-null="false" sql-type="timestamp"/>
     </version>
 
+    <property name="Created" column="Created" />
+    <property name="Updated" column="Updated" />
+    <property name="Deleted" column="Deleted" />
+
+    <property name="Name" column="name" />
+
     <property name="Emails" column="Emails" />
     <property name="PhoneNumbers" column="PhoneNumbers" />
     
-    <property name="AddressLine1" column="AddressLine1" />
-    <property name="AddressLine2" column="AddressLine2" />
+    <property name="StreetAddress" column="StreetAddress" />
     <property name="City" column="City" />
     <property name="StateProvince" column="StateProvince" />
     <property name="PostalCode" column="PostalCode" />
@@ -23,5 +28,7 @@
     <property name="WebSite" column="Web" />
     <property name="LogoUriRelative" column="Logo" />
 
+    <property name="CreditUnits" column="CreditUnits" />
+    <property name="LastServicePayment" column="LastServicePayment" />
   </class>
 </hibernate-mapping>

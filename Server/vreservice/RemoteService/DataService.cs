@@ -20,7 +20,7 @@ namespace Vre.Server.RemoteService
         public const string ServicePathPrefix = ServicePathElement0 + "/";
         private const string ServicePathElement0 = "data";
 
-        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction, Inventory, NamedSearchFilter }
+        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction, Inventory, NamedSearchFilter, Brokerage }
 
 		static DataService()
 		{
@@ -211,6 +211,17 @@ namespace Vre.Server.RemoteService
 						getNamedSearchFilter(request.UserInfo.Session, objectId, request.Response);
 					}
 					return;
+
+				case ModelObject.Brokerage:
+					if (-1 == objectId)
+					{
+						getBrokerageList(request.UserInfo.Session, request.Request.Query, request.Response, includeDeleted);
+					}
+					else
+					{
+						getBrokerage(request.UserInfo.Session, objectId, request.Response);
+					}
+					return;
 			}
 
             throw new NotImplementedException();
@@ -254,6 +265,11 @@ namespace Vre.Server.RemoteService
 					if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
 					updateNamedSearchFilter(request.UserInfo.Session, objectId, request.Request.Data, request.Response);
 					return;
+
+				case ModelObject.Brokerage:
+					if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
+					updateBrokerage(request.UserInfo.Session, objectId, request.Request.Data, request.Response);
+					return;
 			}
 
             throw new NotImplementedException();
@@ -284,7 +300,11 @@ namespace Vre.Server.RemoteService
 				case ModelObject.NamedSearchFilter:
 					createNamedSearchFilter(request.UserInfo.Session, request.Request.Data, request.Response);
                     return;
-            }
+
+				case ModelObject.Brokerage:
+					createBrokerage(request.UserInfo.Session, request.Request.Data, request.Response);
+					return;
+			}
 
             throw new NotImplementedException();
         }
@@ -614,15 +634,18 @@ namespace Vre.Server.RemoteService
         private static void getUser(ClientSession session, int userId, IResponseData resp)
         {
             User user;
-
-            using (UserManager manager = new UserManager(session))
-            {
-                user = manager.Get(userId);
-            }
+			
+            using (var manager = new UserManager(session)) user = manager.Get(userId);
             
             ClientData result = user.GetClientData();
+
+			if ((User.Role.SuperAdmin == session.User.UserRole)
+				|| (session.User.AutoID == user.AutoID))
+				result.Add("creditUnits", user.CreditUnits);
+
             using (IAuthentication auth = new Authentication(session.DbSession))
                 fillInLoginInfo(ref result, ref user, auth);
+
             resp.Data = result;
             resp.ResponseCode = HttpStatusCode.OK;
         }
@@ -664,7 +687,11 @@ namespace Vre.Server.RemoteService
                     for (int idx = 0; idx < cnt; idx++)
                     {
                         result[idx] = list[idx].GetClientData();
-                        fillInLoginInfo(ref result[idx], ref list[idx], auth);
+
+						if (User.Role.SuperAdmin == session.User.UserRole)
+							result[idx].Add("creditUnits", list[idx].CreditUnits);
+
+						fillInLoginInfo(ref result[idx], ref list[idx], auth);
                     }
                 }
             }
@@ -1526,6 +1553,50 @@ namespace Vre.Server.RemoteService
 				return false;
 			}
 		}
+
+		private static void getBrokerage(ClientSession session, int userId, IResponseData resp)
+		{
+			BrokerageInfo info;
+
+			using (var dao = new BrokerageInfoDao(session.DbSession)) info = dao.GetById(userId, true);
+
+			RolePermissionCheck.CheckReadBrokerage(session, info);
+
+			ClientData result = info.GetClientData();
+						
+			if (User.Role.SuperAdmin == session.User.UserRole)
+				//|| (session.User.AutoID == user.AutoID))
+				result.Add("creditUnits", info.CreditUnits);
+
+			resp.Data = result;
+			resp.ResponseCode = HttpStatusCode.OK;
+		}
+
+		private static void getBrokerageList(ClientSession session, ServiceQuery query, IResponseData resp, bool includeDeleted)
+		{
+			ClientData[] result;
+			BrokerageInfo[] list;
+
+			using (var dao = new BrokerageInfoDao(session.DbSession)) list = dao.GetAll(includeDeleted).ToArray();
+
+			// produce output
+			//
+			int cnt = list.Length;
+			result = new ClientData[cnt];
+			for (int idx = 0; idx < cnt; idx++)
+			{
+				RolePermissionCheck.CheckReadBrokerage(session, list[idx]);
+
+				result[idx] = list[idx].GetClientData();
+
+				if (User.Role.SuperAdmin == session.User.UserRole)
+					result[idx].Add("creditUnits", list[idx].CreditUnits);
+			}
+
+			resp.Data = new ClientData();
+			resp.Data.Add("brokerages", result);
+			resp.ResponseCode = HttpStatusCode.OK;
+		}
 		#endregion
 
         #region update
@@ -1781,8 +1852,39 @@ namespace Vre.Server.RemoteService
                 tran.Commit();
             }
         }
+		
+		private static void updateBrokerage(ClientSession session, int itemId, ClientData data, IResponseData resp)
+		{
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
+			{
+				using (var dao = new BrokerageInfoDao(session.DbSession))
+				{
+					var info = dao.GetById(itemId);
 
-	    #endregion
+					if (null == info) throw new FileNotFoundException();
+
+					RolePermissionCheck.CheckUpdateBrokerage(session, info);
+
+					if (info.UpdateFromClient(data))
+					{
+						info.MarkUpdated();
+						dao.Update(info);
+						resp.ResponseCode = HttpStatusCode.OK;
+						resp.Data = new ClientData();
+						resp.Data.Add("updated", 1);
+					}
+					else
+					{
+						resp.ResponseCode = HttpStatusCode.NotModified;
+						resp.Data = new ClientData();
+						resp.Data.Add("updated", 0);
+					}
+				}
+
+				tran.Commit();
+			}
+		}
+		#endregion
 
         #region create
         private static void createUser(ClientSession session, ClientData data, IResponseData resp)
@@ -1793,25 +1895,30 @@ namespace Vre.Server.RemoteService
             string login = data.GetProperty("uid", string.Empty);
             string password = data.GetProperty("pwd", string.Empty);
 
-            using (UserManager manager = new UserManager(session))
-            {
-                manager.Create(role, estateDeveloperId, type, login, password);
-                try
-                {
-                    // create contact info block with any added fields from inbound JSON
-                    User u = manager.Get(type, role, estateDeveloperId, login);
-                    u.UpdateFromClient(data);
-                    resp.ResponseCode = HttpStatusCode.OK;
-					resp.Data = new ClientData();
-					resp.Data.Add("id", u.AutoID);
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
+			{
+				User u;
+				using (UserManager manager = new UserManager(session))
+				{
+					manager.Create(role, estateDeveloperId, type, login, password);
+					try
+					{
+						// create contact info block with any added fields from inbound JSON
+						u = manager.Get(type, role, estateDeveloperId, login);
+						u.UpdateFromClient(data);
+						resp.ResponseCode = HttpStatusCode.OK;
+						resp.Data = new ClientData();
+						resp.Data.Add("id", u.AutoID);
+					}
+					catch (Exception ex)
+					{
+						resp.ResponseCode = HttpStatusCode.Created;
+						resp.ResponseCodeDescription = "Contact information was not stored.";
+						ServiceInstances.Logger.Error("Contact information for created user {0}[{1}] was not saved: {2}", type, login, ex);
+					}
 				}
-                catch (Exception ex)
-                {
-                    resp.ResponseCode = HttpStatusCode.Created;
-                    resp.ResponseCodeDescription = "Contact information was not stored.";
-                    ServiceInstances.Logger.Error("Contact information for created user {0}[{1}] was not saved: {2}", type, login, ex);
-                }
-            }
+				tran.Commit();
+			}
         }
 
 		private static void createNamedSearchFilter(ClientSession session, ClientData data, IResponseData resp)
@@ -1858,7 +1965,22 @@ namespace Vre.Server.RemoteService
         //        }
         //    }
         //}
-        #endregion
+
+		private static void createBrokerage(ClientSession session, ClientData data, IResponseData resp)
+		{
+			RolePermissionCheck.CheckCreateBrokerage(session);
+
+			var result = new BrokerageInfo(string.Empty);
+			result.UpdateFromClient(data);
+
+			using (var dao = new BrokerageInfoDao(session.DbSession))
+				dao.Create(result);
+
+			resp.ResponseCode = HttpStatusCode.OK;
+			resp.Data = new ClientData();
+			resp.Data.Add("id", result.AutoID);
+		}
+		#endregion
 
         #region delete
         private static void deleteUser(ClientSession session, int userId, IResponseData resp)
@@ -1963,7 +2085,30 @@ namespace Vre.Server.RemoteService
             resp.Data = new ClientData();
             resp.Data.Add("deleted", 1);
         }
-        #endregion
+
+		private static void deleteBrokerage(ClientSession session, int itemId, IResponseData resp)
+		{
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
+			{
+				using (var dao = new BrokerageInfoDao(session.DbSession))
+				{
+					var info = dao.GetById(itemId);
+
+					if (null == info) throw new FileNotFoundException();
+
+					RolePermissionCheck.CheckDeleteBrokerage(session, info);
+
+					info.MarkDeleted();
+					dao.Update(info);
+
+					resp.ResponseCode = HttpStatusCode.OK;
+					resp.Data = new ClientData();
+					resp.Data.Add("deleted", 1);
+				}
+				tran.Commit();
+			}
+		}
+		#endregion
 
         #region extra methods which should go to manager class (?)
         private static EstateDeveloper extractDeveloperFromViewOrder(ClientSession session, ViewOrder vo)

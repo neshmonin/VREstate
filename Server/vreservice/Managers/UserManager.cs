@@ -47,8 +47,6 @@ namespace Vre.Server.BusinessLogic
 
                 if (newUser != null)
                 {
-                    newUser.LastLogin = NHibernateHelper.DateTimeMinValue;
-
                     using (UserDao dao = new UserDao(_session.DbSession))
                     {
                         dao.Create(newUser);
@@ -181,28 +179,35 @@ namespace Vre.Server.BusinessLogic
         public void ChangePassword(LoginType type, User.Role role, int estateDeveloperId, string login, 
             string currentPassword, string newPassword)
         {
-            using (IAuthentication auth = new Authentication(_session.DbSession))
-            {
-                int userId;
-                if (auth.AuthenticateUser(type, role, estateDeveloperId, login, currentPassword, out userId))
-                {
-                    User u;
-                    using (UserDao dao = new UserDao(_session.DbSession)) u = dao.GetById(userId);
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(_session))
+			{
+				using (IAuthentication auth = new Authentication(_session.DbSession))
+				{
+					int userId;
+					if (auth.AuthenticateUser(type, role, estateDeveloperId, login, currentPassword, out userId))
+					{
+						User u;
+						using (UserDao dao = new UserDao(_session.DbSession)) u = dao.GetById(userId);
 
-                    //RolePermissionCheck.CheckDeleteUser(_session, u);
-                    RolePermissionCheck.CheckUserAccess(_session, u, RolePermissionCheck.UserInfoAccessLevel.Administrative);
+						//RolePermissionCheck.CheckDeleteUser(_session, u);
+						RolePermissionCheck.CheckUserAccess(_session, u, RolePermissionCheck.UserInfoAccessLevel.Administrative);
 
-                    string errorReason;
-                    if (!auth.ChangePassword(userId, currentPassword, newPassword, out errorReason))
-                    {
-                        throw new PermissionException(errorReason);
-                    }
-                }
-                else
-                {
-                    throw new PermissionException("Unknown login or bad current password");
-                }
-            }
+						string errorReason;
+						if (!auth.ChangePassword(userId, currentPassword, newPassword, out errorReason))
+						{
+							throw new PermissionException(errorReason);
+						}
+
+						u.PasswordChangeRequired = true;
+						using (UserDao dao = new UserDao(_session.DbSession)) dao.SafeUpdate(u);
+					}
+					else
+					{
+						throw new PermissionException("Unknown login or bad current password");
+					}
+				}
+				tran.Commit();
+			}
         }
 
         public void ChangePassword(User user, string currentPassword, string newPassword)
@@ -210,14 +215,22 @@ namespace Vre.Server.BusinessLogic
             //RolePermissionCheck.CheckDeleteUser(_session, user);
             RolePermissionCheck.CheckUserAccess(_session, user, RolePermissionCheck.UserInfoAccessLevel.Administrative);
 
-            using (IAuthentication auth = new Authentication(_session.DbSession))
-            {
-                string errorReason;
-                if (!auth.ChangePassword(user.AutoID, currentPassword, newPassword, out errorReason))
-                {
-                    throw new PermissionException(errorReason);
-                }
-            }
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(_session))
+			{
+				using (IAuthentication auth = new Authentication(_session.DbSession))
+				{
+					string errorReason;
+					if (!auth.ChangePassword(user.AutoID, currentPassword, newPassword, out errorReason))
+					{
+						throw new PermissionException(errorReason);
+					}
+				}
+
+				user.PasswordChangeRequired = false;
+				using (UserDao dao = new UserDao(_session.DbSession)) dao.SafeUpdate(user);
+
+				tran.Commit();
+			}
         }
 
         public User[] List(User.Role role, int estateDeveloperId, string nameLookup, bool includeDeleted)

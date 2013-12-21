@@ -144,6 +144,7 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Dao\AccountDao.cs" />
     <Compile Include="Dao\BuildingDao.cs" />
+    <Compile Include="Dao\BrokerageInfoDao.cs" />
     <Compile Include="Dao\StructureDao.cs" />
     <Compile Include="Dao\FileStorageItemDao.cs" />
     <Compile Include="Dao\MlsInfoDao.cs" />
