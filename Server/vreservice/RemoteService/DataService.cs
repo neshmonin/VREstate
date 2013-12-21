@@ -99,11 +99,13 @@ namespace Vre.Server.RemoteService
                 case ModelObject.Suite:
                     if (-1 == objectId)
                     {
-                        int buildingId = request.Request.Query.GetParam("building", -1);
+						int buildingId = request.Request.Query.GetParam("buildingid", -1);
+						if (-1 == buildingId) buildingId = request.Request.Query.GetParam("building", -1);  // OBSOLETE URI
                         if (-1 == buildingId) throw new ArgumentException("Building ID is missing.");
 
                         Suite.SalesStatus filter;
-                        string filterStr = request.Request.Query.GetParam("statusFilter", "");
+						string filterStr = request.Request.Query.GetParam("statusfilter", string.Empty);
+						if (string.IsNullOrEmpty(filterStr)) filterStr = request.Request.Query.GetParam("statusFilter", "");  // OBSOLETE URI
 						// TODO: Missing 'includeDeleted' option!
                         if (Enum.TryParse<Suite.SalesStatus>(filterStr, true, out filter))
                             getSuiteList(request.UserInfo.Session, buildingId, request.Response, csrq, filter);
@@ -119,7 +121,8 @@ namespace Vre.Server.RemoteService
                 case ModelObject.SuiteType:
                     if (-1 == objectId)
                     {                        
-                        int siteId = request.Request.Query.GetParam("site", -1);
+                        int siteId = request.Request.Query.GetParam("siteid", -1);
+						if (-1 == siteId) siteId = request.Request.Query.GetParam("site", -1);  // OBSOLETE URI
                         if (-1 == siteId) throw new ArgumentException("Site ID is missing.");
 						// TODO: Missing 'includeDeleted' option!
 						getSuiteTypeList(request.UserInfo.Session, siteId, request.Response);
@@ -178,8 +181,10 @@ namespace Vre.Server.RemoteService
                 case ModelObject.Inventory:
                     if (-1 == objectId)
                     {
-                        int buildingId = request.Request.Query.GetParam("building", -1);
-						string mlsId = request.Request.Query.GetParam("mlsId", string.Empty);
+                        int buildingId = request.Request.Query.GetParam("buildingid", -1);
+						if (-1 == buildingId) buildingId = request.Request.Query.GetParam("building", -1);  // OBSOLETE URI
+						string mlsId = request.Request.Query.GetParam("mlsid", string.Empty);
+						if (string.IsNullOrEmpty(mlsId)) mlsId = request.Request.Query.GetParam("mlsId", string.Empty);  // OBSOLETE URI
 						if (buildingId > 0)
 						{
 							getInventoryList(request.UserInfo.Session, buildingId, csrq, request.Response);
@@ -315,6 +320,11 @@ namespace Vre.Server.RemoteService
 					if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
 					deleteNamedSearchFilter(request.UserInfo.Session, objectId, request.Response);
 					return;
+
+				case ModelObject.Brokerage:
+					if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
+					deleteBrokerage(request.UserInfo.Session, objectId, request.Response);
+					return;
 			}
 
             throw new NotImplementedException();
@@ -333,11 +343,13 @@ namespace Vre.Server.RemoteService
             else if (elements[1].Equals("suite")) mo = ModelObject.Suite;
             else if (elements[1].Equals("user")) mo = ModelObject.User;
             else if (elements[1].Equals("suitetype")) mo = ModelObject.SuiteType;
-            else if (elements[1].Equals("viewOrder")) mo = ModelObject.ViewOrder;
-            else if (elements[1].Equals("view")) mo = ModelObject.View;
+            else if (elements[1].Equals("viewOrder")) mo = ModelObject.ViewOrder;  // OBSOLETE URI
+			else if (elements[1].Equals("vieworder")) mo = ModelObject.ViewOrder;
+			else if (elements[1].Equals("view")) mo = ModelObject.View;
             else if (elements[1].Equals("ft")) mo = ModelObject.FinancialTransaction;
             else if (elements[1].Equals("inventory")) mo = ModelObject.Inventory;
 			else if (elements[1].Equals("nsf")) mo = ModelObject.NamedSearchFilter;
+			else if (elements[1].Equals("brokerage")) mo = ModelObject.Brokerage;
 			else throw new ArgumentException("Object path is invalid (2).");
 
             strId = null;
@@ -417,7 +429,8 @@ namespace Vre.Server.RemoteService
             IList<Building> toReturn = null;
             ClientData[] result = null;
 
-            string scopeType = query.GetParam("scopeType", "site");
+            string scopeType = query.GetParam("scopetype", "site");
+			if (string.IsNullOrEmpty(scopeType)) scopeType = query.GetParam("scopeType", "site");  // OBSOLETE URI
 
             if (scopeType.Equals("address"))
             {
@@ -632,7 +645,8 @@ namespace Vre.Server.RemoteService
                 User.Role role;
                 if (!Enum.TryParse<User.Role>(query.GetParam("role", "buyer"), true, out role)) role = User.Role.Buyer;
                 int estateDeveloperId = ResolveDeveloperId(session.DbSession, query["ed"]);// data.GetProperty("ed", -1);
-                string nameLookup = query.GetParam("nameFilter", string.Empty);// data.GetProperty("nameFilter", string.Empty);
+                string nameLookup = query.GetParam("namefilter", string.Empty);
+				if (string.IsNullOrEmpty(nameLookup)) nameLookup = query.GetParam("nameFilter", string.Empty);// data.GetProperty("nameFilter", string.Empty);  // OBSOLETE URI
                 User[] list;
 
 				if (User.IsEstateDeveloperTied(role) && (estateDeveloperId < 0) && session.User.EstateDeveloperID.HasValue)
@@ -679,7 +693,8 @@ namespace Vre.Server.RemoteService
 			IList<NamedSearchFilter> toReturn = null;
 			ClientData[] result = null;
 
-			int ownerId = query.GetParam("ownerId", session.User.AutoID);
+			int ownerId = query.GetParam("ownerid", session.User.AutoID);
+			if ((ownerId == session.User.AutoID) && query.Contains("ownerId")) ownerId = query.GetParam("ownerId", session.User.AutoID); // OBSOLETE URI
 
 			using (var dao = new NamedSearchFilterDao(session.DbSession))
 				toReturn = dao.Get(ownerId, includeDeleted);
@@ -781,13 +796,14 @@ namespace Vre.Server.RemoteService
         {
             ClientData[] result;
 
-            int userId = query.GetParam("userId", -1);
+            int userId = query.GetParam("userid", -1);
+			if (-1 == userId) userId = query.GetParam("userId", -1);  // OBSOLETE URI
             User user;
             FinancialTransaction[] list;
 
             // TODO: implement paging
-            query.GetParam("pgStartIdx", -1);
-            query.GetParam("pgMaxCount", -1);
+            query.GetParam("pg_startidx", -1);
+            query.GetParam("pg_maxcount", -1);
 
             using (UserDao dao = new UserDao(session.DbSession))
                 user = dao.GetById(userId);
@@ -863,7 +879,8 @@ namespace Vre.Server.RemoteService
 
         private static void getViewOrderList(ClientSession session, ServiceQuery query, IResponseData resp, bool includeDeleted)
         {
-            int userId = query.GetParam("userId", -1);
+            int userId = query.GetParam("userid", -1);
+			if (-1 == userId) userId = query.GetParam("userId", -1);  // OBSOLETE URI
             User user;
             ViewOrder[] list;
 
@@ -915,11 +932,11 @@ namespace Vre.Server.RemoteService
 
         private static void getView(IServiceRequest request, ChangeSubscriptionRequest csrq)
         {
-            var type = request.Request.Query.GetParam("type", "viewOrder");
+            var type = request.Request.Query.GetParam("type", "vieworder").ToLowerInvariant();
 
 			var vs = new ViewSettings(request.Request.Query, type);
 
-            if (type.Equals("viewOrder")) getViewViewOrder(request, vs, csrq);
+            if (type.Equals("vieworder")) getViewViewOrder(request, vs, csrq);
 			else if (type.Equals("site")) getViewSite(request.UserInfo.Session, request.Request.Query, vs, csrq, request.Response);
 			else if (type.Equals("building")) getViewBuilding(request.UserInfo.Session, request.Request.Query, vs, csrq, request.Response);
 			else if (type.Equals("suite")) getViewSuite(request.UserInfo.Session, request.Request.Query, vs, csrq, request.Response);
@@ -1083,7 +1100,8 @@ namespace Vre.Server.RemoteService
             if (!double.TryParse(param, out sqRadM)) throw new ArgumentException();
 
             EstateDeveloper devLock = null;
-            string voId = query["relatedVoId"];
+            string voId = query["relatedvieworderid"];
+			if (string.IsNullOrEmpty(voId)) voId = query["relatedVoId"];  // OBSOLETE URI
             if (voId != null)
             {
                 ViewOrder vo = RetrieveViewOrder(session.DbSession, voId, false);
@@ -1419,7 +1437,7 @@ namespace Vre.Server.RemoteService
 			{
 				ShowImported = false;
 
-				if (type.Equals("viewOrder"))
+				if (type.Equals("vieworder"))
 				{
 					ShowSold = false;
 					ShowAvailable = false;
@@ -1461,13 +1479,15 @@ namespace Vre.Server.RemoteService
 				}
 				else throw new NotImplementedException();
 
-				ShowSold = query.GetParam("showSold", ShowSold);
+				ShowSold = query.GetParam("showSold", ShowSold);  // OBSOLETE URI
+				ShowSold = query.GetParam("showsold", ShowSold);  // OBSOLETE URI
 				ShowSold = query.GetParam("sp_s", ShowSold);
 				ShowAvailable = query.GetParam("sp_sa", ShowAvailable);
 				ShowOnHold = query.GetParam("sp_sh", ShowOnHold);
 				ShowResaleAvailable = query.GetParam("sp_ra", ShowResaleAvailable);
 				ShowRental = query.GetParam("sp_rr", ShowRental);
-				ShowImported = query.GetParam("includeImported", ShowImported);
+				ShowImported = query.GetParam("includeImported", ShowImported);  // OBSOLETE URI
+				ShowImported = query.GetParam("includeimported", ShowImported);  // OBSOLETE URI
 				ShowImported = query.GetParam("sp_i", ShowImported);
 			}
 
