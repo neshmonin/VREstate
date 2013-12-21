@@ -29,6 +29,7 @@ public class ViewOrderInfo {
 	private boolean enabled = true;
 	private String label = "";
 	private String mls = "";
+	private String url = "";
 	
 	private JSONObject obj = null;
 	
@@ -54,6 +55,11 @@ public class ViewOrderInfo {
 			if (obj.get("mlsId").isString() != null)
 				result.mls = obj.get("mlsId").isString().stringValue();
 		
+		// Url
+		if (obj.get("viewOrder-url") != null)
+			if (obj.get("viewOrder-url").isString() != null)
+				result.url = obj.get("viewOrder-url").isString().stringValue();
+		
 		return result;
 	}
 	
@@ -71,6 +77,10 @@ public class ViewOrderInfo {
 	
 	public String getMLS() {
 		return mls;
+	}
+	
+	public String getUrl() {
+		return url;
 	}
 	
 	public String getLabel() {

@@ -535,7 +535,9 @@ namespace SuperAdminConsole
                         if (HttpStatusCode.OK == resp.ResponseCode)
                         {
                             ClientData suiteData = resp.Data;
-                            decimal cp = Decimal.Parse(richTextBoxListingPrice.Text);
+                            string price = richTextBoxListingPrice.Text.Replace("$", "");
+                            price = price.Replace(",", "");
+                            decimal cp = Decimal.Parse(price);
 			                if (cp >= 0.0m)
                             {
                                 Money? currentPrice = new Money(cp);

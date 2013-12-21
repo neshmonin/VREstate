@@ -7,7 +7,7 @@ import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.UpdateProfile2Node;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
@@ -36,19 +36,23 @@ public class UpdateProfile2Presenter implements I_Presenter {
 	}
 
 	public void onClose() {
-		node.next(NodeStates.Close);
+		node.next(Actions.Close);
 	}
 
 	public void onCancel() {
-		node.next(NodeStates.Cancel);
+		node.next(Actions.Cancel);
 	}
 
 	public void onPrev() {
-		node.next(NodeStates.Prev);
+		node.next(Actions.Prev);
 	}
 
 	public void onFinish() {
-		node.next(NodeStates.Finish);
+		node.next(Actions.Finish);
+	}
+
+	public void onSelectAvatar() {
+		node.next(Actions.SelectAvatar);
 	}
 
 	// Events

@@ -1,4 +1,4 @@
-package com.condox.ecommerce.client.tree.node;
+package com.condox.ecommerce.client.tree;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,9 +6,8 @@ import java.util.Map;
 import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.tree.Data;
 import com.condox.clientshared.tree.I_TreeNode;
-import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 
 public abstract class AbstractNode {
 	
@@ -16,7 +15,7 @@ public abstract class AbstractNode {
 	private AbstractNode parent = null;
 	private Map<AbstractNode, AbstractNode> children = new HashMap<AbstractNode, AbstractNode>();
 	protected Map<Field, Data> dataRepository = new HashMap<Field, Data>();
-	private NodeStates state = null;
+	private Actions state = null;
 	
 	public EcommerceTree getTree() {
 		return tree;
@@ -28,6 +27,10 @@ public abstract class AbstractNode {
 	
 	public void setParent(AbstractNode newParent) {
 		parent = newParent;
+	}
+	
+	public boolean hasParent() {
+		return parent != null;
 	}
 	
 	public AbstractNode addChild(AbstractNode newChild) {
@@ -43,17 +46,21 @@ public abstract class AbstractNode {
 		return newChild;
 	}
 	
-	public Data getData(Field key) {
+	protected Data getData(Field key) {
 		if (dataRepository.containsKey(key))
 			return dataRepository.get(key);
 		return null;
 	}
 
-	public void setData(Field key, Data data) {
+	protected void setData(Field key, Data data) {
 		dataRepository.put(key, data);
 	}
 	
-	public void setState(NodeStates newState) {
+	public Actions getState() {
+		return state;
+	}
+	
+	public void setState(Actions newState) {
 		state = newState;
 	}
 	
@@ -86,7 +93,7 @@ public abstract class AbstractNode {
 			tree.next();
 	}
 	
-	public void next(NodeStates state) {
+	public void next(Actions state) {
 		setState(state);
 		if (tree != null)
 			tree.next();

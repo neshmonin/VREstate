@@ -109,6 +109,8 @@ namespace Vre.Server.BusinessLogic
 		{
             InitializeNew();
             UserRole = role;
+            if (role == Role.Anonymous)
+                AutoID = 64;
             EstateDeveloperID = estateDeveloperId;
             NickName = string.Empty;
             PrimaryEmailAddress = string.Empty;
