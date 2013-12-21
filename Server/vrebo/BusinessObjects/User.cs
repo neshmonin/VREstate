@@ -74,6 +74,9 @@ namespace Vre.Server.BusinessLogic
         public BrokerageInfo BrokerInfo { get; private set; }
         public IList<UserLicense> Licenses { get; private set; }
         public decimal CreditUnits { get; private set; }
+		public DateTime LastServicePayment { get; set; }
+		public string PhotoUrl { get; set; }
+		public bool PasswordChangeRequired { get; set; }
 
 		public string[] RefererRestriction 
 		{
@@ -122,6 +125,8 @@ namespace Vre.Server.BusinessLogic
             CreditUnits = 0m;
 			RefererRestriction = null;
 			LastLogin = new DateTime(1900, 01, 01);
+			LastServicePayment = LastLogin;
+			PasswordChangeRequired = true;
         }
 
         /// <summary>
@@ -230,6 +235,8 @@ namespace Vre.Server.BusinessLogic
 			if (refererRestriction != null)
 				result.Add("refererRestriction", RefererRestriction);
 
+			result.Add("passwordChangeRequired", PasswordChangeRequired);
+
             return result;
         }
 
@@ -243,12 +250,18 @@ namespace Vre.Server.BusinessLogic
             PersonalInfo = data.UpdateProperty("personalInfo", PersonalInfo, ref changed);
 			RefererRestriction = data.UpdateProperty("refererRestriction", RefererRestriction, ref changed);
 
-            ClientData bicd = data.GetNextLevelDataItem("brokerageInfo");
-            if (bicd.Count > 0)
-            {
-                if (null == BrokerInfo) BrokerInfo = new BrokerageInfo();
-                if (BrokerInfo.UpdateFromClient(bicd)) changed = true;
-            }
+			if (data.GetProperty("passwordChangeRequired", false))  // can only set to true!
+			{
+				PasswordChangeRequired = true;
+				changed = true;
+			}
+
+			//ClientData bicd = data.GetNextLevelDataItem("brokerageInfo");
+			//if (bicd.Count > 0)
+			//{
+			//    if (null == BrokerInfo) BrokerInfo = new BrokerageInfo();
+			//    if (BrokerInfo.UpdateFromClient(bicd)) changed = true;
+			//}
 
             return changed;
         }

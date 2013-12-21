@@ -280,7 +280,6 @@ namespace Vre.Server.RemoteService
                     }
                     user.PersonalInfo = null;  // TODO
                     //user.BrokerInfo = null;   // TODO
-                    user.LastLogin = NHibernateHelper.DateTimeMinValue;
 
                     using (UserDao dao = new UserDao(session))
                         dao.Create(user);

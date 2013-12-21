@@ -18,13 +18,16 @@
     <property name="EstateDeveloperID" column="EstateDeveloperID" />
 
     <property name="LastLogin" column="LastLogin" />
+    <property name="PasswordChangeRequired" column="PasswordChangeRequired" />
 
     <property name="NickName" column="NickName" />
     <property name="PrimaryEmailAddress" column="PrimaryEmailAddress" />
     <property name="TimeZone" column="TimeZone" />
     <property name="PersonalInfo" column="PersonalInfo" />
+    <property name="PhotoUrl" column="PhotoUrl" />
 
     <property name="CreditUnits" column="CreditUnits" />
+    <property name="LastServicePayment" column="LastServicePayment" />
 
     <property name="refererRestriction" column="RefererRestriction" />
 

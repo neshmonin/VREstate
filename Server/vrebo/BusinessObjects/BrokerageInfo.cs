@@ -4,17 +4,14 @@ using System.Diagnostics;
 namespace Vre.Server.BusinessLogic
 {
     [Serializable]
-    public partial class BrokerageInfo : IClientDataProvider
+    public partial class BrokerageInfo : UpdateableBase//IClientDataProvider
     {
-
-        private int AutoID { get; set; }
-        private byte[] Version { get; set; }
-
         private string Emails { get; set; }
         private string PhoneNumbers { get; set; }
 
-        public string AddressLine1 { get; set; }
-        public string AddressLine2 { get; set; }
+		public string Name { get; set; }
+
+        public string StreetAddress { get; set; }
         public string City { get; set; }
         public string StateProvince { get; set; }
         public string PostalCode { get; set; }
@@ -24,18 +21,28 @@ namespace Vre.Server.BusinessLogic
 
         public string LogoUriRelative { get; set; }
 
-        public BrokerageInfo()
+		public decimal CreditUnits { get; private set; }
+		public DateTime LastServicePayment { get; set; }
+
+		private BrokerageInfo() { }
+
+		public BrokerageInfo(string name)
         {
+			InitializeNew();
+			Name = name;
             Emails = string.Empty;
             PhoneNumbers = string.Empty;
+			CreditUnits = 0m;
+			LastServicePayment = new DateTime(1900, 01, 01);
         }
 
         public ClientData GetClientData()
         {
             ClientData result = new ClientData();
 
-            result.Add("addressLine1", AddressLine1);
-            result.Add("addressLine2", AddressLine2);
+			result.Add("name", Name);
+
+            result.Add("streetAddress", StreetAddress);
             result.Add("city", City);
             result.Add("stateProvince", StateProvince);
             result.Add("postalCode", PostalCode);
@@ -53,8 +60,9 @@ namespace Vre.Server.BusinessLogic
         {
             bool changed = false;
 
-            AddressLine1 = data.UpdateProperty("addressLine1", AddressLine1, ref changed);
-            AddressLine2 = data.UpdateProperty("addressLine2", AddressLine2, ref changed);
+			Name = data.UpdateProperty("name", Name, ref changed);
+
+            StreetAddress = data.UpdateProperty("streetAddress", StreetAddress, ref changed);
             City = data.UpdateProperty("city", City, ref changed);
             StateProvince = data.UpdateProperty("stateProvince", StateProvince, ref changed);
             PostalCode = data.UpdateProperty("postalCode", PostalCode, ref changed);
@@ -67,5 +75,10 @@ namespace Vre.Server.BusinessLogic
 
             return changed;
         }
+
+		public override string ToString()
+		{
+			return Name;
+		}
     }
 }
