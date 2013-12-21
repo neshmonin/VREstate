@@ -223,7 +223,6 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 			dataProvider.addDataDisplay(dataGrid);
 
 		//		dataGrid.get
-		dataGrid.addStyleDependentName("ecommerce");
 	}
 	
 	private PopupPanel loading = new PopupPanel();
