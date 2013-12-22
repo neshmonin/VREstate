@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="vrebo" namespace="Vre.Server.BusinessLogic">
+  <class name="PricingPolicy" table="PricingPolicy" dynamic-update="false" lazy="false">
+
+    <id name="AutoID" column="AutoID" unsaved-value="0">
+      <generator class="identity" />
+    </id>
+
+    <version name="Version" generated="always" unsaved-value="null" type="BinaryBlob">
+      <column name="Version" not-null="false" sql-type="timestamp"/>
+    </version>
+
+    <property name="Created" column="Created" />
+    <property name="Updated" column="Updated" />
+    <property name="Deleted" column="Deleted" />
+
+    <property name="TargetObjectType" column="TargetObjectType" />
+    <property name="TargetObjectId" column="TargetObjectId" />
+    <property name="Service" column="Service" />
+    <property name="UnitPrice" column="UnitPrice" />
+  </class>
+</hibernate-mapping>

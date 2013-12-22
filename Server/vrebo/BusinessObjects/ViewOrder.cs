@@ -105,6 +105,7 @@ namespace Vre.Server.BusinessLogic
             RequestCounter = data.GetProperty("requestCounter", 0);
             LastRequestTime = data.GetProperty("lastRequestTime", DateTime.MinValue);
             ViewOrderURL = data.GetProperty("viewOrder-url", string.Empty);
+			UpdateFromClient(data);
         }
 
         public override ClientData GetClientData()

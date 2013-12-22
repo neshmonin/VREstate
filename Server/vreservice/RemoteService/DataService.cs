@@ -20,7 +20,9 @@ namespace Vre.Server.RemoteService
         public const string ServicePathPrefix = ServicePathElement0 + "/";
         private const string ServicePathElement0 = "data";
 
-        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, SuiteType, ViewOrder, View, FinancialTransaction, Inventory, NamedSearchFilter, Brokerage }
+        enum ModelObject { User, EstateDeveloper, Site, Building, Suite, 
+			SuiteType, ViewOrder, View, FinancialTransaction, Inventory, 
+			NamedSearchFilter, Brokerage, PricingPolicy }
 
 		static DataService()
 		{
@@ -222,6 +224,17 @@ namespace Vre.Server.RemoteService
 						getBrokerage(request.UserInfo.Session, objectId, request.Response);
 					}
 					return;
+
+				case ModelObject.PricingPolicy:
+					if (-1 == objectId)
+					{
+						getPricingPolicyList(request.UserInfo.Session, request.Request.Query, request.Response, includeDeleted);
+					}
+					else
+					{
+						getPricingPolicy(request.UserInfo.Session, objectId, request.Response);
+					}
+					return;
 			}
 
             throw new NotImplementedException();
@@ -270,6 +283,11 @@ namespace Vre.Server.RemoteService
 					if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
 					updateBrokerage(request.UserInfo.Session, objectId, request.Request.Data, request.Response);
 					return;
+
+				case ModelObject.PricingPolicy:
+					if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
+					updatePricingPolicy(request.UserInfo.Session, objectId, request.Request.Data, request.Response);
+					return;
 			}
 
             throw new NotImplementedException();
@@ -303,6 +321,10 @@ namespace Vre.Server.RemoteService
 
 				case ModelObject.Brokerage:
 					createBrokerage(request.UserInfo.Session, request.Request.Data, request.Response);
+					return;
+
+				case ModelObject.PricingPolicy:
+					createPricingPolicy(request.UserInfo.Session, request.Request.Data, request.Response);
 					return;
 			}
 
@@ -345,6 +367,11 @@ namespace Vre.Server.RemoteService
 					if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
 					deleteBrokerage(request.UserInfo.Session, objectId, request.Response);
 					return;
+
+				case ModelObject.PricingPolicy:
+					if (-1 == objectId) throw new ArgumentException("Object ID is missing.");
+					deletePricingPolicy(request.UserInfo.Session, objectId, request.Response);
+					return;
 			}
 
             throw new NotImplementedException();
@@ -370,6 +397,7 @@ namespace Vre.Server.RemoteService
             else if (elements[1].Equals("inventory")) mo = ModelObject.Inventory;
 			else if (elements[1].Equals("nsf")) mo = ModelObject.NamedSearchFilter;
 			else if (elements[1].Equals("brokerage")) mo = ModelObject.Brokerage;
+			else if (elements[1].Equals("pp")) mo = ModelObject.PricingPolicy;
 			else throw new ArgumentException("Object path is invalid (2).");
 
             strId = null;
@@ -639,8 +667,8 @@ namespace Vre.Server.RemoteService
             
             ClientData result = user.GetClientData();
 
-			if ((User.Role.SuperAdmin == session.User.UserRole)
-				|| (session.User.AutoID == user.AutoID))
+			if (RolePermissionCheck.GenericUserControlTest(session, user, 
+				RolePermissionCheck.UserInfoAccessLevel.Transactional))
 				result.Add("creditUnits", user.CreditUnits);
 
             using (IAuthentication auth = new Authentication(session.DbSession))
@@ -688,7 +716,8 @@ namespace Vre.Server.RemoteService
                     {
                         result[idx] = list[idx].GetClientData();
 
-						if (User.Role.SuperAdmin == session.User.UserRole)
+						if (RolePermissionCheck.GenericUserControlTest(session, list[idx],
+							RolePermissionCheck.UserInfoAccessLevel.Transactional))
 							result[idx].Add("creditUnits", list[idx].CreditUnits);
 
 						fillInLoginInfo(ref result[idx], ref list[idx], auth);
@@ -1565,7 +1594,6 @@ namespace Vre.Server.RemoteService
 			ClientData result = info.GetClientData();
 						
 			if (User.Role.SuperAdmin == session.User.UserRole)
-				//|| (session.User.AutoID == user.AutoID))
 				result.Add("creditUnits", info.CreditUnits);
 
 			resp.Data = result;
@@ -1595,6 +1623,118 @@ namespace Vre.Server.RemoteService
 
 			resp.Data = new ClientData();
 			resp.Data.Add("brokerages", result);
+			resp.ResponseCode = HttpStatusCode.OK;
+		}
+
+		private static void getPricingPolicy(ClientSession session, int userId, IResponseData resp)
+		{
+			PricingPolicy info;
+
+			using (var dao = new PricingPolicyDao(session.DbSession)) info = dao.GetById(userId, true);
+
+			RolePermissionCheck.CheckReadPricingPolicy(session, info);
+
+			resp.Data = info.GetClientData();
+			resp.ResponseCode = HttpStatusCode.OK;
+		}
+
+		private static void getPricingPolicyList(ClientSession session, ServiceQuery query, IResponseData resp, bool includeDeleted)
+		{
+			IEnumerable<PricingPolicy> list;
+
+			using (var dao = new PricingPolicyDao(session.DbSession))
+			{
+				if (query.Contains("defaults"))
+				{
+					PricingPolicy.SubjectType subject;
+					PricingPolicy.ServiceType service;
+					if (query.GetParam("defaults", false))
+					{
+						if (Enum.TryParse<PricingPolicy.SubjectType>(query["subject"], true, out subject))
+						{
+							if (Enum.TryParse<PricingPolicy.ServiceType>(query["service"], true, out service))
+								list = dao.GetDefaults(subject, service, includeDeleted);
+							else
+								list = dao.GetDefaults(subject, includeDeleted);
+						}
+						else
+						{
+							if (Enum.TryParse<PricingPolicy.ServiceType>(query["service"], true, out service))
+								list = dao.GetDefaults(service, includeDeleted);
+							else
+								list = dao.GetDefaults(includeDeleted);
+						}
+					}
+					else
+					{
+						if (Enum.TryParse<PricingPolicy.SubjectType>(query["subject"], true, out subject))
+						{
+							int id = query.GetParam("subjectid", -1);
+							if (id > 0)
+								list = dao.GetBySubject(subject, id, includeDeleted);
+							else
+								list = dao.GetBySubject(subject, includeDeleted);
+						}
+						else if (Enum.TryParse<PricingPolicy.ServiceType>(query["service"], true, out service))
+						{
+							if (Enum.TryParse<PricingPolicy.SubjectType>(query["subject"], true, out subject))
+								list = dao.GetBySubjectAndService(subject, service, includeDeleted);
+							else
+								list = dao.GetByService(service, includeDeleted);
+						}
+						else
+						{
+							list = dao.GetNonDefaults(includeDeleted);
+						}
+					}
+				}
+				else if (query.Contains("explain"))
+				{
+					PricingPolicy.SubjectType subject;
+					PricingPolicy.ServiceType service;
+					int id = query.GetParam("subjectid", -1);
+					if (id < 1)
+						throw new ArgumentException("Explain requires valid subject ID");
+					if (!Enum.TryParse<PricingPolicy.SubjectType>(query["subject"], true, out subject))
+						throw new ArgumentException("Explain requires valid subject");
+					if (!Enum.TryParse<PricingPolicy.ServiceType>(query["service"], true, out service))
+						throw new ArgumentException("Explain requires valid service");
+
+					object target = null;
+
+					switch (subject)
+					{
+						case PricingPolicy.SubjectType.Brokerage:
+							using (var sdao = new BrokerageInfoDao(session.DbSession))
+								target = sdao.GetById(id);
+							break;
+
+						case PricingPolicy.SubjectType.Agent:
+							using (var sdao = new UserDao(session.DbSession))
+								target = sdao.GetById(id);
+							break;
+					}
+
+					list = dao.GetFor(target, service);
+				}
+				else
+				{
+					list = dao.GetAll(includeDeleted);
+				}
+			}
+
+			// produce output
+			//
+			var result = new List<ClientData>();
+			foreach (var pp in list)
+			{
+				RolePermissionCheck.CheckReadPricingPolicy(session, pp);
+
+				result.Add(pp.GetClientData());
+			}
+
+			resp.Data = new ClientData();
+			resp.Data.Add("policies", result.ToArray());
 			resp.ResponseCode = HttpStatusCode.OK;
 		}
 		#endregion
@@ -1884,6 +2024,38 @@ namespace Vre.Server.RemoteService
 				tran.Commit();
 			}
 		}
+
+		private static void updatePricingPolicy(ClientSession session, int itemId, ClientData data, IResponseData resp)
+		{
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
+			{
+				using (var dao = new PricingPolicyDao(session.DbSession))
+				{
+					var info = dao.GetById(itemId);
+
+					if (null == info) throw new FileNotFoundException();
+
+					RolePermissionCheck.CheckUpdatePricingPolicy(session, info);
+
+					if (info.UpdateFromClient(data))
+					{
+						info.MarkUpdated();
+						dao.Update(info);
+						resp.ResponseCode = HttpStatusCode.OK;
+						resp.Data = new ClientData();
+						resp.Data.Add("updated", 1);
+					}
+					else
+					{
+						resp.ResponseCode = HttpStatusCode.NotModified;
+						resp.Data = new ClientData();
+						resp.Data.Add("updated", 0);
+					}
+				}
+
+				tran.Commit();
+			}
+		}
 		#endregion
 
         #region create
@@ -1973,8 +2145,41 @@ namespace Vre.Server.RemoteService
 			var result = new BrokerageInfo(string.Empty);
 			result.UpdateFromClient(data);
 
-			using (var dao = new BrokerageInfoDao(session.DbSession))
-				dao.Create(result);
+			if (string.IsNullOrEmpty(result.Name))
+				throw new ArgumentException("Name field is requlred");
+
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
+			{
+				using (var dao = new BrokerageInfoDao(session.DbSession))
+				{
+					if (dao.Exists(result.Name))
+						throw new ObjectExistsException("Object with this name already exists");
+					dao.Create(result);
+				}
+				tran.Commit();
+			}
+
+			resp.ResponseCode = HttpStatusCode.OK;
+			resp.Data = new ClientData();
+			resp.Data.Add("id", result.AutoID);
+		}
+
+		private static void createPricingPolicy(ClientSession session, ClientData data, IResponseData resp)
+		{
+			RolePermissionCheck.CheckCreatePricingPolicy(session);
+
+			var result = new PricingPolicy(data);
+
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
+			{
+				using (var dao = new PricingPolicyDao(session.DbSession))
+				{
+					if (dao.Exists(result.TargetObjectType, result.TargetObjectId, result.Service))
+						throw new ObjectExistsException("Object with these settings already exists");
+					dao.Create(result);
+				}
+				tran.Commit();
+			}
 
 			resp.ResponseCode = HttpStatusCode.OK;
 			resp.Data = new ClientData();
@@ -2097,6 +2302,29 @@ namespace Vre.Server.RemoteService
 					if (null == info) throw new FileNotFoundException();
 
 					RolePermissionCheck.CheckDeleteBrokerage(session, info);
+
+					info.MarkDeleted();
+					dao.Update(info);
+
+					resp.ResponseCode = HttpStatusCode.OK;
+					resp.Data = new ClientData();
+					resp.Data.Add("deleted", 1);
+				}
+				tran.Commit();
+			}
+		}
+
+		private static void deletePricingPolicy(ClientSession session, int itemId, IResponseData resp)
+		{
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
+			{
+				using (var dao = new PricingPolicyDao(session.DbSession))
+				{
+					var info = dao.GetById(itemId);
+
+					if (null == info) throw new FileNotFoundException();
+
+					RolePermissionCheck.CheckDeletePricingPolicy(session, info);
 
 					info.MarkDeleted();
 					dao.Update(info);

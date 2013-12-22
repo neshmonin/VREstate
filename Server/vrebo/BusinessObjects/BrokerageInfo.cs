@@ -36,9 +36,15 @@ namespace Vre.Server.BusinessLogic
 			LastServicePayment = new DateTime(1900, 01, 01);
         }
 
+		public BrokerageInfo(ClientData data)
+            : base(data)
+        {
+			UpdateFromClient(data);
+        }
+
         public ClientData GetClientData()
         {
-            ClientData result = new ClientData();
+			ClientData result = base.GetClientData();
 
 			result.Add("name", Name);
 
@@ -72,6 +78,8 @@ namespace Vre.Server.BusinessLogic
                 data.UpdateProperty("phoneNumbers", PhoneNumbers.Split(ContactInfo.ArraySplitterC), ref changed));
             Emails = string.Join(ContactInfo.ArraySplitterS,
                 data.UpdateProperty("emails", Emails.Split(ContactInfo.ArraySplitterC), ref changed));
+
+			WebSite = data.UpdateProperty("webSite", WebSite, ref changed);
 
             return changed;
         }

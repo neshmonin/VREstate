@@ -3,7 +3,7 @@
 -- VR Estate database upgrade script v27 -> v28
 --
 -- Script version 1
--- Last Modified on 2013-12-18 by Andrew
+-- Last Modified on 2013-12-21 by Andrew
 --
 -- ==========================================================================
 USE [VRT]
@@ -64,7 +64,7 @@ BEGIN
 		UPDATE [dbo].[BrokerageInfo] SET [StreetAddress] = [AddressLine1], [Updated] = GETUTCDATE() WHERE [Deleted] = 0
 
 
-		UPDATE [DbSettings] SET [IntValue] = 1, [TimeValue] = GETUTCDATE() WHERE [Id] = 4
+		UPDATE [DbSettings] SET [IntValue] = 2, [TimeValue] = GETUTCDATE() WHERE [Id] = 4
 
 	COMMIT TRAN
 	PRINT 'Complete.'
