@@ -80,6 +80,22 @@ namespace Vre.Server.RemoteService
 					getMlsInfo(request);
 					return;
 				}
+				else if ((command.Equals("store_temp_file") || command.Equals("storetempfile")) && (request.Request.Type == RequestType.Insert))
+				{
+					if (request.Request.RawDataContentType != null)
+					{
+						int dataLen = request.Request.RawData.Length < 1024 ? request.Request.RawData.Length : 1024;
+						byte[] data = new byte[dataLen];
+						Array.Copy(request.Request.RawData, 0, data, 0, dataLen);
+						ServiceInstances.Logger.Debug("StoreTempFile: content type: {0}, len={1}", request.Request.RawDataContentType, request.Request.RawData.Length);
+						ServiceInstances.Logger.Debug("StoreTempFile: some data: {0}", Encoding.ASCII.GetString(data));
+					}
+					else
+					{
+						ServiceInstances.Logger.Debug("StoreTempFile: unknown content!");
+					}
+					return;
+				}
             }
 
             throw new ArgumentException("Program command not understood.");

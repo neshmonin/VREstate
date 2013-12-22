@@ -93,6 +93,7 @@ namespace Vre.Server.RemoteService
 		string[] PathSegments { get; }
 		ServiceQuery Query { get; }
         ClientData Data { get; }
+		string RawDataContentType { get; }
         byte[] RawData { get; }
         /// <summary>
         /// Construct client's URI for service's root entry point based on request information.
