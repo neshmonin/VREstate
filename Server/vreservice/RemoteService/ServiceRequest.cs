@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using Vre.Server.BusinessLogic;
@@ -54,7 +55,12 @@ namespace Vre.Server.RemoteService
             return result;
         }
 
-        public override string ToString()
+		public bool Contains(string name)
+		{
+			return (this[name] != null);
+		}
+
+		public override string ToString()
         {
             StringBuilder result = new StringBuilder();
             bool separator = false;
@@ -87,6 +93,7 @@ namespace Vre.Server.RemoteService
 		string[] PathSegments { get; }
 		ServiceQuery Query { get; }
         ClientData Data { get; }
+		string RawDataContentType { get; }
         byte[] RawData { get; }
         /// <summary>
         /// Construct client's URI for service's root entry point based on request information.

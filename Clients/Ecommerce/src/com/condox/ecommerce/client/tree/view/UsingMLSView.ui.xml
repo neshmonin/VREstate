@@ -16,11 +16,11 @@
 					<g:Label text="Published with MLS?"/>
 				</g:HorizontalPanel>
 				<g:VerticalPanel spacing="10">
-					<g:RadioButton name="new name" text="MLS#" checked="true" enabled="false" ui:field="rbMLS"/>
+					<g:RadioButton name="new name" text="MLS#" ui:field="rbMLS"/>
 					<g:Cell horizontalAlignment="ALIGN_RIGHT">
-						<g:TextBox enabled="false"/>
+						<g:TextBox ui:field="textMLS"/>
 					</g:Cell>
-					<g:RadioButton name="new name" text="This is a private listing, so let&apos;s submit all info manually" checked="true"/>
+					<g:RadioButton name="new name" text="This is a private listing, so let&apos;s submit all info manually" checked="true" ui:field="rbAddress"/>
 				</g:VerticalPanel>
 				<g:Cell verticalAlignment="ALIGN_BOTTOM">
 					<g:HorizontalPanel width="100%">

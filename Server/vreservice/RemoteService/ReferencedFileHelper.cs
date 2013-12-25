@@ -48,6 +48,12 @@ namespace Vre.Server.RemoteService
 			if (!string.IsNullOrEmpty(url)) target.DisplayModelUrl = ServiceInstances.FileStorageManager.ConvertToFullPath(url);
 		}
 
+		public static void ConvertUrlsToAbsolute(User target)
+		{
+			string url = target.PhotoUrl;
+			if (!string.IsNullOrEmpty(url)) target.PhotoUrl = ServiceInstances.FileStorageManager.ConvertToFullPath(url);
+		}
+
 		private const string _ffChromeSpeedTestAltRoot = "https://static.3dcondox.com/vre/";
         private static string ffChromeSpeedTestPathConvert(string relativePath)
         {

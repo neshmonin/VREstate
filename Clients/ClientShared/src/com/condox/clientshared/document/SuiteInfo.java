@@ -1,6 +1,7 @@
 package com.condox.clientshared.document;
 
 import com.condox.clientshared.abstractview.Log;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
@@ -36,6 +37,11 @@ public class SuiteInfo implements I_JSON {
 	public JSONObject toJSONObject() {
 		JSONObject obj = new JSONObject();
 		obj = backup;
+		obj.put("mlsId", new JSONString(mls));
+		obj.put("currentPrice", new JSONNumber(price));
+		obj.put("status", new JSONString(status.toString()));
+		obj.put("vTourUrl", new JSONString(virtualTourURL));
+		obj.put("infoUrl", new JSONString(moreInfoURL));
 		return obj;
 	}
 
@@ -91,6 +97,9 @@ public class SuiteInfo implements I_JSON {
 				}
 			}
 		}
+		if (obj.get("currentPrice") != null)
+			if (obj.get("currentPrice").isNumber() != null)
+				price = (int)obj.get("currentPrice").isNumber().doubleValue();
 //		Log.write(id + ": "+"$" + price + " - " + status);
 
 		/*
@@ -118,9 +127,17 @@ public class SuiteInfo implements I_JSON {
 	public Status getStatus() {
 		return status;
 	}
+	
+	public void setStatus(Status newStatus) {
+		status = newStatus;
+	}
 
 	public int getPrice() {
 		return price;
+	}
+	
+	public void setPrice(int newPrice) {
+		price = newPrice;
 	}
 
 	public void setBalconies(int balconies) {
@@ -219,11 +236,25 @@ public class SuiteInfo implements I_JSON {
 		return virtualTourURL;
 	}
 	
+	public void setVirtualTourURL(String newUrl) {
+		virtualTourURL = newUrl;
+	}
+	
+	
 	public String getMoreInfoURL() {
 		return moreInfoURL;
+	}
+	
+	public void setMoreInfoURL(String newUrl) {
+		moreInfoURL = newUrl;
 	}
 	
 	public String getMLS() {
 		return mls;
 	}
+	
+	public void setMLS(String newMLS) {
+		mls = newMLS;
+	}
+	
 }

@@ -21,7 +21,16 @@ namespace Vre.Server.Dao
                 .List<TEntity>();
         }
 
-        public override TEntity GetById(int entityId)
+		public IList<TEntity> GetAll(bool includeDeleted)
+		{
+			if (!includeDeleted)
+				return GetAll();
+			else
+				lock (_session) return _session.CreateCriteria<TEntity>()
+					.List<TEntity>();
+		}
+
+		public override TEntity GetById(int entityId)
         {
             lock (_session)
             {

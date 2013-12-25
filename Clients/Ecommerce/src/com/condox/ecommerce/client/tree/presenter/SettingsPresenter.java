@@ -6,7 +6,7 @@ import com.condox.clientshared.communication.User;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
 import com.condox.ecommerce.client.I_Presenter;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.SettingsNode;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -39,7 +39,7 @@ public class SettingsPresenter implements I_Presenter {
 
 //	Events
 	public void onClose() {
-		node.setState(NodeStates.Close);
+		node.setState(Actions.Close);
 		node.next();
 	}
 

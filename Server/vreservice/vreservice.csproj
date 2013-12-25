@@ -144,6 +144,8 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Dao\AccountDao.cs" />
     <Compile Include="Dao\BuildingDao.cs" />
+    <Compile Include="Dao\BrokerageInfoDao.cs" />
+    <Compile Include="Dao\PricingPolicyDao.cs" />
     <Compile Include="Dao\StructureDao.cs" />
     <Compile Include="Dao\FileStorageItemDao.cs" />
     <Compile Include="Dao\MlsInfoDao.cs" />
@@ -294,6 +296,7 @@
     <EmbeddedResource Include="Mappings\Structure.hbm.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\PricingPolicy.hbm.xml" />
     <Content Include="SQL\Constraint\Account.sql" />
     <Content Include="SQL\Constraint\DeveloperAdmin.sql" />
     <Content Include="SQL\Constraint\Price.sql" />

@@ -77,6 +77,7 @@ namespace Vre.Server.HttpService
                     }
                     if (null == Data)
                     {
+						RawDataContentType = request.ContentType;
                         RawData = new byte[request.ContentLength64];
                         request.InputStream.Read(RawData, 0, RawData.Length);
                     }
@@ -89,6 +90,7 @@ namespace Vre.Server.HttpService
 			public string[] PathSegments { get; private set; }
             public ServiceQuery Query { get; private set; }
             public ClientData Data { get; private set; }
+			public string RawDataContentType { get; private set; }
             public byte[] RawData { get; private set; }
 			public IPEndPoint EndPoint { get; private set; }
 			public bool IsSecureConnection { get; private set; }

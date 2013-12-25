@@ -14,7 +14,7 @@ import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.PickSuiteNode;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -42,11 +42,13 @@ public class PickSuitePresenter implements I_Presenter {
 	private IDisplay display = null;
 	private List<SuiteInfo> data = new ArrayList<SuiteInfo>();
 	private PickSuiteNode node = null;
+	private EcommerceTree tree = null;
 
 	public PickSuitePresenter(IDisplay display, PickSuiteNode node) {
 		this.display = display;
 		this.display.setPresenter(this);
 		this.node = node;
+		tree = node.getTree();
 	}
 
 	private void updateData() {
@@ -98,24 +100,24 @@ public class PickSuitePresenter implements I_Presenter {
 
 	// Navigation events
 	public void onCancel() {
-		node.setState(NodeStates.Cancel);
+		node.setState(Actions.Cancel);
 		node.next();
 	}
 
 	public void onPrev() {
-		node.setState(NodeStates.Prev);
+		node.setState(Actions.Prev);
 		node.next();
 	}
 
 	public void onNext() {
 		saveData();
-		node.setState(NodeStates.Next);
+		node.setState(Actions.Next);
 		node.next();
 	}
 
 	// Data utils
 	private void saveData() {
-		node.setData(Field.SuiteSelected, new Data(display.getSuiteSelected()));
+		tree.setData(Field.SuiteSelected, new Data(display.getSuiteSelected()));
 	}
 
 }

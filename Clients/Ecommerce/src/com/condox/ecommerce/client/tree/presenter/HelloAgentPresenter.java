@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.condox.clientshared.abstractview.Log;
-import com.condox.clientshared.communication.DELETE;
-import com.condox.clientshared.communication.GET;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.PUT;
 import com.condox.clientshared.communication.User;
@@ -17,10 +15,13 @@ import com.condox.ecommerce.client.Ecommerce.Modes;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.ServerProxy;
 import com.condox.ecommerce.client.UserInfo;
+import com.condox.ecommerce.client.tree.EcommerceTree;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
 import com.condox.ecommerce.client.tree.node.HelloAgentNode;
 import com.condox.ecommerce.client.tree.view.ViewOrderInfo;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
@@ -28,6 +29,13 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
@@ -44,11 +52,13 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 
 	private I_Display display = null;
 	private HelloAgentNode node = null;
+	private EcommerceTree tree = null;
 
 	public HelloAgentPresenter(I_Display newDisplay, HelloAgentNode newNode) {
 		display = newDisplay;
 		display.setPresenter(this);
 		node = newNode;
+		tree = node.getTree();
 	}
 
 	@Override
@@ -67,7 +77,7 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 				JSONObject obj = JSONParser.parseLenient(response.getText()).isObject();
 				UserInfo info = new UserInfo();
 				info.fromJSONObject(obj);
-				node.setData(Field.UserInfo, new Data(info));
+				tree.setData(Field.UserInfo, new Data(info));
 				display.setNickName(info.getNickName());
 				loadOrdersList();
 			}
@@ -80,6 +90,13 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 	}
 	
 	private void loadOrdersList() {
+		final PopupPanel loading = new PopupPanel();
+		loading.clear();
+		loading.setModal(true);
+		loading.setGlassEnabled(true);
+		loading.add(new Label("Loading listings, please wait..."));
+		loading.center();
+		
 		ServerProxy.getOrdersList(User.id, User.SID, new RequestCallback(){
 
 			@Override
@@ -96,6 +113,7 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 					if (info != null)
 						data.add(info);
 				}
+				loading.hide();
 				display.setData(data);
 			}
 
@@ -108,22 +126,22 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 	
 //  Events
 	public void onLogout() {
-		node.setState(NodeStates.Logout);
+		node.setState(Actions.Logout);
 		node.next();
 	}
 
 	public void onShowSettings() {
-		node.setState(NodeStates.Settings);
+		node.setState(Actions.Settings);
 		node.next();
 	}
 
 	public void onNewOrder() {
-		node.setState(NodeStates.NewOrder);
+		node.setState(Actions.NewOrder);
 		node.next();
 	}
 
 	public void onShowHistory() {
-		node.setState(NodeStates.ShowHistory);
+		node.setState(Actions.ShowHistory);
 		node.next();
 	}
 
@@ -147,27 +165,58 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 			}});
 	}
 
-	public void delete(ViewOrderInfo object) {
-		String url = Options.URL_VRT + "data/viewOrder/" + object.getId() + 
-				"?sid=" + User.SID;
-		DELETE.send(url, object.getJSON(), new RequestCallback(){
+	public void delete(final ViewOrderInfo object) {
+		final PopupPanel confirm = new PopupPanel();
+		confirm.setModal(true);
+		confirm.setGlassEnabled(true);
+		VerticalPanel vp = new VerticalPanel();
+		vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+		vp.setSpacing(10);
+		Label labelConfirm1 = new Label("Order will be deleted PERMANENTLY!");
+		Label labelConfirm2 = new Label("Are you sure?");
+		vp.add(labelConfirm1);
+		vp.add(labelConfirm2);
+		HorizontalPanel hp = new HorizontalPanel();
+		hp.setWidth("100%");
+		hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+		Button buttonYes = new Button("Yes");
+		buttonYes.setWidth("75px");
+		buttonYes.addClickHandler(new ClickHandler(){
 
 			@Override
-			public void onResponseReceived(Request request, Response response) {
-				if (Modes.testDeleteOrder.equals(Ecommerce.mode))
-					Log.popup();
-				loadOrdersList();
-			}
-
-			@Override
-			public void onError(Request request, Throwable exception) {
-				// TODO Auto-generated method stub
-				
+			public void onClick(ClickEvent event) {
+				confirm.hide();
+				ServerProxy.deleteOrder(object.getId(), User.SID, new RequestCallback(){
+					
+					@Override
+					public void onResponseReceived(Request request, Response response) {
+						Log.popup();
+						loadOrdersList();
+					}
+					
+					@Override
+					public void onError(Request request, Throwable exception) {
+						// TODO Auto-generated method stub
+						
+					}});
 			}});
+		Button buttonNo = new Button("No");
+		buttonNo.setWidth("75px");
+		buttonNo.addClickHandler(new ClickHandler(){
+
+			@Override
+			public void onClick(ClickEvent event) {
+				confirm.hide();
+			}});
+		hp.add(buttonYes);
+		hp.add(buttonNo);
+		vp.add(hp);
+		confirm.setWidget(vp);
+		confirm.center();
 	}
 
 	public void onUpdateProfile() {
-		node.next(NodeStates.UpdateProfile);
+		node.next(Actions.UpdateProfile);
 	}
 
 	public void openAddress(ViewOrderInfo object) {

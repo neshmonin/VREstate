@@ -17,7 +17,8 @@ public class AgreementView extends Composite implements I_Display {
 			.create(AgreementViewUiBinder.class);
 	@UiField Button buttonProceed;
 	@UiField Button buttonAgree;
-
+	@UiField Button buttonCancel;
+	@UiField Button buttonPrev;
 	interface AgreementViewUiBinder extends UiBinder<Widget, AgreementView> {
 	}
 
@@ -48,6 +49,10 @@ public class AgreementView extends Composite implements I_Display {
 	}
 	@UiHandler("buttonProceed")
 	void onButtonProceedClick(ClickEvent event) {
+		buttonPrev.setVisible(false);
+		buttonProceed.setEnabled(false);
+		buttonCancel.setText("Close");
+		// Change Cancel to Close
 		if (presenter != null)
 			presenter.onProceed();
 	}

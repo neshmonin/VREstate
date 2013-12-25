@@ -43,11 +43,11 @@
 					<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT" verticalAlignment="ALIGN_MIDDLE"/>
 					<g:Label text="Third Party Virtual  Tour (optional)"/>
 					<g:Cell horizontalAlignment="ALIGN_RIGHT">
-						<g:TextBox ui:field="textVirtualTourUrl" width="250px"/>
+						<g:TextBox ui:field="textVirtualTourUrl" width="250px" value="http://"/>
 					</g:Cell>
 				<g:Label text="More Info link (optional)"/>
 				<g:Cell horizontalAlignment="ALIGN_RIGHT">
-					<g:TextBox ui:field="textMoreInfoUrl" width="250px"/>
+					<g:TextBox ui:field="textMoreInfoUrl" width="250px" value="http://"/>
 				</g:Cell>
 				<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_CENTER">
 					<g:Cell verticalAlignment="ALIGN_MIDDLE">

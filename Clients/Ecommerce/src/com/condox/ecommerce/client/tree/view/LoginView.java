@@ -4,17 +4,20 @@ import com.condox.ecommerce.client.tree.presenter.LoginPresenter;
 import com.condox.ecommerce.client.tree.presenter.LoginPresenter.I_Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.PasswordTextBox;
+import com.google.gwt.user.client.ui.FocusPanel;
 
 public class LoginView extends Composite implements I_Display {
 
@@ -27,13 +30,12 @@ public class LoginView extends Composite implements I_Display {
 	@UiField Hyperlink hyperlink;
 	@UiField Button buttonClose;
 	@UiField PasswordTextBox textUserPassword;
+	@UiField FocusPanel focusPanel;
 
 	interface LoginViewUiBinder extends UiBinder<Widget, LoginView> {
 	}
 
 	private LoginPresenter presenter = null;
-	private boolean user = false;
-	private boolean guest = true;
 
 	public LoginView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -44,62 +46,11 @@ public class LoginView extends Composite implements I_Display {
 		this.presenter = presenter;
 	}
 
-//	@Override
-//	public String getUserLogin() {
-////		if (user)
-////			return textUserLogin.getValue();
-////		else if (guest)
-////			return "web";
-//		return "adminan";
-//
-//	}
-//
-//	@Override
-//	public String getUserPassword() {
-////		if (user)
-////			return textUserPassword.getValue();
-////		else if (guest)
-////			return "web";
-//		return "smelatoronto";
-//	}
-//
 	@UiHandler("buttonEnter")
 	void onButtonEnterClick(ClickEvent event) {
 		presenter.onLogin();
 	}
-//
-//	@UiHandler("textUserLogin")
-//	void onTextUserLoginValueChange(ValueChangeEvent<String> event) {
-//
-//	}
-//
-//	@UiHandler("textUserLogin")
-//	void onTextUserLoginKeyUp(KeyUpEvent event) {
-//		updateButtonEnter();
-//	}
-//
-//	@UiHandler("textUserPassword")
-//	void onTextUserPasswordKeyUp(KeyUpEvent event) {
-//		updateButtonEnter();
-//	}
-//
-//	private void updateButtonEnter() {
-//		user = !textUserLogin.getValue().isEmpty();
-//		user &= !textUserPassword.getValue().isEmpty();
-//		guest = textUserLogin.getValue().isEmpty();
-//		guest &= textUserPassword.getValue().isEmpty();
-//		if (user) {
-//			buttonEnter.setEnabled(true);
-//			buttonEnter.setText("Order as a User");
-//		} else if (guest) {
-//			buttonEnter.setEnabled(true);
-//			buttonEnter.setText("Order as a Guest");
-//		} else {
-//			buttonEnter.setEnabled(false);
-//			buttonEnter.setText("Order");
-//		}
-//
-//	}
+
 	@UiHandler("hyperlink")
 	void onHyperlinkClick(ClickEvent event) {
 		if (presenter != null)
@@ -119,5 +70,10 @@ public class LoginView extends Composite implements I_Display {
 	void onButtonCloseClick(ClickEvent event) {
 		if (presenter != null)
 			presenter.onClose();
+	}
+	@UiHandler("focusPanel")
+	void onFocusPanelKeyUp(KeyUpEvent event) {
+		if (event.getNativeKeyCode() == 13)
+			presenter.onLogin();
 	}
 }

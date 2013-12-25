@@ -3,6 +3,7 @@ package com.condox.ecommerce.client.tree.view;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.communication.User.UserRole;
 import com.condox.clientshared.document.SuiteInfo;
+import com.condox.clientshared.document.SuiteInfo.Status;
 import com.condox.ecommerce.client.tree.presenter.OptionsPresenter;
 import com.condox.ecommerce.client.tree.presenter.OptionsPresenter.I_Display;
 import com.google.gwt.core.client.GWT;
@@ -51,10 +52,18 @@ public class OptionsView extends Composite implements I_Display {
 
 			@Override
 			public void run() {
-				int price = Integer.valueOf(textPrice.getValue());
+				int price = 0;
+				if (!textPrice.getValue().isEmpty())
+					try {
+						price = Integer.valueOf(textPrice.getValue());
+					} catch (NumberFormatException e) {
+						textPrice.setValue("" + price);
+						e.printStackTrace();
+					}
 				price = Math.max(price, 0);
+				textPrice.setValue("" + price);
 				boolean valid_sale_price = (!rbForSale.getValue() || price > 10000);
-				boolean valid_rent_price = (!rbForRent.getValue() || price < 10000);
+				boolean valid_rent_price = (!rbForRent.getValue() || price < 10000 && price > 0);
 //				textPrice.setStyleDependentName("incorrect", !(valid_sale_price && valid_rent_price));
 				boolean valid = valid_sale_price && valid_rent_price;
 				buttonNext.setEnabled(valid);
@@ -66,6 +75,20 @@ public class OptionsView extends Composite implements I_Display {
 	@Override
 	public void setPresenter(OptionsPresenter presenter) {
 		this.presenter = presenter;
+		boolean usingMLS = presenter.isUsingMLS();
+		if (usingMLS) {
+			rbForRent.setEnabled(false);
+			rbForSale.setEnabled(false);
+			textMLS.setReadOnly(true);
+			textPrice.setReadOnly(true);
+		}
+		
+		if (User.role.equals(UserRole.Visitor)) {
+			textMLS.setEnabled(false);
+			rbForRent.setEnabled(false);
+			rbForSale.setEnabled(false);
+			textPrice.setEnabled(false);
+		}
 	}
 
 	@UiHandler("buttonCancel")
@@ -98,21 +121,52 @@ public class OptionsView extends Composite implements I_Display {
 
 	@Override
 	public String getVirtualTourUrl() {
-		return textVirtualTourUrl.getValue();
+		if ("http://".equals(textVirtualTourUrl.getValue()))
+			return "";
+		else
+			return textVirtualTourUrl.getValue();
 	}
 
 	@Override
 	public String getMoreInfoUrl() {
-		return textMoreInfoUrl.getValue();
+		if ("http://".equals(textMoreInfoUrl.getValue()))
+			return "";
+		else
+			return textMoreInfoUrl.getValue();
 	}
 
 	@Override
-	public SuiteInfo setSuiteInfo(SuiteInfo newInfo) {
-		String mls = newInfo.getMLS();
-		// if (mls != null && !mls.isEmpty()) {
-		textMLS.setValue(mls);
+	public String getMLS() {
+		return textMLS.getValue();
+	}
 
-		switch (newInfo.getStatus()) {
+	@Override
+	public void setMLS(String newMLS) {
+		textMLS.setValue(newMLS);
+	}
+
+	@Override
+	public int getPrice() {
+		return Integer.valueOf(textPrice.getValue());
+	}
+
+	@Override
+	public void setPrice(int price) {
+		textPrice.setValue("" + Math.max(price, 0));
+	}
+
+	@Override
+	public Status getStatus() {
+		if (rbForSale.getValue())
+			return Status.AvailableResale;
+		if (rbForRent.getValue())
+			return Status.AvailableRent;
+		return Status.AvailableRent;
+	}
+
+	@Override
+	public void setStatus(Status newStatus) {
+		switch (newStatus) {
 		case AvailableRent:
 			rbForRent.setValue(true);
 			break;
@@ -123,22 +177,20 @@ public class OptionsView extends Composite implements I_Display {
 			rbForSale.setValue(true);
 			break;
 		}
+	}
 
-		int price = Math.max(newInfo.getPrice(), 0);
-		textPrice.setValue("" + price);
+	@Override
+	public void setVirtualTourUrl(String newUrl) {
+		textVirtualTourUrl.setValue(newUrl);
+		if (textVirtualTourUrl.getValue().isEmpty())
+			textVirtualTourUrl.setValue("http://");
+	}
 
-		textVirtualTourUrl.setValue(newInfo.getVirtualTourURL());
-		textMoreInfoUrl.setValue(newInfo.getMoreInfoURL());
-
-		if (User.role.equals(UserRole.Visitor)) {
-			textMLS.setEnabled(false);
-			rbForRent.setEnabled(false);
-			rbForSale.setEnabled(false);
-			textPrice.setEnabled(false);
-		}
-		// }
-
-		return null;
+	@Override
+	public void setMoreInfoUrl(String newUrl) {
+		textMoreInfoUrl.setValue(newUrl);
+		if (textMoreInfoUrl.getValue().isEmpty())
+			textMoreInfoUrl.setValue("http://");
 	}
 
 }

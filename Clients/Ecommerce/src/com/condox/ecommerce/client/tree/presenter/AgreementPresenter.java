@@ -12,8 +12,9 @@ import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.Ecommerce.Modes;
 import com.condox.ecommerce.client.Ecommerce;
 import com.condox.ecommerce.client.I_Presenter;
+import com.condox.ecommerce.client.ServerProxy;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.AgreementNode;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -48,11 +49,11 @@ public class AgreementPresenter implements I_Presenter {
 	
 	// Navigation events
 	public void onCancel() {
-		node.next(NodeStates.Cancel);
+		node.next(Actions.Cancel);
 	}
 
 	public void onPrev() {
-		node.next(NodeStates.Prev);
+		node.next(Actions.Prev);
 	}
 	
 	public void onProceed() {
@@ -81,14 +82,21 @@ public class AgreementPresenter implements I_Presenter {
 //					String viewOrderUrl = obj.get("viewOrder-url").isString().stringValue();
 					String viewOrderId = obj.get("viewOrder-id").isString().stringValue();
 					viewOrderId = viewOrderId.replace("-", "");
-					String url = Options.URL_VRT + "viewOrder/" + viewOrderId + "?&sid=" + User.SID;;
-					DELETE.send(url,"",  new RequestCallback(){
+					
+					ServerProxy.deleteOrder(viewOrderId, User.SID, new RequestCallback(){
 
 						@Override
 						public void onResponseReceived(Request request,
 								Response response) {
+							if (response.getStatusCode() == 200) {
+								Window.alert("Congratulations!\n The Interactive 3D Listing has been successfully created");
+							} else {
+								Window.alert("Cannot create the Interactive 3D Listing for you!\n " +
+										"We encountered the following problems:\n" +
+										response.getStatusCode() + " : " + response.getStatusText());
+							}
 							Log.write(response.getStatusText());
-							if (Modes.testDeleteOrder == Ecommerce.mode);
+							if (Modes.testDeleteOrder == Ecommerce.mode)
 								Log.popup();
 						}
 

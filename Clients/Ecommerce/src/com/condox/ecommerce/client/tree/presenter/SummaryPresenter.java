@@ -3,10 +3,11 @@ package com.condox.ecommerce.client.tree.presenter;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.document.SuiteInfo;
+import com.condox.clientshared.document.SuiteInfo.Status;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.SummaryNode;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -39,16 +40,16 @@ public class SummaryPresenter implements I_Presenter {
 	
 	// Navigation events
 	public void onCancel() {
-		node.next(NodeStates.Cancel);
+		node.next(Actions.Cancel);
 	}
 
 	public void onPrev() {
-		node.next(NodeStates.Prev);
+		node.next(Actions.Prev);
 	}
 	
 	public void onNext() {
 		saveData();
-		node.next(NodeStates.Next);
+		node.next(Actions.Next);
 	}
 	
 	// Data utils
@@ -70,6 +71,7 @@ public class SummaryPresenter implements I_Presenter {
 		int price = getInteger(Field.SuitePrice);
 		String virtual_tour = getString(Field.VirtualTourUrl);
 		String more_info = getString(Field.MoreInfoUrl);
+		String status = "";
 		//-----------------
 		Data data = node.getTree().getData(Field.SuiteSelected);
 		if (data != null) {
@@ -79,19 +81,29 @@ public class SummaryPresenter implements I_Presenter {
 			price = info.getPrice();
 			virtual_tour = info.getVirtualTourURL();
 			more_info = info.getMoreInfoURL();
+			switch (info.getStatus()){
+				case AvailableRent:
+					status = "For rent - price $" + price + "/m";
+					break;
+				case AvailableResale:
+					status = "For sale - price $" + price;
+					break;
+			default:
+				break;
+			}
 		}
 		//-----------------
 		
 		String html = ""; 
 		html += "Listing: " + (listing.isEmpty()? "&lt;empty&gt;" : listing) + "<br>";
-		html +=	"MLS# " + (mls.isEmpty()? "&lt;none&gt;" : mls)  + "<br>" + "   Price  " + (price == 0? "&lt;empty&gt;" : "$" + String.valueOf(price)) + "<br>";
-
+		html +=	"MLS# " + (mls.isEmpty()? "&lt;none&gt;" : mls)  + "<br>";
+		html += status.isEmpty()? "" : status + "<br>";
 		html +=	"Third Party Virtual Tour<br>";
 		html += "<div style=\"margin-left:20px\">";
 		if (virtual_tour.isEmpty())
 			html += "&lt;none&gt;";
 		else
-			html += "<a href=\"" + virtual_tour + "\">" + virtual_tour + "</a>";
+			html += "<a href=\"" + virtual_tour + "\" target = \"_blank\">" + virtual_tour + "</a>";
 		html += "</div>";
 
 		html +=	"More Info Link<br>";
@@ -99,7 +111,7 @@ public class SummaryPresenter implements I_Presenter {
 		if (more_info.isEmpty())
 			html += "&lt;none&gt;";
 		else
-			html += "<a href=\"" + more_info + "\">" + more_info + "</a>";
+			html += "<a href=\"" + more_info + "\" target = \"_blank\">" + more_info + "</a>";
 		html += "</div>";
 		
 		display.setData(html);

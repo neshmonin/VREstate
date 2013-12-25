@@ -8,7 +8,7 @@ import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.ServerProxy;
 import com.condox.ecommerce.client.UserInfo;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.UpdateProfile1Node;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -48,11 +48,11 @@ public class UpdateProfile1Presenter implements I_Presenter {
 
 	// Navigation events
 	public void onClose() {
-		node.next(NodeStates.Close);
+		node.next(Actions.Close);
 	}
 
 	public void onCancel() {
-		node.next(NodeStates.Cancel);
+		node.next(Actions.Cancel);
 	}
 
 	public void onApply() {
@@ -74,11 +74,11 @@ public class UpdateProfile1Presenter implements I_Presenter {
 	}
 
 	public void onFinish() {
-		node.next(NodeStates.Finish);
+		node.next(Actions.Finish);
 	}
 
 	public void onNext() {
-		node.next(NodeStates.Next);
+		node.next(Actions.Next);
 	}
 
 	// Events
