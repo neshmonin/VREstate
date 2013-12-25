@@ -698,13 +698,14 @@ namespace Vre.Server.RemoteService
                 int estateDeveloperId = ResolveDeveloperId(session.DbSession, query["ed"]);// data.GetProperty("ed", -1);
                 string nameLookup = query.GetParam("namefilter", string.Empty);
 				if (string.IsNullOrEmpty(nameLookup)) nameLookup = query.GetParam("nameFilter", string.Empty);// data.GetProperty("nameFilter", string.Empty);  // OBSOLETE URI
+				int brokerageId = query.GetParam("brokerageid", -1);
                 User[] list;
 
 				if (User.IsEstateDeveloperTied(role) && (estateDeveloperId < 0) && session.User.EstateDeveloperID.HasValue)
 					estateDeveloperId = session.User.EstateDeveloperID.Value;
 
                 using (UserManager manager = new UserManager(session))
-                    list = manager.List(role, estateDeveloperId, nameLookup, includeDeleted);
+                    list = manager.List(role, estateDeveloperId, brokerageId, nameLookup, includeDeleted);
 
                 // produce output
                 //
@@ -1878,7 +1879,26 @@ namespace Vre.Server.RemoteService
                 {
                     User user = manager.Get(userId);
 
-                    if (user.UpdateFromClient(data))
+					var updated = user.UpdateFromClient(data);
+
+					var bid = data.GetProperty("brokerageId", -1);
+					if (bid > 0)  // try setting brokerage
+					{
+						if (((user.BrokerInfo != null) && (user.BrokerInfo.AutoID != bid))
+							|| (null == user.BrokerInfo))
+						{
+							using (var dao = new BrokerageInfoDao(session.DbSession))
+								user.BrokerInfo = dao.GetById(bid);
+							updated = true;
+						}
+					}
+					else if ((0 == bid) && (user.BrokerInfo != null))
+					{
+						user.BrokerInfo = null;
+						updated = true;
+					}
+					
+					if (updated)
                     {
                         user.MarkUpdated();
                         manager.Update(user);
@@ -2078,6 +2098,16 @@ namespace Vre.Server.RemoteService
 						// create contact info block with any added fields from inbound JSON
 						u = manager.Get(type, role, estateDeveloperId, login);
 						u.UpdateFromClient(data);
+
+						var bid = data.GetProperty("brokerageId", -1);
+						if (bid > 0)  // try setting brokerage
+						{
+							using (var dao = new BrokerageInfoDao(session.DbSession))
+								u.BrokerInfo = dao.GetById(bid);
+						}
+
+						manager.Update(u);
+
 						resp.ResponseCode = HttpStatusCode.OK;
 						resp.Data = new ClientData();
 						resp.Data.Add("id", u.AutoID);

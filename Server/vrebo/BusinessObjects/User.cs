@@ -71,7 +71,7 @@ namespace Vre.Server.BusinessLogic
 		public string TimeZone { get; set; }
 		public string PersonalInfo { get; set; }
         //public ContactInfo PersonalInfo { get; private set; }
-        public BrokerageInfo BrokerInfo { get; private set; }
+        public BrokerageInfo BrokerInfo { get; set; }
         public IList<UserLicense> Licenses { get; private set; }
         public decimal CreditUnits { get; private set; }
 		public DateTime LastServicePayment { get; set; }
@@ -213,7 +213,11 @@ namespace Vre.Server.BusinessLogic
             EstateDeveloperID = data.GetProperty("estateDeveloperId", -1);
             UserRole = data.GetProperty<User.Role>("role", Role.Visitor);
             NickName = data.GetProperty("nickName", string.Empty);
-            // TODO: deal with personal info (vCard) and brokerage
+
+			ClientData bicd = data.GetNextLevelDataItem("brokerage");
+			if (bicd.Count > 0) BrokerInfo = new BrokerageInfo(bicd);
+
+			// TODO: deal with personal info (vCard) and brokerage
         }
 
         public override ClientData GetClientData()
@@ -230,7 +234,7 @@ namespace Vre.Server.BusinessLogic
                 result.Add("personalInfo", PersonalInfo);
 
             if (BrokerInfo != null)
-                result.Add("brokerageInfo", BrokerInfo.GetClientData());
+                result.Add("brokerage", BrokerInfo.GetClientData());
 
 			if (refererRestriction != null)
 				result.Add("refererRestriction", RefererRestriction);

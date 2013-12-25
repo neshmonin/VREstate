@@ -749,7 +749,7 @@ namespace Vre.Server.BusinessLogic
 
 				IList<User> ownerUsers;
 				using (var dao = new UserDao(_session.DbSession))
-					ownerUsers = dao.ListUsers(User.Role.DeveloperAdmin, ownerEd.AutoID, null, false);
+					ownerUsers = dao.ListUsers(User.Role.DeveloperAdmin, ownerEd.AutoID, null, null, false);
 
 				foreach (var user in ownerUsers)
 					if (matchNName.Equals(user.NickName))

@@ -233,7 +233,7 @@ namespace Vre.Server.BusinessLogic
 			}
         }
 
-        public User[] List(User.Role role, int estateDeveloperId, string nameLookup, bool includeDeleted)
+        public User[] List(User.Role role, int estateDeveloperId, int brokerageId, string nameLookup, bool includeDeleted)
         {
             if (includeDeleted && (_session.User.UserRole != User.Role.SuperAdmin))
                 includeDeleted = false;  // only superadmins can see deleted records!
@@ -243,7 +243,9 @@ namespace Vre.Server.BusinessLogic
 
             using (UserDao dao = new UserDao(_session.DbSession))
             {
-                IList<User> result = dao.ListUsers(role, ((estateDeveloperId >= 0) ? (int?)estateDeveloperId : null),
+                IList<User> result = dao.ListUsers(role, 
+					((estateDeveloperId >= 0) ? (int?)estateDeveloperId : null),
+					((brokerageId >= 0) ? (int?)brokerageId : null),
                     nameLookup, includeDeleted);
 
                 for (int idx = result.Count - 1; idx >= 0; idx--)
@@ -284,7 +286,7 @@ namespace Vre.Server.BusinessLogic
                     if (user.UserRole == User.Role.SuperAdmin)
                     {
                         if (_session.User.Equals(user)) throw new InvalidOperationException("Superadmin cannot commit suicide.");
-                        if (dao.ListUsers(User.Role.SuperAdmin, null, null, false).Count < 2)
+                        if (dao.ListUsers(User.Role.SuperAdmin, null, null, null, false).Count < 2)
                         {
                             throw new InvalidOperationException("Cannot delete last active Superadmin.");
                         }
@@ -292,7 +294,7 @@ namespace Vre.Server.BusinessLogic
                     else if (user.UserRole == User.Role.DeveloperAdmin)
                     {
                         if (_session.User.Equals(user)) throw new InvalidOperationException("Developer Admin cannot commit suicide.");
-                        if (dao.ListUsers(User.Role.DeveloperAdmin, user.EstateDeveloperID.Value, null, false).Count < 2)
+                        if (dao.ListUsers(User.Role.DeveloperAdmin, user.EstateDeveloperID.Value, null, null, false).Count < 2)
                         {
                             throw new InvalidOperationException("Cannot delete last active Developer Admin.");
                         }

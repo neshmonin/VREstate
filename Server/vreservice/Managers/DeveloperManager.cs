@@ -62,7 +62,7 @@ namespace Vre.Server.BusinessLogic
                         {
                             if (!User.IsEstateDeveloperTied(r)) continue;
                             //string errorReason;
-                            foreach (User u in dao.ListUsers(r, estateDeveloper.AutoID, null, false))
+                            foreach (User u in dao.ListUsers(r, estateDeveloper.AutoID, null, null, false))
                             {
                                 um.Delete(u);
                             }
