@@ -25,7 +25,8 @@ namespace SuperAdminConsole
 
         private ListViewColumnSorter lvwColumnSorter;
 
-        const string DEFAULT = "";
+        const string EMPTY = "";
+        const string WEB_PREFIX = @"http://";
         bool viewOrderUrlGenerated = false;
         bool emailSent = false;
         bool paymentSkip = false;
@@ -93,34 +94,34 @@ namespace SuperAdminConsole
 
             cleanUp();
 
-            textVTourURL.Text = DEFAULT;
+            textVTourURL.Text = EMPTY;
             textVTourURL.GotFocus += (sender, e) =>
             {
-                if (textVTourURL.Text.Equals(DEFAULT))
+                if (textVTourURL.Text.Equals(EMPTY))
                 {
-                    textVTourURL.Text = @"http://";
-                    textVTourURL.SelectionStart = DEFAULT.Length;
+                    textVTourURL.Text = WEB_PREFIX;
+                    textVTourURL.SelectionStart = WEB_PREFIX.Length;
                 }
             };
             textVTourURL.LostFocus += (sender, e) =>
             {
-                if (textVTourURL.Text.Trim().Length == 0 || textVTourURL.Text == @"http://")
-                    textVTourURL.Text = DEFAULT;
+                if (textVTourURL.Text.Trim().Length == 0 || textVTourURL.Text == WEB_PREFIX)
+                    textVTourURL.Text = EMPTY;
             };
 
-            textMoreInfoUrl.Text = DEFAULT;
+            textMoreInfoUrl.Text = EMPTY;
             textMoreInfoUrl.GotFocus += (sender, e) =>
             {
-                if (textMoreInfoUrl.Text.Equals(DEFAULT))
+                if (textMoreInfoUrl.Text.Equals(EMPTY))
                 {
-                    textMoreInfoUrl.Text = @"http://";
-                    textMoreInfoUrl.SelectionStart = DEFAULT.Length;
+                    textMoreInfoUrl.Text = WEB_PREFIX;
+                    textMoreInfoUrl.SelectionStart = WEB_PREFIX.Length;
                 }
             };
             textMoreInfoUrl.LostFocus += (sender, e) =>
             {
-                if (textMoreInfoUrl.Text.Trim().Length == 0 || textMoreInfoUrl.Text == @"http://")
-                    textMoreInfoUrl.Text = DEFAULT;
+                if (textMoreInfoUrl.Text.Trim().Length == 0 || textMoreInfoUrl.Text == WEB_PREFIX)
+                    textMoreInfoUrl.Text = EMPTY;
             };
 
 

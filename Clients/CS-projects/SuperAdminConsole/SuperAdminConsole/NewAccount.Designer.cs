@@ -44,9 +44,30 @@
             this.comboBoxDeveloper = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.textBoxNickname = new System.Windows.Forms.TextBox();
+            this.tabPageNewBrokerage = new System.Windows.Forms.TabPage();
+            this.tabPageNewAgent = new System.Windows.Forms.TabPage();
+            this.comboBoxCountry = new System.Windows.Forms.ComboBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.textBoxPostal = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.textBoxProvince = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.textBoxCity = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.textBoxStreet = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.textBoxPhone = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.textBoxWebsite = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.buttonCreateBrokerage = new System.Windows.Forms.Button();
+            this.buttonCreateAgent = new System.Windows.Forms.Button();
+            this.listBoxBrokerages = new System.Windows.Forms.ListBox();
             this.tabControAccountTypes.SuspendLayout();
             this.tabPageNewCustomer.SuspendLayout();
             this.tabPageNewDevAdmin.SuspendLayout();
+            this.tabPageNewBrokerage.SuspendLayout();
+            this.tabPageNewAgent.SuspendLayout();
             this.SuspendLayout();
             // 
             // label2
@@ -62,7 +83,7 @@
             // 
             this.textBoxEmail.Location = new System.Drawing.Point(14, 159);
             this.textBoxEmail.Name = "textBoxEmail";
-            this.textBoxEmail.Size = new System.Drawing.Size(264, 20);
+            this.textBoxEmail.Size = new System.Drawing.Size(228, 20);
             this.textBoxEmail.TabIndex = 4;
             this.textBoxEmail.TextChanged += new System.EventHandler(this.onTextChanged);
             // 
@@ -79,8 +100,10 @@
             // 
             // tabControAccountTypes
             // 
-            this.tabControAccountTypes.Controls.Add(this.tabPageNewCustomer);
+            this.tabControAccountTypes.Controls.Add(this.tabPageNewAgent);
             this.tabControAccountTypes.Controls.Add(this.tabPageNewDevAdmin);
+            this.tabControAccountTypes.Controls.Add(this.tabPageNewBrokerage);
+            this.tabControAccountTypes.Controls.Add(this.tabPageNewCustomer);
             this.tabControAccountTypes.Location = new System.Drawing.Point(1, 3);
             this.tabControAccountTypes.Name = "tabControAccountTypes";
             this.tabControAccountTypes.SelectedIndex = 0;
@@ -97,7 +120,7 @@
             this.tabPageNewCustomer.Padding = new System.Windows.Forms.Padding(3);
             this.tabPageNewCustomer.Size = new System.Drawing.Size(464, 109);
             this.tabPageNewCustomer.TabIndex = 0;
-            this.tabPageNewCustomer.Text = "New Customer";
+            this.tabPageNewCustomer.Text = "New Selling Agent";
             // 
             // tabPageNewDevAdmin
             // 
@@ -192,18 +215,204 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(295, 143);
+            this.label1.Location = new System.Drawing.Point(245, 143);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(55, 13);
+            this.label1.Size = new System.Drawing.Size(35, 13);
             this.label1.TabIndex = 10;
-            this.label1.Text = "Nickname";
+            this.label1.Text = "Name";
             // 
             // textBoxNickname
             // 
-            this.textBoxNickname.Location = new System.Drawing.Point(298, 159);
+            this.textBoxNickname.Location = new System.Drawing.Point(248, 159);
             this.textBoxNickname.Name = "textBoxNickname";
-            this.textBoxNickname.Size = new System.Drawing.Size(161, 20);
+            this.textBoxNickname.Size = new System.Drawing.Size(211, 20);
             this.textBoxNickname.TabIndex = 5;
+            // 
+            // tabPageNewBrokerage
+            // 
+            this.tabPageNewBrokerage.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPageNewBrokerage.Controls.Add(this.buttonCreateBrokerage);
+            this.tabPageNewBrokerage.Controls.Add(this.textBoxWebsite);
+            this.tabPageNewBrokerage.Controls.Add(this.label7);
+            this.tabPageNewBrokerage.Controls.Add(this.textBoxPhone);
+            this.tabPageNewBrokerage.Controls.Add(this.label6);
+            this.tabPageNewBrokerage.Controls.Add(this.comboBoxCountry);
+            this.tabPageNewBrokerage.Controls.Add(this.label12);
+            this.tabPageNewBrokerage.Controls.Add(this.textBoxPostal);
+            this.tabPageNewBrokerage.Controls.Add(this.label11);
+            this.tabPageNewBrokerage.Controls.Add(this.textBoxProvince);
+            this.tabPageNewBrokerage.Controls.Add(this.label10);
+            this.tabPageNewBrokerage.Controls.Add(this.textBoxCity);
+            this.tabPageNewBrokerage.Controls.Add(this.label9);
+            this.tabPageNewBrokerage.Controls.Add(this.textBoxStreet);
+            this.tabPageNewBrokerage.Controls.Add(this.label8);
+            this.tabPageNewBrokerage.Location = new System.Drawing.Point(4, 22);
+            this.tabPageNewBrokerage.Name = "tabPageNewBrokerage";
+            this.tabPageNewBrokerage.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageNewBrokerage.Size = new System.Drawing.Size(464, 109);
+            this.tabPageNewBrokerage.TabIndex = 2;
+            this.tabPageNewBrokerage.Text = "New Brokerage";
+            // 
+            // tabPageNewAgent
+            // 
+            this.tabPageNewAgent.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPageNewAgent.Controls.Add(this.listBoxBrokerages);
+            this.tabPageNewAgent.Controls.Add(this.buttonCreateAgent);
+            this.tabPageNewAgent.Location = new System.Drawing.Point(4, 22);
+            this.tabPageNewAgent.Name = "tabPageNewAgent";
+            this.tabPageNewAgent.Size = new System.Drawing.Size(464, 109);
+            this.tabPageNewAgent.TabIndex = 3;
+            this.tabPageNewAgent.Text = "New Agent";
+            // 
+            // comboBoxCountry
+            // 
+            this.comboBoxCountry.FormattingEnabled = true;
+            this.comboBoxCountry.Items.AddRange(new object[] {
+            "CA",
+            "US"});
+            this.comboBoxCountry.Location = new System.Drawing.Point(225, 58);
+            this.comboBoxCountry.Name = "comboBoxCountry";
+            this.comboBoxCountry.Size = new System.Drawing.Size(80, 21);
+            this.comboBoxCountry.TabIndex = 38;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(173, 62);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(43, 13);
+            this.label12.TabIndex = 35;
+            this.label12.Text = "Country";
+            // 
+            // textBoxPostal
+            // 
+            this.textBoxPostal.Location = new System.Drawing.Point(72, 59);
+            this.textBoxPostal.Name = "textBoxPostal";
+            this.textBoxPostal.Size = new System.Drawing.Size(60, 20);
+            this.textBoxPostal.TabIndex = 34;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(8, 62);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(36, 13);
+            this.label11.TabIndex = 33;
+            this.label11.Text = "Postal";
+            // 
+            // textBoxProvince
+            // 
+            this.textBoxProvince.Location = new System.Drawing.Point(276, 33);
+            this.textBoxProvince.Name = "textBoxProvince";
+            this.textBoxProvince.Size = new System.Drawing.Size(29, 20);
+            this.textBoxProvince.TabIndex = 32;
+            this.textBoxProvince.Text = "ON";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(224, 36);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(49, 13);
+            this.label10.TabIndex = 31;
+            this.label10.Text = "Province";
+            // 
+            // textBoxCity
+            // 
+            this.textBoxCity.Location = new System.Drawing.Point(72, 33);
+            this.textBoxCity.Name = "textBoxCity";
+            this.textBoxCity.Size = new System.Drawing.Size(135, 20);
+            this.textBoxCity.TabIndex = 30;
+            this.textBoxCity.Text = "Toronto";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(8, 36);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(24, 13);
+            this.label9.TabIndex = 29;
+            this.label9.Text = "City";
+            // 
+            // textBoxStreet
+            // 
+            this.textBoxStreet.Location = new System.Drawing.Point(72, 6);
+            this.textBoxStreet.Name = "textBoxStreet";
+            this.textBoxStreet.Size = new System.Drawing.Size(233, 20);
+            this.textBoxStreet.TabIndex = 28;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(8, 9);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(55, 13);
+            this.label8.TabIndex = 27;
+            this.label8.Text = "No, Street";
+            // 
+            // textBoxPhone
+            // 
+            this.textBoxPhone.Location = new System.Drawing.Point(72, 85);
+            this.textBoxPhone.Name = "textBoxPhone";
+            this.textBoxPhone.Size = new System.Drawing.Size(91, 20);
+            this.textBoxPhone.TabIndex = 40;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(8, 88);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(48, 13);
+            this.label6.TabIndex = 39;
+            this.label6.Text = "Phone #";
+            // 
+            // textBoxWebsite
+            // 
+            this.textBoxWebsite.Location = new System.Drawing.Point(225, 85);
+            this.textBoxWebsite.Name = "textBoxWebsite";
+            this.textBoxWebsite.Size = new System.Drawing.Size(229, 20);
+            this.textBoxWebsite.TabIndex = 42;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(173, 88);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(46, 13);
+            this.label7.TabIndex = 41;
+            this.label7.Text = "Website";
+            // 
+            // buttonCreateBrokerage
+            // 
+            this.buttonCreateBrokerage.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonCreateBrokerage.Location = new System.Drawing.Point(344, 6);
+            this.buttonCreateBrokerage.Name = "buttonCreateBrokerage";
+            this.buttonCreateBrokerage.Size = new System.Drawing.Size(110, 31);
+            this.buttonCreateBrokerage.TabIndex = 43;
+            this.buttonCreateBrokerage.Text = "Create";
+            this.buttonCreateBrokerage.UseVisualStyleBackColor = true;
+            this.buttonCreateBrokerage.Click += new System.EventHandler(this.buttonCreateBrokerage_Click);
+            // 
+            // buttonCreateAgent
+            // 
+            this.buttonCreateAgent.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonCreateAgent.Location = new System.Drawing.Point(321, 13);
+            this.buttonCreateAgent.Name = "buttonCreateAgent";
+            this.buttonCreateAgent.Size = new System.Drawing.Size(134, 27);
+            this.buttonCreateAgent.TabIndex = 5;
+            this.buttonCreateAgent.Text = "Create account";
+            this.buttonCreateAgent.UseVisualStyleBackColor = true;
+            this.buttonCreateAgent.Click += new System.EventHandler(this.buttonCreateAgent_Click);
+            // 
+            // listBoxBrokerages
+            // 
+            this.listBoxBrokerages.FormattingEnabled = true;
+            this.listBoxBrokerages.Location = new System.Drawing.Point(12, 13);
+            this.listBoxBrokerages.Name = "listBoxBrokerages";
+            this.listBoxBrokerages.Size = new System.Drawing.Size(302, 82);
+            this.listBoxBrokerages.Sorted = true;
+            this.listBoxBrokerages.TabIndex = 6;
+            this.listBoxBrokerages.SelectedIndexChanged += new System.EventHandler(this.listBoxBrokerages_SelectedIndexChanged);
             // 
             // NewAccount
             // 
@@ -224,6 +433,9 @@
             this.tabPageNewCustomer.ResumeLayout(false);
             this.tabPageNewDevAdmin.ResumeLayout(false);
             this.tabPageNewDevAdmin.PerformLayout();
+            this.tabPageNewBrokerage.ResumeLayout(false);
+            this.tabPageNewBrokerage.PerformLayout();
+            this.tabPageNewAgent.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -247,5 +459,24 @@
         private System.Windows.Forms.ComboBox comboBoxDeveloper;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBoxNickname;
+        private System.Windows.Forms.TabPage tabPageNewAgent;
+        private System.Windows.Forms.TabPage tabPageNewBrokerage;
+        private System.Windows.Forms.TextBox textBoxWebsite;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox textBoxPhone;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.ComboBox comboBoxCountry;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.TextBox textBoxPostal;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.TextBox textBoxProvince;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TextBox textBoxCity;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.TextBox textBoxStreet;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Button buttonCreateBrokerage;
+        private System.Windows.Forms.ListBox listBoxBrokerages;
+        private System.Windows.Forms.Button buttonCreateAgent;
     }
 }

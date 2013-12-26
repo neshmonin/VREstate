@@ -6,10 +6,10 @@ namespace Vre.Server.BusinessLogic
     [Serializable]
     public partial class BrokerageInfo : UpdateableBase//IClientDataProvider
     {
-        private string Emails { get; set; }
-        private string PhoneNumbers { get; set; }
-
-		public string Name { get; set; }
+        public string[] Emails { get; set; }
+        public string[] PhoneNumbers { get; set; }
+        
+        public string Name { get; set; }
 
         public string StreetAddress { get; set; }
         public string City { get; set; }
@@ -30,8 +30,8 @@ namespace Vre.Server.BusinessLogic
         {
 			InitializeNew();
 			Name = name;
-            Emails = string.Empty;
-            PhoneNumbers = string.Empty;
+            Emails = new string[1]{ string.Empty };
+            PhoneNumbers = new string[1]{ string.Empty };
 			CreditUnits = 0m;
 			LastServicePayment = new DateTime(1900, 01, 01);
         }
@@ -54,8 +54,8 @@ namespace Vre.Server.BusinessLogic
             result.Add("postalCode", PostalCode);
             result.Add("country", Country);
 
-            result.Add("phoneNumbers", PhoneNumbers.Split(ContactInfo.ArraySplitterC));
-            result.Add("emails", Emails.Split(ContactInfo.ArraySplitterC));
+            result.Add("phoneNumbers", PhoneNumbers);
+            result.Add("emails", Emails);
 
             result.Add("webSite", WebSite);
 
@@ -74,10 +74,8 @@ namespace Vre.Server.BusinessLogic
             PostalCode = data.UpdateProperty("postalCode", PostalCode, ref changed);
             Country = data.UpdateProperty("country", Country, ref changed);
 
-            PhoneNumbers = string.Join(ContactInfo.ArraySplitterS,
-                data.UpdateProperty("phoneNumbers", PhoneNumbers.Split(ContactInfo.ArraySplitterC), ref changed));
-            Emails = string.Join(ContactInfo.ArraySplitterS,
-                data.UpdateProperty("emails", Emails.Split(ContactInfo.ArraySplitterC), ref changed));
+            PhoneNumbers = data.UpdateProperty("phoneNumbers", PhoneNumbers, ref changed);
+            Emails = data.UpdateProperty("emails", Emails, ref changed);
 
 			WebSite = data.UpdateProperty("webSite", WebSite, ref changed);
 
