@@ -62,7 +62,14 @@
             this.label7 = new System.Windows.Forms.Label();
             this.buttonCreateBrokerage = new System.Windows.Forms.Button();
             this.buttonCreateAgent = new System.Windows.Forms.Button();
-            this.listBoxBrokerages = new System.Windows.Forms.ListBox();
+            this.textBoxPWDconfirm = new System.Windows.Forms.TextBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.textBoxPWD = new System.Windows.Forms.TextBox();
+            this.label14 = new System.Windows.Forms.Label();
+            this.textBoxUID = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.comboBoxBrokerages = new System.Windows.Forms.ComboBox();
+            this.label16 = new System.Windows.Forms.Label();
             this.tabControAccountTypes.SuspendLayout();
             this.tabPageNewCustomer.SuspendLayout();
             this.tabPageNewDevAdmin.SuspendLayout();
@@ -217,9 +224,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(245, 143);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(35, 13);
+            this.label1.Size = new System.Drawing.Size(55, 13);
             this.label1.TabIndex = 10;
-            this.label1.Text = "Name";
+            this.label1.Text = "Nickname";
             // 
             // textBoxNickname
             // 
@@ -256,7 +263,14 @@
             // tabPageNewAgent
             // 
             this.tabPageNewAgent.BackColor = System.Drawing.SystemColors.Control;
-            this.tabPageNewAgent.Controls.Add(this.listBoxBrokerages);
+            this.tabPageNewAgent.Controls.Add(this.label16);
+            this.tabPageNewAgent.Controls.Add(this.textBoxPWDconfirm);
+            this.tabPageNewAgent.Controls.Add(this.label13);
+            this.tabPageNewAgent.Controls.Add(this.textBoxPWD);
+            this.tabPageNewAgent.Controls.Add(this.label14);
+            this.tabPageNewAgent.Controls.Add(this.textBoxUID);
+            this.tabPageNewAgent.Controls.Add(this.label15);
+            this.tabPageNewAgent.Controls.Add(this.comboBoxBrokerages);
             this.tabPageNewAgent.Controls.Add(this.buttonCreateAgent);
             this.tabPageNewAgent.Location = new System.Drawing.Point(4, 22);
             this.tabPageNewAgent.Name = "tabPageNewAgent";
@@ -396,7 +410,7 @@
             // buttonCreateAgent
             // 
             this.buttonCreateAgent.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonCreateAgent.Location = new System.Drawing.Point(321, 13);
+            this.buttonCreateAgent.Location = new System.Drawing.Point(317, 71);
             this.buttonCreateAgent.Name = "buttonCreateAgent";
             this.buttonCreateAgent.Size = new System.Drawing.Size(134, 27);
             this.buttonCreateAgent.TabIndex = 5;
@@ -404,15 +418,76 @@
             this.buttonCreateAgent.UseVisualStyleBackColor = true;
             this.buttonCreateAgent.Click += new System.EventHandler(this.buttonCreateAgent_Click);
             // 
-            // listBoxBrokerages
+            // textBoxPWDconfirm
             // 
-            this.listBoxBrokerages.FormattingEnabled = true;
-            this.listBoxBrokerages.Location = new System.Drawing.Point(12, 13);
-            this.listBoxBrokerages.Name = "listBoxBrokerages";
-            this.listBoxBrokerages.Size = new System.Drawing.Size(302, 82);
-            this.listBoxBrokerages.Sorted = true;
-            this.listBoxBrokerages.TabIndex = 6;
-            this.listBoxBrokerages.SelectedIndexChanged += new System.EventHandler(this.listBoxBrokerages_SelectedIndexChanged);
+            this.textBoxPWDconfirm.Location = new System.Drawing.Point(307, 38);
+            this.textBoxPWDconfirm.Name = "textBoxPWDconfirm";
+            this.textBoxPWDconfirm.Size = new System.Drawing.Size(144, 20);
+            this.textBoxPWDconfirm.TabIndex = 15;
+            this.textBoxPWDconfirm.TextChanged += new System.EventHandler(this.textBoxPWDconfirm_TextChanged);
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(240, 41);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(61, 13);
+            this.label13.TabIndex = 18;
+            this.label13.Text = "Type Again";
+            // 
+            // textBoxPWD
+            // 
+            this.textBoxPWD.Location = new System.Drawing.Point(81, 38);
+            this.textBoxPWD.Name = "textBoxPWD";
+            this.textBoxPWD.Size = new System.Drawing.Size(144, 20);
+            this.textBoxPWD.TabIndex = 14;
+            this.textBoxPWD.TextChanged += new System.EventHandler(this.textBoxPWD_TextChanged);
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(11, 41);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(53, 13);
+            this.label14.TabIndex = 17;
+            this.label14.Text = "Password";
+            // 
+            // textBoxUID
+            // 
+            this.textBoxUID.Location = new System.Drawing.Point(81, 9);
+            this.textBoxUID.Name = "textBoxUID";
+            this.textBoxUID.Size = new System.Drawing.Size(144, 20);
+            this.textBoxUID.TabIndex = 13;
+            this.textBoxUID.TextChanged += new System.EventHandler(this.textBoxUID_TextChanged);
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(11, 12);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(64, 13);
+            this.label15.TabIndex = 16;
+            this.label15.Text = "Login Name";
+            // 
+            // comboBoxBrokerages
+            // 
+            this.comboBoxBrokerages.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxBrokerages.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboBoxBrokerages.FormattingEnabled = true;
+            this.comboBoxBrokerages.Location = new System.Drawing.Point(81, 70);
+            this.comboBoxBrokerages.Name = "comboBoxBrokerages";
+            this.comboBoxBrokerages.Size = new System.Drawing.Size(220, 21);
+            this.comboBoxBrokerages.TabIndex = 12;
+            this.comboBoxBrokerages.SelectedIndexChanged += new System.EventHandler(this.comboBoxBrokerages_SelectedIndexChanged);
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(11, 71);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(56, 13);
+            this.label16.TabIndex = 19;
+            this.label16.Text = "Brokerage";
             // 
             // NewAccount
             // 
@@ -436,6 +511,7 @@
             this.tabPageNewBrokerage.ResumeLayout(false);
             this.tabPageNewBrokerage.PerformLayout();
             this.tabPageNewAgent.ResumeLayout(false);
+            this.tabPageNewAgent.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -476,7 +552,14 @@
         private System.Windows.Forms.TextBox textBoxStreet;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Button buttonCreateBrokerage;
-        private System.Windows.Forms.ListBox listBoxBrokerages;
         private System.Windows.Forms.Button buttonCreateAgent;
+        private System.Windows.Forms.TextBox textBoxPWDconfirm;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.TextBox textBoxPWD;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.TextBox textBoxUID;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.ComboBox comboBoxBrokerages;
+        private System.Windows.Forms.Label label16;
     }
 }

@@ -83,7 +83,7 @@ namespace SuperAdminConsole
                 foreach (ClientData cd in admins)
                 {
                     BrokerageInfo brokerage = new BrokerageInfo(cd);
-                    listBoxBrokerages.Items.Add(brokerage);
+                    comboBoxBrokerages.Items.Add(brokerage);
                 }
             }
 
@@ -146,7 +146,10 @@ namespace SuperAdminConsole
                                                indexOfDOT > indexOfAT + 3 &&
                                                indexOfDOT < textBoxEmail.Text.Length - 2 &&
                                                textBoxNickname.Text.Length > 1 &&
-                                               listBoxBrokerages.SelectedItem != null;
+                                               comboBoxBrokerages.SelectedItem != null &&
+                                               !string.IsNullOrEmpty(textBoxUID.Text) &&
+                                                   textBoxPWD.Text.Length > 6 &&
+                                                   textBoxPWD.Text == textBoxPWDconfirm.Text;
                     break;
                 case "New Brokerage":
                     buttonCreateAgent.Enabled = textBoxEmail.Text.Length != 0 &&
@@ -259,9 +262,11 @@ namespace SuperAdminConsole
             User agent = new User(6, User.Role.Agent);
             agent.NickName = textBoxNickname.Text;
             agent.PrimaryEmailAddress = textBoxEmail.Text;
-            BrokerageInfo broker = listBoxBrokerages.SelectedItem as BrokerageInfo;
+            BrokerageInfo broker = comboBoxBrokerages.SelectedItem as BrokerageInfo;
             ClientData data = agent.GetClientData();
             data["brokerageId"] = broker.AutoID;
+            data["uid"] = textBoxUID.Text;
+            data["pwd"] = textBoxPWD.Text;
 
             ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Insert,
                                                           "user",
@@ -279,13 +284,28 @@ namespace SuperAdminConsole
                 return;
             }
 
-            string errMessage = string.Format("Failed creating an Agent account for \'{0}\': {1}",
-                textBoxNickname.Text, resp.ResponseCode.ToString());
+            string errMessage = string.Format("Failed creating an Agent account for \'{0}\':\n{1}",
+                textBoxNickname.Text, resp.ResponseCodeDescription);
             MessageBox.Show(errMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             UpdateState();
         }
 
-        private void listBoxBrokerages_SelectedIndexChanged(object sender, EventArgs e)
+        private void comboBoxBrokerages_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateState();
+        }
+
+        private void textBoxUID_TextChanged(object sender, EventArgs e)
+        {
+            UpdateState();
+        }
+
+        private void textBoxPWD_TextChanged(object sender, EventArgs e)
+        {
+            UpdateState();
+        }
+
+        private void textBoxPWDconfirm_TextChanged(object sender, EventArgs e)
         {
             UpdateState();
         }
