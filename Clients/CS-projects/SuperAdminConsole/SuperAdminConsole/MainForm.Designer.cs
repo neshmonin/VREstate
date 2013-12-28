@@ -127,7 +127,7 @@
             this.toolStripSeparator4,
             this.composePromoEmailToolStripMenuItem});
             this.contextMenuStripViewOrder.Name = "contextMenuStripViewOrder";
-            this.contextMenuStripViewOrder.Size = new System.Drawing.Size(251, 270);
+            this.contextMenuStripViewOrder.Size = new System.Drawing.Size(251, 248);
             this.contextMenuStripViewOrder.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripViewOrder_Opening);
             // 
             // toolStripMenuItemEnableViewOrder

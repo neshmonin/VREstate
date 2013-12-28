@@ -218,7 +218,12 @@ namespace SuperAdminConsole
                 labelStreetName.Visible = treeViewAccounts.SelectedNode.Text == "ViewOrders";
                 textBoxFilter.Visible = treeViewAccounts.SelectedNode.Text == "ViewOrders";
                 if (treeViewAccounts.SelectedNode.Tag as UpdateableBase != null)
-                    tabControlAccountProperty.SelectTab("tabPageInfo");
+                {
+                    if (treeViewAccounts.SelectedNode.Text == "-MLS-")
+                        tabControlAccountProperty.SelectTab("tabPageViewOrders");
+                    else
+                        tabControlAccountProperty.SelectTab("tabPageInfo");
+                }
                 else
                 {
                     switch (treeViewAccounts.SelectedNode.Text)
@@ -306,7 +311,7 @@ namespace SuperAdminConsole
             ClientData adminsJASON = resp.Data;
             ClientData[] admins = adminsJASON.GetNextLevelDataArray("users");
 
-            TreeNode[] adminNodes = new TreeNode[admins.Length];
+            TreeNode[] adminNodes = new TreeNode[admins.Length-1];
             int i = 0;
             foreach (ClientData cd in admins)
             {
@@ -317,7 +322,13 @@ namespace SuperAdminConsole
                 else
                 {
                     if (user.NickName == "mlsImport")
+                    {
                         nodeName = "-MLS-";
+                        TreeNode mlsNode = new TreeNode(nodeName);
+                        mlsNode.Tag = user;
+                        treeViewAccounts.Nodes.Add(mlsNode);
+                        continue;
+                    }
                     else
                         nodeName = string.Format("{0}<{1}>", user.NickName, user.AutoID);
                 }
@@ -412,7 +423,7 @@ namespace SuperAdminConsole
             foreach (ClientData cd in brokerages)
             {
                 BrokerageInfo brokerage = new BrokerageInfo(cd);
-                string nodeName = string.Format("<{0}> {1}", brokerage.AutoID, brokerage.Name);
+                string nodeName = string.Format("<{0}> {1} (?)", brokerage.AutoID, brokerage.Name);
                 TreeNode overwritable = new TreeNode("expand");
                 brokerageNodes[i] = new TreeNode(nodeName, new TreeNode[1]{overwritable});
                 brokerageNodes[i].Tag = brokerage;
@@ -431,6 +442,7 @@ namespace SuperAdminConsole
 
         private User m_agent = null;
         private User m_rigthMouseAgent = null;
+        private BrokerageInfo m_brokerage = null;
 
         private void treeViewAccounts_MouseUp(object sender, MouseEventArgs e)
         {
@@ -451,10 +463,16 @@ namespace SuperAdminConsole
         {
             m_agent = null;
             if (e.Node.Tag != null)
+            {
                 m_agent = e.Node.Tag as User;
+                m_brokerage = e.Node.Tag as BrokerageInfo;
+            }
             else
             if (e.Node.Parent != null && e.Node.Parent.Tag != null)
+            {
                 m_agent = e.Node.Parent.Tag as User;
+                m_brokerage = e.Node.Tag as BrokerageInfo;
+            }
 
             if (m_agent != null)
             {
@@ -462,7 +480,7 @@ namespace SuperAdminConsole
                 m_nickname = m_agent.NickName == string.Empty ? myRole : m_agent.NickName;
             }
 
-            if (e.Node.Text == "ViewOrders")
+            if (e.Node.Text == "ViewOrders" || e.Node.Text == "-MLS-")
                 refreshOrders();
             else if (e.Node.Text == "Logs")
             {
@@ -525,10 +543,38 @@ namespace SuperAdminConsole
                             continue;
 
                         string[] subitems = new string[2];
+                        ListViewItem acctInfo = null;
                         subitems[0] = prop.Key.ToString();
-                        subitems[1] = prop.Value != null ? prop.Value.ToString() : "<none>";
+                        if (prop.Value != null)
+                        {
+                            subitems[1] = prop.Value.ToString();
+                            acctInfo = new ListViewItem(subitems);
+                        }
+                        else
+                        {
+                            subitems[0] = prop.Key.ToString() + "[]";
+                            subitems[1] = "<empty>";
+                            acctInfo = new ListViewItem(subitems);
+                            //ClientData[] array = cd.GetNextLevelDataArray(prop.Key);
+                            //if (array != null)
+                            //{
+                            //    if (array.Length == 0)
+                            //    {
+                            //        subitems[0] = prop.Key.ToString() + "[]";
+                            //        subitems[1] = "<empty>";
+                            //        acctInfo = new ListViewItem(subitems);
+                            //    }
+                            //    else
+                            //    {
+                            //        int i = 0;
+                            //        foreach (var elt in array)
+                            //        {
 
-                        ListViewItem acctInfo = new ListViewItem(subitems);
+                            //        }
+                            //    }
+                            //}
+                        }
+
                         listViewAccountInfo.Items.Add(acctInfo);
                     }
                 }
@@ -556,18 +602,32 @@ namespace SuperAdminConsole
         private void changePropertyValueToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string prop = listViewAccountInfo.SelectedItems[0].SubItems[0].Text;
-            ClientData data = m_agent.GetClientData();
+            ClientData data = null;
+            if (m_agent != null)
+                data = m_agent.GetClientData();
+            else if (m_brokerage != null)
+                data = m_brokerage.GetClientData();
+
             AccountPropertyForm editForm = new AccountPropertyForm(data, prop);
             if (editForm.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 data[prop] = editForm.NewValue;
 
-                ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
-                                                                  "user/" + m_agent.AutoID,
-                                                                  "", data);
+                ServerResponse resp = null;
+                if (m_agent != null)
+                    resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
+                                                       "user/" + m_agent.AutoID,
+                                                       "", data);
+                else
+                    resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
+                                                       "brokerage/" + m_brokerage.AutoID,
+                                                       "", data);
+
                 if (HttpStatusCode.OK != resp.ResponseCode)
                 {
-                    MessageBox.Show("Failed updating property \'" + prop + "\'");
+                    MessageBox.Show("Failed updating property \'" + 
+                                    prop + "\':\n" + 
+                                    resp.ResponseCodeDescription);
                     return;
                 }
                 refreshUserAccounts();
@@ -1234,12 +1294,18 @@ namespace SuperAdminConsole
                                                               null);
             ClientData usersJSON = resp.Data;
             ClientData[] users = usersJSON.GetNextLevelDataArray("users");
+            e.Node.Text = string.Format("<{0}> {1} ({2})",
+                brokerage.AutoID,
+                brokerage.Name,
+                users.Length);
 
-            int i = 0;
             foreach (ClientData cd in users)
             {
                 User user = new User(cd);
-                string nodeName = string.Format("{0} <{1}> {2}", user.AutoID, user.NickName, user.PrimaryEmailAddress);
+                string nodeName = string.Format("{0} <{1}> {2}",
+                    user.AutoID,
+                    user.NickName,
+                    user.PrimaryEmailAddress);
                 //TreeNode[] children = new TreeNode[3] { new TreeNode("ViewOrders"),
                 //                                        new TreeNode("Banners"),
                 //                                        new TreeNode("Logs") };
