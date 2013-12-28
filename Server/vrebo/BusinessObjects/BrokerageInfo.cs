@@ -42,7 +42,7 @@ namespace Vre.Server.BusinessLogic
 			UpdateFromClient(data);
         }
 
-        public ClientData GetClientData()
+        public override ClientData GetClientData()
         {
 			ClientData result = base.GetClientData();
 

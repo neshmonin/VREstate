@@ -77,10 +77,10 @@ namespace SuperAdminConsole
 
             if (resp != null && HttpStatusCode.OK == resp.ResponseCode)
             {
-                ClientData adminsJASON = resp.Data;
-                ClientData[] admins = adminsJASON.GetNextLevelDataArray("brokerages");
+                ClientData brokerageJASON = resp.Data;
+                ClientData[] brokerages = brokerageJASON.GetNextLevelDataArray("brokerages");
 
-                foreach (ClientData cd in admins)
+                foreach (ClientData cd in brokerages)
                 {
                     BrokerageInfo brokerage = new BrokerageInfo(cd);
                     comboBoxBrokerages.Items.Add(brokerage);
