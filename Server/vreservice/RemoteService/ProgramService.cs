@@ -10,6 +10,8 @@ using Vre.Server.HttpService;
 using Vre.Server.Messaging;
 using System.Text;
 using Vre.Server.Task;
+using System.Drawing;
+using Vre.Server.Util;
 
 namespace Vre.Server.RemoteService
 {
@@ -82,24 +84,23 @@ namespace Vre.Server.RemoteService
 				}
 				else if ((command.Equals("store_temp_file") || command.Equals("storetempfile")) && (request.Request.Type == RequestType.Insert))
 				{
-					if (request.Request.RawDataContentType != null)
-					{
-						int dataLen = request.Request.RawData.Length < 1024 ? request.Request.RawData.Length : 1024;
-						byte[] data = new byte[dataLen];
-						Array.Copy(request.Request.RawData, 0, data, 0, dataLen);
-						ServiceInstances.Logger.Debug("StoreTempFile: content type: {0}, len={1}", request.Request.RawDataContentType, request.Request.RawData.Length);
-						ServiceInstances.Logger.Debug("StoreTempFile: some data: {0}", Encoding.ASCII.GetString(data));
-					}
-					else
-					{
-						ServiceInstances.Logger.Debug("StoreTempFile: unknown content!");
-					}
+					storeTempFile(request);
 					return;
 				}
-            }
+				else if ((command.Equals("set_user_photo") || command.Equals("setuserphoto")) && (request.Request.Type == RequestType.Insert))
+				{
+					setUserPhoto(request);
+					return;
+				}
+			}
 
             throw new ArgumentException("Program command not understood.");
         }
+
+		private static void ensureSessionExists(IServiceRequest request)
+		{
+			if (null == request.UserInfo.Session) throw new InvalidOperationException("A session required for this operation");
+		}
 
         private static void sendSalesMessage(IServiceRequest request)
         {
@@ -182,6 +183,8 @@ namespace Vre.Server.RemoteService
 
         private static void changePassword(IServiceRequest request)
         {
+			ensureSessionExists(request);
+
             // parse required arguments
             //
             LoginType loginType = parseLoginType(request.Request.Query);
@@ -212,7 +215,9 @@ namespace Vre.Server.RemoteService
 
         private static void changeLogin(IServiceRequest request)
         {
-            string newLogin = request.Request.Query["newlogin"];
+			ensureSessionExists(request);
+
+			string newLogin = request.Request.Query["newlogin"];
 			if (string.IsNullOrEmpty(newLogin)) newLogin = request.Request.Query["newLogin"];  // OBSOLETE URI
             RolePermissionCheck.CheckUserChangeLogin(request.UserInfo.Session);
             ReverseRequestService.InitiateLoginChange(request.Request, request.UserInfo.Session, newLogin);
@@ -236,7 +241,9 @@ namespace Vre.Server.RemoteService
 
         private static void grantAccess(IServiceRequest request)
         {
-            string granteeId = request.Request.Query["user"];
+			ensureSessionExists(request);
+
+			string granteeId = request.Request.Query["user"];
             bool grant = request.Request.Query.GetParam("grant", "true").Equals("true");
 
             using (UserManager um = new UserManager(request.UserInfo.Session))
@@ -249,7 +256,9 @@ namespace Vre.Server.RemoteService
 
         private static void licenseUser(IServiceRequest request)
         {
-            string licenseeId = request.Request.Query["user"];
+			ensureSessionExists(request);
+
+			string licenseeId = request.Request.Query["user"];
             string siteId = request.Request.Query["site"];
             DateTime limit;
 
@@ -265,7 +274,9 @@ namespace Vre.Server.RemoteService
 
         private static void assignSeller(IServiceRequest request)
         {
-            string userId = request.Request.Query["user"];
+			ensureSessionExists(request);
+
+			string userId = request.Request.Query["user"];
             string targetId;
             bool processed = false;
 
@@ -784,6 +795,134 @@ namespace Vre.Server.RemoteService
 					if (u.BrokerInfo != null) resp.Data.Add("brokerage", u.BrokerInfo.GetClientData());
 				}
 				resp.ResponseCode = HttpStatusCode.OK;
+			}
+		}
+
+		private static void storeTempFile(IServiceRequest request)
+		{
+			ensureSessionExists(request);
+
+			if (request.Request.RawDataContentType != null)
+			{
+				var result = storeTempFile(request.UserInfo.Session, 
+					request.Request.RawDataContentType,
+					new MemoryStream(request.Request.RawData));
+
+				request.Response.ResponseCode = HttpStatusCode.OK;
+				request.Response.Data = new ClientData();
+				request.Response.Data.Add("url", result);
+			}
+			else if (request.Request.FormData != null)
+			{
+				bool found = false;
+				foreach (var item in request.Request.FormData.Items)
+				{
+					if (item.ContentType != null)
+					{
+						var result = storeTempFile(
+							request.UserInfo.Session, 
+							item.ContentType, item.Data);
+
+						request.Response.ResponseCode = HttpStatusCode.OK;
+						request.Response.DataStreamContentType = "txt";
+
+						var bytes = Encoding.ASCII.GetBytes(result);
+						request.Response.DataStream.Write(bytes, 0, bytes.Length);
+
+						found = true;
+						break;
+					}
+				}
+				if (!found) throw new ArgumentException("Request does not contain a file (1)");
+			}
+			else
+			{
+				throw new ArgumentException("Request does not contain a file (0)");
+			}
+		}
+
+		private static string storeTempFile(ClientSession session, 
+			string contentType, Stream data)
+		{
+			string extension = "bin";
+			// TODO: SLOW SEARCH (Low Impact)
+			foreach (var kvp in HttpServiceBase.ContentTypeByExtension)
+			{
+				if (kvp.Value.Equals(contentType)) { extension = kvp.Key; break; }
+			}
+
+			return session.AddTempFile(extension, data);
+		}
+
+		private static void setUserPhoto(IServiceRequest request)
+		{
+			ensureSessionExists(request);
+			
+			var q = request.Request.Query;
+			var url = q.GetParam("photourl", string.Empty);
+			var topCut = q.GetParam("pc_toppx", 0);
+			var leftCut = q.GetParam("pc_leftpx", 0);
+			var rightCut = q.GetParam("pc_rightpx", 0);
+			var bottomCut = q.GetParam("pc_bottompx", 0);
+
+			if (string.IsNullOrEmpty(url)) throw new ArgumentException("Required parameter missing: photourl");
+
+			string result = null;
+			try
+			{
+				var session = request.UserInfo.Session;
+				var path = ServiceInstances.ImmediateFileStorageManager.ConvertToRelativePath(url);
+				if (string.IsNullOrEmpty(path))
+				{
+					throw new ArgumentException("Only hosted image URLs are allowed");
+				}
+				else
+				{
+					using (var s = ServiceInstances.ImmediateFileStorageManager.OpenFile(path))
+					{
+						result = setUserPhoto(session,
+							s, topCut, leftCut, rightCut, bottomCut);
+					}
+				}
+
+				using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
+				{
+					session.DbSession.Refresh(session.User);  // is this required?
+					session.User.PhotoUrl = result;
+					session.DbSession.Update(session.User);
+
+					tran.Commit();
+				}
+			}
+			catch
+			{
+				if (result != null)
+					ServiceInstances.FileStorageManager.RemoveFile(result);
+				throw;
+			}
+
+			request.Response.ResponseCode = HttpStatusCode.OK;
+			request.Response.Data = new ClientData();
+			request.Response.Data.Add("url",
+				ServiceInstances.FileStorageManager.ConvertToFullPath(result));
+		}
+
+		private static string setUserPhoto(ClientSession session,
+			Stream photo, int topCut, int leftCut, int rightCut, int bottomCut)
+		{
+			var img = ImageProcessing.ConditionImage(new Bitmap(photo),
+				leftCut, topCut, rightCut, bottomCut,
+				Configuration.User.UserPhotoWidthPx.Value,
+				Configuration.User.UserPhotoHeightPx.Value);
+
+			using (var s = new MemoryStream())
+			{
+				ImageProcessing.SaveJpeg(s, img, 80);
+
+				s.Position = 0L;
+
+				return ServiceInstances.FileStorageManager.StoreFile("user", "photo",
+					"jpeg", null, s);
 			}
 		}
     }

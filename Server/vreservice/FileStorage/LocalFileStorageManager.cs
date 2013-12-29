@@ -28,5 +28,13 @@ namespace Vre.Server.FileStorage
             else
                 return relativePath;
         }
+
+		public override string ConvertToRelativePath(string fullPath)
+		{
+			if (fullPath.StartsWith(_accessRoot))
+				return fullPath.Substring(_accessRoot.Length);
+			else
+				return null;
+		}
     }
 }

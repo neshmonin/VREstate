@@ -228,6 +228,7 @@
     <Compile Include="UnitTest\UserManagement.cs" />
     <Compile Include="UserMessaging\IUserMessaging.cs" />
     <Compile Include="UserMessaging\MessageGenerator.cs" />
+    <Compile Include="Utilities\ImageProcessing.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mappings\DatabaseSettings.hbm.xml" />

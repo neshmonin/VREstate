@@ -98,6 +98,20 @@ namespace Vre.Server
             }
         }
 
+		private static IFileStorageManager _immediateFileStorageManager = null;
+		public static IFileStorageManager ImmediateFileStorageManager
+		{
+			get
+			{
+				lock (_lock)
+				{
+					if (null == _immediateFileStorageManager)
+						_immediateFileStorageManager = new LocalFileStorageManager();
+				}
+				return _immediateFileStorageManager;
+			}
+		}
+
         private static IFileStorageManager _internalFileStorageManager = null;
         public static IFileStorageManager InternalFileStorageManager
         {
