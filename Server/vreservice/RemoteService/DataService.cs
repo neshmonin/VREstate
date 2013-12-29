@@ -2027,8 +2027,12 @@ namespace Vre.Server.RemoteService
 
 					if (info.UpdateFromClient(data))
 					{
+						var test = dao.GetByName(info.Name);
+						if ((test != null) && !test.Equals(info))
+							throw new ObjectExistsException("Brokerage with this name already exists");
+
 						info.MarkUpdated();
-						dao.Update(info);
+						dao.SafeUpdate(info);
 						resp.ResponseCode = HttpStatusCode.OK;
 						resp.Data = new ClientData();
 						resp.Data.Add("updated", 1);
