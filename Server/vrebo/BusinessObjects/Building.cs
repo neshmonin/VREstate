@@ -84,6 +84,7 @@ namespace Vre.Server.BusinessLogic
             StateProvince = fromServer.GetProperty("stateProvince", string.Empty);
             PostalCode = fromServer.GetProperty("postalCode", string.Empty);
             Country = fromServer.GetProperty("country", string.Empty);
+            Suites = new List<Suite>();
 
             UpdateFromClient(fromServer);
         }
