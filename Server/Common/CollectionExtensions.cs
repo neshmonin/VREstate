@@ -59,5 +59,25 @@ namespace Vre
 				return true;
 			}
 		}
+
+		public static long IndexOfPattern(this byte[] buffer, byte[] pattern, long startPos)
+		{
+			return IndexOfPattern(buffer, pattern, startPos, buffer.Length);
+		}
+
+		public static long IndexOfPattern(this byte[] buffer, byte[] pattern, long startPos, long limit)
+		{
+			// TODO: Implement http://en.wikipedia.org/wiki/Boyer%E2%80%93Moore_string_search_algorithm
+			int plen = pattern.Length;
+			long blen = limit - plen;
+			for (long result = startPos; result < blen; result++)
+			{
+				int idx = plen;
+				for (idx--; idx >= 0; idx--)
+					if (buffer[result + idx] != pattern[idx]) break;
+				if (idx < 0) return result;
+			}
+			return -1;
+		}
 	}
 }

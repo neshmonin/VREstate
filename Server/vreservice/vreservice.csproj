@@ -181,6 +181,7 @@
     <Compile Include="FloodPreventor.cs" />
     <Compile Include="HttpService\HttpServiceBase.cs" />
     <Compile Include="HttpService\IHttpService.cs" />
+    <Compile Include="HttpService\MultipartFormData.cs" />
     <Compile Include="HttpService\RedirectionService.cs" />
     <Compile Include="HttpService\Statistics.cs" />
     <Compile Include="Managers\DeveloperManager.cs" />

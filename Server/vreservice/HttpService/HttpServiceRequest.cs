@@ -55,7 +55,8 @@ namespace Vre.Server.HttpService
                 Path = path;
 				PathSegments = path.Split('/');
                 Query = query;
-				EndPoint = ep;				
+				EndPoint = ep;
+				FormData = null;
 
                 // either HTTPS (SSL) or local connection is required to qualify as secure
                 IsSecureConnection = request.IsSecureConnection | IsCallerSecure(request.RemoteEndPoint.Address);
@@ -75,7 +76,11 @@ namespace Vre.Server.HttpService
 							Data = null;
 						}
                     }
-                    if (null == Data)
+					else if (request.ContentType.Contains("multipart/form-data"))
+					{
+						FormData = MultipartFormData.Parse(request);
+					}
+                    if ((null == Data) && (null == FormData))
                     {
 						RawDataContentType = request.ContentType;
                         RawData = new byte[request.ContentLength64];
@@ -94,6 +99,7 @@ namespace Vre.Server.HttpService
             public byte[] RawData { get; private set; }
 			public IPEndPoint EndPoint { get; private set; }
 			public bool IsSecureConnection { get; private set; }
+			public IMultipartFormData FormData { get; private set; }
             public string ConstructClientRootUri()
             {
                 if (null == _serverRootPath)
