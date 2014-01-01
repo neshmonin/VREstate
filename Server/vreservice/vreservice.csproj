@@ -125,6 +125,9 @@
     <Compile Include="..\_version\versiongen.cs">
       <Link>Properties\versiongen.cs</Link>
     </Compile>
+    <Compile Include="Accounting\Biller.cs" />
+    <Compile Include="Accounting\Invoice.cs" />
+    <Compile Include="Accounting\InvoiceElement.cs" />
     <Compile Include="Authentication\Authentication.cs" />
     <Compile Include="Authentication\IAuthentication.cs" />
     <Compile Include="BusinessLogic\ExpiredException.cs" />

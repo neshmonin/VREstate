@@ -22,7 +22,7 @@ namespace Vre.Server.RemoteService
 
         enum ModelObject { User, EstateDeveloper, Site, Building, Suite, 
 			SuiteType, ViewOrder, View, FinancialTransaction, Inventory, 
-			NamedSearchFilter, Brokerage, PricingPolicy }
+			NamedSearchFilter, Brokerage, PricingPolicy, Billing }
 
 		static DataService()
 		{
@@ -235,6 +235,10 @@ namespace Vre.Server.RemoteService
 						getPricingPolicy(request.UserInfo.Session, objectId, request.Response);
 					}
 					return;
+
+				case ModelObject.Billing:
+					getBilling(request.UserInfo.Session, request.Request.Query, request.Response);
+					return;
 			}
 
             throw new NotImplementedException();
@@ -398,6 +402,7 @@ namespace Vre.Server.RemoteService
 			else if (elements[1].Equals("nsf")) mo = ModelObject.NamedSearchFilter;
 			else if (elements[1].Equals("brokerage")) mo = ModelObject.Brokerage;
 			else if (elements[1].Equals("pp")) mo = ModelObject.PricingPolicy;
+			else if (elements[1].Equals("bill")) mo = ModelObject.Billing;
 			else throw new ArgumentException("Object path is invalid (2).");
 
             strId = null;
@@ -1737,6 +1742,46 @@ namespace Vre.Server.RemoteService
 			resp.Data = new ClientData();
 			resp.Data.Add("policies", result.ToArray());
 			resp.ResponseCode = HttpStatusCode.OK;
+		}
+
+		private static void getBilling(ClientSession session, ServiceQuery query, IResponseData resp)
+		{
+			var type = query.GetParam("type", "brokerage").ToLowerInvariant();
+			int objectId = query.GetParam("id", -1);
+			if (objectId < 0) throw new ArgumentException("Object ID missing.");
+
+			// TODO: Replace with proper rule checking
+			if (session.User.UserRole != User.Role.SuperAdmin)
+				throw new UnauthorizedAccessException();
+
+			Vre.Server.Accounting.Invoice result = null;
+			if (type.Equals("brokerage"))
+			{
+				using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
+				{
+					BrokerageInfo b;
+					using (var dao = new BrokerageInfoDao(session.DbSession))
+						b = dao.GetById(objectId);
+
+					if (null == b) throw new FileNotFoundException("Brokerage does not exist");
+
+					result = Vre.Server.Accounting.Biller.CalculateCurrentForBrokerage(session.DbSession, b);
+				}
+			}
+			else if (type.Equals("agent"))
+			{
+			}
+
+			if (result != null)
+			{
+				resp.ResponseCode = HttpStatusCode.OK;
+				resp.Data = result.GetClientData();
+			}
+			else
+			{
+				resp.ResponseCode = HttpStatusCode.NotFound;
+				resp.ResponseCodeDescription = "No data generated for type/id/time provided";
+			}
 		}
 		#endregion
 

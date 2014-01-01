@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace Vre.Server.BusinessLogic
 {
     [Serializable]
-    public partial class PricingPolicy : UpdateableBase
+    public partial class PricingPolicy : UpdateableBase, IComparable
     {
 		public enum SubjectType : byte
 		{
@@ -15,7 +15,7 @@ namespace Vre.Server.BusinessLogic
 		public enum ServiceType : int
 		{
 			ActiveAgentMontly = 1,
-			PassiveAgentMonthly = 2,
+			AgentHostingFeeMonthly = 2,
 			Interactive3DLayoutCreate = 101, 
 			Interactive3DLayoutMonthly = 201, 
 			ConferenceMonthly = 202
@@ -72,6 +72,13 @@ namespace Vre.Server.BusinessLogic
 		{
 			return string.Format("{0}-{1}-{2}->{3}",
 				TargetObjectType, TargetObjectId, Service, UnitPrice);
+		}
+
+		public int CompareTo(object other)
+		{
+			PricingPolicy opp = other as PricingPolicy;
+			if (null == opp) return 1;
+			return Service.CompareTo(opp.Service);
 		}
     }
 }

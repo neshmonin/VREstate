@@ -112,6 +112,14 @@ namespace Vre.Server.Dao
 				.List<User>();
 		}
 
+		public IList<User> GetForBrokerage(BrokerageInfo brokerage, User.Role role)
+		{
+			lock (_session) return _session.CreateCriteria<User>()
+				.Add(Restrictions.Eq("UserRole", role))
+				.Add(Restrictions.Eq("BrokerInfo", brokerage))
+				.Add(Restrictions.Eq("Deleted", false))
+				.List<User>();
+		}
 	}
 
     //internal class BuyerDao : GenericDisposableDao<Buyer, int> 
