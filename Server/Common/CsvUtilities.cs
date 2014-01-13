@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 
 namespace Vre
 {
     public class CsvUtilities
     {
-        private static readonly char[] _csvEscapingChars = new char[] { ',', '\"' };
+        private static readonly char[] _csvEscapingChars = new char[] { ',', '\"', '\r', '\n' };
         
         public static string ToString<T>(IEnumerable<T> items)
         {
@@ -30,21 +29,52 @@ namespace Vre
             return result.ToString();
         }
 
+		public static string ToCsv<T>(IEnumerable<T> elements)
+		{
+			//double dummy;
+			var result = new StringBuilder();
+			var separator = false;
+			foreach (var e in elements)
+			{
+				if (separator) result.Append(',');
+
+				var csvAble = e.ToString();
+
+				var quote = csvAble.Contains("\"");
+				//var mask = csvAble.StartsWith("=") || double.TryParse(csvAble, out dummy);  // Excel issue
+				var multiline = csvAble.Contains("\r\n") || csvAble.Contains("\r") || csvAble.Contains("\n");
+				var escape = quote || multiline || csvAble.Contains(",");
+
+				if (multiline) csvAble = csvAble.Replace("\r\n", "\n");
+				if (quote) csvAble = csvAble.Replace("\"", "\"\"");
+
+				if (escape) result.Append('\"');
+				//if (mask) result.Append('\'');
+				result.Append(csvAble);
+				if (escape) result.Append('\"');
+
+				separator = true;
+			}
+			return result.ToString();
+		}
+
         /// <summary>
-        /// MULTILINE ELEMENTS ARE NOT SUPPORTED
+        /// Returns null in case of incomplete multiline argument.
         /// </summary>
         public static string[] Split(string line)
         {
-            int cnt = 1, idx, idx0;
+            int cnt = 1;
             bool escape = false, escaped = false;
 
-            for (idx = 0; idx < line.Length; idx++)
-                if ('\"' == line[idx]) escape = !escape;
-                else if ((',' == line[idx]) && !escape) cnt++;
-            if (escape) throw new ArgumentException("The text is not a valid CSV");
+            foreach (var c in line)
+                if ('\"' == c) escape = !escape;
+                else if ((',' == c) && !escape) cnt++;
 
-            string[] result = new string[cnt];
-            cnt = 0; idx = 0; idx0 = 0;
+	        if (escape) return null;  // multiline
+
+            var result = new string[cnt];
+			int idx = 0, idx0 = 0;
+            cnt = 0; 
             while (idx < line.Length)
             {
                 if ('\"' == line[idx])
@@ -64,7 +94,7 @@ namespace Vre
                 idx++;
             }
 
-            if (escaped) result[cnt] = line.Substring(idx0 + 1, idx - idx0 - 2);
+			if (escaped) result[cnt] = line.Substring(idx0 + 1, idx - idx0 - 2).Replace("\"\"", "\"");
             else result[cnt] = line.Substring(idx0, idx - idx0);
 
             return result;
