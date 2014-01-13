@@ -90,9 +90,18 @@ public class Options implements RequestCallback {
 		//Log.write(params.toString());
 
 		// --------------------------------------------------//
-		List<String> oneValueList = new ArrayList<String>();
-		oneValueList.add("true");
-		contextMap.put("includeImported", oneValueList);
+		List<String> valueTRUE = new ArrayList<String>();
+		valueTRUE.add("true");
+		// Always include the listings generated automatically via the mlsimport
+		contextMap.put("includeImported", valueTRUE);
+		
+		if (params.containsKey("ShowPreConstruction") && 
+			Boolean.valueOf(params.get("ShowPreConstruction").get(0))) {
+			// replace this flag with sp_sa and sp_sh
+			contextMap.remove("ShowPreConstruction");
+			contextMap.put("sp_sa", valueTRUE); // load Available
+			contextMap.put("sp_sh", valueTRUE); // load OnHold
+		}
 		// --------------------------------------------------//
 
 		if (params.containsKey("gwt.codesvr"))
@@ -136,7 +145,7 @@ public class Options implements RequestCallback {
 				ROLE = ROLES.KIOSK;
 			contextMap.remove("role");
 		}
-		Log.write("ROLE:" + ROLE);
+//		Log.write("ROLE:" + ROLE);
 
 		Iterator<String> keyIterator = contextMap.keySet().iterator();
 		while (keyIterator.hasNext()) {

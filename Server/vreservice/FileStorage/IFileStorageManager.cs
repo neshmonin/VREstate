@@ -44,6 +44,12 @@ namespace Vre.Server.FileStorage
         /// </summary>
         string ConvertToFullPath(string relativePath);
 
+		/// <summary>
+		/// Returns relative path given full path (see <see cref="ConvertToFullPath"/>) 
+		/// or null if full path is not recognized.
+		/// </summary>
+		string ConvertToRelativePath(string fullPath);
+
         /// <summary>
         /// Removes stored file based on relative path returned by <see cref="StoreFile"/>
         /// </summary>

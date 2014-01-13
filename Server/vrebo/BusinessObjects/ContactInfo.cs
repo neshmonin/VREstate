@@ -46,14 +46,14 @@ namespace Vre.Server.BusinessLogic
         //{
         //    get
         //    {
-        //        if (!string.IsNullOrEmpty(Emails)) return Emails.Split(';');
+        //        if (!string.IsNullOrEmpty(_emails)) return _emails.Split(';');
         //        else return new string[0];
         //    }
         //    set
         //    {
-        //        if (null == value) Emails = string.Empty;
-        //        else if (0 == value.Length) Emails = string.Empty;
-        //        else Emails = string.Join(";", value);
+        //        if (null == value) _emails = string.Empty;
+        //        else if (0 == value.Length) _emails = string.Empty;
+        //        else _emails = string.Join(";", value);
         //    }
         //}
 
@@ -61,10 +61,10 @@ namespace Vre.Server.BusinessLogic
         //{
         //    get
         //    {
-        //        if (string.IsNullOrEmpty(PhoneNumbers)) return new PhoneNumber[0];
+        //        if (string.IsNullOrEmpty(_phoneNumbers)) return new PhoneNumber[0];
         //        else
         //        {
-        //            string[] phs = PhoneNumbers.Split(';');
+        //            string[] phs = _phoneNumbers.Split(';');
         //            PhoneNumber[] result = new PhoneNumber[phs.Length];
         //            for (int idx = phs.Length - 1; idx >= 0; idx--)
         //                result[idx] = new PhoneNumber(phs[idx]);
@@ -73,14 +73,14 @@ namespace Vre.Server.BusinessLogic
         //    }
         //    set
         //    {
-        //        if (null == value) PhoneNumbers = string.Empty;
-        //        else if (0 == value.Length) PhoneNumbers = string.Empty;
+        //        if (null == value) _phoneNumbers = string.Empty;
+        //        else if (0 == value.Length) _phoneNumbers = string.Empty;
         //        else
         //        {
         //            string[] phs = new string[value.Length];
         //            for (int idx = value.Length - 1; idx >= 0; idx--)
         //                phs[idx] = value[idx].ToString();
-        //            PhoneNumbers = string.Join(";", phs);
+        //            _phoneNumbers = string.Join(";", phs);
         //        }
         //    }
         //}

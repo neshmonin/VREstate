@@ -29,7 +29,7 @@
 					<g:Cell width="50%">
 						<g:VerticalPanel spacing="5">
 						<g:Label text="Last Name"/>
-						<g:TextBox ui:field="textLastName"/>
+						<g:TextBox ui:field="textLastName" enabled="false"/>
 					</g:VerticalPanel>
 					</g:Cell>
 				</g:HorizontalPanel>
@@ -42,7 +42,7 @@
 				<g:HorizontalPanel width="100%">
 					<g:VerticalPanel spacing="5">
 						<g:Label text="Phone"/>
-						<g:TextBox ui:field="textPhone"/>
+						<g:TextBox ui:field="textPhone" enabled="false"/>
 					</g:VerticalPanel>
 				</g:HorizontalPanel>
 				<g:HorizontalPanel width="100%"

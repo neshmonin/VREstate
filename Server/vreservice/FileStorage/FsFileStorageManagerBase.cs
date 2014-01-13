@@ -164,6 +164,8 @@ namespace Vre.Server.FileStorage
 
 		public abstract string ConvertToFullPath(string relativePath);
 
+		public abstract string ConvertToRelativePath(string fullPath);
+
         /// <summary>
         /// Returns full path to file based on relative path returned previously by <see cref="storeFile"/>
         /// </summary>

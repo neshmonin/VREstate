@@ -44,7 +44,18 @@ namespace Vre.Server.Dao
                 .UniqueResult<ViewOrder>();
         }
 
-        public IList<ViewOrder> GetActive(ViewOrder.ViewOrderProduct product, ViewOrder.SubjectType type, int targetObjectId)
+		public IList<ViewOrder> GetCreatedBy(int ownerId, DateTime after, DateTime before)
+		{
+			return _session.CreateQuery(
+				"FROM Vre.Server.BusinessLogic.ViewOrder WHERE OwnerId=:oid "
+				+ "AND Created>=:after AND Created<:before")
+				.SetInt32("oid", ownerId)
+				.SetDateTime("after", after)
+				.SetDateTime("before", before)
+				.List<ViewOrder>();
+		}
+
+		public IList<ViewOrder> GetActive(ViewOrder.ViewOrderProduct product, ViewOrder.SubjectType type, int targetObjectId)
         {
             return _session.CreateQuery(
                 "FROM Vre.Server.BusinessLogic.ViewOrder WHERE Product=:pr "

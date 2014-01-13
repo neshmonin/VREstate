@@ -289,7 +289,12 @@ namespace CoreClasses
                 string requestUri = ServerEndpoint + path;
 
                 if (_sid != null)
-                    query += "&sid=" + _sid;
+                {
+                    if (string.IsNullOrWhiteSpace(query))
+                        query = "sid=" + _sid;
+                    else
+                        query += "&sid=" + _sid;
+                }
 
                 if (!string.IsNullOrWhiteSpace(query)) requestUri += "?" + query;
 

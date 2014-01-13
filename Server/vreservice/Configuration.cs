@@ -300,5 +300,14 @@ namespace Vre.Server
 				}
 			}
 		}
+
+		public static class User
+		{
+			public static readonly IntegerConfigurationParam UserPhotoWidthPx =
+				new IntegerConfigurationParam(_config, "UserPhotoWidthPx", 128);
+
+			public static readonly IntegerConfigurationParam UserPhotoHeightPx =
+				new IntegerConfigurationParam(_config, "UserPhotoHeightPx", 128);
+		}
 	}
 }

@@ -14,6 +14,7 @@ namespace CoreClasses
         private List<Site> m_sites = new List<Site>();
 
         public string Name { get { return _estateDeveloper.Name; } }
+        public int ID { get { return _estateDeveloper.AutoID; } }
 
         public List<Site> Sites { get { return m_sites; } }
 

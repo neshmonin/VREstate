@@ -13,7 +13,7 @@ import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.BuildingsNode;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -42,15 +42,17 @@ public class BuildingsPresenter implements I_Presenter {
 	private List<BuildingInfo> data = new ArrayList<BuildingInfo>();
 	private BuildingInfo selected;
 	private BuildingsNode node = null;
+	private EcommerceTree tree = null;
 
 	public BuildingsPresenter(IDisplay display, BuildingsNode node) {
 		this.display = display;
 		this.display.setPresenter(this);
 		this.node = node;
+		tree = node.getTree();
 	}
 
 	public void updateData() {
-		node.setData(Field.FILTERING_BY_CITY, new Data(display.getFilterCity()));
+		tree.setData(Field.FILTERING_BY_CITY, new Data(display.getFilterCity()));
 		display.setData(null, null);
 
 		String url = Options.URL_VRT;
@@ -66,7 +68,7 @@ public class BuildingsPresenter implements I_Presenter {
 				JSONArray arr = obj.get("buildings").isArray();
 
 				Integer id = null;
-				Data buildingIdData = node.getData(Field.BuildingId);
+				Data buildingIdData = tree.getData(Field.BuildingId);
 				if (buildingIdData != null)
 					id = buildingIdData.asInteger();
 //				Log.write("" + id);
@@ -93,7 +95,7 @@ public class BuildingsPresenter implements I_Presenter {
 	public void go(I_Container container) {
 		container.clear();
 		container.add(display);
-		Data data = node.getData(Field.FILTERING_BY_CITY);
+		Data data = tree.getData(Field.FILTERING_BY_CITY);
 		if (data != null) {
 			String filterCity = data.Value;
 			display.setFilterCity(filterCity);
@@ -119,22 +121,22 @@ public class BuildingsPresenter implements I_Presenter {
 //	}
 
 	public void onPrev() {
-		node.setState(NodeStates.Prev);
+		node.setState(Actions.Prev);
 		node.next();
 	}
 
 	public void onCancel() {
-		node.setState(NodeStates.Cancel);
+		node.setState(Actions.Cancel);
 		node.next();
 	}
 
 	public void selectSuite(BuildingInfo object) {
 		if (object != null) {
 			// TODO add validation
-			node.setData(Field.BuildingId, new Data(object.getId()));
-			node.setData(Field.BuildingName, new Data(object.getName()));
+			tree.setData(Field.BuildingId, new Data(object.getId()));
+			tree.setData(Field.BuildingName, new Data(object.getName()));
 //			node.setData(Field.Address, new Data(object.getAddress()));
-			node.setState(NodeStates.Next);
+			node.setState(Actions.Next);
 			node.next();
 		}
 	}

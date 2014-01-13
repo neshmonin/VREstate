@@ -33,6 +33,7 @@
             this.contextMenuStripViewOrder = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItemEnableViewOrder = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemExtend = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemConvert = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItemChangeOrderView = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -85,7 +86,6 @@
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.toolStripMenuItemConvert = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripViewOrder.SuspendLayout();
             this.pnlStartupShutdown.SuspendLayout();
             this.contextMenuStripUserAccount.SuspendLayout();
@@ -127,7 +127,7 @@
             this.toolStripSeparator4,
             this.composePromoEmailToolStripMenuItem});
             this.contextMenuStripViewOrder.Name = "contextMenuStripViewOrder";
-            this.contextMenuStripViewOrder.Size = new System.Drawing.Size(251, 270);
+            this.contextMenuStripViewOrder.Size = new System.Drawing.Size(251, 248);
             this.contextMenuStripViewOrder.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripViewOrder_Opening);
             // 
             // toolStripMenuItemEnableViewOrder
@@ -143,6 +143,13 @@
             this.toolStripMenuItemExtend.Size = new System.Drawing.Size(250, 22);
             this.toolStripMenuItemExtend.Text = "Extend...";
             this.toolStripMenuItemExtend.Click += new System.EventHandler(this.toolStripMenuItemExtend_Click);
+            // 
+            // toolStripMenuItemConvert
+            // 
+            this.toolStripMenuItemConvert.Name = "toolStripMenuItemConvert";
+            this.toolStripMenuItemConvert.Size = new System.Drawing.Size(250, 22);
+            this.toolStripMenuItemConvert.Text = "Convert to Private Listing";
+            this.toolStripMenuItemConvert.Click += new System.EventHandler(this.toolStripMenuItemConvert_Click);
             // 
             // toolStripSeparator2
             // 
@@ -259,6 +266,7 @@
             this.treeViewAccounts.Name = "treeViewAccounts";
             this.treeViewAccounts.Size = new System.Drawing.Size(220, 555);
             this.treeViewAccounts.TabIndex = 7;
+            this.treeViewAccounts.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.treeViewAccounts_AfterExpand);
             this.treeViewAccounts.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewAccounts_AfterSelect);
             this.treeViewAccounts.DragDrop += new System.Windows.Forms.DragEventHandler(this.treeViewAccounts_DragDrop);
             this.treeViewAccounts.DragEnter += new System.Windows.Forms.DragEventHandler(this.treeViewAccounts_DragEnter);
@@ -583,13 +591,6 @@
             // columnHeader7
             // 
             this.columnHeader7.Text = "targetId";
-            // 
-            // toolStripMenuItemConvert
-            // 
-            this.toolStripMenuItemConvert.Name = "toolStripMenuItemConvert";
-            this.toolStripMenuItemConvert.Size = new System.Drawing.Size(250, 22);
-            this.toolStripMenuItemConvert.Text = "Convert to Private Listing";
-            this.toolStripMenuItemConvert.Click += new System.EventHandler(this.toolStripMenuItemConvert_Click);
             // 
             // MainForm
             // 

@@ -16,9 +16,10 @@
 		<g:VerticalPanel>
 			<g:VerticalPanel spacing="5" width="500px">
 				<g:Label text="Please read terms and conditions of the order you are about to make:" horizontalAlignment="ALIGN_LEFT" />
-				<g:HTML wordWrap="true" height="200px" ui:field="htmlSummary" styleName="{style.ageement}">&lt;Text of the ageement here&gt;</g:HTML>
+				<g:HTML wordWrap="true" height="200px" ui:field="htmlSummary" styleName="{style.ageement}">
+</g:HTML>
 				<g:HorizontalPanel width="100%"
-					horizontalAlignment="ALIGN_CENTER">
+					horizontalAlignment="ALIGN_LEFT" spacing="5">
 					<g:Cell verticalAlignment="ALIGN_MIDDLE">
 						<g:Button width="75px" ui:field="buttonCancel">Cancel</g:Button>
 					</g:Cell>

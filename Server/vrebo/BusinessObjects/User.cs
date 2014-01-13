@@ -71,9 +71,12 @@ namespace Vre.Server.BusinessLogic
 		public string TimeZone { get; set; }
 		public string PersonalInfo { get; set; }
         //public ContactInfo PersonalInfo { get; private set; }
-        public BrokerageInfo BrokerInfo { get; private set; }
+        public BrokerageInfo BrokerInfo { get; set; }
         public IList<UserLicense> Licenses { get; private set; }
         public decimal CreditUnits { get; private set; }
+		public DateTime LastServicePayment { get; set; }
+		public string PhotoUrl { get; set; }
+		public bool PasswordChangeRequired { get; set; }
 
 		public string[] RefererRestriction 
 		{
@@ -106,6 +109,8 @@ namespace Vre.Server.BusinessLogic
 		{
             InitializeNew();
             UserRole = role;
+            if (role == Role.Anonymous)
+                AutoID = 64;
             EstateDeveloperID = estateDeveloperId;
             NickName = string.Empty;
             PrimaryEmailAddress = string.Empty;
@@ -120,6 +125,8 @@ namespace Vre.Server.BusinessLogic
             CreditUnits = 0m;
 			RefererRestriction = null;
 			LastLogin = new DateTime(1900, 01, 01);
+			LastServicePayment = LastLogin;
+			PasswordChangeRequired = true;
         }
 
         /// <summary>
@@ -206,7 +213,11 @@ namespace Vre.Server.BusinessLogic
             EstateDeveloperID = data.GetProperty("estateDeveloperId", -1);
             UserRole = data.GetProperty<User.Role>("role", Role.Visitor);
             NickName = data.GetProperty("nickName", string.Empty);
-            // TODO: deal with personal info (vCard) and brokerage
+
+			ClientData bicd = data.GetNextLevelDataItem("brokerage");
+			if (bicd.Count > 0) BrokerInfo = new BrokerageInfo(bicd);
+
+			// TODO: deal with personal info (vCard) and brokerage
         }
 
         public override ClientData GetClientData()
@@ -223,10 +234,12 @@ namespace Vre.Server.BusinessLogic
                 result.Add("personalInfo", PersonalInfo);
 
             if (BrokerInfo != null)
-                result.Add("brokerageInfo", BrokerInfo.GetClientData());
+                result.Add("brokerage", BrokerInfo.GetClientData());
 
 			if (refererRestriction != null)
 				result.Add("refererRestriction", RefererRestriction);
+
+			result.Add("passwordChangeRequired", PasswordChangeRequired);
 
             return result;
         }
@@ -241,12 +254,18 @@ namespace Vre.Server.BusinessLogic
             PersonalInfo = data.UpdateProperty("personalInfo", PersonalInfo, ref changed);
 			RefererRestriction = data.UpdateProperty("refererRestriction", RefererRestriction, ref changed);
 
-            ClientData bicd = data.GetNextLevelDataItem("brokerageInfo");
-            if (bicd.Count > 0)
-            {
-                if (null == BrokerInfo) BrokerInfo = new BrokerageInfo();
-                if (BrokerInfo.UpdateFromClient(bicd)) changed = true;
-            }
+			if (data.GetProperty("passwordChangeRequired", false))  // can only set to true!
+			{
+				PasswordChangeRequired = true;
+				changed = true;
+			}
+
+			//ClientData bicd = data.GetNextLevelDataItem("brokerageInfo");
+			//if (bicd.Count > 0)
+			//{
+			//    if (null == BrokerInfo) BrokerInfo = new BrokerageInfo();
+			//    if (BrokerInfo.UpdateFromClient(bicd)) changed = true;
+			//}
 
             return changed;
         }

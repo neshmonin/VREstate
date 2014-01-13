@@ -59,8 +59,10 @@ namespace Vre.Server.RemoteService
         {
             string text = query.GetParam("text", "Test");
             int height = query.GetParam("height", 12);
-            Color textColor = readColorParam(query, "txtClr", Color.Black);
-            Color shadowColor = readColorParam(query, "shdClr", Color.DarkGray);
+            Color textColor = readColorParam(query, "txtclr", Color.Black);
+			if (Color.Black == textColor) textColor = readColorParam(query, "txtClr", Color.Black);  // OBSOLETE URI
+            Color shadowColor = readColorParam(query, "shdclr", Color.DarkGray);
+			if (Color.DarkGray == shadowColor) shadowColor = readColorParam(query, "shdClr", Color.DarkGray);  // OBSOLETE URI
             bool frame = (query.GetParam("frame", 0) != 0);
 
             string type;

@@ -4,17 +4,14 @@ using System.Diagnostics;
 namespace Vre.Server.BusinessLogic
 {
     [Serializable]
-    public partial class BrokerageInfo : IClientDataProvider
+    public partial class BrokerageInfo : UpdateableBase//IClientDataProvider
     {
+		private string Emails { get; set; }
+		private string PhoneNumbers { get; set; }
+        
+        public string Name { get; set; }
 
-        private int AutoID { get; set; }
-        private byte[] Version { get; set; }
-
-        private string Emails { get; set; }
-        private string PhoneNumbers { get; set; }
-
-        public string AddressLine1 { get; set; }
-        public string AddressLine2 { get; set; }
+        public string StreetAddress { get; set; }
         public string City { get; set; }
         public string StateProvince { get; set; }
         public string PostalCode { get; set; }
@@ -24,25 +21,44 @@ namespace Vre.Server.BusinessLogic
 
         public string LogoUriRelative { get; set; }
 
-        public BrokerageInfo()
+		public decimal CreditUnits { get; private set; }
+		public DateTime LastServicePayment { get; set; }
+
+		public string[] EmailList { get { return Emails.Split(ContactInfo.ArraySplitterC); } }
+		public string[] PhoneNumberList { get { return PhoneNumbers.Split(ContactInfo.ArraySplitterC); } }
+
+		private BrokerageInfo() { }
+
+		public BrokerageInfo(string name)
         {
-            Emails = string.Empty;
-            PhoneNumbers = string.Empty;
+			InitializeNew();
+			Name = name;
+			Emails = string.Empty;
+			PhoneNumbers = string.Empty;
+			CreditUnits = 0m;
+			LastServicePayment = new DateTime(1900, 01, 01);
         }
 
-        public ClientData GetClientData()
+		public BrokerageInfo(ClientData data)
+            : base(data)
         {
-            ClientData result = new ClientData();
+			UpdateFromClient(data);
+        }
 
-            result.Add("addressLine1", AddressLine1);
-            result.Add("addressLine2", AddressLine2);
+        public override ClientData GetClientData()
+        {
+			ClientData result = base.GetClientData();
+
+			result.Add("name", Name);
+
+            result.Add("streetAddress", StreetAddress);
             result.Add("city", City);
             result.Add("stateProvince", StateProvince);
             result.Add("postalCode", PostalCode);
             result.Add("country", Country);
 
-            result.Add("phoneNumbers", PhoneNumbers.Split(ContactInfo.ArraySplitterC));
-            result.Add("emails", Emails.Split(ContactInfo.ArraySplitterC));
+			result.Add("phoneNumbers", PhoneNumbers.Split(ContactInfo.ArraySplitterC));
+			result.Add("emails", Emails.Split(ContactInfo.ArraySplitterC));
 
             result.Add("webSite", WebSite);
 
@@ -53,19 +69,27 @@ namespace Vre.Server.BusinessLogic
         {
             bool changed = false;
 
-            AddressLine1 = data.UpdateProperty("addressLine1", AddressLine1, ref changed);
-            AddressLine2 = data.UpdateProperty("addressLine2", AddressLine2, ref changed);
+			Name = data.UpdateProperty("name", Name, ref changed);
+
+            StreetAddress = data.UpdateProperty("streetAddress", StreetAddress, ref changed);
             City = data.UpdateProperty("city", City, ref changed);
             StateProvince = data.UpdateProperty("stateProvince", StateProvince, ref changed);
             PostalCode = data.UpdateProperty("postalCode", PostalCode, ref changed);
             Country = data.UpdateProperty("country", Country, ref changed);
 
-            PhoneNumbers = string.Join(ContactInfo.ArraySplitterS,
-                data.UpdateProperty("phoneNumbers", PhoneNumbers.Split(ContactInfo.ArraySplitterC), ref changed));
-            Emails = string.Join(ContactInfo.ArraySplitterS,
-                data.UpdateProperty("emails", Emails.Split(ContactInfo.ArraySplitterC), ref changed));
+			PhoneNumbers = string.Join(ContactInfo.ArraySplitterS,
+				data.UpdateProperty("phoneNumbers", PhoneNumbers.Split(ContactInfo.ArraySplitterC), ref changed));
+			Emails = string.Join(ContactInfo.ArraySplitterS,
+				data.UpdateProperty("emails", Emails.Split(ContactInfo.ArraySplitterC), ref changed));
+
+			WebSite = data.UpdateProperty("webSite", WebSite, ref changed);
 
             return changed;
         }
+
+		public override string ToString()
+		{
+			return Name;
+		}
     }
 }

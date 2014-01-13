@@ -8,17 +8,19 @@ namespace Vre.Server.BusinessLogic
         protected UpdateableBase() : base() { }
         protected UpdateableBase(ClientData data) : base(data)
         {
-            AutoID = data.GetProperty("id", -1);
+            AutoID = data.GetProperty("id", 0);
         }
         public UpdateableBase(UpdateableBase copy) : base(copy) { }
     }
 
     public abstract class UpdateableGuidBase : UpdateableBaseGen<Guid> 
     {
+		private static readonly string _defaultId = Guid.Empty.ToString();
+
         protected UpdateableGuidBase() : base() { }
         protected UpdateableGuidBase(ClientData data) : base(data)
         {
-            AutoID = Guid.Parse(data.GetProperty("id", string.Empty));
+            AutoID = Guid.Parse(data.GetProperty("id", _defaultId));
         }
         public UpdateableGuidBase(UpdateableGuidBase copy) : base(copy) { }
     }

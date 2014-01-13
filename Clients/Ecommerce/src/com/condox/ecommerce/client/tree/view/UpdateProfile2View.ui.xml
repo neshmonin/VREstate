@@ -19,23 +19,22 @@
 			<g:Button ui:field="buttonClose">x</g:Button>
 		</g:HorizontalPanel>
 				<g:Label text="Step 2: Tell people more about yourself"/>
-				<g:HorizontalPanel width="100%">
-					<g:Cell width="30%">
-						<g:VerticalPanel spacing="10" verticalAlignment="ALIGN_TOP" height="165px">
-						<g:Label text="Your Picture"/>
-						<g:Button enabled="false">Upload...</g:Button>
-						<g:Cell width="" verticalAlignment="ALIGN_BOTTOM" height="100%">
+				<g:HorizontalPanel>
+					<g:VerticalPanel spacing="10">
+						<g:Label text="Your Picture (click to select)"/>
+						<g:Image width="100px" height="100px" ui:field="image"/>
+					</g:VerticalPanel>
+					<g:Cell verticalAlignment="ALIGN_BOTTOM">
+						<g:VerticalPanel spacing="10" height="100%" width="193px">
+						<g:Cell width="90%">
 							<g:HTML wordWrap="true">When people click your picture, they will load your Personal Website </g:HTML>
+						</g:Cell>
+						<g:Cell horizontalAlignment="ALIGN_RIGHT">
+							<g:TextBox/>
 						</g:Cell>
 					</g:VerticalPanel>
 					</g:Cell>
-					<g:Cell width="50%" height="50%" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
-						<g:Image altText="&lt;Image&gt;" height="80%" width="80%"/>
-					</g:Cell>
 				</g:HorizontalPanel>
-				<g:Cell width="100%">
-					<g:TextBox width="80%"/>
-				</g:Cell>
 				<g:HorizontalPanel width="100%"
 					horizontalAlignment="ALIGN_LEFT">
 					<g:Cell verticalAlignment="ALIGN_MIDDLE">

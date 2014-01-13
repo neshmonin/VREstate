@@ -125,6 +125,9 @@
     <Compile Include="..\_version\versiongen.cs">
       <Link>Properties\versiongen.cs</Link>
     </Compile>
+    <Compile Include="Accounting\Biller.cs" />
+    <Compile Include="Accounting\Invoice.cs" />
+    <Compile Include="Accounting\InvoiceElement.cs" />
     <Compile Include="Authentication\Authentication.cs" />
     <Compile Include="Authentication\IAuthentication.cs" />
     <Compile Include="BusinessLogic\ExpiredException.cs" />
@@ -144,6 +147,8 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Dao\AccountDao.cs" />
     <Compile Include="Dao\BuildingDao.cs" />
+    <Compile Include="Dao\BrokerageInfoDao.cs" />
+    <Compile Include="Dao\PricingPolicyDao.cs" />
     <Compile Include="Dao\StructureDao.cs" />
     <Compile Include="Dao\FileStorageItemDao.cs" />
     <Compile Include="Dao\MlsInfoDao.cs" />
@@ -179,6 +184,7 @@
     <Compile Include="FloodPreventor.cs" />
     <Compile Include="HttpService\HttpServiceBase.cs" />
     <Compile Include="HttpService\IHttpService.cs" />
+    <Compile Include="HttpService\MultipartFormData.cs" />
     <Compile Include="HttpService\RedirectionService.cs" />
     <Compile Include="HttpService\Statistics.cs" />
     <Compile Include="Managers\DeveloperManager.cs" />
@@ -225,6 +231,7 @@
     <Compile Include="UnitTest\UserManagement.cs" />
     <Compile Include="UserMessaging\IUserMessaging.cs" />
     <Compile Include="UserMessaging\MessageGenerator.cs" />
+    <Compile Include="Utilities\ImageProcessing.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mappings\DatabaseSettings.hbm.xml" />
@@ -294,6 +301,7 @@
     <EmbeddedResource Include="Mappings\Structure.hbm.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Mappings\PricingPolicy.hbm.xml" />
     <Content Include="SQL\Constraint\Account.sql" />
     <Content Include="SQL\Constraint\DeveloperAdmin.sql" />
     <Content Include="SQL\Constraint\Price.sql" />

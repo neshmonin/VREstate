@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import com.condox.clientshared.communication.User;
+import com.condox.clientshared.communication.User.UserRole;
 import com.condox.clientshared.document.SuiteInfo;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.presenter.PickSuitePresenter;
@@ -36,6 +38,7 @@ public class PickSuiteView extends Composite implements IDisplay {
 
 	private static PickSuiteViewUiBinder uiBinder = GWT
 			.create(PickSuiteViewUiBinder.class);
+//	private String userRole = "";
 	private PickSuitePresenter presenter;
 	private List<SuiteInfo> data;
 	private ListDataProvider<Floor> dataProvider = new ListDataProvider<Floor>();
@@ -82,7 +85,8 @@ public class PickSuiteView extends Composite implements IDisplay {
 	private PopupPanel loading = new PopupPanel();
 
 	@Override
-	public void setData(List<SuiteInfo> data) {
+	public void setData(String newUserRole, List<SuiteInfo> data) {
+//		userRole = newUserRole;
 		if (data == null) {
 			loading.clear();
 			loading.setModal(true);
@@ -230,49 +234,46 @@ public class PickSuiteView extends Composite implements IDisplay {
 		public String getValue() {
 			sort();
 			String result = "";
-			/*VerticalPanel vp = new VerticalPanel();
-			Label label1 = new Label("label1");
-			Label label2 = new Label("label2");
-			Hyperlink link1 = new Hyperlink("link1","1");
-			Hyperlink link2 = new Hyperlink("link2","2");
-			vp.add(label1);
-			vp.add(label2);
-			vp.add(link1);
-			vp.add(link2);
-			result = vp.toString();*/
 			
 			for (SuiteInfo suite : suites) {
 				String disabled = "";
-
-				// ��� Sold-�������� disabled (mail 28.08.2013)
-				switch (suite.getStatus()) {
-				case Sold:
-					disabled += " disabled=\"true\" ";
-					break;
-				default:
-				}
-				
 				String color = "";
-				switch (suite.getStatus()) {
-				case AvailableResale:
-					color += " color:blue ";
+				if (User.role.equals(UserRole.Visitor)) {
+					if ((suite.getMLS() == null)||(suite.getMLS().isEmpty())) {			
+						disabled = " disabled=\"true\" ";
+						color = " color:red ";
+					}
+				} else {
+					switch (suite.getStatus()) {
+//					if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Available)
+//	                    btn.BackColor = Color.FromArgb(200, 255, 200);
+//					case Available:
+//						color += " background-color:#ffffff ";
+//						break;
+//	                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.ResaleAvailable)
+//	                    btn.BackColor = Color.FromArgb(200, 255, 255);
+					case ResaleAvailable:
+						color += " background-color:#c8ffff ";
 					break;
-				case AvailableRent:
-					color += " color:purple ";
-					break;
-				case Available:
-					color += " color:green ";
-					break;
-				case Sold:
-					color += " color:red ";
-					break;
-				default:
-//					mls += " color:red";
-				}
-				
-				if ((suite.getMLS() == null)||(suite.getMLS().isEmpty())) {			
-					disabled = " disabled=\"true\" ";
-					color = " color:red ";
+//	                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.AvailableRent)
+//	                    btn.BackColor = Color.FromArgb(255, 220, 255);
+					case AvailableRent:
+						color += " background-color:#ffdcff ";
+						break;
+
+//	                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.OnHold)
+//	                    btn.BackColor = Color.FromArgb(255, 255, 200);
+//					case OnHold:
+//						color += " background-color:#ffffc8 ";
+//						break;
+//	                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Sold)
+//	                    // TODO: change to 'theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Resale' when it ready
+//	                    btn.BackColor = Color.FromArgb(255, 250, 250);
+//					case Sold:
+//						color += " background-color:#fffafa ";
+//						break;
+					default:
+					}
 				}
 
 				result += "<button ";
@@ -288,22 +289,9 @@ public class PickSuiteView extends Composite implements IDisplay {
 	}
 
 	private SuiteInfo selected;
-	@Override
-	public String getSuiteName() {
-		if (selected != null)
-			return selected.getName();
-		return null;
-	}
 
 	@Override
-	public String getSuiteFloorplan() {
-		if (selected != null)
-			return selected.getFloorplan_url();
-		return null;
-	}
-
-	@Override
-	public SuiteInfo getSelectedSuite() {
+	public SuiteInfo getSuiteSelected() {
 		return this.selected;
 	}
 	

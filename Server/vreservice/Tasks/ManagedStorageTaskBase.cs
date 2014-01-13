@@ -118,6 +118,13 @@ namespace Vre.Server.Task
 					if (!string.IsNullOrEmpty(st.FloorPlanUrl)) yield return st.FloorPlanUrl;
 				}
 			}
+			using (var dao = new UserDao(dbSession))
+			{
+				foreach (var st in dao.GetAll())
+				{
+					if (!string.IsNullOrEmpty(st.PhotoUrl)) yield return st.PhotoUrl;
+				}
+			}
 		}
 
 		private static IEnumerable<string> getAllInternalFilesUsedByDb(

@@ -99,6 +99,11 @@ namespace Vre.Server.FileStorage
 			return _manager.ConvertToFullPath(relativePath);
 		}
 
+		public string ConvertToRelativePath(string fullPath)
+		{
+			return _manager.ConvertToRelativePath(fullPath);
+		}
+
 		public StorageType Type { get { return _manager.Type; } }
 
 		public Stream OpenFile(string relativePath)

@@ -64,12 +64,16 @@ namespace Vre.Server.Dao
         //    }
         //}
 
-        public IList<User> ListUsers(User.Role role, int? estateDeveloperId, string nameLookup, bool includeDeleted)
+        public IList<User> ListUsers(User.Role role, 
+			int? estateDeveloperId, int? brokerageId,
+			string nameLookup, 
+			bool includeDeleted)
         {
             lock (_session)
             {
                 ICriteria c = _session.CreateCriteria<User>().Add(Restrictions.Eq("UserRole", role));
                 if (estateDeveloperId.HasValue) c = c.Add(Restrictions.Eq("EstateDeveloperID", estateDeveloperId));
+				if (brokerageId.HasValue) c = c.Add(Restrictions.Eq("BrokerInfo.AutoID", brokerageId));
 
                 if (!includeDeleted)
                     c = c.Add(Restrictions.Eq("Deleted", false));
@@ -108,6 +112,14 @@ namespace Vre.Server.Dao
 				.List<User>();
 		}
 
+		public IList<User> GetForBrokerage(BrokerageInfo brokerage, User.Role role)
+		{
+			lock (_session) return _session.CreateCriteria<User>()
+				.Add(Restrictions.Eq("UserRole", role))
+				.Add(Restrictions.Eq("BrokerInfo", brokerage))
+				.Add(Restrictions.Eq("Deleted", false))
+				.List<User>();
+		}
 	}
 
     //internal class BuyerDao : GenericDisposableDao<Buyer, int> 

@@ -4,12 +4,21 @@ import com.condox.ecommerce.client.tree.presenter.UpdateProfile2Presenter;
 import com.condox.ecommerce.client.tree.presenter.UpdateProfile2Presenter.I_Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 
 public class UpdateProfile2View extends Composite implements I_Display {
 
@@ -19,6 +28,7 @@ public class UpdateProfile2View extends Composite implements I_Display {
 	@UiField Button buttonCancel;
 	@UiField Button buttonFinish;
 	@UiField Button buttonClose;
+	@UiField Image image;
 
 	interface UpdateProfile2ViewUiBinder extends UiBinder<Widget, UpdateProfile2View> {
 	}
@@ -52,5 +62,10 @@ public class UpdateProfile2View extends Composite implements I_Display {
 	void onButtonFinishClick(ClickEvent event) {
 		if (presenter != null)
 			presenter.onFinish();
+	}
+	@UiHandler("image")
+	void onImageClick(ClickEvent event) {
+		if (presenter != null)
+			presenter.onSelectAvatar();
 	}
 }

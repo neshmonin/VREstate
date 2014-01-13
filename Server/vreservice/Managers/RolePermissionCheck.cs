@@ -677,7 +677,25 @@ namespace Vre.Server.BusinessLogic
             else throw new PermissionException("This operation is not allowed.");
         }
 
-        private static void genericUserControlCheck(ClientSession session, 
+		public static bool GenericUserControlTest(ClientSession session, User user, UserInfoAccessLevel level)
+		{
+			if (user.Equals(session.User))
+			{
+				// all OK - same user
+				return true;
+			}
+
+			bool sameEd = false;
+			if (session.User.EstateDeveloperID.HasValue)
+				sameEd = session.User.EstateDeveloperID.Equals(user.EstateDeveloperID);
+
+			UserInfoAccessLevel lvl = getUserAL(session.User.UserRole, user.UserRole,
+				sameEd, user.VisibleBy.Contains(session.User));
+
+			return (lvl >= level);
+		}
+
+		private static void genericUserControlCheck(ClientSession session, 
             int? targetUserEstateDeveloperId, User.Role targetUserRole, UserInfoAccessLevel level)
         {
             bool sameEd = false;
@@ -914,6 +932,8 @@ namespace Vre.Server.BusinessLogic
         public static void CheckUserChangeLogin(ClientSession session)
         {
             if (session.User.UserRole == User.Role.SellingAgent) return;
+			if (session.User.UserRole == User.Role.BuyingAgent) return;
+			if (session.User.UserRole == User.Role.Agent) return;
 
             throw new PermissionException("This operation is not allowed.");
         }
@@ -977,6 +997,8 @@ namespace Vre.Server.BusinessLogic
 			if (session.User.UserRole == User.Role.SuperAdmin) return;
 
 			if (session.User.AutoID == target.OwnerId) return;
+
+			throw new PermissionException("This operation is not allowed.");
 		}
 
 		public static void CheckDeleteNamedSearchFilter(ClientSession session, NamedSearchFilter target)
@@ -984,6 +1006,8 @@ namespace Vre.Server.BusinessLogic
 			if (session.User.UserRole == User.Role.SuperAdmin) return;
 
 			if (session.User.AutoID == target.OwnerId) return;
+
+			throw new PermissionException("This operation is not allowed.");
 		}
 
 		public static void CheckReadNamedSearchFilter(ClientSession session, NamedSearchFilter target)
@@ -991,6 +1015,70 @@ namespace Vre.Server.BusinessLogic
 			if (session.User.UserRole == User.Role.SuperAdmin) return;
 
 			if (session.User.AutoID == target.OwnerId) return;
+
+			throw new PermissionException("This operation is not allowed.");
+		}
+		#endregion
+
+		#region brokerage
+		public static void CheckCreateBrokerage(ClientSession session)
+		{
+			if (session.User.UserRole == User.Role.SuperAdmin) return;
+
+			throw new PermissionException("This operation is not allowed.");
+		}
+
+		public static void CheckUpdateBrokerage(ClientSession session, BrokerageInfo target)
+		{
+			if (session.User.UserRole == User.Role.SuperAdmin) return;
+
+			//if (session.User.AutoID == target.OwnerId) return;
+
+			throw new PermissionException("This operation is not allowed.");
+		}
+
+		public static void CheckDeleteBrokerage(ClientSession session, BrokerageInfo target)
+		{
+			if (session.User.UserRole == User.Role.SuperAdmin) return;
+
+			//if (session.User.AutoID == target.OwnerId) return;
+
+			throw new PermissionException("This operation is not allowed.");
+		}
+
+		public static void CheckReadBrokerage(ClientSession session, BrokerageInfo target)
+		{
+			// Everyone can read
+		}
+		#endregion
+
+		#region pricing policy
+		public static void CheckCreatePricingPolicy(ClientSession session)
+		{
+			if (session.User.UserRole == User.Role.SuperAdmin) return;
+
+			throw new PermissionException("This operation is not allowed.");
+		}
+
+		public static void CheckUpdatePricingPolicy(ClientSession session, PricingPolicy target)
+		{
+			if (session.User.UserRole == User.Role.SuperAdmin) return;
+
+			throw new PermissionException("This operation is not allowed.");
+		}
+
+		public static void CheckDeletePricingPolicy(ClientSession session, PricingPolicy target)
+		{
+			if (session.User.UserRole == User.Role.SuperAdmin) return;
+
+			throw new PermissionException("This operation is not allowed.");
+		}
+
+		public static void CheckReadPricingPolicy(ClientSession session, PricingPolicy target)
+		{
+			if (session.User.UserRole == User.Role.SuperAdmin) return;
+
+			throw new PermissionException("This operation is not allowed.");
 		}
 		#endregion
 	}

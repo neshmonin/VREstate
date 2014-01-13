@@ -7,8 +7,9 @@ import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
+import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.LoginNode;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
@@ -27,11 +28,13 @@ public class LoginPresenter implements I_Presenter, I_Login {
 
 	private I_Display display = null;
 	private LoginNode node = null;
+	private EcommerceTree tree = null;
 
 	public LoginPresenter(I_Display newDisplay, LoginNode newNode) {
 		display = newDisplay;
 		display.setPresenter(this);
 		node = newNode;
+		tree = node.getTree();
 	}
 
 	@Override
@@ -58,36 +61,36 @@ public class LoginPresenter implements I_Presenter, I_Login {
 			role = UserRole.SuperAdmin;
 			
 			
-			email = "eugene.simonov@3dcondox.com";
-			password = "3dcondoms";
-			role = UserRole.SellingAgent;
+//			email = "eugene.simonov@3dcondox.com";
+//			password = "3dcondoms";
+//			role = UserRole.SellingAgent;
 		} else
 			role = UserRole.SuperAdmin;
 		
 		
-		node.setData(Field.UserEmail, new Data(email));
-		node.setData(Field.UserPassword, new Data(password));
-		node.setData(Field.UserRole, new Data(role.name()));
+		tree.setData(Field.UserEmail, new Data(email));
+		tree.setData(Field.UserPassword, new Data(password));
+		tree.setData(Field.UserRole, new Data(role.name()));
 		User.Login(this, email, password, role);
 	}
 
 	public void onForgotPassword() {
 		String email = display.getUserEmail().trim();
 		String password = display.getUserPassword().trim();
-		node.setData(Field.UserEmail, new Data(email));
-		node.setData(Field.UserPassword, new Data(password));
-		node.setState(NodeStates.ForgotPassword);
-		node.next();
+		tree.setData(Field.UserEmail, new Data(email));
+		tree.setData(Field.UserPassword, new Data(password));
+		node.setState(Actions.ForgotPassword);
+		tree.next();
 	}
 
 	public void onLoginSucceed() {
-		Data data = node.getData(Field.UserRole);
+		Data data = tree.getData(Field.UserRole);
 		if (data != null) {
 			UserRole role = UserRole.valueOf(data.asString());
 			if (UserRole.Visitor.equals(role))
-				node.setState(NodeStates.Guest);
+				node.setState(Actions.Guest);
 			else
-				node.setState(NodeStates.Agent);
+				node.setState(Actions.Agent);
 			node.next();
 		}
 	}

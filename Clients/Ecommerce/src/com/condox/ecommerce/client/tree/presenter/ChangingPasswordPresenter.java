@@ -2,12 +2,14 @@ package com.condox.ecommerce.client.tree.presenter;
 
 import com.condox.clientshared.communication.GET;
 import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.communication.User;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
+import com.condox.ecommerce.client.ServerProxy;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.NodeStates;
+import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.node.ChangingPasswordNode;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -33,12 +35,14 @@ public class ChangingPasswordPresenter implements I_Presenter {
 
 	@Override
 	public void go(I_Container container) {
+		recoverPassword();
+		container.clear();
+		container.add((I_Contained)display);
+	}
+	
+	private void recoverPassword() {
 		String login = getString(Field.UserEmail);
-		String url = Options.URL_VRT + "program?q=recover"
-				+ "&role=sellingagent"
-//				+ "&ed=<estate developer id>"	// ommited for sellingagent
-				+ "&uid=" + login;
-		GET.send(url, new RequestCallback() {
+		ServerProxy.recoverPassword(login, new RequestCallback(){
 
 			@Override
 			public void onResponseReceived(Request request, Response response) {
@@ -52,13 +56,11 @@ public class ChangingPasswordPresenter implements I_Presenter {
 			public void onError(Request request, Throwable exception) {
 				display.setResult(1);
 			}});
-		container.clear();
-		container.add((I_Contained)display);
 	}
 	
 	// Navigation events
 	public void onBackToLogin() {
-		node.setState(NodeStates.Ok);
+		node.setState(Actions.Ok);
 		node.next();
 	}
 	

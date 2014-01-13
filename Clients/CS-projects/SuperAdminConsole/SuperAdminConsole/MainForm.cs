@@ -217,8 +217,13 @@ namespace SuperAdminConsole
             {
                 labelStreetName.Visible = treeViewAccounts.SelectedNode.Text == "ViewOrders";
                 textBoxFilter.Visible = treeViewAccounts.SelectedNode.Text == "ViewOrders";
-                if (treeViewAccounts.SelectedNode.Level == 0)
-                    tabControlAccountProperty.SelectTab("tabPageInfo");
+                if (treeViewAccounts.SelectedNode.Tag as UpdateableBase != null)
+                {
+                    if (treeViewAccounts.SelectedNode.Text == "-MLS-")
+                        tabControlAccountProperty.SelectTab("tabPageViewOrders");
+                    else
+                        tabControlAccountProperty.SelectTab("tabPageInfo");
+                }
                 else
                 {
                     switch (treeViewAccounts.SelectedNode.Text)
@@ -231,6 +236,11 @@ namespace SuperAdminConsole
                             break;
                         case "Logs":
                             tabControlAccountProperty.SelectTab("tabPageLogs");
+                            break;
+                        default:
+                            tabControlAccountProperty.SelectTab("tabPageEmpty");
+                            labelStreetName.Visible = false;
+                            textBoxFilter.Visible = false;
                             break;
                     }
                 }
@@ -301,6 +311,8 @@ namespace SuperAdminConsole
             ClientData adminsJASON = resp.Data;
             ClientData[] admins = adminsJASON.GetNextLevelDataArray("users");
 
+            TreeNode[] adminNodes = new TreeNode[admins.Length-1];
+            int i = 0;
             foreach (ClientData cd in admins)
             {
                 User user = new User(cd);
@@ -310,19 +322,27 @@ namespace SuperAdminConsole
                 else
                 {
                     if (user.NickName == "mlsImport")
+                    {
                         nodeName = "-MLS-";
+                        TreeNode mlsNode = new TreeNode(nodeName);
+                        mlsNode.Tag = user;
+                        treeViewAccounts.Nodes.Add(mlsNode);
+                        continue;
+                    }
                     else
-                        nodeName = string.Format("ADMIN {0}<{1}>", user.NickName, user.AutoID);
+                        nodeName = string.Format("{0}<{1}>", user.NickName, user.AutoID);
                 }
                 //TreeNode[] children = new TreeNode[3] { new TreeNode("ViewOrders"),
                 //                                        new TreeNode("Banners"),
                 //                                        new TreeNode("Logs") };
                 TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
                                                     new TreeNode("Logs") };
-                TreeNode treeNode = new TreeNode(nodeName, children);
-                treeNode.Tag = user;
-                treeViewAccounts.Nodes.Add(treeNode);
+                adminNodes[i] = new TreeNode(nodeName, children);
+                adminNodes[i].Tag = user;
+                i++;
             }
+            topNode = new TreeNode(string.Format("Dev Admins ({0})", admins.Length), adminNodes);
+            treeViewAccounts.Nodes.Add(topNode);
 
             ///data/user?sid=<SID>[&genval=<generation>][&withdeleted={true|false}][&<hints>]
             resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
@@ -338,6 +358,8 @@ namespace SuperAdminConsole
             ClientData usersJSON = resp.Data;
             ClientData[] users = usersJSON.GetNextLevelDataArray("users");
 
+            TreeNode[] userNodes = new TreeNode[users.Length];
+            i = 0;
             foreach (ClientData cd in users)
             {
                 User user = new User(cd);
@@ -347,15 +369,80 @@ namespace SuperAdminConsole
                 //                                        new TreeNode("Logs") };
                 TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
                                                         new TreeNode("Logs") };
-                TreeNode treeNode = new TreeNode(nodeName, children);
-                treeNode.Tag = user;
-                treeViewAccounts.Nodes.Add(treeNode);
+                userNodes[i] = new TreeNode(nodeName, children);
+                userNodes[i].Tag = user;
+                i++;
             }
+            topNode = new TreeNode(string.Format("Selling Agents ({0})", users.Length), userNodes);
+            treeViewAccounts.Nodes.Add(topNode);
+
+            resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
+                                               "user",
+                                               "role=anonymous",
+                                               null);
+            if (HttpStatusCode.OK != resp.ResponseCode)
+            {
+                MessageBox.Show("Failed querying the list of customers");
+                return;
+            }
+
+            usersJSON = resp.Data;
+            users = usersJSON.GetNextLevelDataArray("users");
+
+            userNodes = new TreeNode[users.Length];
+            i = 0;
+            foreach (ClientData cd in users)
+            {
+                User user = new User(cd);
+                string nodeName = string.Format("<{0}> {1}", user.AutoID, user.PrimaryEmailAddress);
+                TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
+                                                        new TreeNode("Logs")  };
+                userNodes[i] = new TreeNode(nodeName, children);
+                userNodes[i].Tag = user;
+                i++;
+            }
+            topNode = new TreeNode(string.Format("Anonymous Users ({0})", users.Length), userNodes);
+            treeViewAccounts.Nodes.Add(topNode);
+
+
+            resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
+                                               "brokerage",
+                                               "",
+                                               null);
+            if (HttpStatusCode.OK != resp.ResponseCode)
+            {
+                MessageBox.Show("Failed querying the list of brokerages");
+                return;
+            }
+
+            ClientData brokerageJASON = resp.Data;
+            ClientData[] brokerages = brokerageJASON.GetNextLevelDataArray("brokerages");
+
+            TreeNode[] brokerageNodes = new TreeNode[brokerages.Length];
+            i = 0;
+            foreach (ClientData cd in brokerages)
+            {
+                BrokerageInfo brokerage = new BrokerageInfo(cd);
+                string nodeName = string.Format("<{0}> {1} (?)", brokerage.AutoID, brokerage.Name);
+                TreeNode overwritable = new TreeNode("expand");
+                brokerageNodes[i] = new TreeNode(nodeName, new TreeNode[1]{overwritable});
+                brokerageNodes[i].Tag = brokerage;
+                i++;
+            }
+            topNode = new TreeNode(string.Format("Brokerages ({0})", brokerages.Length), brokerageNodes);
+            treeViewAccounts.Nodes.Add(topNode);
+
+            //TreeNode[] lastch = new TreeNode[1] { new TreeNode("ViewOrders") };
+            //TreeNode lastNode = new TreeNode("ANONIMOUS", lastch);
+            //lastNode.Tag = new User(m_currentDeveloper.ID, User.Role.Anonymous);
+            //treeViewAccounts.Nodes.Add(lastNode);
+
             UpdateState();
         }
 
         private User m_agent = null;
         private User m_rigthMouseAgent = null;
+        private BrokerageInfo m_brokerage = null;
 
         private void treeViewAccounts_MouseUp(object sender, MouseEventArgs e)
         {
@@ -364,11 +451,8 @@ namespace SuperAdminConsole
                 TreeNode rigthMouseNode = treeViewAccounts.GetNodeAt(e.X, e.Y);
                 if (rigthMouseNode != null && rigthMouseNode.Tag != null)
                 {
-                    if (!rigthMouseNode.Text.StartsWith("SELF"))
-                    {
-                        m_rigthMouseAgent = rigthMouseNode.Tag as User;
-                        return;
-                    }
+                    m_rigthMouseAgent = rigthMouseNode.Tag as User;
+                    return;
                 }
             }
             m_rigthMouseAgent = null;
@@ -379,10 +463,16 @@ namespace SuperAdminConsole
         {
             m_agent = null;
             if (e.Node.Tag != null)
+            {
                 m_agent = e.Node.Tag as User;
+                m_brokerage = e.Node.Tag as BrokerageInfo;
+            }
             else
             if (e.Node.Parent != null && e.Node.Parent.Tag != null)
+            {
                 m_agent = e.Node.Parent.Tag as User;
+                m_brokerage = e.Node.Tag as BrokerageInfo;
+            }
 
             if (m_agent != null)
             {
@@ -390,14 +480,8 @@ namespace SuperAdminConsole
                 m_nickname = m_agent.NickName == string.Empty ? myRole : m_agent.NickName;
             }
 
-            if (e.Node.Parent == null)
-            {
-                refreshAccountInfo();
-            }
-            else if (e.Node.Text == "ViewOrders")
-            {
+            if (e.Node.Text == "ViewOrders" || e.Node.Text == "-MLS-")
                 refreshOrders();
-            }
             else if (e.Node.Text == "Logs")
             {
                 listViewLogs.Items.Clear();
@@ -431,7 +515,7 @@ namespace SuperAdminConsole
                     string[] subitems = new string[7];
                     DateTime time = log.GetProperty("created", DateTime.Now);
                     subitems[0] = time.Date.ToShortDateString() + ", " + time.ToLongTimeString();
-                    subitems[1] = log.GetProperty("paymentSystem", string.Empty) == "CondoExplorer"?"CE":"PP";
+                    subitems[1] = log.GetProperty("paymentSystem", string.Empty) == "CondoExplorer" ? "CE" : "PP";
                     string paymentRefId = log.GetProperty("paymentRefId", string.Empty);
                     subitems[2] = paymentRefId;
                     subitems[3] = log.GetProperty("operation", string.Empty);
@@ -446,28 +530,57 @@ namespace SuperAdminConsole
                     listViewLogs.Items.Add(order);
                 }
             }
+            else
+            {
+                listViewAccountInfo.Items.Clear();
+                UpdateableBase item = e.Node.Tag as UpdateableBase;
+                if (item != null)
+                {
+                    ClientData cd = item.GetClientData();
+                    foreach (var prop in cd)
+                    {
+                        if (prop.Key == "version" || prop.Key == "estateDeveloperId")
+                            continue;
+
+                        string[] subitems = new string[2];
+                        ListViewItem acctInfo = null;
+                        subitems[0] = prop.Key.ToString();
+                        if (prop.Value != null)
+                        {
+                            subitems[1] = prop.Value.ToString();
+                            acctInfo = new ListViewItem(subitems);
+                        }
+                        else
+                        {
+                            subitems[0] = prop.Key.ToString() + "[]";
+                            subitems[1] = "<empty>";
+                            acctInfo = new ListViewItem(subitems);
+                            //ClientData[] array = cd.GetNextLevelDataArray(prop.Key);
+                            //if (array != null)
+                            //{
+                            //    if (array.Length == 0)
+                            //    {
+                            //        subitems[0] = prop.Key.ToString() + "[]";
+                            //        subitems[1] = "<empty>";
+                            //        acctInfo = new ListViewItem(subitems);
+                            //    }
+                            //    else
+                            //    {
+                            //        int i = 0;
+                            //        foreach (var elt in array)
+                            //        {
+
+                            //        }
+                            //    }
+                            //}
+                        }
+
+                        listViewAccountInfo.Items.Add(acctInfo);
+                    }
+                }
+            }
 
             UpdateState();
-        }
-
-        void refreshAccountInfo()
-        {
-            listViewAccountInfo.Items.Clear();
-            if (m_agent == null)
-                return;
-
-            foreach (var prop in m_agent.GetClientData())
-            {
-                if (prop.Key == "version" || prop.Key == "estateDeveloperId")
-                    continue;
-
-                string[] subitems = new string[2];
-                subitems[0] = prop.Key.ToString();
-                subitems[1] = prop.Value.ToString();
-
-                ListViewItem acctInfo = new ListViewItem(subitems);
-                listViewAccountInfo.Items.Add(acctInfo);
-            }
         }
 
         private void contextMenuStripAccountProperty_Opening(object sender, CancelEventArgs e)
@@ -489,18 +602,32 @@ namespace SuperAdminConsole
         private void changePropertyValueToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string prop = listViewAccountInfo.SelectedItems[0].SubItems[0].Text;
-            ClientData data = m_agent.GetClientData();
+            ClientData data = null;
+            if (m_agent != null)
+                data = m_agent.GetClientData();
+            else if (m_brokerage != null)
+                data = m_brokerage.GetClientData();
+
             AccountPropertyForm editForm = new AccountPropertyForm(data, prop);
             if (editForm.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 data[prop] = editForm.NewValue;
 
-                ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
-                                                                  "user/" + m_agent.AutoID,
-                                                                  "", data);
+                ServerResponse resp = null;
+                if (m_agent != null)
+                    resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
+                                                       "user/" + m_agent.AutoID,
+                                                       "", data);
+                else
+                    resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
+                                                       "brokerage/" + m_brokerage.AutoID,
+                                                       "", data);
+
                 if (HttpStatusCode.OK != resp.ResponseCode)
                 {
-                    MessageBox.Show("Failed updating property \'" + prop + "\'");
+                    MessageBox.Show("Failed updating property \'" + 
+                                    prop + "\':\n" + 
+                                    resp.ResponseCodeDescription);
                     return;
                 }
                 refreshUserAccounts();
@@ -1153,6 +1280,45 @@ namespace SuperAdminConsole
                 refreshOrders();
             }
             UpdateState();
+        }
+
+        private void treeViewAccounts_AfterExpand(object sender, TreeViewEventArgs e)
+        {
+            BrokerageInfo brokerage = e.Node.Tag as BrokerageInfo;
+            if (brokerage == null)
+                return;
+
+            ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
+                                                              "user",
+                                                              "role=Agent&brokerageId=" + brokerage.AutoID,
+                                                              null);
+            ClientData usersJSON = resp.Data;
+            ClientData[] users = usersJSON.GetNextLevelDataArray("users");
+            e.Node.Text = string.Format("<{0}> {1} ({2})",
+                brokerage.AutoID,
+                brokerage.Name,
+                users.Length);
+
+            foreach (ClientData cd in users)
+            {
+                User user = new User(cd);
+                string nodeName = string.Format("{0} <{1}> {2}",
+                    user.AutoID,
+                    user.NickName,
+                    user.PrimaryEmailAddress);
+                //TreeNode[] children = new TreeNode[3] { new TreeNode("ViewOrders"),
+                //                                        new TreeNode("Banners"),
+                //                                        new TreeNode("Logs") };
+                TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
+                                                        new TreeNode("Logs") };
+                TreeNode userNode = new TreeNode(nodeName, children);
+                userNode.Tag = user;
+                TreeNode overwritable = e.Node.FirstNode;
+                if (overwritable.Tag == null)
+                    e.Node.Nodes.Remove(overwritable);
+
+                e.Node.Nodes.Add(userNode);
+            }
         }
 
     }
