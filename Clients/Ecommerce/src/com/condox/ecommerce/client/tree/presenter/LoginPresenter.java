@@ -24,6 +24,8 @@ public class LoginPresenter implements I_Presenter, I_Login {
 		String getUserPassword();
 
 		Widget asWidget();
+
+		UserRole getUserRole();
 	}
 
 	private I_Display display = null;
@@ -47,25 +49,26 @@ public class LoginPresenter implements I_Presenter, I_Login {
 	public void onLogin() {
 		String email = display.getUserEmail().trim();
 		String password = display.getUserPassword().trim();
+		UserRole role = display.getUserRole();
 
-		// TODO
-		UserRole role = null;
-		
-		if (email.isEmpty() && password.isEmpty()) {
-			email = "web";
-			password = "web";
-			role = UserRole.Visitor;
-			
-			email = "adminan";
-			password = "smelatoronto";
-			role = UserRole.SuperAdmin;
-			
-			
-//			email = "eugene.simonov@3dcondox.com";
-//			password = "3dcondoms";
-//			role = UserRole.SellingAgent;
-		} else
-			role = UserRole.SuperAdmin;
+//		// TODO
+//		UserRole role = null;
+//		
+//		if (email.isEmpty() && password.isEmpty()) {
+//			email = "web";
+//			password = "web";
+//			role = UserRole.Visitor;
+//			
+//			email = "adminan";
+//			password = "smelatoronto";
+//			role = UserRole.SuperAdmin;
+//			
+//			
+////			email = "eugene.simonov@3dcondox.com";
+////			password = "3dcondoms";
+////			role = UserRole.SellingAgent;
+//		} else
+//			role = UserRole.SuperAdmin;
 		
 		
 		tree.setData(Field.UserEmail, new Data(email));
