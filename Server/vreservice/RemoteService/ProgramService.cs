@@ -92,7 +92,13 @@ namespace Vre.Server.RemoteService
 					setUserPhoto(request);
 					return;
 				}
-			}
+                else if (command.Equals("credit")
+                    && ((request.Request.Type == RequestType.Insert) || (request.Request.Type == RequestType.Update) || (request.Request.Type == RequestType.Get)))
+                {
+                    credit(request);
+                    return;
+                }
+            }
 
             throw new ArgumentException("Program command not understood.");
         }
@@ -929,5 +935,44 @@ namespace Vre.Server.RemoteService
 					"jpeg", null, s);
 			}
 		}
+
+        private static void credit(IServiceRequest request)
+        {
+            if ((null == request.UserInfo.Session)
+                || !request.UserInfo.Session.TrustedConnection
+                || (request.UserInfo.Session.User.UserRole != User.Role.SuperAdmin))
+                throw new ArgumentException("Program command not understood.");  // conceal request availability
+
+            var targetType = request.Request.Query.GetParam("targettype", string.Empty);
+            var targetId = request.Request.Query.GetParam("targetid", -1);
+            decimal amount;
+
+            if (targetId < 0) throw new ArgumentException("Target (creditee) ID not provided or is invalid");
+            
+            if (!decimal.TryParse(request.Request.Query.GetParam("amount", "0"), out amount))
+                throw new ArgumentException("Credit amount not provided or is invalid");
+
+            if (targetType.Equals("user", StringComparison.InvariantCultureIgnoreCase))
+            {
+                using (var man = new UserManager(request.UserInfo.Session))
+                    amount = man.Credit(targetId, amount);
+
+                request.Response.ResponseCode = HttpStatusCode.OK;
+                request.Response.Data = new ClientData();
+                request.Response.Data.Add("userId", targetId);
+                request.Response.Data.Add("creditUnits", amount);
+            }
+            else if (targetType.Equals("brokerage", StringComparison.InvariantCultureIgnoreCase))
+            {
+                using (var man = new BrokerageManager(request.UserInfo.Session))
+                    amount = man.Credit(targetId, amount);
+
+                request.Response.ResponseCode = HttpStatusCode.OK;
+                request.Response.Data = new ClientData();
+                request.Response.Data.Add("brokerageId", targetId);
+                request.Response.Data.Add("creditUnits", amount);
+            }
+            else throw new ArgumentException("Target type (creditee) not provided or is invalid");
+        }
     }
 }

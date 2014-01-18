@@ -620,5 +620,32 @@ namespace Vre.Server.BusinessLogic
                     ((prev != null) ? prev.AutoID : -1));
             }
         }
+
+        public decimal Credit(int userId, decimal amount)
+        {
+            decimal result;
+
+            using (var tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
+            {
+                User u;
+
+                using (var dao = new UserDao(_session.DbSession)) u = dao.GetById(userId);
+                if (null == u) throw new FileNotFoundException("User ID is not known");
+
+                RolePermissionCheck.CheckUserAccess(_session, u,
+                    RolePermissionCheck.UserInfoAccessLevel.Administrative);
+
+                u.Credit(amount);
+                result = u.CreditUnits;
+
+                _session.DbSession.Update(u);
+
+                tran.Commit();
+
+                ServiceInstances.Logger.Info("Superadmin {0} credited user {1} for {2} units; current user's Credit Units value is {3}",
+                    _session.User, u, amount, result);
+            }
+            return result;
+        }
     }
 }
