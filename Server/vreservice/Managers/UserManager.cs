@@ -12,19 +12,31 @@ namespace Vre.Server.BusinessLogic
     {
         public UserManager(ClientSession clientSession) : base(clientSession) { }
 
-        public void Create(User.Role role, int developerId, LoginType type, string login, string password)
+        public void Create(User.Role role, int aggregateObjectId, LoginType type, string login, string password)
         {
-            //RolePermissionCheck.CheckCreateUser(_session, ((developerId >= 0) ? (int?)developerId : null), role);
-            RolePermissionCheck.CheckUserAccess(_session, ((developerId >= 0) ? (int?)developerId : null), role, 
-                RolePermissionCheck.UserInfoAccessLevel.Administrative);
+            if (User.IsEstateDeveloperTied(role))
+            {
+                RolePermissionCheck.CheckUserAccess(_session, aggregateObjectId, role,
+                    RolePermissionCheck.UserInfoAccessLevel.Administrative);
 
-            createUserInt(role, developerId, type, login, password);
+                createUserInt(role, aggregateObjectId, type, login, password);
 
-            ServiceInstances.Logger.Info("User ID={3} created new user: {0}[{1}] for developer ID={2}",
-                                        type, login, developerId, _session.User.AutoID);
+                ServiceInstances.Logger.Info("User ID={3} created new user: {0}[{1}] for developer ID={2}",
+                                            type, login, aggregateObjectId, _session.User.AutoID);
+            }
+            else
+            {
+                RolePermissionCheck.CheckUserAccess(_session, null, role,
+                    RolePermissionCheck.UserInfoAccessLevel.Administrative);
+
+                createUserInt(role, aggregateObjectId, type, login, password);
+
+                ServiceInstances.Logger.Info("User ID={3} created new user: {0}[{1}] for brokerage ID={2}",
+                                            type, login, aggregateObjectId, _session.User.AutoID);
+            }
         }
 
-        private void createUserInt(User.Role role, int developerId, LoginType type, string login, string password)
+        private void createUserInt(User.Role role, int aggregateObjectId, LoginType type, string login, string password)
         {
             User newUser = null;
 
@@ -36,7 +48,7 @@ namespace Vre.Server.BusinessLogic
                 {
                     using (EstateDeveloperDao devDao = new EstateDeveloperDao(_session.DbSession))
                     {
-                        if (devDao.GetById(developerId) != null) newUser = new User(developerId, role);
+                        if (devDao.GetById(aggregateObjectId) != null) newUser = new User(aggregateObjectId, role);
                         else throw new FileNotFoundException("The developer ID supplied does not exist.");
                     }
                 }
@@ -53,7 +65,7 @@ namespace Vre.Server.BusinessLogic
 
                         using (IAuthentication auth = new Authentication(_session.DbSession))
                         {
-                            if (auth.CreateLogin(type, role, developerId, login, password, newUser.AutoID, out errorReason))
+                            if (auth.CreateLogin(type, role, aggregateObjectId, login, password, newUser.AutoID, out errorReason))
                                 tran.Commit();
                             else
                                 throw new InvalidOperationException(errorReason);
@@ -63,7 +75,7 @@ namespace Vre.Server.BusinessLogic
             }
         }
 
-        public static User Login(LoginType type, User.Role role, int estateDeveloperId, string login, string password)
+        public static User Login(LoginType type, User.Role role, int aggregateObjectId, string login, string password)
         {
             User result = null;
 
@@ -72,7 +84,7 @@ namespace Vre.Server.BusinessLogic
                 using (IAuthentication auth = new Authentication(session))
                 {
                     int userId;
-                    if (auth.AuthenticateUser(type, role, estateDeveloperId, login, password, out userId))
+                    if (auth.AuthenticateUser(type, role, aggregateObjectId, login, password, out userId))
                     {
                         using (UserDao dao = new UserDao(session))
                         {
@@ -105,13 +117,13 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
-        public User Get(LoginType type, User.Role role, int estateDeveloperId, string login)
+        public User Get(LoginType type, User.Role role, int aggregateObjectId, string login)
         {
             User result = null;
 
             using (IAuthentication auth = new Authentication(_session.DbSession))
             {
-                int userId = auth.UserIdByLogin(type, role, estateDeveloperId, login);
+                int userId = auth.UserIdByLogin(type, role, aggregateObjectId, login);
                 if (userId >= 0)
                 {
                     using (UserDao dao = new UserDao(_session.DbSession)) result = dao.GetById(userId);
@@ -176,7 +188,7 @@ namespace Vre.Server.BusinessLogic
         //    }
         //}
 
-        public void ChangePassword(LoginType type, User.Role role, int estateDeveloperId, string login, 
+        public void ChangePassword(LoginType type, User.Role role, int aggregateObjectId, string login, 
             string currentPassword, string newPassword)
         {
 			using (var tran = NHibernateHelper.OpenNonNestedTransaction(_session))
@@ -184,7 +196,7 @@ namespace Vre.Server.BusinessLogic
 				using (IAuthentication auth = new Authentication(_session.DbSession))
 				{
 					int userId;
-					if (auth.AuthenticateUser(type, role, estateDeveloperId, login, currentPassword, out userId))
+					if (auth.AuthenticateUser(type, role, aggregateObjectId, login, currentPassword, out userId))
 					{
 						User u;
 						using (UserDao dao = new UserDao(_session.DbSession)) u = dao.GetById(userId);
@@ -297,6 +309,14 @@ namespace Vre.Server.BusinessLogic
                         if (dao.ListUsers(User.Role.DeveloperAdmin, user.EstateDeveloperID.Value, null, null, false).Count < 2)
                         {
                             throw new InvalidOperationException("Cannot delete last active Developer Admin.");
+                        }
+                    }
+                    else if (user.UserRole == User.Role.BrokerageAdmin)
+                    {
+                        if (_session.User.Equals(user)) throw new InvalidOperationException("Brokerage Admin cannot commit suicide.");
+                        if (dao.ListUsers(User.Role.BrokerageAdmin, user.BrokerInfo.AutoID, null, null, false).Count < 2)
+                        {
+                            throw new InvalidOperationException("Cannot delete last active Brokerage Admin.");
                         }
                     }
 

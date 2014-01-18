@@ -54,7 +54,11 @@ namespace Vre.Server.BusinessLogic
 			/// <summary>
 			/// Independent buying and selling agent; usually belongs to a Brokerage
 			/// </summary>
-			Agent = 10
+			Agent = 10,
+            /// <summary>
+            /// Brokerage Administrator with extensive rights applied to owning BrokerageInfo object
+            /// </summary>
+            BrokerageAdmin = 11
 	    }
 
         public Role UserRole { get; private set; }

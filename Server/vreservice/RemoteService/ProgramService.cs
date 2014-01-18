@@ -137,6 +137,8 @@ namespace Vre.Server.RemoteService
             // role with default of superadmin
             if (!Enum.TryParse<User.Role>(request.Request.Query["role"], true, out role)) role = User.Role.SuperAdmin;
 
+            var brokerageId = request.Request.Query.GetParam("bid", -1);
+
             // estate developer ID with default of none and reference by name support
             int edId = DataService.ResolveDeveloperId(null, estateDeveloperId);
 
@@ -145,7 +147,7 @@ namespace Vre.Server.RemoteService
             if ((!string.IsNullOrWhiteSpace(login)) && (!string.IsNullOrWhiteSpace(password)))
             {
                 sessionId = ServiceInstances.SessionStore.LoginUser(request.Request.EndPoint, 
-                    loginType, role, edId, login, password);
+                    loginType, role, (edId >= 0) ? edId : brokerageId, login, password);
             }
 
             // test user validity
@@ -191,6 +193,7 @@ namespace Vre.Server.RemoteService
             string login = request.Request.Query["uid"];
             User.Role role;
             int estateDeveloperId = DataService.ResolveDeveloperId(null, request.Request.Query["ed"]);
+            int brokerageId = request.Request.Query.GetParam("bid", -1);
             string password = request.Request.Query["pwd"];
             string newPassword = request.Request.Query["npwd"];
             if (!Enum.TryParse<User.Role>(request.Request.Query["role"], true, out role)) role = User.Role.Visitor;
@@ -205,7 +208,8 @@ namespace Vre.Server.RemoteService
                     }
                     else
                     {
-                        manager.ChangePassword(loginType, role, estateDeveloperId, login, password, newPassword);
+                        manager.ChangePassword(loginType, role, estateDeveloperId >= 0 ? estateDeveloperId : brokerageId, 
+                            login, password, newPassword);
                     }
                 }
             }

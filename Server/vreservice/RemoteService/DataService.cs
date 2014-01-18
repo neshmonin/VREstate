@@ -1926,22 +1926,23 @@ namespace Vre.Server.RemoteService
 
 					var updated = user.UpdateFromClient(data);
 
-					var bid = data.GetProperty("brokerageId", -1);
-					if (bid > 0)  // try setting brokerage
-					{
-						if (((user.BrokerInfo != null) && (user.BrokerInfo.AutoID != bid))
-							|| (null == user.BrokerInfo))
-						{
-							using (var dao = new BrokerageInfoDao(session.DbSession))
-								user.BrokerInfo = dao.GetById(bid);
-							updated = true;
-						}
-					}
-					else if ((0 == bid) && (user.BrokerInfo != null))
-					{
-						user.BrokerInfo = null;
-						updated = true;
-					}
+                    // block changing brokerage for now; should be possible?!
+                    //var bid = data.GetProperty("brokerageId", -1);
+                    //if (bid > 0)  // try setting brokerage
+                    //{
+                    //    if (((user.BrokerInfo != null) && (user.BrokerInfo.AutoID != bid))
+                    //        || (null == user.BrokerInfo))
+                    //    {
+                    //        using (var dao = new BrokerageInfoDao(session.DbSession))
+                    //            user.BrokerInfo = dao.GetById(bid);
+                    //        updated = true;
+                    //    }
+                    //}
+                    //else if ((0 == bid) && (user.BrokerInfo != null))
+                    //{
+                    //    user.BrokerInfo = null;
+                    //    updated = true;
+                    //}
 					
 					if (updated)
                     {
@@ -2132,27 +2133,28 @@ namespace Vre.Server.RemoteService
         {
             User.Role role = data.GetProperty<User.Role>("role", User.Role.Visitor);
             LoginType type = data.GetProperty<LoginType>("type", LoginType.Plain);
-            int estateDeveloperId = ResolveDeveloperId(session.DbSession, data.GetProperty("ed", string.Empty));
+            int estateDeveloperId = ResolveDeveloperId(session.DbSession, data.GetProperty("estateDeveloperId", string.Empty));
+            if (estateDeveloperId < 0) estateDeveloperId = ResolveDeveloperId(session.DbSession, data.GetProperty("ed", string.Empty));  // OBSOLETE
             string login = data.GetProperty("uid", string.Empty);
             string password = data.GetProperty("pwd", string.Empty);
+            var brokerageId = data.GetProperty("brokerageId", -1);
 
 			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
 			{
 				User u;
 				using (UserManager manager = new UserManager(session))
 				{
-					manager.Create(role, estateDeveloperId, type, login, password);
+					manager.Create(role, estateDeveloperId >= 0 ? estateDeveloperId : brokerageId, type, login, password);
 					try
 					{
 						// create contact info block with any added fields from inbound JSON
 						u = manager.Get(type, role, estateDeveloperId, login);
 						u.UpdateFromClient(data);
 
-						var bid = data.GetProperty("brokerageId", -1);
-						if (bid > 0)  // try setting brokerage
+						if (brokerageId > 0)  // try setting brokerage
 						{
 							using (var dao = new BrokerageInfoDao(session.DbSession))
-								u.BrokerInfo = dao.GetById(bid);
+							u.BrokerInfo = dao.GetById(brokerageId);
 						}
 
 						manager.Update(u);
@@ -2619,6 +2621,9 @@ namespace Vre.Server.RemoteService
                 ServiceInstances.Logger.Info("On-the-fly ViewOrder reconcile adjusted {0} suite states.", ccnt);
         }
 
+        /// <summary>
+        /// Returns -1 if ID string passed cannot be resolved to a Estate Developer ID
+        /// </summary>
         internal static int ResolveDeveloperId(ISession session, string id)
         {
             int result = -1;

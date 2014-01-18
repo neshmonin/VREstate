@@ -38,7 +38,7 @@ namespace Vre.Server.RemoteService
 		}
 
         public string LoginUser(IPEndPoint ep, LoginType loginType, 
-            User.Role role, int estatedeveloperId, string login, string password)
+            User.Role role, int aggregateObjectId, string login, string password)
         {
             // Flood prevention.
             // This is not a DoS prevention, rather a password brute-force stopper.
@@ -57,7 +57,7 @@ namespace Vre.Server.RemoteService
             }
             else
             {
-                user = UserManager.Login(loginType, role, estatedeveloperId, login, password);
+                user = UserManager.Login(loginType, role, aggregateObjectId, login, password);
                 // TODO: Drop off other user sessions? Configurable?
                 dropOffConcurrentSessions = true;
             }
