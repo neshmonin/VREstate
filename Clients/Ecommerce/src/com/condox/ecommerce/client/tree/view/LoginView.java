@@ -1,5 +1,6 @@
 package com.condox.ecommerce.client.tree.view;
 
+import com.condox.clientshared.communication.User.UserRole;
 import com.condox.ecommerce.client.tree.presenter.LoginPresenter;
 import com.condox.ecommerce.client.tree.presenter.LoginPresenter.I_Display;
 import com.google.gwt.core.client.GWT;
@@ -18,6 +19,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.RadioButton;
 
 public class LoginView extends Composite implements I_Display {
 
@@ -31,6 +33,9 @@ public class LoginView extends Composite implements I_Display {
 	@UiField Button buttonClose;
 	@UiField PasswordTextBox textUserPassword;
 	@UiField FocusPanel focusPanel;
+	@UiField RadioButton rbVisitor;
+	@UiField RadioButton rbSuperAdmin;
+	@UiField RadioButton rbSellingAgent;
 
 	interface LoginViewUiBinder extends UiBinder<Widget, LoginView> {
 	}
@@ -39,6 +44,7 @@ public class LoginView extends Composite implements I_Display {
 
 	public LoginView() {
 		initWidget(uiBinder.createAndBindUi(this));
+		rbVisitor.setValue(true, true);
 	}
 
 	@Override
@@ -75,5 +81,43 @@ public class LoginView extends Composite implements I_Display {
 	void onFocusPanelKeyUp(KeyUpEvent event) {
 		if (event.getNativeKeyCode() == 13)
 			presenter.onLogin();
+	}
+	
+	private void changeRole() {
+		if (rbVisitor.getValue()) {
+			textUserEmail.setText("web");
+			textUserPassword.setText("web");
+		} else if (rbSuperAdmin.getValue()) {
+			textUserEmail.setText("adminan");
+			textUserPassword.setText("smelatoronto");
+		} else if (rbSellingAgent.getValue()) {
+			textUserEmail.setText("eugene.simonov@3dcondox.com");
+			textUserPassword.setText("3dcondoms");
+		}
+	}
+
+	@UiHandler("rbVisitor")
+	void onRoleValueChange(ValueChangeEvent<Boolean> event) {
+		changeRole();
+	}
+	
+	@UiHandler("rbSuperAdmin")
+	void onRbSuperAdminValueChange(ValueChangeEvent<Boolean> event) {
+		changeRole();
+	}
+	@UiHandler("rbSellingAgent")
+	void onRbSellingAgentValueChange(ValueChangeEvent<Boolean> event) {
+		changeRole();
+	}
+
+	@Override
+	public UserRole getUserRole() {
+		if (rbVisitor.getValue())
+			return UserRole.Visitor;
+		if (rbSuperAdmin.getValue())
+			return UserRole.SuperAdmin;
+		if (rbSellingAgent.getValue())
+			return UserRole.SellingAgent;
+		return null;
 	}
 }
