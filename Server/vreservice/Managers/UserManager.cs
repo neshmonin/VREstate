@@ -314,7 +314,7 @@ namespace Vre.Server.BusinessLogic
                     else if (user.UserRole == User.Role.BrokerageAdmin)
                     {
                         if (_session.User.Equals(user)) throw new InvalidOperationException("Brokerage Admin cannot commit suicide.");
-                        if (dao.ListUsers(User.Role.BrokerageAdmin, user.BrokerInfo.AutoID, null, null, false).Count < 2)
+                        if (dao.ListUsers(User.Role.BrokerageAdmin, null, user.BrokerInfo.AutoID, null, false).Count < 2)
                         {
                             throw new InvalidOperationException("Cannot delete last active Brokerage Admin.");
                         }
