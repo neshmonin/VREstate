@@ -7,12 +7,17 @@ namespace Vre.Server.BusinessLogic
 	{
 	    public enum TranSubject : byte
 	    {
-            ViewOrder = 0
+            ViewOrder = 0,
+            User = 1,
+            Service = 2,
+            DirectOperation = 3
 	    }
         public enum TranTarget : byte
         {
             Suite = 0,
-            Building = 1
+            Building = 1,
+            Invoice = 2,
+            None = 3
         }
         public enum OperationType : byte
         {
@@ -21,7 +26,8 @@ namespace Vre.Server.BusinessLogic
         }
         public enum AccountType : byte
         {
-            User = 0
+            User = 0,
+            Brokerage = 1
         }
         public enum PaymentSystemType : byte
         {

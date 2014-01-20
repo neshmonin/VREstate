@@ -132,6 +132,7 @@
     <Compile Include="Authentication\IAuthentication.cs" />
     <Compile Include="BusinessLogic\ExpiredException.cs" />
     <Compile Include="BusinessLogic\ObjectExistsException.cs" />
+    <Compile Include="BusinessObjects\ServiceRequestItem.cs" />
     <Compile Include="BusinessObjects\FileStorageItem.cs" />
     <Compile Include="BusinessObjects\FinancialTransactionExt.cs" />
     <Compile Include="BusinessObjects\Localization.cs" />
@@ -148,6 +149,7 @@
     <Compile Include="Dao\AccountDao.cs" />
     <Compile Include="Dao\BuildingDao.cs" />
     <Compile Include="Dao\BrokerageInfoDao.cs" />
+    <Compile Include="Dao\ServiceRequestItemDao.cs" />
     <Compile Include="Dao\PricingPolicyDao.cs" />
     <Compile Include="Dao\StructureDao.cs" />
     <Compile Include="Dao\FileStorageItemDao.cs" />
@@ -187,6 +189,7 @@
     <Compile Include="HttpService\MultipartFormData.cs" />
     <Compile Include="HttpService\RedirectionService.cs" />
     <Compile Include="HttpService\Statistics.cs" />
+    <Compile Include="Managers\BrokerageManager.cs" />
     <Compile Include="Managers\DeveloperManager.cs" />
     <Compile Include="Managers\RolePermissionCheck.cs" />
     <Compile Include="ModelCache\ModelCache.cs" />
@@ -197,6 +200,7 @@
     <Compile Include="RemoteService\PaymentSystemResponseService.cs" />
     <Compile Include="Tasks\BaseTask.cs" />
     <Compile Include="Tasks\GenerateImportSettings.cs" />
+    <Compile Include="Tasks\GenerateInvoices.cs" />
     <Compile Include="Tasks\ManagedStorageTaskBase.cs" />
     <Compile Include="Tasks\ReconcileManagedStorage.cs" />
     <Compile Include="Tasks\ImportFilesIntoManagedStorage.cs" />

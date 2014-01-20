@@ -29,6 +29,15 @@ namespace Vre.Server.BusinessLogic
 
                 _session.DbSession.Update(b);
 
+
+                var ft = new FinancialTransaction(0, FinancialTransaction.AccountType.Brokerage, b.AutoID,
+                    FinancialTransaction.OperationType.Credit, amount,
+                    FinancialTransaction.TranSubject.DirectOperation, FinancialTransaction.TranTarget.None, -1,
+                    "Credited by " + _session.User.ToString());
+
+                _session.DbSession.Save(ft);
+
+
                 tran.Commit();
 
                 ServiceInstances.Logger.Info("Superadmin {0} credited brokerage {1} for {2} units; current brokerage's Credit Units value is {3}",

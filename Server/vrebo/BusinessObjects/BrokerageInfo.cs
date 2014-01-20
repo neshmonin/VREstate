@@ -91,5 +91,17 @@ namespace Vre.Server.BusinessLogic
 		{
 			return Name;
 		}
+
+        public void Debit(decimal units)
+        {
+            CreditUnits -= units;
+            MarkUpdated();
+        }
+
+        public void Credit(decimal units)
+        {
+            CreditUnits += units;
+            MarkUpdated();
+        }
     }
 }

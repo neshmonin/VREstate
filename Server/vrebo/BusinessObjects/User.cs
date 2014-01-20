@@ -281,5 +281,17 @@ namespace Vre.Server.BusinessLogic
             else
                 return string.Format("ID={0},r={1},e={2}", AutoID, UserRole, PrimaryEmailAddress);
         }
+
+        public void Debit(decimal units)
+        {
+            CreditUnits -= units;
+            MarkUpdated();
+        }
+
+        public void Credit(decimal units)
+        {
+            CreditUnits += units;
+            MarkUpdated();
+        }
     }
 }
