@@ -20,6 +20,11 @@ namespace Vre.Server.BusinessLogic
 
 		public string Contents { get; private set; }
 
+		public string Number
+		{
+			get { return string.Format("3DCX{0:000}{1:000}/{2:00}", AutoID, Created.DayOfYear, Created.Year - 2000); }
+		}
+
 		private Invoice() { }
 
 		public Invoice(SubjectType targetObjectType, int targetObjectId,
