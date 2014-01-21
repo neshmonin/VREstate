@@ -111,6 +111,8 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
@@ -199,6 +201,7 @@
     <Compile Include="PaymentSystemProc\PayPalResponseHandler.cs" />
     <Compile Include="RemoteService\EventService.cs" />
     <Compile Include="RemoteService\PaymentSystemResponseService.cs" />
+    <Compile Include="Spikes\WmiController.cs" />
     <Compile Include="Tasks\BaseTask.cs" />
     <Compile Include="Tasks\GenerateImportSettings.cs" />
     <Compile Include="Tasks\GenerateInvoices.cs" />
@@ -237,6 +240,7 @@
     <Compile Include="UserMessaging\IUserMessaging.cs" />
     <Compile Include="UserMessaging\MessageGenerator.cs" />
     <Compile Include="Utilities\ImageProcessing.cs" />
+    <Compile Include="Utilities\ProcessControl.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mappings\DatabaseSettings.hbm.xml" />
@@ -347,7 +351,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="InterfaceImpl\" />
-    <Folder Include="Spikes\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">

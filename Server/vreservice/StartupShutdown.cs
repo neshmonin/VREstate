@@ -22,6 +22,7 @@ namespace Vre.Server
         public static string[] Listeners { get { lock (_listeners) return _listeners.ToArray(); } }
 
         private static HttpServiceBase _httpService;
+		private static Vre.Server.Spikes.WmiController _wmiController;
 
         public static void PerformStartup(bool startAsService)
         {
@@ -34,6 +35,8 @@ namespace Vre.Server
                     string.Empty
             );
             Status = "Starting...";
+
+			_wmiController = null;
 
             try
             {
@@ -92,6 +95,12 @@ namespace Vre.Server
                     startCommunications();
                 }
 
+				if (Configuration.Service.WmiControl.Value)
+				{
+					_wmiController = new Spikes.WmiController(100 * 1024 * 1024);
+					_wmiController.Start();
+				}
+
                 Status = "Running.";
 
                 // TODO: DEBUG
@@ -108,6 +117,8 @@ namespace Vre.Server
         {
             ServiceInstances.Logger.Info("Stopping server.");
             Status = "Stopping...";
+
+			if (_wmiController != null) _wmiController.Stop();
             
             stopCommunications();
 
