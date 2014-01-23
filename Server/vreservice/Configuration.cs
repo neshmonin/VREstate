@@ -237,6 +237,9 @@ namespace Vre.Server
 		{
 			public static readonly StringConfigurationParam ServerRole =
 				new StringConfigurationParam(_config, "ServerRole", "VRT");
+
+			public static readonly BooleanConfigurationParam WmiControl =
+				new BooleanConfigurationParam(_config, "WmiControl", false);
 		}
 
 		public static class Urls

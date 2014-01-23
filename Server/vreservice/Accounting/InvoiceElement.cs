@@ -1,27 +1,92 @@
 ﻿using System;
-using Vre.Server;
 using Vre.Server.BusinessLogic;
 
 namespace Vre.Server.Accounting
 {
-	class InvoiceElement : IClientDataProvider
+    abstract class InvoiceElement : IClientDataProvider
+    {
+        public abstract decimal Amount { get; }
+
+        public InvoiceElement() { }
+
+        public abstract ClientData GetClientData();
+
+        public bool UpdateFromClient(ClientData data)
+        {
+            throw new InvalidOperationException();
+        }
+    }
+
+    class RequestInvoiceElement : InvoiceElement
+    {
+        public readonly ServiceRequestItem Request;
+        public readonly object Subject;
+
+        public override decimal Amount { get { return Request.Price; } }
+
+        public RequestInvoiceElement(ServiceRequestItem request, object subject)
+        {
+            Request = request;
+            Subject = subject;
+        }
+
+        public override ClientData GetClientData()
+        {
+            var result = new ClientData();
+
+            result.Add("time", Request.Created);
+
+            switch (Request.ServiceObjectType)
+            {
+                case ServiceRequestItem.ServiceType.ViewOrder:
+                    {
+                        var vo = Subject as ViewOrder;
+                        if (vo != null)
+                        {
+                            result.Add("type", "viewOrder");
+                            result.Add("id", UniversalId.GenerateUrlId(UniversalId.IdType.ViewOrder, vo.AutoID));
+                            result.Add("mlsId", string.IsNullOrEmpty(vo.MlsId) ? "N/A" : vo.MlsId);
+                        }
+                        else
+                        {
+                            result.Add("type", "viewOrder");
+                            result.Add("id", "N/A");
+                            result.Add("mlsId", "N/A");
+                        }
+                    }
+                    break;
+
+                default:
+                    result.Add("type", Request.ServiceObjectType.ToString());
+                    break;
+            }
+
+            result.Add("effectiveCost", Request.Price);
+
+            return result;
+        }
+    }
+
+	class ServiceInvoiceElement : InvoiceElement
 	{
 		public readonly DateTime StartTime, EndTime;
 		public readonly PricingPolicy Policy;
 		public readonly object Subject;
-		public readonly decimal Amount;
+        public override decimal Amount { get { return _amount; } }
 
-		public InvoiceElement(DateTime from, DateTime to,
+		private readonly decimal _amount;
+
+		public ServiceInvoiceElement(DateTime from, DateTime to,
 			PricingPolicy policy, decimal amount)
 		{
 			StartTime = from;
 			EndTime = to;
 			Policy = policy;
 			Subject = null;
-			Amount = amount;
+			_amount = amount;
 		}
 
-		public InvoiceElement(DateTime from, DateTime to,
+        public ServiceInvoiceElement(DateTime from, DateTime to,
 			PricingPolicy policy, object subject, decimal amount)
 		{
 			if (!(subject is ViewOrder)
@@ -32,10 +97,10 @@ namespace Vre.Server.Accounting
 			EndTime = to;
 			Policy = policy;
 			Subject = subject;
-			Amount = amount;
+			_amount = amount;
 		}
 
-		public ClientData GetClientData()
+		public override ClientData GetClientData()
 		{
 			var result = new ClientData();
 
@@ -60,11 +125,6 @@ namespace Vre.Server.Accounting
 			}
 
 			return result;
-		}
-
-		public bool UpdateFromClient(ClientData data)
-		{
-			throw new InvalidOperationException();
 		}
 	}
 }

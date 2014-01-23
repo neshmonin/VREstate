@@ -54,7 +54,11 @@ namespace Vre.Server.BusinessLogic
 			/// <summary>
 			/// Independent buying and selling agent; usually belongs to a Brokerage
 			/// </summary>
-			Agent = 10
+			Agent = 10,
+            /// <summary>
+            /// Brokerage Administrator with extensive rights applied to owning BrokerageInfo object
+            /// </summary>
+            BrokerageAdmin = 11
 	    }
 
         public Role UserRole { get; private set; }
@@ -276,6 +280,18 @@ namespace Vre.Server.BusinessLogic
                 return string.Format("ID={0},r={1},ED={2}", AutoID, UserRole, EstateDeveloperID);
             else
                 return string.Format("ID={0},r={1},e={2}", AutoID, UserRole, PrimaryEmailAddress);
+        }
+
+        public void Debit(decimal units)
+        {
+            CreditUnits -= units;
+            MarkUpdated();
+        }
+
+        public void Credit(decimal units)
+        {
+            CreditUnits += units;
+            MarkUpdated();
         }
     }
 }

@@ -289,7 +289,10 @@ namespace Vre.Server.BusinessLogic
 			addUserAcl(User.Role.SuperAdmin, User.Role.Agent,
 				UserInfoAccessLevel.Administrative, UserInfoAccessLevel.Administrative,
 				UserInfoAccessLevel.Administrative, UserInfoAccessLevel.Administrative);
-			addUserAcl(User.Role.SuperAdmin, User.Role.Subcontractor,
+            addUserAcl(User.Role.SuperAdmin, User.Role.BrokerageAdmin,
+                UserInfoAccessLevel.Administrative, UserInfoAccessLevel.Administrative,
+                UserInfoAccessLevel.Administrative, UserInfoAccessLevel.Administrative);
+            addUserAcl(User.Role.SuperAdmin, User.Role.Subcontractor,
                 UserInfoAccessLevel.Administrative, UserInfoAccessLevel.Administrative,
                 UserInfoAccessLevel.Administrative, UserInfoAccessLevel.Administrative);
             addUserAcl(User.Role.SuperAdmin, User.Role.SuperAdmin,
@@ -316,13 +319,16 @@ namespace Vre.Server.BusinessLogic
                 UserInfoAccessLevel.None, UserInfoAccessLevel.Administrative);
             addUserAcl(User.Role.DeveloperAdmin, User.Role.SellingAgent,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,  // Should be more here?
-                UserInfoAccessLevel.Transactional, UserInfoAccessLevel.Transactional);
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
 			addUserAcl(User.Role.DeveloperAdmin, User.Role.Agent,
 				UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,  // Should be more here?
-				UserInfoAccessLevel.Transactional, UserInfoAccessLevel.Transactional);
-			addUserAcl(User.Role.DeveloperAdmin, User.Role.BuyingAgent,
+				UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.DeveloperAdmin, User.Role.BrokerageAdmin,
+                UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,  // Should be more here?
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.DeveloperAdmin, User.Role.BuyingAgent,
 				UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,  // Should be more here?
-				UserInfoAccessLevel.Transactional, UserInfoAccessLevel.Transactional);
+				UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
 			addUserAcl(User.Role.DeveloperAdmin, User.Role.Subcontractor,
                 UserInfoAccessLevel.None, UserInfoAccessLevel.Administrative,
                 UserInfoAccessLevel.Contact, UserInfoAccessLevel.Administrative);
@@ -357,7 +363,10 @@ namespace Vre.Server.BusinessLogic
 			addUserAcl(User.Role.Kiosk, User.Role.Agent,
 				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
 				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
-			addUserAcl(User.Role.Kiosk, User.Role.Subcontractor,
+            addUserAcl(User.Role.Kiosk, User.Role.BrokerageAdmin,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+            addUserAcl(User.Role.Kiosk, User.Role.Subcontractor,
                 UserInfoAccessLevel.None, UserInfoAccessLevel.None,
                 UserInfoAccessLevel.None, UserInfoAccessLevel.None);
             addUserAcl(User.Role.Kiosk, User.Role.SuperAdmin,
@@ -391,7 +400,10 @@ namespace Vre.Server.BusinessLogic
 			addUserAcl(User.Role.SalesPerson, User.Role.Agent,
 				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
 				UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
-			addUserAcl(User.Role.SalesPerson, User.Role.Subcontractor,
+            addUserAcl(User.Role.SalesPerson, User.Role.BrokerageAdmin,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.SalesPerson, User.Role.Subcontractor,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Contact,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Contact);
             addUserAcl(User.Role.SalesPerson, User.Role.SuperAdmin,
@@ -425,7 +437,10 @@ namespace Vre.Server.BusinessLogic
 			addUserAcl(User.Role.SellingAgent, User.Role.Agent,
 				UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
 				UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
-			addUserAcl(User.Role.SellingAgent, User.Role.Subcontractor,
+            addUserAcl(User.Role.SellingAgent, User.Role.BrokerageAdmin,
+                UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.SellingAgent, User.Role.Subcontractor,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
                 UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
             addUserAcl(User.Role.SellingAgent, User.Role.SuperAdmin,
@@ -459,7 +474,10 @@ namespace Vre.Server.BusinessLogic
 			addUserAcl(User.Role.BuyingAgent, User.Role.Agent,
 				UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
 				UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
-			addUserAcl(User.Role.BuyingAgent, User.Role.Subcontractor,
+            addUserAcl(User.Role.BuyingAgent, User.Role.BrokerageAdmin,
+                UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.BuyingAgent, User.Role.Subcontractor,
 				UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
 				UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
 			addUserAcl(User.Role.BuyingAgent, User.Role.SuperAdmin,
@@ -493,7 +511,10 @@ namespace Vre.Server.BusinessLogic
 			addUserAcl(User.Role.Agent, User.Role.Agent,
 				UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
 				UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
-			addUserAcl(User.Role.Agent, User.Role.Subcontractor,
+            addUserAcl(User.Role.Agent, User.Role.BrokerageAdmin,
+                UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.Agent, User.Role.Subcontractor,
 				UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
 				UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
 			addUserAcl(User.Role.Agent, User.Role.SuperAdmin,
@@ -527,7 +548,10 @@ namespace Vre.Server.BusinessLogic
 			addUserAcl(User.Role.Subcontractor, User.Role.Agent,
 				UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
 				UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
-			addUserAcl(User.Role.Subcontractor, User.Role.Subcontractor,
+            addUserAcl(User.Role.Subcontractor, User.Role.BrokerageAdmin,
+                UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.Subcontractor, User.Role.Subcontractor,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Contact,
                 UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
             addUserAcl(User.Role.Subcontractor, User.Role.SuperAdmin,
@@ -561,7 +585,10 @@ namespace Vre.Server.BusinessLogic
 			addUserAcl(User.Role.Buyer, User.Role.Agent,
 				UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact,
 				UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
-			addUserAcl(User.Role.Buyer, User.Role.Subcontractor,
+            addUserAcl(User.Role.Buyer, User.Role.BrokerageAdmin,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.Buyer, User.Role.Subcontractor,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
                 UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
             addUserAcl(User.Role.Buyer, User.Role.SuperAdmin,
@@ -595,7 +622,10 @@ namespace Vre.Server.BusinessLogic
 			addUserAcl(User.Role.Visitor, User.Role.Agent,
 				UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact,
 				UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
-			addUserAcl(User.Role.Visitor, User.Role.Subcontractor,
+            addUserAcl(User.Role.Visitor, User.Role.BrokerageAdmin,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.Visitor, User.Role.Subcontractor,
                 UserInfoAccessLevel.Minimal, UserInfoAccessLevel.Minimal,
                 UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
             addUserAcl(User.Role.Visitor, User.Role.SuperAdmin,
@@ -629,7 +659,10 @@ namespace Vre.Server.BusinessLogic
 			addUserAcl(User.Role.Anonymous, User.Role.Agent,
 				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
 				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
-			addUserAcl(User.Role.Anonymous, User.Role.Subcontractor,
+            addUserAcl(User.Role.Anonymous, User.Role.BrokerageAdmin,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+            addUserAcl(User.Role.Anonymous, User.Role.Subcontractor,
 				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
 				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
 			addUserAcl(User.Role.Anonymous, User.Role.SuperAdmin,
@@ -642,7 +675,44 @@ namespace Vre.Server.BusinessLogic
 				UserInfoAccessLevel.None, UserInfoAccessLevel.None,
 				UserInfoAccessLevel.None, UserInfoAccessLevel.None);
 
-			// cross-reference check
+            addUserAcl(User.Role.BrokerageAdmin, User.Role.Buyer,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.BrokerageAdmin, User.Role.DeveloperAdmin,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.BrokerageAdmin, User.Role.Kiosk,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+            addUserAcl(User.Role.BrokerageAdmin, User.Role.SalesPerson,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.BrokerageAdmin, User.Role.SellingAgent,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.BrokerageAdmin, User.Role.BuyingAgent,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.BrokerageAdmin, User.Role.Agent,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);  // TODO: BrokerageAdmin CONTROL - need more control over agents?
+            addUserAcl(User.Role.BrokerageAdmin, User.Role.BrokerageAdmin,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.BrokerageAdmin, User.Role.Subcontractor,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.BrokerageAdmin, User.Role.SuperAdmin,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.Contact, UserInfoAccessLevel.Contact);
+            addUserAcl(User.Role.BrokerageAdmin, User.Role.Anonymous,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+            addUserAcl(User.Role.BrokerageAdmin, User.Role.Visitor,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None,
+                UserInfoAccessLevel.None, UserInfoAccessLevel.None);
+
+            // cross-reference check
 			foreach (var t in Enum.GetValues(typeof(User.Role)))
 			{
 				Dictionary<User.Role, Tuple<UserInfoAccessLevel, UserInfoAccessLevel, UserInfoAccessLevel, UserInfoAccessLevel>> acl;

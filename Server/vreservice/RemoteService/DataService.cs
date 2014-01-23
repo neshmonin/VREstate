@@ -22,7 +22,7 @@ namespace Vre.Server.RemoteService
 
         enum ModelObject { User, EstateDeveloper, Site, Building, Suite, 
 			SuiteType, ViewOrder, View, FinancialTransaction, Inventory, 
-			NamedSearchFilter, Brokerage, PricingPolicy, Billing }
+			NamedSearchFilter, Brokerage, PricingPolicy, Billing, Invoice }
 
 		static DataService()
 		{
@@ -239,6 +239,10 @@ namespace Vre.Server.RemoteService
 				case ModelObject.Billing:
 					getBilling(request.UserInfo.Session, request.Request.Query, request.Response);
 					return;
+
+				case ModelObject.Invoice:
+					getInvoiceList(request.UserInfo.Session, request.Request.Query, request.Response);
+					return;
 			}
 
             throw new NotImplementedException();
@@ -403,6 +407,7 @@ namespace Vre.Server.RemoteService
 			else if (elements[1].Equals("brokerage")) mo = ModelObject.Brokerage;
 			else if (elements[1].Equals("pp")) mo = ModelObject.PricingPolicy;
 			else if (elements[1].Equals("bill")) mo = ModelObject.Billing;
+			else if (elements[1].Equals("invoice")) mo = ModelObject.Invoice;
 			else throw new ArgumentException("Object path is invalid (2).");
 
             strId = null;
@@ -1770,12 +1775,68 @@ namespace Vre.Server.RemoteService
 			}
 			else if (type.Equals("agent"))
 			{
+				using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
+				{
+					User u;
+					using (var dao = new UserDao(session.DbSession))
+						u = dao.GetById(objectId);
+
+					if (null == u) throw new FileNotFoundException("User does not exist");
+
+					result = Vre.Server.Accounting.Biller.CalculateCurrentForAgent(session.DbSession, u);
+				}
 			}
 
 			if (result != null)
 			{
 				resp.ResponseCode = HttpStatusCode.OK;
 				resp.Data = result.GetClientData();
+			}
+			else
+			{
+				resp.ResponseCode = HttpStatusCode.NotFound;
+				resp.ResponseCodeDescription = "No data generated for type/id/time provided";
+			}
+		}
+
+		private static void getInvoiceList(ClientSession session, ServiceQuery query, IResponseData resp)
+		{
+			var type = query.GetParam("type", "brokerage").ToLowerInvariant();
+			int objectId = query.GetParam("id", -1);
+			if (objectId < 0) throw new ArgumentException("Object ID missing.");
+
+			DateTime from, to;
+			if (!DateTime.TryParseExact(query.GetParam("from", string.Empty), "yyyy-MM-ddTHH:mm:ss", 
+				null, System.Globalization.DateTimeStyles.None, out from))
+				throw new ArgumentException("'From' value is invalid");
+			if (!DateTime.TryParseExact(query.GetParam("to", string.Empty), "yyyy-MM-ddTHH:mm:ss",
+				null, System.Globalization.DateTimeStyles.None, out to))
+				throw new ArgumentException("'To' value is invalid");
+
+			// TODO: Replace with proper rule checking
+			if (session.User.UserRole != User.Role.SuperAdmin)
+				throw new UnauthorizedAccessException();
+
+			IEnumerable<Invoice> result = null;
+			if (type.Equals("brokerage"))
+			{
+				using (var dao = new InvoiceDao(session.DbSession))
+					result = dao.Get(Invoice.SubjectType.Brokerage, objectId, from, to);
+			}
+			else if (type.Equals("agent"))
+			{
+				using (var dao = new InvoiceDao(session.DbSession))
+					result = dao.Get(Invoice.SubjectType.Agent, objectId, from, to);
+			}
+
+			if (result != null)
+			{
+				resp.ResponseCode = HttpStatusCode.OK;
+				resp.Data = new ClientData();
+
+				List<ClientData> rl = new List<ClientData>();
+				foreach (var i in result) rl.Add(i.GetClientData());
+				resp.Data.Add("invoices", rl.ToArray());
 			}
 			else
 			{
@@ -1926,22 +1987,23 @@ namespace Vre.Server.RemoteService
 
 					var updated = user.UpdateFromClient(data);
 
-					var bid = data.GetProperty("brokerageId", -1);
-					if (bid > 0)  // try setting brokerage
-					{
-						if (((user.BrokerInfo != null) && (user.BrokerInfo.AutoID != bid))
-							|| (null == user.BrokerInfo))
-						{
-							using (var dao = new BrokerageInfoDao(session.DbSession))
-								user.BrokerInfo = dao.GetById(bid);
-							updated = true;
-						}
-					}
-					else if ((0 == bid) && (user.BrokerInfo != null))
-					{
-						user.BrokerInfo = null;
-						updated = true;
-					}
+                    // block changing brokerage for now; should be possible?!
+                    //var bid = data.GetProperty("brokerageId", -1);
+                    //if (bid > 0)  // try setting brokerage
+                    //{
+                    //    if (((user.BrokerInfo != null) && (user.BrokerInfo.AutoID != bid))
+                    //        || (null == user.BrokerInfo))
+                    //    {
+                    //        using (var dao = new BrokerageInfoDao(session.DbSession))
+                    //            user.BrokerInfo = dao.GetById(bid);
+                    //        updated = true;
+                    //    }
+                    //}
+                    //else if ((0 == bid) && (user.BrokerInfo != null))
+                    //{
+                    //    user.BrokerInfo = null;
+                    //    updated = true;
+                    //}
 					
 					if (updated)
                     {
@@ -2132,27 +2194,28 @@ namespace Vre.Server.RemoteService
         {
             User.Role role = data.GetProperty<User.Role>("role", User.Role.Visitor);
             LoginType type = data.GetProperty<LoginType>("type", LoginType.Plain);
-            int estateDeveloperId = ResolveDeveloperId(session.DbSession, data.GetProperty("ed", string.Empty));
+            int estateDeveloperId = ResolveDeveloperId(session.DbSession, data.GetProperty("estateDeveloperId", string.Empty));
+            if (estateDeveloperId < 0) estateDeveloperId = ResolveDeveloperId(session.DbSession, data.GetProperty("ed", string.Empty));  // OBSOLETE
             string login = data.GetProperty("uid", string.Empty);
             string password = data.GetProperty("pwd", string.Empty);
+            var brokerageId = data.GetProperty("brokerageId", -1);
 
 			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
 			{
 				User u;
 				using (UserManager manager = new UserManager(session))
 				{
-					manager.Create(role, estateDeveloperId, type, login, password);
+					manager.Create(role, estateDeveloperId >= 0 ? estateDeveloperId : brokerageId, type, login, password);
 					try
 					{
 						// create contact info block with any added fields from inbound JSON
 						u = manager.Get(type, role, estateDeveloperId, login);
 						u.UpdateFromClient(data);
 
-						var bid = data.GetProperty("brokerageId", -1);
-						if (bid > 0)  // try setting brokerage
+						if (brokerageId > 0)  // try setting brokerage
 						{
 							using (var dao = new BrokerageInfoDao(session.DbSession))
-								u.BrokerInfo = dao.GetById(bid);
+							u.BrokerInfo = dao.GetById(brokerageId);
 						}
 
 						manager.Update(u);
@@ -2619,6 +2682,9 @@ namespace Vre.Server.RemoteService
                 ServiceInstances.Logger.Info("On-the-fly ViewOrder reconcile adjusted {0} suite states.", ccnt);
         }
 
+        /// <summary>
+        /// Returns -1 if ID string passed cannot be resolved to a Estate Developer ID
+        /// </summary>
         internal static int ResolveDeveloperId(ISession session, string id)
         {
             int result = -1;

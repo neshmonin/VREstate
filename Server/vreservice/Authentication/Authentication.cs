@@ -54,7 +54,7 @@ namespace Vre.Server.BusinessLogic
             return true;
         }
 
-        public bool CreateLogin(LoginType type, User.Role role, int estateDeveloperId, string login, string password, 
+        public bool CreateLogin(LoginType type, User.Role role, int aggregateObjectIdId, string login, string password, 
             int userId, out string errorReason)
         {
             bool result = false;
@@ -75,7 +75,7 @@ namespace Vre.Server.BusinessLogic
             {
                 using (CredentialsDao dao = new CredentialsDao(_session))
                 {
-                    string intLogin = intLoginFromVisible(role, estateDeveloperId, login);
+                    string intLogin = intLoginFromVisible(role, aggregateObjectIdId, login);
                     Credentials item = dao.GetByLogin(type, intLogin);
                     if (null == item)
                     {
@@ -152,12 +152,12 @@ namespace Vre.Server.BusinessLogic
                     if (null != item)
                     {
                         User.Role role;
-                        int estateDeveloperId;
+                        int aggregateObjectId;
                         string login = null;
 
-                        result = loginElementsFromIntLogin(item.Login, out role, out estateDeveloperId, out login);
+                        result = loginElementsFromIntLogin(item.Login, out role, out aggregateObjectId, out login);
 
-                        string test = intLoginFromVisible(role, estateDeveloperId, newLogin);
+                        string test = intLoginFromVisible(role, aggregateObjectId, newLogin);
 
                         if (null == dao.GetByLogin(LoginType.Plain, test))
                         {
@@ -181,7 +181,7 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
-        public bool AuthenticateUser(LoginType type, User.Role role, int estateDeveloperId, string login, string password, 
+        public bool AuthenticateUser(LoginType type, User.Role role, int aggregateObjectId, string login, string password, 
             out int userId)
         {
             bool result = false;
@@ -189,7 +189,7 @@ namespace Vre.Server.BusinessLogic
 
             using (CredentialsDao dao = new CredentialsDao(_session))
             {
-                Credentials item = dao.GetByLogin(type, intLoginFromVisible(role, estateDeveloperId, login));
+                Credentials item = dao.GetByLogin(type, intLoginFromVisible(role, aggregateObjectId, login));
                 if (null != item)
                 {
                     // TODO: Validate login/password pair against external services for external logins
@@ -201,13 +201,13 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
-        public int UserIdByLogin(LoginType type, User.Role role, int estateDeveloperId, string login)
+        public int UserIdByLogin(LoginType type, User.Role role, int aggregateObjectId, string login)
         {
             int result = -1;
 
             using (CredentialsDao dao = new CredentialsDao(_session))
             {
-                Credentials item = dao.GetByLogin(type, intLoginFromVisible(role, estateDeveloperId, login));
+                Credentials item = dao.GetByLogin(type, intLoginFromVisible(role, aggregateObjectId, login));
                 if (null != item) result = item.UserId;
             }
 
@@ -215,13 +215,13 @@ namespace Vre.Server.BusinessLogic
         }
 
         public bool LoginByUserId(int userId, 
-            out LoginType loginType, out User.Role role, out int estateDeveloperId, out string login)
+            out LoginType loginType, out User.Role role, out int aggregateObjectId, out string login)
         {
             bool result = false;
 
             loginType = LoginType.Plain;
             role = User.Role.Anonymous;
-            estateDeveloperId = -1;
+            aggregateObjectId = -1;
             login = null;
 
             using (CredentialsDao dao = new CredentialsDao(_session))
@@ -230,14 +230,14 @@ namespace Vre.Server.BusinessLogic
                 if (item != null)
                 {
                     loginType = item.Type;
-                    result = loginElementsFromIntLogin(item.Login, out role, out estateDeveloperId, out login);
+                    result = loginElementsFromIntLogin(item.Login, out role, out aggregateObjectId, out login);
                 }
             }
 
             return result;
         }
 
-        public bool DropLogin(LoginType type, User.Role role, int estateDeveloperId, string login)
+        public bool DropLogin(LoginType type, User.Role role, int aggregateObjectId, string login)
         {
             bool result = false;
 
@@ -245,7 +245,7 @@ namespace Vre.Server.BusinessLogic
             {
                 using (CredentialsDao dao = new CredentialsDao(_session))
                 {
-                    Credentials item = dao.GetByLogin(type, intLoginFromVisible(role, estateDeveloperId, login));
+                    Credentials item = dao.GetByLogin(type, intLoginFromVisible(role, aggregateObjectId, login));
                     if (null != item)
                     {
                         dao.Delete(item);
@@ -279,7 +279,7 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
-        private static string intLoginFromVisible(User.Role role, int estateDeveloperId, string login)
+        private static string intLoginFromVisible(User.Role role, int aggregateObjectId, string login)
         {
             switch (role)
             {
@@ -287,13 +287,13 @@ namespace Vre.Server.BusinessLogic
                     return login;
 
                 case User.Role.DeveloperAdmin:
-                    return string.Format("@{0}a{1}", estateDeveloperId, login);
+                    return string.Format("@{0}a{1}", aggregateObjectId, login);
 
                 case User.Role.SalesPerson:
-                    return string.Format("@{0}s{1}", estateDeveloperId, login);
+                    return string.Format("@{0}s{1}", aggregateObjectId, login);
 
                 case User.Role.Subcontractor:
-                    return string.Format("@{0}c{1}", estateDeveloperId, login);
+                    return string.Format("@{0}c{1}", aggregateObjectId, login);
 
                 case User.Role.Buyer:
                     return string.Format("%{0}", login);
@@ -307,8 +307,11 @@ namespace Vre.Server.BusinessLogic
 				case User.Role.Agent:
 					return string.Format("&{0}", login);
 
+                case User.Role.BrokerageAdmin:
+                    return string.Format("@{0}b{1}", aggregateObjectId, login);
+
 				case User.Role.Kiosk:
-                    return string.Format("@{0}k{1}", estateDeveloperId, login);
+                    return string.Format("@{0}k{1}", aggregateObjectId, login);
 
                 default:
                     throw new ArgumentException("Unknown user role");
@@ -316,7 +319,7 @@ namespace Vre.Server.BusinessLogic
         }
 
         private static bool loginElementsFromIntLogin(string intLogin,
-            out User.Role role, out int estateDeveloperId, out string login)
+            out User.Role role, out int aggregateObjectId, out string login)
         {
             bool result = false;
 
@@ -326,50 +329,51 @@ namespace Vre.Server.BusinessLogic
                 while ((idx < intLogin.Length) && (intLogin[idx] >= '0') && (intLogin[idx] <= '9')) idx++;
 
                 role = User.Role.Buyer;
-                estateDeveloperId = -1;
+                aggregateObjectId = -1;
                 login = null;
 
-                if ((idx < intLogin.Length) && int.TryParse(intLogin.Substring(1, idx - 1), out estateDeveloperId))
+                if ((idx < intLogin.Length) && int.TryParse(intLogin.Substring(1, idx - 1), out aggregateObjectId))
                 {
                     login = intLogin.Substring(idx + 1);
                     if ('a' == intLogin[idx]) { role = User.Role.DeveloperAdmin; result = true; }
                     else if ('s' == intLogin[idx]) { role = User.Role.SalesPerson; result = true; }
                     else if ('c' == intLogin[idx]) { role = User.Role.Subcontractor; result = true; }
                     else if ('k' == intLogin[idx]) { role = User.Role.Kiosk; result = true; }
+                    else if ('b' == intLogin[idx]) { role = User.Role.BrokerageAdmin; result = true; }
                 }
             }
             else if (intLogin.StartsWith("#"))
             {
                 role = User.Role.SellingAgent;
-                estateDeveloperId = -1;
+                aggregateObjectId = -1;
                 login = intLogin.Substring(1);
                 result = true;
             }
 			else if (intLogin.StartsWith("^"))
 			{
 				role = User.Role.BuyingAgent;
-				estateDeveloperId = -1;
+				aggregateObjectId = -1;
 				login = intLogin.Substring(1);
 				result = true;
 			}
 			else if (intLogin.StartsWith("&"))
 			{
 				role = User.Role.Agent;
-				estateDeveloperId = -1;
+				aggregateObjectId = -1;
 				login = intLogin.Substring(1);
 				result = true;
 			}
 			else if (intLogin.StartsWith("%"))
             {
                 role = User.Role.Buyer;
-                estateDeveloperId = -1;
+                aggregateObjectId = -1;
                 login = intLogin.Substring(1);
                 result = true;
             }
             else
             {
                 role = User.Role.SuperAdmin;
-                estateDeveloperId = -1;
+                aggregateObjectId = -1;
                 login = intLogin;
                 result = true;
             }

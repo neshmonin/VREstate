@@ -92,7 +92,13 @@ namespace Vre.Server.RemoteService
 					setUserPhoto(request);
 					return;
 				}
-			}
+                else if (command.Equals("credit")
+                    && ((request.Request.Type == RequestType.Insert) || (request.Request.Type == RequestType.Update) || (request.Request.Type == RequestType.Get)))
+                {
+                    credit(request);
+                    return;
+                }
+            }
 
             throw new ArgumentException("Program command not understood.");
         }
@@ -137,6 +143,8 @@ namespace Vre.Server.RemoteService
             // role with default of superadmin
             if (!Enum.TryParse<User.Role>(request.Request.Query["role"], true, out role)) role = User.Role.SuperAdmin;
 
+            var brokerageId = request.Request.Query.GetParam("bid", -1);
+
             // estate developer ID with default of none and reference by name support
             int edId = DataService.ResolveDeveloperId(null, estateDeveloperId);
 
@@ -145,7 +153,7 @@ namespace Vre.Server.RemoteService
             if ((!string.IsNullOrWhiteSpace(login)) && (!string.IsNullOrWhiteSpace(password)))
             {
                 sessionId = ServiceInstances.SessionStore.LoginUser(request.Request.EndPoint, 
-                    loginType, role, edId, login, password);
+                    loginType, role, (edId >= 0) ? edId : brokerageId, login, password);
             }
 
             // test user validity
@@ -191,6 +199,7 @@ namespace Vre.Server.RemoteService
             string login = request.Request.Query["uid"];
             User.Role role;
             int estateDeveloperId = DataService.ResolveDeveloperId(null, request.Request.Query["ed"]);
+            int brokerageId = request.Request.Query.GetParam("bid", -1);
             string password = request.Request.Query["pwd"];
             string newPassword = request.Request.Query["npwd"];
             if (!Enum.TryParse<User.Role>(request.Request.Query["role"], true, out role)) role = User.Role.Visitor;
@@ -205,7 +214,8 @@ namespace Vre.Server.RemoteService
                     }
                     else
                     {
-                        manager.ChangePassword(loginType, role, estateDeveloperId, login, password, newPassword);
+                        manager.ChangePassword(loginType, role, estateDeveloperId >= 0 ? estateDeveloperId : brokerageId, 
+                            login, password, newPassword);
                     }
                 }
             }
@@ -925,5 +935,44 @@ namespace Vre.Server.RemoteService
 					"jpeg", null, s);
 			}
 		}
+
+        private static void credit(IServiceRequest request)
+        {
+            if ((null == request.UserInfo.Session)
+                || !request.UserInfo.Session.TrustedConnection
+                || (request.UserInfo.Session.User.UserRole != User.Role.SuperAdmin))
+                throw new ArgumentException("Program command not understood.");  // conceal request availability
+
+            var targetType = request.Request.Query.GetParam("targettype", string.Empty);
+            var targetId = request.Request.Query.GetParam("targetid", -1);
+            decimal amount;
+
+            if (targetId < 0) throw new ArgumentException("Target (creditee) ID not provided or is invalid");
+            
+            if (!decimal.TryParse(request.Request.Query.GetParam("amount", "0"), out amount))
+                throw new ArgumentException("Credit amount not provided or is invalid");
+
+            if (targetType.Equals("user", StringComparison.InvariantCultureIgnoreCase))
+            {
+                using (var man = new UserManager(request.UserInfo.Session))
+                    amount = man.Credit(targetId, amount);
+
+                request.Response.ResponseCode = HttpStatusCode.OK;
+                request.Response.Data = new ClientData();
+                request.Response.Data.Add("userId", targetId);
+                request.Response.Data.Add("creditUnits", amount);
+            }
+            else if (targetType.Equals("brokerage", StringComparison.InvariantCultureIgnoreCase))
+            {
+                using (var man = new BrokerageManager(request.UserInfo.Session))
+                    amount = man.Credit(targetId, amount);
+
+                request.Response.ResponseCode = HttpStatusCode.OK;
+                request.Response.Data = new ClientData();
+                request.Response.Data.Add("brokerageId", targetId);
+                request.Response.Data.Add("creditUnits", amount);
+            }
+            else throw new ArgumentException("Target type (creditee) not provided or is invalid");
+        }
     }
 }
