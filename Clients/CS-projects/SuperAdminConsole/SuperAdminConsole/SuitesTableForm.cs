@@ -105,11 +105,27 @@ namespace SuperAdminConsole
             int index = 0;
             int tabIndex = 0;
 
+            // ---- Uncomment the following code to get a report on the suites ----
+            string printableReport = string.Empty;
+            System.Diagnostics.Trace.WriteLine("");
+            System.Diagnostics.Trace.WriteLine("=====================================================================");
+            System.Diagnostics.Trace.WriteLine(Building.ToString());
+            // ---- End of the buildings report code ----
+
             foreach (ClientData suite in suites)
             {
                 SuiteInventory theSuite = new SuiteInventory(suite);
+
                 if (floor != suite["floorName"] as string)
                 {
+                    // ---- Uncomment the following code to get a report on the suites ----
+                    if (!string.IsNullOrEmpty(printableReport))
+                    {
+                        System.Diagnostics.Trace.WriteLine(printableReport);
+                        printableReport = string.Empty;
+                    }
+                    // ---- End of the buildings report code ----
+
                     floor = suite["floorName"] as string;
                     label.Y += lineIncrement;
                     button.X = labelUnits.Location.X;
@@ -126,6 +142,12 @@ namespace SuperAdminConsole
                     lbl.TabIndex = tabIndex++;
                     this.Controls.Add(lbl);
                 }
+
+                // ---- Uncomment the following code to get a report on the suites ----
+                if (theSuite.Area <= 0.0 || theSuite.Bathrooms <= 0 || theSuite.Bathrooms <= 0)
+                    printableReport += "\t" + theSuite.SuiteName;
+                // ---- End of the buildings report code ----
+
                 Button btn = new Button();
                 btn.Location = button;
                 btn.Size = new Size(ButtonIncrement - 4, 23);
@@ -161,6 +183,7 @@ namespace SuperAdminConsole
                                     mls);
                 toolTipButton.SetToolTip(btn, tooltip);
                 //btn.UseVisualStyleBackColor = true;
+
                 btn.TabIndex = tabIndex++;
                 btn.Click += new System.EventHandler(delegate(object o, EventArgs e)
                     {

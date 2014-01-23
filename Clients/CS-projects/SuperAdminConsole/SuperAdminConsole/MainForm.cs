@@ -215,8 +215,10 @@ namespace SuperAdminConsole
             }
             else
             {
-                labelStreetName.Visible = treeViewAccounts.SelectedNode.Text == "ViewOrders";
-                textBoxFilter.Visible = treeViewAccounts.SelectedNode.Text == "ViewOrders";
+                labelStreetName.Visible = treeViewAccounts.SelectedNode.Text == "ViewOrders" ||
+                                          treeViewAccounts.SelectedNode.Text == "-MLS-";
+                textBoxFilter.Visible = treeViewAccounts.SelectedNode.Text == "ViewOrders" ||
+                                          treeViewAccounts.SelectedNode.Text == "-MLS-";
                 if (treeViewAccounts.SelectedNode.Tag as UpdateableBase != null)
                 {
                     if (treeViewAccounts.SelectedNode.Text == "-MLS-")
@@ -228,6 +230,7 @@ namespace SuperAdminConsole
                 {
                     switch (treeViewAccounts.SelectedNode.Text)
                     {
+                        case "-MLS-":
                         case "ViewOrders":
                             tabControlAccountProperty.SelectTab("tabPageViewOrders");
                             break;
@@ -508,7 +511,7 @@ namespace SuperAdminConsole
                     //    accountId = 8                                             int
                     //    operation = Debit                                         string
                     //    amount = 50                                               decimal
-                    //    subject = View"                                           string
+                    //    theObject = View"                                           string
                     //    target = Suite"                                           string
                     //    targetId = 8564                                           int
                     //    extraTargetInfo = 96D7DB20-DD22-4F66-B153-C7053484ED3C    string
@@ -578,9 +581,123 @@ namespace SuperAdminConsole
                         listViewAccountInfo.Items.Add(acctInfo);
                     }
                 }
+                listViewLocalPP.Items.Clear();
+                if (m_agent != null)
+                    PopulatePricingPolicy(m_agent, "agent");
+                else
+                if (m_brokerage != null)
+                    PopulatePricingPolicy(m_brokerage, "brokerage");
+
+
+                listViewCurrentBalance.Items.Clear();
             }
 
             UpdateState();
+        }
+
+        private void PopulatePricingPolicy(UpdateableBase theObject, string subject)
+        {
+            if (theObject == null) return;
+
+            ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
+                                                                "pp",
+                                                                "defaults=false&" +
+                                                                "subject=" + subject + "&" +
+                                                                "subjectid=" +
+                                                                    theObject.AutoID.ToString(),
+                                                                null);
+
+            ClientData[] policies = resp.Data.GetNextLevelDataArray("policies");
+            if (policies == null || policies.Length == 0)
+            {
+                listViewLocalPP.Visible = false;
+                buttonDeleteLocalPP.Visible = false;
+                buttonAddLocalPP.Visible = true;
+                buttonAddLocalPP.Text = "Add Local Pricing Policy...";
+                if (buttonAddLocalPP.Tag == null)
+                {
+                    buttonAddLocalPP.Tag = this;
+                    buttonAddLocalPP.Click += new System.EventHandler(
+                        delegate(object o, EventArgs evnt)
+                        {
+                            AddPricingPolicy(theObject, subject);
+                        });
+                }
+            }
+            else
+            {
+                listViewLocalPP.Visible = true;
+                buttonDeleteLocalPP.Visible = true;
+                buttonAddLocalPP.Visible = false;
+                buttonDeleteLocalPP.Text = "Delete Local Pricing Policy";
+                if (buttonDeleteLocalPP.Tag == null)
+                {
+                    buttonDeleteLocalPP.Tag = this;
+                    buttonDeleteLocalPP.Click += new System.EventHandler(
+                        delegate(object o, EventArgs evnt)
+                        {
+                            if (MessageBox.Show("Are you sure you want to delete local Pricing Policy for " +
+                                theObject.ToString() + "?", "", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                                DeletePricingPolicy(theObject, subject);
+                        });
+                }
+                foreach (ClientData policy in policies)
+                {
+                    string[] subitems = new string[2];
+                    subitems[0] = policy.GetProperty("service", "<unknown>");
+                    subitems[1] = policy.GetProperty("unitPrice", 0.00m).ToString();
+                    ListViewItem pi = new ListViewItem(subitems);
+                    listViewLocalPP.Items.Add(pi);
+                }
+            }
+        }
+
+        private void AddPricingPolicy(UpdateableBase theObject, string subject)
+        {
+            ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
+                                                                "pp",
+                                                                "defaults=true&" +
+                                                                "subject=" + subject + "&" +
+                                                                "subjectid=0",
+                                                                null);
+            ClientData[] policies = resp.Data.GetNextLevelDataArray("policies");
+            PricingPolicy[] pricingPolicies = new PricingPolicy[policies.Length];
+
+            for (int j = 0; j < policies.Length; j++)
+            {
+                pricingPolicies[j] = new PricingPolicy(policies[j]);
+                string[] subitems = new string[2];
+                subitems[0] = policies[j].GetProperty("service", "<unknown>");
+                subitems[1] = policies[j].GetProperty("unitPrice", 0.00m).ToString();
+                ListViewItem pi = new ListViewItem(subitems);
+                listViewLocalPP.Items.Add(pi);
+            }
+            PricingPolicy pp =
+                new PricingPolicy(subject == "agent" ?
+                                        PricingPolicy.SubjectType.Agent :
+                                        PricingPolicy.SubjectType.Brokerage,
+                                  theObject.AutoID,
+                                  PricingPolicy.ServiceType.ActiveAgentMontly,
+                                  5.00m);
+
+            resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Insert,
+                                                                "pp",
+                                                                "subject=" + subject + "&" +
+                                                                "subjectid=" +
+                                                                    theObject.AutoID.ToString(),
+                                                                pp.GetClientData());
+            PopulatePricingPolicy(theObject, subject);
+        }
+
+        private void DeletePricingPolicy(UpdateableBase theObject, string subject)
+        {
+            ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Delete,
+                                                                "pp",
+                                                                "subject=" + subject + "&" +
+                                                                "subjectid=" +
+                                                                    theObject.AutoID.ToString(),
+                                                                null);
+            PopulatePricingPolicy(theObject, subject);
         }
 
         private void contextMenuStripAccountProperty_Opening(object sender, CancelEventArgs e)
@@ -742,11 +859,13 @@ namespace SuperAdminConsole
         ClientData[] viewOrdersOfCurrentUser = null;
         void refreshOrders()
         {
+            Cursor current = Cursor.Current;
+            Cursor = Cursors.WaitCursor;
             if (ListViewOrders.SelectedIndices.Count > 0)
                 lastSelectedIndex = ListViewOrders.SelectedIndices[0];
 
             //https://vrt.3dcondox.com/vre/data/viewOrder?
-            //                                         userId=<selling agent id>&
+            //                                         userId=<selling theObject id>&
             //                                         sid=<SID>
             ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
                                                                 "viewOrder",
@@ -754,6 +873,8 @@ namespace SuperAdminConsole
                                                                 "&ed=" +
                                                                 m_currentDeveloper.Name +
                                                                 "&verbose=true", null);
+
+            Cursor = current;
             if (HttpStatusCode.OK != resp.ResponseCode)
             {
                 MessageBox.Show("Failed querying ViewOrders for customer \'" + m_agent.NickName + "\'");
@@ -822,7 +943,7 @@ namespace SuperAdminConsole
             string viewOrderId = viewOrder.GetProperty("id", string.Empty);
             if (viewOrderId != string.Empty)
             {
-                // ClientData agent = treeViewAccounts.SelectedNode.Tag as ClientData;
+                // ClientData theObject = treeViewAccounts.SelectedNode.Tag as ClientData;
 
                 viewOrderId = viewOrderId.Replace("-", string.Empty); 
                 ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
@@ -1271,7 +1392,7 @@ namespace SuperAdminConsole
             string viewOrderId = viewOrder.GetProperty("id", string.Empty);
             if (viewOrderId != string.Empty)
             {
-                // ClientData agent = treeViewAccounts.SelectedNode.Tag as ClientData;
+                // ClientData theObject = treeViewAccounts.SelectedNode.Tag as ClientData;
 
                 viewOrderId = viewOrderId.Replace("-", string.Empty);
                 ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,

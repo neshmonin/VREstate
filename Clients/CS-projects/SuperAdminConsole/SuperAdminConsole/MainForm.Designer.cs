@@ -61,7 +61,15 @@
             this.comboBoxEstateDeveloper = new System.Windows.Forms.ComboBox();
             this.tabControlAccountProperty = new SuperAdminConsole.WizardPages();
             this.tabPageInfo = new System.Windows.Forms.TabPage();
+            this.buttonDeleteLocalPP = new System.Windows.Forms.Button();
+            this.listViewLocalPP = new System.Windows.Forms.ListView();
+            this.columnHeaderService = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeaderRate = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.buttonAddLocalPP = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
+            this.listViewCurrentBalance = new System.Windows.Forms.ListView();
+            this.columnHeaderServiceType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeaderBalance = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.listViewAccountInfo = new System.Windows.Forms.ListView();
             this.columnHeaderProperty = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderValue = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -365,7 +373,11 @@
             // tabPageInfo
             // 
             this.tabPageInfo.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPageInfo.Controls.Add(this.buttonDeleteLocalPP);
+            this.tabPageInfo.Controls.Add(this.listViewLocalPP);
+            this.tabPageInfo.Controls.Add(this.buttonAddLocalPP);
             this.tabPageInfo.Controls.Add(this.label2);
+            this.tabPageInfo.Controls.Add(this.listViewCurrentBalance);
             this.tabPageInfo.Controls.Add(this.listViewAccountInfo);
             this.tabPageInfo.Location = new System.Drawing.Point(4, 22);
             this.tabPageInfo.Name = "tabPageInfo";
@@ -374,14 +386,90 @@
             this.tabPageInfo.TabIndex = 4;
             this.tabPageInfo.Text = "Info";
             // 
+            // buttonDeleteLocalPP
+            // 
+            this.buttonDeleteLocalPP.Location = new System.Drawing.Point(221, 260);
+            this.buttonDeleteLocalPP.Name = "buttonDeleteLocalPP";
+            this.buttonDeleteLocalPP.Size = new System.Drawing.Size(197, 23);
+            this.buttonDeleteLocalPP.TabIndex = 5;
+            this.buttonDeleteLocalPP.Text = "Delete Local Pricing Policy";
+            this.buttonDeleteLocalPP.UseVisualStyleBackColor = true;
+            // 
+            // listViewLocalPP
+            // 
+            this.listViewLocalPP.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.listViewLocalPP.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeaderService,
+            this.columnHeaderRate});
+            this.listViewLocalPP.ContextMenuStrip = this.contextMenuStripAccountProperty;
+            this.listViewLocalPP.FullRowSelect = true;
+            this.listViewLocalPP.GridLines = true;
+            this.listViewLocalPP.Location = new System.Drawing.Point(215, 290);
+            this.listViewLocalPP.MultiSelect = false;
+            this.listViewLocalPP.Name = "listViewLocalPP";
+            this.listViewLocalPP.Size = new System.Drawing.Size(206, 133);
+            this.listViewLocalPP.TabIndex = 4;
+            this.listViewLocalPP.UseCompatibleStateImageBehavior = false;
+            this.listViewLocalPP.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeaderService
+            // 
+            this.columnHeaderService.Text = "Service";
+            this.columnHeaderService.Width = 131;
+            // 
+            // columnHeaderRate
+            // 
+            this.columnHeaderRate.Text = "Rate";
+            this.columnHeaderRate.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.columnHeaderRate.Width = 67;
+            // 
+            // buttonAddLocalPP
+            // 
+            this.buttonAddLocalPP.Location = new System.Drawing.Point(221, 341);
+            this.buttonAddLocalPP.Name = "buttonAddLocalPP";
+            this.buttonAddLocalPP.Size = new System.Drawing.Size(197, 23);
+            this.buttonAddLocalPP.TabIndex = 3;
+            this.buttonAddLocalPP.Text = "Add Local Pricing Policy";
+            this.buttonAddLocalPP.UseVisualStyleBackColor = true;
+            // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(90, 350);
+            this.label2.Location = new System.Drawing.Point(11, 272);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(172, 13);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "Personal Info (not implemented yet)";
+            this.label2.Size = new System.Drawing.Size(121, 13);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "Current Balance Details:";
+            // 
+            // listViewCurrentBalance
+            // 
+            this.listViewCurrentBalance.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.listViewCurrentBalance.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeaderServiceType,
+            this.columnHeaderBalance});
+            this.listViewCurrentBalance.ContextMenuStrip = this.contextMenuStripAccountProperty;
+            this.listViewCurrentBalance.FullRowSelect = true;
+            this.listViewCurrentBalance.GridLines = true;
+            this.listViewCurrentBalance.Location = new System.Drawing.Point(2, 290);
+            this.listViewCurrentBalance.MultiSelect = false;
+            this.listViewCurrentBalance.Name = "listViewCurrentBalance";
+            this.listViewCurrentBalance.Size = new System.Drawing.Size(206, 133);
+            this.listViewCurrentBalance.TabIndex = 1;
+            this.listViewCurrentBalance.UseCompatibleStateImageBehavior = false;
+            this.listViewCurrentBalance.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeaderServiceType
+            // 
+            this.columnHeaderServiceType.Text = "Service";
+            this.columnHeaderServiceType.Width = 131;
+            // 
+            // columnHeaderBalance
+            // 
+            this.columnHeaderBalance.Text = "Balance ($)";
+            this.columnHeaderBalance.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.columnHeaderBalance.Width = 67;
             // 
             // listViewAccountInfo
             // 
@@ -676,7 +764,6 @@
         private System.Windows.Forms.ColumnHeader columnHeaderValue;
         private System.Windows.Forms.ContextMenuStrip contextMenuStripAccountProperty;
         private System.Windows.Forms.ToolStripMenuItem changePropertyValueToolStripMenuItem;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ColumnHeader buildingAdd;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem editNotesForThisItemToolStripMenuItem;
@@ -690,6 +777,15 @@
         private System.Windows.Forms.ComboBox comboBoxEstateDeveloper;
         private System.Windows.Forms.ToolStripMenuItem copyURLToClipboardToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemConvert;
+        private System.Windows.Forms.ListView listViewCurrentBalance;
+        private System.Windows.Forms.ColumnHeader columnHeaderServiceType;
+        private System.Windows.Forms.ColumnHeader columnHeaderBalance;
+        private System.Windows.Forms.ListView listViewLocalPP;
+        private System.Windows.Forms.ColumnHeader columnHeaderService;
+        private System.Windows.Forms.ColumnHeader columnHeaderRate;
+        private System.Windows.Forms.Button buttonAddLocalPP;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button buttonDeleteLocalPP;
     }
 }
 

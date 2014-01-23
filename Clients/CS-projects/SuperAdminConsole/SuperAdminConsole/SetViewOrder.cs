@@ -538,7 +538,10 @@ namespace SuperAdminConsole
                             ClientData suiteData = resp.Data;
                             string price = richTextBoxListingPrice.Text.Replace("$", "");
                             price = price.Replace(",", "");
-                            decimal cp = Decimal.Parse(price);
+                            decimal cp = 0.0m;
+                            if (!string.IsNullOrEmpty(price))
+                                try { cp = Decimal.Parse(price); } catch (Exception) {}
+
 			                if (cp >= 0.0m)
                             {
                                 Money? currentPrice = new Money(cp);
@@ -768,6 +771,7 @@ namespace SuperAdminConsole
                 subitems[3] = building.GetProperty("city", string.Empty);
                 subitems[4] = postal;
 
+                //// ---- Uncomment the following code to get a report on all buildings ----
                 //string buildingInfo = string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}",
                 //    count++,
                 //    buildingName,
@@ -777,6 +781,7 @@ namespace SuperAdminConsole
                 //    postal);
                 //System.Diagnostics.Trace.WriteLine(buildingInfo);
                 //System.Diagnostics.Trace.Flush();
+                //// ---- End of the buildings report code ----
 
                 ListViewItem buildingItem = new ListViewItem(subitems);
                 buildingItem.Tag = building;
