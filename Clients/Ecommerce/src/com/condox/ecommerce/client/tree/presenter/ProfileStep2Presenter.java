@@ -1,33 +1,23 @@
 package com.condox.ecommerce.client.tree.presenter;
 
-import com.condox.clientshared.communication.User;
-import com.condox.clientshared.communication.User.UserRole;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
-import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
-import com.condox.ecommerce.client.tree.EcommerceTree.Field;
+import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
-import com.condox.ecommerce.client.tree.node.UpdateProfile2Node;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class UpdateProfile2Presenter implements I_Presenter {
+public class ProfileStep2Presenter implements I_Presenter {
 
 	public static interface I_Display extends I_Contained {
-		void setPresenter(UpdateProfile2Presenter presenter);
+		void setPresenter(ProfileStep2Presenter presenter);
 
 		Widget asWidget();
 	}
 
 	private I_Display display = null;
-	private UpdateProfile2Node node = null;
-
-	public UpdateProfile2Presenter(I_Display newDisplay, UpdateProfile2Node newNode) {
-		display = newDisplay;
-		display.setPresenter(this);
-		node = newNode;
-	}
+	private EcommerceTree tree = null;
 
 	@Override
 	public void go(I_Container container) {
@@ -36,23 +26,34 @@ public class UpdateProfile2Presenter implements I_Presenter {
 	}
 
 	public void onClose() {
-		node.next(Actions.Close);
+		tree.next(Actions.Close);
 	}
 
 	public void onCancel() {
-		node.next(Actions.Cancel);
+		tree.next(Actions.Cancel);
 	}
 
 	public void onPrev() {
-		node.next(Actions.Prev);
+		tree.next(Actions.Prev);
 	}
 
 	public void onFinish() {
-		node.next(Actions.Finish);
+		tree.next(Actions.Finish);
 	}
 
 	public void onSelectAvatar() {
-		node.next(Actions.SelectAvatar);
+		tree.next(Actions.SelectAvatar);
+	}
+
+	@Override
+	public void setView(Composite view) {
+		display = (I_Display) view;
+		display.setPresenter(this);
+	}
+
+	@Override
+	public void setTree(EcommerceTree tree) {
+		this.tree = tree;
 	}
 
 	// Events

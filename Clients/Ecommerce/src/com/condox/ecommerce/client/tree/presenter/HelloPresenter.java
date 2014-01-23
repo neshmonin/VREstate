@@ -18,7 +18,7 @@ import com.condox.ecommerce.client.UserInfo;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.node.HelloAgentNode;
+import com.condox.ecommerce.client.tree.EcommerceNode;
 import com.condox.ecommerce.client.tree.view.ViewOrderInfo;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -30,7 +30,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -38,10 +38,10 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
+public class HelloPresenter implements I_Presenter {
 
 	public static interface I_Display extends I_Contained {
-		void setPresenter(HelloAgentPresenter presenter);
+		void setPresenter(HelloPresenter presenter);
 		
 		void setNickName(String value);
 		
@@ -51,15 +51,7 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 	}
 
 	private I_Display display = null;
-	private HelloAgentNode node = null;
 	private EcommerceTree tree = null;
-
-	public HelloAgentPresenter(I_Display newDisplay, HelloAgentNode newNode) {
-		display = newDisplay;
-		display.setPresenter(this);
-		node = newNode;
-		tree = node.getTree();
-	}
 
 	@Override
 	public void go(I_Container container) {
@@ -126,23 +118,19 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 	
 //  Events
 	public void onLogout() {
-		node.setState(Actions.Logout);
-		node.next();
+		tree.next(Actions.Logout);
 	}
 
 	public void onShowSettings() {
-		node.setState(Actions.Settings);
-		node.next();
+		tree.next(Actions.Settings);
 	}
 
 	public void onNewOrder() {
-		node.setState(Actions.NewOrder);
-		node.next();
+		tree.next(Actions.NewOrder);
 	}
 
 	public void onShowHistory() {
-		node.setState(Actions.ShowHistory);
-		node.next();
+		tree.next(Actions.History);
 	}
 
 	public void setEnabled(ViewOrderInfo object, boolean enabled) {
@@ -190,7 +178,7 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 					
 					@Override
 					public void onResponseReceived(Request request, Response response) {
-						Log.popup();
+//						Log.popup();
 						loadOrdersList();
 					}
 					
@@ -216,7 +204,7 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 	}
 
 	public void onUpdateProfile() {
-		node.next(Actions.UpdateProfile);
+		tree.next(Actions.ProfileStep1);
 	}
 
 	public void openAddress(ViewOrderInfo object) {
@@ -224,5 +212,18 @@ public class HelloAgentPresenter implements I_Presenter/*, I_HelloAgent*/ {
 			String url = object.getUrl();
 			Window.open(url, "_blank", null);
 		}
+	}
+
+	@Override
+	public void setView(Composite view) {
+		// TODO Auto-generated method stub
+		display = (I_Display) view;
+		display.setPresenter(this);
+	}
+
+	@Override
+	public void setTree(EcommerceTree tree) {
+		// TODO Auto-generated method stub
+		this.tree = tree;
 	}
 }

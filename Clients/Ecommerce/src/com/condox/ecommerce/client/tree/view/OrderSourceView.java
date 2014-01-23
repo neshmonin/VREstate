@@ -1,7 +1,9 @@
 package com.condox.ecommerce.client.tree.view;
 
-import com.condox.ecommerce.client.tree.presenter.UsingMLSPresenter;
-import com.condox.ecommerce.client.tree.presenter.UsingMLSPresenter.I_Display;
+import java.util.List;
+
+import com.condox.ecommerce.client.tree.presenter.OrderSourcePresenter;
+import com.condox.ecommerce.client.tree.presenter.OrderSourcePresenter.I_Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -10,12 +12,14 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.SuggestBox;
 
-public class UsingMLSView extends Composite implements I_Display {
+public class OrderSourceView extends Composite implements I_Display {
 
 	private static UsingMLSViewUiBinder uiBinder = GWT
 			.create(UsingMLSViewUiBinder.class);
@@ -28,24 +32,34 @@ public class UsingMLSView extends Composite implements I_Display {
 	@UiField
 	Button buttonPrev;
 	@UiField
-	TextBox textMLS;
-	@UiField
 	RadioButton rbAddress;
+	@UiField (provided = true) 
+	SuggestBox sbMLS;
 
-	interface UsingMLSViewUiBinder extends UiBinder<Widget, UsingMLSView> {
+	interface UsingMLSViewUiBinder extends UiBinder<Widget, OrderSourceView> {
 	}
 
-	private UsingMLSPresenter presenter = null;
+	private OrderSourcePresenter presenter = null;
+	private MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
 
-	public UsingMLSView() {
+	public OrderSourceView() {
+		sbMLS = new SuggestBox(oracle);
 		initWidget(uiBinder.createAndBindUi(this));
+		sbMLS.setText("");
+		
 		Timer validation = new Timer() {
 
 			@Override
 			public void run() {
-				textMLS.setEnabled(rbMLS.getValue());
+				if (rbMLS.getValue()) {
+					sbMLS.setEnabled(true);
+				} else {
+					sbMLS.setEnabled(false);
+					sbMLS.setValue("");
+				}
+				
 				boolean valid = true;
-				valid &= (rbAddress.getValue() || !textMLS.getValue().isEmpty());
+				valid &= (rbAddress.getValue() || !sbMLS.getValue().isEmpty());
 				buttonNext.setEnabled(valid);
 			}
 		};
@@ -53,7 +67,7 @@ public class UsingMLSView extends Composite implements I_Display {
 	}
 
 	@Override
-	public void setPresenter(UsingMLSPresenter presenter) {
+	public void setPresenter(OrderSourcePresenter presenter) {
 		this.presenter = presenter;
 	}
 
@@ -89,11 +103,17 @@ public class UsingMLSView extends Composite implements I_Display {
 
 	@Override
 	public String getMLS() {
-		return textMLS.getValue();
+		return sbMLS.getValue();
 	}
 
 	@Override
 	public void setMLS(String value) {
-		textMLS.setValue(value);
+		sbMLS.setValue(value);
+	}
+
+	@Override
+	public void setMLSSuggestions(List<String> value) {
+		oracle.clear();
+//		oracle.addAll(value);
 	}
 }

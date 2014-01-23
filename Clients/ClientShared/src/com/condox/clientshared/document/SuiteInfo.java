@@ -8,6 +8,12 @@ import com.google.gwt.json.client.JSONValue;
 
 public class SuiteInfo implements I_JSON {
 
+	public static SuiteInfo fromJSON(JSONObject obj) {
+		SuiteInfo info = new SuiteInfo();
+		info.fromJSONObject(obj);
+		return info;
+	}
+
 	public enum Status {
 		Sold, Available, OnHold, ResaleAvailable, Selected, Layout, AvailableRent // ??
 		, AvailableResale
@@ -26,12 +32,19 @@ public class SuiteInfo implements I_JSON {
 	private int balconies = -1;
 	private int terraces = -1;
 	private int price = -1;
+	private String currentPriceDisplay = "";
+	private int buildingId = -1;
 	private String virtualTourURL = "";
 	private String moreInfoURL = "";
 	private String mls = "";
 	private String address = "";
-	
+
 	private JSONObject backup = null;
+
+	private void setString(JSONObject obj, String key, String value) {
+		if (value != null)
+			obj.put(key, new JSONString(value));
+	}
 
 	@Override
 	public JSONObject toJSONObject() {
@@ -39,9 +52,11 @@ public class SuiteInfo implements I_JSON {
 		obj = backup;
 		obj.put("mlsId", new JSONString(mls));
 		obj.put("currentPrice", new JSONNumber(price));
+		obj.put("buildingId", new JSONNumber(buildingId));
 		obj.put("status", new JSONString(status.toString()));
 		obj.put("vTourUrl", new JSONString(virtualTourURL));
 		obj.put("infoUrl", new JSONString(moreInfoURL));
+		setString(obj, "currentPriceDisplay", currentPriceDisplay);
 		return obj;
 	}
 
@@ -49,10 +64,10 @@ public class SuiteInfo implements I_JSON {
 	public void fromJSONObject(JSONObject obj) {
 		backup = obj;
 		id = (int) obj.get("id").isNumber().doubleValue();
+		buildingId = (int) obj.get("buildingId").isNumber().doubleValue();
 		name = obj.get("name").isString().stringValue();
 		level_number = (int) obj.get("levelNumber").isNumber().doubleValue();
 		floor_name = obj.get("floorName").isString().stringValue();
-		
 
 		// TODO
 		try {
@@ -61,7 +76,7 @@ public class SuiteInfo implements I_JSON {
 			mls = obj.get("mlsId").isString().stringValue();
 			address = obj.get("address").isString().stringValue();
 		} catch (Exception e) {
-			
+
 		}
 		String _status = obj.get("status").isString().stringValue();
 		try {
@@ -70,19 +85,19 @@ public class SuiteInfo implements I_JSON {
 			e.printStackTrace();
 			status = Status.Available;
 		}
-//		Log.write(_status);
+		// Log.write(_status);
 
 		if (obj.containsKey("floorPlanUrl"))
 			if (obj.get("floorPlanUrl").isString() != null)
 				setFloorplan_url(obj.get("floorPlanUrl").isString()
 						.stringValue());
-		setArea(obj.get("area").isNumber().doubleValue());
-		setBedrooms((int) obj.get("bedrooms").isNumber().doubleValue());
-		setDens((int) obj.get("dens").isNumber().doubleValue());
-		setBathrooms(obj.get("bathrooms").isNumber().doubleValue());
-		setBalconies((int) obj.get("balconies").isNumber().doubleValue());
-		setTerraces((int) obj.get("terraces").isNumber().doubleValue());
-		
+		// setArea(obj.get("area").isNumber().doubleValue());
+		// setBedrooms((int) obj.get("bedrooms").isNumber().doubleValue());
+		// setDens((int) obj.get("dens").isNumber().doubleValue());
+		// setBathrooms(obj.get("bathrooms").isNumber().doubleValue());
+		// setBalconies((int) obj.get("balconies").isNumber().doubleValue());
+		// setTerraces((int) obj.get("terraces").isNumber().doubleValue());
+
 		// Processing of price
 		JSONValue jv = obj.get("currentPrice");
 		if (jv != null) {
@@ -99,13 +114,29 @@ public class SuiteInfo implements I_JSON {
 		}
 		if (obj.get("currentPrice") != null)
 			if (obj.get("currentPrice").isNumber() != null)
-				price = (int)obj.get("currentPrice").isNumber().doubleValue();
-//		Log.write(id + ": "+"$" + price + " - " + status);
+				price = (int) obj.get("currentPrice").isNumber().doubleValue();
+		// Log.write(id + ": "+"$" + price + " - " + status);
 
 		/*
 		 * if (price < 0) { // Workaround for prices price = (int) (500 + 500 *
 		 * Math.random()); price *= 1000; }
 		 */
+		currentPriceDisplay = getString(obj, "currentPriceDisplay");
+	}
+	
+	public String getCurrentPriceDisplay() {
+		return currentPriceDisplay;
+	}
+
+	public void setCurrentPriceDisplay(String currentPriceDisplay) {
+		this.currentPriceDisplay = currentPriceDisplay;
+	}
+
+	private String getString(JSONObject obj, String key) {
+		if (obj.get(key) != null)
+			if (obj.get(key).isString() != null)
+				return obj.get(key).isString().stringValue();
+		return null;
 	}
 
 	public int getId() {
@@ -127,7 +158,7 @@ public class SuiteInfo implements I_JSON {
 	public Status getStatus() {
 		return status;
 	}
-	
+
 	public void setStatus(Status newStatus) {
 		status = newStatus;
 	}
@@ -135,7 +166,7 @@ public class SuiteInfo implements I_JSON {
 	public int getPrice() {
 		return price;
 	}
-	
+
 	public void setPrice(int newPrice) {
 		price = newPrice;
 	}
@@ -188,6 +219,10 @@ public class SuiteInfo implements I_JSON {
 		return dens;
 	}
 
+	public int getBuildingId() {
+		return buildingId;
+	}
+
 	public void setTerraces(int terraces) {
 		this.terraces = terraces;
 	}
@@ -195,7 +230,7 @@ public class SuiteInfo implements I_JSON {
 	public int getTerraces() {
 		return terraces;
 	}
-	
+
 	public String getAddress() {
 		return address;
 	}
@@ -226,35 +261,34 @@ public class SuiteInfo implements I_JSON {
 		if (getArea() > 0)
 			tooltip += "Area: " + getArea() + " Sq.Ft.\r\n";
 		// tooltip += "Floorplan: " + getFloorplan_url() + "\r\n";
-		
+
 		if (!getMLS().isEmpty())
 			tooltip += "MLS#: " + getMLS() + "\r\n";
 		return tooltip;
 	}
-	
+
 	public String getVirtualTourURL() {
 		return virtualTourURL;
 	}
-	
+
 	public void setVirtualTourURL(String newUrl) {
 		virtualTourURL = newUrl;
 	}
-	
-	
+
 	public String getMoreInfoURL() {
 		return moreInfoURL;
 	}
-	
+
 	public void setMoreInfoURL(String newUrl) {
 		moreInfoURL = newUrl;
 	}
-	
+
 	public String getMLS() {
 		return mls;
 	}
-	
+
 	public void setMLS(String newMLS) {
 		mls = newMLS;
 	}
-	
+
 }

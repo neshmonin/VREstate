@@ -13,6 +13,7 @@ import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
 public class EmailPresenter implements I_Presenter {
@@ -133,4 +134,16 @@ public class EmailPresenter implements I_Presenter {
 //	public void setOwnerEmail(String ownerEmail) {
 //		EcommerceTree.set(Field.Email, new Data(ownerEmail));
 //	}
+
+	@Override
+	public void setView(Composite view) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setTree(EcommerceTree tree) {
+		// TODO Auto-generated method stub
+		
+	}
 }

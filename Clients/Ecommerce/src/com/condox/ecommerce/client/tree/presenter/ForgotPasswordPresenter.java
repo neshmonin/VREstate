@@ -1,17 +1,15 @@
 package com.condox.ecommerce.client.tree.presenter;
 
-import com.condox.clientshared.communication.I_Login;
-import com.condox.clientshared.communication.User;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
+import com.condox.ecommerce.client.UserInfo;
 import com.condox.ecommerce.client.tree.EcommerceTree;
-import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
-import com.condox.ecommerce.client.tree.node.ForgotPasswordNode;
-import com.condox.ecommerce.client.tree.node.LoginNode;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ForgotPasswordPresenter implements I_Presenter {
@@ -27,34 +25,40 @@ public class ForgotPasswordPresenter implements I_Presenter {
 	}
 
 	private I_Display display = null;
-	private ForgotPasswordNode node = null;
 	private EcommerceTree tree = null;
-
-	public ForgotPasswordPresenter(I_Display newDisplay, ForgotPasswordNode newNode) {
-		display = newDisplay;
-		display.setPresenter(this);
-		node = newNode;
-		tree = node.getTree();
-	}
 
 	@Override
 	public void go(I_Container container) {
 		container.clear();
 		container.add((I_Contained)display);
 		
-		Data data = node.getTree().getData(Field.UserEmail); 
+		Data data = tree.getData(Field.UserInfo); 
 		if (data != null) {
-			String email = data.asString();
-			display.setEmail(email);
+			UserInfo info = new UserInfo();
+			info.fromJSONObject(data.asJSONObject());
+			display.setEmail(info.getLogin());
 		}
 	}
 
 	// Events
 	public void onSubmit() {
 		String email = display.getEmail().trim();
-		Window.alert("TODO: send mail with new password.");
-		tree.setData(Field.UserEmail, new Data(email));
-		node.setState(Actions.Submit);
-		node.next();
+		tree.setData(Field.EmailToRecoverPassword, new Data(email));
+		tree.next(Actions.Submit);
+	}
+
+	@Override
+	public void setView(Composite view) {
+		display = (I_Display) view;
+		display.setPresenter(this);
+	}
+
+	@Override
+	public void setTree(EcommerceTree tree) {
+		this.tree = tree;
+	}
+
+	public void onClose() {
+		tree.next(Actions.Close);
 	}
 }

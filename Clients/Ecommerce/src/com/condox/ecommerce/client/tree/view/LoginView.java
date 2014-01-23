@@ -64,7 +64,7 @@ public class LoginView extends Composite implements I_Display {
 	}
 
 	@Override
-	public String getUserEmail() {
+	public String getUserLogin() {
 		return textUserEmail.getValue();
 	}
 
