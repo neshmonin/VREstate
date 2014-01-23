@@ -111,6 +111,8 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
@@ -125,10 +127,14 @@
     <Compile Include="..\_version\versiongen.cs">
       <Link>Properties\versiongen.cs</Link>
     </Compile>
+    <Compile Include="Accounting\Biller.cs" />
+    <Compile Include="Accounting\Invoice.cs" />
+    <Compile Include="Accounting\InvoiceElement.cs" />
     <Compile Include="Authentication\Authentication.cs" />
     <Compile Include="Authentication\IAuthentication.cs" />
     <Compile Include="BusinessLogic\ExpiredException.cs" />
     <Compile Include="BusinessLogic\ObjectExistsException.cs" />
+    <Compile Include="BusinessObjects\ServiceRequestItem.cs" />
     <Compile Include="BusinessObjects\FileStorageItem.cs" />
     <Compile Include="BusinessObjects\FinancialTransactionExt.cs" />
     <Compile Include="BusinessObjects\Localization.cs" />
@@ -145,6 +151,8 @@
     <Compile Include="Dao\AccountDao.cs" />
     <Compile Include="Dao\BuildingDao.cs" />
     <Compile Include="Dao\BrokerageInfoDao.cs" />
+    <Compile Include="Dao\InvoiceDao.cs" />
+    <Compile Include="Dao\ServiceRequestItemDao.cs" />
     <Compile Include="Dao\PricingPolicyDao.cs" />
     <Compile Include="Dao\StructureDao.cs" />
     <Compile Include="Dao\FileStorageItemDao.cs" />
@@ -181,8 +189,10 @@
     <Compile Include="FloodPreventor.cs" />
     <Compile Include="HttpService\HttpServiceBase.cs" />
     <Compile Include="HttpService\IHttpService.cs" />
+    <Compile Include="HttpService\MultipartFormData.cs" />
     <Compile Include="HttpService\RedirectionService.cs" />
     <Compile Include="HttpService\Statistics.cs" />
+    <Compile Include="Managers\BrokerageManager.cs" />
     <Compile Include="Managers\DeveloperManager.cs" />
     <Compile Include="Managers\RolePermissionCheck.cs" />
     <Compile Include="ModelCache\ModelCache.cs" />
@@ -191,8 +201,10 @@
     <Compile Include="PaymentSystemProc\PayPalResponseHandler.cs" />
     <Compile Include="RemoteService\EventService.cs" />
     <Compile Include="RemoteService\PaymentSystemResponseService.cs" />
+    <Compile Include="Spikes\WmiController.cs" />
     <Compile Include="Tasks\BaseTask.cs" />
     <Compile Include="Tasks\GenerateImportSettings.cs" />
+    <Compile Include="Tasks\GenerateInvoices.cs" />
     <Compile Include="Tasks\ManagedStorageTaskBase.cs" />
     <Compile Include="Tasks\ReconcileManagedStorage.cs" />
     <Compile Include="Tasks\ImportFilesIntoManagedStorage.cs" />
@@ -227,6 +239,8 @@
     <Compile Include="UnitTest\UserManagement.cs" />
     <Compile Include="UserMessaging\IUserMessaging.cs" />
     <Compile Include="UserMessaging\MessageGenerator.cs" />
+    <Compile Include="Utilities\ImageProcessing.cs" />
+    <Compile Include="Utilities\ProcessControl.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mappings\DatabaseSettings.hbm.xml" />
@@ -297,6 +311,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Mappings\PricingPolicy.hbm.xml" />
+    <EmbeddedResource Include="Mappings\Invoice.hbm.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <Content Include="SQL\Constraint\Account.sql" />
     <Content Include="SQL\Constraint\DeveloperAdmin.sql" />
     <Content Include="SQL\Constraint\Price.sql" />
@@ -334,7 +351,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="InterfaceImpl\" />
-    <Folder Include="Spikes\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">

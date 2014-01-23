@@ -7,6 +7,7 @@ using System.Threading;
 using NHibernate;
 using Vre.Server.BusinessLogic;
 using Vre.Server.Dao;
+using System.IO;
 
 namespace Vre.Server.RemoteService
 {
@@ -37,7 +38,7 @@ namespace Vre.Server.RemoteService
 		}
 
         public string LoginUser(IPEndPoint ep, LoginType loginType, 
-            User.Role role, int estatedeveloperId, string login, string password)
+            User.Role role, int aggregateObjectId, string login, string password)
         {
             // Flood prevention.
             // This is not a DoS prevention, rather a password brute-force stopper.
@@ -56,7 +57,7 @@ namespace Vre.Server.RemoteService
             }
             else
             {
-                user = UserManager.Login(loginType, role, estatedeveloperId, login, password);
+                user = UserManager.Login(loginType, role, aggregateObjectId, login, password);
                 // TODO: Drop off other user sessions? Configurable?
                 dropOffConcurrentSessions = true;
             }
@@ -274,6 +275,7 @@ namespace Vre.Server.RemoteService
         {
             killEventThread();
             UnsubscribeAll();
+			clearTempFiles();
             lock (_dbSessionLock)
             {
                 if (DbSession != null)
@@ -604,6 +606,26 @@ namespace Vre.Server.RemoteService
             {
                 Interlocked.Decrement(ref _eventThreadCounter);
             }
-        }     
+        }
+
+		private readonly List<string> _tempFiles = new List<string>();
+
+		public string AddTempFile(string extension, Stream data)
+		{
+			string result = ServiceInstances.ImmediateFileStorageManager.StoreFile(
+				"temp", null, extension, null, data);
+			lock (_tempFiles) _tempFiles.Add(result);
+			return ServiceInstances.ImmediateFileStorageManager.ConvertToFullPath(result);
+		}
+
+		private void clearTempFiles()
+		{
+			lock (_tempFiles)
+			{
+				foreach (var name in _tempFiles)
+					ServiceInstances.ImmediateFileStorageManager.RemoveFile(name);
+				_tempFiles.Clear();
+			}
+		}
     }
 }

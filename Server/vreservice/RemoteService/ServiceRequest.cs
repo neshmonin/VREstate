@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using Vre.Server.BusinessLogic;
+using System.Collections.Generic;
 
 namespace Vre.Server.RemoteService
 {
@@ -85,6 +86,19 @@ namespace Vre.Server.RemoteService
 
     internal enum RequestType { Get, Insert, Update, Delete }
 
+	internal interface IFormDataItem
+	{
+		string ContentType { get; }
+		string Name { get; }
+		string FileName { get; }
+		Stream Data { get; }
+	}
+
+	internal interface IMultipartFormData
+	{
+		ICollection<IFormDataItem> Items { get; }
+	}
+
     internal interface IRequestData
     {
 		Uri Referer { get; }
@@ -95,6 +109,7 @@ namespace Vre.Server.RemoteService
         ClientData Data { get; }
 		string RawDataContentType { get; }
         byte[] RawData { get; }
+		IMultipartFormData FormData { get; }
         /// <summary>
         /// Construct client's URI for service's root entry point based on request information.
         /// <para>Required to generate a resource for client containing references to server's other resources.</para>

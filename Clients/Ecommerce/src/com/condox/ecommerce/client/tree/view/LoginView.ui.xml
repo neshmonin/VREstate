@@ -10,7 +10,7 @@
 
 		
 	</ui:style>
-		<g:SimplePanel>
+		<g:SimplePanel width="200px">
 		<g:FocusPanel ui:field="focusPanel">
 	<g:VerticalPanel spacing="5" horizontalAlignment="ALIGN_CENTER"
 		verticalAlignment="ALIGN_MIDDLE" width="100%" height="100%">
@@ -26,6 +26,11 @@
 		<g:Cell horizontalAlignment="ALIGN_CENTER">
 			<g:Hyperlink text="Forgot password?" ui:field="hyperlink" />
 		</g:Cell>
+		<g:VerticalPanel>
+			<g:RadioButton name="Role" text="Visitor" ui:field="rbVisitor"/>
+			<g:RadioButton name="Role" text="SuperAdmin" ui:field="rbSuperAdmin"/>
+			<g:RadioButton name="Role" text="SellingAgent" ui:field="rbSellingAgent"/>
+		</g:VerticalPanel>
 		<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_CENTER">
 			<g:Button width="80%" text="Login" ui:field="buttonEnter" />
 		</g:HorizontalPanel>

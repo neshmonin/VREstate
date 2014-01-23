@@ -237,6 +237,9 @@ namespace Vre.Server
 		{
 			public static readonly StringConfigurationParam ServerRole =
 				new StringConfigurationParam(_config, "ServerRole", "VRT");
+
+			public static readonly BooleanConfigurationParam WmiControl =
+				new BooleanConfigurationParam(_config, "WmiControl", false);
 		}
 
 		public static class Urls
@@ -299,6 +302,15 @@ namespace Vre.Server
 						new StringConfigurationParam(_config, "MLS-INFO-TREB-Config", string.Empty);
 				}
 			}
+		}
+
+		public static class User
+		{
+			public static readonly IntegerConfigurationParam UserPhotoWidthPx =
+				new IntegerConfigurationParam(_config, "UserPhotoWidthPx", 128);
+
+			public static readonly IntegerConfigurationParam UserPhotoHeightPx =
+				new IntegerConfigurationParam(_config, "UserPhotoHeightPx", 128);
 		}
 	}
 }

@@ -1,3 +1,4 @@
+using System.IO;
 namespace Vre.Server.FileStorage
 {
     internal class IntLocalFileStorageManager : FsFileStorageManagerBase
@@ -9,6 +10,20 @@ namespace Vre.Server.FileStorage
 		public override string ConvertToFullPath(string relativePath)
 		{
 			return convertToLocalPath(relativePath);
+		}
+
+		public override string ConvertToRelativePath(string fullPath)
+		{
+			if (fullPath.StartsWith(_storeRoot.Value))
+			{
+				var p = fullPath.Substring(_storeRoot.Value.Length).Replace(Path.DirectorySeparatorChar, '/');
+				if ((p.Length > 0) && (p[0] == Path.DirectorySeparatorChar)) p = p.Substring(1);
+				return p;
+			}
+			else
+			{
+				return null;
+			}
 		}
     }
 }

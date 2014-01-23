@@ -2,15 +2,22 @@
 using System.Linq;
 using NHibernate;
 using Vre.Server.BusinessLogic;
+using System;
 
 namespace Vre.Server.Dao
 {
 	internal static class PricingPolicyFallbackRules
 	{
 		private static Dictionary<PricingPolicy.SubjectType, List<PricingPolicy.SubjectType>> _searchRules;
+		private static List<PricingPolicy.ServiceType> _services;
 
 		static PricingPolicyFallbackRules()
 		{
+			_services = new List<PricingPolicy.ServiceType>();
+			// we do not care of specific order really
+			foreach (PricingPolicy.ServiceType pps in Enum.GetValues(typeof(PricingPolicy.ServiceType)))
+				_services.Add(pps);
+
 			_searchRules = new Dictionary<PricingPolicy.SubjectType, List<PricingPolicy.SubjectType>>();
 
 			_searchRules.Add(PricingPolicy.SubjectType.Brokerage, new List<PricingPolicy.SubjectType>(new[] 
@@ -29,9 +36,11 @@ namespace Vre.Server.Dao
 			// 1. Rules targeted specific objects ordered by rule chain (e.g. first for agent, then brokerage)
 			// 2. default rules ordered by rule chain (e.g. first for agent, then brokerage)
 			// Result sample would be: agent personal, brokerage dedicated, agent default, brokerage default
+			// If multiple services' rules are ordered, top N items shall be effective values.
 			return items.OrderBy(p => (
-				((0 == p.TargetObjectId) ? 100 : 0) + // assume no more than 100 rules in a chain :)
-				(rule.IndexOf(p.TargetObjectType))
+				((0 == p.TargetObjectId) ? 1000000 : 0) +
+				(rule.IndexOf(p.TargetObjectType) * 1000) +
+				_services.IndexOf(p.Service)
 				)).ToList();
 		}
 	}
@@ -52,6 +61,37 @@ namespace Vre.Server.Dao
 			var policy = GetFor(u, service).FirstOrDefault();
 
 			return (policy != null) ? policy.UnitPrice : (decimal?)null;
+		}
+
+		/// <summary>
+		/// Get policy list for specific target, ordered by fallback rules.
+		/// </summary>
+		public IList<PricingPolicy> GetFor(object target)
+		{
+			var user = target as User;
+			if ((user != null) && (user.BrokerInfo != null))
+			{
+				return _session.CreateQuery(@"FROM Vre.Server.BusinessLogic.PricingPolicy
+WHERE Deleted=0
+AND ((TargetObjectType=:ot1 AND (TargetObjectId=:oid1 OR TargetObjectId=0))
+OR (TargetObjectType=:ot2 AND (TargetObjectId=:oid2 OR TargetObjectId=0)))")
+					.SetEnum("ot1", PricingPolicy.SubjectType.Brokerage)
+					.SetInt32("oid1", user.BrokerInfo.AutoID)
+					.SetEnum("ot2", PricingPolicy.SubjectType.Agent)
+					.SetInt32("oid2", user.AutoID)
+					.List<PricingPolicy>().OrderFor(PricingPolicy.SubjectType.Agent);
+			}
+			var brokerage = target as BrokerageInfo;
+			if (brokerage != null)
+			{
+				return _session.CreateQuery(@"FROM Vre.Server.BusinessLogic.PricingPolicy
+WHERE Deleted=0
+AND TargetObjectType=:ot AND (TargetObjectId=:oid OR TargetObjectId=0)")
+					.SetEnum("ot", PricingPolicy.SubjectType.Brokerage)
+					.SetInt32("oid", brokerage.AutoID)
+					.List<PricingPolicy>().OrderFor(PricingPolicy.SubjectType.Brokerage);
+			}
+			return new List<PricingPolicy>(0);
 		}
 
 		/// <summary>

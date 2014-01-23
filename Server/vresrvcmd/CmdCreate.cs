@@ -66,6 +66,7 @@ namespace Vre.Client.CommandLine
                 else if (paramValue.Equals("buyer")) role = User.Role.Buyer;
                 else if (paramValue.Equals("sellingagent")) role = User.Role.SellingAgent;
                 else if (paramValue.Equals("kiosk")) role = User.Role.Kiosk;
+                else if (paramValue.Equals("brokerageadmin")) role = User.Role.BrokerageAdmin;
                 else throw new ArgumentException("Role specified is not valid.");
                 data.Add("role", role);
             }

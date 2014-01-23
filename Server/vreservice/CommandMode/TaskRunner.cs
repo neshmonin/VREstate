@@ -20,6 +20,7 @@ namespace Vre.Server.Command
 			addTask(new ImportFilesIntoManagedStorage());
 			addTask(new ReconcileManagedStorage());
 			addTask(new GenerateImportSettings());
+            addTask(new GenerateInvoices());
 		}
 
         private void addTask(ITask task) { _tasks.Add(task.Name, task); }
