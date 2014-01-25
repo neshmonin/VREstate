@@ -43,6 +43,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 		I_Login {
 	
 	public static VREstate instance = null;
+	private State _state; 
 
 	/**
 	 * @wbp.parser.entryPoint
@@ -52,7 +53,7 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 		// Log.write(GWT.getHostPageBaseURL());
 		// Log.write(GWT.getModuleBaseForStaticFiles());
 		// Log.write(GWT.getModuleBaseURL());
-		
+		_state = State.Create(); 
 		Options.Init();
 //		LoginUser();
 		
