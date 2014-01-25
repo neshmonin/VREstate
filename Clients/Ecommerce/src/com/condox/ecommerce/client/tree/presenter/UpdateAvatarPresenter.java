@@ -1,15 +1,11 @@
 package com.condox.ecommerce.client.tree.presenter;
 
-import com.condox.clientshared.communication.User;
-import com.condox.clientshared.communication.User.UserRole;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
-import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
-import com.condox.ecommerce.client.tree.EcommerceTree.Field;
+import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
-import com.condox.ecommerce.client.tree.node.UpdateAvatarNode;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
 public class UpdateAvatarPresenter implements I_Presenter {
@@ -21,13 +17,8 @@ public class UpdateAvatarPresenter implements I_Presenter {
 	}
 
 	private I_Display display = null;
-	private UpdateAvatarNode node = null;
+	private EcommerceTree tree = null;
 
-	public UpdateAvatarPresenter(I_Display newDisplay, UpdateAvatarNode newNode) {
-		display = newDisplay;
-		display.setPresenter(this);
-		node = newNode;
-	}
 
 	@Override
 	public void go(I_Container container) {
@@ -36,11 +27,22 @@ public class UpdateAvatarPresenter implements I_Presenter {
 	}
 
 	public void onApply() {
-		node.next(Actions.Close);
+		tree.next(Actions.Close);
 	}
 
 	public void onClose() {
-		node.next(Actions.Close);
+		tree.next(Actions.Close);
+	}
+
+	@Override
+	public void setView(Composite view) {
+		display = (I_Display) view;
+		display.setPresenter(this);
+	}
+
+	@Override
+	public void setTree(EcommerceTree tree) {
+		this.tree = tree;
 	}
 
 //	public void onClose() {

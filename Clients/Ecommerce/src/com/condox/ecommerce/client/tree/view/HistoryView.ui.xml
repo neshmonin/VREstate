@@ -2,20 +2,36 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:p1="urn:import:com.google.gwt.user.cellview.client">
 	<ui:style>
-		.important {
-			margin-left: 50px;
-		}
+	.important {
+		margin-left: 50px;
+	}
 	</ui:style>
-		<g:VerticalPanel width="100%" height="100%" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
-			<g:VerticalPanel >
-				<g:VerticalPanel spacing="10" width="350px">
-					<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT" spacing="10">
-						<g:Hyperlink text="Close" targetHistoryToken="newHistoryToken"/>
-					</g:HorizontalPanel>
-					<g:ScrollPanel height="200px">
-						<g:HTML wordWrap="true" width="100%" ui:field="htmlHistoryData">a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/>a<br/></g:HTML>
+	<g:SimplePanel width="800px" height="400px">
+		<g:VerticalPanel horizontalAlignment="ALIGN_CENTER"
+			verticalAlignment="ALIGN_TOP" width="100%" height="100%">
+			<g:Cell horizontalAlignment="ALIGN_RIGHT">
+				<g:HorizontalPanel
+				horizontalAlignment="ALIGN_RIGHT" spacing="10">
+				<g:Hyperlink text="Close" targetHistoryToken="newHistoryToken"
+					ui:field="hyperlink" />
+			</g:HorizontalPanel>
+			</g:Cell>
+			<g:Cell height="100%">
+				<g:HorizontalPanel height="100%" width="100%">
+					<g:ScrollPanel width="300px" height="360px">
+						<g:VerticalPanel width="100%">
+						<g:Cell height="100%">
+							<p1:CellList ui:field="cellList" />
+						</g:Cell>
+					</g:VerticalPanel>
 					</g:ScrollPanel>
-			</g:VerticalPanel>
-			</g:VerticalPanel>
+					<g:Cell width="100%" height="200px">
+						<g:SimplePanel height="360px" >
+							<g:HTML wordWrap="true" width="100%" height="100%" ui:field="form"/>
+						</g:SimplePanel>
+					</g:Cell>
+				</g:HorizontalPanel>
+			</g:Cell>
 		</g:VerticalPanel>
+	</g:SimplePanel>
 </ui:UiBinder> 

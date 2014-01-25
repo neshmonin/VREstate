@@ -12,22 +12,22 @@ import com.condox.clientshared.document.BuildingInfo;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
-import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
-import com.condox.ecommerce.client.tree.node.BuildingsNode;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class BuildingsPresenter implements I_Presenter {
+public class PickBuildingPresenter implements I_Presenter {
 
 	public interface IDisplay extends I_Contained {
 		
-		void setPresenter(BuildingsPresenter presenter);
+		void setPresenter(PickBuildingPresenter presenter);
 
 		void setData(List<BuildingInfo> data, BuildingInfo selected);
 		
@@ -41,15 +41,7 @@ public class BuildingsPresenter implements I_Presenter {
 	private IDisplay display = null;
 	private List<BuildingInfo> data = new ArrayList<BuildingInfo>();
 	private BuildingInfo selected;
-	private BuildingsNode node = null;
 	private EcommerceTree tree = null;
-
-	public BuildingsPresenter(IDisplay display, BuildingsNode node) {
-		this.display = display;
-		this.display.setPresenter(this);
-		this.node = node;
-		tree = node.getTree();
-	}
 
 	public void updateData() {
 		tree.setData(Field.FILTERING_BY_CITY, new Data(display.getFilterCity()));
@@ -68,9 +60,9 @@ public class BuildingsPresenter implements I_Presenter {
 				JSONArray arr = obj.get("buildings").isArray();
 
 				Integer id = null;
-				Data buildingIdData = tree.getData(Field.BuildingId);
-				if (buildingIdData != null)
-					id = buildingIdData.asInteger();
+//				Data buildingIdData = tree.getData(Field.BuildingId);
+//				if (buildingIdData != null)
+//					id = buildingIdData.asInteger();
 //				Log.write("" + id);
 				data.clear();
 				for (int index = 0; index < arr.size(); index++) {
@@ -121,24 +113,32 @@ public class BuildingsPresenter implements I_Presenter {
 //	}
 
 	public void onPrev() {
-		node.setState(Actions.Prev);
-		node.next();
+		tree.next(Actions.Prev);
 	}
 
 	public void onCancel() {
-		node.setState(Actions.Cancel);
-		node.next();
+		tree.next(Actions.Cancel);
 	}
 
 	public void selectSuite(BuildingInfo object) {
 		if (object != null) {
 			// TODO add validation
-			tree.setData(Field.BuildingId, new Data(object.getId()));
-			tree.setData(Field.BuildingName, new Data(object.getName()));
-//			node.setData(Field.Address, new Data(object.getAddress()));
-			node.setState(Actions.Next);
-			node.next();
+//			tree.setData(Field.BuildingId, new Data(object.getId()));
+//			tree.setData(Field.BuildingName, new Data(object.getName()));
+			tree.setData(Field.BuildingInfo, new Data(object));
+			tree.next(Actions.Next);
 		}
+	}
+
+	@Override
+	public void setView(Composite view) {
+		display = (IDisplay) view;
+		display.setPresenter(this);
+	}
+
+	@Override
+	public void setTree(EcommerceTree tree) {
+		this.tree = tree;
 	}
 
 }
