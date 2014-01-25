@@ -24,8 +24,24 @@ namespace Vre.Server.BusinessLogic
 		public decimal CreditUnits { get; private set; }
 		public DateTime LastServicePayment { get; set; }
 
-		public string[] EmailList { get { return Emails.Split(ContactInfo.ArraySplitterC); } }
-		public string[] PhoneNumberList { get { return PhoneNumbers.Split(ContactInfo.ArraySplitterC); } }
+		public string[] EmailList
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Emails))
+                    return null;
+                return Emails.Split(ContactInfo.ArraySplitterC);
+            }
+        }
+		public string[] PhoneNumberList
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(PhoneNumbers))
+                    return null;
+                return PhoneNumbers.Split(ContactInfo.ArraySplitterC);
+            }
+        }
 
 		private BrokerageInfo() { }
 
@@ -77,10 +93,17 @@ namespace Vre.Server.BusinessLogic
             PostalCode = data.UpdateProperty("postalCode", PostalCode, ref changed);
             Country = data.UpdateProperty("country", Country, ref changed);
 
-			PhoneNumbers = string.Join(ContactInfo.ArraySplitterS,
-				data.UpdateProperty("phoneNumbers", PhoneNumbers.Split(ContactInfo.ArraySplitterC), ref changed));
-			Emails = string.Join(ContactInfo.ArraySplitterS,
-				data.UpdateProperty("emails", Emails.Split(ContactInfo.ArraySplitterC), ref changed));
+            if (string.IsNullOrEmpty(PhoneNumbers))
+                data.UpdateProperty("phoneNumbers", new string[0], ref changed);
+            else
+                PhoneNumbers = string.Join(ContactInfo.ArraySplitterS, 
+                    data.UpdateProperty("phoneNumbers", PhoneNumbers.Split(ContactInfo.ArraySplitterC), ref changed));
+
+            if (string.IsNullOrEmpty(Emails))
+                data.UpdateProperty("emails", new string[0], ref changed);
+            else
+                Emails = string.Join(ContactInfo.ArraySplitterS,
+                    data.UpdateProperty("emails", Emails.Split(ContactInfo.ArraySplitterC), ref changed));
 
 			WebSite = data.UpdateProperty("webSite", WebSite, ref changed);
 
