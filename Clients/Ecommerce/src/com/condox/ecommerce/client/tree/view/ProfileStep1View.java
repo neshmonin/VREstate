@@ -1,28 +1,27 @@
 package com.condox.ecommerce.client.tree.view;
 
-import com.condox.clientshared.abstractview.Log;
 import com.condox.ecommerce.client.UserInfo;
-import com.condox.ecommerce.client.tree.presenter.AgreementPresenter;
-import com.condox.ecommerce.client.tree.presenter.UpdateProfile1Presenter;
-import com.condox.ecommerce.client.tree.presenter.UpdateProfile1Presenter.I_Display;
+import com.condox.ecommerce.client.tree.presenter.ProfileStep1Presenter;
+import com.condox.ecommerce.client.tree.presenter.ProfileStep1Presenter.I_Display;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.event.dom.client.ChangeEvent;
 
-public class UpdateProfile1View extends Composite implements I_Display {
+public class ProfileStep1View extends Composite implements I_Display {
 
-	private static UpdateProfile1ViewUiBinder uiBinder = GWT
-			.create(UpdateProfile1ViewUiBinder.class);
+	private static ProfileStep1ViewUiBinder uiBinder = GWT
+			.create(ProfileStep1ViewUiBinder.class);
 	@UiField Button buttonApply;
 	@UiField Button buttonCancel;
-	@UiField Button buttonNext;
+//	@UiField Button buttonNext;
 	@UiField Button buttonFinish;
 	@UiField Button buttonClose;
 	@UiField TextBox textFirstName;
@@ -30,13 +29,13 @@ public class UpdateProfile1View extends Composite implements I_Display {
 	@UiField TextBox textEmail;
 	@UiField TextBox textPhone;
 
-	interface UpdateProfile1ViewUiBinder extends UiBinder<Widget, UpdateProfile1View> {
+	interface ProfileStep1ViewUiBinder extends UiBinder<Widget, ProfileStep1View> {
 	}
 
-	private UpdateProfile1Presenter presenter = null;
+	private ProfileStep1Presenter presenter = null;
 	private UserInfo info = null;
 
-	public UpdateProfile1View() {
+	public ProfileStep1View() {
 		initWidget(uiBinder.createAndBindUi(this));
 		Timer updateView = new Timer() {
 
@@ -55,11 +54,11 @@ public class UpdateProfile1View extends Composite implements I_Display {
 				
 				buttonApply.setEnabled(!empty && changed);
 			}};
-		updateView.scheduleRepeating(500);
+//		updateView.scheduleRepeating(500);
 	}
 
 	@Override
-	public void setPresenter(UpdateProfile1Presenter presenter) {
+	public void setPresenter(ProfileStep1Presenter presenter) {
 		this.presenter = presenter;
 	}
 	@UiHandler("buttonClose")
@@ -79,17 +78,18 @@ public class UpdateProfile1View extends Composite implements I_Display {
 			info.setEmail(textEmail.getValue());
 			presenter.onApply();
 		}
+		buttonApply.setEnabled(false);
 	}
 	@UiHandler("buttonFinish")
 	void onButtonFinishClick(ClickEvent event) {
 		if (presenter != null)
 			presenter.onFinish();
 	}
-	@UiHandler("buttonNext")
-	void onButtonNextClick(ClickEvent event) {
-		if (presenter != null)
-			presenter.onNext();
-	}
+//	@UiHandler("buttonNext")
+//	void onButtonNextClick(ClickEvent event) {
+//		if (presenter != null)
+//			presenter.onNext();
+//	}
 
 	@Override
 	public void setUserInfo(UserInfo newInfo) {
@@ -101,5 +101,21 @@ public class UpdateProfile1View extends Composite implements I_Display {
 	@Override
 	public UserInfo getUserInfo() {
 		return info;
+	}
+	@UiHandler("textFirstName")
+	void onTextFirstNameChange(ChangeEvent event) {
+		buttonApply.setEnabled(true);
+	}
+	@UiHandler("textLastName")
+	void onTextLastNameChange(ChangeEvent event) {
+		buttonApply.setEnabled(true);
+	}
+	@UiHandler("textEmail")
+	void onTextEmailChange(ChangeEvent event) {
+		buttonApply.setEnabled(true);
+	}
+	@UiHandler("textPhone")
+	void onTextPhoneChange(ChangeEvent event) {
+		buttonApply.setEnabled(true);
 	}
 }

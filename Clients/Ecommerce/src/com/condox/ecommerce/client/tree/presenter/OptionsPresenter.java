@@ -2,14 +2,13 @@ package com.condox.ecommerce.client.tree.presenter;
 
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
-import com.condox.clientshared.document.Suite.Status;
 import com.condox.clientshared.document.SuiteInfo;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
-import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
-import com.condox.ecommerce.client.tree.node.OptionsNode;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
 public class OptionsPresenter implements I_Presenter {
@@ -43,21 +42,13 @@ public class OptionsPresenter implements I_Presenter {
 	}
 
 	private I_Display display = null;
-	private OptionsNode node = null;
 	private EcommerceTree tree = null;
 	private SuiteInfo info = null;
-
-	public OptionsPresenter(I_Display newDisplay, OptionsNode newNode) {
-		node = newNode;
-		tree = node.getTree();
-		display = newDisplay;
-		display.setPresenter(this);
-	}
 
 	@Override
 	public void go(I_Container container) {
 		// TODO update data
-		Data data = tree.getData(Field.SuiteSelected);
+		Data data = tree.getData(Field.SuiteInfo);
 		if (data != null) {
 			info = new SuiteInfo();
 			info.fromJSONObject(data.asJSONObject());
@@ -73,17 +64,18 @@ public class OptionsPresenter implements I_Presenter {
 
 	// Navigation events
 	public void onCancel() {
-		node.next(Actions.Cancel);
+		tree.next(Actions.Cancel);
 	}
 
 	public void onPrev() {
-		Data data = tree.getData(Field.UsingMLS);
-		if (data != null) {
-			if (data.asBoolean())
-				node.next(Actions.UsingMLS);
-			else
-				node.next(Actions.UsingAddress);
-		}
+//		Data data = tree.getData(Field.UsingMLS);
+//		if (data != null) {
+//			if (data.asBoolean())
+//				tree.next(Actions.UsingMLS);
+//			else
+//				tree.next(Actions.UsingAddress);
+//		}
+		tree.next(Actions.Prev);
 	}
 
 	public void onNext() {
@@ -93,8 +85,8 @@ public class OptionsPresenter implements I_Presenter {
 		info.setStatus(display.getStatus());
 		info.setVirtualTourURL(display.getVirtualTourUrl());
 		info.setMoreInfoURL(display.getMoreInfoUrl());
-		tree.setData(Field.SuiteSelected, new Data(info));
-		node.next(Actions.Next);
+		tree.setData(Field.SuiteInfo, new Data(info));
+		tree.next(Actions.Next);
 	}
 
 	// Data utils
@@ -114,6 +106,17 @@ public class OptionsPresenter implements I_Presenter {
 			return data.asBoolean();
 		else
 			return false;
+	}
+
+	@Override
+	public void setView(Composite view) {
+		display = (I_Display) view;
+		display.setPresenter(this);
+	}
+
+	@Override
+	public void setTree(EcommerceTree tree) {
+		this.tree = tree;
 	}
 
 }

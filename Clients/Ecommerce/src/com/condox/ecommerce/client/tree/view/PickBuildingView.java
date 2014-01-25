@@ -7,8 +7,8 @@ import com.condox.clientshared.document.BuildingInfo;
 import com.condox.ecommerce.client.FilteredListDataProvider;
 import com.condox.ecommerce.client.IFilter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
-import com.condox.ecommerce.client.tree.presenter.BuildingsPresenter;
-import com.condox.ecommerce.client.tree.presenter.BuildingsPresenter.IDisplay;
+import com.condox.ecommerce.client.tree.presenter.PickBuildingPresenter;
+import com.condox.ecommerce.client.tree.presenter.PickBuildingPresenter.IDisplay;
 //import com.condox.ecommerce.client.tree.presenter.BuildingsPresenter.IDisplay;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -41,19 +41,19 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.event.dom.client.ChangeEvent;
 
-public class BuildingsView extends Composite implements IDisplay,
+public class PickBuildingView extends Composite implements IDisplay,
 		IFilter<BuildingInfo> {
 
-	private static BuildingsViewUiBinder uiBinder = GWT
-			.create(BuildingsViewUiBinder.class);
+	private static PickBuildingViewUiBinder uiBinder = GWT
+			.create(PickBuildingViewUiBinder.class);
 
-	interface BuildingsViewUiBinder extends UiBinder<Widget, BuildingsView> {
+	interface PickBuildingViewUiBinder extends UiBinder<Widget, PickBuildingView> {
 	}
 
 	private String filterStr = "Start typing your building name or address...";
 //	private String filterStr = "Type here Name, Street or Postal to filter...";
 
-	public BuildingsView() {
+	public PickBuildingView() {
 		initWidget(uiBinder.createAndBindUi(this));
 		textFilter.setText(filterStr);
 		pager.setDisplay(dataGrid);
@@ -206,7 +206,7 @@ public class BuildingsView extends Composite implements IDisplay,
 		dataGrid.setEmptyTableWidget(loadingLabel);
 	}
 
-	private BuildingsPresenter presenter = null;
+	private PickBuildingPresenter presenter = null;
 	private BuildingInfo selectedBuilding = null;
 	private FilteredListDataProvider<BuildingInfo> dataProvider = new FilteredListDataProvider<BuildingInfo>(
 			this);
@@ -225,7 +225,7 @@ public class BuildingsView extends Composite implements IDisplay,
 	
 
 	@Override
-	public void setPresenter(BuildingsPresenter presenter) {
+	public void setPresenter(PickBuildingPresenter presenter) {
 		// TODO Auto-generated method stub
 		this.presenter = presenter;
 	}

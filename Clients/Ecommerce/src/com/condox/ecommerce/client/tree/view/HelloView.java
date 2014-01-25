@@ -5,8 +5,8 @@ import java.util.List;
 import com.condox.clientshared.abstractview.Log;
 import com.condox.ecommerce.client.FilteredListDataProvider;
 import com.condox.ecommerce.client.IFilter;
-import com.condox.ecommerce.client.tree.presenter.HelloAgentPresenter;
-import com.condox.ecommerce.client.tree.presenter.HelloAgentPresenter.I_Display;
+import com.condox.ecommerce.client.tree.presenter.HelloPresenter;
+import com.condox.ecommerce.client.tree.presenter.HelloPresenter.I_Display;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
@@ -31,7 +31,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class HelloAgentView extends Composite implements I_Display, IFilter<ViewOrderInfo> {
+public class HelloView extends Composite implements I_Display, IFilter<ViewOrderInfo> {
 
 	//
 	public static String SELECTED_ID = null;
@@ -42,24 +42,24 @@ public class HelloAgentView extends Composite implements I_Display, IFilter<View
 	@UiField (provided = true) DataGrid<ViewOrderInfo> dataGrid = new DataGrid<ViewOrderInfo>(50, resource);
 	private FilteredListDataProvider<ViewOrderInfo> dataProvider = new FilteredListDataProvider<ViewOrderInfo>(this);
 	@UiField Hyperlink hyperlink;
-	@UiField Label textNickName;
 	@UiField Button buttonSettings;
 	@UiField Button buttonShowHistory;
 	@UiField Button button_1;
 	@UiField Button button;
+	@UiField Label textNickName;
 
-	interface HelloAgentViewUiBinder extends UiBinder<Widget, HelloAgentView> {
+	interface HelloAgentViewUiBinder extends UiBinder<Widget, HelloView> {
 	}
 
-	private HelloAgentPresenter presenter = null;
+	private HelloPresenter presenter = null;
 
-	public HelloAgentView() {
+	public HelloView() {
 		initWidget(uiBinder.createAndBindUi(this));
 		CreateDataGrid();
 	}
 
 	@Override
-	public void setPresenter(HelloAgentPresenter presenter) {
+	public void setPresenter(HelloPresenter presenter) {
 		this.presenter = presenter;
 	}
 	final SingleSelectionModel<ViewOrderInfo> selectionModel = new SingleSelectionModel<ViewOrderInfo>();

@@ -20,8 +20,6 @@ public class CongratulationsView extends Composite implements I_Display {
 	private static CongratulationsViewUiBinder uiBinder = GWT
 			.create(CongratulationsViewUiBinder.class);
 	@UiField Button buttonCancel;
-	@UiField Button buttonPrev;
-	@UiField Button buttonNext;
 
 	interface CongratulationsViewUiBinder extends UiBinder<Widget, CongratulationsView> {
 	}
@@ -41,16 +39,6 @@ public class CongratulationsView extends Composite implements I_Display {
 	void onButtonCancelClick(ClickEvent event) {
 		if (presenter != null)
 			presenter.onCancel();
-	}
-	@UiHandler("buttonPrev")
-	void onButtonPrevClick(ClickEvent event) {
-		if (presenter != null)
-			presenter.onPrev();
-	}
-	@UiHandler("buttonNext")
-	void onButtonNextClick(ClickEvent event) {
-		if (presenter != null)
-			presenter.onNext();
 	}
 
 	@Override

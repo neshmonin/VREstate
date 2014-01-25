@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 
 public class BuildingInfo implements I_JSON{
 	private static Map<Integer, BuildingInfo> ids = new HashMap<Integer, BuildingInfo>();
@@ -20,18 +22,25 @@ public class BuildingInfo implements I_JSON{
 	private String postal = "";
 	private Position position = null;
 	private Double altitude_adjustment = null;
+	private String country = "";
 	
 	@Override
 	public JSONObject toJSONObject() {
-		return null;
+		JSONObject obj = new JSONObject();
+		obj.put("id", new JSONNumber(id));
+		obj.put("name", new JSONString(name));
+		obj.put("address", new JSONString(address));
+		obj.put("country", new JSONString(country));
+		return obj;
 	}
 
 	@Override
 	public void fromJSONObject(JSONObject obj) {
 		id = (int) obj.get("id").isNumber().doubleValue();
 		// TODO version
-		parent_id = (int) obj.get("siteId").isNumber().doubleValue();
+//		parent_id = (int) obj.get("siteId").isNumber().doubleValue();
 		name = obj.get("name").isString().stringValue();
+		country = obj.get("country").isString().stringValue();
 		
 		if (obj.containsKey("center")) {	// ?? TODO 
 			JSONObject position = obj.get("center").isObject();
@@ -49,7 +58,7 @@ public class BuildingInfo implements I_JSON{
 			this.position.setTilt(tilt);
 			this.position.setRange(range);
 		}
-		max_suite_altitude = obj.get("maxSuiteAltitude").isNumber().doubleValue();
+//		max_suite_altitude = obj.get("maxSuiteAltitude").isNumber().doubleValue();
 		
 		if (obj.containsKey("address")) {
 			address = obj.get("address").isString().stringValue();
@@ -73,6 +82,14 @@ public class BuildingInfo implements I_JSON{
 			
 	}
 	
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
 	public boolean hasAltitudeAdjustment() {
 		return altitude_adjustment != null;
 	}

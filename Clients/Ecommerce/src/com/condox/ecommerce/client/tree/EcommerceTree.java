@@ -1,328 +1,202 @@
 package com.condox.ecommerce.client.tree;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
-import com.condox.ecommerce.client.tree.node.AgreementNode;
-import com.condox.ecommerce.client.tree.node.BuildingsNode;
-import com.condox.ecommerce.client.tree.node.ChangingPasswordNode;
-import com.condox.ecommerce.client.tree.node.DefaultsNode;
-import com.condox.ecommerce.client.tree.node.ForgotPasswordNode;
-import com.condox.ecommerce.client.tree.node.HelloAgentNode;
-import com.condox.ecommerce.client.tree.node.LoginNode;
-import com.condox.ecommerce.client.tree.node.NewOrderNode;
-import com.condox.ecommerce.client.tree.node.OptionsNode;
-import com.condox.ecommerce.client.tree.node.PickSuiteNode;
-import com.condox.ecommerce.client.tree.node.SettingsNode;
-import com.condox.ecommerce.client.tree.node.ShowHistoryNode;
-import com.condox.ecommerce.client.tree.node.SummaryNode;
-import com.condox.ecommerce.client.tree.node.UpdateAvatarNode;
-import com.condox.ecommerce.client.tree.node.UpdateProfile1Node;
-import com.condox.ecommerce.client.tree.node.UpdateProfile2Node;
-import com.condox.ecommerce.client.tree.node.UsingMLSNode;
+import com.condox.ecommerce.client.I_Presenter;
+import com.condox.ecommerce.client.tree.presenter.AgreementPresenter;
+import com.condox.ecommerce.client.tree.presenter.ChangingPasswordPresenter;
+import com.condox.ecommerce.client.tree.presenter.CongratulationsPresenter;
+import com.condox.ecommerce.client.tree.presenter.ForgotPasswordPresenter;
+import com.condox.ecommerce.client.tree.presenter.HelloPresenter;
+import com.condox.ecommerce.client.tree.presenter.HistoryPresenter;
+import com.condox.ecommerce.client.tree.presenter.LoginPresenter;
+import com.condox.ecommerce.client.tree.presenter.NewOrderPresenter;
+import com.condox.ecommerce.client.tree.presenter.OptionsPresenter;
+import com.condox.ecommerce.client.tree.presenter.OrderSourcePresenter;
+import com.condox.ecommerce.client.tree.presenter.PickBuildingPresenter;
+import com.condox.ecommerce.client.tree.presenter.PickSuitePresenter;
+import com.condox.ecommerce.client.tree.presenter.ProfileStep1Presenter;
+import com.condox.ecommerce.client.tree.presenter.ProfileStep2Presenter;
+import com.condox.ecommerce.client.tree.presenter.SettingsPresenter;
+import com.condox.ecommerce.client.tree.presenter.SummaryPresenter;
+import com.condox.ecommerce.client.tree.view.AgreementView;
+import com.condox.ecommerce.client.tree.view.ChangingPasswordView;
+import com.condox.ecommerce.client.tree.view.CongratulationsView;
+import com.condox.ecommerce.client.tree.view.ForgotPasswordView;
+import com.condox.ecommerce.client.tree.view.HelloView;
+import com.condox.ecommerce.client.tree.view.HistoryView;
+import com.condox.ecommerce.client.tree.view.LoginView;
+import com.condox.ecommerce.client.tree.view.NewOrderView;
+import com.condox.ecommerce.client.tree.view.OptionsView;
+import com.condox.ecommerce.client.tree.view.OrderSourceView;
+import com.condox.ecommerce.client.tree.view.PickBuildingView;
+import com.condox.ecommerce.client.tree.view.PickSuiteView;
+import com.condox.ecommerce.client.tree.view.ProfileStep1View;
+import com.condox.ecommerce.client.tree.view.ProfileStep2View;
+import com.condox.ecommerce.client.tree.view.SettingsView;
+import com.condox.ecommerce.client.tree.view.SummaryView;
+import com.google.gwt.user.client.ui.Composite;
 
 public class EcommerceTree {
 
 	public I_Container container = new PopupContainer(); // TODO first version.
 
+	private List<String> leafs = new ArrayList<String>();
+	private List<String> MVPs = new ArrayList<String>();
+	private EcommerceNode currNode = new EcommerceNode("Defaults");
+
 	public enum Actions {
-		PrevMLS, PrevAddress,
-		Close, ForgotPassword, Submit, Ok, Guest, Agent, Logout, Settings, ShowHistory, NewOrder, Cancel, Prev, Next, OneMore, Finish, UsingMLS, UsingAddress, Proceed, UpdateProfile, Apply, SelectAvatar
-	}
-
-	private AbstractNode currNode = new DefaultsNode();
-//	private List<String> leafs = new ArrayList<String>();
-	private Node configNode = new Node("DefaultNode");
-
-	class Node {
-		private String nodeType = null;
-		private Node parent = null;
-		private Map<Actions, Node> actions = new HashMap<Actions, Node>();
-
-		public Node(String newNodeType) {
-			nodeType = newNodeType;
-		}
-
-		public void setParent(Node newParent) {
-			parent = newParent;
-		};
-
-		public boolean hasParent() {
-			return parent != null;
-		};
-
-		public void addAction(Actions state, Node nextNode) {
-			actions.put(state, nextNode);
-			nextNode.setParent(this);
-		}
-
-		public Node getNextNode(Actions state) {
-			return actions.get(state);
-		}
+		Guest, Agent, Close, ProfileStep1, Settings, NewOrder, History, ForgotPassword, Logout, Next, Finish, Cancel, Prev, SelectAvatar, Ok, Submit, UsingMLS, UsingAddress, IncorrectMLS, Congratulations
 	}
 
 	public void config() {
-		final Node login = new Node("LoginNode");
-		final Node agentHello = new Node("HelloAgentNode");
-		final Node agentUpdateProfile1 = new Node("UpdateProfile1Node");
-		final Node agentUpdateProfile2 = new Node("UpdateProfile2Node");
-		final Node agentSettings = new Node("SettingsNode");
-		final Node agentHistory = new Node("ShowHistoryNode");
-		final Node newOrder = new Node("NewOrderNode");
-		final Node usingMLS = new Node("UsingMLSNode");
-		final Node pickBuilding = new Node("BuildingsNode");
-		final Node pickSuite = new Node("PickSuiteNode");
-		final Node options = new Node("OptionsNode");
-		final Node summary = new Node("SummaryNode");
-		final Node agreement = new Node("AgreementNode");
-
-		configNode.addAction(null, login);
-		login.addAction(Actions.Agent, agentHello);
-		// Agent hello
-		agentHello.addAction(Actions.Logout, login);
-		agentHello.addAction(Actions.UpdateProfile, agentUpdateProfile1);
-		agentHello.addAction(Actions.Settings, agentSettings);
-		agentHello.addAction(Actions.ShowHistory, agentHistory);
-		agentHello.addAction(Actions.NewOrder, /* newOrder */usingMLS);
-		// Update profile, step #1
-		agentUpdateProfile1.addAction(Actions.Close, agentHello);
-		agentUpdateProfile1.addAction(Actions.Cancel, agentHello);
-		agentUpdateProfile1.addAction(Actions.Next, agentUpdateProfile2);
-		agentUpdateProfile1.addAction(Actions.Finish, agentHello);
-		// Update profile, step #2
-		agentUpdateProfile2.addAction(Actions.Close, agentHello);
-		agentUpdateProfile2.addAction(Actions.Cancel, agentHello);
-		agentUpdateProfile2.addAction(Actions.Prev, agentUpdateProfile1);
-		agentUpdateProfile2.addAction(Actions.Finish, agentHello);
-		// Settings
-		agentSettings.addAction(Actions.Close, agentHello);
-		// History
-		agentHistory.addAction(Actions.Close, agentHello);
-		// New order
-		// Using MLS
-		usingMLS.addAction(Actions.Close, agentHello);
-		usingMLS.addAction(Actions.Cancel, agentHello);
-		usingMLS.addAction(Actions.Prev, agentHello);
-		usingMLS.addAction(Actions.UsingMLS, options);
-		usingMLS.addAction(Actions.UsingAddress, pickBuilding);
-		// Pick building
-		pickBuilding.addAction(Actions.Close, agentHello);
-		pickBuilding.addAction(Actions.Cancel, agentHello);
-		pickBuilding.addAction(Actions.Prev, usingMLS);
-		pickBuilding.addAction(Actions.Next, pickSuite);
-		// Pick suite
-		pickSuite.addAction(Actions.Close, agentHello);
-		pickSuite.addAction(Actions.Cancel, agentHello);
-		pickSuite.addAction(Actions.Prev, pickBuilding);
-		pickSuite.addAction(Actions.Next, options);
-		// Options
-		options.addAction(Actions.Close, agentHello);
-		options.addAction(Actions.Cancel, agentHello);
-		options.addAction(Actions.UsingMLS, usingMLS);
-		options.addAction(Actions.UsingAddress, pickSuite);
-		options.addAction(Actions.Next, summary);
-		// Summary
-		summary.addAction(Actions.Close, agentHello);
-		summary.addAction(Actions.Cancel, agentHello);
-		summary.addAction(Actions.Prev, options);
-		summary.addAction(Actions.Next, agreement);
-		// Agreement
-		agreement.addAction(Actions.Close, agentHello);
-		agreement.addAction(Actions.Cancel, agentHello);
-		agreement.addAction(Actions.Prev, summary);
-//		summary.addAction(Actions.Next, agreement);
+		leafs.add("Defaults/Login.ForgotPassword/ForgotPassword.Submit/ChangingPassword.Close=>Defaults/Login");
+		leafs.add("Defaults/Login.ForgotPassword/ForgotPassword.Close=>Defaults/Login");
 		
-		// // Forgot password node
-		// //
-		// leafs.add("DefaultsNode/LoginNode.ForgotPassword/ForgotPasswordNode.Close=>DefaultsNode/LoginNode");
-		// //
-		// leafs.add("DefaultsNode/LoginNode.ForgotPassword/ForgotPasswordNode.Submit/ChangingPasswordNode.Ok=>DefaultsNode/LoginNode");
-		// leafs.add("DefaultsNode/LoginNode.ForgotPassword/ChangingPasswordNode.Ok=>DefaultsNode/LoginNode");
-		//
-		// String login = "DefaultsNode/LoginNode";
-		//
-		// // Agent node
-		// final String agentHello = login + ".Agent/HelloAgentNode";
-		// final String agentUpdateProfile1 = agentHello
-		// + ".UpdateProfile/UpdateProfile1Node";
-		// final String agentUpdateProfile2 = agentUpdateProfile1
-		// + ".Next/UpdateProfile2Node";
-		// final String agentSettings = agentHello + ".Settings/SettingsNode";
-		// final String agentHistory = agentHello +
-		// ".ShowHistory/ShowHistoryNode";
-		// final String agentNewOrder = agentHello + ".NewOrder/NewOrderNode";
-		// final String agentUsingMLS = agentNewOrder + ".Next/UsingMLSNode";
-		// final String agentPickBuilding = agentUsingMLS
-		// + ".NotUsingMLS/BuildingsNode";
-		// final String agentPickSuite = agentPickBuilding +
-		// ".Next/PickSuiteNode";
-		// final String agentOrderOptions = agentPickSuite +
-		// ".Next/OptionsNode";
-		// // final String agentOrderOptions2 = agentUsingMLS +
-		// // ".UsingMLS/OptionsNode";
-		// final String agentOrderSummary = agentOrderOptions
-		// + ".Next/SummaryNode";
-		// // final String agentOrderSummary2 = agentOrderOptions2 +
-		// // ".Next/SummaryNode";
-		//
-		// final String agentAgreement = agentOrderSummary +
-		// ".Next/AgreementNode";
-		//
-		// // Update profile, step #1
-		// leafs.add(agentUpdateProfile1 + ".Close=>" + agentHello);
-		// leafs.add(agentUpdateProfile1 + ".Cancel=>" + agentHello);
-		// leafs.add(agentUpdateProfile1 + ".Finish=>" + agentHello);
-		// // Update profile, step #2
-		// leafs.add(agentUpdateProfile2 + ".Close=>" + agentHello);
-		// leafs.add(agentUpdateProfile2 + ".Cancel=>" + agentHello);
-		// leafs.add(agentUpdateProfile2 + ".Prev=>" + agentUpdateProfile1);
-		// leafs.add(agentUpdateProfile2 + ".Finish=>" + agentHello);
-		// // Settings
-		// leafs.add(agentSettings + ".Close=>" + agentHello);
-		// // Show history
-		// leafs.add(agentHistory + ".Close=>" + agentHello);
-		// // New order
-		// leafs.add(agentNewOrder + ".Cancel=>" + agentHello);
-		// // // Using MLS#
-		// // leafs.add(agentUsingMLS + ".Cancel=>" + agentHello);
-		// // leafs.add(agentUsingMLS + ".Prev=>" + agentHello);
-		// // Pick building
-		// leafs.add(agentPickBuilding + ".Cancel=>" + agentHello);
-		// leafs.add(agentPickBuilding + ".Prev=>" + agentUsingMLS);
-		// // Pick suite
-		// leafs.add(agentPickSuite + ".Cancel=>" + agentHello);
-		// leafs.add(agentPickSuite + ".Prev=>" + agentPickBuilding);
-		// // Order options
-		// leafs.add(agentOrderOptions + ".Cancel=>" + agentHello);
-		// leafs.add(agentOrderOptions + ".Prev=>" + agentPickSuite);
-		// // Order summary
-		// leafs.add(agentOrderSummary + ".Cancel=>" + agentHello);
-		// leafs.add(agentOrderSummary + ".Prev=>" + agentOrderOptions);
-		// // Agreement
-		// leafs.add(agentAgreement + ".Cancel=>" + agentHello);
-		// leafs.add(agentAgreement + ".Prev=>" + agentOrderSummary);
+		leafs.add("Defaults/Login.Guest/Hello.Logout=>Defaults/Login");
+		leafs.add("Defaults/Login.Guest/Hello.ProfileStep1/ProfileStep1.Close=>Defaults/Login.Guest/Hello");
+		leafs.add("Defaults/Login.Guest/Hello.Settings/Settings.Close=>Defaults/Login.Guest/Hello");
+		leafs.add("Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.Cancel=>Defaults/Login.Guest/Hello");
+		leafs.add("Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.Prev=>Defaults/Login.Guest/Hello");
+		leafs.add("Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Cancel=>Defaults/Login.Guest/Hello");
+		leafs.add("Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Prev=>Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource");
+		leafs.add("Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Cancel=>Defaults/Login.Guest/Hello");
+		leafs.add("Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Prev=>Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding");
+		leafs.add("Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Cancel=>Defaults/Login.Guest/Hello");
+		leafs.add("Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Prev=>Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite");
+		leafs.add("Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary");
+		leafs.add("Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Cancel=>Defaults/Login.Guest/Hello");
+		leafs.add("Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Prev=>Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options");
+		leafs.add("Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Next/Agreement.Cancel=>Defaults/Login.Guest/Hello");
+		leafs.add("Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Next/Agreement.Prev=>Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary");
+		leafs.add("Defaults/Login.Guest/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Next/Agreement.Congratulations/Congratulations.Cancel=>Defaults/Login.Guest/Hello");
+		leafs.add("Defaults/Login.Guest/Hello.History/History.Close=>Defaults/Login.Guest/Hello");
+
+		leafs.add("Defaults/Login.Agent/Hello.Logout=>Defaults/Login");
+		leafs.add("Defaults/Login.Agent/Hello.ProfileStep1/ProfileStep1.Close=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.ProfileStep1/ProfileStep1.Cancel=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.ProfileStep1/ProfileStep1.Next/ProfileStep2.Close=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.ProfileStep1/ProfileStep1.Finish=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.Settings/Settings.Close=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.Cancel=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.Prev=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingMLS/Options.Cancel=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingMLS/Options.Prev=>Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingMLS/Options.Next/Summary.Cancel=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingMLS/Options.Next/Summary.Prev=>Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingMLS/Options");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingMLS/Options.Next/Summary.Next/Agreement.Cancel=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingMLS/Options.Next/Summary.Next/Agreement.Prev=>Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingMLS/Options.Next/Summary");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Cancel=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Prev=>Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Cancel=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Prev=>Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Cancel=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Prev=>Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Cancel=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Prev=>Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Next/Agreement.Cancel=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Next/Agreement.Prev=>Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Next/Agreement.Congratulations/Congratulations.Cancel=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Agent/Hello.History/History.Close=>Defaults/Login.Agent/Hello");
+
+		MVPs.add("Defaults/null/null/null");
+		MVPs.add("Login/null/LoginView/LoginPresenter");
+		MVPs.add("Hello/null/HelloView/HelloPresenter");
+		MVPs.add("ProfileStep1/null/ProfileStep1View/ProfileStep1Presenter");
+		MVPs.add("Settings/null/SettingsView/SettingsPresenter");
+		MVPs.add("NewOrder/null/NewOrderView/NewOrderPresenter");
+		MVPs.add("History/null/HistoryView/HistoryPresenter");
+		MVPs.add("OrderSource/null/OrderSourceView/OrderSourcePresenter");
+		MVPs.add("IncorrectMLS/null/IncorrectMLSView/IncorrectMLSPresenter");
+		MVPs.add("PickBuilding/null/PickBuildingView/PickBuildingPresenter");
+		MVPs.add("PickSuite/null/PickSuiteView/PickSuitePresenter");
+		MVPs.add("Options/null/OptionsView/OptionsPresenter");
+		MVPs.add("Summary/null/SummaryView/SummaryPresenter");
+		MVPs.add("Agreement/null/AgreementView/AgreementPresenter");
+		MVPs.add("Congratulations/null/CongratulationsView/CongratulationsPresenter");
+		MVPs.add("ForgotPassword/null/ForgotPasswordView/ForgotPasswordPresenter");
+		MVPs.add("ChangingPassword/null/ChangingPasswordView/ChangingPasswordPresenter");
 	}
 
-	public void next() {
-		// if (currNode == null)
-		// currNode = _createNode("DefaultsNode");
-		Actions currState = currNode.getState();
-		configNode = configNode.getNextNode(currState);
-
-		boolean ready = false;
-		AbstractNode node = currNode;
-		while (node.hasParent()) {
-			if (node.getName().equals(configNode.nodeType)) {
-				ready = true;
-				currNode = node;
-				break;
+	public void next(Actions action) {
+		// Log.write("EcommerceTree.next()");
+		if (currNode == null)
+			currNode = new EcommerceNode("Defaults");
+		else {
+			currNode.setAction(action);
+			String currPath = currNode.getLeaf();
+			Log.write("currPath: " + currPath);
+			String nextPath = null;
+			for (String leaf : leafs)
+				if (leaf.startsWith(currNode.getLeaf()))
+					nextPath = leaf.substring(currPath.length());
+			Log.write("nextPath: " + nextPath);
+			if (nextPath == null)
+				return;
+			if (nextPath.startsWith("/")) {
+				String nextNodeType = nextPath.substring(1);
+				int index = nextNodeType.indexOf("/");
+				if (index > 0)
+					nextNodeType = nextNodeType.substring(0, index);
+				index = nextNodeType.indexOf(".");
+				if (index > 0)
+					nextNodeType = nextNodeType.substring(0, index);
+				EcommerceNode nextNode = createNode(nextNodeType);
+				currNode = currNode.addChild(nextNode);
+				// currNode = nextNode;
+				goNode(currNode);
+			} else if (nextPath.startsWith("=>")) { // Jump to prev node
+				// Log.write("Jumping nextNode:");
+				String nextNodeLeaf = nextPath.substring(2);
+				// Log.write("nextNodeLeaf = " + nextNodeLeaf);
+				while (currNode != null) {
+					String str = currNode.getLeaf();
+					str = str.substring(0, str.lastIndexOf("."));
+					// Log.write(str);
+					if (nextNodeLeaf.equals(str)) {
+						goNode(currNode);
+						break;
+					}
+					currNode = currNode.getParent();
+				}
 			}
-			node = node.getParent();
 		}
-		if (!ready) {
-			AbstractNode nextNode = _createNode(configNode.nodeType);
-			currNode = currNode.addChild(nextNode);
-		}
-		currNode.go(this);
-		// if (currNode == null)
-		// currNode = _createNode("DefaultsNode");
-		// String currPath = currNode.getLeaf();
-		// // Log.write("currPath = " + currPath);
-		//
-		// String nextPath = null;
-		// for (String leaf : leafs)
-		// if (leaf.startsWith(currPath))
-		// nextPath = leaf.substring(currPath.length());
-		// // Log.write("nextPath = " + nextPath);
-		//
-		// if (nextPath == null)
-		// return;
-		// if (nextPath.startsWith("/")) { // Create next node
-		// // Log.write("Creating nextNode:");
-		// String nextNodeType = nextPath.substring(1);
-		//
-		// int index = nextNodeType.indexOf("/");
-		// if (index > 0)
-		// nextNodeType = nextNodeType.substring(0, index);
-		//
-		// index = nextNodeType.indexOf(".");
-		// if (index > 0)
-		// nextNodeType = nextNodeType.substring(0, index);
-		//
-		// // Log.write("nextNodeType = " + nextNodeType);
-		// AbstractNode nextNode = _createNode(nextNodeType);
-		//
-		// currNode = currNode.addChild(nextNode);
-		//
-		// currNode.go(this);
-		//
-		// } else if (nextPath.startsWith("=>")) { // Jump to next node
-		// // Log.write("Jumping nextNode:");
-		// String nextNodeLeaf = nextPath.substring(2);
-		// // Log.write("nextNodeLeaf = " + nextNodeLeaf);
-		// while (currNode != null) {
-		// String s = currNode.getLeaf();
-		// s = s.substring(0, s.lastIndexOf("."));
-		// // Log.write(s);
-		// if (nextNodeLeaf.equals(s)) {
-		// currNode.go(this);
-		// break;
-		// }
-		// currNode = currNode.getParent();
-		// }
-		// }
 	}
 
-	private AbstractNode _createNode(String nodeType) {
-		if ("DefaultsNode".equals(nodeType))
-			return new DefaultsNode();
-		if ("LoginNode".equals(nodeType))
-			return new LoginNode();
-		if ("ForgotPasswordNode".equals(nodeType))
-			return new ForgotPasswordNode();
-		if ("ChangingPasswordNode".equals(nodeType))
-			return new ChangingPasswordNode();
-		if ("HelloAgentNode".equals(nodeType))
-			return new HelloAgentNode();
-		if ("UpdateProfile1Node".equals(nodeType))
-			return new UpdateProfile1Node();
-		if ("UpdateProfile2Node".equals(nodeType))
-			return new UpdateProfile2Node();
-		if ("UpdateAvatarNode".equals(nodeType))
-			return new UpdateAvatarNode();
-		if ("SettingsNode".equals(nodeType))
-			return new SettingsNode();
-		if ("ShowHistoryNode".equals(nodeType))
-			return new ShowHistoryNode();
-		if ("NewOrderNode".equals(nodeType))
-			return new NewOrderNode();
-		if ("UsingMLSNode".equals(nodeType))
-			return new UsingMLSNode();
-		if ("BuildingsNode".equals(nodeType))
-			return new BuildingsNode();
-		if ("PickSuiteNode".equals(nodeType))
-			return new PickSuiteNode();
-		if ("OptionsNode".equals(nodeType))
-			return new OptionsNode();
-		if ("SummaryNode".equals(nodeType))
-			return new SummaryNode();
-		if ("AgreementNode".equals(nodeType))
-			return new AgreementNode();
-		return null;
+	private EcommerceNode createNode(String nextNodeType) {
+		EcommerceNode result = new EcommerceNode(nextNodeType);
+		return result;
+	}
 
+	private void goNode(EcommerceNode node) {
+		Composite view = null;
+		I_Presenter presenter = null;
+		String name = node.getName();
+		for (String str : MVPs)
+			if (str.startsWith(name)) {
+				String[] mvp = str.split("/");
+				view = getView(mvp[2]);
+				presenter = getPresenter(mvp[3]);
+			}
+		if (presenter != null) {
+			presenter.setTree(this);
+			if (view != null)
+				presenter.setView(view);
+			presenter.go(this.container);
+		}
 	}
 
 	public Data getData(Field key) {
-		AbstractNode node = currNode;
+		EcommerceNode node = (EcommerceNode) currNode;
 		while (node != null) {
 			if (node.getData(key) != null)
 				return node.getData(key);
 			else
-				node = node.getParent();
+				node = (EcommerceNode) node.getParent();
 		}
 		return null;
 	}
@@ -332,22 +206,58 @@ public class EcommerceTree {
 			currNode.setData(key, value);
 	}
 
+	private I_Presenter getPresenter(String name) {
+		if ("LoginPresenter".equals(name)) return new LoginPresenter(); 
+		if ("ForgotPasswordPresenter".equals(name)) return new ForgotPasswordPresenter(); 
+		if ("ChangingPasswordPresenter".equals(name)) return new ChangingPasswordPresenter(); 
+		if ("HelloPresenter".equals(name)) return new HelloPresenter(); 
+		if ("NewOrderPresenter".equals(name)) return new NewOrderPresenter(); 
+		if ("OptionsPresenter".equals(name)) return new OptionsPresenter(); 
+		if ("PickBuildingPresenter".equals(name)) return new PickBuildingPresenter(); 
+		if ("PickSuitePresenter".equals(name)) return new PickSuitePresenter(); 
+		if ("ProfileStep1Presenter".equals(name)) return new ProfileStep1Presenter(); 
+		if ("ProfileStep2Presenter".equals(name)) return new ProfileStep2Presenter(); 
+		if ("SettingsPresenter".equals(name)) return new SettingsPresenter(); 
+		if ("SummaryPresenter".equals(name)) return new SummaryPresenter(); 
+		if ("OrderSourcePresenter".equals(name)) return new OrderSourcePresenter(); 
+		if ("AgreementPresenter".equals(name)) return new AgreementPresenter(); 
+		if ("CongratulationsPresenter".equals(name)) return new CongratulationsPresenter(); 
+		if ("HistoryPresenter".equals(name)) return new HistoryPresenter(); 
+		return null;
+	}
+
+	private Composite getView(String name) {
+		if ("LoginView".equals(name)) return new LoginView(); 
+		if ("ForgotPasswordView".equals(name)) return new ForgotPasswordView(); 
+		if ("ChangingPasswordView".equals(name)) return new ChangingPasswordView(); 
+		if ("HelloView".equals(name)) return new HelloView(); 
+		if ("NewOrderView".equals(name)) return new NewOrderView(); 
+		if ("OptionsView".equals(name)) return new OptionsView(); 
+		if ("PickBuildingView".equals(name)) return new PickBuildingView(); 
+		if ("PickSuiteView".equals(name)) return new PickSuiteView(); 
+		if ("ProfileStep1View".equals(name)) return new ProfileStep1View(); 
+		if ("ProfileStep2View".equals(name)) return new ProfileStep2View(); 
+		if ("SettingsView".equals(name)) return new SettingsView(); 
+		if ("SummaryView".equals(name)) return new SummaryView(); 
+		if ("OrderSourceView".equals(name)) return new OrderSourceView(); 
+		if ("AgreementView".equals(name)) return new AgreementView(); 
+		if ("CongratulationsView".equals(name)) return new CongratulationsView(); 
+		if ("HistoryView".equals(name)) return new HistoryView(); 
+		return null;
+	}
+
 	// -----------------
 
 	public enum Field {
-		UserEmail, UserPassword, UserRole,
-
-		BuildingId, BuildingName,
-
-		SuiteId, SuiteName, SuiteAddress, SuiteMLS, SuitePrice,
-
 		FILTERING_BY_CITY, VirtualTourUrl, MoreInfoUrl // TODO review this
 														// constants
-		, UserInfo, SuiteSelected, UsingMLS
+		, UserInfo, UsingMLS, BuildingInfo, SuiteInfo, EmailToRecoverPassword
 
 	}
 
 	public void close() {
 		container.clear();
 	}
+
+	// ------------------------
 }

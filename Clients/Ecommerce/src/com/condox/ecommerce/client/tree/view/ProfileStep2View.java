@@ -1,7 +1,7 @@
 package com.condox.ecommerce.client.tree.view;
 
-import com.condox.ecommerce.client.tree.presenter.UpdateProfile2Presenter;
-import com.condox.ecommerce.client.tree.presenter.UpdateProfile2Presenter.I_Display;
+import com.condox.ecommerce.client.tree.presenter.ProfileStep2Presenter;
+import com.condox.ecommerce.client.tree.presenter.ProfileStep2Presenter.I_Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.Window;
@@ -20,7 +20,7 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 
-public class UpdateProfile2View extends Composite implements I_Display {
+public class ProfileStep2View extends Composite implements I_Display {
 
 	private static UpdateProfile2ViewUiBinder uiBinder = GWT
 			.create(UpdateProfile2ViewUiBinder.class);
@@ -30,17 +30,17 @@ public class UpdateProfile2View extends Composite implements I_Display {
 	@UiField Button buttonClose;
 	@UiField Image image;
 
-	interface UpdateProfile2ViewUiBinder extends UiBinder<Widget, UpdateProfile2View> {
+	interface UpdateProfile2ViewUiBinder extends UiBinder<Widget, ProfileStep2View> {
 	}
 
-	private UpdateProfile2Presenter presenter = null;
+	private ProfileStep2Presenter presenter = null;
 
-	public UpdateProfile2View() {
+	public ProfileStep2View() {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 
 	@Override
-	public void setPresenter(UpdateProfile2Presenter presenter) {
+	public void setPresenter(ProfileStep2Presenter presenter) {
 		this.presenter = presenter;
 	}
 	@UiHandler("buttonClose")

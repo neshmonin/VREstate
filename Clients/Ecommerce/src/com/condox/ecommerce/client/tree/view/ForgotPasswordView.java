@@ -11,12 +11,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Button;
 
 public class ForgotPasswordView extends Composite implements I_Display {
 
 	private static ForgotPasswordViewUiBinder uiBinder = GWT
 			.create(ForgotPasswordViewUiBinder.class);
 	@UiField TextBox textUserEmail;
+	@UiField Button button;
 
 	interface ForgotPasswordViewUiBinder extends UiBinder<Widget, ForgotPasswordView> {
 	}
@@ -46,5 +48,10 @@ public class ForgotPasswordView extends Composite implements I_Display {
 	@Override
 	public void setEmail(String value) {
 		textUserEmail.setValue(value);
+	}
+	@UiHandler("button")
+	void onButtonClick(ClickEvent event) {
+		if (presenter != null)
+			presenter.onClose();
 	}
 }

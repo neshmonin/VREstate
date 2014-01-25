@@ -5,12 +5,7 @@ import com.condox.clientshared.communication.I_Login;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.communication.User.UserRole;
-import com.condox.clientshared.tree.Data;
-import com.condox.ecommerce.client.tree.AbstractNode;
 import com.condox.ecommerce.client.tree.EcommerceTree;
-import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
-import com.condox.ecommerce.client.tree.PopupContainer;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -20,7 +15,6 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -58,7 +52,7 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 	private void startWizard() {
 		EcommerceTree tree = new EcommerceTree();
 		tree.config();
-		tree.next();
+		tree.next(null);
 	}
 	
 	private void testUpdateProfile() {

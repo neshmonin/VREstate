@@ -2,6 +2,8 @@ package com.condox.ecommerce.client.tree.presenter;
 
 import com.condox.clientshared.container.I_Container;
 import com.condox.ecommerce.client.I_Presenter;
+import com.condox.ecommerce.client.tree.EcommerceTree;
+import com.google.gwt.user.client.ui.Composite;
 
 public class ProductPresenter implements I_Presenter {
 
@@ -45,6 +47,18 @@ public class ProductPresenter implements I_Presenter {
 //		display.setLayout(productType == "Layout");
 //		container.clear();
 //		container.add((I_Contained)display);
+	}
+
+	@Override
+	public void setView(Composite view) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setTree(EcommerceTree tree) {
+		// TODO Auto-generated method stub
+		
 	}
 
 //	public void onPrev() {
