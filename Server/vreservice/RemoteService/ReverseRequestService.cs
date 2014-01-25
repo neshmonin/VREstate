@@ -101,6 +101,10 @@ namespace Vre.Server.RemoteService
                                 dataChanged = processAccountRegister(request, rq, session);
                                 break;
 
+							case ReverseRequest.RequestType.PasswordRecover:
+								dataChanged = processPasswordRecover(request, rq, session);
+								break;
+
                             case ReverseRequest.RequestType.LoginChange:
                                 dataChanged = processLoginChange(request, rq, session);
                                 break;
@@ -452,8 +456,123 @@ namespace Vre.Server.RemoteService
         }
         #endregion
 
-        #region ViewOrder
-        public static ViewOrder CreateViewOrder(IServiceRequest srq, User targetUser, string note,
+		#region password recover
+		public static void InitiatePasswordRecover(string userRole, string estateDeveloperId, string login)
+		{
+			ReverseRequest request;
+
+			User.Role role;
+			if (!Enum.TryParse<User.Role>(userRole, true, out role)) throw new ArgumentException("User role not specified or is invalid");
+
+			using (ISession dbSession = NHibernateHelper.GetSession())
+			{
+				using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(dbSession))
+				{
+					int eid = -1;
+					if (User.IsEstateDeveloperTied(role))
+					{
+						eid = DataService.ResolveDeveloperId(dbSession, estateDeveloperId);
+						if (eid < 0) throw new ArgumentException("Estate developer ID is not provided or is invalid");
+					}
+
+					int uid;
+					using (IAuthentication auth = new Authentication(dbSession))
+						uid = auth.UserIdByLogin(LoginType.Plain, role, eid, login);
+
+					if (uid < 0) throw new FileNotFoundException("User is not found in the system");
+
+					using (ReverseRequestDao dao = new ReverseRequestDao(dbSession))
+					{
+						request = ReverseRequest.CreatePasswordRecover(uid, login,
+							DateTime.UtcNow.AddSeconds(Configuration.HttpService.ReverseRequestLinkExpirationSec.Value),
+							generateReferenceParameterName(), generateReferenceParameterValue());
+
+						dao.Create(request);
+					}
+
+					User u;
+					using (var dao = new UserDao(dbSession)) u = dao.GetById(uid);
+
+					ServiceInstances.MessageGen.SendMessage(null, u.PrimaryEmailAddress, "MSG_PASSWORD_RECOVER",
+						GenerateUrl(request), request.ExpiresOn);
+
+					//session.DbSession.Flush();
+					tran.Commit();
+				}
+			}
+		}
+
+		private static bool processPasswordRecover(IServiceRequest request, ReverseRequest dbRequest, ISession session)
+		{
+			bool dataChanged = false;
+			string testValue = request.Request.Query.GetParam(dbRequest.ReferenceParamName, string.Empty);
+			string refValue = request.Request.Query.GetParam("rid", string.Empty);
+			string password = request.Request.Query.GetParam("pwd", string.Empty);
+			User user;
+
+			if ((0 == refValue.Length) || (0 == password.Length))
+			{
+				// a link from email is accessed: generate password entry page
+				//
+				makeHttpResponse(request, null, "HTML_PASSWORD_ENTRY",
+					UniversalId.GenerateUrlId(UniversalId.IdType.ReverseRequest, dbRequest.Id),
+					dbRequest.ReferenceParamName,
+					"rid", dbRequest.ReferenceParamValue,
+					dbRequest.Login);
+			}
+			else
+			{
+				if ((testValue.Length > 0) || !dbRequest.ReferenceParamValue.Equals(refValue)) // TODO: robot action detected!
+				{
+					ServiceInstances.Logger.Error(
+						"Robot activity detected (password recover).\r\nURL: {0}",
+						request.UserInfo);
+					makeHttpResponse(request, null, "HTML_GENERIC_ERROR", string.Empty, string.Empty);
+				}
+				else
+				{
+					bool result = false;
+					string errorReason = null;
+
+					// change password
+					//
+					using (IAuthentication auth = new Authentication(session))
+						result = auth.ChangePassword(dbRequest.UserId.Value, null, password, out errorReason);
+
+					if (result)
+					{
+						// remove record and respond with confirmation
+
+						using (ReverseRequestDao dao = new ReverseRequestDao(session)) dao.Delete(dbRequest);
+
+						using (var dao = new UserDao(session)) user = dao.GetById(dbRequest.UserId.Value);
+
+						// successful change callback: generate confirmation information
+						//
+						string rn = Utilities.GenerateReferenceNumber();
+						ServiceInstances.Logger.Info("{0} User UID={1} successfully reset password.",
+							rn, dbRequest.UserId);
+
+						// prepare plaintext response to be parsed by javascript on page
+						//
+						makeJavascriptResponse(request, rn, "TXT_PASSWORD_UPDATED", user);
+
+						dataChanged = true;
+					}
+					else
+					{
+						string rn = Utilities.GenerateReferenceNumber();
+						ServiceInstances.Logger.Error("{0} Password reset error: {1}", rn, errorReason ?? "Authentication error");
+						throw new InvalidOperationException(errorReason ?? "Authentication error");
+					}
+				}
+			}
+			return dataChanged;
+		}
+		#endregion
+
+		#region ViewOrder
+		public static ViewOrder CreateViewOrder(IServiceRequest srq, User targetUser, string note,
             ViewOrder.ViewOrderProduct product, ViewOrder.ViewOrderOptions options, string mlsId, string mlsUrl,
             ViewOrder.SubjectType type, int targetObjectId, 
 			string productUrl, DateTime expiresOn,
