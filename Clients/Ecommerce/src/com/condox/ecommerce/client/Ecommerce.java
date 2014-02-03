@@ -6,7 +6,9 @@ import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.communication.User.UserRole;
 import com.condox.ecommerce.client.tree.EcommerceTree;
+import com.condox.ecommerce.client.resources.*;
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.Request;
@@ -20,16 +22,21 @@ import com.google.gwt.user.client.History;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
-	public enum Modes {noTest, testDeleteOrder, testUpdateOrder}
+	public enum Modes {
+		noTest, testDeleteOrder, testUpdateOrder
+	}
+
 	public static Modes mode = Modes.noTest;
+
 	/**
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
+		CSS.Instance.my().ensureInjected();
 		Options.Init();
 		History.addValueChangeHandler(this);
 		History.fireCurrentHistoryState();
-//		History.newItem("testUpdateProfile");
+		// History.newItem("testUpdateProfile");
 	}
 
 	@Override
@@ -42,19 +49,19 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 		}
 		if ("login".equals(token))
 			startWizard();
-		else if("orderNow".equals(token))
+		else if ("orderNow".equals(token))
 			startWizard();
-		else if("testUpdateProfile".equals(token))
+		else if ("testUpdateProfile".equals(token))
 			testUpdateProfile();
 		History.newItem("", false);
 	}
-	
+
 	private void startWizard() {
 		EcommerceTree tree = new EcommerceTree();
 		tree.config();
 		tree.next(null);
 	}
-	
+
 	private void testUpdateProfile() {
 		String login = "adminan";
 		String password = "smelatoronto";
@@ -63,45 +70,60 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 
 			@Override
 			public void onLoginSucceed() {
-				ServerProxy.getUserInfo(User.id, User.SID, new RequestCallback(){
-
-					@Override
-					public void onResponseReceived(Request request, Response response) {
-						JSONObject obj = JSONParser.parseLenient(response.getText()).isObject();
-						UserInfo info = new UserInfo();
-						info.fromJSONObject(obj);
-						String nick = info.getNickName();
-						if (nick.startsWith("<changed>"))
-							nick = nick.substring(9);
-						else
-							nick = "<changed>" + nick;
-						info.setNickName(nick);
-						
-						ServerProxy.setUserInfo(User.id, info.toJSONObject().toString(), User.SID, new RequestCallback() {
+				ServerProxy.getUserInfo(User.id, User.SID,
+						new RequestCallback() {
 
 							@Override
-							public void onResponseReceived(Request request, Response response) {
-								// TODO Auto-generated method stub
-								Log.popup();
+							public void onResponseReceived(Request request,
+									Response response) {
+								JSONObject obj = JSONParser.parseLenient(
+										response.getText()).isObject();
+								UserInfo info = new UserInfo();
+								info.fromJSONObject(obj);
+								String nick = info.getNickName();
+								if (nick.startsWith("<changed>"))
+									nick = nick.substring(9);
+								else
+									nick = "<changed>" + nick;
+								info.setNickName(nick);
+
+								ServerProxy.setUserInfo(User.id, info
+										.toJSONObject().toString(), User.SID,
+										new RequestCallback() {
+
+											@Override
+											public void onResponseReceived(
+													Request request,
+													Response response) {
+												// TODO Auto-generated method
+												// stub
+												Log.popup();
+											}
+
+											@Override
+											public void onError(
+													Request request,
+													Throwable exception) {
+												// TODO Auto-generated method
+												// stub
+
+											}
+										});
+
 							}
 
 							@Override
-							public void onError(Request request, Throwable exception) {
-								// TODO Auto-generated method stub
-								
-							}});
-						
-					}
+							public void onError(Request request,
+									Throwable exception) {
 
-					@Override
-					public void onError(Request request, Throwable exception) {
-						
-					}});
+							}
+						});
 			}
 
 			@Override
 			public void onLoginFailed(Throwable exception) {
-				
-			}}, login, password, role);
+
+			}
+		}, login, password, role);
 	}
 }

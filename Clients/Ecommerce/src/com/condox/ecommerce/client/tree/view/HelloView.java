@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.user.client.ui.TextBox;
 
 public class HelloView extends Composite implements I_Display, IFilter<ViewOrderInfo> {
 
@@ -47,6 +48,7 @@ public class HelloView extends Composite implements I_Display, IFilter<ViewOrder
 	@UiField Button button_1;
 	@UiField Button button;
 	@UiField Label textNickName;
+	@UiField TextBox url;
 
 	interface HelloAgentViewUiBinder extends UiBinder<Widget, HelloView> {
 	}
@@ -169,6 +171,28 @@ public class HelloView extends Composite implements I_Display, IFilter<ViewOrder
 		
 		dataGrid.addColumn(DeleteColumn, "");
 		
+		// Get column
+		Column<ViewOrderInfo, String> GetUrlColumn = new Column<ViewOrderInfo, String>(
+				new ClickableTextCell(anchorRenderer)) {
+			@Override
+			public String getValue(ViewOrderInfo object) {
+				return "<a style=\"cursor:pointer;\">get url</a>";
+			}
+			
+		};
+		
+		GetUrlColumn.setFieldUpdater(new FieldUpdater<ViewOrderInfo, String>() {
+			
+			@Override
+			public void update(int index, ViewOrderInfo object,
+					String value) {
+//				SELECTED_ID = selectionModel.getSelectedObject().getId();
+				presenter.getUrl(object);
+			}
+		});
+		
+		dataGrid.addColumn(GetUrlColumn, "Url");
+		
 				
 //
 //		// Add a column to fit free space.
@@ -208,10 +232,11 @@ public class HelloView extends Composite implements I_Display, IFilter<ViewOrder
 //		if (!dataProvider.getDataDisplays().contains(dataGrid))
 //			dataProvider.addDataDisplay(dataGrid);
 //
-		dataGrid.setColumnWidth(AddressColumn, "420px");
+		dataGrid.setColumnWidth(AddressColumn, "400px");
 		dataGrid.setColumnWidth(MLSColumn, "80px");
-		dataGrid.setColumnWidth(DisableColumn, "80px");
-		dataGrid.setColumnWidth(DeleteColumn, "80px");
+		dataGrid.setColumnWidth(DisableColumn, "60px");
+		dataGrid.setColumnWidth(DeleteColumn, "55px");
+		dataGrid.setColumnWidth(GetUrlColumn, "70px");
 //		// ================================
 //		String s = "Loading buildings list, please wait for few seconds..";
 //		Label loadingLabel = new Label(s);
@@ -287,5 +312,11 @@ public class HelloView extends Composite implements I_Display, IFilter<ViewOrder
 	void onButtonClick(ClickEvent event) {
 		if (presenter != null)
 			presenter.onUpdateProfile();
+	}
+
+	@Override
+	public void setViewOrderUrl(String url) {
+		this.url.setText(url);
+		this.url.selectAll();
 	}
 }

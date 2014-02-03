@@ -56,7 +56,7 @@ h1 {
     .MainPage {
     	background-color: slateblue;
     }
-    .gwt-Button {
+    .ecommerce-button1 {
     	color: Maroon;
     	background-color: Maroon;
     }
@@ -165,8 +165,6 @@ a : hover {
 	color: aqua;
 	text-decoration: underline;
 }
-.my-container {
-}
 .my-hyperlink {
 	color: aqua;
 }
@@ -205,12 +203,8 @@ line-height: 50px;
 	font-weight: bold;
 }
 .my-Button {
-	color: red;
-	font-variant: small-caps;
-	font-size: 18px;
-	font-style: oblique;
-	font-weight: bold;
-	text-decoration: blink;
+	border: 2px solid dodgerblue;
+
 }
 .my-node {
 	margin-left: 20px;
@@ -218,7 +212,8 @@ line-height: 50px;
 .gwt-TextBox-incorrect {
 	background-color: Red;
 }
-.ecommerce {
-	background-color: coral;
+.gwt-defaultButton {
+	border: Silver;
+	background-color: dodgerblue;
 }
 	

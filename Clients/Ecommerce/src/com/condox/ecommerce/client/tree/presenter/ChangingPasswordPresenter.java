@@ -1,5 +1,6 @@
 package com.condox.ecommerce.client.tree.presenter;
 
+import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.GET;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.container.I_Contained;
@@ -48,6 +49,7 @@ public class ChangingPasswordPresenter implements I_Presenter {
 				@Override
 				public void onResponseReceived(Request request,
 						Response response) {
+					Log.write(response.getStatusText());
 					 display.setResult(0);
 					 container.clear();
 					 container.add((I_Contained)display);

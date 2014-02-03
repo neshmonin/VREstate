@@ -1,5 +1,6 @@
 package com.condox.ecommerce.client.tree.presenter;
 
+import com.condox.clientshared.communication.User.UserRole;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
@@ -17,9 +18,9 @@ public class ForgotPasswordPresenter implements I_Presenter {
 	public static interface I_Display extends I_Contained {
 		void setPresenter(ForgotPasswordPresenter presenter);
 
-		String getEmail();
+		String getLogin();
 		
-		void setEmail(String value);
+		void setLogin(String value);
 
 		Widget asWidget();
 	}
@@ -36,14 +37,22 @@ public class ForgotPasswordPresenter implements I_Presenter {
 		if (data != null) {
 			UserInfo info = new UserInfo();
 			info.fromJSONObject(data.asJSONObject());
-			display.setEmail(info.getLogin());
+			display.setLogin(info.getLogin());
 		}
 	}
 
 	// Events
 	public void onSubmit() {
-		String email = display.getEmail().trim();
-		tree.setData(Field.EmailToRecoverPassword, new Data(email));
+		Data data = tree.getData(Field.UserInfo);
+		if (data != null) {
+			UserInfo info = new UserInfo();
+			info.fromJSONObject(data.asJSONObject());
+			String login = display.getLogin().trim();
+			info.setLogin(login);
+			tree.setData(Field.UserInfo, new Data(info));
+		
+//		tree.setData(Field.EmailToRecoverPassword, new Data(email));
+		}
 		tree.next(Actions.Submit);
 	}
 

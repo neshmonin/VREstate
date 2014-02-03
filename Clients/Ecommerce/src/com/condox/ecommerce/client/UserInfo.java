@@ -18,6 +18,10 @@ public class UserInfo implements I_JSON {
 	private String timeZone = null;
 	private Integer loginType = null;
 
+//	public UserInfo(JSONObject source) {
+//		this.fromJSONObject(source);
+//	}
+	
 	public Integer getId() {
 		return id;
 	}
@@ -69,9 +73,10 @@ public class UserInfo implements I_JSON {
 	// Utils
 
 	private String getString(JSONObject obj, String key) {
-		if (obj.get(key) != null)
-			if (obj.get(key).isString() != null)
-				return obj.get(key).isString().stringValue();
+		if (obj != null)
+			if (obj.get(key) != null)
+				if (obj.get(key).isString() != null)
+					return obj.get(key).isString().stringValue();
 		return null;
 	}
 
@@ -85,8 +90,9 @@ public class UserInfo implements I_JSON {
 	public void fromJSONObject(JSONObject obj) {
 		login = getString(obj, "login");
 		password = getString(obj, "password");
-
-		role = User.UserRole.valueOf(getString(obj, "role"));
+		
+		if (getString(obj, "role") != null)
+			role = User.UserRole.valueOf(getString(obj, "role"));
 
 		nickName = getString(obj, "nickName");
 		primaryEmail = getString(obj, "primaryEmail");

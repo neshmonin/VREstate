@@ -2,6 +2,7 @@ package com.condox.clientshared.document;
 
 import java.util.ArrayList;
 
+import com.condox.clientshared.abstractview.Log;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 
@@ -240,11 +241,13 @@ public class Suite implements I_VRObject {
 
 	@Override
 	public void setInfoUrl(String infoUrl) {
+		Log.write("Suite.setInfoUrl: " + infoUrl);
 		this.infoUrl = infoUrl;
 	}
 
 	@Override
 	public String getInfoUrl() {
+		Log.write("Suite.getInfoUrl: " + infoUrl);
 		return infoUrl;
 	}
 

@@ -19,6 +19,8 @@ import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -66,6 +68,8 @@ public class HistoryView extends Composite implements I_Display {
 	@SuppressWarnings("unused")
 	private HistoryPresenter presenter = null;
 	private int currSuiteId = 0;
+	private PopupPanel loading = new PopupPanel();
+
 
 	public HistoryView() {
 		cellList.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
@@ -79,7 +83,12 @@ public class HistoryView extends Composite implements I_Display {
 						HistoryTransactionInfo selected = selectionModel
 								.getSelectedObject();
 						if (selected != null) {
-//							html = "";
+							// html = "";
+							loading.clear();
+							loading.setModal(true);
+							loading.setGlassEnabled(true);
+							loading.add(new Label("Loading, please wait..."));
+							loading.center();
 							currSuiteId = selected.getTargetId();
 							if (presenter != null)
 								presenter.getSuiteInfo(currSuiteId);
@@ -103,7 +112,6 @@ public class HistoryView extends Composite implements I_Display {
 		this.transactions.clear();
 		this.transactions.addAll(transactions);
 		cellList.setRowData(0, transactions);
-
 	}
 
 	@Override
@@ -115,21 +123,27 @@ public class HistoryView extends Composite implements I_Display {
 	@Override
 	public void setSuiteInfo(SuiteInfo info) {
 		html = "";
-//		SuiteInfo.Status status = info.getStatus();
+		// SuiteInfo.Status status = info.getStatus();
 		html += "Object: Suite<br>";
-		html += "Status: " + info.getStatus() + "<br>";
-		html += "Price: " + info.getCurrentPriceDisplay() + "<br>";
+		if (!info.getMLS().isEmpty())
+			html += "MLS#: " + info.getMLS() + "<br>";
+		// html += "Status: " + info.getStatus() + "<br>";
+		// html += "Price: " + info.getCurrentPriceDisplay() + "<br>";
 		if (presenter != null)
 			presenter.getBuildingInfo(info.getBuildingId());
-//		form.setHTML(html);
+		// form.setHTML(html);
 	}
-	
+
 	@Override
 	public void setBuildingInfo(BuildingInfo info) {
-		html += "Address: " + info.getName() + ", " + info.getStreet() + ", " + info.getCity() + "<br>";
-		html += "Country: " + info.getCountry() + "<br>";
-//		html += "Price: " + info.getCurrentPriceDisplay() + "<br>";
+		html += "Address: " + info.getName() + ", " + info.getStreet() + ", "
+				+ info.getCity() + "<br>";
+		String country = info.getCountry();
+		country = country.isEmpty()? "<none>" : country;
+		html += "Country: " + country + "<br>";
+		// html += "Price: " + info.getCurrentPriceDisplay() + "<br>";
 		form.setHTML(html);
+		loading.hide();
 	}
 
 	@UiHandler("hyperlink")

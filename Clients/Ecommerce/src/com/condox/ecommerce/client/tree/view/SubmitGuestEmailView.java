@@ -1,9 +1,10 @@
 package com.condox.ecommerce.client.tree.view;
 
-import com.condox.ecommerce.client.tree.presenter.ForgotPasswordPresenter;
-import com.condox.ecommerce.client.tree.presenter.ForgotPasswordPresenter.I_Display;
+import com.condox.ecommerce.client.tree.presenter.SubmitGuestEmailPresenter;
+import com.condox.ecommerce.client.tree.presenter.SubmitGuestEmailPresenter.I_Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -12,26 +13,29 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FocusPanel;
 
-public class ForgotPasswordView extends Composite implements I_Display {
+public class SubmitGuestEmailView extends Composite implements I_Display {
 
-	private static ForgotPasswordViewUiBinder uiBinder = GWT
-			.create(ForgotPasswordViewUiBinder.class);
+	private static SubmitGuestEmailViewUiBinder uiBinder = GWT
+			.create(SubmitGuestEmailViewUiBinder.class);
 	@UiField TextBox login;
 	@UiField Button close;
 	@UiField Button submit;
+	@UiField FocusPanel focusPanel;
 
-	interface ForgotPasswordViewUiBinder extends UiBinder<Widget, ForgotPasswordView> {
+	interface SubmitGuestEmailViewUiBinder extends UiBinder<Widget, SubmitGuestEmailView> {
 	}
 
-	private ForgotPasswordPresenter presenter = null;
+	private SubmitGuestEmailPresenter presenter = null;
 
-	public ForgotPasswordView() {
+	public SubmitGuestEmailView() {
 		initWidget(uiBinder.createAndBindUi(this));
+		login.setFocus(true);
 	}
 
 	@Override
-	public void setPresenter(ForgotPasswordPresenter presenter) {
+	public void setPresenter(SubmitGuestEmailPresenter presenter) {
 		this.presenter = presenter;
 	}
 
@@ -52,6 +56,11 @@ public class ForgotPasswordView extends Composite implements I_Display {
 	@UiHandler("submit")
 	void onSubmitClick(ClickEvent event) {
 		if (presenter != null)
+			presenter.onSubmit();
+	}
+	@UiHandler("focusPanel")
+	void onFocusPanelKeyUp(KeyUpEvent event) {
+		if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER)
 			presenter.onSubmit();
 	}
 }

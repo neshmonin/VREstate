@@ -48,17 +48,18 @@ public class HelloPresenter implements I_Presenter {
 		void setData(List<ViewOrderInfo> data);
 		
 		Widget asWidget();
+
+		void setViewOrderUrl(String url);
 	}
 
 	private I_Display display = null;
 	private EcommerceTree tree = null;
-
+// ServerAPI api = new ServerAPI();
 	@Override
 	public void go(I_Container container) {
 		container.clear();
 		container.add((I_Contained)display);
 		loadPersonalInfo();
-		
 	}
 	
 	private void loadPersonalInfo() {
@@ -225,5 +226,9 @@ public class HelloPresenter implements I_Presenter {
 	public void setTree(EcommerceTree tree) {
 		// TODO Auto-generated method stub
 		this.tree = tree;
+	}
+
+	public void getUrl(ViewOrderInfo object) {
+		display.setViewOrderUrl(object.getUrl());
 	}
 }

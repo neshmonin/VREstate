@@ -9,7 +9,7 @@ import java.util.List;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.communication.User.UserRole;
 import com.condox.clientshared.document.SuiteInfo;
-import com.condox.ecommerce.client.tree.EcommerceTree;
+import com.condox.ecommerce.client.resources.CSS;
 import com.condox.ecommerce.client.tree.presenter.PickSuitePresenter;
 import com.condox.ecommerce.client.tree.presenter.PickSuitePresenter.IDisplay;
 import com.google.gwt.cell.client.ClickableTextCell;
@@ -38,14 +38,17 @@ public class PickSuiteView extends Composite implements IDisplay {
 
 	private static PickSuiteViewUiBinder uiBinder = GWT
 			.create(PickSuiteViewUiBinder.class);
-//	private String userRole = "";
+	// private String userRole = "";
 	private PickSuitePresenter presenter;
 	private List<SuiteInfo> data;
 	private ListDataProvider<Floor> dataProvider = new ListDataProvider<Floor>();
-	
-	@UiField(provided=true) DataGrid<Floor> dataGrid = new DataGrid<Floor>();
-	@UiField Button buttonCancel;
-	@UiField Button buttonPrev;
+
+	@UiField(provided = true)
+	DataGrid<Floor> dataGrid = new DataGrid<Floor>();
+	@UiField
+	Button buttonCancel;
+	@UiField
+	Button buttonPrev;
 
 	interface PickSuiteViewUiBinder extends UiBinder<Widget, PickSuiteView> {
 	}
@@ -54,23 +57,23 @@ public class PickSuiteView extends Composite implements IDisplay {
 		initWidget(uiBinder.createAndBindUi(this));
 		setSelectEvent();
 	}
-	
+
 	private native void setSelectEvent()/*-{
 		var instance = this;
-		$wnd.onSelectSuite = function(id){
+		$wnd.onSelectSuite = function(id) {
 			instance.@com.condox.ecommerce.client.tree.view.PickSuiteView::onSelectSuite(I)(id);
 		}
 	}-*/;
-	
+
 	private void onSelectSuite(int id) {
-//		Window.alert("" + id);
+		// Window.alert("" + id);
 		Iterator<SuiteInfo> infos = data.iterator();
 		while (infos.hasNext()) {
 			SuiteInfo info = infos.next();
 			if (info.getId() == id) {
 				this.selected = info;
-//				presenter.onSubmit();
-//				presenter.onPayNow();
+				// presenter.onSubmit();
+				// presenter.onPayNow();
 				presenter.onNext();
 				return;
 			}
@@ -81,12 +84,12 @@ public class PickSuiteView extends Composite implements IDisplay {
 	public void setPresenter(PickSuitePresenter presenter) {
 		this.presenter = presenter;
 	}
-	
+
 	private PopupPanel loading = new PopupPanel();
 
 	@Override
 	public void setData(String newUserRole, List<SuiteInfo> data) {
-//		userRole = newUserRole;
+		// userRole = newUserRole;
 		if (data == null) {
 			loading.clear();
 			loading.setModal(true);
@@ -132,6 +135,7 @@ public class PickSuiteView extends Composite implements IDisplay {
 			CreateDataGrid();
 		}
 	}
+
 	private void CreateDataGrid() {
 		// ==============================================
 		// dataGrid = new DataGrid<Building>();
@@ -146,7 +150,7 @@ public class PickSuiteView extends Composite implements IDisplay {
 		// -------------------------
 		// -------------------------
 		// //
-		
+
 		// Add a text column to show the no of the floor.
 		TextColumn<Floor> nameColumn = new TextColumn<Floor>() {
 			@Override
@@ -174,10 +178,10 @@ public class PickSuiteView extends Composite implements IDisplay {
 				return sb.toSafeHtml();
 			}
 		};
-		
+
 		// dataColumn
-		Column<Floor, String> dataColumn = new Column<Floor, String>(new ClickableTextCell(
-				anchorRenderer2)) {
+		Column<Floor, String> dataColumn = new Column<Floor, String>(
+				new ClickableTextCell(anchorRenderer2)) {
 			@Override
 			public String getValue(Floor object) {
 				return object.getValue();
@@ -186,8 +190,9 @@ public class PickSuiteView extends Composite implements IDisplay {
 		dataColumn.setFieldUpdater(new FieldUpdater<Floor, String>() {
 			@Override
 			public void update(int index, Floor object, String value) {
-				/*selectedFloor = object;
-				presenter.onSubmit();*/
+				/*
+				 * selectedFloor = object; presenter.onSubmit();
+				 */
 			}
 		});
 		dataGrid.addColumn(dataColumn, "");
@@ -195,16 +200,17 @@ public class PickSuiteView extends Composite implements IDisplay {
 		if (!dataProvider.getDataDisplays().contains(dataGrid)) {
 			dataProvider.addDataDisplay(dataGrid);
 		}
-		
+
 		// ================================
 		String s = "Loading suits list, please wait for few seconds..";
 		Label loadingLabel = new Label(s);
 		loadingLabel.setStylePrimaryName("my-loading-label");
 		// dataGrid.setLoadingIndicator(loadingLabel);
 		dataGrid.setEmptyTableWidget(loadingLabel);
-		
+
 	}
-	//**********************************
+
+	// **********************************
 	private class Floor {
 		private ArrayList<SuiteInfo> suites = new ArrayList<SuiteInfo>();
 		private String name = "";
@@ -234,53 +240,33 @@ public class PickSuiteView extends Composite implements IDisplay {
 		public String getValue() {
 			sort();
 			String result = "";
-			
+
 			for (SuiteInfo suite : suites) {
 				String disabled = "";
-				String color = "";
-				if (User.role.equals(UserRole.Visitor)) {
-					if ((suite.getMLS() == null)||(suite.getMLS().isEmpty())) {			
-						disabled = " disabled=\"true\" ";
-						color = " color:red ";
-					}
-				} else {
+				String style = "";
+
+				// Visitor role && no MLS#
+				if ((User.role.equals(UserRole.Visitor))
+						&& ((suite.getMLS() == null) || (suite.getMLS()
+								.isEmpty()))) {
+					disabled = " disabled=\"true\" ";
+					style = CSS.Instance.my().suite_disabled();
+				} else
+
 					switch (suite.getStatus()) {
-//					if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Available)
-//	                    btn.BackColor = Color.FromArgb(200, 255, 200);
-//					case Available:
-//						color += " background-color:#ffffff ";
-//						break;
-//	                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.ResaleAvailable)
-//	                    btn.BackColor = Color.FromArgb(200, 255, 255);
 					case ResaleAvailable:
-						color += " background-color:#c8ffff ";
-					break;
-//	                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.AvailableRent)
-//	                    btn.BackColor = Color.FromArgb(255, 220, 255);
-					case AvailableRent:
-						color += " background-color:#ffdcff ";
+						style = CSS.Instance.my().suite_resale();
 						break;
-
-//	                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.OnHold)
-//	                    btn.BackColor = Color.FromArgb(255, 255, 200);
-//					case OnHold:
-//						color += " background-color:#ffffc8 ";
-//						break;
-//	                else if (theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Sold)
-//	                    // TODO: change to 'theSuite.Status == Vre.Server.BusinessLogic.Suite.SalesStatus.Resale' when it ready
-//	                    btn.BackColor = Color.FromArgb(255, 250, 250);
-//					case Sold:
-//						color += " background-color:#fffafa ";
-//						break;
+					case AvailableRent:
+						style = CSS.Instance.my().suite_rent();
+						break;
 					default:
+						style = CSS.Instance.my().suite_default();
 					}
-				}
 
-				result += "<button ";
-				result += "type=\"button\"" + " onclick=\"onSelectSuite("
-						+ suite.getId() + ")\"" + "style=\"width:50px;"+color+"\""
-						+ "class=\"btnSelectSuite\"" + disabled + "title=\""
-						+ suite.getTooltip() + "\">";
+				result += "<button type=\"button\" class=\"" + style + "\" ";
+				result += "onclick=\"onSelectSuite(" + suite.getId() + ")\"";
+				result += disabled + "title=\"" + suite.getTooltip() + "\">";
 				result += suite.getName();
 				result += "</button> ";
 			}
@@ -294,12 +280,13 @@ public class PickSuiteView extends Composite implements IDisplay {
 	public SuiteInfo getSuiteSelected() {
 		return this.selected;
 	}
-	
+
 	@UiHandler("buttonPrev")
 	void onButtonPrevClick(ClickEvent event) {
 		if (presenter != null)
 			presenter.onPrev();
 	}
+
 	@UiHandler("buttonCancel")
 	void onButtonCancelClick(ClickEvent event) {
 		if (presenter != null)

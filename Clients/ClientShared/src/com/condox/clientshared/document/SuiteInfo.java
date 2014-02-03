@@ -64,7 +64,10 @@ public class SuiteInfo implements I_JSON {
 	public void fromJSONObject(JSONObject obj) {
 		backup = obj;
 		id = (int) obj.get("id").isNumber().doubleValue();
-		buildingId = (int) obj.get("buildingId").isNumber().doubleValue();
+		//-------------
+		if (obj.get("buildingId") != null)
+			if (obj.get("buildingId").isNumber() != null)
+				buildingId = (int) obj.get("buildingId").isNumber().doubleValue();
 		name = obj.get("name").isString().stringValue();
 		level_number = (int) obj.get("levelNumber").isNumber().doubleValue();
 		floor_name = obj.get("floorName").isString().stringValue();

@@ -62,7 +62,7 @@ public class HistoryPresenter implements I_Presenter, I_GetHistoryHandler  {
 		if (obj.containsKey("transactions"))
 			if (obj.get("transactions").isArray() != null) {
 				JSONArray items = obj.get("transactions").isArray();
-				for (int i = 0; i < 100/* items.size() */; i++) {
+				for (int i = 0; i < Math.min(100, items.size()); i++) {
 					HistoryTransactionInfo transaction = HistoryTransactionInfo
 							.fromJSON(items.get(i).isObject());
 					transactions.add(transaction);

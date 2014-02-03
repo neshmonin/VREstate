@@ -29,6 +29,9 @@
 				</g:Cell>
 			</g:HorizontalPanel>
 			<p1:DataGrid height="300px" ui:field="dataGrid" skipRowHoverCheck="true" skipRowHoverStyleUpdate="true" skipRowHoverFloatElementCheck="true"/>
+			<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_CENTER">
+				<g:TextBox width="649px" ui:field="url"/>
+			</g:HorizontalPanel>
 			<g:HorizontalPanel width="100%">
 				<g:Cell width="50%" horizontalAlignment="ALIGN_CENTER">
 					<g:Button text="New Order..." width="80%" ui:field="button_1"/>
