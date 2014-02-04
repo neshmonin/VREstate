@@ -40,7 +40,12 @@ namespace Vre.Server.RemoteService
                     changePassword(request);
                     return;
                 }
-                else if (command.Equals("chlogin") && (request.Request.Type == RequestType.Get))
+				else if (command.Equals("recover") && (request.Request.Type == RequestType.Get))
+				{
+					recoverPassword(request);
+					return;
+				}
+				else if (command.Equals("chlogin") && (request.Request.Type == RequestType.Get))
                 {
                     changeLogin(request);
                     return;
@@ -760,6 +765,15 @@ namespace Vre.Server.RemoteService
             ReverseRequestService.InitiateUserRegistration(login);
             request.Response.ResponseCode = HttpStatusCode.OK;
         }
+
+		private static void recoverPassword(IServiceRequest request)
+		{
+			ReverseRequestService.InitiatePasswordRecover(
+				request.Request.Query.GetParam("role", string.Empty),
+				request.Request.Query.GetParam("ed", string.Empty),
+				request.Request.Query.GetParam("uid", string.Empty));
+			request.Response.ResponseCode = HttpStatusCode.OK;
+		}
 
         private static LoginType parseLoginType(ServiceQuery args)
         {

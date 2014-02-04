@@ -113,7 +113,7 @@ namespace Vre.Server.BusinessLogic
                     Credentials item = dao.GetByUserId(userId);
                     if (null != item)
                     {
-                        if (item.VerifyPassword(currentPassword))
+                        if (string.IsNullOrEmpty(currentPassword) || item.VerifyPassword(currentPassword))
                         {
                             item.SetPassword(
 								Configuration.Security.PasswordHashType.Value,
