@@ -42,24 +42,39 @@ namespace Vre.Server.RemoteService
         {
             // Flood prevention.
             // This is not a DoS prevention, rather a password brute-force stopper.
-            ServiceInstances.FloodStopper.UpdatePeer(ep.Address.ToString());
+            //ServiceInstances.FloodStopper.UpdatePeer(ep.Address.ToString());
 
             ServiceInstances.Logger.Info("User login attempt from {0}: type='{1}', login='{2}'.",
                 ep, loginType, login);
 
             User user;
             bool dropOffConcurrentSessions;
+			string peerId;
+			int delayLoginSec;
             // Anonymous web client login
             if ((LoginType.Plain == loginType) && (User.Role.Visitor == role) && login.Equals("web") && password.Equals("web"))
             {
                 user = new User(null, User.Role.Visitor);
                 dropOffConcurrentSessions = false;
+				peerId = null;
+				delayLoginSec = 0;
             }
             else
             {
-                user = UserManager.Login(loginType, role, aggregateObjectId, login, password);
-                // TODO: Drop off other user sessions? Configurable?
-                dropOffConcurrentSessions = true;
+				peerId = string.Format("{0}{1}{2}{3}", loginType, role, aggregateObjectId, login);
+				var d = ServiceInstances.FloodStopper.NeedDelay(peerId, false);
+				delayLoginSec = d / 1000;
+				if (0 == d)
+				{
+					user = UserManager.Login(loginType, role, aggregateObjectId, login, password);
+					// TODO: Drop off other user sessions? Configurable?
+					dropOffConcurrentSessions = true;
+				}
+				else
+				{
+					user = null;
+					dropOffConcurrentSessions = false;
+				}
             }
 
             if (user != null)
@@ -97,7 +112,10 @@ namespace Vre.Server.RemoteService
                 ServiceInstances.Logger.Warn("User login from {0}, type='{1}', login='{2}' denied.",
                     ep, loginType, login);
 
-                return null;
+				if ((peerId != null) && (0 == delayLoginSec)) ServiceInstances.FloodStopper.UpdatePeer(peerId);
+
+				if (delayLoginSec > 0) return "---" + delayLoginSec.ToString();
+				else return null;
             }
         }
 
