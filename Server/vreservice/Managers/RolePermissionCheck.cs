@@ -1041,14 +1041,22 @@ namespace Vre.Server.BusinessLogic
             throw new PermissionException("This operation is not allowed.");
         }
 
-        public static bool CheckUpdateViewOrder(ClientSession session, User targetUser)
+        public static bool CheckUpdateViewOrder(ClientSession session, User owner)
         {
-            return CheckCreateViewOrder(session, targetUser, null);  // same permissions
+            return CheckCreateViewOrder(session, owner, null);  // same permissions
         }
 
-        public static void CheckDeleteViewOrder(ClientSession session, User targetUser)
+		public static bool CheckLimitedUpdateViewOrder(ClientSession session, User owner)
+		{
+			return (session.User.Equals(owner) && session.User.UserRole != User.Role.SuperAdmin);
+		}
+
+        public static void CheckDeleteViewOrder(ClientSession session, User owner)
         {
-            CheckCreateViewOrder(session, targetUser, null);  // same permissions
+			// owner can delete
+			if (session.User.Equals(owner)) return;
+
+            CheckCreateViewOrder(session, owner, null);  // same permissions
         }
         #endregion
 

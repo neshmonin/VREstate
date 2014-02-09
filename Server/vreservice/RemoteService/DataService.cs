@@ -2069,10 +2069,20 @@ namespace Vre.Server.RemoteService
                 using (UserDao dao = new UserDao(session.DbSession))
                     owner = dao.GetById(viewOrder.OwnerId);
 
-                RolePermissionCheck.CheckUpdateViewOrder(session, owner);
+				bool unauthorizedChange = false;
+				bool updated = false;
+				if (RolePermissionCheck.CheckLimitedUpdateViewOrder(session, owner))
+				{
+					updated = viewOrder.UpdateFromClient(data, new[] { "enabled" }, out unauthorizedChange);
+				}
+				else
+				{
+					RolePermissionCheck.CheckUpdateViewOrder(session, owner);
+					updated = viewOrder.UpdateFromClient(data);
+				}
 
-                if (viewOrder.UpdateFromClient(data))
-                {
+				if (updated)
+				{
                     viewOrder.MarkUpdated();
 
                     using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
@@ -2080,33 +2090,41 @@ namespace Vre.Server.RemoteService
 
                     // Generate financial transaction
                     //
-                    FinancialTransaction.TranTarget tt = FinancialTransaction.TranTarget.Suite;
-                    switch (viewOrder.TargetObjectType)
-                    {
-                        case ViewOrder.SubjectType.Building: tt = FinancialTransaction.TranTarget.Building; break;
-                        case ViewOrder.SubjectType.Suite: tt = FinancialTransaction.TranTarget.Suite; break;
-                    }
-                    FinancialTransaction ft = new FinancialTransaction(session.User.AutoID,
-                        FinancialTransaction.AccountType.User, viewOrder.OwnerId,
-                        FinancialTransaction.OperationType.Debit, 0m,
-                        FinancialTransaction.TranSubject.ViewOrder,
-                        tt, viewOrder.TargetObjectId, viewOrder.AutoID.ToString());
+					//FinancialTransaction.TranTarget tt = FinancialTransaction.TranTarget.Suite;
+					//switch (viewOrder.TargetObjectType)
+					//{
+					//    case ViewOrder.SubjectType.Building: tt = FinancialTransaction.TranTarget.Building; break;
+					//    case ViewOrder.SubjectType.Suite: tt = FinancialTransaction.TranTarget.Suite; break;
+					//}
+					//FinancialTransaction ft = new FinancialTransaction(session.User.AutoID,
+					//    FinancialTransaction.AccountType.User, viewOrder.OwnerId,
+					//    FinancialTransaction.OperationType.Debit, 0m,
+					//    FinancialTransaction.TranSubject.ViewOrder,
+					//    tt, viewOrder.TargetObjectId, viewOrder.AutoID.ToString());
 
-                    if (!string.IsNullOrWhiteSpace(paymentSystemRefId))
-                        ft.SetPaymentSystemReference(FinancialTransaction.PaymentSystemType.CondoExplorer, paymentSystemRefId);
+					//if (!string.IsNullOrWhiteSpace(paymentSystemRefId))
+					//    ft.SetPaymentSystemReference(FinancialTransaction.PaymentSystemType.CondoExplorer, paymentSystemRefId);
 
-                    using (FinancialTransactionDao dao = new FinancialTransactionDao(session.DbSession))
-                    {
-                        dao.Create(ft);
-                        ft.SetAutoSystemReferenceId();
-                        dao.Update(ft);
-                    }
+					//using (FinancialTransactionDao dao = new FinancialTransactionDao(session.DbSession))
+					//{
+					//    dao.Create(ft);
+					//    ft.SetAutoSystemReferenceId();
+					//    dao.Update(ft);
+					//}
 
                     ReflectViewOrderStatusInTarget(viewOrder, session.DbSession);
 
-                    resp.ResponseCode = HttpStatusCode.OK;
+					if (unauthorizedChange)
+					{
+						resp.ResponseCode = HttpStatusCode.Unauthorized;
+						resp.ResponseCodeDescription = "Some changes were not applied";
+					}
+					else
+					{
+						resp.ResponseCode = HttpStatusCode.OK;
+					}
                     resp.Data = new ClientData();
-                    resp.Data.Add("ref", ft.SystemRefId);
+                    //resp.Data.Add("ref", ft.SystemRefId);
                     resp.Data.Add("updated", 1);
                 }
                 else
