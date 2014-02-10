@@ -6,8 +6,6 @@ import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.PUT;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.communication.User.UserRole;
-import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.document.SuiteInfo;
 import com.condox.clientshared.document.SuiteInfo.Status;
 import com.condox.clientshared.tree.Data;
@@ -25,11 +23,12 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class AgreementPresenter implements I_Presenter {
 
-	public static interface I_Display extends I_Contained {
+	public static interface I_Display {
 		void setPresenter(AgreementPresenter presenter);
 
 		Widget asWidget();
@@ -39,9 +38,9 @@ public class AgreementPresenter implements I_Presenter {
 	private EcommerceTree tree = null;
 
 	@Override
-	public void go(I_Container container) {
+	public void go(HasWidgets container) {
 		container.clear();
-		container.add(display);
+		container.add(display.asWidget());
 	}
 
 	// Navigation events

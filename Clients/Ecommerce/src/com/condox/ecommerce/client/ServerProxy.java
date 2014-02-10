@@ -4,7 +4,6 @@ import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.DELETE;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User;
-import com.condox.ecommerce.client.Ecommerce.Modes;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;

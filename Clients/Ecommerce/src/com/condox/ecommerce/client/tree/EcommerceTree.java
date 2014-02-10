@@ -44,10 +44,11 @@ import com.condox.ecommerce.client.tree.view.SettingsView;
 import com.condox.ecommerce.client.tree.view.SubmitGuestEmailView;
 import com.condox.ecommerce.client.tree.view.SummaryView;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
 
 public class EcommerceTree {
 
-	public I_Container container = new PopupContainer(); // TODO first version.
+	public HasWidgets container = new PopupContainer(); // TODO first version.
 
 	private List<String> leafs = new ArrayList<String>();
 	private List<String> MVPs = new ArrayList<String>();

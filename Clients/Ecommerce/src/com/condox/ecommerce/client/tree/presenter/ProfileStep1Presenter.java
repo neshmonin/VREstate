@@ -2,7 +2,6 @@ package com.condox.ecommerce.client.tree.presenter;
 
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.ServerProxy;
@@ -14,6 +13,7 @@ import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ProfileStep1Presenter implements I_Presenter {
@@ -33,13 +33,13 @@ public class ProfileStep1Presenter implements I_Presenter {
 
 
 	@Override
-	public void go(I_Container container) {
+	public void go(HasWidgets container) {
 		Data data = tree.getData(Field.UserInfo);
 		UserInfo info = new UserInfo();
 		info.fromJSONObject(data.asJSONObject());
 		display.setUserInfo(info);
 		container.clear();
-		container.add((I_Contained)display);
+		container.add(display.asWidget());
 	}
 
 	// Navigation events

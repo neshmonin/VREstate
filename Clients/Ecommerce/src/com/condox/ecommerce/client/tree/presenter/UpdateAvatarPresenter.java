@@ -1,16 +1,15 @@
 package com.condox.ecommerce.client.tree.presenter;
 
-import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class UpdateAvatarPresenter implements I_Presenter {
 
-	public static interface I_Display extends I_Contained {
+	public static interface I_Display {
 		void setPresenter(UpdateAvatarPresenter presenter);
 
 		Widget asWidget();
@@ -21,9 +20,9 @@ public class UpdateAvatarPresenter implements I_Presenter {
 
 
 	@Override
-	public void go(I_Container container) {
+	public void go(HasWidgets container) {
 		container.clear();
-		container.add((I_Contained)display);
+		container.add(display.asWidget());
 	}
 
 	public void onApply() {

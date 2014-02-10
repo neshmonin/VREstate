@@ -1,21 +1,18 @@
 package com.condox.ecommerce.client.tree.presenter;
 
-import com.condox.clientshared.communication.User.UserRole;
-import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.UserInfo;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ForgotPasswordPresenter implements I_Presenter {
 
-	public static interface I_Display extends I_Contained {
+	public static interface I_Display {
 		void setPresenter(ForgotPasswordPresenter presenter);
 
 		String getLogin();
@@ -29,9 +26,9 @@ public class ForgotPasswordPresenter implements I_Presenter {
 	private EcommerceTree tree = null;
 
 	@Override
-	public void go(I_Container container) {
+	public void go(HasWidgets container) {
 		container.clear();
-		container.add((I_Contained)display);
+		container.add(display.asWidget());
 		
 		Data data = tree.getData(Field.UserInfo); 
 		if (data != null) {

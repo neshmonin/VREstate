@@ -11,8 +11,6 @@ import com.condox.clientshared.document.Building;
 import com.condox.clientshared.document.Document;
 import com.condox.clientshared.document.Site;
 import com.condox.vrestate.client.ge.GE;
-import com.condox.vrestate.client.tree.PopupContainer;
-import com.condox.vrestate.client.tree.VREstateTree;
 import com.condox.vrestate.client.view.HelicopterView;
 import com.condox.vrestate.client.view.ProgressBar;
 import com.condox.vrestate.client.view.SiteView;
@@ -24,9 +22,13 @@ import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
 import com.nitrous.gwt.earth.client.api.GEHtmlStringBalloon;
 import com.nitrous.gwt.earth.client.api.GEPlugin;
+import com.nitrous.gwt.earth.client.api.GoogleEarth;
 import com.nitrous.gwt.earth.client.api.KmlContainer;
 import com.nitrous.gwt.earth.client.api.KmlFeature;
 import com.nitrous.gwt.earth.client.api.KmlLink;
@@ -54,14 +56,14 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 		// Log.write(GWT.getModuleBaseURL());
 		
 		Options.Init();
-//		LoginUser();
+		LoginUser();
 		
 		instance = this;
 		
 		
 		// my testing
-		VREstateTree tree = new VREstateTree();
-		tree.go(new PopupContainer());
+//		VREstateTree tree = new VREstateTree();
+//		tree.go(new PopupContainer());
 		
 		// my2 testing
 //		DefaultPresenter Default = new DefaultPresenter(null);
@@ -86,8 +88,30 @@ public class VREstate implements EntryPoint, RequestCallback, KmlLoadCallback,
 	private GE ge = null;
 
 	public void StartGE() {
-		ge = new GE();
-		ge.Init(this);
+		if (GoogleEarth.isInstalled() && GoogleEarth.isSupported()) {
+			ge = new GE();
+			ge.Init(this);
+		} else {
+			String url = Options.URL_VRT + "data/view?type=viewOrder&id="
+					+ Options.getViewOrderId() + "&track=true&SID=" + User.SID;
+			GET.send(url, new RequestCallback(){
+
+				@Override
+				public void onResponseReceived(Request request,
+						Response response) {
+					Log.write("response: " + response.getText());
+					JSONObject obj = JSONParser.parseStrict(response.getText()).isObject();
+					String url = obj.get("viewOrders").isArray().get(0).isObject().get("infoUrl").isString().stringValue();
+					Window.Location.replace(url);
+					
+				}
+
+				@Override
+				public void onError(Request request, Throwable exception) {
+					// TODO Auto-generated method stub
+					
+				}});
+		}
 	};
 
 	public static int checkChangesPeriodSec;

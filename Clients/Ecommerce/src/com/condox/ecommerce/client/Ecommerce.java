@@ -5,12 +5,12 @@ import com.condox.clientshared.communication.I_Login;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.communication.User.UserRole;
+import com.condox.ecommerce.client.resources.CSS;
 import com.condox.ecommerce.client.tree.EcommerceTree;
-import com.condox.ecommerce.client.resources.*;
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
@@ -22,12 +22,15 @@ import com.google.gwt.user.client.History;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
-	public enum Modes {
-		noTest, testDeleteOrder, testUpdateOrder
-	}
-
-	public static Modes mode = Modes.noTest;
-
+//	public enum Modes {
+//		noTest, testDeleteOrder, testUpdateOrder
+//	}
+//
+//	public static Modes mode = Modes.noTest;
+	
+	public static HandlerManager eventBus = new HandlerManager(null);
+	public static AppController appViewer = new AppController(/*rpcService, */eventBus);
+	
 	/**
 	 * This is the entry point method.
 	 */
@@ -42,11 +45,11 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 	@Override
 	public void onValueChange(ValueChangeEvent<String> event) {
 		String token = event.getValue();
-		try {
-			mode = Modes.valueOf(token);
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
+//		try {
+//			mode = Modes.valueOf(token);
+//		} catch (Exception e) {
+//			// TODO: handle exception
+//		}
 		if ("login".equals(token))
 			startWizard();
 		else if ("orderNow".equals(token))
