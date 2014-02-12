@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Vre.Server.BusinessLogic
 {
@@ -168,5 +169,43 @@ namespace Vre.Server.BusinessLogic
 
             return result;
         }
-    }
+
+		public bool UpdateFromClient(ClientData data, ICollection<string> availableFields, out bool changesSkipped)
+		{
+			changesSkipped = false;
+			bool result = base.UpdateFromClient(data);
+
+			if (availableFields.Contains("enabled")) Enabled = data.UpdateProperty("enabled", Enabled, ref result);
+			else if (data.GetProperty("enabled", false) != Enabled) changesSkipped = true;
+
+			if (availableFields.Contains("imported")) Imported = data.UpdateProperty("imported", Imported, ref result);
+			else if (data.GetProperty("imported", false) != Imported) changesSkipped = true;
+
+			if (availableFields.Contains("note")) Note = data.UpdateProperty("note", Note, ref result);
+			else if (data.GetProperty("note", string.Empty) != Note) changesSkipped = true;
+
+			if (availableFields.Contains("expiresOn")) ExpiresOn = data.UpdateProperty("expiresOn", ExpiresOn, ref result);
+			else if (data.GetProperty("expiresOn", DateTime.MinValue) != ExpiresOn) changesSkipped = true;
+
+			if (availableFields.Contains("ownerId")) OwnerId = data.UpdateProperty("ownerId", OwnerId, ref result);
+			else if (data.GetProperty("ownerId", 0) != OwnerId) changesSkipped = true;
+
+			if (availableFields.Contains("product")) Product = data.UpdateProperty<ViewOrderProduct>("product", Product, ref result);
+			else if (data.GetProperty<ViewOrderProduct>("product", ViewOrderProduct.Building3DLayout) != Product) changesSkipped = true;
+
+			if (availableFields.Contains("options")) Options = data.UpdateProperty<ViewOrderOptions>("options", Options, ref result);
+			else if (data.GetProperty<ViewOrderOptions>("options", ViewOrderOptions.ExternalTour) != Options) changesSkipped = true;
+
+			if (availableFields.Contains("mlsId")) MlsId = data.UpdateProperty("mlsId", MlsId, ref result);
+			else if (data.GetProperty("mlsId", String.Empty) != MlsId) changesSkipped = true;
+
+			if (availableFields.Contains("infoUrl")) InfoUrl = data.UpdateProperty("infoUrl", InfoUrl, ref result);
+			else if (data.GetProperty("infoUrl", String.Empty) != InfoUrl) changesSkipped = true;
+
+			if (availableFields.Contains("vTourUrl")) VTourUrl = data.UpdateProperty("vTourUrl", VTourUrl, ref result);
+			else if (data.GetProperty("vTourUrl", String.Empty) != VTourUrl) changesSkipped = true;
+
+			return result;
+		}
+	}
 }
