@@ -51,7 +51,7 @@ public class SettingsPresenter implements I_Presenter {
 
 			@Override
 			public void onError(Request request, Throwable exception) {
-				Window.alert("Error while changing login email.");
+				Window.alert("Error while changing primary email.");
 			}});
 	}
 
