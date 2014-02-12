@@ -58,7 +58,7 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 	private EcommerceTree tree;
 	private ServerAPI api = new ServerAPI();
 	List<ViewOrderInfo> orders = new ArrayList<ViewOrderInfo>();
-	private String selected;// remove
+	public static String selected;// remove
 
 	private void bind() {
 		display.getEditProfile().addClickHandler(new ClickHandler(){

@@ -85,9 +85,9 @@ public class AgreementPresenter implements I_Presenter {
 				Log.write(response.getStatusCode() + ": "
 						+ response.getStatusText());
 				if (response.getStatusCode() == 200) {
-					JSONObject obj = JSONParser
+					final JSONObject order = JSONParser
 							.parseLenient(response.getText()).isObject();
-					viewOrderId = obj.get("viewOrder-id").isString()
+					viewOrderId = order.get("viewOrder-id").isString()
 							.stringValue();
 					viewOrderId = viewOrderId.replace("-", "");
 
@@ -165,8 +165,10 @@ public class AgreementPresenter implements I_Presenter {
 													Request request,
 													Response response) {
 												int status = response.getStatusCode();
-												 if ((status == 200)||(status == 304))
+												 if ((status == 200)||(status == 304)) {
+													 HelloPresenter.selected = viewOrderId;
 													 tree.next(Actions.Next);
+												 }
 												 else
 													 ServerProxy.deleteOrder(
 																viewOrderId, User.SID,
