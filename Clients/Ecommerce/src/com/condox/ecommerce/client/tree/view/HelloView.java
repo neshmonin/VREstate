@@ -3,7 +3,6 @@ package com.condox.ecommerce.client.tree.view;
 import java.util.List;
 
 import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
 import com.condox.ecommerce.client.tree.presenter.HelloPresenter.I_Display;
 import com.condox.ecommerce.client.tree.presenter.I_HelloPresenter;
 import com.google.gwt.cell.client.AbstractCell;
@@ -14,12 +13,14 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.user.client.ui.Label;
 
 public class HelloView<T> extends Composite implements I_Display, I_Contained {
 
@@ -33,19 +34,24 @@ public class HelloView<T> extends Composite implements I_Display, I_Contained {
 		@Override
 		public void render(Context context, ViewOrderInfo value, SafeHtmlBuilder sb) {
 			// TODO
-			Label lbl = new Label();
-//			lbl.setText(value.getLabel());
-			String[] s = value.getLabel().split(",");
-			String l = s[0] + ", " + s[1];
+			String[] arr = value.getLabel().split(",");
+			String str = arr[0] + ", " + arr[1];
 			if (!value.getMLS().isEmpty())
-				l += ", " + value.getMLS();
-			lbl.setText(l);
-				
-			sb.appendHtmlConstant(lbl.getElement().getString());
+				str += ", " + value.getMLS();
+
+//			CheckBox cb = new CheckBox();
+//			cb.setValue(value.isEnabled());
+//			cb.setText(str);
+//			sb.appendHtmlConstant(cb.getElement().getString());
+			if (value.isEnabled())	
+				sb.appendHtmlConstant("<p style=\"margin:0px;\">" + str + "</p>");
+			else
+				sb.appendHtmlConstant("<p style=\"background-color:lightgrey;margin:0px;\">" + str + "</p>");
 		}
 	});
 	@UiField HTMLPanel details;
 	@UiField Button logout;
+	@UiField Label userName;
 
 	interface HelloViewUiBinder extends UiBinder<Widget, HelloView> {
 	}
@@ -86,14 +92,22 @@ public class HelloView<T> extends Composite implements I_Display, I_Contained {
 	public HasWidgets getDetailsArea() {
 		return details;
 	}
+	
 	@Override
 	public SingleSelectionModel<ViewOrderInfo> getSelection() {
 		// TODO Auto-generated method stub
 		return (SingleSelectionModel<ViewOrderInfo>) orderList.getSelectionModel();
 	}
+	
 	@Override
 	public HasClickHandlers getLogout() {
 		// TODO Auto-generated method stub
 		return logout;
+	}
+	
+	@Override
+	public void setUserName(String name) {
+		// TODO Auto-generated method stub
+		userName.setText(name);
 	}
 }

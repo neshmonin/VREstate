@@ -7,7 +7,9 @@ import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
+import com.condox.clientshared.document.ViewOrder;
 import com.condox.ecommerce.client.I_Presenter;
+import com.condox.ecommerce.client.UserInfo;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.api.I_RequestCallback;
@@ -23,6 +25,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -45,6 +48,9 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 		
 		HasWidgets getDetailsArea();
 		void setData(List<ViewOrderInfo> data);
+		
+		void setUserName(String name);
+		
 		Widget asWidget();
 	}
 
@@ -52,6 +58,7 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 	private EcommerceTree tree;
 	private ServerAPI api = new ServerAPI();
 	List<ViewOrderInfo> orders = new ArrayList<ViewOrderInfo>();
+	private String selected;// remove
 
 	private void bind() {
 		display.getEditProfile().addClickHandler(new ClickHandler(){
@@ -85,6 +92,7 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 			
 			@Override
 			public void onSelectionChange(SelectionChangeEvent event) {
+				selected = display.getSelection().getSelectedObject().getId();
 				showDetails(display.getSelection().getSelectedObject());
 			}
 		});
@@ -182,6 +190,11 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 		switch (api.getType()) {
 		case GetUserInfo:
 			Log.write(result.toString());
+			
+			UserInfo user = new UserInfo();
+			user.fromJSONObject(result);
+			display.setUserName(user.getNickName());
+			
 			getViewOrders();
 			break;
 		case GetViewOrders:
@@ -198,6 +211,9 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 			}
 			display.setData(orders);
 			display.getSelection().setSelected(orders.get(0), true);
+			for (ViewOrderInfo item : orders)
+				if (item.getId().equals(selected))
+					display.getSelection().setSelected(item, true);
 			break;
 		default:
 			break;

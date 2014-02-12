@@ -1,5 +1,7 @@
 package com.condox.ecommerce.client.tree.view;
 
+import com.condox.clientshared.abstractview.Log;
+import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.UserInfo;
 import com.condox.ecommerce.client.tree.presenter.ProfileStep1Presenter;
 import com.condox.ecommerce.client.tree.presenter.ProfileStep1Presenter.I_Display;
@@ -23,7 +25,6 @@ public class ProfileStep1View extends Composite implements I_Display {
 	@UiField Button buttonCancel;
 //	@UiField Button buttonNext;
 	@UiField Button buttonFinish;
-	@UiField Button buttonClose;
 	@UiField TextBox textFirstName;
 	@UiField TextBox textLastName;
 	@UiField TextBox textEmail;
@@ -61,11 +62,7 @@ public class ProfileStep1View extends Composite implements I_Display {
 	public void setPresenter(ProfileStep1Presenter presenter) {
 		this.presenter = presenter;
 	}
-	@UiHandler("buttonClose")
-	void onButtonCloseClick(ClickEvent event) {
-		if (presenter != null)
-			presenter.onClose();
-	}
+	
 	@UiHandler("buttonCancel")
 	void onButtonCancelClick(ClickEvent event) {
 		if (presenter != null)
@@ -93,6 +90,7 @@ public class ProfileStep1View extends Composite implements I_Display {
 
 	@Override
 	public void setUserInfo(UserInfo newInfo) {
+		Log.write(newInfo.toJSONObject().toString());
 		info = newInfo;
 		textFirstName.setValue(info.getNickName());
 		textEmail.setValue(info.getEmail());

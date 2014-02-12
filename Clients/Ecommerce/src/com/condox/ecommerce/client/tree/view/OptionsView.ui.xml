@@ -25,7 +25,7 @@
 							<g:Cell width="100%" horizontalAlignment="ALIGN_RIGHT">
 								<g:HorizontalPanel spacing="5" horizontalAlignment="ALIGN_RIGHT" width="100%">
 								<g:Cell verticalAlignment="ALIGN_MIDDLE">
-									<g:Label text="Price, $" horizontalAlignment="ALIGN_LEFT"/>
+									<g:Label text="Price, $" horizontalAlignment="ALIGN_LEFT" ui:field="priceCaption"/>
 								</g:Cell>
 								<g:Cell horizontalAlignment="ALIGN_RIGHT" verticalAlignment="ALIGN_MIDDLE">
 									<g:TextBox ui:field="textPrice" width="100px"/>

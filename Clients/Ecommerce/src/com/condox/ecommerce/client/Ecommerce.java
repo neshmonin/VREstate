@@ -54,8 +54,8 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 			startWizard();
 		else if ("orderNow".equals(token))
 			startWizard();
-		else if ("testUpdateProfile".equals(token))
-			testUpdateProfile();
+//		else if ("testUpdateProfile".equals(token))
+//			testUpdateProfile();
 		History.newItem("", false);
 	}
 
@@ -65,68 +65,68 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 		tree.next(null);
 	}
 
-	private void testUpdateProfile() {
-		String login = "adminan";
-		String password = "smelatoronto";
-		UserRole role = UserRole.SuperAdmin;
-		User.Login(new I_Login() {
-
-			@Override
-			public void onLoginSucceed() {
-				ServerProxy.getUserInfo(User.id, User.SID,
-						new RequestCallback() {
-
-							@Override
-							public void onResponseReceived(Request request,
-									Response response) {
-								JSONObject obj = JSONParser.parseLenient(
-										response.getText()).isObject();
-								UserInfo info = new UserInfo();
-								info.fromJSONObject(obj);
-								String nick = info.getNickName();
-								if (nick.startsWith("<changed>"))
-									nick = nick.substring(9);
-								else
-									nick = "<changed>" + nick;
-								info.setNickName(nick);
-
-								ServerProxy.setUserInfo(User.id, info
-										.toJSONObject().toString(), User.SID,
-										new RequestCallback() {
-
-											@Override
-											public void onResponseReceived(
-													Request request,
-													Response response) {
-												// TODO Auto-generated method
-												// stub
-												Log.popup();
-											}
-
-											@Override
-											public void onError(
-													Request request,
-													Throwable exception) {
-												// TODO Auto-generated method
-												// stub
-
-											}
-										});
-
-							}
-
-							@Override
-							public void onError(Request request,
-									Throwable exception) {
-
-							}
-						});
-			}
-
-			@Override
-			public void onLoginFailed(Throwable exception) {
-
-			}
-		}, login, password, role);
-	}
+//	private void testUpdateProfile() {
+//		String login = "adminan";
+//		String password = "smelatoronto";
+//		UserRole role = UserRole.SuperAdmin;
+//		User.Login(new I_Login() {
+//
+//			@Override
+//			public void onLoginSucceed() {
+//				ServerProxy.getUserInfo(User.id, User.SID,
+//						new RequestCallback() {
+//
+//							@Override
+//							public void onResponseReceived(Request request,
+//									Response response) {
+//								JSONObject obj = JSONParser.parseLenient(
+//										response.getText()).isObject();
+//								UserInfo info = new UserInfo();
+//								info.fromJSONObject(obj);
+//								String nick = info.getNickName();
+//								if (nick.startsWith("<changed>"))
+//									nick = nick.substring(9);
+//								else
+//									nick = "<changed>" + nick;
+//								info.setNickName(nick);
+//
+//								ServerProxy.setUserInfo(User.id, info
+//										.toJSONObject().toString(), User.SID,
+//										new RequestCallback() {
+//
+//											@Override
+//											public void onResponseReceived(
+//													Request request,
+//													Response response) {
+//												// TODO Auto-generated method
+//												// stub
+//												Log.popup();
+//											}
+//
+//											@Override
+//											public void onError(
+//													Request request,
+//													Throwable exception) {
+//												// TODO Auto-generated method
+//												// stub
+//
+//											}
+//										});
+//
+//							}
+//
+//							@Override
+//							public void onError(Request request,
+//									Throwable exception) {
+//
+//							}
+//						});
+//			}
+//
+//			@Override
+//			public void onLoginFailed(Throwable exception) {
+//
+//			}
+//		}, login, password, role);
+//	}
 }

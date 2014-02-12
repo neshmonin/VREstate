@@ -95,7 +95,7 @@ public class OrderSourcePresenter implements I_Presenter {
 //										new Data(display.getMLS()));
 								tree.next(Actions.UsingMLS);
 							} else {
-								Window.alert("Please, check your MLS#");
+								tree.next(Actions.ErrorMLS);
 							}
 						}
 

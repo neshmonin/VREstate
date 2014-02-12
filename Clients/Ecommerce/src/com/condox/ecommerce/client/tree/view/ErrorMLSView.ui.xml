@@ -1,0 +1,24 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		.important {
+			color: mediumblue;
+			margin-left: 50px;
+			background-color: slateblue;
+		}
+	</ui:style>
+		<g:VerticalPanel width="100%" height="100%" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+			<g:VerticalPanel >
+				<g:VerticalPanel spacing="15">
+					<g:Label text="Invalid MLS#" horizontalAlignment="ALIGN_CENTER"/>
+					<g:HTML wordWrap="true">Please check your MLS#<br />
+					and correct it.<br />
+					After you done, try again.</g:HTML>
+				<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_CENTER">
+					<g:Button width="80%" text="Back to try again" ui:field="buttonEnter"/>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+			</g:VerticalPanel>
+		</g:VerticalPanel>
+</ui:UiBinder> 

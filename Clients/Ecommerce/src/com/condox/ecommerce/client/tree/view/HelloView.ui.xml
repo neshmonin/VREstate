@@ -7,6 +7,7 @@
 	<g:HTMLPanel>
 		<g:VerticalPanel spacing="10">
 			<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label text="New Label" horizontalAlignment="ALIGN_LEFT" ui:field="userName"/>
 				<g:Button text="Logout" ui:field="logout"/>
 			</g:HorizontalPanel>
 			<g:HorizontalPanel width="100%" spacing="10">

@@ -31,6 +31,9 @@ public class ServerAPI implements RequestCallback {
 		case GetUserInfo:
 			getUserInfo(data);
 			break;
+		case SetUserInfo:
+			setUserInfo(data);
+			break;
 		case GetViewOrders:
 			getViewOrders(data);
 			break;
@@ -41,7 +44,25 @@ public class ServerAPI implements RequestCallback {
 			break;
 		}
 	}
-	
+
+	private void setUserInfo(JSONObject data) {
+		String userId = data.get("userId").isString().stringValue();
+		String userSID = data.get("userSID").isString().stringValue();
+		String putData = data.get("putData").isString().stringValue();
+		String url = Options.URL_VRT + "data/user/" + userId + "?sid="
+				+ userSID;
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.PUT,
+				URL.encode(url));
+		builder.setRequestData(putData);
+		builder.setHeader("Content-type", "application/json;");
+		builder.setCallback(this);
+		try {
+			builder.send();
+		} catch (RequestException e) {
+			e.printStackTrace();
+		}
+	}
+
 	private void getUserInfo(JSONObject data) {
 		String userId = data.get("userId").isString().stringValue();
 		String userSID = data.get("userSID").isString().stringValue();
@@ -57,7 +78,7 @@ public class ServerAPI implements RequestCallback {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void getViewOrders(JSONObject data) {
 		String userId = data.get("userId").isString().stringValue();
 		String userSID = data.get("userSID").isString().stringValue();
@@ -73,11 +94,12 @@ public class ServerAPI implements RequestCallback {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void getSuiteInfo(JSONObject data) {
 		int suiteId = (int) data.get("suiteId").isNumber().doubleValue();
 		String userSID = data.get("userSID").isString().stringValue();
-		String url = Options.URL_VRT + "data/suite/" + suiteId + "?sid=" + userSID;
+		String url = Options.URL_VRT + "data/suite/" + suiteId + "?sid="
+				+ userSID;
 		Log.write("Request: " + url);
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET,
 				URL.encode(url));
@@ -89,21 +111,24 @@ public class ServerAPI implements RequestCallback {
 			e.printStackTrace();
 		}
 	}
-	
-	
 
 	@Override
 	public void onResponseReceived(Request request, Response response) {
-		Log.write("Response: " + response.getStatusCode() + ", " + response.getStatusText());
-		this.callback.onOK(JSONParser.parseStrict(response.getText()).isObject());
-//		switch (this.type) {
-//		case GetUserInfo:
-//			this.callback.onOK(JSONParser.parseStrict(response.getText()).isObject());
-//			break;
-//		default:
-//			break;
-//
-//		}
+		Log.write("Response: " + response.getStatusCode() + ", "
+				+ response.getStatusText());
+		if (response.getStatusCode() == 200)
+			this.callback.onOK(JSONParser.parseStrict(response.getText())
+					.isObject());
+		if (response.getStatusCode() == 304)
+			this.callback.onOK(new JSONObject());
+		// switch (this.type) {
+		// case GetUserInfo:
+		// this.callback.onOK(JSONParser.parseStrict(response.getText()).isObject());
+		// break;
+		// default:
+		// break;
+		//
+		// }
 	}
 
 	@Override

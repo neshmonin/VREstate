@@ -87,8 +87,8 @@ public class OrderDetailsPresenter implements I_Presenter, I_OrderDetailsPresent
 		VerticalPanel vp = new VerticalPanel();
 		vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		vp.setSpacing(10);
-		Label labelConfirm1 = new Label("Order will be deleted PERMANENTLY!");
-		Label labelConfirm2 = new Label("Are you sure?");
+		Label labelConfirm1 = new Label("This Interactive 3D Listing will be deleted permanently.");
+		Label labelConfirm2 = new Label("Do you still want to proceed?");
 		vp.add(labelConfirm1);
 		vp.add(labelConfirm2);
 		HorizontalPanel hp = new HorizontalPanel();
@@ -118,7 +118,7 @@ public class OrderDetailsPresenter implements I_Presenter, I_OrderDetailsPresent
 						
 					}});
 			}});
-		Button buttonNo = new Button("No");
+		Button buttonNo = new Button("Cancel");
 		buttonNo.setWidth("75px");
 		buttonNo.addClickHandler(new ClickHandler(){
 

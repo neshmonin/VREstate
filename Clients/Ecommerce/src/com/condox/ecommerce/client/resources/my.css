@@ -11,8 +11,8 @@ suite-default - else buttons (for now - sold)
 
 .suite-resale {
 	height: 25px;
-	color: blue;
-	background-color: aqua;
+/* 	color: blue; */
+	background-color: #66CCFF;
 }
 
 /* .suite-resale:hover {
@@ -29,8 +29,8 @@ suite-default - else buttons (for now - sold)
 
 .suite-rent {
 	height: 25px;
-	color: purple;
-	background-color: fuchsia;
+/* 	color: 000000; */
+	background-color: #FF99FF;
 }
 
 /* .suite-rent:hover {
@@ -47,7 +47,7 @@ suite-default - else buttons (for now - sold)
 
 .suite-default {
 	height: 25px;
-	background-color: red;
+/* 	background-color: red; */
 }
 
 /* .suite-default:hover {

@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.InlineHyperlink;
+import com.google.gwt.user.client.ui.TextBox;
 
 public class OrderDetailsView<T> extends Composite implements I_Display,
 		I_Contained {
@@ -33,6 +34,7 @@ public class OrderDetailsView<T> extends Composite implements I_Display,
 	Button delete;
 	@UiField
 	HTML summary;
+	@UiField TextBox orderURL;
 
 	interface OrderDetailsViewUiBinder extends
 			UiBinder<Widget, OrderDetailsView> {
@@ -71,7 +73,7 @@ public class OrderDetailsView<T> extends Composite implements I_Display,
 //		if (moreInfo.startsWith("http://"))
 //			moreInfo = moreInfo.replaceFirst("http://", "https://");
 //		miPreview.setUrl(moreInfo);
-
+		orderURL.setText(info.getUrl());
 		enable.setValue(info.isEnabled());
 		if (enable.getValue())
 			enable.setText("Enabled");

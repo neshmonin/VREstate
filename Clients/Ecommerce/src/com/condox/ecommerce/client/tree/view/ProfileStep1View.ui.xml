@@ -15,10 +15,7 @@
 		horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 		<g:VerticalPanel>
 			<g:VerticalPanel spacing="5" width="370px">
-				<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT">
-					<g:Button text="x" ui:field="buttonClose"/>
-				</g:HorizontalPanel>
-				<g:Label text="Step 1: Your Contact Info (how people will see it...)" horizontalAlignment="ALIGN_LEFT" />
+				<g:Label text="Your Contact Info (how people will see it...)" horizontalAlignment="ALIGN_LEFT" />
 				<g:HorizontalPanel width="100%">
 					<g:Cell width="50%">
 						<g:VerticalPanel spacing="5">
