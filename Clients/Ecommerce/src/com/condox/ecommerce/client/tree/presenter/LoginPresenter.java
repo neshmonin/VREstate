@@ -5,8 +5,6 @@ import java.util.Date;
 import com.condox.clientshared.communication.I_Login;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.communication.User.UserRole;
-import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.UserInfo;
@@ -16,11 +14,13 @@ import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
 public class LoginPresenter implements I_Presenter, I_Login {
 
-	public static interface I_Display extends I_Contained {
+	public static interface I_Display {
 		void setPresenter(LoginPresenter presenter);
 
 		String getLogin();
@@ -53,12 +53,12 @@ public class LoginPresenter implements I_Presenter, I_Login {
 	}
 
 	@Override
-	public void go(I_Container container) {
+	public void go(HasWidgets container) {
 		String login = Cookies.getCookie("login");
 		if (login != null)
 			display.setLogin(login);
 		container.clear();
-		container.add(display);
+		container.add(display.asWidget());
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package com.condox.ecommerce.client.tree.presenter;
 
-import com.condox.clientshared.container.I_Contained;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
@@ -8,10 +7,10 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
-public class IncorrectMLSPresenter implements I_Presenter {
+public class ErrorMLSPresenter implements I_Presenter {
 
-	public static interface I_Display extends I_Contained {
-		void setPresenter(IncorrectMLSPresenter presenter);
+	public static interface I_Display {
+		void setPresenter(ErrorMLSPresenter presenter);
 
 		Widget asWidget();
 	}
@@ -20,13 +19,17 @@ public class IncorrectMLSPresenter implements I_Presenter {
 	private EcommerceTree tree = null;
 
 	@Override
-	public void go(HasWidgets container) {
-//		container.clear();
-//		container.add((I_Contained)display);
-//		tree.setData(Field.SuiteMLS, new Data(tree.getData(Field.SuiteMLS)));
-//		Window.alert("Please, check your MLS");
+	public void go(final HasWidgets container) {
+		container.clear();
+		container.add(display.asWidget());
+
+	}
+
+	// Navigation events
+	public void onBack() {
 		tree.next(Actions.Prev);
 	}
+
 
 	@Override
 	public void setView(Composite view) {

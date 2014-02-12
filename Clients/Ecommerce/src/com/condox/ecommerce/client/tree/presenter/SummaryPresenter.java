@@ -1,7 +1,6 @@
 package com.condox.ecommerce.client.tree.presenter;
 
 import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.document.BuildingInfo;
 import com.condox.clientshared.document.SuiteInfo;
 import com.condox.clientshared.tree.Data;
@@ -10,6 +9,7 @@ import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SummaryPresenter implements I_Presenter {
@@ -26,11 +26,11 @@ public class SummaryPresenter implements I_Presenter {
 	private EcommerceTree tree = null;
 
 	@Override
-	public void go(I_Container container) {
+	public void go(HasWidgets container) {
 		// TODO update data
 		loadData();
 		container.clear();
-		container.add(display);
+		container.add(display.asWidget());
 	}
 	
 	// Navigation events

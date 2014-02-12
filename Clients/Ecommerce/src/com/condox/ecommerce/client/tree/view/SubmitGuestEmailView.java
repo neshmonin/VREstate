@@ -19,12 +19,17 @@ public class SubmitGuestEmailView extends Composite implements I_Display {
 
 	private static SubmitGuestEmailViewUiBinder uiBinder = GWT
 			.create(SubmitGuestEmailViewUiBinder.class);
-	@UiField TextBox login;
-	@UiField Button close;
-	@UiField Button submit;
-	@UiField FocusPanel focusPanel;
+	@UiField
+	TextBox login;
+	@UiField
+	Button close;
+	@UiField
+	Button submit;
+	@UiField
+	FocusPanel focusPanel;
 
-	interface SubmitGuestEmailViewUiBinder extends UiBinder<Widget, SubmitGuestEmailView> {
+	interface SubmitGuestEmailViewUiBinder extends
+			UiBinder<Widget, SubmitGuestEmailView> {
 	}
 
 	private SubmitGuestEmailPresenter presenter = null;
@@ -48,19 +53,30 @@ public class SubmitGuestEmailView extends Composite implements I_Display {
 	public void setLogin(String value) {
 		login.setValue(value);
 	}
+
 	@UiHandler("close")
 	void onCloseClick(ClickEvent event) {
 		if (presenter != null)
 			presenter.onClose();
 	}
+
 	@UiHandler("submit")
 	void onSubmitClick(ClickEvent event) {
-		if (presenter != null)
+		if (presenter != null) {
+			close.setEnabled(false);
+			submit.setText("Submitted");
+			submit.setEnabled(false);
 			presenter.onSubmit();
+		}
 	}
+
 	@UiHandler("focusPanel")
 	void onFocusPanelKeyUp(KeyUpEvent event) {
-		if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER)
+		if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+			close.setEnabled(false);
+			submit.setText("Submitted");
+			submit.setEnabled(false);
 			presenter.onSubmit();
+		}
 	}
 }

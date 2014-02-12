@@ -6,8 +6,6 @@ import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.PUT;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.communication.User.UserRole;
-import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.document.SuiteInfo;
 import com.condox.clientshared.document.SuiteInfo.Status;
 import com.condox.clientshared.tree.Data;
@@ -25,11 +23,12 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class AgreementPresenter implements I_Presenter {
 
-	public static interface I_Display extends I_Contained {
+	public static interface I_Display {
 		void setPresenter(AgreementPresenter presenter);
 
 		Widget asWidget();
@@ -39,9 +38,9 @@ public class AgreementPresenter implements I_Presenter {
 	private EcommerceTree tree = null;
 
 	@Override
-	public void go(I_Container container) {
+	public void go(HasWidgets container) {
 		container.clear();
-		container.add(display);
+		container.add(display.asWidget());
 	}
 
 	// Navigation events
@@ -86,9 +85,9 @@ public class AgreementPresenter implements I_Presenter {
 				Log.write(response.getStatusCode() + ": "
 						+ response.getStatusText());
 				if (response.getStatusCode() == 200) {
-					JSONObject obj = JSONParser
+					final JSONObject order = JSONParser
 							.parseLenient(response.getText()).isObject();
-					viewOrderId = obj.get("viewOrder-id").isString()
+					viewOrderId = order.get("viewOrder-id").isString()
 							.stringValue();
 					viewOrderId = viewOrderId.replace("-", "");
 
@@ -166,8 +165,10 @@ public class AgreementPresenter implements I_Presenter {
 													Request request,
 													Response response) {
 												int status = response.getStatusCode();
-												 if ((status == 200)||(status == 304))
+												 if ((status == 200)||(status == 304)) {
+													 HelloPresenter.selected = viewOrderId;
 													 tree.next(Actions.Next);
+												 }
 												 else
 													 ServerProxy.deleteOrder(
 																viewOrderId, User.SID,

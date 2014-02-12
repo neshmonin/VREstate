@@ -1,11 +1,9 @@
 package com.condox.ecommerce.client.tree.presenter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.document.SuiteInfo;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
@@ -21,6 +19,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class OrderSourcePresenter implements I_Presenter {
@@ -45,7 +44,7 @@ public class OrderSourcePresenter implements I_Presenter {
 	private EcommerceTree tree = null;
 
 	@Override
-	public void go(I_Container container) {
+	public void go(HasWidgets container) {
 		Data data = tree.getData(Field.UsingMLS);
 		if (data != null) {
 			display.setUsingMLS(data.asBoolean());
@@ -65,7 +64,7 @@ public class OrderSourcePresenter implements I_Presenter {
 //		display.setMLSSuggestions(values2);
 		
 		container.clear();
-		container.add((I_Contained) display);
+		container.add(display.asWidget());
 	}
 
 	// Navigation events
@@ -96,7 +95,7 @@ public class OrderSourcePresenter implements I_Presenter {
 //										new Data(display.getMLS()));
 								tree.next(Actions.UsingMLS);
 							} else {
-								Window.alert("Please, check your MLS#");
+								tree.next(Actions.ErrorMLS);
 							}
 						}
 

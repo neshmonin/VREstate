@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.Label;
 
 public class OptionsView extends Composite implements I_Display {
 
@@ -40,6 +41,7 @@ public class OptionsView extends Composite implements I_Display {
 	TextBox textMoreInfoUrl;
 	@UiField
 	TextBox textMLS;
+	@UiField Label priceCaption;
 
 	interface OptionsViewUiBinder extends UiBinder<Widget, OptionsView> {
 	}
@@ -67,6 +69,7 @@ public class OptionsView extends Composite implements I_Display {
 //				textPrice.setStyleDependentName("incorrect", !(valid_sale_price && valid_rent_price));
 				boolean valid = valid_sale_price && valid_rent_price;
 				buttonNext.setEnabled(valid);
+				priceCaption.setText(rbForRent.getValue()? "Price, $/m" : "Price, $");
 				
 			}};
 		validate.scheduleRepeating(100);

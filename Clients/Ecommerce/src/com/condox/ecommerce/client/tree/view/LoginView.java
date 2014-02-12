@@ -42,7 +42,7 @@ public class LoginView extends Composite implements I_Display {
 
 	interface LoginViewUiBinder extends UiBinder<Widget, LoginView> {
 	}
-
+	
 	private LoginPresenter presenter = null;
 	private PopupPanel logining = new PopupPanel();
 
