@@ -4,8 +4,7 @@
 	<ui:style>
 	
 	</ui:style>
-	<g:HTMLPanel>
-		<g:VerticalPanel spacing="10">
+			<g:VerticalPanel spacing="10" ui:field="mainView">
 			<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT">
 				<g:Label text="New Label" horizontalAlignment="ALIGN_LEFT" ui:field="userName"/>
 				<g:Button text="Logout" ui:field="logout"/>
@@ -16,11 +15,11 @@
 					<g:Button width="200px" text="Settings..." ui:field="editSettings"/>
 				</g:Cell>
 			</g:HorizontalPanel>
-			<g:HorizontalPanel width="800px" height="400px" borderWidth="2">
-			<g:VerticalPanel height="100%" width="300px" spacing="10">
-							<g:Cell height="100%">
-								<p1:CellList ui:field="orderList" />
-							</g:Cell>
+			<g:HorizontalPanel width="800px" borderWidth="2">
+				<g:VerticalPanel spacing="10" width="300px">
+					<g:ScrollPanel ui:field="scroll" height="400px">
+						<p1:CellList ui:field="orderList" width="100%" height="100%" />
+					</g:ScrollPanel>
 			</g:VerticalPanel>
 			<g:Cell width="100%">
 				<g:HTMLPanel height="100%" ui:field="details"/>
@@ -33,5 +32,4 @@
 				</g:Cell>
 			</g:HorizontalPanel>
 		</g:VerticalPanel>
-	</g:HTMLPanel>
 </ui:UiBinder> 

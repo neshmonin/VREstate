@@ -5,6 +5,7 @@ import com.condox.clientshared.utils.JSONParams;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
@@ -16,6 +17,7 @@ public class User implements RequestCallback, I_Login {
 	}
 
 	public static String SID;
+	public static int waitSec;
 	public static String id;
 	public static UserRole role;
 	public static int keepAlivePeriodSec;
@@ -55,6 +57,7 @@ public class User implements RequestCallback, I_Login {
 			User.request += "&uid=" + uid + "&pwd=" + pwd;
 		}
 		theUser = new User(loginInterface);
+		User.request = URL.encode(User.request);
 		GET.send(User.request + "&generation=" + counter++, theUser);
 		return theUser;
 	}

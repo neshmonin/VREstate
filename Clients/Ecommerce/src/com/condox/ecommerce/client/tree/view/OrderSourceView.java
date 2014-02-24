@@ -60,6 +60,7 @@ public class OrderSourceView extends Composite implements I_Display {
 				
 				boolean valid = true;
 				valid &= (rbAddress.getValue() || !sbMLS.getValue().isEmpty());
+				valid &= (sbMLS.getValue().isEmpty() || sbMLS.getValue().matches("[A-Z]{1,1}[0-9]{7,7}"));
 				buttonNext.setEnabled(valid);
 			}
 		};

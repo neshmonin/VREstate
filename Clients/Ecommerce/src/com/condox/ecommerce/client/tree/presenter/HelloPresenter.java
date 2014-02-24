@@ -42,6 +42,11 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 		HasClickHandlers getCreateOrder();
 		HasClickHandlers getShowHistory();
 		HasClickHandlers getLogout();
+		
+		HasClickHandlers getReloadPage();
+		void setMainView();
+		void setProgressView();
+		void setErrorView();
 
 		SingleSelectionModel<ViewOrderInfo> getSelection();
 		
@@ -155,10 +160,13 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 		container.clear();
 		container.add(display.asWidget());
 		bind();
+//		display.setProgressView();
 		getUserInfo();
 	}
 
 	private void getUserInfo() {
+//		display.setProgressView();
+		tree.recenter();
 		JSONObject obj = new JSONObject();
 		obj.put("userId", new JSONString(User.id));
 		obj.put("userSID", new JSONString(User.SID));
@@ -189,11 +197,11 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 	public void onOK(JSONObject result) {
 		switch (api.getType()) {
 		case GetUserInfo:
-			Log.write(result.toString());
+//			Log.write(result.toString());
 			
 			UserInfo user = new UserInfo();
 			user.fromJSONObject(result);
-			display.setUserName(user.getNickName());
+			display.setUserName(user.getPersonalInfo().getLastName() + ", " + user.getPersonalInfo().getFirstName());
 			
 			getViewOrders();
 			break;
@@ -210,10 +218,13 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 				orders.add(info);
 			}
 			display.setData(orders);
-			display.getSelection().setSelected(orders.get(0), true);
+			if (!orders.isEmpty())
+				display.getSelection().setSelected(orders.get(0), true);
 			for (ViewOrderInfo item : orders)
 				if (item.getId().equals(selected))
 					display.getSelection().setSelected(item, true);
+//		display.setMainView();
+//		tree.recenter();
 			break;
 		default:
 			break;

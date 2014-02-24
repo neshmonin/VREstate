@@ -1,0 +1,18 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+	
+	</ui:style>
+	<g:HTMLPanel>
+		<g:VerticalPanel width="292px" horizontalAlignment="ALIGN_CENTER" spacing="10">
+			<g:HorizontalPanel height="142px" verticalAlignment="ALIGN_MIDDLE" width="339px">
+				<g:Cell width="100%">
+					<g:Image width="127px" height="122px" url="images/warning.jpg"/>
+				</g:Cell>
+				<g:HTML wordWrap="true" ui:field="warning"/>
+			</g:HorizontalPanel>
+			<g:Button text="OK, reload the page" ui:field="ok"/>
+		</g:VerticalPanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 

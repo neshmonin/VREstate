@@ -4,9 +4,13 @@ import com.condox.clientshared.communication.GET;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.container.I_Contained;
+import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
+import com.condox.ecommerce.client.UserInfo;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
+import com.condox.ecommerce.client.tree.view.WarningView;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
@@ -19,7 +23,7 @@ public class SettingsPresenter implements I_Presenter {
 
 	public static interface I_Display extends I_Contained {
 		void setPresenter(SettingsPresenter presenter);
-
+		void setEmail(String newEmail);
 		Widget asWidget();
 	}
 
@@ -28,6 +32,12 @@ public class SettingsPresenter implements I_Presenter {
 
 	@Override
 	public void go(HasWidgets container) {
+		Data data = tree.getData(Field.UserInfo);
+		if (data != null) {
+			UserInfo info = new UserInfo();
+			info.fromJSONObject(data.asJSONObject());
+			display.setEmail(info.getEmail());
+		}
 		container.clear();
 		container.add(display.asWidget());
 	}
@@ -73,6 +83,14 @@ public class SettingsPresenter implements I_Presenter {
 			public void onResponseReceived(Request request, Response response) {
 				if (response.getStatusCode() == 200)
 					Window.alert("Password changed");
+				else {
+					WarningPresenter warning = new WarningPresenter(new WarningView(), null);
+					String message = "Status code: " + response.getStatusCode() + "<br />";
+					message += "Status text: " + response.getStatusText() + "<br />";
+					message += "Response text: " + response.getText();
+					warning.setMessage(message);
+					warning.go(null);
+				}
 			}
 
 			@Override

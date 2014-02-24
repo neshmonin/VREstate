@@ -89,4 +89,10 @@ public class SettingsView extends Composite implements I_Display {
 	@UiHandler("textEmail")
 	void onTextEmailChange(ChangeEvent event) {
 	}
+
+	@Override
+	public void setEmail(String newEmail) {
+		// TODO Auto-generated method stub
+		textEmail.setValue(newEmail);
+	}
 }

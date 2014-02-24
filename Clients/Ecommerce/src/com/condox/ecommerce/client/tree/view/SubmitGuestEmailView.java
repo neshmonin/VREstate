@@ -8,6 +8,7 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.uibinder.client.UiField;
@@ -33,10 +34,25 @@ public class SubmitGuestEmailView extends Composite implements I_Display {
 	}
 
 	private SubmitGuestEmailPresenter presenter = null;
+	private Timer validator;
+	private boolean submitted = false;
 
 	public SubmitGuestEmailView() {
 		initWidget(uiBinder.createAndBindUi(this));
 		login.setFocus(true);
+		validator = new Timer() {
+
+			@Override
+			public void run() {
+				String email = login.getValue();
+				boolean valid = true;
+				// Validating email
+				valid = email.matches("[a-z0-9_-]+(\\.[a-z0-9_-]+)*@[a-z0-9_-]+(\\.[a-z0-9_-]+)+");
+				submit.setEnabled(valid&!submitted);
+			}
+			
+		};
+		validator.scheduleRepeating(500);;
 	}
 
 	@Override
@@ -65,6 +81,7 @@ public class SubmitGuestEmailView extends Composite implements I_Display {
 		if (presenter != null) {
 			close.setEnabled(false);
 			submit.setText("Submitted");
+			submitted = true;
 			submit.setEnabled(false);
 			presenter.onSubmit();
 		}

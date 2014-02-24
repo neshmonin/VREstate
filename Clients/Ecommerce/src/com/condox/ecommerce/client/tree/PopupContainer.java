@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class PopupContainer implements HasWidgets {
 	
-	private DialogBox popup = new DialogBox() {
+	public DialogBox popup = new DialogBox() {
 		protected void beginDragging(MouseDownEvent event) {
 			event.preventDefault();
 		};

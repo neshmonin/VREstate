@@ -5,6 +5,7 @@ import com.condox.ecommerce.client.tree.presenter.LoginPresenter.I_Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -12,14 +13,13 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.event.dom.client.KeyUpEvent;
 
 public class LoginView extends Composite implements I_Display {
 
@@ -114,8 +114,15 @@ public class LoginView extends Composite implements I_Display {
 		logining.add(new Label("Logining, please wait..."));
 		logining.center();
 		
-		if (presenter != null)
+		if (presenter != null) {
 			presenter.onLogin();
+			new Timer() {
+
+				@Override
+				public void run() {
+					logining.hide();
+				}}.schedule(5000);
+		}
 	}
 
 	@Override

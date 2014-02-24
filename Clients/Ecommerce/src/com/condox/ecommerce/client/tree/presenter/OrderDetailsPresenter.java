@@ -36,15 +36,19 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class OrderDetailsPresenter implements I_Presenter, I_OrderDetailsPresenter,
-		I_RequestCallback {
+public class OrderDetailsPresenter implements I_Presenter,
+		I_OrderDetailsPresenter, I_RequestCallback {
 
 	public interface I_Display {
-//		void setData(List<ViewOrderInfo> data);
+		// void setData(List<ViewOrderInfo> data);
 		HasClickHandlers getDelete();
+
 		HasValueChangeHandlers<Boolean> getEnabled();
+
 		void setData(ViewOrderInfo info);
+
 		void setData(String html);
+
 		Widget asWidget();
 	}
 
@@ -57,29 +61,30 @@ public class OrderDetailsPresenter implements I_Presenter, I_OrderDetailsPresent
 	public void setViewOrderInfo(ViewOrderInfo value) {
 		details = value;
 	}
-	
+
 	public void setParent(HelloPresenter parent) {
 		this.parent = parent;
 	}
-	
+
 	private void bind() {
 		display.getDelete().addClickHandler(new ClickHandler() {
-			
+
 			@Override
 			public void onClick(ClickEvent event) {
 				deleteOrder();
 			}
 		});
-		display.getEnabled().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-			
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				// TODO Auto-generated method stub
-				enableOrder(event.getValue());
-			}
-		});
+		display.getEnabled().addValueChangeHandler(
+				new ValueChangeHandler<Boolean>() {
+
+					@Override
+					public void onValueChange(ValueChangeEvent<Boolean> event) {
+						// TODO Auto-generated method stub
+						enableOrder(event.getValue());
+					}
+				});
 	}
-	
+
 	void deleteOrder() {
 		final PopupPanel confirm = new PopupPanel();
 		confirm.setModal(true);
@@ -87,7 +92,8 @@ public class OrderDetailsPresenter implements I_Presenter, I_OrderDetailsPresent
 		VerticalPanel vp = new VerticalPanel();
 		vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		vp.setSpacing(10);
-		Label labelConfirm1 = new Label("This Interactive 3D Listing will be deleted permanently.");
+		Label labelConfirm1 = new Label(
+				"This Interactive 3D Listing will be deleted permanently.");
 		Label labelConfirm2 = new Label("Do you still want to proceed?");
 		vp.add(labelConfirm1);
 		vp.add(labelConfirm2);
@@ -96,48 +102,54 @@ public class OrderDetailsPresenter implements I_Presenter, I_OrderDetailsPresent
 		hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		Button buttonYes = new Button("Yes");
 		buttonYes.setWidth("75px");
-		buttonYes.addClickHandler(new ClickHandler(){
+		buttonYes.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
 				confirm.hide();
-				ServerProxy.deleteOrder(details.getId(), User.SID, new RequestCallback(){
-					
-					@Override
-					public void onResponseReceived(Request request, Response response) {
-//						Log.popup();
-//						loadOrdersList();
-						if (response.getStatusCode() != 200)
-							Window.alert("Error while deleting vieworder.");
-						parent.getViewOrders();
-					}
-					
-					@Override
-					public void onError(Request request, Throwable exception) {
-						// TODO Auto-generated method stub
-						
-					}});
-			}});
+				ServerProxy.deleteOrder(details.getId(), User.SID,
+						new RequestCallback() {
+
+							@Override
+							public void onResponseReceived(Request request,
+									Response response) {
+								// Log.popup();
+								// loadOrdersList();
+								if (response.getStatusCode() != 200)
+									Window.alert("Error while deleting vieworder.");
+								parent.getViewOrders();
+							}
+
+							@Override
+							public void onError(Request request,
+									Throwable exception) {
+								// TODO Auto-generated method stub
+
+							}
+						});
+			}
+		});
 		Button buttonNo = new Button("Cancel");
 		buttonNo.setWidth("75px");
-		buttonNo.addClickHandler(new ClickHandler(){
+		buttonNo.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
 				confirm.hide();
-			}});
+			}
+		});
 		hp.add(buttonYes);
 		hp.add(buttonNo);
 		vp.add(hp);
 		confirm.setWidget(vp);
 		confirm.center();
 	}
-	
+
 	private void enableOrder(boolean value) {
 		details.setEnabled(value);
-		String url = Options.URL_VRT + "data/viewOrder/" + details.getId() + 
-				"?sid=" + User.SID;
-		PUT.send(url, details.getJSON(), new RequestCallback(){
+		String url = Options.URL_VRT + "data/viewOrder/" + details.getId()
+				+ "?sid=" + User.SID;
+		PUT.send(url, details.getJSON(), new RequestCallback() {
 
 			@Override
 			public void onResponseReceived(Request request, Response response) {
@@ -147,8 +159,9 @@ public class OrderDetailsPresenter implements I_Presenter, I_OrderDetailsPresent
 			@Override
 			public void onError(Request request, Throwable exception) {
 				// TODO Auto-generated method stub
-				
-			}});
+
+			}
+		});
 	}
 
 	@Override
@@ -164,52 +177,52 @@ public class OrderDetailsPresenter implements I_Presenter, I_OrderDetailsPresent
 	@Override
 	public void go(HasWidgets container) {
 		container.clear();
-//		container.add((I_Contained) display);
+		// container.add((I_Contained) display);
 		container.add(display.asWidget());
 		bind();
 		vieworder = details;
 		display.setData(details);
 		startLoadingData();
-//		getUserInfo();
+		// getUserInfo();
 	}
 
-//	private void getUserInfo() {
-//		JSONObject obj = new JSONObject();
-//		obj.put("userId", new JSONString(User.id));
-//		obj.put("userSID", new JSONString(User.SID));
-//		api.execute(RequestType.GetUserInfo, obj, this);
-//	}
-//
-//	private void getViewOrders() {
-//		JSONObject obj = new JSONObject();
-//		obj.put("userId", new JSONString(User.id));
-//		obj.put("userSID", new JSONString(User.SID));
-//		api.execute(RequestType.GetViewOrders, obj, this);
-//	}
-//
+	// private void getUserInfo() {
+	// JSONObject obj = new JSONObject();
+	// obj.put("userId", new JSONString(User.id));
+	// obj.put("userSID", new JSONString(User.SID));
+	// api.execute(RequestType.GetUserInfo, obj, this);
+	// }
+	//
+	// private void getViewOrders() {
+	// JSONObject obj = new JSONObject();
+	// obj.put("userId", new JSONString(User.id));
+	// obj.put("userSID", new JSONString(User.SID));
+	// api.execute(RequestType.GetViewOrders, obj, this);
+	// }
+	//
 	@Override
 	public void onOK(JSONObject result) {
 		switch (api.getType()) {
 		case GetSuiteInfo:
 			suite.fromJSONObject(result);
-//			JSONObject data = new JSONObject();
+			// JSONObject data = new JSONObject();
 			finishLoadingData();
 			break;
-//		case GetUserInfo:
-//			Log.write(result.toString());
-//			getViewOrders();
-//			break;
-//		case GetViewOrders:
-//			Log.write(result.toString());
-//			List<ViewOrderInfo> orders = new ArrayList<ViewOrderInfo>();
-//			JSONArray arr = result.get("viewOrders").isArray();
-//			for (int i = 0; i < arr.size(); i++) {
-//				ViewOrderInfo info = ViewOrderInfo.fromJSON(arr.get(i)
-//						.toString());
-//				orders.add(info);
-//			}
-////			display.setData(orders);
-//			break;
+		// case GetUserInfo:
+		// Log.write(result.toString());
+		// getViewOrders();
+		// break;
+		// case GetViewOrders:
+		// Log.write(result.toString());
+		// List<ViewOrderInfo> orders = new ArrayList<ViewOrderInfo>();
+		// JSONArray arr = result.get("viewOrders").isArray();
+		// for (int i = 0; i < arr.size(); i++) {
+		// ViewOrderInfo info = ViewOrderInfo.fromJSON(arr.get(i)
+		// .toString());
+		// orders.add(info);
+		// }
+		// // display.setData(orders);
+		// break;
 		default:
 			break;
 		}
@@ -224,69 +237,90 @@ public class OrderDetailsPresenter implements I_Presenter, I_OrderDetailsPresent
 	@Override
 	public void onDeleteItem(Object item) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onEnableItem(Object item, boolean value) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private ViewOrderInfo vieworder = new ViewOrderInfo();
 	private SuiteInfo suite = new SuiteInfo();
 	private BuildingInfo building = new BuildingInfo();
-	
+
 	private void startLoadingData() {
 		int suiteId = details.getTargetObjectId();
-//		Log.write("" + suiteId);
+		// Log.write("" + suiteId);
 		JSONObject data = new JSONObject();
 		data.put("suiteId", new JSONNumber(suiteId));
 		data.put("userSID", new JSONString(User.SID));
 		api.execute(RequestType.GetSuiteInfo, data, this);
 	}
-	
+
 	private void finishLoadingData() {
-		String html = ""; 
-		html += "Listing: " + (vieworder.getLabel().isEmpty()? "&lt;none&gt;" : vieworder.getLabel()) + "<br>";
-		html +=	"MLS# " + (vieworder.getMLS().isEmpty()? "&lt;none&gt;" : vieworder.getMLS())  + "<br>";
-		html += suite.getStatus().name().isEmpty()? "" : "Status: " + suite.getStatus() + "<br>";
-		html +=	"Third Party Virtual Tour<br>";
+		String html = "";
+		html += "Listing: "
+				+ (vieworder.getLabel().isEmpty() ? "&lt;none&gt;" : vieworder
+						.getLabel()) + "<br>";
+		html += "MLS# "
+				+ (vieworder.getMLS().isEmpty() ? "&lt;none&gt;" : vieworder
+						.getMLS()) + "<br>";
+		html += suite.getStatus().name().isEmpty() ? "" : "Status: "
+				+ suite.getStatus() + "<br>";
+		switch (suite.getStatus()) {
+		case AvailableResale:
+			html += suite.getCurrentPriceDisplay().isEmpty() ? "" : "Price: "
+					+ suite.getCurrentPriceDisplay() + "<br>";
+			break;
+		case AvailableRent:
+			html += suite.getCurrentPriceDisplay().isEmpty() ? "" : "Price: "
+					+ suite.getCurrentPriceDisplay() + "/m <br>";
+			break;
+		default:
+			break;
+		}
+
+		html += "Third Party Virtual Tour<br>";
 		html += "<div style=\"margin-left:20px\">";
 		if (vieworder.getVirtualTourUrl().isEmpty())
 			html += "&lt;none&gt;";
 		else
-			html += "<a href=\"" + vieworder.getVirtualTourUrl() + "\" target = \"_blank\">" + vieworder.getVirtualTourUrl() + "</a>";
+			html += "<a href=\"" + vieworder.getVirtualTourUrl()
+					+ "\" target = \"_blank\">" + vieworder.getVirtualTourUrl()
+					+ "</a>";
 		html += "</div>";
 
-		html +=	"More Info Link<br>";
+		html += "More Info Link<br>";
 		html += "<div style=\"margin-left:20px\">";
 		if (vieworder.getMoreInfoUrl().isEmpty())
 			html += "&lt;none&gt;";
 		else
-			html += "<a href=\"" + vieworder.getMoreInfoUrl() + "\" target = \"_blank\">" + vieworder.getMoreInfoUrl() + "</a>";
+			html += "<a href=\"" + vieworder.getMoreInfoUrl()
+					+ "\" target = \"_blank\">" + vieworder.getMoreInfoUrl()
+					+ "</a>";
 		html += "</div>";
-		
+
 		display.setData(html);
-		
+
 	}
-	
+
 	private void loadData() {
-//			switch (info.getStatus()) {
-//			case AvailableRent:
-//				status = "For rent - price $" + price + "/m";
-//				break;
-//			case AvailableResale:
-//				status = "For sale - price $" + price;
-//				break;
-//			default:
-//				break;
-//	}
-//		}
-		
-		//-----------------
-		
-		
+		// switch (info.getStatus()) {
+		// case AvailableRent:
+		// status = "For rent - price $" + price + "/m";
+		// break;
+		// case AvailableResale:
+		// status = "For sale - price $" + price;
+		// break;
+		// default:
+		// break;
+		// }
+		// }
+
+		// -----------------
+
 	}
 
 }

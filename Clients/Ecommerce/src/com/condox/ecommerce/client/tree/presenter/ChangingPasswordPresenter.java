@@ -9,6 +9,7 @@ import com.condox.ecommerce.client.UserInfo;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
+import com.condox.ecommerce.client.tree.view.WarningView;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
@@ -47,18 +48,25 @@ public class ChangingPasswordPresenter implements I_Presenter {
 				@Override
 				public void onResponseReceived(Request request,
 						Response response) {
+					if (response.getStatusCode() != 200) {
+						WarningPresenter warning = new WarningPresenter(new WarningView(), null);
+						String message = "Status code: " + response.getStatusCode() + "<br />";
+						message += "Status text: " + response.getStatusText() + "<br />";
+						message += "Response text: " + response.getText();
+						warning.setMessage(message);
+						warning.go(null);
+					} else {
 					Log.write(response.getStatusText());
 					 display.setResult(0);
 					 container.clear();
 					 container.add(display.asWidget());
 					// TODO Auto-generated method stub
-					
+					}
 				}
 
 				@Override
 				public void onError(Request request, Throwable exception) {
-					// TODO Auto-generated method stub
-					
+					new WarningPresenter(new WarningView(), null).go(null);
 				}});
 		}
 

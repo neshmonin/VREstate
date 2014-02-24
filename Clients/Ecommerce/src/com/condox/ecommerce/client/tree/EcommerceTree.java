@@ -48,8 +48,13 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasWidgets;
 
 public class EcommerceTree {
+	
+	// to remove
+	public void recenter() {
+		((PopupContainer)container).popup.center();
+	};
 
-	public HasWidgets container = new PopupContainer(); // TODO first version.
+	private HasWidgets container = new PopupContainer(); // TODO first version.
 
 	private List<String> leafs = new ArrayList<String>();
 	private List<String> MVPs = new ArrayList<String>();
@@ -110,6 +115,7 @@ public class EcommerceTree {
 		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingMLS/Options.Next/Summary.Prev=>Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingMLS/Options");
 		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingMLS/Options.Next/Summary.Next/Agreement.Cancel=>Defaults/Login.Agent/Hello");
 		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingMLS/Options.Next/Summary.Next/Agreement.Prev=>Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingMLS/Options.Next/Summary");
+		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingMLS/Options.Next/Summary.Next/Agreement.Next/Congratulations.Cancel=>Defaults/Login.Agent/Hello");
 		
 		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Cancel=>Defaults/Login.Agent/Hello");
 		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.UsingAddress/PickBuilding.Prev=>Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource");

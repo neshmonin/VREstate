@@ -68,6 +68,7 @@ public class OptionsView extends Composite implements I_Display {
 				boolean valid_rent_price = (!rbForRent.getValue() || price < 10000 && price > 0);
 //				textPrice.setStyleDependentName("incorrect", !(valid_sale_price && valid_rent_price));
 				boolean valid = valid_sale_price && valid_rent_price;
+				valid &= (textMLS.getValue().isEmpty() || textMLS.getValue().matches("[A-Z]{1,1}[0-9]{7,7}"));
 				buttonNext.setEnabled(valid);
 				priceCaption.setText(rbForRent.getValue()? "Price, $/m" : "Price, $");
 				
