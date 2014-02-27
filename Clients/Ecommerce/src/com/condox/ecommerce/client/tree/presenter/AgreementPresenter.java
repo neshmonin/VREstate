@@ -19,6 +19,8 @@ import com.condox.ecommerce.client.tree.api.I_RequestCallback;
 import com.condox.ecommerce.client.tree.api.RequestType;
 import com.condox.ecommerce.client.tree.api.ServerAPI;
 import com.condox.ecommerce.client.tree.view.WarningView;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
@@ -27,6 +29,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -44,6 +47,10 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 
 	@Override
 	public void go(HasWidgets container) {
+		if (UserRole.Visitor.equals(User.role)) {
+			tree.next(Actions.Next);
+			return;
+		}
 		container.clear();
 		container.add(display.asWidget());
 	}
@@ -60,10 +67,10 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 	private String viewOrderId = "";
 
 	public void onProceed() {
-		Data data = tree.getData(Field.UserInfo);
-		UserInfo info = new UserInfo();
-		info.fromJSONObject(data.asJSONObject());
-		if (info.getRole() == UserRole.Visitor) {
+//		Data data = tree.getData(Field.UserInfo);
+//		UserInfo info = new UserInfo();
+//		info.fromJSONObject(data.asJSONObject());
+		if (User.role == UserRole.Visitor) {
 			tree.next(Actions.Next);
 			return;
 		}
@@ -108,7 +115,7 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 						@Override
 						public void onResponseReceived(Request request,
 								Response response) {
-							JSONObject obj = JSONParser.parseLenient(
+							final JSONObject obj = JSONParser.parseLenient(
 									response.getText()).isObject();
 							Log.write("Response: " + response.getText());
 							/*
@@ -192,6 +199,26 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 															Response response) {
 														Log.write("Re-load suite info(for check)");
 														Log.write("Response text: " + response.getText());
+														if (!response.getText().equals(obj.toString())) {
+															final DialogBox warning = new DialogBox();
+															WarningPresenter.I_Display widget = new WarningView();
+															widget.setMessage("Bug while updating suite.<br /> No errors, but suite is not updated :(.");
+															widget.getOK().addClickHandler(new ClickHandler(){
+
+																@Override
+																public void onClick(ClickEvent event) {
+																	// TODO Auto-generated method stub
+																	warning.hide();
+																	tree.next(Actions.Cancel);
+																}});
+															warning.add(widget.asWidget());
+															warning.setGlassEnabled(true);
+															warning.center();
+//															WarningPresenter warning = new WarningPresenter(new WarningView(), null);
+//															String message = "Bug while updating suite.<br /> No errors, but suite is not updated :(. ";
+//															warning.setMessage(message);
+//															warning.go(null);
+														}
 													}
 
 													@Override
@@ -209,7 +236,27 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 													 HelloPresenter.selected = viewOrderId;
 													 tree.next(Actions.Next);
 												 }
-												 else
+												 else {
+													 
+													 final DialogBox warning = new DialogBox();
+														WarningPresenter.I_Display widget = new WarningView();
+														widget.setMessage("Error while editing listing.<br /> Server error " + response.getStatusCode() + " : " + response.getStatusText() + "<br />");
+														widget.getOK().addClickHandler(new ClickHandler(){
+
+															@Override
+															public void onClick(ClickEvent event) {
+																// TODO Auto-generated method stub
+																warning.hide();
+																tree.next(Actions.Cancel);
+															}});
+														warning.add(widget.asWidget());
+														warning.setGlassEnabled(true);
+														warning.center();
+//														WarningPresenter warning = new WarningPresenter(new WarningView(), null);
+//														String message = "Error while editing listing.<br /> Server error " + response.getStatusCode() + " : " + response.getStatusText() + "<br />";
+//														warning.setMessage(message);
+//														warning.go(null);
+
 													 ServerProxy.deleteOrder(
 																viewOrderId, User.SID,
 																new RequestCallback() {
@@ -226,6 +273,7 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 																			Throwable exception) {
 																	}
 																});
+												 }
 													 
 											}
 
@@ -261,12 +309,24 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 
 						}
 					});} else {
-						WarningPresenter warning = new WarningPresenter(new WarningView(), null);
-						String message = "Status code: " + response.getStatusCode() + "<br />";
-						message += "Status text: " + response.getStatusText() + "<br />";
-						message += "Response text: " + response.getText();
-						warning.setMessage(message);
-						warning.go(null);
+						 final DialogBox warning = new DialogBox();
+							WarningPresenter.I_Display widget = new WarningView();
+							widget.setMessage("Error while creating listing.<br /> Server error " + response.getStatusCode() + " : " + response.getStatusText() + "<br />");
+							widget.getOK().addClickHandler(new ClickHandler(){
+
+								@Override
+								public void onClick(ClickEvent event) {
+									// TODO Auto-generated method stub
+									warning.hide();
+									tree.next(Actions.Cancel);
+								}});
+							warning.add(widget.asWidget());
+							warning.setGlassEnabled(true);
+							warning.center();
+//						WarningPresenter warning = new WarningPresenter(new WarningView(), null);
+//						String message = "Error while creating listing.<br /> Server error " + response.getStatusCode() + " : " + response.getStatusText() + "<br />";
+//						warning.setMessage(message);
+//						warning.go(null);
 					}
 					
 			}

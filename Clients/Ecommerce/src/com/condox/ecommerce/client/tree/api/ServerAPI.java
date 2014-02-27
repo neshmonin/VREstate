@@ -4,6 +4,8 @@ import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User.UserRole;
 import com.condox.clientshared.utils.StringFormatter;
+import com.condox.ecommerce.client.UserInfo;
+import com.condox.ecommerce.client.model.LoginModel;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -16,39 +18,64 @@ import com.google.gwt.user.client.Timer;
 
 public class ServerAPI implements RequestCallback {
 
-	public static void login(String role, String uid, String pwd,
-			RequestCallback callback) {
+	public static Request login(LoginModel loginModel, RequestCallback callback) {
 		// https://www.3dcondox.com/vre/program?q=login&role=visitor&uid=web&pwd=web
+		// -----------------------------
+		String role = "";
+		switch (loginModel.getRole()) {
+		case Visitor:
+			role = "visitor";
+			break;
+		case SellingAgent:
+			role = "agent";
+			break;
+		case SuperAdmin:
+			role = "superadmin";
+			break;
+		default:
+			break;
+		}
+		String uid = loginModel.getUid();
+		String pwd = loginModel.getPwd();
+//		if (uid.isEmpty() && pwd.isEmpty()) {
+//			uid = "web";
+//			pwd = "web";
+//			role = "visitor";
+//		}
+		// -----------------------------
 		String url = StringFormatter.format(Options.URL_VRT
 				+ "program?q=login&role={0}&uid={1}&pwd={2}", role, uid, pwd);
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET,
 				URL.encode(url));
 		builder.setRequestData("");
 		builder.setCallback(callback);
-		send(builder);
+		return send(builder);
 	}
 
-	private static void send(final RequestBuilder builder) {
+	private static Request send(final RequestBuilder builder) {
+		log(builder);
+		final RequestCallback original = builder.getCallback();
 		builder.setCallback(new RequestCallback() {
 
 			@Override
 			public void onResponseReceived(Request request, Response response) {
 				log(response);
-				builder.getCallback().onResponseReceived(request, response);
+				original.onResponseReceived(request, response);
 			}
 
 			@Override
 			public void onError(Request request, Throwable exception) {
-				builder.getCallback().onError(request, exception);
+				original.onError(request, exception);
 			}
 		});
 
 		try {
-			builder.send();
+			return builder.send();
 		} catch (RequestException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return null;
 	}
 
 	private RequestType type = null;

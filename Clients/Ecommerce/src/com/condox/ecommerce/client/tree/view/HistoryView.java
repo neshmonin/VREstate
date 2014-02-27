@@ -120,8 +120,11 @@ public class HistoryView extends Composite implements I_Display {
 
 	private String html = "";
 
+	private SuiteInfo suiteInfo;
+	
 	@Override
 	public void setSuiteInfo(SuiteInfo info) {
+		suiteInfo = info;
 		html = "";
 		// SuiteInfo.Status status = info.getStatus();
 		html += "Object: Suite<br>";
@@ -136,7 +139,7 @@ public class HistoryView extends Composite implements I_Display {
 
 	@Override
 	public void setBuildingInfo(BuildingInfo info) {
-		html += "Address: " + info.getName() + ", " + info.getStreet() + ", "
+		html += "Address: " + suiteInfo.getName() + " - " +info.getName() + ", " + info.getStreet() + ", "
 				+ info.getCity() + "<br>";
 		String country = info.getCountry();
 		country = country.isEmpty()? "<none>" : country;

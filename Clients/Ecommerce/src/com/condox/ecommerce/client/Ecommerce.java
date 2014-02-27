@@ -38,18 +38,13 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 		CSS.Instance.my().ensureInjected();
 		Options.Init();
 		History.addValueChangeHandler(this);
-		History.fireCurrentHistoryState();
-		// History.newItem("testUpdateProfile");
+		 History.newItem("login", false);
+		 History.fireCurrentHistoryState();
 	}
 
 	@Override
 	public void onValueChange(ValueChangeEvent<String> event) {
 		String token = event.getValue();
-//		try {
-//			mode = Modes.valueOf(token);
-//		} catch (Exception e) {
-//			// TODO: handle exception
-//		}
 		if ("login".equals(token))
 			startWizard();
 		else if ("orderNow".equals(token))

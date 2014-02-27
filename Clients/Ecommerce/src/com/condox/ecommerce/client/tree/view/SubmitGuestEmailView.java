@@ -28,6 +28,7 @@ public class SubmitGuestEmailView extends Composite implements I_Display {
 	Button submit;
 	@UiField
 	FocusPanel focusPanel;
+	@UiField Button button;
 
 	interface SubmitGuestEmailViewUiBinder extends
 			UiBinder<Widget, SubmitGuestEmailView> {
@@ -95,5 +96,10 @@ public class SubmitGuestEmailView extends Composite implements I_Display {
 			submit.setEnabled(false);
 			presenter.onSubmit();
 		}
+	}
+	@UiHandler("button")
+	void onButtonClick(ClickEvent event) {
+		if (presenter != null)
+			presenter.onPrev();
 	}
 }

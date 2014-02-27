@@ -3,6 +3,7 @@ package com.condox.clientshared.document;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.condox.clientshared.abstractview.Log;
 import com.google.gwt.json.client.JSONObject;
 
 public class HistoryTransactionInfo implements I_JSON {
@@ -32,6 +33,7 @@ public class HistoryTransactionInfo implements I_JSON {
 
 	@Override
 	public void fromJSONObject(JSONObject obj) {
+		Log.write(obj.toString());
 		if (obj != null)
 			if (obj.get("created") != null)
 				if (obj.get("created").isString() != null) {

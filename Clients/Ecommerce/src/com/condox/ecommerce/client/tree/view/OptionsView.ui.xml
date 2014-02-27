@@ -8,11 +8,10 @@
 			background-color: slateblue;
 		}
 	</ui:style>
-		<g:VerticalPanel width="100%" height="100%" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" styleName="incorrect">
-			<g:VerticalPanel >
-				<g:VerticalPanel spacing="5" width="300px">
-					<g:Label text="Options of the Interactive 3D Listing" horizontalAlignment="ALIGN_CENTER"/>
-					<g:HorizontalPanel width="100%">
+		<g:VerticalPanel width="750px" height="500px" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" styleName="incorrect">
+			<g:Label text="Specify the options for the Interactive 3D Listing" horizontalAlignment="ALIGN_CENTER"/>
+			<g:Cell width="50%">
+				<g:HorizontalPanel spacing="20">
 						<g:VerticalPanel>
 							<g:HorizontalPanel spacing="5" width="100%">
 								<g:Cell verticalAlignment="ALIGN_MIDDLE">
@@ -40,16 +39,13 @@
 						</g:VerticalPanel>
 						</g:Cell>
 					</g:HorizontalPanel>
-					<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT" verticalAlignment="ALIGN_MIDDLE"/>
-					<g:Label text="Third Party Virtual  Tour (optional)"/>
-					<g:Cell horizontalAlignment="ALIGN_RIGHT">
-						<g:TextBox ui:field="textVirtualTourUrl" width="250px" value="http://"/>
-					</g:Cell>
-				<g:Label text="More Info link (optional)"/>
-				<g:Cell horizontalAlignment="ALIGN_RIGHT">
-					<g:TextBox ui:field="textMoreInfoUrl" width="250px" value="http://"/>
-				</g:Cell>
-				<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_CENTER">
+			</g:Cell>
+			<g:Label text="Third Party Virtual  Tour (optional)" horizontalAlignment="ALIGN_LEFT" width="400px"/>
+			<g:TextBox ui:field="textVirtualTourUrl" width="400px" value="http://"/>
+			<g:Label text="More Info link (optional)" width="400px" horizontalAlignment="ALIGN_LEFT"/>
+			<g:TextBox ui:field="textMoreInfoUrl" width="400px" value="http://"/>
+			<g:Cell verticalAlignment="ALIGN_BOTTOM">
+				<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_LEFT" spacing="10" verticalAlignment="ALIGN_BOTTOM">
 					<g:Cell verticalAlignment="ALIGN_MIDDLE">
 						<g:Button width="75px" ui:field="buttonCancel">Cancel</g:Button>
 					</g:Cell>
@@ -60,7 +56,6 @@
 					</g:HorizontalPanel>
 					</g:Cell>
 				</g:HorizontalPanel>
-			</g:VerticalPanel>
-			</g:VerticalPanel>
+			</g:Cell>
 		</g:VerticalPanel>
 </ui:UiBinder> 

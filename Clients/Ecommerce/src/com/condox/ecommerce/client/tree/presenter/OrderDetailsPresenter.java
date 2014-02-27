@@ -267,8 +267,18 @@ public class OrderDetailsPresenter implements I_Presenter,
 		html += "MLS# "
 				+ (vieworder.getMLS().isEmpty() ? "&lt;none&gt;" : vieworder
 						.getMLS()) + "<br>";
-		html += suite.getStatus().name().isEmpty() ? "" : "Status: "
-				+ suite.getStatus() + "<br>";
+		if (!suite.getStatus().name().isEmpty()) {
+			switch (suite.getStatus()) {
+			case AvailableRent:
+				html += "Status: For Rent <br>";
+				break;
+			case AvailableResale:
+				html += "Status: For Sale <br>";
+				break;
+			default:
+				break;
+			}
+		}
 		switch (suite.getStatus()) {
 		case AvailableResale:
 			html += suite.getCurrentPriceDisplay().isEmpty() ? "" : "Price: "

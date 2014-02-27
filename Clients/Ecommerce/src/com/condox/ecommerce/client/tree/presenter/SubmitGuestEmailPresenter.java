@@ -111,4 +111,8 @@ public class SubmitGuestEmailPresenter implements I_Presenter {
 	public void onClose() {
 		tree.next(Actions.Close);
 	}
+
+	public void onPrev() {
+		tree.next(Actions.Prev);
+	}
 }

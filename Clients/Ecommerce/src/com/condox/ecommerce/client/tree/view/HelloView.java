@@ -26,6 +26,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 
 public class HelloView<T> extends Composite implements I_Display, I_Contained {
 
@@ -66,12 +67,11 @@ public class HelloView<T> extends Composite implements I_Display, I_Contained {
 	@UiField
 	HTMLPanel details;
 	@UiField
-	Button logout;
-	@UiField
 	Label userName;
 	@UiField
 	VerticalPanel mainView;
 	@UiField ScrollPanel scroll;
+	@UiField Hyperlink logout;
 
 	interface HelloViewUiBinder extends UiBinder<Widget, HelloView> {
 	}

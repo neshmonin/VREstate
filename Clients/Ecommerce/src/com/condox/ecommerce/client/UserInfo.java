@@ -1,7 +1,10 @@
 package com.condox.ecommerce.client;
 
 import com.condox.clientshared.communication.User;
+import com.condox.clientshared.communication.User.UserRole;
 import com.condox.clientshared.document.I_JSON;
+import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
@@ -22,7 +25,7 @@ public class UserInfo implements I_JSON {
 	private Integer id = null;
 	private String login = "";
 	private String password = "";
-	private User.UserRole role = null;
+	private UserRole role = UserRole.SellingAgent;
 	private String primaryEmail = null;
 	// private String version = null; // ??
 	private Integer estateDeveloperId = null;
@@ -34,13 +37,14 @@ public class UserInfo implements I_JSON {
 	private String lastName = null;
 	private String email = null;
 	private String phone = null;
-	//-------------------------------
+	private boolean passwordChangeRequired = false;
+	// -------------------------------
 	private PersonalInfo personalInfo = new PersonalInfo();
-	
+
 	public PersonalInfo getPersonalInfo() {
 		return personalInfo;
 	}
-	
+
 	public void setPersonalInfo(PersonalInfo newPersonalInfo) {
 		personalInfo = newPersonalInfo;
 	}
@@ -121,7 +125,13 @@ public class UserInfo implements I_JSON {
 		return phone;
 	}
 
-	// Utils
+	public boolean isPasswordChangeRequired() {
+		return passwordChangeRequired;
+	}
+
+	public void setPasswordChangeRequired(boolean passwordChangeRequired) {
+		this.passwordChangeRequired = passwordChangeRequired;
+	}
 
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
@@ -130,7 +140,18 @@ public class UserInfo implements I_JSON {
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
+	
+	
 
+	public String getPrimaryEmail() {
+		return primaryEmail;
+	}
+
+	public void setPrimaryEmail(String primaryEmail) {
+		this.primaryEmail = primaryEmail;
+	}
+
+	// Utils
 	private String getString(JSONObject obj, String key) {
 		if (obj != null)
 			if (obj.get(key) != null)
@@ -147,6 +168,15 @@ public class UserInfo implements I_JSON {
 
 	@Override
 	public void fromJSONObject(JSONObject obj) {
+		if (obj.containsKey("userId"))
+			if (obj.get("userId") != null)
+				id = (int) obj.get("userId").isNumber().doubleValue();
+		
+		if (obj.containsKey("id"))
+			if (obj.get("id") != null)
+				id = (int) obj.get("id").isNumber().doubleValue();
+		
+
 		login = getString(obj, "login");
 		password = getString(obj, "password");
 
@@ -156,12 +186,13 @@ public class UserInfo implements I_JSON {
 		nickName = getString(obj, "nickName");
 		primaryEmail = getString(obj, "primaryEmail");
 		try {
-			personalInfo.fromJSONObject(JSONParser.parseStrict(getString(obj, "personalInfo")).isObject());
+			personalInfo.fromJSONObject(JSONParser.parseStrict(
+					getString(obj, "personalInfo")).isObject());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//		personalInfo.fromJSONObject(obj.get("personalInfo")));
+		// personalInfo.fromJSONObject(obj.get("personalInfo")));
 		// --------------------------------------------
 		firstName = "<none>";
 		lastName = "<none>";
@@ -177,19 +208,28 @@ public class UserInfo implements I_JSON {
 
 		phone = getString(obj, "tel");
 		phone = (phone != null) ? phone : "<none>";
+
+		// passwordChangeRequired
+		if (obj.containsKey("passwordChangeRequired"))
+			if (obj.get("passwordChangeRequired").isBoolean() != null)
+				passwordChangeRequired = obj.get("passwordChangeRequired")
+						.isBoolean().booleanValue();
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
 		JSONObject obj = new JSONObject();
+		obj.put("userId", new JSONNumber(id));
 		setString(obj, "login", login);
 		setString(obj, "password", password);
+		obj.put("passwordChangeRequired",
+				JSONBoolean.getInstance(passwordChangeRequired));
 
 		setString(obj, "role", role.name());
 
 		setString(obj, "nickName", nickName);
 		setString(obj, "primaryEmail", primaryEmail);
-//		obj.put("personalInfo", personalInfo.toJSONObject());
+		// obj.put("personalInfo", personalInfo.toJSONObject());
 		setString(obj, "personalInfo", personalInfo.toJSONObject().toString());
 		// --------------------------------------------
 		setString(obj, "n", lastName + ";" + firstName);

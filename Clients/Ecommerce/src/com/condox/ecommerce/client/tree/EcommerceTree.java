@@ -78,11 +78,12 @@ public class EcommerceTree {
 		leafs.add("Defaults/Login.Guest/OrderSource.UsingMLS/Options.Next/Summary.Cancel=>Defaults/Login");
 		leafs.add("Defaults/Login.Guest/OrderSource.UsingMLS/Options.Next/Summary.Prev=>Defaults/Login.Guest/OrderSource.UsingMLS/Options");
 
-		leafs.add("Defaults/Login.Guest/OrderSource.UsingMLS/Options.Next/Summary.Next/Agreement.Cancel=>Defaults/Login");
-		leafs.add("Defaults/Login.Guest/OrderSource.UsingMLS/Options.Next/Summary.Next/Agreement.Prev=>Defaults/Login.Guest/OrderSource.UsingMLS/Options.Next/Summary");
+//		leafs.add("Defaults/Login.Guest/OrderSource.UsingMLS/Options.Next/Summary.Next/Agreement.Cancel=>Defaults/Login");
+//		leafs.add("Defaults/Login.Guest/OrderSource.UsingMLS/Options.Next/Summary.Next/Agreement.Prev=>Defaults/Login.Guest/OrderSource.UsingMLS/Options.Next/Summary");
 		
-		leafs.add("Defaults/Login.Guest/OrderSource.UsingMLS/Options.Next/Summary.Next/Agreement.Next/GuestEmail.Close=>Defaults/Login");
-		leafs.add("Defaults/Login.Guest/OrderSource.UsingMLS/Options.Next/Summary.Next/Agreement.Next/GuestEmail.Submit/GuestCongratulations.Next=>Defaults/Login");
+		leafs.add("Defaults/Login.Guest/OrderSource.UsingMLS/Options.Next/Summary.Next/GuestEmail.Close=>Defaults/Login");
+		leafs.add("Defaults/Login.Guest/OrderSource.UsingMLS/Options.Next/Summary.Next/GuestEmail.Submit/GuestCongratulations.Next=>Defaults/Login");
+		leafs.add("Defaults/Login.Guest/OrderSource.UsingMLS/Options.Next/Summary.Next/GuestEmail.Prev=>Defaults/Login.Guest/OrderSource.UsingMLS/Options.Next/Summary");
 				
 		leafs.add("Defaults/Login.Guest/OrderSource.UsingAddress/PickBuilding.Cancel=>Defaults/Login");
 		leafs.add("Defaults/Login.Guest/OrderSource.UsingAddress/PickBuilding.Prev=>Defaults/Login.Guest/OrderSource");
@@ -97,6 +98,7 @@ public class EcommerceTree {
 		leafs.add("Defaults/Login.Guest/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Next/Agreement.Prev=>Defaults/Login.Guest/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary");
 		leafs.add("Defaults/Login.Guest/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Next/Agreement.Next/GuestEmail.Close=>Defaults/Login");
 		leafs.add("Defaults/Login.Guest/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Next/Agreement.Next/GuestEmail.Submit/GuestCongratulations.Next=>Defaults/Login");
+		leafs.add("Defaults/Login.Guest/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Next/Agreement.Next/GuestEmail.Prev=>Defaults/Login.Guest/OrderSource.UsingAddress/PickBuilding.Next/PickSuite.Next/Options.Next/Summary.Next/Agreement");
 		// leafs.add("Defaults/Login.Guest/Hello.History/History.Close=>Defaults/Login.Guest/Hello");
 
 		leafs.add("Defaults/Login.Agent/Hello.Logout=>Defaults/Login");
@@ -105,6 +107,7 @@ public class EcommerceTree {
 		leafs.add("Defaults/Login.Agent/Hello.ProfileStep1/ProfileStep1.Next/ProfileStep2.Close=>Defaults/Login.Agent/Hello");
 		leafs.add("Defaults/Login.Agent/Hello.ProfileStep1/ProfileStep1.Finish=>Defaults/Login.Agent/Hello");
 		leafs.add("Defaults/Login.Agent/Hello.Settings/Settings.Close=>Defaults/Login.Agent/Hello");
+		leafs.add("Defaults/Login.Settings/Settings.Close=>Defaults/Login.Agent/Hello");
 		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.Cancel=>Defaults/Login.Agent/Hello");
 		leafs.add("Defaults/Login.Agent/Hello.NewOrder/NewOrder.Next/OrderSource.Prev=>Defaults/Login.Agent/Hello");
 		// OrderSource
@@ -159,12 +162,14 @@ public class EcommerceTree {
 		else {
 			currNode.setAction(action);
 			String currPath = currNode.getLeaf();
-			Log.write("currPath: " + currPath);
+//			Log.write("currPath: " + currPath);
 			String nextPath = null;
-			for (String leaf : leafs)
+			for (String leaf : leafs) {
+//				Log.write(leaf);
 				if (leaf.startsWith(currNode.getLeaf()))
 					nextPath = leaf.substring(currPath.length());
-			Log.write("nextPath: " + nextPath);
+			}
+//			Log.write("nextPath: " + nextPath);
 			if (nextPath == null)
 				return;
 			if (nextPath.startsWith("/")) {
@@ -344,7 +349,9 @@ public class EcommerceTree {
 	public enum Field {
 		FILTERING_BY_CITY, VirtualTourUrl, MoreInfoUrl // TODO review this
 														// constants
-		,  UserInfo, UsingMLS, BuildingInfo, SuiteInfo, EmailToRecoverPassword
+		,  UserInfo, UsingMLS, BuildingInfo, SuiteInfo, EmailToRecoverPassword,
+		LoginModel
+		
 
 	}
 

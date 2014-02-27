@@ -1,6 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:p1="urn:import:com.google.gwt.user.cellview.client">
 	<ui:style>
 		.important {
 			color: mediumblue;
@@ -8,14 +8,14 @@
 			background-color: slateblue;
 		}
 	</ui:style>
-	<g:VerticalPanel width="100%" height="100%"
+	<g:VerticalPanel width="750px" height="500px"
 		horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
-		<g:VerticalPanel>
-			<g:VerticalPanel spacing="5" width="300px">
-				<g:Label text="Summary of your order" horizontalAlignment="ALIGN_CENTER" />
-				<g:HTML wordWrap="true" height="200px" ui:field="htmlSummary"/>
-				<g:HorizontalPanel width="100%"
-					horizontalAlignment="ALIGN_CENTER">
+		<g:Label text="Summary" horizontalAlignment="ALIGN_CENTER" />
+		<g:HTML wordWrap="true" height="200px" ui:field="htmlSummary" width="475px" horizontalAlignment="ALIGN_LEFT"></g:HTML>
+		<g:HTML wordWrap="true" width="475px" horizontalAlignment="ALIGN_LEFT" ui:field="html">You will be able to preview the order and, if you like it, you will be charged $49.99 (paid via secure connection with your credit card)</g:HTML>
+		<g:Cell verticalAlignment="ALIGN_BOTTOM">
+			<g:HorizontalPanel width="100%"
+					horizontalAlignment="ALIGN_LEFT" verticalAlignment="ALIGN_BOTTOM" spacing="10">
 					<g:Cell verticalAlignment="ALIGN_MIDDLE">
 						<g:Button width="75px" ui:field="buttonCancel">Cancel</g:Button>
 					</g:Cell>
@@ -26,7 +26,6 @@
 						</g:HorizontalPanel>
 					</g:Cell>
 				</g:HorizontalPanel>
-			</g:VerticalPanel>
-		</g:VerticalPanel>
+		</g:Cell>
 	</g:VerticalPanel>
 </ui:UiBinder> 

@@ -2,6 +2,10 @@ package com.condox.ecommerce.client.tree.view;
 
 import java.util.List;
 
+import com.condox.clientshared.communication.User.UserRole;
+import com.condox.clientshared.tree.Data;
+import com.condox.clientshared.tree.Tree;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.presenter.OrderSourcePresenter;
 import com.condox.ecommerce.client.tree.presenter.OrderSourcePresenter.I_Display;
 import com.google.gwt.core.client.GWT;
@@ -12,12 +16,11 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.Widget;
 
 public class OrderSourceView extends Composite implements I_Display {
 
@@ -33,8 +36,10 @@ public class OrderSourceView extends Composite implements I_Display {
 	Button buttonPrev;
 	@UiField
 	RadioButton rbAddress;
-	@UiField (provided = true) 
+	@UiField(provided = true)
 	SuggestBox sbMLS;
+	@UiField
+	Label label;
 
 	interface UsingMLSViewUiBinder extends UiBinder<Widget, OrderSourceView> {
 	}
@@ -46,7 +51,7 @@ public class OrderSourceView extends Composite implements I_Display {
 		sbMLS = new SuggestBox(oracle);
 		initWidget(uiBinder.createAndBindUi(this));
 		sbMLS.setText("");
-		
+
 		Timer validation = new Timer() {
 
 			@Override
@@ -57,14 +62,16 @@ public class OrderSourceView extends Composite implements I_Display {
 					sbMLS.setEnabled(false);
 					sbMLS.setValue("");
 				}
-				
+
 				boolean valid = true;
 				valid &= (rbAddress.getValue() || !sbMLS.getValue().isEmpty());
-				valid &= (sbMLS.getValue().isEmpty() || sbMLS.getValue().matches("[A-Z]{1,1}[0-9]{7,7}"));
+				valid &= (sbMLS.getValue().isEmpty() || sbMLS.getValue()
+						.matches("[A-Z]{1,1}[0-9]{7,7}"));
 				buttonNext.setEnabled(valid);
 			}
 		};
 		validation.scheduleRepeating(100);
+		// --------------------------------
 	}
 
 	@Override
@@ -115,6 +122,30 @@ public class OrderSourceView extends Composite implements I_Display {
 	@Override
 	public void setMLSSuggestions(List<String> value) {
 		oracle.clear();
-//		oracle.addAll(value);
+		// oracle.addAll(value);
+	}
+
+	@Override
+	public void setUserRole(UserRole role) {
+		switch (role) {
+		case Visitor:
+			label.setText("Please either specify the MLS# for your listing, or, if you do not remember it, provide the address");
+			rbMLS.setText("Use MLS#");
+			rbAddress
+					.setText("Do not remember the MLS# - let's use the address");
+			break;
+		case Agent:
+			label.setText("You can create either a copy of an MLS listing, or make a completely new unique Interactive 3D Listing");
+			rbMLS.setText("Create a copy of MLS listing");
+			rbAddress.setText("Create a unique Interactive 3D Listing");
+			break;
+		default:
+			label.setText("Please either specify the MLS# for your listing, or, if you do not remember it, provide the address");
+			rbMLS.setText("Use MLS#");
+			rbAddress
+					.setText("Do not remember the MLS# - let's use the address");
+			break;
+
+		}
 	}
 }

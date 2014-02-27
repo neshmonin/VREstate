@@ -5,17 +5,18 @@ import java.util.List;
 
 import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.User;
-import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
-import com.condox.clientshared.document.ViewOrder;
+import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.UserInfo;
+import com.condox.ecommerce.client.model.LoginModel;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
+import com.condox.ecommerce.client.tree.EcommerceTree.Field;
 import com.condox.ecommerce.client.tree.api.I_RequestCallback;
 import com.condox.ecommerce.client.tree.api.RequestType;
 import com.condox.ecommerce.client.tree.api.ServerAPI;
 import com.condox.ecommerce.client.tree.view.OrderDetailsView;
+import com.condox.ecommerce.client.tree.view.PasswordChangeRequired;
 import com.condox.ecommerce.client.tree.view.ViewOrderInfo;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -25,7 +26,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -38,24 +39,31 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 
 	public interface I_Display {
 		HasClickHandlers getEditProfile();
+
 		HasClickHandlers getEditSettings();
+
 		HasClickHandlers getCreateOrder();
+
 		HasClickHandlers getShowHistory();
+
 		HasClickHandlers getLogout();
-		
+
 		HasClickHandlers getReloadPage();
+
 		void setMainView();
+
 		void setProgressView();
+
 		void setErrorView();
 
 		SingleSelectionModel<ViewOrderInfo> getSelection();
-		
-		
+
 		HasWidgets getDetailsArea();
+
 		void setData(List<ViewOrderInfo> data);
-		
+
 		void setUserName(String name);
-		
+
 		Widget asWidget();
 	}
 
@@ -64,77 +72,81 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 	private ServerAPI api = new ServerAPI();
 	List<ViewOrderInfo> orders = new ArrayList<ViewOrderInfo>();
 	public static String selected;// remove
+	private UserInfo userInfo = new UserInfo();
 
 	private void bind() {
-		display.getEditProfile().addClickHandler(new ClickHandler(){
+		display.getEditProfile().addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
 				showEditProfile();
-			}});
+			}
+		});
 		display.getEditSettings().addClickHandler(new ClickHandler() {
-			
+
 			@Override
 			public void onClick(ClickEvent event) {
 				showEditSettings();
 			}
 		});
 		display.getCreateOrder().addClickHandler(new ClickHandler() {
-			
+
 			@Override
 			public void onClick(ClickEvent event) {
 				showCreateOrder();
 			}
 		});
 		display.getShowHistory().addClickHandler(new ClickHandler() {
-			
+
 			@Override
 			public void onClick(ClickEvent event) {
 				showHistory();
 			}
 		});
-		display.getSelection().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-			
-			@Override
-			public void onSelectionChange(SelectionChangeEvent event) {
-				selected = display.getSelection().getSelectedObject().getId();
-				showDetails(display.getSelection().getSelectedObject());
-			}
-		});
+		display.getSelection().addSelectionChangeHandler(
+				new SelectionChangeEvent.Handler() {
+
+					@Override
+					public void onSelectionChange(SelectionChangeEvent event) {
+						selected = display.getSelection().getSelectedObject()
+								.getId();
+						showDetails(display.getSelection().getSelectedObject());
+					}
+				});
 		display.getLogout().addClickHandler(new ClickHandler() {
-			
+
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO Auto-generated method stub
 				tree.next(Actions.Logout);
 			}
 		});
-//		display.getList().addChangeHandler(new ChangeHandler() {
-//			
-//			@Override
-//			public void onChange(ChangeEvent event) {
-//				showDetails(orders.get(display.getSelected()));
-//			}
-//		});
-		
+		// display.getList().addChangeHandler(new ChangeHandler() {
+		//
+		// @Override
+		// public void onChange(ChangeEvent event) {
+		// showDetails(orders.get(display.getSelected()));
+		// }
+		// });
+
 	}
-	
+
 	private void showEditProfile() {
 		tree.next(Actions.ProfileStep1);
 	}
-	
+
 	private void showEditSettings() {
 		tree.next(Actions.Settings);
 	}
-	
+
 	private void showCreateOrder() {
 		tree.next(Actions.NewOrder);
 	}
-	
+
 	private void showHistory() {
 		tree.next(Actions.History);
 	}
-	
+
 	void showDetails(ViewOrderInfo value) {
 		OrderDetailsPresenter detailsPresenter = new OrderDetailsPresenter();
 		OrderDetailsView detailsView = new OrderDetailsView();
@@ -157,16 +169,31 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 
 	@Override
 	public void go(HasWidgets container) {
-		container.clear();
-		container.add(display.asWidget());
-		bind();
-//		display.setProgressView();
-		getUserInfo();
+//		Data data = tree.getData(Field.UserInfo);
+//		userInfo.fromJSONObject(data.asJSONObject());
+		
+		
+		
+		
+//		if (!info.isPasswordChangeRequired())
+//			tree.next(Actions.Settings);
+//		else {
+			// ---------------------------------------
+			container.clear();
+			container.add(display.asWidget());
+			bind();
+			// display.setProgressView();
+			getUserInfo();
+//		}
 	}
 
 	private void getUserInfo() {
-//		display.setProgressView();
-		tree.recenter();
+		// display.setProgressView();
+//		tree.recenter();
+		Data data = tree.getData(Field.LoginModel);
+		LoginModel loginModel = new LoginModel();
+		loginModel.fromJSONObject(data.asJSONObject());
+		
 		JSONObject obj = new JSONObject();
 		obj.put("userId", new JSONString(User.id));
 		obj.put("userSID", new JSONString(User.SID));
@@ -174,15 +201,16 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 	}
 
 	private PopupPanel loading = new PopupPanel();
+
 	public void getViewOrders() {
 		loading.clear();
 		loading.setModal(true);
 		loading.setGlassEnabled(true);
 		loading.add(new Label("Loading, please wait..."));
 		loading.center();
-		
+
 		JSONObject obj = new JSONObject();
-		obj.put("userId", new JSONString(User.id));
+		obj.put("userId", new JSONString(String.valueOf(userInfo.getId())));
 		obj.put("userSID", new JSONString(User.SID));
 		api.execute(RequestType.GetViewOrders, obj, this);
 	}
@@ -197,12 +225,42 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 	public void onOK(JSONObject result) {
 		switch (api.getType()) {
 		case GetUserInfo:
-//			Log.write(result.toString());
-			
-			UserInfo user = new UserInfo();
-			user.fromJSONObject(result);
-			display.setUserName(user.getPersonalInfo().getLastName() + ", " + user.getPersonalInfo().getFirstName());
-			
+			// Log.write(result.toString());
+
+//			UserInfo user = new UserInfo();
+			userInfo.fromJSONObject(result);
+			display.setUserName(userInfo.getPersonalInfo().getLastName() + ", "
+					+ userInfo.getPersonalInfo().getFirstName());
+			tree.setData(Field.UserInfo, new Data(userInfo));
+			//-----------------
+			if (userInfo.isPasswordChangeRequired()) {
+				final DialogBox passwordChangeRequired = new DialogBox();
+				PasswordChangeRequired widget = new PasswordChangeRequired();
+
+				widget.getNow().addClickHandler(new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent event) {
+//						userInfo.setPasswordChangeRequired(true);
+						passwordChangeRequired.hide();
+						tree.next(Actions.Settings);
+					}
+				});
+				widget.getLater().addClickHandler(new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent event) {
+//						userInfo.setPasswordChangeRequired(false);
+						passwordChangeRequired.hide();
+//						tree.next(Actions.Agent);
+						getViewOrders();
+					}
+				});
+				passwordChangeRequired.add(widget.asWidget());
+				passwordChangeRequired.setGlassEnabled(true);
+				passwordChangeRequired.center();
+			} else 
+			//-----------------
 			getViewOrders();
 			break;
 		case GetViewOrders:
@@ -213,8 +271,8 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 			for (int i = 0; i < arr.size(); i++) {
 				ViewOrderInfo info = ViewOrderInfo.fromJSON(arr.get(i)
 						.toString());
-				info.fromJSONObject(JSONParser.parseStrict(arr.get(i)
-						.toString()).isObject());
+				info.fromJSONObject(JSONParser.parseStrict(
+						arr.get(i).toString()).isObject());
 				orders.add(info);
 			}
 			display.setData(orders);
@@ -223,8 +281,8 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 			for (ViewOrderInfo item : orders)
 				if (item.getId().equals(selected))
 					display.getSelection().setSelected(item, true);
-//		display.setMainView();
-//		tree.recenter();
+			// display.setMainView();
+			// tree.recenter();
 			break;
 		default:
 			break;

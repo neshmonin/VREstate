@@ -4,8 +4,13 @@ import com.condox.ecommerce.client.tree.presenter.LoginPresenter;
 import com.condox.ecommerce.client.tree.presenter.LoginPresenter.I_Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -42,9 +47,9 @@ public class LoginView extends Composite implements I_Display {
 
 	interface LoginViewUiBinder extends UiBinder<Widget, LoginView> {
 	}
-	
+
 	private LoginPresenter presenter = null;
-	private PopupPanel logining = new PopupPanel();
+
 
 	public LoginView() {
 		Timer update = new Timer() {
@@ -66,16 +71,14 @@ public class LoginView extends Composite implements I_Display {
 		};
 		update.scheduleRepeating(500);
 		initWidget(uiBinder.createAndBindUi(this));
+		// Styling
+		enter.setStyleDependentName("navigation", true);
+		close.setStyleDependentName("navigation", true);
 	}
 
 	@Override
 	public void setPresenter(LoginPresenter presenter) {
 		this.presenter = presenter;
-	}
-
-	@UiHandler("enter")
-	void onEnterClick(ClickEvent event) {
-		enter();
 	}
 
 	@UiHandler("forgotPassword")
@@ -104,34 +107,32 @@ public class LoginView extends Composite implements I_Display {
 	@UiHandler("focusPanel")
 	void onFocusPanelKeyUp(KeyUpEvent event) {
 		if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER)
-			enter();
-	}
-	
-	private void enter() {
-		logining.clear();
-		logining.setModal(true);
-		logining.setGlassEnabled(true);
-		logining.add(new Label("Logining, please wait..."));
-		logining.center();
-		
-		if (presenter != null) {
-			presenter.onLogin();
-			new Timer() {
+			enter.fireEvent(new GwtEvent<ClickHandler>() {
 
 				@Override
-				public void run() {
-					logining.hide();
-				}}.schedule(5000);
-		}
+				public com.google.gwt.event.shared.GwtEvent.Type<ClickHandler> getAssociatedType() {
+					return ClickEvent.getType();
+				}
+
+				@Override
+				protected void dispatch(ClickHandler handler) {
+					handler.onClick(null);
+				}
+			});
 	}
 
 	@Override
 	public void beforeClose() {
-		logining.hide();
+
 	}
 
 	@Override
 	public void setLogin(String login) {
 		this.login.setText(login);
+	}
+
+	@Override
+	public HasClickHandlers getLoginButton() {
+		return enter;
 	}
 }

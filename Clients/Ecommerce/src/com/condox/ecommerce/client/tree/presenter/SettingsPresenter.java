@@ -36,7 +36,7 @@ public class SettingsPresenter implements I_Presenter {
 		if (data != null) {
 			UserInfo info = new UserInfo();
 			info.fromJSONObject(data.asJSONObject());
-			display.setEmail(info.getEmail());
+			display.setEmail(info.getPrimaryEmail());
 		}
 		container.clear();
 		container.add(display.asWidget());

@@ -7,12 +7,12 @@
 			<g:VerticalPanel spacing="10" ui:field="mainView">
 			<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT">
 				<g:Label text="New Label" horizontalAlignment="ALIGN_LEFT" ui:field="userName"/>
-				<g:Button text="Logout" ui:field="logout"/>
+				<g:Hyperlink text="Logout" targetHistoryToken="newHistoryToken" ui:field="logout"/>
 			</g:HorizontalPanel>
 			<g:HorizontalPanel width="100%" spacing="10">
-				<g:Button width="200px" text="Update your profile..." ui:field="editProfile"/>
+				<g:Button width="250px" text="Update your profile..." ui:field="editProfile"/>
 				<g:Cell horizontalAlignment="ALIGN_RIGHT">
-					<g:Button width="200px" text="Settings..." ui:field="editSettings"/>
+					<g:Button width="250px" text="Settings..." ui:field="editSettings"/>
 				</g:Cell>
 			</g:HorizontalPanel>
 			<g:HorizontalPanel width="800px" borderWidth="2">
@@ -26,9 +26,9 @@
 			</g:Cell>
 		</g:HorizontalPanel>
 			<g:HorizontalPanel width="100%" spacing="10">
-				<g:Button width="200px" text="Create new ViewOrder..." ui:field="createOrder"/>
+				<g:Button width="250px" text="Create new Interactive 3D Listing..." ui:field="createOrder"/>
 				<g:Cell horizontalAlignment="ALIGN_RIGHT">
-					<g:Button width="200px" text="Show history..." ui:field="showHistory"/>
+					<g:Button width="250px" text="Show history..." ui:field="showHistory"/>
 				</g:Cell>
 			</g:HorizontalPanel>
 		</g:VerticalPanel>

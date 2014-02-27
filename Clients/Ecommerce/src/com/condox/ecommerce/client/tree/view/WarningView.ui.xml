@@ -10,9 +10,9 @@
 				<g:Cell width="100%">
 					<g:Image width="127px" height="122px" url="images/warning.jpg"/>
 				</g:Cell>
-				<g:HTML wordWrap="true" ui:field="warning"/>
+				<g:HTML wordWrap="true" ui:field="warning" height="107px" width="204px"/>
 			</g:HorizontalPanel>
-			<g:Button text="OK, reload the page" ui:field="ok"/>
+			<g:Button text="OK" ui:field="ok" width="75px"/>
 		</g:VerticalPanel>
 	</g:HTMLPanel>
 </ui:UiBinder> 

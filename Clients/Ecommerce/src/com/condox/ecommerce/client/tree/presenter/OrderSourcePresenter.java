@@ -3,22 +3,27 @@ package com.condox.ecommerce.client.tree.presenter;
 import java.util.List;
 
 import com.condox.clientshared.communication.User;
+import com.condox.clientshared.communication.User.UserRole;
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.document.SuiteInfo;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.ServerProxy;
+import com.condox.ecommerce.client.UserInfo;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
+import com.condox.ecommerce.client.tree.view.WarningView;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -38,6 +43,8 @@ public class OrderSourcePresenter implements I_Presenter {
 		void setMLSSuggestions(List<String> value);
 
 		Widget asWidget();
+		//-----------------
+		void setUserRole(UserRole role);
 	}
 
 	private I_Display display = null;
@@ -95,7 +102,20 @@ public class OrderSourcePresenter implements I_Presenter {
 //										new Data(display.getMLS()));
 								tree.next(Actions.UsingMLS);
 							} else {
-								tree.next(Actions.ErrorMLS);
+//								tree.next(Actions.ErrorMLS);
+								final DialogBox warning = new DialogBox();
+								WarningPresenter.I_Display widget = new WarningView();
+								widget.setMessage("Sorry, this listing cannot be located in the 3D Condo Explorer's Database. Please try another MLS#.");
+								widget.getOK().addClickHandler(new ClickHandler(){
+
+									@Override
+									public void onClick(ClickEvent event) {
+										// TODO Auto-generated method stub
+										warning.hide();
+									}});
+								warning.add(widget.asWidget());
+								warning.setGlassEnabled(true);
+								warning.center();
 							}
 						}
 
@@ -118,6 +138,10 @@ public class OrderSourcePresenter implements I_Presenter {
 	public void setView(Composite view) {
 		display = (I_Display) view;
 		display.setPresenter(this);
+		Data data = tree.getData(Field.UserInfo);
+		UserInfo info = new UserInfo();
+		info.fromJSONObject(data.asJSONObject());
+		display.setUserRole(info.getRole());
 	}
 
 	@Override

@@ -8,31 +8,28 @@
 			background-color: slateblue;
 		}
 	</ui:style>
-		<g:VerticalPanel width="100%" height="100%" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
-			<g:VerticalPanel>
-				<g:FocusPanel ui:field="focusPanel">
-					<g:VerticalPanel spacing="10" horizontalAlignment="ALIGN_CENTER" width="100%" height="100%">
-					<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT">
-						<g:Button width="25px" height="25px" text="X" ui:field="close"/>
-					</g:HorizontalPanel>
-					<g:HorizontalPanel horizontalAlignment="ALIGN_LEFT" width="100%">
-						<g:Cell width="200px" horizontalAlignment="ALIGN_CENTER">
-							<g:HTML wordWrap="true" width="311px" horizontalAlignment="ALIGN_LEFT">To complete the order we'll have to send you a verification message with the further instructions.<br></br>
+		<g:VerticalPanel width="750px" height="500px" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_TOP">
+			<g:Cell verticalAlignment="ALIGN_BOTTOM">
+				<g:HTML wordWrap="true" width="350px" horizontalAlignment="ALIGN_LEFT">To complete the order we'll have to send you a verification message with the further instructions.<br></br>
 				Please provide an email address that you'll be able to check next couple of minutes:</g:HTML>
+			</g:Cell>
+			<g:Cell verticalAlignment="ALIGN_BOTTOM">
+				<g:FocusPanel ui:field="focusPanel">
+				<g:VerticalPanel spacing="10" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_BOTTOM">
+					<g:TextBox ui:field="login" width="185px"/>
+				<g:Button width="100%" text="Submit the Order" ui:field="submit"/>
+			</g:VerticalPanel>
+			</g:FocusPanel>
+			</g:Cell>
+			<g:HTML wordWrap="true" width="300px" horizontalAlignment="ALIGN_LEFT">Please have your credit card ready.<br></br>
+You will be charged $49.99 (you still will be able to cancel the order after preview)</g:HTML>
+			<g:Cell verticalAlignment="ALIGN_BOTTOM">
+				<g:HorizontalPanel width="100%" spacing="10">
+						<g:Button width="75px" text="Cancel" ui:field="close"/>
+						<g:Cell width="150px">
+							<g:Button width="75px" ui:field="button">&lt;&lt; Prev</g:Button>
 						</g:Cell>
 					</g:HorizontalPanel>
-				<g:TextBox ui:field="login"/>
-				<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_CENTER">
-					<g:Button width="185px" text="Submit" ui:field="submit"/>
-				</g:HorizontalPanel>
-				<g:HorizontalPanel>
-					<g:Cell width="300px">
-						<g:HTML wordWrap="true">Please have your credit card ready.<br></br>
-You will be charged $49.99 (you still will be able to cancel the order after preview)</g:HTML>
-					</g:Cell>
-				</g:HorizontalPanel>
-			</g:VerticalPanel>
-				</g:FocusPanel>
-			</g:VerticalPanel>
+			</g:Cell>
 		</g:VerticalPanel>
 </ui:UiBinder> 

@@ -24,24 +24,42 @@ public class BuildingInfo implements I_JSON {
 	private Position position = null;
 	private Double altitude_adjustment = null;
 	private String country = "";
+	private String province = "";
 
 	@Override
 	public JSONObject toJSONObject() {
 		JSONObject obj = new JSONObject();
 		obj.put("id", new JSONNumber(id));
 		obj.put("name", new JSONString(name));
+		obj.put("addressLine1", new JSONString(street));
 		obj.put("address", new JSONString(address));
 		obj.put("country", new JSONString(country));
+		obj.put("postalCode", new JSONString(postal));
+		obj.put("city", new JSONString(city));
+		obj.put("stateProvince", new JSONString(province));
 		return obj;
 	}
 
 	@Override
 	public void fromJSONObject(JSONObject obj) {
-		id = (int) obj.get("id").isNumber().doubleValue();
-		// TODO version
-		// parent_id = (int) obj.get("siteId").isNumber().doubleValue();
-		name = obj.get("name").isString().stringValue();
-		country = JSONUtils.getString(obj, "country");
+		// id
+		if (obj.containsKey("id"))
+			if (obj.get("id").isNumber() != null)
+				id = (int) obj.get("id").isNumber().doubleValue();
+		// name
+		if (obj.containsKey("name"))
+			if (obj.get("name").isString() != null)
+				name = obj.get("name").isString().stringValue();
+
+		// country
+		if (obj.containsKey("country"))
+			if (obj.get("country").isString() != null)
+				country = JSONUtils.getString(obj, "country");
+		
+		// province
+		if (obj.containsKey("stateProvince"))
+			if (obj.get("stateProvince").isString() != null)
+				province = JSONUtils.getString(obj, "stateProvince");
 
 		if (obj.containsKey("center")) { // ?? TODO
 			JSONObject position = obj.get("center").isObject();
@@ -129,6 +147,16 @@ public class BuildingInfo implements I_JSON {
 
 	public int getId() {
 		return id;
+	}
+	
+	
+
+	public String getProvince() {
+		return province;
+	}
+
+	public void setProvince(String province) {
+		this.province = province;
 	}
 
 	public int getParent_id() {
