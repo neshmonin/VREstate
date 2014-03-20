@@ -80,12 +80,12 @@ public class OptionsView extends Composite implements I_Display {
 	public void setPresenter(OptionsPresenter presenter) {
 		this.presenter = presenter;
 		boolean usingMLS = presenter.isUsingMLS();
-		if (usingMLS) {
-			rbForRent.setEnabled(false);
-			rbForSale.setEnabled(false);
-			textMLS.setReadOnly(true);
-			textPrice.setReadOnly(true);
-		}
+//		if (usingMLS) {
+//			rbForRent.setEnabled(false);
+//			rbForSale.setEnabled(false);
+//			textMLS.setReadOnly(true);
+//			textPrice.setReadOnly(true);
+//		}
 		
 		if (User.role.equals(UserRole.Visitor)) {
 			textMLS.setEnabled(false);
@@ -147,6 +147,12 @@ public class OptionsView extends Composite implements I_Display {
 	@Override
 	public void setMLS(String newMLS) {
 		textMLS.setValue(newMLS);
+		if (!getMLS().isEmpty()) {
+			rbForRent.setEnabled(false);
+			rbForSale.setEnabled(false);
+			textMLS.setEnabled(false);
+			textPrice.setEnabled(false);
+		}
 	}
 
 	@Override

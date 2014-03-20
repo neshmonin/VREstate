@@ -98,8 +98,8 @@ public class OrderSourcePresenter implements I_Presenter {
 								info.fromJSONObject(arr.get(0).isObject());
 								tree.setData(Field.SuiteInfo,
 										new Data(info));
-//								tree.setData(Field.SuiteMLS,
-//										new Data(display.getMLS()));
+								tree.setData(Field.UsingMLS,
+										new Data(true));
 								tree.next(Actions.UsingMLS);
 							} else {
 //								tree.next(Actions.ErrorMLS);
@@ -125,8 +125,11 @@ public class OrderSourcePresenter implements I_Presenter {
 
 						}
 					});
-		} else
+		} else {
+			tree.setData(Field.UsingMLS,
+					new Data(false));
 			tree.next(Actions.UsingAddress);
+		}
 
 	}
 
