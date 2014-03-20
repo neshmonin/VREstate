@@ -22,7 +22,7 @@ public class Options implements RequestCallback {
 
 	public static MODE SERVER_MODE;
 
-	public static String URL_VRT;
+	public static String URL_VRT = "https://vrt.3dcondox.com/vre/";
 	public static String URL_STATIC;
 	public static String URL_MODELS;
 
