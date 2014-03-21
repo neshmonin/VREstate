@@ -67,16 +67,14 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 	private String viewOrderId = "";
 
 	public void onProceed() {
-//		Data data = tree.getData(Field.UserInfo);
-//		UserInfo info = new UserInfo();
-//		info.fromJSONObject(data.asJSONObject());
+		// Data data = tree.getData(Field.UserInfo);
+		// UserInfo info = new UserInfo();
+		// info.fromJSONObject(data.asJSONObject());
 		if (User.role == UserRole.Visitor) {
 			tree.next(Actions.Next);
 			return;
 		}
-		
-		
-		
+
 		String url = Options.URL_VRT;
 		url += "program?";
 		url += "&q=register";
@@ -88,7 +86,8 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 		url += "&options=fp"; // TODO
 		// MLS#
 		String mls = getSuiteInfo(Field.SuiteInfo).getMLS();
-		url += "&mls_id=" + mls;
+		if (!mls.isEmpty())
+			url += "&mls_id=" + mls;
 		url += "&propertyType=suite"; // TODO
 		url += "&propertyId=" + getSuiteInfo(Field.SuiteInfo).getId();
 		url += "&sid=" + User.SID;
@@ -99,8 +98,8 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 				Log.write(response.getStatusCode() + ": "
 						+ response.getStatusText());
 				if (response.getStatusCode() == 200) {
-					final JSONObject order = JSONParser
-							.parseLenient(response.getText()).isObject();
+					final JSONObject order = JSONParser.parseLenient(
+							response.getText()).isObject();
 					viewOrderId = order.get("viewOrder-id").isString()
 							.stringValue();
 					viewOrderId = viewOrderId.replace("-", "");
@@ -136,29 +135,29 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 								SuiteInfo info = new SuiteInfo();
 								info.fromJSONObject(data.asJSONObject());
 
-//								if (obj.containsKey("currentPrice")) {
-									NumberFormat fmt = NumberFormat
-											.getDecimalFormat();
-									fmt.overrideFractionDigits(2);
-									String currentPrice = String.valueOf(info
-											.getPrice());
-									obj.put("currentPrice",
-											new JSONString(currentPrice));
-//								}
-//								if (obj
-//										.containsKey("currentPriceDisplay")) {
-									/*NumberFormat*/ fmt = NumberFormat
-											.getDecimalFormat();
-									fmt.overrideFractionDigits(2);
-									/*String*/ currentPrice = fmt.format(info
-											.getPrice());
-									obj.put("currentPriceDisplay",
-											new JSONString("$" + currentPrice));
-//								}
-//								if (obj
-//										.containsKey("currentPriceCurrency"))
-									obj.put("currentPriceCurrency",
-											new JSONString("CAD"));
+								// if (obj.containsKey("currentPrice")) {
+								NumberFormat fmt = NumberFormat
+										.getDecimalFormat();
+								fmt.overrideFractionDigits(2);
+								String currentPrice = String.valueOf(info
+										.getPrice());
+								obj.put("currentPrice", new JSONString(
+										currentPrice));
+								// }
+								// if (obj
+								// .containsKey("currentPriceDisplay")) {
+								/* NumberFormat */fmt = NumberFormat
+										.getDecimalFormat();
+								fmt.overrideFractionDigits(2);
+								/* String */currentPrice = fmt.format(info
+										.getPrice());
+								obj.put("currentPriceDisplay", new JSONString(
+										"$" + currentPrice));
+								// }
+								// if (obj
+								// .containsKey("currentPriceCurrency"))
+								obj.put("currentPriceCurrency", new JSONString(
+										"CAD"));
 
 								if (info.getStatus() == Status.AvailableRent)
 									obj.put("status", new JSONString(
@@ -166,121 +165,149 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 								if (info.getStatus() == Status.AvailableResale)
 									obj.put("status", new JSONString(
 											"AvailableResale"));
+
+								String mls = getSuiteInfo(Field.SuiteInfo)
+										.getMLS();
+								if (!mls.isEmpty())
+									obj.put("mlsId", new JSONString(mls));
 							}
 
 							String url = Options.URL_VRT;
 							url += "data/suite/"
 									+ getSuiteInfo(Field.SuiteInfo).getId();
 							url += "?sid=" + User.SID;
-							
+
 							Log.write("Request: " + url);
-							Log.write("Request data: " + obj.toString());	
-								PUT.send(url, obj.toString(),
-										new RequestCallback() {
+							Log.write("Request data: " + obj.toString());
+							PUT.send(url, obj.toString(),
+									new RequestCallback() {
 
-											@Override
-											public void onResponseReceived(
-													Request request,
-													Response response) {
-												Log.write("Response status code: " + response.getStatusCode());
-												Log.write("Response status text: " + response.getStatusText());
-												Log.write("Response text: " + response.getText());
-												//-------------------------------------------
-												String url = Options.URL_VRT;
-												url += "data/suite/"
-														+ getSuiteInfo(Field.SuiteInfo).getId();
-												url += "?sid=" + User.SID + "&counter=5";
-												Log.write("Request: " + url);
-												GET.send(url, new RequestCallback() {
+										@Override
+										public void onResponseReceived(
+												Request request,
+												Response response) {
+											Log.write("Response status code: "
+													+ response.getStatusCode());
+											Log.write("Response status text: "
+													+ response.getStatusText());
+											Log.write("Response text: "
+													+ response.getText());
+											// -------------------------------------------
+											String url = Options.URL_VRT;
+											url += "data/suite/"
+													+ getSuiteInfo(
+															Field.SuiteInfo)
+															.getId();
+											url += "?sid=" + User.SID
+													+ "&counter=5";
+											Log.write("Request: " + url);
+											GET.send(url,
+													new RequestCallback() {
 
-													@Override
-													public void onResponseReceived(
-															Request request,
-															Response response) {
-														Log.write("Re-load suite info(for check)");
-														Log.write("Response text: " + response.getText());
-														if (!response.getText().equals(obj.toString())) {
-															final DialogBox warning = new DialogBox();
-															WarningPresenter.I_Display widget = new WarningView();
-															widget.setMessage("Bug while updating suite.<br /> No errors, but suite is not updated :(.");
-															widget.getOK().addClickHandler(new ClickHandler(){
+														@Override
+														public void onResponseReceived(
+																Request request,
+																Response response) {
+															Log.write("Re-load suite info(for check)");
+															Log.write("Response text: "
+																	+ response
+																			.getText());
+															if (!response
+																	.getText()
+																	.equals(obj
+																			.toString())) {
+																final DialogBox warning = new DialogBox();
+																WarningPresenter.I_Display widget = new WarningView();
+																widget.setMessage("Bug while updating suite.<br /> No errors, but suite is not updated :(.");
+																widget.getOK()
+																		.addClickHandler(
+																				new ClickHandler() {
 
-																@Override
-																public void onClick(ClickEvent event) {
-																	// TODO Auto-generated method stub
-																	warning.hide();
-																	tree.next(Actions.Cancel);
-																}});
-															warning.add(widget.asWidget());
-															warning.setGlassEnabled(true);
-															warning.center();
-//															WarningPresenter warning = new WarningPresenter(new WarningView(), null);
-//															String message = "Bug while updating suite.<br /> No errors, but suite is not updated :(. ";
-//															warning.setMessage(message);
-//															warning.go(null);
+																					@Override
+																					public void onClick(
+																							ClickEvent event) {
+																						// TODO
+																						// Auto-generated
+																						// method
+																						// stub
+																						warning.hide();
+																						tree.next(Actions.Cancel);
+																					}
+																				});
+																warning.add(widget
+																		.asWidget());
+																warning.setGlassEnabled(true);
+																warning.center();
+																// WarningPresenter
+																// warning = new
+																// WarningPresenter(new
+																// WarningView(),
+																// null);
+																// String
+																// message =
+																// "Bug while updating suite.<br /> No errors, but suite is not updated :(. ";
+																// warning.setMessage(message);
+																// warning.go(null);
+															}
 														}
-													}
 
-													@Override
-													public void onError(
-															Request request,
-															Throwable exception) {
-														// TODO Auto-generated method stub
-														
-													}
-													
-												});
-												//-------------------------------------------
-												int status = response.getStatusCode();
-												 if ((status == 200)||(status == 304)) {
-													 HelloPresenter.selected = viewOrderId;
-													 tree.next(Actions.Next);
-												 }
-												 else {
-													 
-													 final DialogBox warning = new DialogBox();
-														WarningPresenter.I_Display widget = new WarningView();
-														widget.setMessage("Error while editing listing.<br /> Server error " + response.getStatusCode() + " : " + response.getStatusText() + "<br />");
-														widget.getOK().addClickHandler(new ClickHandler(){
+														@Override
+														public void onError(
+																Request request,
+																Throwable exception) {
+															// TODO
+															// Auto-generated
+															// method stub
+
+														}
+
+													});
+											// -------------------------------------------
+											int status = response
+													.getStatusCode();
+											if ((status == 200)
+													|| (status == 304)) {
+												HelloPresenter.selected = viewOrderId;
+												tree.next(Actions.Next);
+											} else {
+
+												final DialogBox warning = new DialogBox();
+												WarningPresenter.I_Display widget = new WarningView();
+												widget.setMessage("Error while editing listing.<br /> Server error "
+														+ response
+																.getStatusCode()
+														+ " : "
+														+ response
+																.getStatusText()
+														+ "<br />");
+												widget.getOK().addClickHandler(
+														new ClickHandler() {
 
 															@Override
-															public void onClick(ClickEvent event) {
-																// TODO Auto-generated method stub
+															public void onClick(
+																	ClickEvent event) {
+																// TODO
+																// Auto-generated
+																// method stub
 																warning.hide();
 																tree.next(Actions.Cancel);
-															}});
-														warning.add(widget.asWidget());
-														warning.setGlassEnabled(true);
-														warning.center();
-//														WarningPresenter warning = new WarningPresenter(new WarningView(), null);
-//														String message = "Error while editing listing.<br /> Server error " + response.getStatusCode() + " : " + response.getStatusText() + "<br />";
-//														warning.setMessage(message);
-//														warning.go(null);
+															}
+														});
+												warning.add(widget.asWidget());
+												warning.setGlassEnabled(true);
+												warning.center();
+												// WarningPresenter warning =
+												// new WarningPresenter(new
+												// WarningView(), null);
+												// String message =
+												// "Error while editing listing.<br /> Server error "
+												// + response.getStatusCode() +
+												// " : " +
+												// response.getStatusText() +
+												// "<br />";
+												// warning.setMessage(message);
+												// warning.go(null);
 
-													 ServerProxy.deleteOrder(
-																viewOrderId, User.SID,
-																new RequestCallback() {
-
-																	@Override
-																	public void onResponseReceived(
-																			Request request,
-																			Response response) {
-																	}
-
-																	@Override
-																	public void onError(
-																			Request request,
-																			Throwable exception) {
-																	}
-																});
-												 }
-													 
-											}
-
-											@Override
-											public void onError(
-													Request request,
-													Throwable exception) {
 												ServerProxy.deleteOrder(
 														viewOrderId, User.SID,
 														new RequestCallback() {
@@ -297,10 +324,33 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 																	Throwable exception) {
 															}
 														});
-
 											}
-										});
-								
+
+										}
+
+										@Override
+										public void onError(Request request,
+												Throwable exception) {
+											ServerProxy.deleteOrder(
+													viewOrderId, User.SID,
+													new RequestCallback() {
+
+														@Override
+														public void onResponseReceived(
+																Request request,
+																Response response) {
+														}
+
+														@Override
+														public void onError(
+																Request request,
+																Throwable exception) {
+														}
+													});
+
+										}
+									});
+
 						}
 
 						@Override
@@ -308,74 +358,83 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 							// TODO Auto-generated method stub
 
 						}
-					});} else {
-						 final DialogBox warning = new DialogBox();
-							WarningPresenter.I_Display widget = new WarningView();
-							widget.setMessage("Error while creating listing.<br /> Server error " + response.getStatusCode() + " : " + response.getStatusText() + "<br />");
-							widget.getOK().addClickHandler(new ClickHandler(){
+					});
+				} else {
+					final DialogBox warning = new DialogBox();
+					WarningPresenter.I_Display widget = new WarningView();
+					widget.setMessage("Error while creating listing.<br /> Server error "
+							+ response.getStatusCode()
+							+ " : "
+							+ response.getStatusText() + "<br />");
+					widget.getOK().addClickHandler(new ClickHandler() {
 
-								@Override
-								public void onClick(ClickEvent event) {
-									// TODO Auto-generated method stub
-									warning.hide();
-									tree.next(Actions.Cancel);
-								}});
-							warning.add(widget.asWidget());
-							warning.setGlassEnabled(true);
-							warning.center();
-//						WarningPresenter warning = new WarningPresenter(new WarningView(), null);
-//						String message = "Error while creating listing.<br /> Server error " + response.getStatusCode() + " : " + response.getStatusText() + "<br />";
-//						warning.setMessage(message);
-//						warning.go(null);
-					}
-					
+						@Override
+						public void onClick(ClickEvent event) {
+							// TODO Auto-generated method stub
+							warning.hide();
+							tree.next(Actions.Cancel);
+						}
+					});
+					warning.add(widget.asWidget());
+					warning.setGlassEnabled(true);
+					warning.center();
+					// WarningPresenter warning = new WarningPresenter(new
+					// WarningView(), null);
+					// String message =
+					// "Error while creating listing.<br /> Server error " +
+					// response.getStatusCode() + " : " +
+					// response.getStatusText() + "<br />";
+					// warning.setMessage(message);
+					// warning.go(null);
+				}
+
 			}
 
 			@Override
 			public void onError(Request request, Throwable exception) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			});
+		});
 
 	}
-	
+
 	private void startCreateOrder() {
 		JSONObject data = new JSONObject();
 		data.put("ownerId", new JSONString(User.id));
 		data.put("ownerId", new JSONString(User.id));
-//		url += "&ownerId=" + User.id;
-//		url += "&daysValid=1";
-//		url += "&product=prl";
-//		url += "&options=fp"; // TODO
-//		String mls = getSuiteInfo(Field.SuiteInfo).getMLS();
-//		url += "&mls_id=" + mls;
-//		url += "&propertyType=suite"; // TODO
-//		url += "&propertyId=" + getSuiteInfo(Field.SuiteInfo).getId();
-//		url += "&sid=" + User.SID;
+		// url += "&ownerId=" + User.id;
+		// url += "&daysValid=1";
+		// url += "&product=prl";
+		// url += "&options=fp"; // TODO
+		// String mls = getSuiteInfo(Field.SuiteInfo).getMLS();
+		// url += "&mls_id=" + mls;
+		// url += "&propertyType=suite"; // TODO
+		// url += "&propertyId=" + getSuiteInfo(Field.SuiteInfo).getId();
+		// url += "&sid=" + User.SID;
 	}
-	
+
 	private void finishCreateOrder() {
-		
+
 	}
-	
+
 	private void startLoadingSuite(String id) {
 		JSONObject data = new JSONObject();
 		data.put("id", new JSONString(id));
 		data.put("sid", new JSONString(User.SID));
 		api.execute(RequestType.GetSuiteInfo, data, this);
 	}
-	
+
 	private void finishLoadingSuite() {
-		
+
 	}
-	
+
 	private void startUpdateSuite() {
-		
+
 	}
-	
+
 	private void finishUpdateSuite() {
-		
+
 	}
 
 	// Data utils
@@ -451,13 +510,13 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 	@Override
 	public void onOK(JSONObject result) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onError() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
