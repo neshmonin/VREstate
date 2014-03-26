@@ -166,10 +166,10 @@ public class AgreementPresenter implements I_Presenter, I_RequestCallback {
 									obj.put("status", new JSONString(
 											"AvailableResale"));
 
-								String mls = getSuiteInfo(Field.SuiteInfo)
-										.getMLS();
-								if (!mls.isEmpty())
-									obj.put("mlsId", new JSONString(mls));
+//								String mls = getSuiteInfo(Field.SuiteInfo)
+//										.getMLS();
+//								if (!mls.isEmpty())
+//									obj.put("mlsId", new JSONString(mls));
 							}
 
 							String url = Options.URL_VRT;
