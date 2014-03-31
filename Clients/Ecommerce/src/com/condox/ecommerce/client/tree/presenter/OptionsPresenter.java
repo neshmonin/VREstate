@@ -17,6 +17,7 @@ public class OptionsPresenter implements I_Presenter {
 		void setPresenter(OptionsPresenter presenter);
 
 		// SuiteInfo setSuiteInfo(SuiteInfo newInfo);
+		void setViewOrderType(EcommerceTree.ListingType type);
 
 		String getMLS();
 
@@ -57,6 +58,7 @@ public class OptionsPresenter implements I_Presenter {
 			display.setStatus(info.getStatus());
 			display.setVirtualTourUrl(info.getVirtualTourURL());
 			display.setMoreInfoUrl(info.getMoreInfoURL());
+			display.setViewOrderType(EcommerceTree.ListingType.values()[tree.getData(Field.ListingType).asInteger()]);
 		}
 		container.clear();
 		container.add(display.asWidget());

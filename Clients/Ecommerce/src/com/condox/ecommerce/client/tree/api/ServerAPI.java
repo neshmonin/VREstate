@@ -369,6 +369,7 @@ public class ServerAPI implements RequestCallback {
 		String url = StringFormatter.format(BASE_URL + "data/suite/{0}?sid={1}", id, sid);
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.PUT, url);
 		builder.setRequestData(data);
+		log("Request data: " + data);
 		execute(builder, callback);
 	}
 	
@@ -435,7 +436,7 @@ public class ServerAPI implements RequestCallback {
 
 	private static void log(String message) {
 		Date date = new Date();
-		DateTimeFormat dtf = DateTimeFormat.getFormat("yyyyMMddHHmmss");
+		DateTimeFormat dtf = DateTimeFormat.getFormat("yyyy/MM/dd HH:mm:ss");
 		GWT.log(dtf.format(date, TimeZone.createTimeZone(0)) + " - " + message);
 	}
 

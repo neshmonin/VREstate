@@ -9,7 +9,11 @@
 		}
 	</ui:style>
 		<g:VerticalPanel width="750px" height="500px" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" styleName="incorrect">
-			<g:Label text="Specify the options for the Interactive 3D Listing" horizontalAlignment="ALIGN_CENTER"/>
+			<g:HorizontalPanel>
+				<g:Label text="Specify the options for the Interactive 3D Listing (" horizontalAlignment="ALIGN_CENTER"/>
+				<g:Label text="New Label" ui:field="listingType"/>
+				<g:Label text=")"/>
+			</g:HorizontalPanel>
 			<g:Cell width="50%">
 				<g:HorizontalPanel spacing="20">
 						<g:VerticalPanel>

@@ -121,6 +121,17 @@ public class SummaryPresenter implements I_Presenter {
 		// -----------------
 		String html = "";
 		html += "<table>";
+		
+		EcommerceTree.ListingType viewOrderType = EcommerceTree.ListingType.values()[tree.getData(Field.ListingType).asInteger()];
+		switch (viewOrderType) {
+		case PRIVATE:
+			html += row("Listing type:", "PRIVATE");
+			break;
+		case PUBLIC:
+			html += row("Listing type:", "PUBLIC");
+			break;
+		}
+		
 		switch (User.role) {
 		case Visitor:
 			html += row("User:", "GUEST");
