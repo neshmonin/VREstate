@@ -102,7 +102,7 @@ public class ProfileStep1Presenter implements I_Presenter, I_RequestCallback {
 	}
 
 	@Override
-	public void onOK(JSONObject result) {
+	public void onSuccess(JSONObject result) {
 		// TODO Auto-generated method stub
 		switch(api.getType()) {
 		case GetUserInfo:
@@ -121,7 +121,7 @@ public class ProfileStep1Presenter implements I_Presenter, I_RequestCallback {
 	}
 
 	@Override
-	public void onError() {
+	public void onError(String message) {
 		// TODO Auto-generated method stub
 		
 	}

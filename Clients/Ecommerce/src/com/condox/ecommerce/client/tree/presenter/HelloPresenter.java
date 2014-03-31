@@ -222,7 +222,7 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 	}
 
 	@Override
-	public void onOK(JSONObject result) {
+	public void onSuccess(JSONObject result) {
 		switch (api.getType()) {
 		case GetUserInfo:
 			// Log.write(result.toString());
@@ -290,7 +290,7 @@ public class HelloPresenter implements I_Presenter, I_HelloPresenter,
 	}
 
 	@Override
-	public void onError() {
+	public void onError(String message) {
 		// TODO Auto-generated method stub
 
 	}

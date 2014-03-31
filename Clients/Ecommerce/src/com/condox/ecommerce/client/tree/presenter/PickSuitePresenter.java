@@ -32,10 +32,10 @@ public class PickSuitePresenter implements I_Presenter {
 
 		Widget asWidget();
 
-//		String getSuiteName();
-//
-//		String getSuiteFloorplan();
-//
+		// String getSuiteName();
+		//
+		// String getSuiteFloorplan();
+		//
 		SuiteInfo getSuiteSelected();
 	}
 
@@ -73,7 +73,8 @@ public class PickSuitePresenter implements I_Presenter {
 					data.add(info);
 				}
 
-//				display.setData(node.getTree().getData(Field.UserRole).asString(), data);
+				// display.setData(node.getTree().getData(Field.UserRole).asString(),
+				// data);
 				display.setData("", data);
 				// CreateTable();
 			}
@@ -112,6 +113,18 @@ public class PickSuitePresenter implements I_Presenter {
 
 	// Data utils
 	private void saveData() {
+		SuiteInfo suite = display.getSuiteSelected();
+		switch (suite.getStatus()) {
+		case AvailableRent:
+		case ResaleAvailable:
+			tree.setData(Field.ListingType, new Data(
+					EcommerceTree.ListingType.PRIVATE.ordinal()));
+			break;
+		default:
+			tree.setData(Field.ListingType, new Data(
+					EcommerceTree.ListingType.PUBLIC.ordinal()));
+			break;
+		}
 		tree.setData(Field.SuiteInfo, new Data(display.getSuiteSelected()));
 	}
 

@@ -7,7 +7,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 
 public class ViewOrderInfo implements I_JSON {
-	
+
 	// {"id":"c30232aa-0abe-43da-898c-00a04f440cb5",
 	// "version":[0,0,0,0,0,52,160,173],
 	// "ownerId":6,
@@ -29,6 +29,7 @@ public class ViewOrderInfo implements I_JSON {
 
 	private String id = null;
 	private boolean enabled = true;
+	private String product = "";
 	private String label = "";
 	private String mls = "";
 	private String url = "";
@@ -56,6 +57,10 @@ public class ViewOrderInfo implements I_JSON {
 
 		result.label = obj.get("label").isString().stringValue();
 
+		if (obj.containsKey("product")
+				&& (obj.get("product").isString() != null))
+			result.product = obj.get("product").isString().stringValue();
+
 		// MLS#
 		if (obj.get("mlsId") != null)
 			if (obj.get("mlsId").isString() != null)
@@ -77,6 +82,10 @@ public class ViewOrderInfo implements I_JSON {
 				result.vt_URL = obj.get("vTourUrl").isString().stringValue();
 
 		return result;
+	}
+
+	public String getProduct() {
+		return product;
 	}
 
 	public String getId() {
@@ -133,9 +142,9 @@ public class ViewOrderInfo implements I_JSON {
 	public void fromJSONObject(JSONObject obj) {
 		targetObjectId = getInteger(obj, "targetObjectId");
 	}
-	
+
 	// Utils
-	
+
 	private int getInteger(JSONObject obj, String key) {
 		if (obj.get(key) != null)
 			if (obj.get(key).isNumber() != null)

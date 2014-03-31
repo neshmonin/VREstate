@@ -201,7 +201,7 @@ public class OrderDetailsPresenter implements I_Presenter,
 	// }
 	//
 	@Override
-	public void onOK(JSONObject result) {
+	public void onSuccess(JSONObject result) {
 		switch (api.getType()) {
 		case GetSuiteInfo:
 			suite.fromJSONObject(result);
@@ -229,7 +229,7 @@ public class OrderDetailsPresenter implements I_Presenter,
 	}
 
 	@Override
-	public void onError() {
+	public void onError(String message) {
 		// TODO Auto-generated method stub
 
 	}
@@ -264,7 +264,13 @@ public class OrderDetailsPresenter implements I_Presenter,
 		html += "Listing: "
 				+ (vieworder.getLabel().isEmpty() ? "&lt;none&gt;" : vieworder
 						.getLabel()) + "<br>";
-		html += "MLS# "
+		
+		if ("PrivateListing".equals(vieworder.getProduct()))
+			html += "Listing type: PRIVATE<br>";
+		else
+			html += "Listing type: PUBLIC<br>";
+
+		html += "MLS#: "
 				+ (vieworder.getMLS().isEmpty() ? "&lt;none&gt;" : vieworder
 						.getMLS()) + "<br>";
 		if (!suite.getStatus().name().isEmpty()) {

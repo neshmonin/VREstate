@@ -1,17 +1,21 @@
 package com.condox.ecommerce.client.tree.api;
 
-import com.condox.clientshared.abstractview.Log;
+import java.util.Date;
+
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User.UserRole;
 import com.condox.clientshared.utils.StringFormatter;
-import com.condox.ecommerce.client.UserInfo;
 import com.condox.ecommerce.client.model.LoginModel;
+import com.condox.ecommerce.client.tree.EcommerceTree;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Timer;
@@ -37,11 +41,11 @@ public class ServerAPI implements RequestCallback {
 		}
 		String uid = loginModel.getUid();
 		String pwd = loginModel.getPwd();
-//		if (uid.isEmpty() && pwd.isEmpty()) {
-//			uid = "web";
-//			pwd = "web";
-//			role = "visitor";
-//		}
+		// if (uid.isEmpty() && pwd.isEmpty()) {
+		// uid = "web";
+		// pwd = "web";
+		// role = "visitor";
+		// }
 		// -----------------------------
 		String url = StringFormatter.format(Options.URL_VRT
 				+ "program?q=login&role={0}&uid={1}&pwd={2}", role, uid, pwd);
@@ -259,12 +263,12 @@ public class ServerAPI implements RequestCallback {
 		busy = false;
 		log(response);
 		if (response.getStatusCode() == 200)
-			this.callback.onOK(JSONParser.parseStrict(response.getText())
+			this.callback.onSuccess(JSONParser.parseStrict(response.getText())
 					.isObject());
 		else if (response.getStatusCode() == 304)
-			this.callback.onOK(new JSONObject());
+			this.callback.onSuccess(new JSONObject());
 		else
-			this.callback.onError();
+			this.callback.onError("");
 		// switch (this.type) {
 		// case GetUserInfo:
 		// this.callback.onOK(JSONParser.parseStrict(response.getText()).isObject());
@@ -291,9 +295,148 @@ public class ServerAPI implements RequestCallback {
 		log("Response text: " + response.getText());
 	}
 
+	// private static void log(String message) {
+	// if (logging)
+	// Log.write(message);
+	// }
+
+	// ===============================================================
+	private final static String BASE_URL = Options.URL_VRT;
+
+	// private final static String BASE_URL = "https://vrt.3dcondox.com/vre/";
+
+	public static void userLogin(UserRole role, String uid, String pwd,
+			final I_RequestCallback callback) {
+		// Role
+		String sRole = "";
+		switch (role) {
+		case Visitor:
+			sRole = "visitor";
+			break;
+		case Agent:
+			sRole = "agent";
+			break;
+		case SuperAdmin:
+			sRole = "superadmin";
+			break;
+		}
+		// https://www.3dcondox.com/vre/program?q=login&uid=web&pwd=web&role=visitor
+		// -----------------------------
+		String url = "";
+		if (uid.isEmpty() && pwd.isEmpty())
+			url = StringFormatter.format(BASE_URL
+					+ "program?q=login&uid={0}&pwd={1}&role={2}", "web", "web",
+					"visitor");
+		else
+			url = StringFormatter.format(BASE_URL
+					+ "program?q=login&uid={0}&pwd={1}&role={2}", uid, pwd,
+					sRole);
+
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, url);
+		execute(builder, callback);
+	}
+
+	public static void registerViewOrder(String ownerId,
+			EcommerceTree.ListingType product, String mlsId, int propertyId,
+			String sid, final I_RequestCallback callback) {
+		
+		String sProduct = "";
+		switch (product) {
+		case PRIVATE:
+			sProduct = "prl";
+			break;
+		case PUBLIC:
+			sProduct = "pul";
+			break;
+		}
+		
+		String url = StringFormatter.format(BASE_URL + "program?q=register"
+				+ "&entity=viewOrder&ownerId={0}" + "&daysValid=1"
+				+ "&product={1}" + "&options=fp" + "&mls_id={2}"
+				+ "&propertyType=suite" + "&propertyId={3}" + "&sid={4}",
+				ownerId, sProduct, mlsId, propertyId, sid);
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, url);
+		execute(builder, callback);
+	}
+	
+	public static void requestSuite(int id, String sid, I_RequestCallback callback) {
+		String url = StringFormatter.format(BASE_URL + "data/suite/{0}?sid={1}", id, sid);
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, url);
+		execute(builder, callback);
+	}
+	
+	public static void updateSuite(int id, String sid, String data, I_RequestCallback callback) {
+		String url = StringFormatter.format(BASE_URL + "data/suite/{0}?sid={1}", id, sid);
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.PUT, url);
+		builder.setRequestData(data);
+		execute(builder, callback);
+	}
+	
+	public static void removeViewOrder(String id, String sid, I_RequestCallback callback) {
+			String url = StringFormatter.format(BASE_URL + "data/viewOrder/{0}?sid={1}",id,sid);
+			RequestBuilder builder = new RequestBuilder(RequestBuilder.DELETE, url);
+			execute(builder, callback);
+	}
+
+	// public static void fetchViewData(ViewType type, String id, String sid,
+	// final I_RequestCallback callback) {
+	// String sType = "";
+	// switch (type) {
+	// case VIEW_ORDER:
+	// sType = "viewOrder";
+	// break;
+	// case SITE:
+	// sType = "site";
+	// break;
+	// }
+	// String url = "";
+	// url = StringFormatter.format(BASE_URL
+	// + "/data/view?type={0}&id={1}&track=true&SID={2}", sType, id,
+	// sid);
+	// RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, url);
+	// execute(builder, callback);
+	// }
+
+	private static void execute(RequestBuilder builder,
+			final I_RequestCallback callback) {
+		builder.setCallback(new RequestCallback() {
+
+			@Override
+			public void onResponseReceived(Request request, Response response) {
+				// TODO Auto-generated method stub
+				log("Response status: " + response.getStatusCode() + ": "
+						+ response.getStatusText());
+				log("Response: " + response.getText());
+				if (response.getStatusCode() != Response.SC_OK)
+					callback.onError(response.getStatusCode() + ":"
+							+ response.getStatusText());
+				else {
+					String json = response.getText();
+					// if (json.isEmpty())
+					JSONObject obj = JSONParser.parseStrict(json).isObject();
+					callback.onSuccess(obj);
+				}
+			}
+
+			@Override
+			public void onError(Request request, Throwable exception) {
+				callback.onError("Some unknown error.");
+			}
+		});
+
+		log("Send: " + builder.getUrl());
+		try {
+			builder.send();
+		} catch (RequestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	private static void log(String message) {
-		if (logging)
-			Log.write(message);
+		Date date = new Date();
+		DateTimeFormat dtf = DateTimeFormat.getFormat("yyyyMMddHHmmss");
+		GWT.log(dtf.format(date, TimeZone.createTimeZone(0)) + " - " + message);
 	}
 
 }

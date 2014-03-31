@@ -350,10 +350,12 @@ public class EcommerceTree {
 		FILTERING_BY_CITY, VirtualTourUrl, MoreInfoUrl // TODO review this
 														// constants
 		,  UserInfo, UsingMLS, BuildingInfo, SuiteInfo, EmailToRecoverPassword,
-		LoginModel
+		LoginModel, ListingType
 		
 
 	}
+	
+	public static enum ListingType {PUBLIC, PRIVATE}
 
 	public void close() {
 		container.clear();

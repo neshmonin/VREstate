@@ -56,10 +56,10 @@ public class HelloView<T> extends Composite implements I_Display, I_Contained {
 					// cb.setValue(value.isEnabled());
 					// cb.setText(str);
 					// sb.appendHtmlConstant(cb.getElement().getString());
-					if (value.isEnabled())
-						sb.appendHtmlConstant("<p style=\"margin:0px;\">" + str
+					if (value.isEnabled()) {
+						sb.appendHtmlConstant("<p style=\"margin:0px;\">" + str + value.getProduct()
 								+ "</p>");
-					else
+					} else
 						sb.appendHtmlConstant("<p style=\"color:lightgrey;margin:0px;\">"
 								+ str + "</p>");
 				}
