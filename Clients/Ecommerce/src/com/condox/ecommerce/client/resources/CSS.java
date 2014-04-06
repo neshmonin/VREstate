@@ -8,8 +8,8 @@ public interface CSS extends ClientBundle {
 
 	public static final CSS Instance = GWT.create(CSS.class);
 
-	@Source("my.css")
+	@Source("Colors.css")
 	@NotStrict
-	My my();
+	Colors colors();
 
 }

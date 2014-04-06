@@ -250,18 +250,18 @@ public class PickSuiteView extends Composite implements IDisplay {
 						&& ((suite.getMLS() == null) || (suite.getMLS()
 								.isEmpty()))) {
 					disabled = " disabled=\"true\" ";
-					style = CSS.Instance.my().suite_disabled();
+					style = CSS.Instance.colors().suite_disabled();
 				} else
 
 					switch (suite.getStatus()) {
 					case ResaleAvailable:
-						style = CSS.Instance.my().suite_resale();
+						style = CSS.Instance.colors().suite_resale();
 						break;
 					case AvailableRent:
-						style = CSS.Instance.my().suite_rent();
+						style = CSS.Instance.colors().suite_rent();
 						break;
 					default:
-						style = CSS.Instance.my().suite_default();
+						style = CSS.Instance.colors().suite_default();
 					}
 
 				result += "<button type=\"button\" class=\"" + style + "\" ";

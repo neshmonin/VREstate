@@ -29,6 +29,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -41,10 +42,13 @@ public class OrderDetailsPresenter implements I_Presenter,
 
 	public interface I_Display {
 		// void setData(List<ViewOrderInfo> data);
+		void setSuiteInfo(SuiteInfo suiteInfo);
+		void setViewOrderInfo(ViewOrderInfo viewOrderInfo);
+		
 		HasClickHandlers getDelete();
 
 		HasValueChangeHandlers<Boolean> getEnabled();
-
+		
 		void setData(ViewOrderInfo info);
 
 		void setData(String html);
@@ -317,7 +321,10 @@ public class OrderDetailsPresenter implements I_Presenter,
 					+ "\" target = \"_blank\">" + vieworder.getMoreInfoUrl()
 					+ "</a>";
 		html += "</div>";
-
+		
+		
+		display.setViewOrderInfo(vieworder);
+		display.setSuiteInfo(suite);
 		display.setData(html);
 
 	}

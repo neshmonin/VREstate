@@ -56,6 +56,12 @@ public class HelloView<T> extends Composite implements I_Display, I_Contained {
 					// cb.setValue(value.isEnabled());
 					// cb.setText(str);
 					// sb.appendHtmlConstant(cb.getElement().getString());
+					
+					if ("PrivateListing".equals(value.getProduct())) {
+						str = str;
+					} else if ("PublicListing".equals(value.getProduct()))
+						str = "<b>" + str + "</b>";
+					
 					if (value.isEnabled()) {
 						sb.appendHtmlConstant("<p style=\"margin:0px;\">" + str + value.getProduct()
 								+ "</p>");

@@ -7,8 +7,12 @@
 			margin-left: 50px;
 			background-color: slateblue;
 		}
+		.bg {
+			color: Blue;
+			background-color: Teal;
+		}
 	</ui:style>
-		<g:VerticalPanel width="750px" height="500px" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" styleName="incorrect">
+		<g:VerticalPanel width="750px" height="500px" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 			<g:HorizontalPanel>
 				<g:Label text="Specify the options for the Interactive 3D Listing (" horizontalAlignment="ALIGN_CENTER"/>
 				<g:Label text="New Label" ui:field="listingType"/>

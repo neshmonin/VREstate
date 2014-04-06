@@ -35,7 +35,7 @@ public class Ecommerce implements EntryPoint, ValueChangeHandler<String> {
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
-		CSS.Instance.my().ensureInjected();
+		CSS.Instance.colors().ensureInjected();
 		Options.Init();
 		History.addValueChangeHandler(this);
 		 History.newItem("login", false);
