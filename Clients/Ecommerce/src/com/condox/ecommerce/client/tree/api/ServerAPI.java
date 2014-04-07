@@ -368,6 +368,7 @@ public class ServerAPI implements RequestCallback {
 	public static void updateSuite(int id, String sid, String data, I_RequestCallback callback) {
 		String url = StringFormatter.format(BASE_URL + "data/suite/{0}?sid={1}", id, sid);
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.PUT, url);
+		builder.setHeader("Content-type", "application/json");
 		builder.setRequestData(data);
 		log("Request data: " + data);
 		execute(builder, callback);

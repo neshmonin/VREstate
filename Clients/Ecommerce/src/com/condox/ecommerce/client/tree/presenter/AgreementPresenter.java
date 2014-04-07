@@ -212,18 +212,6 @@ public class AgreementPresenter implements I_Presenter {
 
 					@Override
 					public void onError(String errMessage) {
-						ServerProxy.deleteOrder(viewOrderId, User.SID, new RequestCallback() {
-							
-							@Override
-							public void onResponseReceived(Request request, Response response) {
-								tree.next(Actions.Cancel);
-							}
-							
-							@Override
-							public void onError(Request request, Throwable exception) {
-								
-							}
-						});
 						// Error message.
 						final DialogBox warning = new DialogBox();
 						WarningPresenter.I_Display widget = new WarningView();
@@ -237,7 +225,19 @@ public class AgreementPresenter implements I_Presenter {
 							@Override
 							public void onClick(ClickEvent event) {
 								warning.hide();
-								tree.next(Actions.Cancel);
+								ServerProxy.deleteOrder(viewOrderId, User.SID, new RequestCallback() {
+									
+									@Override
+									public void onResponseReceived(Request request, Response response) {
+										tree.next(Actions.Cancel);
+									}
+									
+									@Override
+									public void onError(Request request, Throwable exception) {
+										
+									}
+								});
+//								tree.next(Actions.Cancel);
 							}
 						});
 						warning.add(widget.asWidget());
