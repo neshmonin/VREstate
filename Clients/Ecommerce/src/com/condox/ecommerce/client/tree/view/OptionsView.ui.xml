@@ -15,7 +15,9 @@
 		<g:VerticalPanel width="750px" height="500px" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 			<g:Cell verticalAlignment="ALIGN_MIDDLE" width="100%" horizontalAlignment="ALIGN_CENTER">
 				<g:HorizontalPanel horizontalAlignment="ALIGN_CENTER" width="100%" spacing="10">
-				<g:Label text="New Label" ui:field="listingType"/>
+					<g:Cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+						<g:Label text="New Label" ui:field="listingType"/>
+					</g:Cell>
 				<g:Cell horizontalAlignment="ALIGN_RIGHT">
 					<g:Image height="164px" width="194px" ui:field="image"/>
 				</g:Cell>

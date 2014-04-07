@@ -218,11 +218,11 @@ public class OptionsView extends Composite implements I_Display {
 		switch (type) {
 		case PRIVATE:
 			listingType.setText("Specify the options for the Private Listing:");
-			image.setUrl("PrivateListing.png");
+			image.setUrl("images/PrivateListing.png");
 			break;
 		case PUBLIC:
 			listingType.setText("Specify the options for the Public Listing:");
-			image.setUrl("PublicListing.png");
+			image.setUrl("images/PublicListing.png");
 			break;
 		}
 
