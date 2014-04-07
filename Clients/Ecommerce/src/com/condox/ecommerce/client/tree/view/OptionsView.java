@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Image;
 
 public class OptionsView extends Composite implements I_Display {
 
@@ -44,8 +45,8 @@ public class OptionsView extends Composite implements I_Display {
 	TextBox textMLS;
 	@UiField
 	Label priceCaption;
-	@UiField
-	Label listingType;
+	@UiField Image image;
+	@UiField Label listingType;
 
 	interface OptionsViewUiBinder extends UiBinder<Widget, OptionsView> {
 	}
@@ -216,10 +217,12 @@ public class OptionsView extends Composite implements I_Display {
 	public void setViewOrderType(ListingType type) {
 		switch (type) {
 		case PRIVATE:
-			listingType.setText("PRIVATE");
+			listingType.setText("Specify the options for the Private Listing:");
+			image.setUrl("PrivateListing.png");
 			break;
 		case PUBLIC:
-			listingType.setText("PUBLIC");
+			listingType.setText("Specify the options for the Public Listing:");
+			image.setUrl("PublicListing.png");
 			break;
 		}
 

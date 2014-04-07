@@ -19,6 +19,6 @@ public interface Colors extends CssResource {
 	@ClassName("resale-color")
 	String resale_color();
 	
-	@ClassName("Rent-color")
+	@ClassName("rent-color")
 	String rent_color();
 }

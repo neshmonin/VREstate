@@ -61,9 +61,9 @@ suite-default - else buttons (for now - sold)
 } */
 
 .resale-color {
-	color: #66CCFF;
+	background-color: #66CCFF;
 }
 
 .rent-color {
-	color: #FF99FF;
+	background-color: #FF99FF;
 }

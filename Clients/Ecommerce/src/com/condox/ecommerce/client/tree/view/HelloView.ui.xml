@@ -17,12 +17,12 @@
 			</g:HorizontalPanel>
 			<g:HorizontalPanel width="800px" borderWidth="2">
 				<g:VerticalPanel spacing="10" width="300px">
-					<g:ScrollPanel ui:field="scroll" height="400px">
+					<g:ScrollPanel ui:field="scroll">
 						<p1:CellList ui:field="orderList" width="100%" height="100%" />
 					</g:ScrollPanel>
 			</g:VerticalPanel>
-			<g:Cell width="100%">
-				<g:HTMLPanel height="100%" ui:field="details"/>
+			<g:Cell width="100%" height="100%">
+				<g:HTMLPanel ui:field="details" height="400px"/>
 			</g:Cell>
 		</g:HorizontalPanel>
 			<g:HorizontalPanel width="100%" spacing="10">
