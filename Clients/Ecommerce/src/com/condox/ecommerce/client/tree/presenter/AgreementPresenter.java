@@ -219,43 +219,45 @@ public class AgreementPresenter implements I_Presenter {
 
 					@Override
 					public void onError(String errMessage) {
-						// Error message.
-						final DialogBox warning = new DialogBox();
-						WarningPresenter.I_Display widget = new WarningView();
-						if (errMessage.isEmpty())
-							widget.setMessage("Error while updating suite.");
-						else
-							widget.setMessage("Error while updating suite - "
-									+ errMessage);
-						widget.getOK().addClickHandler(new ClickHandler() {
+						if (!errMessage.startsWith("304:")) {
+							// Error message.
+							final DialogBox warning = new DialogBox();
+							WarningPresenter.I_Display widget = new WarningView();
+							if (errMessage.isEmpty())
+								widget.setMessage("Error while updating suite.");
+							else
+								widget.setMessage("Error while updating suite - "
+										+ errMessage);
+							widget.getOK().addClickHandler(new ClickHandler() {
 
-							@Override
-							public void onClick(ClickEvent event) {
-								warning.hide();
-								ServerProxy.deleteOrder(viewOrderId, User.SID,
-										new RequestCallback() {
+								@Override
+								public void onClick(ClickEvent event) {
+									warning.hide();
+									ServerProxy.deleteOrder(viewOrderId,
+											User.SID, new RequestCallback() {
 
-											@Override
-											public void onResponseReceived(
-													Request request,
-													Response response) {
-												tree.next(Actions.Cancel);
-											}
+												@Override
+												public void onResponseReceived(
+														Request request,
+														Response response) {
+													tree.next(Actions.Cancel);
+												}
 
-											@Override
-											public void onError(
-													Request request,
-													Throwable exception) {
+												@Override
+												public void onError(
+														Request request,
+														Throwable exception) {
 
-											}
-										});
-								// tree.next(Actions.Cancel);
-							}
-						});
-						warning.add(widget.asWidget());
-						warning.setGlassEnabled(true);
-						warning.center();
+												}
+											});
+									// tree.next(Actions.Cancel);
+								}
+							});
+							warning.add(widget.asWidget());
+							warning.setGlassEnabled(true);
+							warning.center();
 
+						}
 					}
 				});
 	}
