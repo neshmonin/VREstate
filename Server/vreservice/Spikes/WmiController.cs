@@ -26,6 +26,7 @@ namespace Vre.Server.Spikes
 		private void thread()
 		{
 			int errcnt = 0;
+			Thread.CurrentThread.Name = "WMICTL#" + Thread.CurrentThread.ManagedThreadId.ToString();
 
 			while (!_stopEvent.WaitOne(10000))
 			{

@@ -1,8 +1,9 @@
 @ECHO OFF
 
 
-SET devenv="C:\Program Files\Microsoft Visual Studio 10.0\Common7\IDE\devenv.exe"
-SET git="C:\Program Files\GIT\bin\git.exe"
+SET devenv="%VS100COMNTOOLS%..\IDE\devenv.exe"
+SET git=git.exe
+SET curDir=%~dp0
 
 
 
@@ -35,6 +36,11 @@ IF ERRORLEVEL 1 GOTO devenvFailed
 ECHO Packaging...
 CALL setup\prepare.bat
 IF ERRORLEVEL 1 GOTO packagingFailed
+
+REM For quick FTP upload:
+CD /D "%curDir%"
+COPY setup\ready\arc\binaries.zip .
+
 PAUSE
 EXIT 0
 

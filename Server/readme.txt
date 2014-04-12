@@ -6,7 +6,7 @@ Server building readme
 I. Prerequisites
 ----------------
 
-1. Windows XP SP3+; Windows 7 may also be used; not verified.
+1. Windows XP SP3+; Windows 7; x86 or x64
 
 2. Microsoft .NET Framework 4.0 Full Profile
 
