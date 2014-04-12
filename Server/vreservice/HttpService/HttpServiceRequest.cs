@@ -141,6 +141,8 @@ namespace Vre.Server.HttpService
                 DataStreamContentType = null;
                 DataPhysicalLocation = null;
                 RedirectionUrl = null;
+				HoldResponseForServerPush = false;
+				ClientCaching = true;
                 _respImpl = respImpl;
                 _responseProc = proc;
             }
@@ -151,6 +153,7 @@ namespace Vre.Server.HttpService
             public Stream DataStream { get; private set; }
             public string DataPhysicalLocation { get; set; }
             public bool HoldResponseForServerPush { get; set; }
+			public bool ClientCaching { get; set; }
             public string RedirectionUrl { get; set; }
             public void ProcessResponse() { _responseProc(_respImpl, this, null); }
             public void ProcessResponse(Exception ex) { _responseProc(_respImpl, this, ex); }

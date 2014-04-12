@@ -53,6 +53,8 @@ namespace Vre.Server.RemoteService
 
             getPathElements(request.Request.Path, out mo, out objectId, out strObjectId);
 
+			request.Response.ClientCaching = false;  // no data read requests should be cached
+
             csrq = retrieveChangeSubscriptionRequest(request.Request.Query);
             includeDeleted = request.Request.Query.GetParam("withdeleted", false);
 
