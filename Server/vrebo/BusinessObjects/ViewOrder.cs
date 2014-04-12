@@ -98,6 +98,29 @@ namespace Vre.Server.BusinessLogic
             MarkUpdated();
         }
 
+		public bool IsTargeting(UpdateableBase target)
+		{
+			switch (TargetObjectType)
+			{
+				case SubjectType.Building:
+					{
+						var t = target as Building;
+						if (null == t) return false;
+						return (t.AutoID == TargetObjectId);
+					}
+
+				case SubjectType.Suite:
+					{
+						var t = target as Suite;
+						if (null == t) return false;
+						return (t.AutoID == TargetObjectId);
+					}
+
+				default:
+					return false;
+			}
+		}
+
         public ViewOrder(ClientData data)
             : base(data)
         {

@@ -9,7 +9,7 @@ using Vre.Server.Dao;
 
 namespace Vre.Server.RemoteService
 {
-    internal class AddressHelper
+    internal static class AddressHelper
     {
         private static readonly List<string> _streetSuffixDictionaryUri = new List<string>
         {
@@ -308,5 +308,44 @@ namespace Vre.Server.RemoteService
             if (result.Length > 0) return result.Substring(0, result.Length - 2);  // trim trailing comma
             else return string.Empty;
         }
-    }
+
+		public static string GetReadableAddress(this Building b)
+		{
+			return ConvertToReadableAddress(b, null);
+		}
+
+		public static string GetReadableAddress(this Suite s)
+		{
+			return ConvertToReadableAddress(s.Building, s);
+		}
+
+		public static bool IsSameAddress(this Building b, Building other)
+		{
+			bool aeq = addressElementLooseEqual(b.Country, other.Country)
+				&& addressElementLooseEqual(b.StateProvince, other.StateProvince)
+				&& addressElementLooseEqual(b.City, other.City)
+				&& addressElementLooseEqual(b.AddressLine1, other.AddressLine1)
+				&& addressElementLooseEqual(b.AddressLine2, other.AddressLine2);
+			return aeq || b.Location.IsEqual(other.Location, 3.0);
+		}
+
+		/// <summary>
+		/// Loose address element comparison. Assumes any element being null as missing information and thus potentially equal.
+		/// </summary>
+		private static bool addressElementLooseEqual(string left, string right)
+		{
+			if (!string.IsNullOrEmpty(left))
+			{
+				if (!string.IsNullOrEmpty(right)) 
+					return left.Equals(right, StringComparison.InvariantCultureIgnoreCase);
+			}
+			return true;
+		}
+
+		public static bool IsSameAddress(this Suite s, Suite other)
+		{
+			return (s.Building.IsSameAddress(other.Building) 
+				&& (s.SuiteName.Equals(other.SuiteName, StringComparison.InvariantCultureIgnoreCase)));
+		}
+	}
 }

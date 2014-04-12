@@ -22,6 +22,16 @@ namespace Vre.Server.Dao
 				.List<ViewOrder>();
 		}
 
+		//public IList<ViewOrder> GetByNonImportedMlsId(string mlsId)
+		//{
+		//    return _session.CreateQuery(
+		//        "FROM Vre.Server.BusinessLogic.ViewOrder WHERE MlsId=:id "
+		//        + "AND Deleted=0 AND Enabled=1 AND ExpiresOn>:ex AND Imported=0")
+		//        .SetString("id", mlsId)
+		//        .SetDateTime("ex", DateTime.UtcNow)
+		//        .List<ViewOrder>();
+		//}
+
 		public IList<ViewOrder> GetByImportedMlsId(string mlsId)
 		{
 			return _session.CreateQuery(
@@ -228,5 +238,11 @@ AND s.BuildingID=:bid").AddEntity(typeof(ViewOrder))
                 return new KeyValuePair<Guid, string>((Guid)tuple[0]/*Guid.Parse(tuple[0] as string)*/, tuple[1] as string);
             }
         }
-    }
+
+		public IList<string> GetAllActiveMlsIds()
+		{
+			return _session.CreateSQLQuery("SELECT DISTINCT vo.[MlsId] FROM [ViewOrders] vo WHERE vo.[Deleted]=0 AND vo.[Enabled]=1 AND vo.[MlsId] IS NOT NULL AND vo.[MlsId]<>''")
+				.List<string>();
+		}
+	}
 }

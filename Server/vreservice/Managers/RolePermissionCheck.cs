@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Vre.Server.RemoteService;
+using Vre.Server.Dao;
 namespace Vre.Server.BusinessLogic
 {
     internal static class RolePermissionCheck
@@ -163,7 +164,18 @@ namespace Vre.Server.BusinessLogic
                 throw new PermissionException("This operation is allowed to superadmins and estate developer admins only.");
             }
         }
-        #endregion
+
+		public static bool CheckLimitedUpdateSuite(ClientSession session, Suite target)
+		{
+			if (session.User.UserRole == User.Role.SuperAdmin) return false;
+
+			bool isOwner;
+			using (var dao = new ViewOrderDao(session.DbSession))
+				isOwner = dao.GetActive(session.User.AutoID, ViewOrder.SubjectType.Suite, target.AutoID) != null;
+
+			return isOwner;
+		}
+		#endregion
 
         #region users
         public enum UserInfoAccessLevel : int

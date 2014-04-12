@@ -1898,7 +1898,7 @@ namespace Vre.Server.RemoteService
 	                    if (!suite.UpdateFromClient(suiteData)) continue;
 	                    try
 	                    {
-		                    if (manager.UpdateSuite(suite))
+		                    if (true)//manager.UpdateSuite(suite))
 		                    {
 			                    updatedCnt++;
 
@@ -1945,38 +1945,41 @@ namespace Vre.Server.RemoteService
 		private static void updateSuite(ClientSession session, int suiteId, ClientData data, IResponseData resp)
 		{
 			bool updated = false;
-			Suite suite;
+			bool unauthorizedChange = false;
 
-			using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session))
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
 			{
-				using (SiteManager manager = new SiteManager(session))
-				{
-					suite = manager.GetSuiteById(suiteId);
-
-					var price = suite.CurrentPrice;
-					if (suite.UpdateFromClient(data))
-					{
-						if (manager.UpdateSuite(suite))
-						{
-							if (suite.CurrentPrice.HasValue && 
-								(!price.HasValue || (suite.CurrentPrice.Value.CompareTo(price.Value) != 0)))
-								manager.LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice));
-
-							updated = true;
-						}
-					}
-
-				}  // using SiteManager
+				using (var manager = new SiteManager(session))
+					updated = manager.UpdateSuite(suiteId, data, out unauthorizedChange);
 
 				if (updated) tran.Commit();
 				else tran.Rollback();
 			}  // transaction
 
-			// make sure building information is refreshed
-			session.DbSession.Refresh(suite);
+			setTriStateUpdateResponse(resp, updated, unauthorizedChange);
+		}
 
-			resp.ResponseCode = updated ? HttpStatusCode.OK : HttpStatusCode.NotModified;
-			resp.Data = new ClientData { { "updated", updated ? 1 : 0 } };
+		private static void setTriStateUpdateResponse(IResponseData resp, bool updated, bool unauthorizedChange)
+		{
+			resp.Data = new ClientData();
+			if (updated)
+			{
+				if (unauthorizedChange)
+				{
+					resp.ResponseCode = HttpStatusCode.Unauthorized;
+					resp.ResponseCodeDescription = "Some changes were not applied";
+				}
+				else
+				{
+					resp.ResponseCode = HttpStatusCode.OK;
+				}
+				resp.Data.Add("updated", 1);
+			}
+			else
+			{
+				resp.ResponseCode = HttpStatusCode.NotModified;
+				resp.Data.Add("updated", 0);
+			}
 		}
 
 		private static void updateUser(ClientSession session, int userId, ClientData data, IResponseData resp)
@@ -2062,6 +2065,8 @@ namespace Vre.Server.RemoteService
         private static void updateViewOrder(ClientSession session, ServiceQuery query, string strObjectId, ClientData data, IResponseData resp)
         {
             string paymentSystemRefId = query["pr"];
+			bool unauthorizedChange;
+			bool updated;
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
@@ -2071,8 +2076,6 @@ namespace Vre.Server.RemoteService
                 using (UserDao dao = new UserDao(session.DbSession))
                     owner = dao.GetById(viewOrder.OwnerId);
 
-				bool unauthorizedChange = false;
-				bool updated = false;
 				if (RolePermissionCheck.CheckLimitedUpdateViewOrder(session, owner))
 				{
 					updated = viewOrder.UpdateFromClient(data, new[] { "enabled" }, out unauthorizedChange);
@@ -2080,6 +2083,7 @@ namespace Vre.Server.RemoteService
 				else
 				{
 					RolePermissionCheck.CheckUpdateViewOrder(session, owner);
+					unauthorizedChange = false;
 					updated = viewOrder.UpdateFromClient(data);
 				}
 
@@ -2115,30 +2119,12 @@ namespace Vre.Server.RemoteService
 					//}
 
                     ReflectViewOrderStatusInTarget(viewOrder, session.DbSession);
-
-					if (unauthorizedChange)
-					{
-						resp.ResponseCode = HttpStatusCode.Unauthorized;
-						resp.ResponseCodeDescription = "Some changes were not applied";
-					}
-					else
-					{
-						resp.ResponseCode = HttpStatusCode.OK;
-					}
-                    resp.Data = new ClientData();
                     //resp.Data.Add("ref", ft.SystemRefId);
-                    resp.Data.Add("updated", 1);
                 }
-                else
-                {
-                    resp.ResponseCode = HttpStatusCode.NotModified;
-                    resp.Data = new ClientData();
-                    resp.Data.Add("updated", 0);
-                }
-
                 tran.Commit();
             }
-        }
+			setTriStateUpdateResponse(resp, updated, unauthorizedChange);
+		}
 		
 		private static void updateBrokerage(ClientSession session, int itemId, ClientData data, IResponseData resp)
 		{

@@ -201,6 +201,7 @@
     <Compile Include="PaymentSystemProc\PayPalResponseHandler.cs" />
     <Compile Include="RemoteService\EventService.cs" />
     <Compile Include="RemoteService\PaymentSystemResponseService.cs" />
+    <Compile Include="RemoteService\RequestParameters.cs" />
     <Compile Include="Spikes\WmiController.cs" />
     <Compile Include="Tasks\BaseTask.cs" />
     <Compile Include="Tasks\GenerateImportSettings.cs" />
