@@ -138,19 +138,42 @@ namespace Vre.Server.BusinessLogic
             }
         }
 
-        public bool UpdateSuite(Suite suite)
+		public bool UpdateSuite(int suiteId, ClientData data, out bool unauthorizedChange)
         {
-            RolePermissionCheck.CheckUpdateSuite(_session, suite);
+			Suite suite;
+			using (SuiteDao dao = new SuiteDao(_session.DbSession))
+			{
+				suite = dao.GetById(suiteId);
+				if (null == suite) throw new FileNotFoundException("Suite does not exist.");
+			}
 
-            using (SuiteDao dao = new SuiteDao(_session.DbSession))
-            {
-                bool result = dao.SafeUpdate(suite);
-                if (result)
-                    ServiceInstances.Logger.Info("User ID={0} updated suite ID={1} ({2}, {3}).",
-                        _session.User.AutoID, suite.AutoID,
-                        suite.SuiteName, suite.Building);
-                return result;
-            }
+			bool result = false;
+			if (RolePermissionCheck.CheckLimitedUpdateSuite(_session, suite))
+			{
+				result = suite.UpdateFromClient(data, new[] { "currentPrice" }, out unauthorizedChange);
+			}
+			else
+			{
+				RolePermissionCheck.CheckUpdateSuite(_session, suite);
+				unauthorizedChange = false;
+				result = suite.UpdateFromClient(data);
+			}
+
+			var price = suite.CurrentPrice;
+			if (result)
+			{
+				using (var dao = new SuiteDao(_session.DbSession)) dao.SafeUpdate(suite);
+
+				if (suite.CurrentPrice.HasValue &&
+					(!price.HasValue || (suite.CurrentPrice.Value.CompareTo(price.Value) != 0)))
+					LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice));
+
+				ServiceInstances.Logger.Info("User ID={0} updated suite ID={1} ({2}, {3}).",
+					_session.User.AutoID, suite.AutoID,
+					suite.SuiteName, suite.Building);
+			}
+
+            return result;
         }
 
         public bool UpdateBuilding(Building building)
@@ -304,18 +327,20 @@ namespace Vre.Server.BusinessLogic
         }
 
 		public string ImportUpdateExistingViewOrders(ICollection<string> activeItems, ICollection<MlsItem> newItems, 
-			bool importOnly)
+			bool importOnly, out string salesNotification)
 		{
 			var issues = new StringBuilder();
+			var salesMsg = new StringBuilder();
 			int add = 0, adj = 0, skp = 0, err = 0;
 			List<string> updatedMlsInfos = new List<string>();
 
 			ServiceInstances.Logger.Info("Got {0} items to check.", newItems.Count);
 
-			IDictionary<Guid, string> voIds;
-			using (var vodao = new ViewOrderDao(_session.DbSession))
-				// TODO: MLS provider filter injection point
-				voIds = vodao.GetAllActiveIdsAndMlsIdV2();
+			IList<string> activeMlsNums, stubMlsNums;
+			using (var dao = new ViewOrderDao(_session.DbSession))
+				activeMlsNums = dao.GetAllActiveMlsIds();
+			using (var dao = new MlsInfoDao(_session.DbSession))
+				stubMlsNums = dao.GetStubNumbers();
 
 			foreach (var item in newItems)
 			{
@@ -323,7 +348,7 @@ namespace Vre.Server.BusinessLogic
 
 				try
 				{
-					if (!voIds.Values.Contains(item.MlsId))
+					if (!activeMlsNums.Contains(item.MlsId))  // unknown item
 					{
 						if (string.IsNullOrEmpty(item.StreetNumber))
 						{
@@ -342,15 +367,84 @@ namespace Vre.Server.BusinessLogic
 								ImportListing(item, results, ref err, ref skp, ref add, ref issues, ref updatedMlsInfos);
 						}
 					}
-					else if (!importOnly)
+					else if (stubMlsNums.Contains(item.MlsId))  // known, but stub data (number only)
+					{
+						if (string.IsNullOrEmpty(item.StreetNumber))  // no address; rely on Agent's selection?
+						{
+							IEnumerable<UpdateableBase> results;
+							var owners = gatherViewOrderInfosByMlsId(item.MlsId, out results);
+
+							var msg = string.Format(
+								"MLS#{0} lists incomplete address ({1}); stub item upgraded to normal without verification; ViewOrder owner list:\r\n{2}.",
+								item.MlsId, item.CompiledAddress, owners);
+							ServiceInstances.Logger.Warn(msg);
+							salesMsg.AppendLine(msg);
+							//issues.AppendFormat("MLS#{0} lists incomplete address ({1}); not processed.\r\n",
+							//    item.MlsId, item.CompiledAddress);
+
+							// TODO: generate imported ViewOrder???
+							// Generate imported ViewOrder to create a permanent target-MLS# link
+							ImportListing(item, results, ref err, ref skp, ref add, ref issues, ref updatedMlsInfos);
+						}
+						else  // try searching by address
+						{
+							IEnumerable<UpdateableBase> results = FindMlsItemTarget(item, issues);
+							if (null == results)
+							{
+								var owners = gatherViewOrderInfosByMlsId(item.MlsId, out results);
+
+								var msg = string.Format(
+									"MLS#{0} lists unknown address ({1}); stub item upgraded to normal without verification; ViewOrder owner list:\r\n{2}.",
+									item.MlsId, item.CompiledAddress, owners);
+								ServiceInstances.Logger.Warn(msg);
+								salesMsg.AppendLine(msg);
+
+								// TODO: generate imported ViewOrder???
+								// Generate imported ViewOrder to create a permanent target-MLS# link
+								ImportListing(item, results, ref err, ref skp, ref add, ref issues, ref updatedMlsInfos);
+							}
+							else
+							{
+								using (var dao = new ViewOrderDao(_session.DbSession))
+								{
+									foreach (var vo in dao.GetByMlsId(item.MlsId))
+									{
+										var votarget = vo.GetTarget(_session.DbSession);
+										foreach (var r in results)
+										{
+											if (!votarget.Equals(r) && !isSameTarget(votarget, r))
+											{
+												User owner;
+												using (var udao = new UserDao(_session.DbSession)) owner = udao.GetById(vo.OwnerId);
+												
+												var msg = string.Format(
+													"MLS#{0} lists address ({1}); resolved address is ({2}); stub item created by {4} references ({3}) instead."
+													+ " Stub MLS item upgraded; no additional actions taken.",
+													item.MlsId, item.CompiledAddress, getReadableTargetAddress(r),
+													getReadableTargetAddress(votarget),
+													owner);
+												ServiceInstances.Logger.Error(msg);
+												salesMsg.AppendLine(msg);
+											}
+											// TODO: generate imported ViewOrder???
+											// Generate imported ViewOrder to create a permanent target-MLS# link
+											ImportListing(item, new[] { r }, ref err, ref skp, ref add, ref issues, ref updatedMlsInfos);
+										}
+									}
+								}
+							}
+						}
+						updateMlsInfo(item, updatedMlsInfos);
+					}
+					else if (!importOnly)   // known item
 					{
 						// such approach is required as we can have N View Orders for one MLS#
-						foreach (var id in voIds.Keys)
+						using (var dao = new ViewOrderDao(_session.DbSession))
 						{
-							if (voIds[id].Equals(item.MlsId))
+							foreach (var vo in dao.GetByMlsId(item.MlsId))
 							{
-								voId = id;
-								UpdateViewOrderInfo(item, voId, ref skp, ref err, ref adj, ref updatedMlsInfos);
+  								voId = vo.AutoID;
+								UpdateViewOrderInfo(item, vo, ref skp, ref err, ref adj, ref updatedMlsInfos);
 							}
 						}
 					}
@@ -371,7 +465,63 @@ namespace Vre.Server.BusinessLogic
 
 			if (err > 0) issues.AppendFormat("Total {0} listing processing errors.", err);
 
+			salesNotification = salesMsg.ToString();
 			return issues.ToString();
+		}
+
+		private static bool isSameTarget(UpdateableBase left, UpdateableBase right)
+		{
+			Suite sleft = left as Suite;
+			if (sleft != null)
+			{
+				Suite sright = right as Suite;
+				if (sright != null) return sleft.IsSameAddress(sright);
+			}
+			Building bleft = left as Building;
+			if (bleft != null)
+			{
+				Building bright = right as Building;
+				if (bright != null) return bleft.IsSameAddress(bright);
+			}
+			return false;
+		}
+
+		private static string getReadableTargetAddress(UpdateableBase target)
+		{
+			Suite s = target as Suite;
+			if (s != null) return s.GetReadableAddress();
+
+			Building b = target as Building;
+			if (b != null) return b.GetReadableAddress();
+
+			return "<unknown target type>";
+		}
+
+		private string gatherViewOrderInfosByMlsId(string mlsId, out IEnumerable<UpdateableBase> targets)
+		{
+			StringBuilder result = new StringBuilder();
+			var tresult = new List<UpdateableBase>();
+			using (var vdao = new ViewOrderDao(_session.DbSession))
+			{
+				using (var udao = new UserDao(_session.DbSession))
+				{
+					foreach (var vo in vdao.GetByMlsId(mlsId)) //.Foreach(vo => ownerList.Add(vo.OwnerId));
+					{
+						var t = vo.GetTarget(_session.DbSession);
+						if (!tresult.Contains(t)) tresult.Add(t);
+
+						Suite s = t as Suite;
+						if (s != null) result.Append(s.GetReadableAddress());
+						Building b = t as Building;
+						if (b != null) result.Append(b.GetReadableAddress());
+
+						result.Append(" -> ");
+						result.Append(udao.GetById(vo.OwnerId).ToString());
+					}
+				}
+			}
+			targets = tresult;
+			return result.ToString();
 		}
 
 		public string RetroImportExistingViewOrders(ICollection<MlsItem> newItems, int buildingId,
@@ -520,21 +670,17 @@ namespace Vre.Server.BusinessLogic
 			return issues.ToString();
 		}
 
-		private void UpdateViewOrderInfo(MlsItem item, Guid voId,
+		private void UpdateViewOrderInfo(MlsItem item, ViewOrder vo,
 			ref int skp, ref int err, ref int adj, ref List<string> updatedMlsInfos)
 		{
 			using (var tran = NHibernateHelper.OpenNonNestedTransaction(_session.DbSession))
 			{
 				var changed = false;
 
-				ViewOrder vo;
-				using (var vodao = new ViewOrderDao(_session.DbSession))
-					vo = vodao.GetById(voId);
-
 				if ((null == vo) || (vo.TargetObjectType != ViewOrder.SubjectType.Suite))
 				{
 					ServiceInstances.Logger.Warn("MLS#{0} Existing VOID={1} references a non-suite; skipped.",
-						item.MlsId, voId);
+						item.MlsId, vo.AutoID);
 					skp++;
 					// TODO: add support for buildings
 					return;
@@ -657,7 +803,7 @@ namespace Vre.Server.BusinessLogic
 
 					suite.CurrentPrice = new Money(Convert.ToDecimal(item.CurrentPrice), Currency.Cad); // TODO: Currently locked to CAD
 					LogNewSuitePrice(suite, (float)item.CurrentPrice);
-					
+
 					switch (item.SaleLeaseState)
 					{
 						case MlsItem.SaleLease.Lease:
@@ -680,11 +826,7 @@ namespace Vre.Server.BusinessLogic
 				}
 
 				// Import extra information
-				if (!updatedMlsInfos.Contains(item.MlsId))
-				{
-					ImportUpdateMlsInfo(item, false);
-					updatedMlsInfos.Add(item.MlsId);
-				}
+				updateMlsInfo(item, updatedMlsInfos);
 	
 				ServiceInstances.Logger.Info("Imported MLS#{0} for {1} ({2}); VOID={3}",
 					item.MlsId, ed.Name, item.CompiledAddress, vo.AutoID);
@@ -700,6 +842,15 @@ namespace Vre.Server.BusinessLogic
 			}
 
 			return result;
+		}
+
+		private void updateMlsInfo(MlsItem item, List<string> updatedMlsInfos)
+		{
+			if (!updatedMlsInfos.Contains(item.MlsId))
+			{
+				ImportUpdateMlsInfo(item, false);
+				updatedMlsInfos.Add(item.MlsId);
+			}
 		}
 
 		private IEnumerable<UpdateableBase> FindMlsItemTarget(MlsItem item, StringBuilder issues)

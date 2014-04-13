@@ -1,26 +1,26 @@
 package com.condox.ecommerce.client.tree.presenter;
 
+import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.GET;
 import com.condox.clientshared.communication.Options;
-import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
-import com.condox.ecommerce.client.ServerProxy;
 import com.condox.ecommerce.client.UserInfo;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
+import com.condox.ecommerce.client.tree.view.WarningView;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ChangingPasswordPresenter implements I_Presenter {
 
-	public static interface I_Display extends I_Contained {
+	public static interface I_Display {
 		void setPresenter(ChangingPasswordPresenter presenter);
 
 		void setResult(int result);
@@ -32,7 +32,7 @@ public class ChangingPasswordPresenter implements I_Presenter {
 	private EcommerceTree tree = null;
 
 	@Override
-	public void go(final I_Container container) {
+	public void go(final HasWidgets container) {
 		Data data = tree.getData(Field.UserInfo);
 		if (data != null) {
 			UserInfo info = new UserInfo();
@@ -48,17 +48,25 @@ public class ChangingPasswordPresenter implements I_Presenter {
 				@Override
 				public void onResponseReceived(Request request,
 						Response response) {
+					if (response.getStatusCode() != 200) {
+						WarningPresenter warning = new WarningPresenter(new WarningView(), null);
+						String message = "Status code: " + response.getStatusCode() + "<br />";
+						message += "Status text: " + response.getStatusText() + "<br />";
+						message += "Response text: " + response.getText();
+						warning.setMessage(message);
+						warning.go(null);
+					} else {
+					Log.write(response.getStatusText());
 					 display.setResult(0);
 					 container.clear();
-					 container.add((I_Contained)display);
+					 container.add(display.asWidget());
 					// TODO Auto-generated method stub
-					
+					}
 				}
 
 				@Override
 				public void onError(Request request, Throwable exception) {
-					// TODO Auto-generated method stub
-					
+					new WarningPresenter(new WarningView(), null).go(null);
 				}});
 		}
 

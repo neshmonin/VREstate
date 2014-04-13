@@ -1,0 +1,16 @@
+    <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+    <ui:UiBinder
+    xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    >
+     
+    <g:FlowPanel styleName="volume" ui:field="volume">
+    <g:FlowPanel styleName="volume-knob" ui:field="volume_knob"/>
+    <g:FlowPanel styleName="progress-bar" ui:field="progress_bar">
+    <g:FlowPanel styleName="l-bar" ui:field="l_bar"/>
+    <g:FlowPanel styleName="l-bar-fon" ui:field="l_bar_fon"/>
+    <g:FlowPanel styleName="r-bar" ui:field="r_bar"/>
+    <g:FlowPanel styleName="r-bar-fon" ui:field="r_bar_fon"/>
+    </g:FlowPanel>
+    </g:FlowPanel>
+    </ui:UiBinder> 

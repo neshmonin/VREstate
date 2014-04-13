@@ -1,0 +1,69 @@
+/* 
+suite-resale - for resale buttons
+suite-rent - for rent buttons
+suite-default - else buttons (for now - sold) 
+ */
+.suite-disabled {
+	height: 25px;
+	color: grey;
+	background-color: silver;
+}
+
+.suite-resale {
+	height: 25px;
+/* 	color: blue; */
+	background-color: #66CCFF;
+}
+
+/* .suite-resale:hover {
+	height: 25px;
+	color: blue;
+	background-color: aqua;
+}
+
+.suite-resale:active {
+	height: 50px;
+	color: blue;
+	background-color: aqua;
+} */
+
+.suite-rent {
+	height: 25px;
+/* 	color: 000000; */
+	background-color: #FF99FF;
+}
+
+/* .suite-rent:hover {
+	height: 50px;
+	color: purple;
+	background-color: fuchsia;
+}
+
+.suite-rent:active {
+	height: 50px;
+	color: purple;
+	background-color: fuchsia;
+} */
+
+.suite-default {
+	height: 25px;
+/* 	background-color: red; */
+}
+
+/* .suite-default:hover {
+	height: 50px;
+	background-color: red;
+}
+
+.suite-default:active {
+	height: 50px;
+	background-color: red;
+} */
+
+.resale-color {
+	background-color: #66CCFF;
+}
+
+.rent-color {
+	background-color: #FF99FF;
+}

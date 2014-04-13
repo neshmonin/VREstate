@@ -194,10 +194,56 @@ namespace Vre.Server.BusinessLogic
             SuiteName = data.UpdateProperty("name", SuiteName, ref changed);
             ShowPanoramicView = data.UpdateProperty("showPanoramicView", ShowPanoramicView, ref changed);
             Status = data.UpdateProperty("status", Status, ref changed);
+			updatePrice(data, ref changed);
+
+			return changed;
+        }
+
+		public virtual bool UpdateFromClient(ClientData data, ICollection<string> availableFields, out bool changesSkipped)
+		{
+			changesSkipped = false;
+			bool result = base.UpdateFromClient(data);
+
+			if (availableFields.Contains("levelNumber")) PhysicalLevelNumber = data.UpdateProperty("levelNumber", PhysicalLevelNumber, ref result);
+			else if (data.GetProperty("levelNumber", 0) != PhysicalLevelNumber) changesSkipped = true;
+
+			if (availableFields.Contains("name")) SuiteName = data.UpdateProperty("name", SuiteName, ref result);
+			else if (data.GetProperty("name", string.Empty) != SuiteName) changesSkipped = true;
+
+			if (availableFields.Contains("showPanoramicView")) ShowPanoramicView = data.UpdateProperty("showPanoramicView", ShowPanoramicView, ref result);
+			else if (data.GetProperty("showPanoramicView", false) != ShowPanoramicView) changesSkipped = true;
+
+			if (availableFields.Contains("status")) Status = data.UpdateProperty("status", Status, ref result);
+			else if (data.GetProperty<SalesStatus>("status", SalesStatus.Available) != Status) changesSkipped = true;
+
+			if (availableFields.Contains("currentPrice"))
+			{
+				updatePrice(data, ref result);
+			}
+			else
+			{
+				if (CurrentPrice.HasValue)
+				{
+					if (!CurrentPrice.Value.Equals(new Money(
+							data.GetProperty("currentPrice", Convert.ToDecimal(CurrentPrice.Value)),
+							CurrentPrice.Value.Currency)))
+						changesSkipped = true;
+				}
+				else
+				{
+					if (data.GetProperty("currentPrice", -1.0m) > 0.0m) changesSkipped = true;
+				}
+			}
+
+			return result;
+		}
+
+		private void updatePrice(ClientData data, ref bool result)
+		{
 			if (CurrentPrice.HasValue)
 			{
 				CurrentPrice = new Money(
-					data.UpdateProperty("currentPrice", Convert.ToDecimal(CurrentPrice.Value), ref changed),
+					data.UpdateProperty("currentPrice", Convert.ToDecimal(CurrentPrice.Value), ref result),
 					CurrentPrice.Value.Currency);
 			}
 			else
@@ -210,14 +256,12 @@ namespace Vre.Server.BusinessLogic
 						c = Currency.Cad;
 
 					CurrentPrice = new Money(value, c);
-					changed = true;
+					result = true;
 				}
 			}
-
-			return changed;
-        }
-
-        public override string ToString()
+		}
+		
+		public override string ToString()
         {
             return SuiteName;
         }

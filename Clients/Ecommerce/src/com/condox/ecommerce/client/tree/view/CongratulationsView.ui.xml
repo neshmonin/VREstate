@@ -8,20 +8,21 @@
 			background-color: slateblue;
 		}
 		.big-text {
-			font-size: 24px;
 		}
 	</ui:style>
-	<g:VerticalPanel width="100%" height="100%"
+	<g:VerticalPanel
 		horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 		<g:VerticalPanel >
-			<g:VerticalPanel spacing="5" width="300px">
-				<g:Cell horizontalAlignment="ALIGN_CENTER">
-					<g:HTML wordWrap="true" height="200px" ui:field="htmlSummary" styleName="{style.big-text}">-New ViewOrder created- <br/><br/><br/>The Invoice and the link has been sent to your  email address.</g:HTML>
-				</g:Cell>
+			<g:VerticalPanel spacing="10" width="402px">
+				<g:HorizontalPanel spacing="20">
+					<g:Image width="120px" height="120px" url="images/Successfull.png"/>
+					<g:HTML wordWrap="true" ui:field="htmlSummary">The Interactive 3D Listing created successfully.<br />
+The detailed confirmation message has been sent to your primary email.</g:HTML>
+				</g:HorizontalPanel>
 				<g:HorizontalPanel width="100%"
 					horizontalAlignment="ALIGN_CENTER">
 					<g:Cell verticalAlignment="ALIGN_MIDDLE" horizontalAlignment="ALIGN_CENTER">
-						<g:Button ui:field="buttonCancel" text="Back to your account">Cancel</g:Button>
+						<g:Button ui:field="buttonCancel" width="75px">Close</g:Button>
 					</g:Cell>
 				</g:HorizontalPanel>
 			</g:VerticalPanel>

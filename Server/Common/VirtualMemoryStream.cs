@@ -55,14 +55,14 @@ namespace Vre
 
 		public override void Flush() { }
 
-		public void CopyTo(Stream destination)
+		public new void CopyTo(Stream destination)
 		{
 			long remaining = (_length - Position);
 			destination.Write(_field, (int)(_headOffset + Position), (int)remaining);
 			Position = _length;
 		}
 
-		public void CopyTo(Stream destination, int bufferSize)
+		public new void CopyTo(Stream destination, int bufferSize)
 		{
 			long remaining;
 			do

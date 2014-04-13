@@ -17,8 +17,9 @@ public class ForgotPasswordView extends Composite implements I_Display {
 
 	private static ForgotPasswordViewUiBinder uiBinder = GWT
 			.create(ForgotPasswordViewUiBinder.class);
-	@UiField TextBox textUserEmail;
-	@UiField Button button;
+	@UiField TextBox login;
+	@UiField Button close;
+	@UiField Button submit;
 
 	interface ForgotPasswordViewUiBinder extends UiBinder<Widget, ForgotPasswordView> {
 	}
@@ -34,24 +35,23 @@ public class ForgotPasswordView extends Composite implements I_Display {
 		this.presenter = presenter;
 	}
 
-	@UiHandler("buttonEnter")
-	void onButtonEnterClick(ClickEvent event) {
-		if (presenter != null)
-			presenter.onSubmit();
+	@Override
+	public String getLogin() {
+		return login.getValue();
 	}
 
 	@Override
-	public String getEmail() {
-		return textUserEmail.getValue();
+	public void setLogin(String value) {
+		login.setValue(value);
 	}
-
-	@Override
-	public void setEmail(String value) {
-		textUserEmail.setValue(value);
-	}
-	@UiHandler("button")
-	void onButtonClick(ClickEvent event) {
+	@UiHandler("close")
+	void onCloseClick(ClickEvent event) {
 		if (presenter != null)
 			presenter.onClose();
+	}
+	@UiHandler("submit")
+	void onSubmitClick(ClickEvent event) {
+		if (presenter != null)
+			presenter.onSubmit();
 	}
 }

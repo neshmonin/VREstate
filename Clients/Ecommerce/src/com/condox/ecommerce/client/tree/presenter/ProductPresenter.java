@@ -1,9 +1,9 @@
 package com.condox.ecommerce.client.tree.presenter;
 
-import com.condox.clientshared.container.I_Container;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
 
 public class ProductPresenter implements I_Presenter {
 
@@ -39,7 +39,7 @@ public class ProductPresenter implements I_Presenter {
 //	}
 
 	@Override
-	public void go(I_Container container) {
+	public void go(HasWidgets container) {
 //		String productType = EcommerceTree.get(Field.ProductType).asString();
 //		display.setListing(productType != "Layout");
 //		display.setPrivate(productType == "ListingPrivate");

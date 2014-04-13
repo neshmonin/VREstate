@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Vre.Server.RemoteService;
+using Vre.Server.Dao;
 namespace Vre.Server.BusinessLogic
 {
     internal static class RolePermissionCheck
@@ -163,7 +164,18 @@ namespace Vre.Server.BusinessLogic
                 throw new PermissionException("This operation is allowed to superadmins and estate developer admins only.");
             }
         }
-        #endregion
+
+		public static bool CheckLimitedUpdateSuite(ClientSession session, Suite target)
+		{
+			if (session.User.UserRole == User.Role.SuperAdmin) return false;
+
+			bool isOwner;
+			using (var dao = new ViewOrderDao(session.DbSession))
+				isOwner = dao.GetActive(session.User.AutoID, ViewOrder.SubjectType.Suite, target.AutoID) != null;
+
+			return isOwner;
+		}
+		#endregion
 
         #region users
         public enum UserInfoAccessLevel : int
@@ -1041,14 +1053,22 @@ namespace Vre.Server.BusinessLogic
             throw new PermissionException("This operation is not allowed.");
         }
 
-        public static bool CheckUpdateViewOrder(ClientSession session, User targetUser)
+        public static bool CheckUpdateViewOrder(ClientSession session, User owner)
         {
-            return CheckCreateViewOrder(session, targetUser, null);  // same permissions
+            return CheckCreateViewOrder(session, owner, null);  // same permissions
         }
 
-        public static void CheckDeleteViewOrder(ClientSession session, User targetUser)
+		public static bool CheckLimitedUpdateViewOrder(ClientSession session, User owner)
+		{
+			return (session.User.Equals(owner) && session.User.UserRole != User.Role.SuperAdmin);
+		}
+
+        public static void CheckDeleteViewOrder(ClientSession session, User owner)
         {
-            CheckCreateViewOrder(session, targetUser, null);  // same permissions
+			// owner can delete
+			if (session.User.Equals(owner)) return;
+
+            CheckCreateViewOrder(session, owner, null);  // same permissions
         }
         #endregion
 

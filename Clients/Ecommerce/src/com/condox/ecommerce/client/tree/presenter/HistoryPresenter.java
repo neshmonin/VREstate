@@ -6,8 +6,6 @@ import java.util.List;
 import com.condox.clientshared.communication.GET;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User;
-import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.document.BuildingInfo;
 import com.condox.clientshared.document.HistoryTransactionInfo;
 import com.condox.clientshared.document.SuiteInfo;
@@ -21,11 +19,12 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class HistoryPresenter implements I_Presenter, I_GetHistoryHandler  {
 
-	public static interface I_Display extends I_Contained {
+	public static interface I_Display {
 		void setPresenter(HistoryPresenter presenter);
 
 		void setHistoryTransactions(List<HistoryTransactionInfo> transactions);
@@ -42,9 +41,9 @@ public class HistoryPresenter implements I_Presenter, I_GetHistoryHandler  {
 	private List<HistoryTransactionInfo> transactions = new ArrayList<HistoryTransactionInfo>();
 
 	@Override
-	public void go(I_Container container) {
+	public void go(HasWidgets container) {
 		container.clear();
-		container.add((I_Contained) display);
+		container.add(display.asWidget());
 
 		String url = Options.URL_VRT;
 		url += "data/ft?";
@@ -62,7 +61,7 @@ public class HistoryPresenter implements I_Presenter, I_GetHistoryHandler  {
 		if (obj.containsKey("transactions"))
 			if (obj.get("transactions").isArray() != null) {
 				JSONArray items = obj.get("transactions").isArray();
-				for (int i = 0; i < 100/* items.size() */; i++) {
+				for (int i = 0; i < Math.min(100, items.size()); i++) {
 					HistoryTransactionInfo transaction = HistoryTransactionInfo
 							.fromJSON(items.get(i).isObject());
 					transactions.add(transaction);

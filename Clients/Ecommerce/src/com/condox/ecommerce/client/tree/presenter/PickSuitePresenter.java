@@ -7,7 +7,6 @@ import com.condox.clientshared.communication.GET;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.document.BuildingInfo;
 import com.condox.clientshared.document.SuiteInfo;
 import com.condox.clientshared.tree.Data;
@@ -22,6 +21,7 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class PickSuitePresenter implements I_Presenter {
@@ -32,10 +32,10 @@ public class PickSuitePresenter implements I_Presenter {
 
 		Widget asWidget();
 
-//		String getSuiteName();
-//
-//		String getSuiteFloorplan();
-//
+		// String getSuiteName();
+		//
+		// String getSuiteFloorplan();
+		//
 		SuiteInfo getSuiteSelected();
 	}
 
@@ -73,7 +73,8 @@ public class PickSuitePresenter implements I_Presenter {
 					data.add(info);
 				}
 
-//				display.setData(node.getTree().getData(Field.UserRole).asString(), data);
+				// display.setData(node.getTree().getData(Field.UserRole).asString(),
+				// data);
 				display.setData("", data);
 				// CreateTable();
 			}
@@ -90,9 +91,9 @@ public class PickSuitePresenter implements I_Presenter {
 	}
 
 	@Override
-	public void go(I_Container container) {
+	public void go(HasWidgets container) {
 		container.clear();
-		container.add(display);
+		container.add(display.asWidget());
 		updateData();
 	}
 
@@ -112,6 +113,18 @@ public class PickSuitePresenter implements I_Presenter {
 
 	// Data utils
 	private void saveData() {
+		SuiteInfo suite = display.getSuiteSelected();
+		switch (suite.getStatus()) {
+		case AvailableRent:
+		case ResaleAvailable:
+			tree.setData(Field.ListingType, new Data(
+					EcommerceTree.ListingType.PRIVATE.ordinal()));
+			break;
+		default:
+			tree.setData(Field.ListingType, new Data(
+					EcommerceTree.ListingType.PUBLIC.ordinal()));
+			break;
+		}
 		tree.setData(Field.SuiteInfo, new Data(display.getSuiteSelected()));
 	}
 

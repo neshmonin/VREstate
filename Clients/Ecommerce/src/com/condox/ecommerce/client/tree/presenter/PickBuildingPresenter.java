@@ -1,13 +1,13 @@
 package com.condox.ecommerce.client.tree.presenter;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.GET;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User;
-import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
 import com.condox.clientshared.document.BuildingInfo;
 import com.condox.clientshared.tree.Data;
 import com.condox.ecommerce.client.I_Presenter;
@@ -20,12 +20,14 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 public class PickBuildingPresenter implements I_Presenter {
 
-	public interface IDisplay extends I_Contained {
+	public interface IDisplay {
 		
 		void setPresenter(PickBuildingPresenter presenter);
 
@@ -56,6 +58,7 @@ public class PickBuildingPresenter implements I_Presenter {
 			@Override
 			public void onResponseReceived(Request request, Response response) {
 				String json = response.getText();
+				Log.write(json);
 				JSONObject obj = JSONParser.parseStrict(json).isObject();
 				JSONArray arr = obj.get("buildings").isArray();
 
@@ -84,14 +87,17 @@ public class PickBuildingPresenter implements I_Presenter {
 	}
 
 	@Override
-	public void go(I_Container container) {
+	public void go(HasWidgets container) {
 		container.clear();
-		container.add(display);
-		Data data = tree.getData(Field.FILTERING_BY_CITY);
-		if (data != null) {
-			String filterCity = data.Value;
-			display.setFilterCity(filterCity);
-		}
+		container.add(display.asWidget());
+		String city = Cookies.getCookie("city");
+		if (city != null)
+			display.setFilterCity(city);
+//		Data data = tree.getData(Field.FILTERING_BY_CITY);
+//		if (data != null) {
+//			String filterCity = data.Value;
+//			display.setFilterCity(filterCity);
+//		}
 		updateData();
 	}
 //
@@ -122,6 +128,8 @@ public class PickBuildingPresenter implements I_Presenter {
 
 	public void selectSuite(BuildingInfo object) {
 		if (object != null) {
+			Cookies.setCookie("city", display.getFilterCity(),
+					new Date(new Date().getTime() + 1000 * 60 * 60 * 24));
 			// TODO add validation
 //			tree.setData(Field.BuildingId, new Data(object.getId()));
 //			tree.setData(Field.BuildingName, new Data(object.getName()));

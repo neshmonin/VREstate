@@ -8,33 +8,33 @@
 			background-color: slateblue;
 		}
 	</ui:style>
-	<g:VerticalPanel width="100%" height="100%"
+	<g:VerticalPanel width="750px" height="500px"
 		horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
-		<g:VerticalPanel>
-			<g:VerticalPanel spacing="5" width="300px" height="200px">
-				<g:HorizontalPanel spacing="20">
-					<g:Label text="Published with MLS?"/>
+		<g:HorizontalPanel spacing="20">
+					<g:Label text="Please either specify the MLS# for your listing, or, if you do not remember it, provide the address" ui:field="label"/>
 				</g:HorizontalPanel>
-				<g:VerticalPanel spacing="10">
-					<g:RadioButton name="new name" text="MLS#" ui:field="rbMLS"/>
-					<g:Cell horizontalAlignment="ALIGN_RIGHT">
-						<g:SuggestBox ui:field="sbMLS"/>
-					</g:Cell>
-					<g:RadioButton name="new name" text="This is a private listing, so let&apos;s submit all info manually" checked="true" ui:field="rbAddress"/>
+		<g:VerticalPanel spacing="25" width="100%">
+			<g:RadioButton name="new name" text="Use MLS#" ui:field="rbMLS"/>
+			<g:HorizontalPanel width="30%" horizontalAlignment="ALIGN_RIGHT">
+				<g:VerticalPanel horizontalAlignment="ALIGN_CENTER" spacing="5">
+					<g:SuggestBox ui:field="sbMLS"/>
+					<g:Label text="(sample - C1234567)"/>
 				</g:VerticalPanel>
-				<g:Cell verticalAlignment="ALIGN_BOTTOM">
-					<g:HorizontalPanel width="100%">
+			</g:HorizontalPanel>
+					<g:RadioButton name="new name" text="Do not remember the MLS# - let&apos;s use the address." checked="true" ui:field="rbAddress"/>
+				</g:VerticalPanel>
+		<g:Cell verticalAlignment="ALIGN_BOTTOM">
+			<g:HorizontalPanel width="100%" spacing="10">
 						<g:Cell width="50%" verticalAlignment="ALIGN_MIDDLE">
 							<g:Button text="Cancel" ui:field="buttonCancel" width="75px"/>
 						</g:Cell>
-						<g:HorizontalPanel spacing="5">
+						<g:Cell horizontalAlignment="ALIGN_RIGHT">
+							<g:HorizontalPanel spacing="5">
 							<g:Button width="75px" ui:field="buttonPrev" text="&lt;&lt; Prev">Prev</g:Button>
 							<g:Button text="Next &gt;&gt;" ui:field="buttonNext" width="75px"/>
 						</g:HorizontalPanel>
+						</g:Cell>
 					</g:HorizontalPanel>
-				</g:Cell>
-
-			</g:VerticalPanel>
-		</g:VerticalPanel>
+		</g:Cell>
 	</g:VerticalPanel>
 </ui:UiBinder> 

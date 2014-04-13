@@ -171,66 +171,26 @@ namespace Vre.Server.RemoteService
 			{
 				using (var tran = NHibernateHelper.OpenNonNestedTransaction(dbSession))
 				{
-					ViewOrder voProduct = null;
-					User productOwner = null;
-
 					ReverseRequest rr = null;
 					using (var dao = new ReverseRequestDao(dbSession))
 						rr = dao.GetById(UniversalId.ExtractAsGuid(response.ProductId));
+
 					if (null != rr)
 					{
-						if (rr.Request != ReverseRequest.RequestType.ViewOrderActivation)
-						{
-							ServiceInstances.PaymentLogger.Error("Invalid Reverse Request type: {0}", rr.Request);
-							ServiceInstances.Logger.Error("Invalid Reverse Request type: {0}", rr.Request);
-							throw new ArgumentException("Product ID is not valid.");
+                        switch (rr.Request)
+                        {
+                            case ReverseRequest.RequestType.ViewOrderActivation:
+                                processViewOrderActivation(handler, response, dbSession, rr);
+                                break;
+
+                            // TODO: Add account payments here
+
+                            default:
+							    ServiceInstances.PaymentLogger.Error("Invalid Reverse Request type: {0}", rr.Request);
+							    ServiceInstances.Logger.Error("Invalid Reverse Request type: {0}", rr.Request);
+							    throw new ArgumentException("Product ID is not valid.");
 						}
 
-						using (var dao = new ViewOrderDao(dbSession))
-							voProduct = dao.GetById(new Guid(rr.Subject));
-
-						if (voProduct != null)
-							using (var dao = new UserDao(dbSession))
-								productOwner = dao.GetById(voProduct.OwnerId);
-
-						if (response.Succeed)
-						{
-							processPayment(handler, response, dbSession, rr, voProduct, productOwner);
-						}
-						else
-						{
-							if ((voProduct != null) && (productOwner != null))
-							{
-								sendFailureMessage(dbSession, voProduct, productOwner,
-									response.SystemReferenceNumber, response.NetAmount + response.Taxes,
-									"Payment system responded with failure: probably transaction was rejected.");
-								sendSalesFailureMessage(dbSession,
-									voProduct, productOwner,
-									handler.SystemName,
-									response.SystemReferenceNumber, response.NetAmount + response.Taxes,
-									"Payment system responded with failure: probably transaction was rejected.");
-
-								ServiceInstances.Logger.Error(
-									"Payment system {0} (product={1}, payment reference={2}) response: {3}; payment not processed; message sent.",
-									handler.SystemName,
-									response.ProductId, response.SystemReferenceNumber,
-									response.StatusDescription);
-							}
-							else
-							{
-								sendSalesFailureMessage(dbSession,
-									voProduct, productOwner,
-									handler.SystemName,
-									response.SystemReferenceNumber, response.NetAmount + response.Taxes,
-									"Payment system responded with failure: probably transaction was rejected.");
-
-								ServiceInstances.Logger.Error(
-									"Payment system {0} (product={1}, payment reference={2}) response: {3}; payment not processed; message NOT sent.",
-									handler.SystemName,
-									response.ProductId, response.SystemReferenceNumber,
-									response.StatusDescription);
-							}
-						}
 
 						tran.Commit();
 					}  // reverse request found
@@ -241,6 +201,59 @@ namespace Vre.Server.RemoteService
 				}
 			}
 		}
+
+        private static void processViewOrderActivation(IPaymentSystemResponseHandler handler, PaymentResponse response, 
+            NHibernate.ISession dbSession, ReverseRequest rr)
+        {
+            ViewOrder voProduct = null;
+            User productOwner = null;
+
+            using (var dao = new ViewOrderDao(dbSession))
+                voProduct = dao.GetById(new Guid(rr.Subject));
+
+            if (voProduct != null)
+                using (var dao = new UserDao(dbSession))
+                    productOwner = dao.GetById(voProduct.OwnerId);
+
+            if (response.Succeed)
+            {
+                processPayment(handler, response, dbSession, rr, voProduct, productOwner);
+            }
+            else
+            {
+                if ((voProduct != null) && (productOwner != null))
+                {
+                    sendFailureMessage(dbSession, voProduct, productOwner,
+                        response.SystemReferenceNumber, response.NetAmount + response.Taxes,
+                        "Payment system responded with failure: probably transaction was rejected.");
+                    sendSalesFailureMessage(dbSession,
+                        voProduct, productOwner,
+                        handler.SystemName,
+                        response.SystemReferenceNumber, response.NetAmount + response.Taxes,
+                        "Payment system responded with failure: probably transaction was rejected.");
+
+                    ServiceInstances.Logger.Error(
+                        "Payment system {0} (product={1}, payment reference={2}) response: {3}; payment not processed; message sent.",
+                        handler.SystemName,
+                        response.ProductId, response.SystemReferenceNumber,
+                        response.StatusDescription);
+                }
+                else
+                {
+                    sendSalesFailureMessage(dbSession,
+                        voProduct, productOwner,
+                        handler.SystemName,
+                        response.SystemReferenceNumber, response.NetAmount + response.Taxes,
+                        "Payment system responded with failure: probably transaction was rejected.");
+
+                    ServiceInstances.Logger.Error(
+                        "Payment system {0} (product={1}, payment reference={2}) response: {3}; payment not processed; message NOT sent.",
+                        handler.SystemName,
+                        response.ProductId, response.SystemReferenceNumber,
+                        response.StatusDescription);
+                }
+            }
+        }
 
 		private static void processPayment(IPaymentSystemResponseHandler handler, PaymentResponse response,
 			NHibernate.ISession dbSession, 

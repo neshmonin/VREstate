@@ -2,6 +2,7 @@ package com.condox.vrestate.client.tree;
 
 import com.condox.clientshared.container.I_Contained;
 import com.condox.clientshared.container.I_Container;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -45,6 +46,11 @@ public class PopupContainer implements I_Container {
 			popup.hide();
 		else
 			popup.center();
+	}
+
+	@Override
+	public void add(Composite child) {
+		
 	}
 
 }

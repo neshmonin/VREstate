@@ -4,7 +4,6 @@ import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.DELETE;
 import com.condox.clientshared.communication.Options;
 import com.condox.clientshared.communication.User;
-import com.condox.ecommerce.client.Ecommerce.Modes;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -101,20 +100,20 @@ public class ServerProxy {
 	}
 
 	// Recover forgotted password
-	public static void recoverPassword(String id, final RequestCallback callback) {
-		Log.write("Recover forgotted password:");
-		String url = Options.URL_VRT + "program?q=recover"
-				+ "&role=sellingagent&uid=" + id;
-		GET(url, null, callback);
-	}
+//	public static void recoverPassword(String id, final RequestCallback callback) {
+//		Log.write("Recover forgotted password:");
+//		String url = Options.URL_VRT + "program?q=recover"
+//				+ "&role=sellingagent&uid=" + id;
+//		GET(url, null, callback);
+//	}
 
-	// Get user info
-	public static void getUserInfo(String id, String sid,
-			final RequestCallback callback) {
-		Log.write("Get User info:");
-		String url = Options.URL_VRT + "data/user/" + id + "?sid=" + sid;
-		GET(url, null, callback);
-	}
+//	// Get user info
+//	public static void getUserInfo(String id, String sid,
+//			final RequestCallback callback) {
+//		Log.write("Get User info:");
+//		String url = Options.URL_VRT + "data/user/" + id + "?sid=" + sid;
+//		GET(url, null, callback);
+//	}
 
 	// Set user info
 	public static void setUserInfo(String id, String info, String sid,
@@ -124,14 +123,14 @@ public class ServerProxy {
 		PUT(url, info, callback);
 	}
 
-	// Get orders list
-	public static void getOrdersList(String user_id, String sid,
-			final RequestCallback callback) {
-		Log.write("Get Orders list:");
-		String url = Options.URL_VRT + "data/viewOrder?userId=" + user_id
-				+ "&ed=Resale" + "&verbose=true" + "&sid=" + sid;
-		GET(url, null, callback);
-	}
+//	// Get orders list
+//	public static void getOrdersList(String user_id, String sid,
+//			final RequestCallback callback) {
+//		Log.write("Get Orders list:");
+//		String url = Options.URL_VRT + "data/viewOrder?userId=" + user_id
+//				+ "&ed=Resale" + "&verbose=true" + "&sid=" + sid;
+//		GET(url, null, callback);
+//	}
 	
 	// Delete order
 		public static void deleteOrder(String order_id, String sid,

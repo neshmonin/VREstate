@@ -15,5 +15,11 @@ namespace Vre.Server.Dao
 				.SetString("num", num)
 				.UniqueResult<MlsInfo>();
 		}
+
+		public IList<string> GetStubNumbers()
+		{
+			return _session.CreateSQLQuery("SELECT mi.[MlsNum] FROM [MlsInfo] mi WHERE mi.[Deleted]=0 AND mi.[RawInfo]='{}'")
+				.List<string>();
+		}
     }
 }

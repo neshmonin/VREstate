@@ -14,7 +14,7 @@
 					<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT">
 						<g:Button width="25px" height="25px" text="X" ui:field="buttonClose"/>
 					</g:HorizontalPanel>
-					<g:Label text="Change Login Email" horizontalAlignment="ALIGN_CENTER"/>
+					<g:Label text="Change Primary Email" horizontalAlignment="ALIGN_CENTER"/>
 					<g:HorizontalPanel width="100%" spacing="10">
 						<g:VerticalPanel>
 							<g:Label text="New Email"/>

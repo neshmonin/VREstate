@@ -277,9 +277,9 @@ namespace Vre.Server.BusinessLogic
         public override string ToString()
         {
             if (EstateDeveloperID != null)
-                return string.Format("ID={0},r={1},ED={2}", AutoID, UserRole, EstateDeveloperID);
+				return string.Format("ID={0},r={1},ED={2},e={3}", AutoID, UserRole, EstateDeveloperID, PrimaryEmailAddress);
             else
-                return string.Format("ID={0},r={1},e={2}", AutoID, UserRole, PrimaryEmailAddress);
+				return string.Format("ID={0},r={1},e={2}", AutoID, UserRole, PrimaryEmailAddress);
         }
 
         public void Debit(decimal units)

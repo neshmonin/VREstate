@@ -2,8 +2,8 @@ package com.condox.ecommerce.client.tree.view;
 
 import com.condox.clientshared.communication.User;
 import com.condox.clientshared.communication.User.UserRole;
-import com.condox.clientshared.document.SuiteInfo;
 import com.condox.clientshared.document.SuiteInfo.Status;
+import com.condox.ecommerce.client.tree.EcommerceTree.ListingType;
 import com.condox.ecommerce.client.tree.presenter.OptionsPresenter;
 import com.condox.ecommerce.client.tree.presenter.OptionsPresenter.I_Display;
 import com.google.gwt.core.client.GWT;
@@ -14,9 +14,12 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Image;
 
 public class OptionsView extends Composite implements I_Display {
 
@@ -40,6 +43,10 @@ public class OptionsView extends Composite implements I_Display {
 	TextBox textMoreInfoUrl;
 	@UiField
 	TextBox textMLS;
+	@UiField
+	Label priceCaption;
+	@UiField Image image;
+	@UiField Label listingType;
 
 	interface OptionsViewUiBinder extends UiBinder<Widget, OptionsView> {
 	}
@@ -63,26 +70,33 @@ public class OptionsView extends Composite implements I_Display {
 				price = Math.max(price, 0);
 				textPrice.setValue("" + price);
 				boolean valid_sale_price = (!rbForSale.getValue() || price > 10000);
-				boolean valid_rent_price = (!rbForRent.getValue() || price < 10000 && price > 0);
-//				textPrice.setStyleDependentName("incorrect", !(valid_sale_price && valid_rent_price));
+				boolean valid_rent_price = (!rbForRent.getValue() || price < 10000
+						&& price > 0);
+				// textPrice.setStyleDependentName("incorrect",
+				// !(valid_sale_price && valid_rent_price));
 				boolean valid = valid_sale_price && valid_rent_price;
+				valid &= (textMLS.getValue().isEmpty() || textMLS.getValue()
+						.matches("[A-Z]{1,1}[0-9]{7,7}"));
 				buttonNext.setEnabled(valid);
-				
-			}};
+				priceCaption.setText(rbForRent.getValue() ? "Price, $/m"
+						: "Price, $");
+
+			}
+		};
 		validate.scheduleRepeating(100);
 	}
 
 	@Override
 	public void setPresenter(OptionsPresenter presenter) {
 		this.presenter = presenter;
-		boolean usingMLS = presenter.isUsingMLS();
-		if (usingMLS) {
-			rbForRent.setEnabled(false);
-			rbForSale.setEnabled(false);
-			textMLS.setReadOnly(true);
-			textPrice.setReadOnly(true);
-		}
-		
+//		boolean usingMLS = presenter.isUsingMLS();
+		// if (usingMLS) {
+		// rbForRent.setEnabled(false);
+		// rbForSale.setEnabled(false);
+		// textMLS.setReadOnly(true);
+		// textPrice.setReadOnly(true);
+		// }
+
 		if (User.role.equals(UserRole.Visitor)) {
 			textMLS.setEnabled(false);
 			rbForRent.setEnabled(false);
@@ -143,6 +157,12 @@ public class OptionsView extends Composite implements I_Display {
 	@Override
 	public void setMLS(String newMLS) {
 		textMLS.setValue(newMLS);
+		if (!getMLS().isEmpty()) {
+			rbForRent.setEnabled(false);
+			rbForSale.setEnabled(false);
+			textMLS.setEnabled(false);
+			textPrice.setEnabled(false);
+		}
 	}
 
 	@Override
@@ -191,6 +211,21 @@ public class OptionsView extends Composite implements I_Display {
 		textMoreInfoUrl.setValue(newUrl);
 		if (textMoreInfoUrl.getValue().isEmpty())
 			textMoreInfoUrl.setValue("http://");
+	}
+
+	@Override
+	public void setViewOrderType(ListingType type) {
+		switch (type) {
+		case PRIVATE:
+			listingType.setText("Specify the options for the Private Listing:");
+			image.setUrl("images/PrivateListing.png");
+			break;
+		case PUBLIC:
+			listingType.setText("Specify the options for the Public Listing:");
+			image.setUrl("images/PublicListing.png");
+			break;
+		}
+
 	}
 
 }

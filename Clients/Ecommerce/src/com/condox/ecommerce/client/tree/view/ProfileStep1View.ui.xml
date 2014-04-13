@@ -15,34 +15,31 @@
 		horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 		<g:VerticalPanel>
 			<g:VerticalPanel spacing="5" width="370px">
-				<g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT">
-					<g:Button text="x" ui:field="buttonClose"/>
-				</g:HorizontalPanel>
-				<g:Label text="Step 1: Your Contact Info (how people will see it...)" horizontalAlignment="ALIGN_LEFT" />
+				<g:Label text="Your Contact Info (how people will see it...)" horizontalAlignment="ALIGN_LEFT" />
 				<g:HorizontalPanel width="100%">
 					<g:Cell width="50%">
 						<g:VerticalPanel spacing="5">
 						<g:Label text="First Name*"/>
-						<g:TextBox ui:field="textFirstName"/>
+						<g:TextBox ui:field="firstName"/>
 					</g:VerticalPanel>
 					</g:Cell>
 					<g:Cell width="50%">
 						<g:VerticalPanel spacing="5">
 						<g:Label text="Last Name"/>
-						<g:TextBox ui:field="textLastName"/>
+						<g:TextBox ui:field="lastName"/>
 					</g:VerticalPanel>
 					</g:Cell>
 				</g:HorizontalPanel>
 				<g:HorizontalPanel width="100%">
 					<g:VerticalPanel spacing="5" width="100%">
 						<g:Label text="eMail*"/>
-						<g:TextBox width="349px" ui:field="textEmail"/>
+						<g:TextBox width="349px" ui:field="email"/>
 					</g:VerticalPanel>
 				</g:HorizontalPanel>
 				<g:HorizontalPanel width="100%">
 					<g:VerticalPanel spacing="5">
 						<g:Label text="Phone"/>
-						<g:TextBox ui:field="textPhone"/>
+						<g:TextBox ui:field="phone"/>
 					</g:VerticalPanel>
 				</g:HorizontalPanel>
 				<g:HorizontalPanel width="100%"

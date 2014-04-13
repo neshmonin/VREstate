@@ -178,7 +178,7 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
-        public static ReverseRequest CreatePasswordRecover(int userId, DateTime expiresOn,
+        public static ReverseRequest CreatePasswordRecover(int userId, string login, DateTime expiresOn,
             string refParamName, string refParamValue)
         {
             ReverseRequest result = new ReverseRequest();
@@ -188,7 +188,7 @@ namespace Vre.Server.BusinessLogic
             result.RequestCounter = 0;
             result.LastRequestTime = _minimalTime;
             result.UserId = userId;
-            result.Login = null;
+            result.Login = login;
             result.Subject = null;
             result.ReferenceParamName = refParamName;
             result.ReferenceParamValue = refParamValue;

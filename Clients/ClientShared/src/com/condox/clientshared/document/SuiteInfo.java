@@ -64,20 +64,34 @@ public class SuiteInfo implements I_JSON {
 	public void fromJSONObject(JSONObject obj) {
 		backup = obj;
 		id = (int) obj.get("id").isNumber().doubleValue();
-		buildingId = (int) obj.get("buildingId").isNumber().doubleValue();
-		name = obj.get("name").isString().stringValue();
-		level_number = (int) obj.get("levelNumber").isNumber().doubleValue();
+		// -------------
+		if (obj.get("buildingId") != null)
+			if (obj.get("buildingId").isNumber() != null)
+				buildingId = (int) obj.get("buildingId").isNumber()
+						.doubleValue();
+
+		if ((obj.containsKey("name") && (obj.get("name").isString() != null)))
+			name = obj.get("name").isString().stringValue();
+
+		if ((obj.containsKey("levelNumber") && (obj.get("levelNumber")
+				.isNumber() != null)))
+			level_number = (int) obj.get("levelNumber").isNumber()
+					.doubleValue();
+
 		floor_name = obj.get("floorName").isString().stringValue();
 
 		// TODO
 		try {
 			virtualTourURL = obj.get("vTourUrl").isString().stringValue();
 			moreInfoURL = obj.get("infoUrl").isString().stringValue();
-			mls = obj.get("mlsId").isString().stringValue();
+			// mls = obj.get("mlsId").isString().stringValue();
 			address = obj.get("address").isString().stringValue();
 		} catch (Exception e) {
 
 		}
+		if ((obj.containsKey("mlsId")) && (obj.get("mlsId").isString() != null))
+			mls = obj.get("mlsId").isString().stringValue();
+
 		String _status = obj.get("status").isString().stringValue();
 		try {
 			status = Status.valueOf(_status);
@@ -91,10 +105,20 @@ public class SuiteInfo implements I_JSON {
 			if (obj.get("floorPlanUrl").isString() != null)
 				setFloorplan_url(obj.get("floorPlanUrl").isString()
 						.stringValue());
-		// setArea(obj.get("area").isNumber().doubleValue());
-		// setBedrooms((int) obj.get("bedrooms").isNumber().doubleValue());
-		// setDens((int) obj.get("dens").isNumber().doubleValue());
-		// setBathrooms(obj.get("bathrooms").isNumber().doubleValue());
+		
+		if ((obj.containsKey("area"))&&(obj.get("area").isNumber()!=null))
+		 area = obj.get("area").isNumber().doubleValue();
+		
+		if ((obj.containsKey("bedrooms"))
+				&& (obj.get("bedrooms").isNumber() != null))
+			bedrooms = (int) obj.get("bedrooms").isNumber().doubleValue();
+		
+		if ((obj.containsKey("dens"))&&(obj.get("dens").isNumber()!=null))
+		dens=(int) obj.get("dens").isNumber().doubleValue();
+		
+		if ((obj.containsKey("bathrooms"))
+				&& (obj.get("bathrooms").isNumber() != null))
+			bathrooms = obj.get("bathrooms").isNumber().doubleValue();
 		// setBalconies((int) obj.get("balconies").isNumber().doubleValue());
 		// setTerraces((int) obj.get("terraces").isNumber().doubleValue());
 
@@ -112,9 +136,9 @@ public class SuiteInfo implements I_JSON {
 				}
 			}
 		}
-		if (obj.get("currentPrice") != null)
-			if (obj.get("currentPrice").isNumber() != null)
-				price = (int) obj.get("currentPrice").isNumber().doubleValue();
+		if ((obj.get("currentPrice") != null)
+				&& (obj.get("currentPrice").isNumber() != null))
+			price = (int) obj.get("currentPrice").isNumber().doubleValue();
 		// Log.write(id + ": "+"$" + price + " - " + status);
 
 		/*
@@ -123,7 +147,7 @@ public class SuiteInfo implements I_JSON {
 		 */
 		currentPriceDisplay = getString(obj, "currentPriceDisplay");
 	}
-	
+
 	public String getCurrentPriceDisplay() {
 		return currentPriceDisplay;
 	}
@@ -246,7 +270,7 @@ public class SuiteInfo implements I_JSON {
 		if ((getBedrooms() == 0) && (int) getBathrooms() != 0)
 			tooltip += "Bedrooms: Studio \r\n";
 		else
-			tooltip += "Bedrooms: " + getBedrooms() + "\r\n";
+			tooltip += "Bedrooms: " + (getBedrooms()  + ((dens!=0)? 0.5 : 0)) + "\r\n";
 
 		if ((getBedrooms() == 0) && (int) getBathrooms() == 0) {
 			tooltip = "";

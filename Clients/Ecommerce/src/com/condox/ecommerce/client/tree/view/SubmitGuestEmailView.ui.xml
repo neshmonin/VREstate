@@ -1,0 +1,35 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		.important {
+			color: mediumblue;
+			margin-left: 50px;
+			background-color: slateblue;
+		}
+	</ui:style>
+		<g:VerticalPanel width="750px" height="500px" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_TOP">
+			<g:Cell verticalAlignment="ALIGN_BOTTOM">
+				<g:HTML wordWrap="true" width="350px" horizontalAlignment="ALIGN_LEFT">To complete the order we'll have to send you a verification message with the further instructions.<br></br>
+				Please provide an email address that you'll be able to check next couple of minutes:</g:HTML>
+			</g:Cell>
+			<g:Cell verticalAlignment="ALIGN_BOTTOM">
+				<g:FocusPanel ui:field="focusPanel">
+				<g:VerticalPanel spacing="10" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_BOTTOM">
+					<g:TextBox ui:field="login" width="185px"/>
+				<g:Button width="100%" text="Submit the Order" ui:field="submit"/>
+			</g:VerticalPanel>
+			</g:FocusPanel>
+			</g:Cell>
+			<g:HTML wordWrap="true" width="300px" horizontalAlignment="ALIGN_LEFT">Please have your credit card ready.<br></br>
+You will be charged $49.99 (you still will be able to cancel the order after preview)</g:HTML>
+			<g:Cell verticalAlignment="ALIGN_BOTTOM">
+				<g:HorizontalPanel width="100%" spacing="10">
+						<g:Button width="75px" text="Cancel" ui:field="close"/>
+						<g:Cell width="150px">
+							<g:Button width="75px" ui:field="button">&lt;&lt; Prev</g:Button>
+						</g:Cell>
+					</g:HorizontalPanel>
+			</g:Cell>
+		</g:VerticalPanel>
+</ui:UiBinder> 

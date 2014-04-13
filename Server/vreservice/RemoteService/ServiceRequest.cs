@@ -128,6 +128,7 @@ namespace Vre.Server.RemoteService
         string DataPhysicalLocation { get; set; }
         Stream DataStream { get; }
         bool HoldResponseForServerPush { get; set; }
+		bool ClientCaching { get; set; }
         /// <summary>
         /// Takes precedense over all other response modes.
         /// </summary>

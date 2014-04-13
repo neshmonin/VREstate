@@ -40,7 +40,12 @@ namespace Vre.Server.RemoteService
                     changePassword(request);
                     return;
                 }
-                else if (command.Equals("chlogin") && (request.Request.Type == RequestType.Get))
+				else if (command.Equals("recover") && (request.Request.Type == RequestType.Get))
+				{
+					recoverPassword(request);
+					return;
+				}
+				else if (command.Equals("chlogin") && (request.Request.Type == RequestType.Get))
                 {
                     changeLogin(request);
                     return;
@@ -174,13 +179,22 @@ namespace Vre.Server.RemoteService
             //
             if (sessionId != null)
             {
-				var user = ServiceInstances.SessionStore[sessionId].User;
-                request.Response.ResponseCode = HttpStatusCode.OK;
-                request.Response.Data = new ClientData();
-                request.Response.Data.Add("sid", sessionId);
-                request.Response.Data.Add("keepalivePeriodSec", ServiceInstances.SessionStore.ClientKeepalivePeriodSec);
-                request.Response.Data.Add("userId", user.AutoID);
-				request.Response.Data.Add("passwordChangeRequired", user.PasswordChangeRequired);
+				if (!sessionId.StartsWith("---"))
+				{
+					var user = ServiceInstances.SessionStore[sessionId].User;
+					request.Response.ResponseCode = HttpStatusCode.OK;
+					request.Response.Data = new ClientData();
+					request.Response.Data.Add("sid", sessionId);
+					request.Response.Data.Add("keepalivePeriodSec", ServiceInstances.SessionStore.ClientKeepalivePeriodSec);
+					request.Response.Data.Add("userId", user.AutoID);
+					request.Response.Data.Add("passwordChangeRequired", user.PasswordChangeRequired);
+				}
+				else
+				{
+					request.Response.ResponseCode = HttpStatusCode.ServiceUnavailable;
+					request.Response.Data = new ClientData();
+					request.Response.Data.Add("waitSec", sessionId.Substring(3));
+				}
             }
             else
             {
@@ -371,10 +385,6 @@ namespace Vre.Server.RemoteService
             string mlsId = request.Request.Query["mls_id"];
             string mlsUrl = HttpUtility.UrlDecode(request.Request.Query["mls_url"]);
 			string note = HttpUtility.UrlDecode(request.Request.Query["note"]);
-            string propertyType = request.Request.Query["propertytype"];
-			if (string.IsNullOrEmpty(propertyType)) propertyType = request.Request.Query["propertyType"];  // OBSOLETE URI
-            string propertyId = request.Request.Query["propertyid"];
-			if (string.IsNullOrEmpty(propertyId)) propertyId = request.Request.Query["propertyId"];  // OBSOLETE URI
             string ownerId = request.Request.Query["ownerid"];
 			if (string.IsNullOrEmpty(ownerId)) ownerId = request.Request.Query["ownerId"];  // OBSOLETE URI
 			string anonymousOwnerEmail = request.Request.Query["owneremail"];
@@ -390,33 +400,20 @@ namespace Vre.Server.RemoteService
 				switch (request.UserInfo.Session.User.UserRole)
 				{
 					case User.Role.Agent:
+						registerAgentViewOrder(request, mlsId, paymentRefId);
+						return;
+
 					case User.Role.BuyingAgent:
-						registerBuyingAgentViewOrder(request, mlsId, propertyType, propertyId, paymentRefId);
+						registerBuyingAgentViewOrder(request, mlsId, paymentRefId);
 						return;
 				}
 			}
 
 			expiresOn = getViewOrderTimeArgument(request);
 
-            string pt = request.Request.Query["product"];
-            if (string.IsNullOrWhiteSpace(pt)) throw new ArgumentException("Product type missing");
-            if (pt.Equals("prl")) product = ViewOrder.ViewOrderProduct.PrivateListing;
-            else if (pt.Equals("pul")) product = ViewOrder.ViewOrderProduct.PublicListing;
-            else if (pt.Equals("b3dl")) product = ViewOrder.ViewOrderProduct.Building3DLayout;
-            else throw new ArgumentException("Product type is unknown");
-
-            string op = request.Request.Query["options"];
-            if (!string.IsNullOrWhiteSpace(op))
-            {
-                if (op.Equals("fp")) options = ViewOrder.ViewOrderOptions.FloorPlan;
-                else if (op.Equals("evt")) options = ViewOrder.ViewOrderOptions.ExternalTour;
-                else if (op.Equals("3dt")) options = ViewOrder.ViewOrderOptions.VirtualTour3D;
-                else throw new ArgumentException("Option is unknown");
-            }
-            else
-            {
-                options = ViewOrder.ViewOrderOptions.FloorPlan;
-            }
+            if (!request.Request.HasProductType()) throw new ArgumentException("Product type missing");
+			product = request.Request.GetProductType();
+			options = request.Request.GetProductOptions();
 
             //if (string.IsNullOrWhiteSpace(paymentRefId)) throw new ArgumentException("Required parameter missing");
 
@@ -476,7 +473,7 @@ namespace Vre.Server.RemoteService
                 // BE CAREFUL WITH PERMISSION CHECKS IN THIS "IF" STATEMENT
                 //
 				bool immediateCreate;
-                if (string.IsNullOrWhiteSpace(propertyType) || string.IsNullOrWhiteSpace(propertyId))
+                if (!request.Request.HasPropertyId() || !request.Request.HasPropertyType())
                 {
                     // view by address lookup
                     //
@@ -513,34 +510,41 @@ namespace Vre.Server.RemoteService
                 {
                     // view by property ID
                     //
-                    if (!int.TryParse(propertyId, out targetId)) throw new ArgumentException("Property ID is not valid");
-
                     UpdateableBase to = null;
+					targetId = request.Request.GetPropertyId();
 
-                    if (propertyType.Equals("suite"))
-                    {
-                        targetType = ViewOrder.SubjectType.Suite;
-                        Suite s;
-                        using (SuiteDao dao = new SuiteDao(request.UserInfo.Session.DbSession)) s = dao.GetById(targetId);
-						// The following is not applicable any more: multiple VOs per object may co-exist; suite status does not matter
-                        //if (s.Status != Suite.SalesStatus.Sold) throw new ObjectExistsException("Suite status in not SOLD");
-                        to = s;
-						immediateCreate = RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, s.Building);
-                    }
-                    else if (propertyType.Equals("building"))
-                    {
-                        targetType = ViewOrder.SubjectType.Building;
-                        Building b;
-                        using (BuildingDao dao = new BuildingDao(request.UserInfo.Session.DbSession)) b = dao.GetById(targetId);
-						// The following is not applicable any more: multiple VOs per object may co-exist; building status does not matter
-						//if (product != ViewOrder.ViewOrderProduct.Building3DLayout)
-						//{
-						//    if (b.Status != Building.BuildingStatus.Sold) throw new ObjectExistsException("Building status in not SOLD");
-						//}
-						to = b;
-						immediateCreate = RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, b);
-                    }
-                    else throw new ArgumentException("Unknown property type");
+					switch (request.Request.GetPropertyType())
+					{
+						case ViewOrder.SubjectType.Suite:
+							{
+								targetType = ViewOrder.SubjectType.Suite;
+								Suite s;
+								using (SuiteDao dao = new SuiteDao(request.UserInfo.Session.DbSession)) s = dao.GetById(targetId);
+								// The following is not applicable any more: multiple VOs per object may co-exist; suite status does not matter
+								//if (s.Status != Suite.SalesStatus.Sold) throw new ObjectExistsException("Suite status in not SOLD");
+								to = s;
+								immediateCreate = RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, s.Building);
+								break;
+							}
+
+						case ViewOrder.SubjectType.Building:
+							{
+								targetType = ViewOrder.SubjectType.Building;
+								Building b;
+								using (BuildingDao dao = new BuildingDao(request.UserInfo.Session.DbSession)) b = dao.GetById(targetId);
+								// The following is not applicable any more: multiple VOs per object may co-exist; building status does not matter
+								//if (product != ViewOrder.ViewOrderProduct.Building3DLayout)
+								//{
+								//    if (b.Status != Building.BuildingStatus.Sold) throw new ObjectExistsException("Building status in not SOLD");
+								//}
+								to = b;
+								immediateCreate = RolePermissionCheck.CheckCreateViewOrder(request.UserInfo.Session, targetUser, b);
+								break;
+							}
+
+						default:
+							throw new ArgumentException("Unknown property type");
+					}
 
                     if (null == to) throw new FileNotFoundException("Property not found in system.");
                 }
@@ -615,7 +619,7 @@ namespace Vre.Server.RemoteService
 		}
 
 		private static void registerBuyingAgentViewOrder(IServiceRequest request,
-			string mlsId, string propertyType, string propertyId, string paymentRefId)
+			string mlsId, string paymentRefId)
 		{
 			ISession dbSession = request.UserInfo.Session.DbSession;
 
@@ -624,7 +628,7 @@ namespace Vre.Server.RemoteService
 				ViewOrder.SubjectType targetType;
 				int targetId;
 
-				retrieveExistingViewOrder(request, ref mlsId, propertyType, propertyId, dbSession, out targetType, out targetId);
+				retrieveExistingViewOrder(request, ref mlsId, true, dbSession, out targetType, out targetId);
 
 				ViewOrder newVo = ReverseRequestService.CreateViewOrder(request, 
 					request.UserInfo.Session.User, 
@@ -648,8 +652,44 @@ namespace Vre.Server.RemoteService
 			}
 		}
 
+		private static void registerAgentViewOrder(IServiceRequest request,
+			string mlsId, string paymentRefId)
+		{
+			ISession dbSession = request.UserInfo.Session.DbSession;
+
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(dbSession))
+			{
+				ViewOrder.SubjectType targetType;
+				int targetId;
+
+				retrieveExistingViewOrder(request, ref mlsId, false, dbSession, out targetType, out targetId);
+
+				ViewOrder newVo = ReverseRequestService.CreateViewOrder(request,
+					request.UserInfo.Session.User,
+					null,
+					request.Request.HasProductType() ? 
+						request.Request.GetProductType() : ViewOrder.ViewOrderProduct.PrivateListing,
+					request.Request.HasProductOptions() ?
+						request.Request.GetProductOptions() : ViewOrder.ViewOrderOptions.VirtualTour3D,  // TODO: Should be configurable?
+					mlsId, null, targetType, targetId,
+					null,
+					DateTime.UtcNow.AddYears(1), // the period is until property is sold or up to one year - whichever comes first
+					paymentRefId);
+
+				newVo.InfoUrl = string.Format("{0}info.html#{1}!{2}",
+					request.Request.ConstructClientRootUri(),
+					"mls",
+					UniversalId.GenerateUrlId(UniversalId.IdType.ViewOrder, newVo.AutoID));
+
+				using (var dao = new ViewOrderDao(request.UserInfo.Session.DbSession))
+					dao.Update(newVo);
+
+				tran.Commit();
+			}
+		}
+
 		private static void retrieveExistingViewOrder(IServiceRequest request,
-			ref string mlsId, string propertyType, string propertyId, 
+			ref string mlsId, bool requireMlsId,
 			ISession dbSession, 
 			out ViewOrder.SubjectType targetType, out int targetId)
 		{
@@ -686,40 +726,98 @@ namespace Vre.Server.RemoteService
 
 				if (string.IsNullOrEmpty(mlsId))
 					throw new ArgumentException("ViewOrder referenced by ID has no MLS# associated");
+
+				return;
 			}
 			// ... if not - try MLS# provided ...
 			else if (!string.IsNullOrEmpty(mlsId))
 			{
-				ViewOrder vo;
+				bool found = false;
 				using (var dao = new ViewOrderDao(dbSession))
-					vo = dao.GetByImportedMlsId(mlsId).FirstOrDefault();
+				{
+					foreach (var vo in dao.GetByImportedMlsId(mlsId))
+					{
+						targetType = vo.TargetObjectType;
+						targetId = vo.TargetObjectId;
+						found = true;
 
-				if (null == vo)
-					throw new FileNotFoundException("MLS# provided is not known in system");
-
-				targetType = vo.TargetObjectType;
-				targetId = vo.TargetObjectId;
+						if (request.Request.HasPropertyType())
+						{
+							if ((targetType == request.Request.GetPropertyType())
+								|| (targetId == request.Request.GetPropertyId()))
+								return;
+						}
+						else
+						{
+							// TODO: May need to find the Resale-bound ViewOrder here!
+							return;
+						}
+					}
+				}
+				if (found && request.Request.HasPropertyType())
+					// we found something; the request has property reference and those two do not match
+					throw new ArgumentException("The MLS number provided does not refer to this property");
 			}
 			// ... else - try searching by property ID and type provided
-			else
+			targetType = request.Request.GetPropertyType();
+			targetId = request.Request.GetPropertyId();
+
+			if (string.IsNullOrEmpty(mlsId))
 			{
-				if (!int.TryParse(propertyId, out targetId))
-					throw new ArgumentException("Property ID is not valid");
+				mlsId = findMlsIdForTarget(dbSession, targetType, targetId);
 
-				if (propertyType.Equals("suite"))
-					targetType = ViewOrder.SubjectType.Suite;
-				else if (propertyType.Equals("building"))
-					targetType = ViewOrder.SubjectType.Building;
-				else
-					throw new ArgumentException("Unknown property type");
+				if ((null == mlsId) && requireMlsId)
+					throw new FileNotFoundException("No known View Order with defined MLS ID exists for the target.");
 
-				//mlsId = null;
-				using (var dao = new ViewOrderDao(dbSession))
-					foreach (var vo in dao.GetActive(targetType, targetId))
-						if (!string.IsNullOrEmpty(vo.MlsId)) { mlsId = vo.MlsId; break; }
+				checkTargetExists(dbSession, targetType, targetId);
+			}
+			else // MLS# is provided and is not known to the system
+			{
+				checkTargetExists(dbSession, targetType, targetId);
+				createMlsInfoStubRecord(dbSession, mlsId);
+			}
+		}
 
-				if (null == mlsId)
-					throw new FileNotFoundException("No known View Order with specified MLS ID exists for the target.");
+		private static string findMlsIdForTarget(ISession dbSession, ViewOrder.SubjectType targetType, int targetId)
+		{
+			string result = null;
+
+			// The only link between targets and MLS records are ViewOrders
+			// At least one imported must exist.
+
+			using (var dao = new ViewOrderDao(dbSession))
+				foreach (var vo in dao.GetActive(targetType, targetId))
+					if (!string.IsNullOrEmpty(vo.MlsId)) { result = vo.MlsId; break; }
+			
+			return result;
+		}
+
+		private static void createMlsInfoStubRecord(ISession dbSession, string mlsId)
+		{
+			Mls.MlsItem mlsSource = new Mls.MlsItem();
+			mlsSource.MlsId = mlsId;
+			using (var dao = new MlsInfoDao(dbSession)) dao.Create(new MlsInfo(mlsSource));
+		}
+
+		private static void checkTargetExists(ISession dbSession, ViewOrder.SubjectType targetType, int targetId)
+		{
+			switch (targetType)
+			{
+				case ViewOrder.SubjectType.Building:
+					{
+						Building b;
+						using (var dao = new BuildingDao(dbSession)) b = dao.GetById(targetId);
+						if (null == b) throw new FileNotFoundException("Property type/ID not found.");
+					}
+					break;
+
+				case ViewOrder.SubjectType.Suite:
+					{
+						Suite s;
+						using (var dao = new SuiteDao(dbSession)) s = dao.GetById(targetId);
+						if (null == s) throw new FileNotFoundException("Property type/ID not found.");
+					}
+					break;
 			}
 		}
 
@@ -760,6 +858,15 @@ namespace Vre.Server.RemoteService
             ReverseRequestService.InitiateUserRegistration(login);
             request.Response.ResponseCode = HttpStatusCode.OK;
         }
+
+		private static void recoverPassword(IServiceRequest request)
+		{
+			ReverseRequestService.InitiatePasswordRecover(
+				request.Request.Query.GetParam("role", string.Empty),
+				request.Request.Query.GetParam("ed", string.Empty),
+				request.Request.Query.GetParam("uid", string.Empty));
+			request.Response.ResponseCode = HttpStatusCode.OK;
+		}
 
         private static LoginType parseLoginType(ServiceQuery args)
         {

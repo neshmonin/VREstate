@@ -19,6 +19,7 @@ namespace Vre.Server.Task
         {
             IMlsInfoProvider prov;
 			StringBuilder report = new StringBuilder();
+			string salesNotifications;
 			string issues;
             
 			// STEP 1
@@ -51,12 +52,15 @@ namespace Vre.Server.Task
 				session.Resume();
 				DatabaseSettingsDao.VerifyDatabase();
 				using (var manager = new SiteManager(session))
-					issues = manager.ImportUpdateExistingViewOrders(activeItems, prov.GetNewItems(), false);
+					issues = manager.ImportUpdateExistingViewOrders(activeItems, prov.GetNewItems(), false, out salesNotifications);
 			}
 			if (issues.Length > 0) report.AppendFormat("\r\nMLS Import problems:\r\n{0}", issues);
 
 			if (report.Length > 0)
 				SendAdministrativeAlert(null, report.ToString());
+
+			if (!string.IsNullOrEmpty(salesNotifications))
+				SendSalesAlert("MLS Importing Issues", salesNotifications);
         }
 
 	    private static void CloseRemovedMlsListings(ICollection<string> activeItems)

@@ -241,6 +241,8 @@ namespace Vre.Server.HttpService
 
         private void updateResponse(HttpListenerResponse response, IResponseData data)
         {
+			if (!data.ClientCaching) disableBrowserCaching(response);
+
             if (data.RedirectionUrl != null)
             {
                 response.Redirect(data.RedirectionUrl);
@@ -274,7 +276,7 @@ namespace Vre.Server.HttpService
                 }
                 else if (data.DataStream.Length > 0)
                 {
-                    if (data.DataStream.CanSeek) data.DataStream.Seek(0, SeekOrigin.Begin);  // safeguard
+					if (data.DataStream.CanSeek) data.DataStream.Seek(0, SeekOrigin.Begin);  // safeguard
                     data.DataStream.CopyTo(response.OutputStream);
                 }
                 else if (data.DataPhysicalLocation != null)
@@ -293,6 +295,14 @@ namespace Vre.Server.HttpService
                 }
             }  // ! redirection
         }
+
+		private static void disableBrowserCaching(HttpListenerResponse response)
+		{
+			// http://stackoverflow.com/questions/49547/making-sure-a-web-page-is-not-cached-across-all-browsers
+			response.Headers[HttpResponseHeader.CacheControl] = "no-cache, no-store, must-revalidate";
+			response.Headers[HttpResponseHeader.Pragma] = "no-cache";
+			response.Headers[HttpResponseHeader.Expires] = "0";
+		}
 
         private void updateResponse(HttpListenerResponse response, Exception e)
         {
@@ -594,6 +604,11 @@ namespace Vre.Server.HttpService
                     text.Append("\tLast update: today\r\n");
                     text.Append("\tStandards: HTTP/1.1\r\n");
                     text.Append("\tLanguages: none\r\n");
+                    text.Append("\r\n");
+                    text.Append("\r\n");
+                    text.Append("/* FRAMEWORKS */\r\n");
+                    text.Append("\tMoney: by codekaizen@codeproject");
+                    text.Append("\t");
                     break;
             }
 

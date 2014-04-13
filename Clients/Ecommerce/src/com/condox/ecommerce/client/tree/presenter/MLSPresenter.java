@@ -1,9 +1,9 @@
 package com.condox.ecommerce.client.tree.presenter;
 
-import com.condox.clientshared.container.I_Container;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
 
 public class MLSPresenter implements I_Presenter {
 
@@ -32,7 +32,7 @@ public class MLSPresenter implements I_Presenter {
 //	}
 
 	@Override
-	public void go(I_Container container) {
+	public void go(HasWidgets container) {
 //		display.setMLS("");
 //		container.clear();
 //		container.add((I_Contained)display);

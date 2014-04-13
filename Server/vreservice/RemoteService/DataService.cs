@@ -53,6 +53,8 @@ namespace Vre.Server.RemoteService
 
             getPathElements(request.Request.Path, out mo, out objectId, out strObjectId);
 
+			request.Response.ClientCaching = false;  // no data read requests should be cached
+
             csrq = retrieveChangeSubscriptionRequest(request.Request.Query);
             includeDeleted = request.Request.Query.GetParam("withdeleted", false);
 
@@ -1896,7 +1898,7 @@ namespace Vre.Server.RemoteService
 	                    if (!suite.UpdateFromClient(suiteData)) continue;
 	                    try
 	                    {
-		                    if (manager.UpdateSuite(suite))
+		                    if (true)//manager.UpdateSuite(suite))
 		                    {
 			                    updatedCnt++;
 
@@ -1943,38 +1945,41 @@ namespace Vre.Server.RemoteService
 		private static void updateSuite(ClientSession session, int suiteId, ClientData data, IResponseData resp)
 		{
 			bool updated = false;
-			Suite suite;
+			bool unauthorizedChange = false;
 
-			using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session))
+			using (var tran = NHibernateHelper.OpenNonNestedTransaction(session))
 			{
-				using (SiteManager manager = new SiteManager(session))
-				{
-					suite = manager.GetSuiteById(suiteId);
-
-					var price = suite.CurrentPrice;
-					if (suite.UpdateFromClient(data))
-					{
-						if (manager.UpdateSuite(suite))
-						{
-							if (suite.CurrentPrice.HasValue && 
-								(!price.HasValue || (suite.CurrentPrice.Value.CompareTo(price.Value) != 0)))
-								manager.LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice));
-
-							updated = true;
-						}
-					}
-
-				}  // using SiteManager
+				using (var manager = new SiteManager(session))
+					updated = manager.UpdateSuite(suiteId, data, out unauthorizedChange);
 
 				if (updated) tran.Commit();
 				else tran.Rollback();
 			}  // transaction
 
-			// make sure building information is refreshed
-			session.DbSession.Refresh(suite);
+			setTriStateUpdateResponse(resp, updated, unauthorizedChange);
+		}
 
-			resp.ResponseCode = updated ? HttpStatusCode.OK : HttpStatusCode.NotModified;
-			resp.Data = new ClientData { { "updated", updated ? 1 : 0 } };
+		private static void setTriStateUpdateResponse(IResponseData resp, bool updated, bool unauthorizedChange)
+		{
+			resp.Data = new ClientData();
+			if (updated)
+			{
+				if (unauthorizedChange)
+				{
+					resp.ResponseCode = HttpStatusCode.Unauthorized;
+					resp.ResponseCodeDescription = "Some changes were not applied";
+				}
+				else
+				{
+					resp.ResponseCode = HttpStatusCode.OK;
+				}
+				resp.Data.Add("updated", 1);
+			}
+			else
+			{
+				resp.ResponseCode = HttpStatusCode.NotModified;
+				resp.Data.Add("updated", 0);
+			}
 		}
 
 		private static void updateUser(ClientSession session, int userId, ClientData data, IResponseData resp)
@@ -2060,6 +2065,8 @@ namespace Vre.Server.RemoteService
         private static void updateViewOrder(ClientSession session, ServiceQuery query, string strObjectId, ClientData data, IResponseData resp)
         {
             string paymentSystemRefId = query["pr"];
+			bool unauthorizedChange;
+			bool updated;
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
@@ -2069,10 +2076,19 @@ namespace Vre.Server.RemoteService
                 using (UserDao dao = new UserDao(session.DbSession))
                     owner = dao.GetById(viewOrder.OwnerId);
 
-                RolePermissionCheck.CheckUpdateViewOrder(session, owner);
+				if (RolePermissionCheck.CheckLimitedUpdateViewOrder(session, owner))
+				{
+					updated = viewOrder.UpdateFromClient(data, new[] { "enabled" }, out unauthorizedChange);
+				}
+				else
+				{
+					RolePermissionCheck.CheckUpdateViewOrder(session, owner);
+					unauthorizedChange = false;
+					updated = viewOrder.UpdateFromClient(data);
+				}
 
-                if (viewOrder.UpdateFromClient(data))
-                {
+				if (updated)
+				{
                     viewOrder.MarkUpdated();
 
                     using (ViewOrderDao dao = new ViewOrderDao(session.DbSession))
@@ -2080,45 +2096,35 @@ namespace Vre.Server.RemoteService
 
                     // Generate financial transaction
                     //
-                    FinancialTransaction.TranTarget tt = FinancialTransaction.TranTarget.Suite;
-                    switch (viewOrder.TargetObjectType)
-                    {
-                        case ViewOrder.SubjectType.Building: tt = FinancialTransaction.TranTarget.Building; break;
-                        case ViewOrder.SubjectType.Suite: tt = FinancialTransaction.TranTarget.Suite; break;
-                    }
-                    FinancialTransaction ft = new FinancialTransaction(session.User.AutoID,
-                        FinancialTransaction.AccountType.User, viewOrder.OwnerId,
-                        FinancialTransaction.OperationType.Debit, 0m,
-                        FinancialTransaction.TranSubject.ViewOrder,
-                        tt, viewOrder.TargetObjectId, viewOrder.AutoID.ToString());
+					//FinancialTransaction.TranTarget tt = FinancialTransaction.TranTarget.Suite;
+					//switch (viewOrder.TargetObjectType)
+					//{
+					//    case ViewOrder.SubjectType.Building: tt = FinancialTransaction.TranTarget.Building; break;
+					//    case ViewOrder.SubjectType.Suite: tt = FinancialTransaction.TranTarget.Suite; break;
+					//}
+					//FinancialTransaction ft = new FinancialTransaction(session.User.AutoID,
+					//    FinancialTransaction.AccountType.User, viewOrder.OwnerId,
+					//    FinancialTransaction.OperationType.Debit, 0m,
+					//    FinancialTransaction.TranSubject.ViewOrder,
+					//    tt, viewOrder.TargetObjectId, viewOrder.AutoID.ToString());
 
-                    if (!string.IsNullOrWhiteSpace(paymentSystemRefId))
-                        ft.SetPaymentSystemReference(FinancialTransaction.PaymentSystemType.CondoExplorer, paymentSystemRefId);
+					//if (!string.IsNullOrWhiteSpace(paymentSystemRefId))
+					//    ft.SetPaymentSystemReference(FinancialTransaction.PaymentSystemType.CondoExplorer, paymentSystemRefId);
 
-                    using (FinancialTransactionDao dao = new FinancialTransactionDao(session.DbSession))
-                    {
-                        dao.Create(ft);
-                        ft.SetAutoSystemReferenceId();
-                        dao.Update(ft);
-                    }
+					//using (FinancialTransactionDao dao = new FinancialTransactionDao(session.DbSession))
+					//{
+					//    dao.Create(ft);
+					//    ft.SetAutoSystemReferenceId();
+					//    dao.Update(ft);
+					//}
 
                     ReflectViewOrderStatusInTarget(viewOrder, session.DbSession);
-
-                    resp.ResponseCode = HttpStatusCode.OK;
-                    resp.Data = new ClientData();
-                    resp.Data.Add("ref", ft.SystemRefId);
-                    resp.Data.Add("updated", 1);
+                    //resp.Data.Add("ref", ft.SystemRefId);
                 }
-                else
-                {
-                    resp.ResponseCode = HttpStatusCode.NotModified;
-                    resp.Data = new ClientData();
-                    resp.Data.Add("updated", 0);
-                }
-
                 tran.Commit();
             }
-        }
+			setTriStateUpdateResponse(resp, updated, unauthorizedChange);
+		}
 		
 		private static void updateBrokerage(ClientSession session, int itemId, ClientData data, IResponseData resp)
 		{

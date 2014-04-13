@@ -69,8 +69,6 @@ namespace Vre.Server.BusinessLogic
         {
 			ConstructionSite = site;
 
-            AltitudeAdjustment = fromServer.GetProperty("altitudeAdjustment", 0.0);
-            MaxSuiteAltitude = fromServer.GetProperty("maxSuiteAltitude", 0.0);
 
             DisplayModelUrl = fromServer.GetProperty("displayModelUrl", string.Empty);
             OverlayModelUrl = fromServer.GetProperty("overlayModelUrl", string.Empty);
@@ -150,7 +148,10 @@ namespace Vre.Server.BusinessLogic
 
             InitialView = data.UpdateProperty("initialView", InitialView, ref changed);
 
-            return changed;
+			AltitudeAdjustment = data.UpdateProperty("altitudeAdjustment", AltitudeAdjustment, ref changed);
+			MaxSuiteAltitude = data.UpdateProperty("maxSuiteAltitude", MaxSuiteAltitude, ref changed);
+			
+			return changed;
         }
 
         public override string ToString()

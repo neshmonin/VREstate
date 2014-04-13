@@ -1,36 +1,35 @@
 package com.condox.ecommerce.client.tree.presenter;
 
-import com.condox.clientshared.abstractview.Log;
-import com.condox.clientshared.communication.GET;
-import com.condox.clientshared.communication.Options;
-import com.condox.clientshared.communication.PUT;
 import com.condox.clientshared.communication.User;
-import com.condox.clientshared.container.I_Contained;
-import com.condox.clientshared.container.I_Container;
+import com.condox.clientshared.communication.User.UserRole;
 import com.condox.clientshared.document.SuiteInfo;
 import com.condox.clientshared.document.SuiteInfo.Status;
 import com.condox.clientshared.tree.Data;
-import com.condox.ecommerce.client.Ecommerce;
-import com.condox.ecommerce.client.Ecommerce.Modes;
 import com.condox.ecommerce.client.I_Presenter;
 import com.condox.ecommerce.client.ServerProxy;
 import com.condox.ecommerce.client.tree.EcommerceTree;
 import com.condox.ecommerce.client.tree.EcommerceTree.Actions;
 import com.condox.ecommerce.client.tree.EcommerceTree.Field;
+import com.condox.ecommerce.client.tree.api.I_RequestCallback;
+import com.condox.ecommerce.client.tree.api.ServerAPI;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
+import com.condox.ecommerce.client.tree.view.*;
 
 public class AgreementPresenter implements I_Presenter {
 
-	public static interface I_Display extends I_Contained {
+	public static interface I_Display {
 		void setPresenter(AgreementPresenter presenter);
 
 		Widget asWidget();
@@ -40,11 +39,15 @@ public class AgreementPresenter implements I_Presenter {
 	private EcommerceTree tree = null;
 
 	@Override
-	public void go(I_Container container) {
+	public void go(HasWidgets container) {
+		if (UserRole.Visitor.equals(User.role)) {
+			tree.next(Actions.Next);
+			return;
+		}
 		container.clear();
-		container.add(display);
+		container.add(display.asWidget());
 	}
-	
+
 	// Navigation events
 	public void onCancel() {
 		tree.next(Actions.Cancel);
@@ -53,169 +56,213 @@ public class AgreementPresenter implements I_Presenter {
 	public void onPrev() {
 		tree.next(Actions.Prev);
 	}
-	private String viewOrderId = "";
-	public void onProceed() {
-//		saveData();
-//		node.next(NodeStates.Proceed);
-		String url = Options.URL_VRT;
-		url += "program?";
-		url += "&q=register";
-		url += "&entity=viewOrder";
-		url += "&ownerId=" + User.id;
-//		url += "&pr=" + User.id;
-		url += "&daysValid=1";
-		url += "&product=prl";
-		url += "&options=fp";	// TODO
-		//MLS#
-		String 	mls = getSuiteInfo(Field.SuiteInfo).getMLS();
-		url += "&mls_id=" + mls;
-		url += "&propertyType=suite";	// TODO
-		url += "&propertyId=" + getSuiteInfo(Field.SuiteInfo).getId();
-		url += "&sid=" + User.SID;
-		GET.send(url, new RequestCallback(){
 
-			@Override
-			public void onResponseReceived(Request request, Response response) {
-				Log.write(response.getStatusCode() + ": " + response.getStatusText());
-				if (response.getStatusCode() == 200) {
-					JSONObject obj = JSONParser.parseLenient(response.getText()).isObject();
-//					String viewOrderUrl = obj.get("viewOrder-url").isString().stringValue();
-					viewOrderId = obj.get("viewOrder-id").isString().stringValue();
-					viewOrderId = viewOrderId.replace("-", "");
-					
-					String url = Options.URL_VRT;
-					url += "data/suite/" + getSuiteInfo(Field.SuiteInfo).getId();
-					url += "?sid=" + User.SID;
-					GET.send(url, new RequestCallback(){
+	private String viewOrderId = "";
+
+	public void onProceed() {
+		if (User.role == UserRole.Visitor)
+			tree.next(Actions.Next);
+		else
+			registerListing();
+	}
+
+	private void registerListing() {
+		Data data = tree.getData(Field.ListingType);
+		EcommerceTree.ListingType viewOrderType = EcommerceTree.ListingType
+				.values()[data.asInteger()];
+
+		switch (viewOrderType) {
+		case PRIVATE:
+		case PUBLIC:
+			ServerAPI.registerViewOrder(User.id, viewOrderType,
+					getSuiteInfo(Field.SuiteInfo).getMLS(),
+					getSuiteInfo(Field.SuiteInfo).getId(), User.SID,
+					new I_RequestCallback() {
 
 						@Override
-						public void onResponseReceived(Request request,
-								Response response) {
-							JSONObject obj = JSONParser.parseLenient(response.getText()).isObject();
-							/*{"id":3582,
-							 * "version":[0,0,0,0,0,56,238,124],
-							 * "buildingId":193,
-							 * "levelNumber":-1,
-							 * "floorName":"10",
-							 * "name":"1011",
-							 * "ceilingHeightFt":9,
-							 * "showPanoramicView":true,
-							 * "status":"AvailableRent",
-							 * "position":
-							 * {"lon":-79.3750991821289,
-							 * 	"lat":43.646324157714844,
-							 * 	"alt":30.90764045715332,
-							 * 	"hdg":-32.75,
-							 * 	"vhdg":0},
-							 * "suiteTypeId":1393,
-							 * "currentPrice":"1650.00",
-							 * "currentPriceDisplay":"$1,650.00",
-							 * "currentPriceCurrency":"CAD"}*/
-							Log.write("Original suite:" + obj.toString());
-							Data data = tree.getData(Field.SuiteInfo);
-							if (data != null) {
-								SuiteInfo info = new SuiteInfo();
-								info.fromJSONObject(data.asJSONObject());
-
-								if (obj.containsKey("currentPrice")) {
-									NumberFormat fmt = NumberFormat
-											.getDecimalFormat();
-									fmt.overrideFractionDigits(2);
-									String currentPrice = fmt.format(info
-											.getPrice());
-									obj.put("currentPrice", new JSONString(
-											currentPrice));
-								}
-								if (obj.containsKey("currentPriceDisplay")) {
-									NumberFormat fmt = NumberFormat
-											.getDecimalFormat();
-									fmt.overrideFractionDigits(2);
-									String currentPrice = fmt.format(info
-											.getPrice());
-									obj.put("currentPriceDisplay",
-											new JSONString("$" + currentPrice));
-								}
-								if (obj.containsKey("currentPriceCurrency"))
-									obj.put("currentPriceCurrency",
-											new JSONString("CAD"));
-
-								if (info.getStatus() == Status.AvailableRent)
-									obj.put("status", new JSONString(
-											"AvaibleRent"));
-								if (info.getStatus() == Status.AvailableResale)
-									obj.put("status", new JSONString(
-											"AvaibleResale"));
-							}
-							
-							Log.write("Edited suite:" + obj.toString());
-							String url = Options.URL_VRT;
-							url += "data/suite/" + getSuiteInfo(Field.SuiteInfo).getId();
-							url += "?sid=" + User.SID;
-							PUT.send(url, obj.toString(), new RequestCallback(){
-
-								@Override
-								public void onResponseReceived(Request request,
-										Response response) {
-									if (response.getStatusCode() == 200)
-//										Window.alert("Congratulations!\n The Interactive 3D Listing has been successfully created");
-										tree.next(Actions.Congratulations);
-									else
-										ServerProxy.deleteOrder(viewOrderId, User.SID, new RequestCallback(){
-											
-											@Override
-											public void onResponseReceived(Request request,
-													Response response) {
-												if (response.getStatusCode() == 200) {
-												}
-												Log.write(response.getStatusText());
-												if (Modes.testDeleteOrder == Ecommerce.mode)
-													Log.popup();
-											}
-											
-											@Override
-											public void onError(Request request, Throwable exception) {
-												// TODO Auto-generated method stub
-												
-											}});
-									
-								}
-
-								@Override
-								public void onError(Request request,
-										Throwable exception) {
-									// TODO Auto-generated method stub
-									
-								}});
+						public void onSuccess(JSONObject obj) {
+							viewOrderId = obj.get("viewOrder-id").isString()
+									.stringValue();
+							viewOrderId = viewOrderId.replace("-", "");
+							requestSuite();
 						}
 
 						@Override
-						public void onError(Request request, Throwable exception) {
-							// TODO Auto-generated method stub
-							
-						}});
-					
-			}
-			}
-			@Override
-			public void onError(Request request, Throwable exception) {
-				// TODO Auto-generated method stub
-				
-			}});
+						public void onError(String errMessage) {
+							// Error message.
+							final DialogBox warning = new DialogBox();
+							WarningPresenter.I_Display widget = new WarningView();
+							if (errMessage.isEmpty())
+								widget.setMessage("Error while creating listing.");
+							else
+								widget.setMessage("Error while creating listing - "
+										+ errMessage);
+							widget.getOK().addClickHandler(new ClickHandler() {
+
+								@Override
+								public void onClick(ClickEvent event) {
+									warning.hide();
+									tree.next(Actions.Cancel);
+								}
+							});
+							warning.add(widget.asWidget());
+							warning.setGlassEnabled(true);
+							warning.center();
+						}
+					});
+			break;
+		// break;
+		}
+
 	}
-	
+
+	private void requestSuite() {
+		ServerAPI.requestSuite(getSuiteInfo(Field.SuiteInfo).getId(), User.SID,
+				new I_RequestCallback() {
+
+					@Override
+					public void onSuccess(JSONObject obj) {
+						String original = obj.toString();
+						Data data = tree.getData(Field.SuiteInfo);
+						if (data != null) {
+							SuiteInfo info = new SuiteInfo();
+							info.fromJSONObject(data.asJSONObject());
+
+							NumberFormat fmt = NumberFormat.getDecimalFormat();
+							fmt.overrideFractionDigits(2);
+							String currentPrice = String.valueOf(info
+									.getPrice());
+							obj.put("currentPrice",
+									new JSONString(currentPrice));
+							fmt = NumberFormat.getDecimalFormat();
+							fmt.overrideFractionDigits(2);
+							currentPrice = fmt.format(info.getPrice());
+							obj.put("currentPriceDisplay", new JSONString("$"
+									+ currentPrice));
+
+							obj.put("currentPriceCurrency", new JSONString(
+									"CAD"));
+
+							EcommerceTree.ListingType viewOrderType = EcommerceTree.ListingType
+									.values()[tree.getData(Field.ListingType)
+									.asInteger()];
+							if (EcommerceTree.ListingType.PUBLIC
+									.equals(viewOrderType)) {
+								if (info.getStatus() == Status.AvailableRent)
+									obj.put("status", new JSONString(
+											"AvailableRent"));
+								if (info.getStatus() == Status.AvailableResale)
+									obj.put("status", new JSONString(
+											"AvailableResale"));
+							}
+						}
+						GWT.log("Original data: " + original);
+						GWT.log("Updated data: " + obj.toString());
+						if (!original.equals(obj.toString()))
+							updateSuite(obj.toString());
+					}
+
+					@Override
+					public void onError(String errMessage) {
+						if (!errMessage.startsWith("304:")) {
+							// Error message.
+							final DialogBox warning = new DialogBox();
+							WarningPresenter.I_Display widget = new WarningView();
+							if (errMessage.isEmpty())
+								widget.setMessage("Error while requesting suite.");
+							else
+								widget.setMessage("Error while requesting suite - "
+										+ errMessage);
+							widget.getOK().addClickHandler(new ClickHandler() {
+
+								@Override
+								public void onClick(ClickEvent event) {
+									warning.hide();
+									ServerProxy.deleteOrder(viewOrderId,
+											User.SID, new RequestCallback() {
+
+												@Override
+												public void onResponseReceived(
+														Request request,
+														Response response) {
+													tree.next(Actions.Cancel);
+												}
+
+												@Override
+												public void onError(
+														Request request,
+														Throwable exception) {
+
+												}
+											});
+									// tree.next(Actions.Cancel);
+								}
+							});
+							warning.add(widget.asWidget());
+							warning.setGlassEnabled(true);
+							warning.center();
+						}
+
+					}
+				});
+	}
+
+	private void updateSuite(String data) {
+		ServerAPI.updateSuite(getSuiteInfo(Field.SuiteInfo).getId(), User.SID,
+				data, new I_RequestCallback() {
+
+					@Override
+					public void onSuccess(JSONObject obj) {
+						// TODO Auto-generated method stub
+						tree.next(Actions.Next);
+					}
+
+					@Override
+					public void onError(String errMessage) {
+						if (!errMessage.startsWith("304:")) {
+							// Error message.
+							final DialogBox warning = new DialogBox();
+							WarningPresenter.I_Display widget = new WarningView();
+							if (errMessage.isEmpty())
+								widget.setMessage("Error while updating suite.");
+							else
+								widget.setMessage("Error while updating suite - "
+										+ errMessage);
+							widget.getOK().addClickHandler(new ClickHandler() {
+
+								@Override
+								public void onClick(ClickEvent event) {
+									warning.hide();
+									ServerProxy.deleteOrder(viewOrderId,
+											User.SID, new RequestCallback() {
+
+												@Override
+												public void onResponseReceived(
+														Request request,
+														Response response) {
+													tree.next(Actions.Cancel);
+												}
+
+												@Override
+												public void onError(
+														Request request,
+														Throwable exception) {
+
+												}
+											});
+									// tree.next(Actions.Cancel);
+								}
+							});
+							warning.add(widget.asWidget());
+							warning.setGlassEnabled(true);
+							warning.center();
+
+						}
+					}
+				});
+	}
+
 	// Data utils
-	private String getString(Field key) {
-		Data data = tree.getData(key);
-		String s = (data == null)? "" : data.asString();
-		return s;
-	}
-	
-	private int getInteger(Field key) {
-		Data data = tree.getData(key);
-		int s = (data == null)? -1 : data.asInteger();
-		return s;
-	}
-	
 	private SuiteInfo getSuiteInfo(Field key) {
 		Data data = tree.getData(key);
 		if (data != null) {
@@ -225,36 +272,6 @@ public class AgreementPresenter implements I_Presenter {
 		}
 		return null;
 	}
-//	
-//	private void loadData() {
-//		String listing = getString(Field.Address);
-//		String mls = getString(Field.MLS);
-//		String price = getString(Field.Price);
-//		String virtual_tour = getString(Field.VirtualTourUrl);
-//		String more_info = getString(Field.MoreInfoUrl);
-//		
-//		String html = 
-//				"Listing: " + (listing.isEmpty()? "<<empty>>" : listing) + "<br>" +
-//				"MLS# " + mls + "<br>" + " Price  " + (price.isEmpty()? "<<empty>>" : price);
-////				"Third Party Virtual Tour<br>" +
-////				"	" + (virtual_tour.isEmpty()? "<<empty>>" : virtual_tour) + "<br>";
-//	
-//		html += "More Info Link<br>";
-//		if (more_info.isEmpty())
-//			html += "<<empty>>";
-//		else
-//			html += "<<a href=\"" + more_info + "\">>" + more_info + "<</a>>";
-//		
-////		display.setData(html);
-//		
-//	}
-//	
-//	private void saveData() {
-////		node.setData(Field.SuiteId, new Data(display.getSelectedSuite().getId()));
-////		node.setData(Field.SuiteName, new Data(display.getSelectedSuite().getName()));
-////		node.setData(Field.Address, new Data(display.getSelectedSuite().getAddress()));
-////		node.setData(Field.MLS, new Data(display.getSelectedSuite().getMLS()));
-//	}
 
 	@Override
 	public void setView(Composite view) {

@@ -34,6 +34,7 @@ public class SettingsView extends Composite implements I_Display {
 	}
 
 	private SettingsPresenter presenter = null;
+	private String oldPrimaryEmail = "";
 
 	public SettingsView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -44,7 +45,8 @@ public class SettingsView extends Composite implements I_Display {
 				String email = textEmail.getValue();
 				boolean valid = true;
 				// Validating email
-				valid = email.matches("[a-z0-9_-]+(\\.[a-z0-9_-]+)*@[a-z0-9_-]+(\\.[a-z0-9_-]+)+");
+				valid &= !oldPrimaryEmail.equals(email);
+				valid &= email.matches("[a-z0-9_-]+(\\.[a-z0-9_-]+)*@[a-z0-9_-]+(\\.[a-z0-9_-]+)+");
 				buttonChangeEmail.setEnabled(valid);
 				//Validating password
 				valid = true;
@@ -88,5 +90,11 @@ public class SettingsView extends Composite implements I_Display {
 	
 	@UiHandler("textEmail")
 	void onTextEmailChange(ChangeEvent event) {
+	}
+
+	@Override
+	public void setEmail(String newEmail) {
+		textEmail.setValue(newEmail);
+		oldPrimaryEmail = newEmail;
 	}
 }
