@@ -224,7 +224,21 @@ namespace SuperAdminConsole
                     if (treeViewAccounts.SelectedNode.Text == "-MLS-")
                         tabControlAccountProperty.SelectTab("tabPageViewOrders");
                     else
-                        tabControlAccountProperty.SelectTab("tabPageInfo");
+                        if (m_agent != null || m_brokerage != null)
+                        {
+                            tabControlAccountProperty.SelectTab("tabPageInfo");
+                            buttonDeleteLocalPP.Visible = m_SupportingBrokerages;
+                            label2.Visible = m_SupportingBrokerages;
+                            listViewCurrentBalance.Visible = m_SupportingBrokerages;
+                            listViewLocalPP.Visible = m_SupportingBrokerages;
+                            buttonAddLocalPP.Visible = m_SupportingBrokerages;
+                        }
+                        else
+                        {
+                            tabControlAccountProperty.SelectTab("tabPageEmpty");
+                            labelStreetName.Visible = false;
+                            textBoxFilter.Visible = false;
+                        }
                 }
                 else
                 {
@@ -288,7 +302,7 @@ namespace SuperAdminConsole
             ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
                                                               "user/" + ServerProxy.MyID,
                                                               "", null);
-            User admin = new User(resp.Data);
+            User userMyself = new User(resp.Data);
             //TreeNode[] ch = new TreeNode[3] { new TreeNode("ViewOrders"),
             //                                  new TreeNode("Banners"),
             //                                  new TreeNode("Logs") };
@@ -296,7 +310,7 @@ namespace SuperAdminConsole
                                               new TreeNode("Logs") };
 
             TreeNode topNode = new TreeNode(string.Format("SELF ({0})", myRole), ch);
-            topNode.Tag = admin;
+            topNode.Tag = userMyself;
             treeViewAccounts.Nodes.Add(topNode);
 
             ///data/user?sid=<SID>[&genval=<generation>][&withdeleted={true|false}][&<hints>]
@@ -318,22 +332,22 @@ namespace SuperAdminConsole
             int i = 0;
             foreach (ClientData cd in admins)
             {
-                User user = new User(cd);
+                User userDevAdmin = new User(cd);
                 string nodeName = string.Empty;
-                if (string.IsNullOrEmpty(user.NickName))
-                    nodeName = string.Format("ADMIN <{0}>", user.AutoID);
+                if (string.IsNullOrEmpty(userDevAdmin.NickName))
+                    nodeName = string.Format("ADMIN <{0}>", userDevAdmin.AutoID);
                 else
                 {
-                    if (user.NickName == "mlsImport")
+                    if (userDevAdmin.NickName == "mlsImport")
                     {
                         nodeName = "-MLS-";
                         TreeNode mlsNode = new TreeNode(nodeName);
-                        mlsNode.Tag = user;
+                        mlsNode.Tag = userDevAdmin;
                         treeViewAccounts.Nodes.Add(mlsNode);
                         continue;
                     }
                     else
-                        nodeName = string.Format("{0}<{1}>", user.NickName, user.AutoID);
+                        nodeName = string.Format("{0}<{1}>", userDevAdmin.NickName, userDevAdmin.AutoID);
                 }
                 //TreeNode[] children = new TreeNode[3] { new TreeNode("ViewOrders"),
                 //                                        new TreeNode("Banners"),
@@ -341,7 +355,7 @@ namespace SuperAdminConsole
                 TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
                                                     new TreeNode("Logs") };
                 adminNodes[i] = new TreeNode(nodeName, children);
-                adminNodes[i].Tag = user;
+                adminNodes[i].Tag = userDevAdmin;
                 i++;
             }
             topNode = new TreeNode(string.Format("Dev Admins ({0})", admins.Length), adminNodes);
@@ -365,15 +379,18 @@ namespace SuperAdminConsole
             i = 0;
             foreach (ClientData cd in users)
             {
-                User user = new User(cd);
-                string nodeName = string.Format("{0} <{1}> {2}", user.AutoID, user.NickName, user.PrimaryEmailAddress);
+                User userSellingAgent = new User(cd);
+                string nodeName = string.Format("{0} <{1}> {2}", 
+                    userSellingAgent.AutoID, 
+                    userSellingAgent.NickName, 
+                    userSellingAgent.PrimaryEmailAddress);
                 //TreeNode[] children = new TreeNode[3] { new TreeNode("ViewOrders"),
                 //                                        new TreeNode("Banners"),
                 //                                        new TreeNode("Logs") };
                 TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
                                                         new TreeNode("Logs") };
                 userNodes[i] = new TreeNode(nodeName, children);
-                userNodes[i].Tag = user;
+                userNodes[i].Tag = userSellingAgent;
                 i++;
             }
             topNode = new TreeNode(string.Format("Selling Agents ({0})", users.Length), userNodes);
@@ -396,12 +413,12 @@ namespace SuperAdminConsole
             i = 0;
             foreach (ClientData cd in users)
             {
-                User user = new User(cd);
-                string nodeName = string.Format("<{0}> {1}", user.AutoID, user.PrimaryEmailAddress);
+                User userAnonymous = new User(cd);
+                string nodeName = string.Format("<{0}> {1}", userAnonymous.AutoID, userAnonymous.PrimaryEmailAddress);
                 TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
                                                         new TreeNode("Logs")  };
                 userNodes[i] = new TreeNode(nodeName, children);
-                userNodes[i].Tag = user;
+                userNodes[i].Tag = userAnonymous;
                 i++;
             }
             topNode = new TreeNode(string.Format("Anonymous Users ({0})", users.Length), userNodes);
@@ -414,31 +431,35 @@ namespace SuperAdminConsole
                                                null);
             if (HttpStatusCode.OK != resp.ResponseCode)
             {
-                MessageBox.Show("Failed querying the list of brokerages");
-                return;
+                m_SupportingBrokerages = resp.ResponseCode != HttpStatusCode.BadRequest;
+                if (m_SupportingBrokerages)
+                    MessageBox.Show("Failed querying the list of brokerages");
             }
-
-            ClientData brokerageJASON = resp.Data;
-            ClientData[] brokerages = brokerageJASON.GetNextLevelDataArray("brokerages");
-
-            TreeNode[] brokerageNodes = new TreeNode[brokerages.Length];
-            i = 0;
-            foreach (ClientData cd in brokerages)
+            else
             {
-                BrokerageInfo brokerage = new BrokerageInfo(cd);
-                string nodeName = string.Format("<{0}> {1} (?)", brokerage.AutoID, brokerage.Name);
-                TreeNode overwritable = new TreeNode("expand");
-                brokerageNodes[i] = new TreeNode(nodeName, new TreeNode[1]{overwritable});
-                brokerageNodes[i].Tag = brokerage;
-                i++;
-            }
-            topNode = new TreeNode(string.Format("Brokerages ({0})", brokerages.Length), brokerageNodes);
-            treeViewAccounts.Nodes.Add(topNode);
 
-            //TreeNode[] lastch = new TreeNode[1] { new TreeNode("ViewOrders") };
-            //TreeNode lastNode = new TreeNode("ANONIMOUS", lastch);
-            //lastNode.Tag = new User(m_currentDeveloper.ID, User.Role.Anonymous);
-            //treeViewAccounts.Nodes.Add(lastNode);
+                ClientData brokerageJASON = resp.Data;
+                ClientData[] brokerages = brokerageJASON.GetNextLevelDataArray("brokerages");
+
+                TreeNode[] brokerageNodes = new TreeNode[brokerages.Length];
+                i = 0;
+                foreach (ClientData cd in brokerages)
+                {
+                    BrokerageInfo brokerage = new BrokerageInfo(cd);
+                    string nodeName = string.Format("<{0}> {1} (?)", brokerage.AutoID, brokerage.Name);
+                    TreeNode overwritable = new TreeNode("expand");
+                    brokerageNodes[i] = new TreeNode(nodeName, new TreeNode[1] { overwritable });
+                    brokerageNodes[i].Tag = brokerage;
+                    i++;
+                }
+                topNode = new TreeNode(string.Format("Brokerages ({0})", brokerages.Length), brokerageNodes);
+                treeViewAccounts.Nodes.Add(topNode);
+
+                //TreeNode[] lastch = new TreeNode[1] { new TreeNode("ViewOrders") };
+                //TreeNode lastNode = new TreeNode("ANONIMOUS", lastch);
+                //lastNode.Tag = new User(m_currentDeveloper.ID, User.Role.Anonymous);
+                //treeViewAccounts.Nodes.Add(lastNode);
+            }
 
             UpdateState();
         }
@@ -485,7 +506,8 @@ namespace SuperAdminConsole
 
             if (e.Node.Text == "ViewOrders" || e.Node.Text == "-MLS-")
                 refreshOrders();
-            else if (e.Node.Text == "Logs")
+            else
+            if (e.Node.Text == "Logs")
             {
                 listViewLogs.Items.Clear();
                 // https://vrt.3dcondox.com/vre/data/ft?userId=<id>&sid=<SID>
@@ -595,8 +617,12 @@ namespace SuperAdminConsole
             UpdateState();
         }
 
+        private bool m_SupportingBrokerages = true;
+
         private void PopulatePricingPolicy(UpdateableBase theObject, string subject)
         {
+            if (!m_SupportingBrokerages) return;
+
             if (theObject == null) return;
 
             ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
@@ -762,8 +788,10 @@ namespace SuperAdminConsole
                 string filter = textBoxFilter.Text.ToLower();
                 string label = viewOrder.GetProperty("label", string.Empty);
                 String note = viewOrder.GetProperty("note", string.Empty);
+                String mlsId = viewOrder.GetProperty("mlsId", string.Empty);
                 if (!label.ToLower().Contains(filter) &&
-                    !note.ToLower().Contains(filter))
+                    !note.ToLower().Contains(filter) &&
+                    !mlsId.ToLower().Contains(filter))
                     continue;
 
                 //id = 20a6b755-58b2-4616-89de-92faf1ed6814
@@ -772,7 +800,7 @@ namespace SuperAdminConsole
                 //expiresOn = 01/11/2012 12:00:00 AM
                 //enabled = True
                 //product = 0
-                //mlsId = 
+                //mlsId = "W2847767"
                 //vTourUrl = 
                 //targetObjectType = 0
                 //targetObjectId = 8516
@@ -1034,7 +1062,8 @@ namespace SuperAdminConsole
             {
                 newUser = nodeToDropIn.Tag as User;
                 nodeToDropIn.Expand();
-                nodeToDropIn = nodeToDropIn.Nodes[0];
+                if (nodeToDropIn.Nodes.Count > 0)
+                    nodeToDropIn = nodeToDropIn.Nodes[0];
             }
             else if (nodeToDropIn.Level == 1)
             {

@@ -41,9 +41,6 @@
             this.copyURLToClipboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.LoadTheLinkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.editNotesForThisItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.editMLSURLForThisItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.composePromoEmailToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.buttonRefresh = new System.Windows.Forms.Button();
             this.pnlStartupShutdown = new System.Windows.Forms.Panel();
@@ -130,12 +127,9 @@
             this.copyURLToClipboardToolStripMenuItem,
             this.LoadTheLinkToolStripMenuItem,
             this.toolStripSeparator3,
-            this.editNotesForThisItemToolStripMenuItem,
-            this.editMLSURLForThisItemToolStripMenuItem,
-            this.toolStripSeparator4,
             this.composePromoEmailToolStripMenuItem});
             this.contextMenuStripViewOrder.Name = "contextMenuStripViewOrder";
-            this.contextMenuStripViewOrder.Size = new System.Drawing.Size(251, 248);
+            this.contextMenuStripViewOrder.Size = new System.Drawing.Size(251, 220);
             this.contextMenuStripViewOrder.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripViewOrder_Opening);
             // 
             // toolStripMenuItemEnableViewOrder
@@ -201,25 +195,6 @@
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(247, 6);
-            // 
-            // editNotesForThisItemToolStripMenuItem
-            // 
-            this.editNotesForThisItemToolStripMenuItem.Name = "editNotesForThisItemToolStripMenuItem";
-            this.editNotesForThisItemToolStripMenuItem.Size = new System.Drawing.Size(250, 22);
-            this.editNotesForThisItemToolStripMenuItem.Text = "Edit Notes for This Item...";
-            this.editNotesForThisItemToolStripMenuItem.Click += new System.EventHandler(this.editNotesForThisItemToolStripMenuItem_Click);
-            // 
-            // editMLSURLForThisItemToolStripMenuItem
-            // 
-            this.editMLSURLForThisItemToolStripMenuItem.Name = "editMLSURLForThisItemToolStripMenuItem";
-            this.editMLSURLForThisItemToolStripMenuItem.Size = new System.Drawing.Size(250, 22);
-            this.editMLSURLForThisItemToolStripMenuItem.Text = "Edit MLS URL for This Item...";
-            this.editMLSURLForThisItemToolStripMenuItem.Click += new System.EventHandler(this.editMLSURLForThisItemToolStripMenuItem_Click);
-            // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(247, 6);
             // 
             // composePromoEmailToolStripMenuItem
             // 
@@ -405,7 +380,7 @@
             this.listViewLocalPP.ContextMenuStrip = this.contextMenuStripAccountProperty;
             this.listViewLocalPP.FullRowSelect = true;
             this.listViewLocalPP.GridLines = true;
-            this.listViewLocalPP.Location = new System.Drawing.Point(215, 290);
+            this.listViewLocalPP.Location = new System.Drawing.Point(211, 290);
             this.listViewLocalPP.MultiSelect = false;
             this.listViewLocalPP.Name = "listViewLocalPP";
             this.listViewLocalPP.Size = new System.Drawing.Size(206, 133);
@@ -766,9 +741,6 @@
         private System.Windows.Forms.ToolStripMenuItem changePropertyValueToolStripMenuItem;
         private System.Windows.Forms.ColumnHeader buildingAdd;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.ToolStripMenuItem editNotesForThisItemToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem editMLSURLForThisItemToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem composePromoEmailToolStripMenuItem;
         private System.Windows.Forms.TextBox textBoxFilter;
         private System.Windows.Forms.Label labelStreetName;

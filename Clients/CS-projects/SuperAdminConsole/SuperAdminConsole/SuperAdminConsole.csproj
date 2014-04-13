@@ -61,6 +61,12 @@
     <Compile Include="AccountPropertyForm.Designer.cs">
       <DependentUpon>AccountPropertyForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="EmailSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EmailSettings.Designer.cs">
+      <DependentUpon>EmailSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="EmailViewOrder.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -125,6 +131,9 @@
     </Compile>
     <EmbeddedResource Include="AccountPropertyForm.resx">
       <DependentUpon>AccountPropertyForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EmailSettings.resx">
+      <DependentUpon>EmailSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EmailViewOrder.resx">
       <DependentUpon>EmailViewOrder.cs</DependentUpon>
