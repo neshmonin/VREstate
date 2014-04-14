@@ -20,6 +20,7 @@ namespace SuperAdminConsole
         {
             Creation,
             Transfer,
+            Copy,
             Update
         }
 
@@ -85,6 +86,9 @@ namespace SuperAdminConsole
         public User theUser { private set; get; }
 
         ClientData theOrder = null;
+
+        public ClientData TheViewOrder { get { return theOrder; } }
+
         ChangeReason theReason;
         Developer m_developer = null;
 
@@ -133,7 +137,9 @@ namespace SuperAdminConsole
             {
                 tabControlSteps.SelectTab("tabPageViewOrderOptions");
                 addressVerified = true;
-                ViewOrder.ViewOrderOptions options = theOrder.GetProperty<ViewOrder.ViewOrderOptions>("options", ViewOrder.ViewOrderOptions.FloorPlan);
+                ViewOrder.ViewOrderOptions options = 
+                    theOrder.GetProperty<ViewOrder.ViewOrderOptions>("options", 
+                                                                     ViewOrder.ViewOrderOptions.FloorPlan);
                 if (options != ViewOrder.ViewOrderOptions.FloorPlan)
                     textVTourURL.Text = theOrder["vTourUrl"] as string;
 
@@ -157,6 +163,10 @@ namespace SuperAdminConsole
                 case ChangeReason.Transfer:
                     price = Properties.Settings.Default.PriceOf3DListing;
                     this.Text = "Transferring viewOrder to Another Account";
+                    break;
+                case ChangeReason.Copy:
+                    price = Properties.Settings.Default.PriceOf3DListing;
+                    this.Text = "Creating a Private Copy of the Public Listing under Another Account";
                     break;
                 case ChangeReason.Update:
                     price = Properties.Settings.Default.ChangeViewOrderOptionsFee;
@@ -333,7 +343,8 @@ namespace SuperAdminConsole
                         buttonPayment.Enabled = !paymentSkip &&
                                                 numericUpDownPrice.Value > 0M &&
                                                  paymentRefId == string.Empty;
-                        buttonFinish.Enabled = theReason == ChangeReason.Transfer;
+                        buttonFinish.Enabled = theReason == ChangeReason.Transfer ||
+                                               theReason == ChangeReason.Copy;
                     }
 
                     groupBoxListingOptions.Enabled = paymentRefId == string.Empty;
@@ -500,6 +511,11 @@ namespace SuperAdminConsole
 
         private void buttonGenerateURL_Click(object sender, EventArgs e)
         {
+            createViewOrder();
+        }
+
+        private void createViewOrder()
+        {
             if (!viewOrderUrlGenerated)
             {
                 // https://vrt.3dcondox.com/program?
@@ -623,7 +639,8 @@ namespace SuperAdminConsole
                                                                                 "suite/" + PropertyID,
                                                                                 "",
                                                                                 suiteData);
-                            if (HttpStatusCode.OK == resp.ResponseCode)
+                            if (HttpStatusCode.OK == resp.ResponseCode ||
+                                HttpStatusCode.NotModified == resp.ResponseCode)
                             {
                                 viewOrderUrlGenerated = true;
                                 textBoxViewOrderURL.Text = viewOrderUrl;
@@ -708,27 +725,39 @@ namespace SuperAdminConsole
 
         private void buttonFinish_Click(object sender, EventArgs e)
         {
-            if (theReason == ChangeReason.Transfer)
+            ViewOrder.ViewOrderOptions options =
+                        textVTourURL.Text == string.Empty ? ViewOrder.ViewOrderOptions.FloorPlan :
+                                                            ViewOrder.ViewOrderOptions.ExternalTour;
+            switch (theReason)
             {
-                DateTime expiresOn = DateTime.Now.AddDays((double)numericUpDownDaysValid.Value + 1);
-                expiresOn = System.TimeZone.CurrentTimeZone.ToUniversalTime(expiresOn.Date);
-                theOrder["expiresOn"] = expiresOn;
-                theOrder["ownerId"] = theUser.AutoID;
-                theOrder["note"] = textBoxNote.Text;
-            }
-
-            if (theReason != ChangeReason.Creation)
-            {
-                ViewOrder.ViewOrderOptions options = 
-                    textVTourURL.Text == string.Empty ? ViewOrder.ViewOrderOptions.FloorPlan :
-                                                        ViewOrder.ViewOrderOptions.ExternalTour;
-                //bool changed = false;
-                //theOrder.UpdateProperty("options", options, ref changed);
-                theOrder["options"] = (int)options;
-                theOrder["vTourUrl"] = textVTourURL.Text;
-                theOrder["mlsId"] = textBoxMLS.Text;
-                theOrder["infoUrl"] = textMoreInfoUrl.Text;
-                theOrder["note"] = textBoxNote.Text;
+                case ChangeReason.Copy:
+                    DateTime expiresOn = DateTime.Now.AddDays((double)numericUpDownDaysValid.Value);
+                    expiresOn = System.TimeZone.CurrentTimeZone.ToUniversalTime(expiresOn.Date);
+                    radioButtonPrivateListing.Checked = true;
+                    createViewOrder();
+                    theOrder["options"] = (int)options;
+                    theOrder["expiresOn"] = expiresOn;
+                    theOrder["ownerId"] = theUser.AutoID;
+                    theOrder["note"] = textBoxNote.Text;
+                    theOrder["vTourUrl"] = textVTourURL.Text;
+                    theOrder["infoUrl"] = textMoreInfoUrl.Text;
+                    theOrder["product"] = ViewOrder.ViewOrderProduct.PrivateListing;
+                    break;
+                case ChangeReason.Update:
+                case ChangeReason.Transfer:
+                    theOrder["options"] = (int)options;
+                    theOrder["ownerId"] = theUser.AutoID;
+                    theOrder["note"] = textBoxNote.Text;
+                    theOrder["vTourUrl"] = textVTourURL.Text;
+                    theOrder["infoUrl"] = textMoreInfoUrl.Text;
+                    break;
+                case ChangeReason.Creation:
+                    theOrder["options"] = (int)options;
+                    theOrder["vTourUrl"] = textVTourURL.Text;
+                    theOrder["infoUrl"] = textMoreInfoUrl.Text;
+                    theOrder["mlsId"] = textBoxMLS.Text;
+                    theOrder["note"] = textBoxNote.Text;
+                    break;
             }
 
             DialogResult = System.Windows.Forms.DialogResult.OK;

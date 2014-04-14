@@ -860,7 +860,11 @@ namespace SuperAdminConsole
                 }
 
                 ListViewItem orderItem = new ListViewItem(subitems);
-                orderItem.Font = ListViewOrders.Font.Clone() as Font;
+                FontStyle fontStyle = FontStyle.Regular;
+                if (viewOrder.GetProperty("note", "") != "")
+                    fontStyle = FontStyle.Italic;
+
+                orderItem.Font = new Font(ListViewOrders.Font, fontStyle);
                 if (expiredOn.CompareTo(DateTime.Now.AddDays(2.0)) < 0)
                     orderItem.ForeColor = Color.Red;
                 else
@@ -1024,27 +1028,42 @@ namespace SuperAdminConsole
             UpdateState();
         }
 
+        DragDropEffects dragDropState = DragDropEffects.None;
+
         private void listViewOrders_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button != System.Windows.Forms.MouseButtons.Left)
-                return;
+            if (ListViewOrders.SelectedItems.Count == 0) return;
+
+            switch (e.Button)
+            {
+                case System.Windows.Forms.MouseButtons.Left:
+                    dragDropState = DragDropEffects.Move;
+                    break;
+                case System.Windows.Forms.MouseButtons.Right:
+                    ClientData viewOrderToCopy = ListViewOrders.SelectedItems[0].Tag as ClientData;
+                    if (viewOrderToCopy == null) return;
+                    if (viewOrderToCopy.GetProperty("product", "") != "PublicListing")
+                        return;
+
+                    dragDropState = DragDropEffects.Copy;
+                    break;
+            }
 
             //if (m_agent.UserRole != User.Role.SuperAdmin &&
             //    m_agent.UserRole != User.Role.DeveloperAdmin)
             //    return;
 
-            if (ListViewOrders.SelectedItems.Count != 0)
-                ListViewOrders.DoDragDrop(ListViewOrders.SelectedItems[0], DragDropEffects.Move);
+            ListViewOrders.DoDragDrop(ListViewOrders.SelectedItems[0], dragDropState);
         }
 
         private void listViewOrders_DragOver(object sender, DragEventArgs e)
         {
-            e.Effect = DragDropEffects.Move;
+            e.Effect = dragDropState;
         }
 
         private void treeViewAccounts_DragEnter(object sender, DragEventArgs e)
         {
-            e.Effect = DragDropEffects.Move;
+            e.Effect = dragDropState;
         }
 
         private void treeViewAccounts_DragDrop(object sender, DragEventArgs e)
@@ -1053,7 +1072,8 @@ namespace SuperAdminConsole
                 treeViewAccounts.PointToClient(new Point(e.X, e.Y)));
             if (nodeToDropIn == null)
             {
-                e.Effect = DragDropEffects.None;
+                dragDropState = DragDropEffects.None;
+                e.Effect = dragDropState;
                 return;
             }
 
@@ -1075,7 +1095,8 @@ namespace SuperAdminConsole
 
             if (newUser == null)
             {
-                e.Effect = DragDropEffects.None;
+                dragDropState = DragDropEffects.None;
+                e.Effect = dragDropState;
                 return;
             }
 
@@ -1092,24 +1113,38 @@ namespace SuperAdminConsole
 
             if (lvItem == null)
             {
-                e.Effect = DragDropEffects.None;
+                dragDropState = DragDropEffects.None;
+                e.Effect = dragDropState;
                 return;
             }
 
-            ClientData viewOrderToMove = lvItem.Tag as ClientData;
-            if (viewOrderToMove == null)
+            ClientData viewOrderSource = lvItem.Tag as ClientData;
+            if (viewOrderSource == null)
             {
-                e.Effect = DragDropEffects.None;
+                dragDropState = DragDropEffects.None;
+                e.Effect = dragDropState;
                 return;
             }
 
-            SetViewOrder updateViewOrder = new SetViewOrder(m_agent, 
-                                                            viewOrderToMove, 
-                                                            SetViewOrder.ChangeReason.Transfer,
+            SetViewOrder.ChangeReason changeReason = SetViewOrder.ChangeReason.Transfer;
+            ClientData viewOrderDest;
+            if (dragDropState == DragDropEffects.Copy)
+            {
+                viewOrderDest = new ClientData();
+                viewOrderDest.Merge(viewOrderSource);
+                changeReason = SetViewOrder.ChangeReason.Copy;
+            }
+            else
+                viewOrderDest = viewOrderSource;
+
+            SetViewOrder updateViewOrder = new SetViewOrder(m_agent,
+                                                            viewOrderDest,
+                                                            changeReason,
                                                             m_currentDeveloper);
             if (updateViewOrder.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
-                e.Effect = DragDropEffects.None;
+                dragDropState = DragDropEffects.None;
+                e.Effect = dragDropState;
                 return;
             }
 
@@ -1117,27 +1152,46 @@ namespace SuperAdminConsole
             //DateTime expiresOn = DateTime.Now.AddDays(90.0);
             //viewOrderToMove["expiresOn"] = expiresOn;
 
-            string viewOrderId = viewOrderToMove.GetProperty("id", string.Empty);
+            string viewOrderId = viewOrderDest.GetProperty("id", string.Empty);
             if (viewOrderId == string.Empty)
             {
-                e.Effect = DragDropEffects.None;
+                dragDropState = DragDropEffects.None;
+                e.Effect = dragDropState;
                 return;
             }
 
             viewOrderId = viewOrderId.Replace("-", string.Empty);
-            ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
-                                                                "viewOrder/" + viewOrderId,
-                                                                "pr=" + updateViewOrder.paymentRefId,
-                                                                viewOrderToMove);
-
-            if (HttpStatusCode.OK != resp.ResponseCode)
+            if (dragDropState == DragDropEffects.Move)
             {
-                MessageBox.Show("Cannot transfer this viewOrder to this account");
-                UpdateState();
+                ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
+                                                                  "viewOrder/" + viewOrderId,
+                                                                  "pr=" + updateViewOrder.paymentRefId,
+                                                                  viewOrderDest);
+                if (HttpStatusCode.OK != resp.ResponseCode)
                 {
-                    e.Effect = DragDropEffects.None;
+                    string msg = string.Format("Cannot {0} this viewOrder to this account",
+                        dragDropState == DragDropEffects.Move ? "transfer" : "copy");
+                    MessageBox.Show(msg);
+                    UpdateState();
+
+                    dragDropState = DragDropEffects.None;
+                    e.Effect = dragDropState;
                     return;
                 }
+            }
+            else // copy
+            {
+                // update the notes of the source with the destination info:
+                String note = viewOrderSource.GetProperty("note", string.Empty);
+                note += "====== " + DateTime.Now.ToString() + " ========\r\n";
+                note += "Copied to " + m_agent.NickName + "(ID=" + m_agent.AutoID + ")\r\n";
+                note += "URL=" + updateViewOrder.ViewOrderURL + "\r\n";
+                note += "Valid for " + updateViewOrder.DaysValid + " days\r\n";
+                viewOrderSource["note"] = note;
+                ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
+                                                                  "viewOrder/" + viewOrderId,
+                                                                  null,
+                                                                  viewOrderSource);
             }
 
             EmailViewOrder form = EmailViewOrder.Create(viewOrderId,
@@ -1145,14 +1199,17 @@ namespace SuperAdminConsole
                                                         EmailViewOrder.Template.OrderConfirmation);
             if (form == null)
             {
-                e.Effect = DragDropEffects.None;
+                dragDropState = DragDropEffects.None;
+                e.Effect = dragDropState;
                 return;
             }
 
             if (form.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 UpdateState();
-                MessageBox.Show("The viewOrder has been transferred successfully!", "ViewOrder Transferred",
+                string werb = dragDropState == DragDropEffects.Move ? "transferred" : "copied";
+                string msg = string.Format("The viewOrder has been {0} successfully!", werb);
+                MessageBox.Show(msg, "ViewOrder " + werb,
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
@@ -1198,13 +1255,14 @@ namespace SuperAdminConsole
                                                             m_currentDeveloper);
             if (updateViewOrder.ShowDialog(this) == DialogResult.OK)
             {
-                string viewOrderId = viewOrderToUpdate.GetProperty("id", string.Empty);
+                string viewOrderId = updateViewOrder.TheViewOrder.GetProperty("id", string.Empty);
                 viewOrderId = viewOrderId.Replace("-", string.Empty);
-                string param = string.IsNullOrEmpty(updateViewOrder.paymentRefId) ? string.Empty : "pr=" + updateViewOrder.paymentRefId;
+                string param = string.IsNullOrEmpty(updateViewOrder.paymentRefId) ? 
+                    string.Empty : "pr=" + updateViewOrder.paymentRefId;
                 ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
                                                                     "viewOrder/" + viewOrderId,
                                                                     param,
-                                                                    viewOrderToUpdate);
+                                                                    updateViewOrder.TheViewOrder);
                 refreshOrders();
             }
         }
