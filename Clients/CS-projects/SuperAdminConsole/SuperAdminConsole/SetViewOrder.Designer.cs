@@ -695,6 +695,7 @@
             this.richTextBoxListingPrice.Size = new System.Drawing.Size(77, 21);
             this.richTextBoxListingPrice.TabIndex = 26;
             this.richTextBoxListingPrice.Text = "";
+            this.richTextBoxListingPrice.TextChanged += new System.EventHandler(this.updateStateEvent);
             // 
             // label16
             // 
@@ -850,6 +851,7 @@
             this.textVTourURL.Name = "textVTourURL";
             this.textVTourURL.Size = new System.Drawing.Size(384, 20);
             this.textVTourURL.TabIndex = 10;
+            this.textVTourURL.TextChanged += new System.EventHandler(this.updateStateEvent);
             // 
             // tabPageGenerateViewOrder
             // 

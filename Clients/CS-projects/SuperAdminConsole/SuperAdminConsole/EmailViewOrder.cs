@@ -32,6 +32,38 @@ namespace SuperAdminConsole
         string body = string.Empty;
         static SmtpClient smtp;
         static string readableName;
+        string email;
+        const string ParameterOpen = "<";
+        const string ParameterClose = ">";
+        string Parameters = ParameterOpen + "..." + ParameterClose + ParameterOpen + "..." + ParameterClose;
+
+        Dictionary<Word, string> wordsDictionary = new Dictionary<Word, string>();
+        Dictionary<Condition, string> conditionsDictionary = new Dictionary<Condition, string>();
+
+        public enum Word
+        {
+            ADDRESS_TO,
+            VIEWORDER_ADDRESS,
+            VIEWORDER_URL,
+            PRICE_NO_TAX,
+            DAYS_VALID,
+            VALID_UNTIL_TIME_DAY,
+            TODAYS_DATE,
+            MLS_NUMBER,
+            SIGNATURE,
+            PRODUCT_NAME,
+            PAYMENT_REF,
+            VTOUR_URL,
+            TAX,
+            PAID_GROSS
+        }
+
+        public enum Condition
+        {
+            IF_EQUAL,
+            IF_NOTEQUAL,
+            ENDIF
+        }
 
         public static EmailViewOrder Create(string viewOrderId, string payRefId, Template template)
         {
@@ -56,27 +88,53 @@ namespace SuperAdminConsole
         public EmailViewOrder(Template template)
         {
             InitializeComponent();
-            string email = string.IsNullOrEmpty(theUser.PrimaryEmailAddress) ? theUser.NickName : theUser.PrimaryEmailAddress;
             if (template == Template.OrderConfirmation)
             {
+                email = string.IsNullOrEmpty(theUser.PrimaryEmailAddress) ? theUser.NickName : theUser.PrimaryEmailAddress;
                 textBoxAddressTo.Text = email;
+            }
+
+            wordsDictionary.Add(Word.ADDRESS_TO, "{ADDRESS_TO}");
+            wordsDictionary.Add(Word.VIEWORDER_ADDRESS, "{VIEWORDER_ADDRESS}");
+            wordsDictionary.Add(Word.VIEWORDER_URL, "{VIEWORDER_URL}");
+            wordsDictionary.Add(Word.PRICE_NO_TAX, "{PRICE_NO_TAX}");
+            wordsDictionary.Add(Word.DAYS_VALID, "{DAYS_VALID}");
+            wordsDictionary.Add(Word.VALID_UNTIL_TIME_DAY, "{VALID_UNTIL_TIME_DAY}");
+            wordsDictionary.Add(Word.TODAYS_DATE, "{TODAYS_DATE}");
+            wordsDictionary.Add(Word.MLS_NUMBER, "{MLS_NUMBER}");
+            wordsDictionary.Add(Word.SIGNATURE, "{SIGNATURE}");
+            wordsDictionary.Add(Word.PRODUCT_NAME, "{PRODUCT_NAME}");
+            wordsDictionary.Add(Word.PAYMENT_REF, "{PAYMENT_REF}");
+            wordsDictionary.Add(Word.VTOUR_URL, "{VTOUR_URL}");
+            wordsDictionary.Add(Word.TAX, "{TAX}");
+            wordsDictionary.Add(Word.PAID_GROSS, "{PAID_GROSS}");
+
+            conditionsDictionary.Add(Condition.IF_EQUAL, "{IF_EQUAL}" + Parameters);
+            conditionsDictionary.Add(Condition.IF_NOTEQUAL, "{IF_NOTEQUAL}" + Parameters);
+            conditionsDictionary.Add(Condition.ENDIF, "{ENDIF}");
+
+            loadFromTemplate(template);
+            theTemplate = template;
+            UpdateState();
+        }
+
+        private void loadFromTemplate(Template template)
+        {
+            if (template == Template.OrderConfirmation)
+            {
                 body = Properties.Settings.Default.orderConfirmationTemplate;
-                subject = "Interactive 3D Listing Order Confirmation";
+                subject = Properties.Settings.Default.defaultConfirmationSubject;
                 textBody.Focus();
             }
             else if (template == Template.ListingPromotion)
             {
                 body = Properties.Settings.Default.listingPromoTemplate;
-                subject = PreprocessTemplate(Properties.Settings.Default.defaultPromoSubject);
+                subject = Properties.Settings.Default.defaultPromoSubject;
                 textBoxAddressTo.Focus();
             }
 
             textBody.Text = PreprocessTemplate(body);
-
-            theTemplate = template;
-            textBoxAddressTo.ReadOnly = theUser.UserRole == User.Role.SellingAgent && !string.IsNullOrEmpty(email);
-            UpdateState();
-            textBoxSubject.Text = subject;
+            textBoxSubject.Text = PreprocessTemplate(subject);
         }
 
         private void buttonSend_Click(object sender, EventArgs e)
@@ -123,6 +181,8 @@ namespace SuperAdminConsole
         
         private void UpdateState()
         {
+            textBoxAddressTo.ReadOnly = theUser.UserRole == 
+                User.Role.SellingAgent && !string.IsNullOrEmpty(email);
             int indexOfAT = textBoxAddressTo.Text.IndexOf('@');
             int indexOfDOT = textBoxAddressTo.Text.LastIndexOf('.');
             buttonSend.Enabled = textBoxAddressTo.Text.Length != 0 &&
@@ -136,8 +196,67 @@ namespace SuperAdminConsole
             UpdateState();
         }
 
+        private string ProcessCondition(string body, Condition cond)
+        {
+            /* ========== A sample of a condition =========
+            {IF_NOTEQUAL}<{PAID_GROSS}><00.00>
+            Price:    ${PRICE_NO_TAX}
+            HST:      ${TAX}
+            -------------------
+            Total:    ${PAID_GROSS}
+            {ENDIF}
+            =============================================== */
+            string strippedCondition = conditionsDictionary[cond].Replace(Parameters, "");
+            while (body.Contains(strippedCondition))
+            {
+                int start_IF = body.IndexOf(strippedCondition, 0);
+                body = body.Remove(start_IF, strippedCondition.Length);
+
+                int start_ENDIF = body.IndexOf(conditionsDictionary[Condition.ENDIF], 0);
+                body = body.Remove(start_ENDIF, conditionsDictionary[Condition.ENDIF].Length);
+
+                string condition_body = body.Substring(start_IF, start_ENDIF - start_IF);
+                body = body.Remove(start_IF, start_ENDIF - start_IF);
+
+                // extract the first parameter:
+                int start_param_1 = condition_body.IndexOf(ParameterOpen);
+                int end_param_1 = condition_body.IndexOf(ParameterClose, start_param_1);
+                string param_1 = condition_body.Substring(start_param_1 + 1, end_param_1 - start_param_1 - 1);
+                param_1 = PreprocessTemplate(param_1);
+
+                int start_param_2 = condition_body.IndexOf(ParameterOpen, end_param_1);
+                int end_param_2 = condition_body.IndexOf(ParameterClose, start_param_2);
+                string param_2 = condition_body.Substring(start_param_2 + 1, end_param_2 - start_param_2 - 1);
+                param_2 = PreprocessTemplate(param_2);
+
+                bool conditionValue = true;
+                switch (cond)
+                {
+                    case Condition.IF_EQUAL:
+                        conditionValue = param_1 == param_2;
+                        break;
+                    case Condition.IF_NOTEQUAL:
+                        conditionValue = param_1 != param_2;
+                        break;
+                }
+
+                if (conditionValue)
+                {
+                    string conditionText = condition_body.Substring(end_param_2+1);
+                    conditionText = PreprocessTemplate(conditionText);
+                    body = body.Insert(start_IF, conditionText);
+                }
+            }
+
+            return body;
+        }
+
         private string PreprocessTemplate(string body)
         {
+            // First pass - to process the conditions (if any)
+            body = ProcessCondition(body, Condition.IF_EQUAL);
+            body = ProcessCondition(body, Condition.IF_NOTEQUAL);
+
             // TODO: get HST and Price from transaction
             decimal taxRate = Properties.Settings.Default.SalesTaxValuePercent / 100M;
             decimal price = 0M;
@@ -179,38 +298,64 @@ namespace SuperAdminConsole
                 }
             }
 
-            if (body.Contains("{ADDRESS_TO}"))
-                body = body.Replace("{ADDRESS_TO}", textBoxAddressTo.Text);
-            if (body.Contains("{VIEWORDER_ADDRESS}"))
-                body = body.Replace("{VIEWORDER_ADDRESS}", readableName);
-            if (body.Contains("{VIEWORDER_URL}"))
-                body = body.Replace("{VIEWORDER_URL}", theOrder.ViewOrderURL);
-            if (body.Contains("{PRICE_NO_TAX}"))
-                body = body.Replace("{PRICE_NO_TAX}", string.Format("{0:00.00}", Properties.Settings.Default.PriceOf3DListing));
-            if (body.Contains("{DAYS_VALID}"))
-                body = body.Replace("{DAYS_VALID}", ((theOrder.ExpiresOn - DateTime.Now).Days + 1).ToString());
-            if (body.Contains("{VALID_UNTIL_TIME_DAY}"))
-                body = body.Replace("{VALID_UNTIL_TIME_DAY}", theOrder.ExpiresOn.ToShortTimeString() + 
+            if (body.Contains(wordsDictionary[Word.ADDRESS_TO]))
+                body = body.Replace(wordsDictionary[Word.ADDRESS_TO], textBoxAddressTo.Text);
+            if (body.Contains(wordsDictionary[Word.VIEWORDER_ADDRESS]))
+                body = body.Replace(wordsDictionary[Word.VIEWORDER_ADDRESS], readableName);
+            if (body.Contains(wordsDictionary[Word.VIEWORDER_URL]))
+                body = body.Replace(wordsDictionary[Word.VIEWORDER_URL], theOrder.ViewOrderURL);
+            if (body.Contains(wordsDictionary[Word.PRICE_NO_TAX]))
+                body = body.Replace(wordsDictionary[Word.PRICE_NO_TAX], string.Format("{0:00.00}", Properties.Settings.Default.PriceOf3DListing));
+            if (body.Contains(wordsDictionary[Word.DAYS_VALID]))
+                body = body.Replace(wordsDictionary[Word.DAYS_VALID], ((theOrder.ExpiresOn - DateTime.Now).Days + 1).ToString());
+            if (body.Contains(wordsDictionary[Word.VALID_UNTIL_TIME_DAY]))
+                body = body.Replace(wordsDictionary[Word.VALID_UNTIL_TIME_DAY], theOrder.ExpiresOn.ToShortTimeString() + 
                                                        " of " + theOrder.ExpiresOn.ToLongDateString());
-            if (body.Contains("{TODAYS_DATE}"))
-                body = body.Replace("{TODAYS_DATE}", DateTime.Now.ToShortDateString());
-            if (body.Contains("{MLS_NUMBER}"))
-                body = body.Replace("{MLS_NUMBER}", mlsId);
-            if (body.Contains("{SIGNATURE}"))
-                body = body.Replace("{SIGNATURE}", signature);
-            if (body.Contains("{PRODUCT_NAME}"))
-                body = body.Replace("{PRODUCT_NAME}", product);
-            if (body.Contains("{PAYMENT_REF}"))
-                body = body.Replace("{PAYMENT_REF}", paymentRefId);
-            if (body.Contains("{VTOUR_URL}"))
-                body = body.Replace("{VTOUR_URL}", theOrder.Options == ViewOrder.ViewOrderOptions.FloorPlan ? 
+            if (body.Contains(wordsDictionary[Word.TODAYS_DATE]))
+                body = body.Replace(wordsDictionary[Word.TODAYS_DATE], DateTime.Now.ToShortDateString());
+            if (body.Contains(wordsDictionary[Word.MLS_NUMBER]))
+                body = body.Replace(wordsDictionary[Word.MLS_NUMBER], mlsId);
+            if (body.Contains(wordsDictionary[Word.SIGNATURE]))
+                body = body.Replace(wordsDictionary[Word.SIGNATURE], signature);
+            if (body.Contains(wordsDictionary[Word.PRODUCT_NAME]))
+                body = body.Replace(wordsDictionary[Word.PRODUCT_NAME], product);
+            if (body.Contains(wordsDictionary[Word.PAYMENT_REF]))
+                body = body.Replace(wordsDictionary[Word.PAYMENT_REF], paymentRefId);
+            if (body.Contains(wordsDictionary[Word.VTOUR_URL]))
+                body = body.Replace(wordsDictionary[Word.VTOUR_URL], theOrder.Options == ViewOrder.ViewOrderOptions.FloorPlan ? 
                                                     "<none>" : theOrder.VTourUrl);
-            if (body.Contains("{TAX}"))
-                body = body.Replace("{TAX}", string.Format("{0:00.00}", tax));
-            if (body.Contains("{PAID_GROSS}"))
-                body = body.Replace("{PAID_GROSS}", string.Format("{0:00.00}", trInfo != null ? 
+            if (body.Contains(wordsDictionary[Word.TAX]))
+                body = body.Replace(wordsDictionary[Word.TAX], string.Format("{0:00.00}", tax));
+            if (body.Contains(wordsDictionary[Word.PAID_GROSS]))
+                body = body.Replace(wordsDictionary[Word.PAID_GROSS], string.Format("{0:00.00}", trInfo != null ? 
                                                     trInfo.GrossAmount : 0.00M));
             return body;
+        }
+
+        private void buttonSettings_Click(object sender, EventArgs e)
+        {
+            EmailSettings emailSettings = new EmailSettings(subject, body, 
+                                                    wordsDictionary.Values.ToList(),
+                                                    conditionsDictionary.Values.ToList());
+
+            if (emailSettings.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+            {
+                if (theTemplate == Template.OrderConfirmation)
+                {
+                    Properties.Settings.Default.orderConfirmationTemplate = emailSettings.Body;
+                    Properties.Settings.Default.defaultConfirmationSubject = emailSettings.Subject;
+                }
+                else if (theTemplate == Template.ListingPromotion)
+                {
+                    Properties.Settings.Default.listingPromoTemplate = emailSettings.Body;
+                    Properties.Settings.Default.defaultPromoSubject = emailSettings.Subject;
+                }
+                Properties.Settings.Default.Save();
+
+                loadFromTemplate(theTemplate);
+
+                UpdateState();
+            }
         }
     }
 }

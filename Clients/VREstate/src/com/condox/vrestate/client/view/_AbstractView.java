@@ -65,19 +65,9 @@ public abstract class _AbstractView implements I_AbstractView {
 				m_timeoutTimer.schedule(2 * 60 * 1000);
 			else
 				m_timeoutTimer.schedule(TIMEOUTINTERVAL);
-	}
+		}
 	}
 	
-//	public static void onTimerReset() {
-//		_AbstractView.ResetTimeOut();
-//		// Window.alert("VR:onTimerReset");
-//	}
-//
-//	public static void onTimerTimeout() {
-//		_AbstractView.PopToTheBottom();
-//		// Window.alert("VR:onTimerTimeout");
-//	}
-
 	protected boolean isViewChangedInProgress = false;
 
 	@Override

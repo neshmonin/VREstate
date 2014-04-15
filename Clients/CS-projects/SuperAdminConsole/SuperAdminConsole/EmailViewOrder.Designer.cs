@@ -34,6 +34,7 @@
             this.textBoxSubject = new System.Windows.Forms.TextBox();
             this.textBody = new System.Windows.Forms.TextBox();
             this.buttonSend = new System.Windows.Forms.Button();
+            this.buttonSettings = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // textBoxAddressTo
@@ -91,13 +92,24 @@
             // buttonSend
             // 
             this.buttonSend.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSend.Location = new System.Drawing.Point(569, 22);
+            this.buttonSend.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonSend.Location = new System.Drawing.Point(345, 4);
             this.buttonSend.Name = "buttonSend";
-            this.buttonSend.Size = new System.Drawing.Size(88, 28);
+            this.buttonSend.Size = new System.Drawing.Size(313, 34);
             this.buttonSend.TabIndex = 3;
-            this.buttonSend.Text = "Send";
+            this.buttonSend.Text = "Send this email";
             this.buttonSend.UseVisualStyleBackColor = true;
             this.buttonSend.Click += new System.EventHandler(this.buttonSend_Click);
+            // 
+            // buttonSettings
+            // 
+            this.buttonSettings.Location = new System.Drawing.Point(498, 44);
+            this.buttonSettings.Name = "buttonSettings";
+            this.buttonSettings.Size = new System.Drawing.Size(160, 23);
+            this.buttonSettings.TabIndex = 4;
+            this.buttonSettings.Text = "Change the defaults...";
+            this.buttonSettings.UseVisualStyleBackColor = true;
+            this.buttonSettings.Click += new System.EventHandler(this.buttonSettings_Click);
             // 
             // EmailViewOrder
             // 
@@ -107,6 +119,7 @@
             this.AutoScroll = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(670, 677);
+            this.Controls.Add(this.buttonSettings);
             this.Controls.Add(this.buttonSend);
             this.Controls.Add(this.textBody);
             this.Controls.Add(this.label2);
@@ -129,5 +142,6 @@
         private System.Windows.Forms.TextBox textBoxSubject;
         private System.Windows.Forms.TextBox textBody;
         private System.Windows.Forms.Button buttonSend;
+        private System.Windows.Forms.Button buttonSettings;
     }
 }

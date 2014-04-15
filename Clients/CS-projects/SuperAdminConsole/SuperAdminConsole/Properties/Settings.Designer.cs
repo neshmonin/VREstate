@@ -121,18 +121,6 @@ namespace SuperAdminConsole.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("We created Interactive 3D Listing for this property:\r\n{0}\r\nIt is free, just try i" +
-            "t!\r\nThis link will die in {1} days. If you want to keep it, send email to sales@" +
-            "3DcondoX.com.  \r\nFor more info see http://youtu.be/byMQRkqmFmU\r\n  Thanks, 3dcond" +
-            "ox.com\r\n")]
-        public string the300charsTemplate {
-            get {
-                return ((string)(this["the300charsTemplate"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("3D Condo Explorer team\r\nwww.3dcondox.com\r\nsales@3DcondoX.com\r\n1-855-332-6630 x.2\r" +
             "\n")]
         public string defaultSignature {
@@ -143,44 +131,67 @@ namespace SuperAdminConsole.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Check this out - new 3D Virtual Tour, and free!")]
-        public string defaultPromoSubject {
+        [global::System.Configuration.DefaultSettingValueAttribute("365")]
+        public int defaultDaysValidPermanent {
             get {
-                return ((string)(this["defaultPromoSubject"]));
+                return ((int)(this["defaultDaysValidPermanent"]));
             }
         }
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"We created an Interactive 3D Listing for your {MLS_NUMBER}:
+        {VIEWORDER_URL}
+This link will die in {DAYS_VALID} days. If you want to keep it, send email to sales@3DcondoX.com.
+For more info see http://youtu.be/rTLzjlY8HjM
+  Thanks, 3dcondox.com
+")]
+        public string the300charsTemplate {
+            get {
+                return ((string)(this["the300charsTemplate"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("On your listing {VIEWORDER_ADDRESS}")]
+        public string defaultPromoSubject {
+            get {
+                return ((string)(this["defaultPromoSubject"]));
+            }
+            set {
+                this["defaultPromoSubject"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute(@"PLEASE DO NOT REPLY TO THIS MESSAGE.
 
-Dear {0},
+Dear {ADDRESS_TO},
 Thank you for ordering from 3D Condo Explorer Inc!
 
 Here are your order details:
 ---------------------------
-    Order Number: {1}
-    Order Date: {2} 
-    {10} Address:
-        {3}
+    Order Number: {PAYMENT_REF}
+    Order Date: {TODAYS_DATE} 
+    {PRODUCT_NAME} Address:
+        {VIEWORDER_ADDRESS}
 
-Options (to change call Customer Support 1-855-332-6630 ext.2):
-    Inside the Unit: {4}
-    
-You cannot change address of the Interactive 3D Listing, but other options can be changed
+You cannot change address of the {PRODUCT_NAME}, but other options can be changed
 at any time
 
 Interactive 3D Listing URL:
-    {5}
+    {VIEWORDER_URL}
     Please copy-paste this link to use in your MLS listing.
 
-(Note: this Interactive 3D Listing will be valid for {6} days. You can extend this term any time,
+(Note: this Interactive 3D Listing will be valid for {DAYS_VALID} days. You can extend this term any time,
 as many times as you want free of charge - by calling Customer Support 1-855-332-6630 ext.2).
 
-Price:    ${7:00.00}
-HST:      ${8:00.00}
+Price:    ${PRICE_NO_TAX}
+HST:      ${TAX}
 -------------------
-Total:    ${9:00.00}
+Total:    ${PAID_GROSS}
 
 
 We hope you enjoy your purchase!
@@ -192,41 +203,57 @@ The 3D Condo Explorer Sales Team")]
             get {
                 return ((string)(this["orderConfirmationTemplate"]));
             }
+            set {
+                this["orderConfirmationTemplate"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Dear {0},\r\n\r\nI noticed that you posted an MLS listing {7}for the following proper" +
-            "ty:\r\n\r\n    {1}\r\n\r\nLet me introduce \"{9}(TM)\" - new Google Earth-based 3D Virtual" +
-            " Tour. \r\nThis is a new, exciting and breathtaking 3D Virtual Tour, that will gra" +
-            "b everyone.\r\n\r\nTry it right now, it is free for you - just click this link:\r\n\r\n{" +
-            "2}\r\n\r\n   ... or if hesitating - check first this video (http://youtu.be/byMQRkqm" +
-            "FmU).\r\n\r\nDid you watch / try it?\r\n\r\nYes, this is completely NEW product - you ne" +
-            "ver saw anything like this before!\r\nThis is a new way how to present a real esta" +
-            "te! \r\nAnd we give it to you FOR FREE (value of ${3:00.00} - our gift for you) - " +
-            "use it now!\r\nYou can post this link with your MLS record - just like a regular v" +
-            "irtual tour.\r\nOr/and you can email it to your prospects - it is extremely inform" +
-            "ational, presenting 100%\r\naccurate out-of-window view.\r\n\r\nWhere is the catch? No" +
-            " catch! This is a promotional action of the 3D Condo Explorer Inc.\r\n\r\nONLY ONE T" +
-            "HING - PLEASE READ THIS: This Interactive 3D Listing(TM) link is temporary, \r\nif" +
-            " you do nothing, it\'ll automatically die in {4} days (i.e. after {5} \r\nit will s" +
-            "top working). \r\nSo, IF YOU WANT TO KEEP IT, PLEASE COPY THIS MESSAGE AND SEND IT" +
-            " TO sales@3DcondoX.com.\r\n\r\nIf you want more info, call us at:\r\n    1-855-332-663" +
-            "0 (1-855-3d cond0) ext.2 (\"Sales and Marketing\"), 9AM-5PM weekdays\r\n        ... " +
-            "or ...\r\n    email your questions to sales@3DcondoX.com\r\n\r\nWe are glad to help yo" +
-            "u with your highly competitive and challenging business.\r\n\r\nYours,\r\n{8}\r\n{6}")]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"Dear {ADDRESS_TO},
+
+I noticed that you posted an MLS listing {MLS_NUMBER}for the 
+    {VIEWORDER_ADDRESS}
+
+3D Condo Explorer has created an Interactive 3D Listing for this property.
+Interactive 3D Listing is a new amazing way of presenting your real estate using the
+3D Virtual Reality world of Google Earth - check this video to get the idea
+http://youtu.be/rTLzjlY8HjM...
+
+So, here is your Interactive 3D Listing - click it to see how it works:
+
+   {VIEWORDER_URL}
+
+IMPORTANT NOTE: The link above is temporary, if you do nothing, it'll die in {DAYS_VALID} days.
+So, IF YOU WANT TO KEEP IT, PLEASE COPY THIS MESSAGE AND SEND IT TO sales@3DcondoX.com.
+
+For more info visit our website (www.3dcondox.com), or call us at:
+    1-855-332-6630 (1-855-3d cond0) ext.2 (""Sales and Marketing""), 9AM-5PM weekdays
+Also you can just email your questions to sales@3DcondoX.com
+
+We are glad to help you with your highly competitive and challenging business.
+
+Yours,
+{SIGNATURE}
+{TODAYS_DATE}")]
         public string listingPromoTemplate {
             get {
                 return ((string)(this["listingPromoTemplate"]));
             }
+            set {
+                this["listingPromoTemplate"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("365")]
-        public int defaultDaysValidPermanent {
+        [global::System.Configuration.DefaultSettingValueAttribute("Interactive 3D Listing Order Confirmation")]
+        public string defaultConfirmationSubject {
             get {
-                return ((int)(this["defaultDaysValidPermanent"]));
+                return ((string)(this["defaultConfirmationSubject"]));
+            }
+            set {
+                this["defaultConfirmationSubject"] = value;
             }
         }
     }

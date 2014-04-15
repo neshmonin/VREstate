@@ -215,19 +215,36 @@ namespace SuperAdminConsole
             }
             else
             {
-                labelStreetName.Visible = treeViewAccounts.SelectedNode.Text == "ViewOrders";
-                textBoxFilter.Visible = treeViewAccounts.SelectedNode.Text == "ViewOrders";
+                labelStreetName.Visible = treeViewAccounts.SelectedNode.Text == "ViewOrders" ||
+                                          treeViewAccounts.SelectedNode.Text == "-MLS-";
+                textBoxFilter.Visible = treeViewAccounts.SelectedNode.Text == "ViewOrders" ||
+                                          treeViewAccounts.SelectedNode.Text == "-MLS-";
                 if (treeViewAccounts.SelectedNode.Tag as UpdateableBase != null)
                 {
                     if (treeViewAccounts.SelectedNode.Text == "-MLS-")
                         tabControlAccountProperty.SelectTab("tabPageViewOrders");
                     else
-                        tabControlAccountProperty.SelectTab("tabPageInfo");
+                        if (m_agent != null || m_brokerage != null)
+                        {
+                            tabControlAccountProperty.SelectTab("tabPageInfo");
+                            buttonDeleteLocalPP.Visible = m_SupportingBrokerages;
+                            label2.Visible = m_SupportingBrokerages;
+                            listViewCurrentBalance.Visible = m_SupportingBrokerages;
+                            listViewLocalPP.Visible = m_SupportingBrokerages;
+                            buttonAddLocalPP.Visible = m_SupportingBrokerages;
+                        }
+                        else
+                        {
+                            tabControlAccountProperty.SelectTab("tabPageEmpty");
+                            labelStreetName.Visible = false;
+                            textBoxFilter.Visible = false;
+                        }
                 }
                 else
                 {
                     switch (treeViewAccounts.SelectedNode.Text)
                     {
+                        case "-MLS-":
                         case "ViewOrders":
                             tabControlAccountProperty.SelectTab("tabPageViewOrders");
                             break;
@@ -285,7 +302,7 @@ namespace SuperAdminConsole
             ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
                                                               "user/" + ServerProxy.MyID,
                                                               "", null);
-            User admin = new User(resp.Data);
+            User userMyself = new User(resp.Data);
             //TreeNode[] ch = new TreeNode[3] { new TreeNode("ViewOrders"),
             //                                  new TreeNode("Banners"),
             //                                  new TreeNode("Logs") };
@@ -293,7 +310,7 @@ namespace SuperAdminConsole
                                               new TreeNode("Logs") };
 
             TreeNode topNode = new TreeNode(string.Format("SELF ({0})", myRole), ch);
-            topNode.Tag = admin;
+            topNode.Tag = userMyself;
             treeViewAccounts.Nodes.Add(topNode);
 
             ///data/user?sid=<SID>[&genval=<generation>][&withdeleted={true|false}][&<hints>]
@@ -315,22 +332,22 @@ namespace SuperAdminConsole
             int i = 0;
             foreach (ClientData cd in admins)
             {
-                User user = new User(cd);
+                User userDevAdmin = new User(cd);
                 string nodeName = string.Empty;
-                if (string.IsNullOrEmpty(user.NickName))
-                    nodeName = string.Format("ADMIN <{0}>", user.AutoID);
+                if (string.IsNullOrEmpty(userDevAdmin.NickName))
+                    nodeName = string.Format("ADMIN <{0}>", userDevAdmin.AutoID);
                 else
                 {
-                    if (user.NickName == "mlsImport")
+                    if (userDevAdmin.NickName == "mlsImport")
                     {
                         nodeName = "-MLS-";
                         TreeNode mlsNode = new TreeNode(nodeName);
-                        mlsNode.Tag = user;
+                        mlsNode.Tag = userDevAdmin;
                         treeViewAccounts.Nodes.Add(mlsNode);
                         continue;
                     }
                     else
-                        nodeName = string.Format("{0}<{1}>", user.NickName, user.AutoID);
+                        nodeName = string.Format("{0}<{1}>", userDevAdmin.NickName, userDevAdmin.AutoID);
                 }
                 //TreeNode[] children = new TreeNode[3] { new TreeNode("ViewOrders"),
                 //                                        new TreeNode("Banners"),
@@ -338,7 +355,7 @@ namespace SuperAdminConsole
                 TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
                                                     new TreeNode("Logs") };
                 adminNodes[i] = new TreeNode(nodeName, children);
-                adminNodes[i].Tag = user;
+                adminNodes[i].Tag = userDevAdmin;
                 i++;
             }
             topNode = new TreeNode(string.Format("Dev Admins ({0})", admins.Length), adminNodes);
@@ -362,15 +379,18 @@ namespace SuperAdminConsole
             i = 0;
             foreach (ClientData cd in users)
             {
-                User user = new User(cd);
-                string nodeName = string.Format("{0} <{1}> {2}", user.AutoID, user.NickName, user.PrimaryEmailAddress);
+                User userSellingAgent = new User(cd);
+                string nodeName = string.Format("{0} <{1}> {2}", 
+                    userSellingAgent.AutoID, 
+                    userSellingAgent.NickName, 
+                    userSellingAgent.PrimaryEmailAddress);
                 //TreeNode[] children = new TreeNode[3] { new TreeNode("ViewOrders"),
                 //                                        new TreeNode("Banners"),
                 //                                        new TreeNode("Logs") };
                 TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
                                                         new TreeNode("Logs") };
                 userNodes[i] = new TreeNode(nodeName, children);
-                userNodes[i].Tag = user;
+                userNodes[i].Tag = userSellingAgent;
                 i++;
             }
             topNode = new TreeNode(string.Format("Selling Agents ({0})", users.Length), userNodes);
@@ -393,12 +413,12 @@ namespace SuperAdminConsole
             i = 0;
             foreach (ClientData cd in users)
             {
-                User user = new User(cd);
-                string nodeName = string.Format("<{0}> {1}", user.AutoID, user.PrimaryEmailAddress);
+                User userAnonymous = new User(cd);
+                string nodeName = string.Format("<{0}> {1}", userAnonymous.AutoID, userAnonymous.PrimaryEmailAddress);
                 TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
                                                         new TreeNode("Logs")  };
                 userNodes[i] = new TreeNode(nodeName, children);
-                userNodes[i].Tag = user;
+                userNodes[i].Tag = userAnonymous;
                 i++;
             }
             topNode = new TreeNode(string.Format("Anonymous Users ({0})", users.Length), userNodes);
@@ -411,31 +431,35 @@ namespace SuperAdminConsole
                                                null);
             if (HttpStatusCode.OK != resp.ResponseCode)
             {
-                MessageBox.Show("Failed querying the list of brokerages");
-                return;
+                m_SupportingBrokerages = resp.ResponseCode != HttpStatusCode.BadRequest;
+                if (m_SupportingBrokerages)
+                    MessageBox.Show("Failed querying the list of brokerages");
             }
-
-            ClientData brokerageJASON = resp.Data;
-            ClientData[] brokerages = brokerageJASON.GetNextLevelDataArray("brokerages");
-
-            TreeNode[] brokerageNodes = new TreeNode[brokerages.Length];
-            i = 0;
-            foreach (ClientData cd in brokerages)
+            else
             {
-                BrokerageInfo brokerage = new BrokerageInfo(cd);
-                string nodeName = string.Format("<{0}> {1} (?)", brokerage.AutoID, brokerage.Name);
-                TreeNode overwritable = new TreeNode("expand");
-                brokerageNodes[i] = new TreeNode(nodeName, new TreeNode[1]{overwritable});
-                brokerageNodes[i].Tag = brokerage;
-                i++;
-            }
-            topNode = new TreeNode(string.Format("Brokerages ({0})", brokerages.Length), brokerageNodes);
-            treeViewAccounts.Nodes.Add(topNode);
 
-            //TreeNode[] lastch = new TreeNode[1] { new TreeNode("ViewOrders") };
-            //TreeNode lastNode = new TreeNode("ANONIMOUS", lastch);
-            //lastNode.Tag = new User(m_currentDeveloper.ID, User.Role.Anonymous);
-            //treeViewAccounts.Nodes.Add(lastNode);
+                ClientData brokerageJASON = resp.Data;
+                ClientData[] brokerages = brokerageJASON.GetNextLevelDataArray("brokerages");
+
+                TreeNode[] brokerageNodes = new TreeNode[brokerages.Length];
+                i = 0;
+                foreach (ClientData cd in brokerages)
+                {
+                    BrokerageInfo brokerage = new BrokerageInfo(cd);
+                    string nodeName = string.Format("<{0}> {1} (?)", brokerage.AutoID, brokerage.Name);
+                    TreeNode overwritable = new TreeNode("expand");
+                    brokerageNodes[i] = new TreeNode(nodeName, new TreeNode[1] { overwritable });
+                    brokerageNodes[i].Tag = brokerage;
+                    i++;
+                }
+                topNode = new TreeNode(string.Format("Brokerages ({0})", brokerages.Length), brokerageNodes);
+                treeViewAccounts.Nodes.Add(topNode);
+
+                //TreeNode[] lastch = new TreeNode[1] { new TreeNode("ViewOrders") };
+                //TreeNode lastNode = new TreeNode("ANONIMOUS", lastch);
+                //lastNode.Tag = new User(m_currentDeveloper.ID, User.Role.Anonymous);
+                //treeViewAccounts.Nodes.Add(lastNode);
+            }
 
             UpdateState();
         }
@@ -482,7 +506,8 @@ namespace SuperAdminConsole
 
             if (e.Node.Text == "ViewOrders" || e.Node.Text == "-MLS-")
                 refreshOrders();
-            else if (e.Node.Text == "Logs")
+            else
+            if (e.Node.Text == "Logs")
             {
                 listViewLogs.Items.Clear();
                 // https://vrt.3dcondox.com/vre/data/ft?userId=<id>&sid=<SID>
@@ -508,7 +533,7 @@ namespace SuperAdminConsole
                     //    accountId = 8                                             int
                     //    operation = Debit                                         string
                     //    amount = 50                                               decimal
-                    //    subject = View"                                           string
+                    //    theObject = View"                                           string
                     //    target = Suite"                                           string
                     //    targetId = 8564                                           int
                     //    extraTargetInfo = 96D7DB20-DD22-4F66-B153-C7053484ED3C    string
@@ -578,9 +603,127 @@ namespace SuperAdminConsole
                         listViewAccountInfo.Items.Add(acctInfo);
                     }
                 }
+                listViewLocalPP.Items.Clear();
+                if (m_agent != null)
+                    PopulatePricingPolicy(m_agent, "agent");
+                else
+                if (m_brokerage != null)
+                    PopulatePricingPolicy(m_brokerage, "brokerage");
+
+
+                listViewCurrentBalance.Items.Clear();
             }
 
             UpdateState();
+        }
+
+        private bool m_SupportingBrokerages = true;
+
+        private void PopulatePricingPolicy(UpdateableBase theObject, string subject)
+        {
+            if (!m_SupportingBrokerages) return;
+
+            if (theObject == null) return;
+
+            ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
+                                                                "pp",
+                                                                "defaults=false&" +
+                                                                "subject=" + subject + "&" +
+                                                                "subjectid=" +
+                                                                    theObject.AutoID.ToString(),
+                                                                null);
+
+            ClientData[] policies = resp.Data.GetNextLevelDataArray("policies");
+            if (policies == null || policies.Length == 0)
+            {
+                listViewLocalPP.Visible = false;
+                buttonDeleteLocalPP.Visible = false;
+                buttonAddLocalPP.Visible = true;
+                buttonAddLocalPP.Text = "Add Local Pricing Policy...";
+                if (buttonAddLocalPP.Tag == null)
+                {
+                    buttonAddLocalPP.Tag = this;
+                    buttonAddLocalPP.Click += new System.EventHandler(
+                        delegate(object o, EventArgs evnt)
+                        {
+                            AddPricingPolicy(theObject, subject);
+                        });
+                }
+            }
+            else
+            {
+                listViewLocalPP.Visible = true;
+                buttonDeleteLocalPP.Visible = true;
+                buttonAddLocalPP.Visible = false;
+                buttonDeleteLocalPP.Text = "Delete Local Pricing Policy";
+                if (buttonDeleteLocalPP.Tag == null)
+                {
+                    buttonDeleteLocalPP.Tag = this;
+                    buttonDeleteLocalPP.Click += new System.EventHandler(
+                        delegate(object o, EventArgs evnt)
+                        {
+                            if (MessageBox.Show("Are you sure you want to delete local Pricing Policy for " +
+                                theObject.ToString() + "?", "", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                                DeletePricingPolicy(theObject, subject);
+                        });
+                }
+                foreach (ClientData policy in policies)
+                {
+                    string[] subitems = new string[2];
+                    subitems[0] = policy.GetProperty("service", "<unknown>");
+                    subitems[1] = policy.GetProperty("unitPrice", 0.00m).ToString();
+                    ListViewItem pi = new ListViewItem(subitems);
+                    listViewLocalPP.Items.Add(pi);
+                }
+            }
+        }
+
+        private void AddPricingPolicy(UpdateableBase theObject, string subject)
+        {
+            ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
+                                                                "pp",
+                                                                "defaults=true&" +
+                                                                "subject=" + subject + "&" +
+                                                                "subjectid=0",
+                                                                null);
+            ClientData[] policies = resp.Data.GetNextLevelDataArray("policies");
+            PricingPolicy[] pricingPolicies = new PricingPolicy[policies.Length];
+
+            for (int j = 0; j < policies.Length; j++)
+            {
+                pricingPolicies[j] = new PricingPolicy(policies[j]);
+                string[] subitems = new string[2];
+                subitems[0] = policies[j].GetProperty("service", "<unknown>");
+                subitems[1] = policies[j].GetProperty("unitPrice", 0.00m).ToString();
+                ListViewItem pi = new ListViewItem(subitems);
+                listViewLocalPP.Items.Add(pi);
+            }
+            PricingPolicy pp =
+                new PricingPolicy(subject == "agent" ?
+                                        PricingPolicy.SubjectType.Agent :
+                                        PricingPolicy.SubjectType.Brokerage,
+                                  theObject.AutoID,
+                                  PricingPolicy.ServiceType.ActiveAgentMontly,
+                                  5.00m);
+
+            resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Insert,
+                                                                "pp",
+                                                                "subject=" + subject + "&" +
+                                                                "subjectid=" +
+                                                                    theObject.AutoID.ToString(),
+                                                                pp.GetClientData());
+            PopulatePricingPolicy(theObject, subject);
+        }
+
+        private void DeletePricingPolicy(UpdateableBase theObject, string subject)
+        {
+            ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Delete,
+                                                                "pp",
+                                                                "subject=" + subject + "&" +
+                                                                "subjectid=" +
+                                                                    theObject.AutoID.ToString(),
+                                                                null);
+            PopulatePricingPolicy(theObject, subject);
         }
 
         private void contextMenuStripAccountProperty_Opening(object sender, CancelEventArgs e)
@@ -645,8 +788,10 @@ namespace SuperAdminConsole
                 string filter = textBoxFilter.Text.ToLower();
                 string label = viewOrder.GetProperty("label", string.Empty);
                 String note = viewOrder.GetProperty("note", string.Empty);
+                String mlsId = viewOrder.GetProperty("mlsId", string.Empty);
                 if (!label.ToLower().Contains(filter) &&
-                    !note.ToLower().Contains(filter))
+                    !note.ToLower().Contains(filter) &&
+                    !mlsId.ToLower().Contains(filter))
                     continue;
 
                 //id = 20a6b755-58b2-4616-89de-92faf1ed6814
@@ -655,7 +800,7 @@ namespace SuperAdminConsole
                 //expiresOn = 01/11/2012 12:00:00 AM
                 //enabled = True
                 //product = 0
-                //mlsId = 
+                //mlsId = "W2847767"
                 //vTourUrl = 
                 //targetObjectType = 0
                 //targetObjectId = 8516
@@ -715,7 +860,11 @@ namespace SuperAdminConsole
                 }
 
                 ListViewItem orderItem = new ListViewItem(subitems);
-                orderItem.Font = ListViewOrders.Font.Clone() as Font;
+                FontStyle fontStyle = FontStyle.Regular;
+                if (viewOrder.GetProperty("note", "") != "")
+                    fontStyle = FontStyle.Italic;
+
+                orderItem.Font = new Font(ListViewOrders.Font, fontStyle);
                 if (expiredOn.CompareTo(DateTime.Now.AddDays(2.0)) < 0)
                     orderItem.ForeColor = Color.Red;
                 else
@@ -742,11 +891,13 @@ namespace SuperAdminConsole
         ClientData[] viewOrdersOfCurrentUser = null;
         void refreshOrders()
         {
+            Cursor current = Cursor.Current;
+            Cursor = Cursors.WaitCursor;
             if (ListViewOrders.SelectedIndices.Count > 0)
                 lastSelectedIndex = ListViewOrders.SelectedIndices[0];
 
             //https://vrt.3dcondox.com/vre/data/viewOrder?
-            //                                         userId=<selling agent id>&
+            //                                         userId=<selling theObject id>&
             //                                         sid=<SID>
             ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
                                                                 "viewOrder",
@@ -754,6 +905,8 @@ namespace SuperAdminConsole
                                                                 "&ed=" +
                                                                 m_currentDeveloper.Name +
                                                                 "&verbose=true", null);
+
+            Cursor = current;
             if (HttpStatusCode.OK != resp.ResponseCode)
             {
                 MessageBox.Show("Failed querying ViewOrders for customer \'" + m_agent.NickName + "\'");
@@ -822,7 +975,7 @@ namespace SuperAdminConsole
             string viewOrderId = viewOrder.GetProperty("id", string.Empty);
             if (viewOrderId != string.Empty)
             {
-                // ClientData agent = treeViewAccounts.SelectedNode.Tag as ClientData;
+                // ClientData theObject = treeViewAccounts.SelectedNode.Tag as ClientData;
 
                 viewOrderId = viewOrderId.Replace("-", string.Empty); 
                 ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
@@ -875,27 +1028,42 @@ namespace SuperAdminConsole
             UpdateState();
         }
 
+        DragDropEffects dragDropState = DragDropEffects.None;
+
         private void listViewOrders_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button != System.Windows.Forms.MouseButtons.Left)
-                return;
+            if (ListViewOrders.SelectedItems.Count == 0) return;
+
+            switch (e.Button)
+            {
+                case System.Windows.Forms.MouseButtons.Left:
+                    dragDropState = DragDropEffects.Move;
+                    break;
+                case System.Windows.Forms.MouseButtons.Right:
+                    ClientData viewOrderToCopy = ListViewOrders.SelectedItems[0].Tag as ClientData;
+                    if (viewOrderToCopy == null) return;
+                    if (viewOrderToCopy.GetProperty("product", "") != "PublicListing")
+                        return;
+
+                    dragDropState = DragDropEffects.Copy;
+                    break;
+            }
 
             //if (m_agent.UserRole != User.Role.SuperAdmin &&
             //    m_agent.UserRole != User.Role.DeveloperAdmin)
             //    return;
 
-            if (ListViewOrders.SelectedItems.Count != 0)
-                ListViewOrders.DoDragDrop(ListViewOrders.SelectedItems[0], DragDropEffects.Move);
+            ListViewOrders.DoDragDrop(ListViewOrders.SelectedItems[0], dragDropState);
         }
 
         private void listViewOrders_DragOver(object sender, DragEventArgs e)
         {
-            e.Effect = DragDropEffects.Move;
+            e.Effect = dragDropState;
         }
 
         private void treeViewAccounts_DragEnter(object sender, DragEventArgs e)
         {
-            e.Effect = DragDropEffects.Move;
+            e.Effect = dragDropState;
         }
 
         private void treeViewAccounts_DragDrop(object sender, DragEventArgs e)
@@ -904,7 +1072,8 @@ namespace SuperAdminConsole
                 treeViewAccounts.PointToClient(new Point(e.X, e.Y)));
             if (nodeToDropIn == null)
             {
-                e.Effect = DragDropEffects.None;
+                dragDropState = DragDropEffects.None;
+                e.Effect = dragDropState;
                 return;
             }
 
@@ -913,7 +1082,8 @@ namespace SuperAdminConsole
             {
                 newUser = nodeToDropIn.Tag as User;
                 nodeToDropIn.Expand();
-                nodeToDropIn = nodeToDropIn.Nodes[0];
+                if (nodeToDropIn.Nodes.Count > 0)
+                    nodeToDropIn = nodeToDropIn.Nodes[0];
             }
             else if (nodeToDropIn.Level == 1)
             {
@@ -925,7 +1095,8 @@ namespace SuperAdminConsole
 
             if (newUser == null)
             {
-                e.Effect = DragDropEffects.None;
+                dragDropState = DragDropEffects.None;
+                e.Effect = dragDropState;
                 return;
             }
 
@@ -942,24 +1113,38 @@ namespace SuperAdminConsole
 
             if (lvItem == null)
             {
-                e.Effect = DragDropEffects.None;
+                dragDropState = DragDropEffects.None;
+                e.Effect = dragDropState;
                 return;
             }
 
-            ClientData viewOrderToMove = lvItem.Tag as ClientData;
-            if (viewOrderToMove == null)
+            ClientData viewOrderSource = lvItem.Tag as ClientData;
+            if (viewOrderSource == null)
             {
-                e.Effect = DragDropEffects.None;
+                dragDropState = DragDropEffects.None;
+                e.Effect = dragDropState;
                 return;
             }
 
-            SetViewOrder updateViewOrder = new SetViewOrder(m_agent, 
-                                                            viewOrderToMove, 
-                                                            SetViewOrder.ChangeReason.Transfer,
+            SetViewOrder.ChangeReason changeReason = SetViewOrder.ChangeReason.Transfer;
+            ClientData viewOrderDest;
+            if (dragDropState == DragDropEffects.Copy)
+            {
+                viewOrderDest = new ClientData();
+                viewOrderDest.Merge(viewOrderSource);
+                changeReason = SetViewOrder.ChangeReason.Copy;
+            }
+            else
+                viewOrderDest = viewOrderSource;
+
+            SetViewOrder updateViewOrder = new SetViewOrder(m_agent,
+                                                            viewOrderDest,
+                                                            changeReason,
                                                             m_currentDeveloper);
             if (updateViewOrder.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
             {
-                e.Effect = DragDropEffects.None;
+                dragDropState = DragDropEffects.None;
+                e.Effect = dragDropState;
                 return;
             }
 
@@ -967,27 +1152,46 @@ namespace SuperAdminConsole
             //DateTime expiresOn = DateTime.Now.AddDays(90.0);
             //viewOrderToMove["expiresOn"] = expiresOn;
 
-            string viewOrderId = viewOrderToMove.GetProperty("id", string.Empty);
+            string viewOrderId = viewOrderDest.GetProperty("id", string.Empty);
             if (viewOrderId == string.Empty)
             {
-                e.Effect = DragDropEffects.None;
+                dragDropState = DragDropEffects.None;
+                e.Effect = dragDropState;
                 return;
             }
 
             viewOrderId = viewOrderId.Replace("-", string.Empty);
-            ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
-                                                                "viewOrder/" + viewOrderId,
-                                                                "pr=" + updateViewOrder.paymentRefId,
-                                                                viewOrderToMove);
-
-            if (HttpStatusCode.OK != resp.ResponseCode)
+            if (dragDropState == DragDropEffects.Move)
             {
-                MessageBox.Show("Cannot transfer this viewOrder to this account");
-                UpdateState();
+                ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
+                                                                  "viewOrder/" + viewOrderId,
+                                                                  "pr=" + updateViewOrder.paymentRefId,
+                                                                  viewOrderDest);
+                if (HttpStatusCode.OK != resp.ResponseCode)
                 {
-                    e.Effect = DragDropEffects.None;
+                    string msg = string.Format("Cannot {0} this viewOrder to this account",
+                        dragDropState == DragDropEffects.Move ? "transfer" : "copy");
+                    MessageBox.Show(msg);
+                    UpdateState();
+
+                    dragDropState = DragDropEffects.None;
+                    e.Effect = dragDropState;
                     return;
                 }
+            }
+            else // copy
+            {
+                // update the notes of the source with the destination info:
+                String note = viewOrderSource.GetProperty("note", string.Empty);
+                note += "====== " + DateTime.Now.ToString() + " ========\r\n";
+                note += "Copied to " + m_agent.NickName + "(ID=" + m_agent.AutoID + ")\r\n";
+                note += "URL=" + updateViewOrder.ViewOrderURL + "\r\n";
+                note += "Valid for " + updateViewOrder.DaysValid + " days\r\n";
+                viewOrderSource["note"] = note;
+                ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
+                                                                  "viewOrder/" + viewOrderId,
+                                                                  null,
+                                                                  viewOrderSource);
             }
 
             EmailViewOrder form = EmailViewOrder.Create(viewOrderId,
@@ -995,14 +1199,17 @@ namespace SuperAdminConsole
                                                         EmailViewOrder.Template.OrderConfirmation);
             if (form == null)
             {
-                e.Effect = DragDropEffects.None;
+                dragDropState = DragDropEffects.None;
+                e.Effect = dragDropState;
                 return;
             }
 
             if (form.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 UpdateState();
-                MessageBox.Show("The viewOrder has been transferred successfully!", "ViewOrder Transferred",
+                string werb = dragDropState == DragDropEffects.Move ? "transferred" : "copied";
+                string msg = string.Format("The viewOrder has been {0} successfully!", werb);
+                MessageBox.Show(msg, "ViewOrder " + werb,
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
@@ -1048,13 +1255,14 @@ namespace SuperAdminConsole
                                                             m_currentDeveloper);
             if (updateViewOrder.ShowDialog(this) == DialogResult.OK)
             {
-                string viewOrderId = viewOrderToUpdate.GetProperty("id", string.Empty);
+                string viewOrderId = updateViewOrder.TheViewOrder.GetProperty("id", string.Empty);
                 viewOrderId = viewOrderId.Replace("-", string.Empty);
-                string param = string.IsNullOrEmpty(updateViewOrder.paymentRefId) ? string.Empty : "pr=" + updateViewOrder.paymentRefId;
+                string param = string.IsNullOrEmpty(updateViewOrder.paymentRefId) ? 
+                    string.Empty : "pr=" + updateViewOrder.paymentRefId;
                 ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
                                                                     "viewOrder/" + viewOrderId,
                                                                     param,
-                                                                    viewOrderToUpdate);
+                                                                    updateViewOrder.TheViewOrder);
                 refreshOrders();
             }
         }
@@ -1271,7 +1479,7 @@ namespace SuperAdminConsole
             string viewOrderId = viewOrder.GetProperty("id", string.Empty);
             if (viewOrderId != string.Empty)
             {
-                // ClientData agent = treeViewAccounts.SelectedNode.Tag as ClientData;
+                // ClientData theObject = treeViewAccounts.SelectedNode.Tag as ClientData;
 
                 viewOrderId = viewOrderId.Replace("-", string.Empty);
                 ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,

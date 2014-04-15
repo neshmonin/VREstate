@@ -20,6 +20,7 @@ namespace SuperAdminConsole
         {
             Creation,
             Transfer,
+            Copy,
             Update
         }
 
@@ -36,6 +37,9 @@ namespace SuperAdminConsole
         string initialMoreInfoUrl;
         string initialNote;
         string initialMLS;
+        string initialCurrPrice;
+
+        string targetObjectType;
 
         public string ViewOrderPrice
         {
@@ -82,6 +86,9 @@ namespace SuperAdminConsole
         public User theUser { private set; get; }
 
         ClientData theOrder = null;
+
+        public ClientData TheViewOrder { get { return theOrder; } }
+
         ChangeReason theReason;
         Developer m_developer = null;
 
@@ -130,7 +137,9 @@ namespace SuperAdminConsole
             {
                 tabControlSteps.SelectTab("tabPageViewOrderOptions");
                 addressVerified = true;
-                ViewOrder.ViewOrderOptions options = theOrder.GetProperty<ViewOrder.ViewOrderOptions>("options", ViewOrder.ViewOrderOptions.FloorPlan);
+                ViewOrder.ViewOrderOptions options = 
+                    theOrder.GetProperty<ViewOrder.ViewOrderOptions>("options", 
+                                                                     ViewOrder.ViewOrderOptions.FloorPlan);
                 if (options != ViewOrder.ViewOrderOptions.FloorPlan)
                     textVTourURL.Text = theOrder["vTourUrl"] as string;
 
@@ -140,6 +149,7 @@ namespace SuperAdminConsole
                 textBoxNote.Text = theOrder.GetProperty("note", string.Empty);
             }
 
+            targetObjectType = theOrder.GetProperty("targetObjectType", "");
             paymentRefId = string.Empty;
             decimal price = 0M;
 
@@ -153,6 +163,10 @@ namespace SuperAdminConsole
                 case ChangeReason.Transfer:
                     price = Properties.Settings.Default.PriceOf3DListing;
                     this.Text = "Transferring viewOrder to Another Account";
+                    break;
+                case ChangeReason.Copy:
+                    price = Properties.Settings.Default.PriceOf3DListing;
+                    this.Text = "Creating a Private Copy of the Public Listing under Another Account";
                     break;
                 case ChangeReason.Update:
                     price = Properties.Settings.Default.ChangeViewOrderOptionsFee;
@@ -181,27 +195,74 @@ namespace SuperAdminConsole
             theUser = user;
             comboBoxCountry.SelectedIndex = 0;
 
+            if (theReason == ChangeReason.Creation)
+            {
+                lvwColumnSorter = new ListViewColumnSorter();
+                listViewAddresses.ListViewItemSorter = lvwColumnSorter;
+            }
+            else
+            {
+                if (targetObjectType == "Suite")
+                {
+                    int suiteID = theOrder.GetProperty("targetObjectId", 0);
+                    ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
+                                                                      "suite/" + suiteID, "", null);
+
+                    if (HttpStatusCode.OK != resp.ResponseCode)
+                        return;
+
+                    populateFromSuite(resp.Data);
+                }
+            }
+
             initialVTourURL = textVTourURL.Text;
             initialMoreInfoUrl = textMoreInfoUrl.Text;
             initialMLS = textBoxMLS.Text;
             initialNote = textBoxNote.Text;
-
-            lvwColumnSorter = new ListViewColumnSorter();
-            listViewAddresses.ListViewItemSorter = lvwColumnSorter;
-            textBoxMLS.ReadOnly = theReason != ChangeReason.Creation;
-            //textMoreInfoUrl.ReadOnly = theReason != ChangeReason.Creation;
-            //textBoxNote.Visible = theReason == ChangeReason.Creation;
-            label11.Visible = theReason == ChangeReason.Creation;
+            initialCurrPrice = richTextBoxListingPrice.Text;
 
             UpdateState();
         }
+
+        private void populateFromSuite(ClientData suite)
+        {
+            textUnitNo.Text = suite.GetProperty("name", "<unknown>");
+            PropertyType = "suite";
+            PropertyID = suite.GetProperty("id", 0);
+            decimal currPrice = suite.GetProperty("currentPrice", -1.0m);
+            richTextBoxListingPrice.Text = currPrice != -1.0m ?
+                            currPrice.ToString() :
+                            string.Empty;
+            bool changed = false;
+            Vre.Server.BusinessLogic.Suite.SalesStatus Status = Vre.Server.BusinessLogic.Suite.SalesStatus.AvailableRent;
+            Status = suite.UpdateProperty("status", Status, ref changed);
+            switch (Status)
+            {
+                case Vre.Server.BusinessLogic.Suite.SalesStatus.AvailableRent:
+                    radioButtonListingTypeRent.Checked = true;
+                    break;
+                case Vre.Server.BusinessLogic.Suite.SalesStatus.ResaleAvailable:
+                    radioButtonListingTypeSale.Checked = true;
+                    break;
+                default:
+                    //radioButtonListingTypeSale.Checked = false;
+                    //radioButtonListingTypeRent.Checked = false;
+                    radioButtonListingTypeSale.Visible = false;
+                    radioButtonListingTypeRent.Visible = false;
+                    break;
+            }
+
+            addressVerified = true;
+        }
+
 
         private bool haveOptionsChanged()
         {
             return initialVTourURL != textVTourURL.Text ||
                    initialMoreInfoUrl != textMoreInfoUrl.Text ||
                    initialMLS != textBoxMLS.Text ||
-                   initialNote != textBoxNote.Text;
+                   initialNote != textBoxNote.Text ||
+                   initialCurrPrice != richTextBoxListingPrice.Text;
         }
 
         private string generateTitle()
@@ -282,7 +343,8 @@ namespace SuperAdminConsole
                         buttonPayment.Enabled = !paymentSkip &&
                                                 numericUpDownPrice.Value > 0M &&
                                                  paymentRefId == string.Empty;
-                        buttonFinish.Enabled = theReason == ChangeReason.Transfer;
+                        buttonFinish.Enabled = theReason == ChangeReason.Transfer ||
+                                               theReason == ChangeReason.Copy;
                     }
 
                     groupBoxListingOptions.Enabled = paymentRefId == string.Empty;
@@ -297,6 +359,13 @@ namespace SuperAdminConsole
                     textBoxTotal.Text = ViewOrderPriceWithTax;
                     buttonCancel.Visible = paymentRefId == string.Empty;
                     buttonOneMore.Visible = false;
+                    groupBoxListingOptions.Visible = targetObjectType == "Suite";
+                    //label11.Visible = theReason == ChangeReason.Creation;
+                    radioButtonListingTypeSale.Enabled = theReason == ChangeReason.Creation || initialMLS == "";
+                    radioButtonListingTypeRent.Enabled = theReason == ChangeReason.Creation || initialMLS == "";
+                    textBoxMLS.ReadOnly = theReason != ChangeReason.Creation;
+                    richTextBoxListingPrice.ReadOnly = theReason != ChangeReason.Creation || initialMLS != "";
+
                     break;
                 case "Generate":
                     buttonCancel.Visible = paymentSkip && !viewOrderUrlGenerated;
@@ -442,6 +511,11 @@ namespace SuperAdminConsole
 
         private void buttonGenerateURL_Click(object sender, EventArgs e)
         {
+            createViewOrder();
+        }
+
+        private void createViewOrder()
+        {
             if (!viewOrderUrlGenerated)
             {
                 // https://vrt.3dcondox.com/program?
@@ -527,7 +601,14 @@ namespace SuperAdminConsole
                     //      ”ref”:<ref number>
                     //  }
 
-                    if (HttpStatusCode.OK == resp.ResponseCode)
+                    if (radioButton3DLayout.Checked)
+                    {
+                        viewOrderUrlGenerated = true;
+                        textBoxViewOrderURL.Text = viewOrderUrl;
+                        ViewOrderID = viewOrderID;
+                        ViewOrderURL = textBoxViewOrderURL.Text;
+                    }
+                    else
                     {
                         resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Get,
                                                                             "suite/" + PropertyID,
@@ -535,10 +616,15 @@ namespace SuperAdminConsole
                                                                             null);
                         if (HttpStatusCode.OK == resp.ResponseCode)
                         {
+                            if (textBoxMLS.Text == string.Empty) return;
+
                             ClientData suiteData = resp.Data;
                             string price = richTextBoxListingPrice.Text.Replace("$", "");
                             price = price.Replace(",", "");
-                            decimal cp = Decimal.Parse(price);
+                            decimal cp = 0.0m;
+                            if (!string.IsNullOrEmpty(price))
+                                try { cp = Decimal.Parse(price); } catch (Exception) {}
+
 			                if (cp >= 0.0m)
                             {
                                 Money? currentPrice = new Money(cp);
@@ -553,7 +639,8 @@ namespace SuperAdminConsole
                                                                                 "suite/" + PropertyID,
                                                                                 "",
                                                                                 suiteData);
-                            if (HttpStatusCode.OK == resp.ResponseCode)
+                            if (HttpStatusCode.OK == resp.ResponseCode ||
+                                HttpStatusCode.NotModified == resp.ResponseCode)
                             {
                                 viewOrderUrlGenerated = true;
                                 textBoxViewOrderURL.Text = viewOrderUrl;
@@ -638,27 +725,39 @@ namespace SuperAdminConsole
 
         private void buttonFinish_Click(object sender, EventArgs e)
         {
-            if (theReason == ChangeReason.Transfer)
+            ViewOrder.ViewOrderOptions options =
+                        textVTourURL.Text == string.Empty ? ViewOrder.ViewOrderOptions.FloorPlan :
+                                                            ViewOrder.ViewOrderOptions.ExternalTour;
+            switch (theReason)
             {
-                DateTime expiresOn = DateTime.Now.AddDays((double)numericUpDownDaysValid.Value + 1);
-                expiresOn = System.TimeZone.CurrentTimeZone.ToUniversalTime(expiresOn.Date);
-                theOrder["expiresOn"] = expiresOn;
-                theOrder["ownerId"] = theUser.AutoID;
-                theOrder["note"] = textBoxNote.Text;
-            }
-
-            if (theReason != ChangeReason.Creation)
-            {
-                ViewOrder.ViewOrderOptions options = 
-                    textVTourURL.Text == string.Empty ? ViewOrder.ViewOrderOptions.FloorPlan :
-                                                        ViewOrder.ViewOrderOptions.ExternalTour;
-                //bool changed = false;
-                //theOrder.UpdateProperty("options", options, ref changed);
-                theOrder["options"] = (int)options;
-                theOrder["vTourUrl"] = textVTourURL.Text;
-                theOrder["mlsId"] = textBoxMLS.Text;
-                theOrder["infoUrl"] = textMoreInfoUrl.Text;
-                theOrder["note"] = textBoxNote.Text;
+                case ChangeReason.Copy:
+                    DateTime expiresOn = DateTime.Now.AddDays((double)numericUpDownDaysValid.Value);
+                    expiresOn = System.TimeZone.CurrentTimeZone.ToUniversalTime(expiresOn.Date);
+                    radioButtonPrivateListing.Checked = true;
+                    createViewOrder();
+                    theOrder["options"] = (int)options;
+                    theOrder["expiresOn"] = expiresOn;
+                    theOrder["ownerId"] = theUser.AutoID;
+                    theOrder["note"] = textBoxNote.Text;
+                    theOrder["vTourUrl"] = textVTourURL.Text;
+                    theOrder["infoUrl"] = textMoreInfoUrl.Text;
+                    theOrder["product"] = ViewOrder.ViewOrderProduct.PrivateListing;
+                    break;
+                case ChangeReason.Update:
+                case ChangeReason.Transfer:
+                    theOrder["options"] = (int)options;
+                    theOrder["ownerId"] = theUser.AutoID;
+                    theOrder["note"] = textBoxNote.Text;
+                    theOrder["vTourUrl"] = textVTourURL.Text;
+                    theOrder["infoUrl"] = textMoreInfoUrl.Text;
+                    break;
+                case ChangeReason.Creation:
+                    theOrder["options"] = (int)options;
+                    theOrder["vTourUrl"] = textVTourURL.Text;
+                    theOrder["infoUrl"] = textMoreInfoUrl.Text;
+                    theOrder["mlsId"] = textBoxMLS.Text;
+                    theOrder["note"] = textBoxNote.Text;
+                    break;
             }
 
             DialogResult = System.Windows.Forms.DialogResult.OK;
@@ -709,6 +808,8 @@ namespace SuperAdminConsole
 
         private void initListViewAddresses(string scopeType)
         {
+            lvwColumnSorter.SortColumn = 0;
+            lvwColumnSorter.Order = SortOrder.Ascending;
             string scopeParam = string.Format("scopeType={0}&ad_mu={1}&ed={2}",
                                               scopeType,
                                               comboBoxCity.SelectedItem,
@@ -733,6 +834,7 @@ namespace SuperAdminConsole
         {
             listViewAddresses.Items.Clear();
             //int count = 1;
+            List<String> buildingList = new List<string>();
             foreach (ClientData building in buildingsOfTheSelectedCity)
             {
                 string filter = textBoxStreetName.Text.ToLower();
@@ -768,20 +870,28 @@ namespace SuperAdminConsole
                 subitems[3] = building.GetProperty("city", string.Empty);
                 subitems[4] = postal;
 
-                //string buildingInfo = string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}",
-                //    count++,
-                //    buildingName,
-                //    addressLine1.Substring(0, separator + 1),
-                //    addressLine1.Substring(separator + 1),
-                //    building.GetProperty("city", string.Empty),
-                //    postal);
-                //System.Diagnostics.Trace.WriteLine(buildingInfo);
-                //System.Diagnostics.Trace.Flush();
+                buildingList.Add(buildingName);
+                /*// ---- Uncomment the following code to get a report on all buildings ----
+                string buildingInfo = string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}",
+                    count++,
+                    buildingName,
+                    addressLine1.Substring(0, separator + 1),
+                    addressLine1.Substring(separator + 1),
+                    building.GetProperty("city", string.Empty),
+                    postal);
+                System.Diagnostics.Trace.WriteLine(buildingInfo);
+                System.Diagnostics.Trace.Flush();
+                // ---- End of the buildings report code ----*/
 
                 ListViewItem buildingItem = new ListViewItem(subitems);
                 buildingItem.Tag = building;
                 listViewAddresses.Items.Add(buildingItem);
             }
+            //buildingList.Sort();
+            foreach (string NAME in buildingList)
+                System.Diagnostics.Trace.WriteLine(NAME);
+
+            listViewAddresses.Sort();
         }
 
         private void tabControlAddressPicking_SelectedTabChanged(object sender, EventArgs e)
@@ -845,16 +955,25 @@ namespace SuperAdminConsole
             if (objSrc.DialogResult != System.Windows.Forms.DialogResult.OK)
                 return;
 
-            textUnitNo.Text = objSrc.Suite.SuiteName;
-            ClientData suiteCD = objSrc.Suite.GetClientData();
-            textBoxMLS.Text = objSrc.MLS;
-            textVTourURL.Text = objSrc.VTourURL;
-            textMoreInfoUrl.Text = objSrc.MoreInfoURL;
+            populateFromSuiteInventory(objSrc.Suite);
             PostalAddress = objSrc.PostalAddress;
+
+            tabControlSteps.SelectedIndex = tabControlSteps.SelectedIndex + 1;
+            UpdateState();
+        }
+
+        private void populateFromSuiteInventory(Vre.Server.BusinessLogic.SuiteInventory suiteInv)
+        {
+            textUnitNo.Text = suiteInv.SuiteName;
+            textBoxMLS.Text = suiteInv.MLS;
+            textVTourURL.Text = suiteInv.VirtualTourURL;
+            textMoreInfoUrl.Text = suiteInv.MoreInfoURL;
             PropertyType = "suite";
-            PropertyID = objSrc.Suite.AutoID;
-            richTextBoxListingPrice.Text = objSrc.Suite.CurrentPrice.HasValue ? objSrc.Suite.CurrentPrice.Value.ToString() : string.Empty;
-            switch (objSrc.Suite.Status)
+            PropertyID = suiteInv.AutoID;
+            richTextBoxListingPrice.Text = suiteInv.CurrentPrice.HasValue ? 
+                            suiteInv.CurrentPrice.Value.ToString() : 
+                            string.Empty;
+            switch (suiteInv.Status)
             {
                 case Vre.Server.BusinessLogic.Suite.SalesStatus.AvailableRent:
                     radioButtonListingTypeRent.Checked = true;
@@ -865,13 +984,12 @@ namespace SuperAdminConsole
             }
 
             addressVerified = true;
-            tabControlSteps.SelectedIndex = tabControlSteps.SelectedIndex + 1;
-            UpdateState();
         }
 
         private void NewViewOrder_Load(object sender, EventArgs e)
         {
-            comboBoxCity.SelectedIndex = 0;
+            if (theReason == ChangeReason.Creation)
+                comboBoxCity.SelectedIndex = 0;
             UpdateState();
         }
 

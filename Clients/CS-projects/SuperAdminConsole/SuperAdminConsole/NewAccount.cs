@@ -224,8 +224,8 @@ namespace SuperAdminConsole
             brokerage.PostalCode = textBoxPostal.Text;
             brokerage.Country = comboBoxCountry.Text;
             brokerage.WebSite = textBoxWebsite.Text;
-            brokerage.PhoneNumbers[0] = textBoxPhone.Text;
-            brokerage.Emails[0] = textBoxEmail.Text;
+            brokerage.PhoneNumberList[0] = textBoxPhone.Text;
+            brokerage.EmailList[0] = textBoxEmail.Text;
 
             ClientData data = brokerage.GetClientData();
 
