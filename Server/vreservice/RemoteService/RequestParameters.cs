@@ -112,5 +112,36 @@ namespace Vre.Server.RemoteService
 
 			return result;
 		}
+
+		public static bool HasPrice(this IRequestData request)
+		{
+			return request.Query.Contains("prc");
+		}
+
+		public static Money? GetPrice(this IRequestData request)
+		{
+			var arg = request.Query["prc"];
+			var carg = request.Query["prccur"];
+
+			Currency cur = Currency.None;
+
+			if (!string.IsNullOrEmpty(carg))
+			{
+				if (!Currency.TryParse(carg, out cur)) cur = Currency.None;
+			}
+
+			if ((Currency.None == cur) && (arg.Length > 3))
+			{
+				if (Currency.TryParse(arg.Substring(0, 3), out cur)) arg = arg.Substring(3);
+				else cur = Currency.None;
+			}
+
+			if (Currency.None == cur) cur = Currency.Cad;  // TODO: DEFAULT
+
+			decimal val;
+			if (decimal.TryParse(arg, out val)) return new Money(val, cur);
+
+			return null;
+		}
 	}
 }
