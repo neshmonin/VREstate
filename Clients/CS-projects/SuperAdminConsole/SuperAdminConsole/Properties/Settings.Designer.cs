@@ -210,31 +210,34 @@ The 3D Condo Explorer Sales Team")]
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(@"Dear {ADDRESS_TO},
+        [global::System.Configuration.DefaultSettingValueAttribute(@"Dear friend,
 
-I noticed that you posted an MLS listing {MLS_NUMBER}for the 
-    {VIEWORDER_ADDRESS}
+CONGRATULATIONS: As a part of the 3D Condo Explorer's promo campaign you've been presented
+with a FREE (value of ${PRICE_NO_TAX}+HST!) Interactive 3D Listing!
 
-3D Condo Explorer has created an Interactive 3D Listing for this property.
-Interactive 3D Listing is a new amazing way of presenting your real estate using the
-3D Virtual Reality world of Google Earth - check this video to get the idea
-http://youtu.be/rTLzjlY8HjM...
+                           Interactive 3D Listing is a new amazing way of presenting your real estate using the
+                           3D Virtual Reality world of Google Earth - check this video to get an idea:
+                           http://youtu.be/rTLzjlY8HjM
 
-So, here is your Interactive 3D Listing - click it to see how it works:
+We noticed that you posted an MLS listing {MLS_NUMBER}on a condo at the following address:
+               {VIEWORDER_ADDRESS}
 
-   {VIEWORDER_URL}
+... so, here is your Interactive 3D Listing for this property:
 
-IMPORTANT NOTE: The link above is temporary, if you do nothing, it'll die in {DAYS_VALID} days.
-So, IF YOU WANT TO KEEP IT, PLEASE COPY THIS MESSAGE AND SEND IT TO sales@3DcondoX.com.
+               {VIEWORDER_URL} - click it to see how it works!
+
+IMPORTANT NOTE: The link above is temporary, if you do nothing, it'll stop working in {DAYS_VALID} days.
+So, IF YOU WANT TO KEEP IT, then JUST REPLY THIS MESSAGE, and we'll be happy to make
+it permanent for you!
 
 For more info visit our website (www.3dcondox.com), or call us at:
-    1-855-332-6630 (1-855-3d cond0) ext.2 (""Sales and Marketing""), 9AM-5PM weekdays
+    1-855-332-6630 (1-855-3d cond0) ext.2 (Sales and Marketing), 9AM-5PM weekdays
 Also you can just email your questions to sales@3DcondoX.com
 
 We are glad to help you with your highly competitive and challenging business.
 
-Yours,
-{SIGNATURE}
+
+3D Condo Explorer's sales team
 {TODAYS_DATE}")]
         public string listingPromoTemplate {
             get {
@@ -254,6 +257,58 @@ Yours,
             }
             set {
                 this["defaultConfirmationSubject"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"Dear friend,
+
+CONGRATULATIONS: As a part of the 3D Condo Explorer's promo campaign you've been presented
+with a FREE (value of ${PRICE_NO_TAX}+HST!) Interactive 3D Listing!
+
+                           Interactive 3D Listing is a new amazing way of presenting your real estate using the
+                           3D Virtual Reality world of Google Earth - check this video to get an idea:
+                           http://youtu.be/rTLzjlY8HjM
+
+We noticed that you posted an MLS listing {MLS_NUMBER}on a condo at the following address:
+               {VIEWORDER_ADDRESS}
+
+... so, here is your Interactive 3D Listing for this property:
+
+               {VIEWORDER_URL} - click it to see how it works!
+
+IMPORTANT NOTE: The link above is temporary, if you do nothing, it'll stop working in {DAYS_VALID} days.
+So, IF YOU WANT TO KEEP IT, then JUST REPLY THIS MESSAGE, and we'll be happy to make
+it permanent for you!
+
+For more info visit our website (www.3dcondox.com), or call us at:
+    1-855-332-6630 (1-855-3d cond0) ext.2 (Sales and Marketing), 9AM-5PM weekdays
+Also you can just email your questions to sales@3DcondoX.com
+
+We are glad to help you with your highly competitive and challenging business.
+
+
+3D Condo Explorer's sales team
+{TODAYS_DATE}")]
+        public string listingCopyingAsPrivate {
+            get {
+                return ((string)(this["listingCopyingAsPrivate"]));
+            }
+            set {
+                this["listingCopyingAsPrivate"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Free Interactive 3D Listing for you")]
+        public string defaultListingCopyingAsPrivateSubject {
+            get {
+                return ((string)(this["defaultListingCopyingAsPrivateSubject"]));
+            }
+            set {
+                this["defaultListingCopyingAsPrivateSubject"] = value;
             }
         }
     }

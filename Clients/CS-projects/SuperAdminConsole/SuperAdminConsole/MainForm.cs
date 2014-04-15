@@ -461,6 +461,9 @@ namespace SuperAdminConsole
                 //treeViewAccounts.Nodes.Add(lastNode);
             }
 
+            lvwColumnSorter.SortColumn = 3;
+            lvwColumnSorter.Order = SortOrder.Ascending;
+            //lvwColumnSorter.Order = SortOrder.Descending;
             UpdateState();
         }
 
@@ -849,9 +852,12 @@ namespace SuperAdminConsole
                         subitems[2] = "3DL";
                         break;
                 }
+
                 DateTime expiredOn = viewOrder.GetProperty("expiresOn", DateTime.Now);
                 subitems[3] = expiredOn.ToShortDateString();
-                subitems[4] = viewOrder.GetProperty("mlsId", string.Empty);
+                if (viewOrder.GetProperty("note", "") != "")
+                    subitems[4] = "*";
+                subitems[4] += viewOrder.GetProperty("mlsId", string.Empty);
 
                 string vTourUrl = viewOrder.GetProperty("vTourUrl", string.Empty);
                 if (vTourUrl != string.Empty)
@@ -862,8 +868,7 @@ namespace SuperAdminConsole
                 ListViewItem orderItem = new ListViewItem(subitems);
                 FontStyle fontStyle = FontStyle.Regular;
                 if (viewOrder.GetProperty("note", "") != "")
-                    fontStyle = FontStyle.Italic;
-
+                    fontStyle = FontStyle.Bold;
                 orderItem.Font = new Font(ListViewOrders.Font, fontStyle);
                 if (expiredOn.CompareTo(DateTime.Now.AddDays(2.0)) < 0)
                     orderItem.ForeColor = Color.Red;
@@ -885,6 +890,9 @@ namespace SuperAdminConsole
 
                 ListViewOrders.Items.Add(orderItem);
             }
+            lvwColumnSorter.SortColumn = 3;
+            lvwColumnSorter.Order = SortOrder.Ascending;
+            //lvwColumnSorter.Order = SortOrder.Descending;
         }
 
         int lastSelectedIndex = -1;
@@ -1161,6 +1169,7 @@ namespace SuperAdminConsole
             }
 
             viewOrderId = viewOrderId.Replace("-", string.Empty);
+            EmailViewOrder.Template template = EmailViewOrder.Template.ListingPromotion;
             if (dragDropState == DragDropEffects.Move)
             {
                 ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
@@ -1192,11 +1201,13 @@ namespace SuperAdminConsole
                                                                   "viewOrder/" + viewOrderId,
                                                                   null,
                                                                   viewOrderSource);
+                template = EmailViewOrder.Template.ListingCopyingAsPrivate;
+                viewOrderId = updateViewOrder.ViewOrderID.Replace("-", string.Empty);
             }
 
             EmailViewOrder form = EmailViewOrder.Create(viewOrderId,
                                                         updateViewOrder.paymentRefId,
-                                                        EmailViewOrder.Template.OrderConfirmation);
+                                                        template);
             if (form == null)
             {
                 dragDropState = DragDropEffects.None;

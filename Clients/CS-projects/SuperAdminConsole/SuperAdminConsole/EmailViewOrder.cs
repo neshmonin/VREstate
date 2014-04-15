@@ -18,6 +18,7 @@ namespace SuperAdminConsole
         public enum Template 
         {
             ListingPromotion,
+            ListingCopyingAsPrivate,
             OrderConfirmation
         }
 
@@ -120,17 +121,23 @@ namespace SuperAdminConsole
 
         private void loadFromTemplate(Template template)
         {
-            if (template == Template.OrderConfirmation)
+            switch (template)
             {
-                body = Properties.Settings.Default.orderConfirmationTemplate;
-                subject = Properties.Settings.Default.defaultConfirmationSubject;
-                textBody.Focus();
-            }
-            else if (template == Template.ListingPromotion)
-            {
-                body = Properties.Settings.Default.listingPromoTemplate;
-                subject = Properties.Settings.Default.defaultPromoSubject;
-                textBoxAddressTo.Focus();
+                case Template.OrderConfirmation:
+                    body = Properties.Settings.Default.orderConfirmationTemplate;
+                    subject = Properties.Settings.Default.defaultConfirmationSubject;
+                    textBody.Focus();
+                    break;
+                case Template.ListingCopyingAsPrivate:
+                    body = Properties.Settings.Default.listingCopyingAsPrivate;
+                    subject = Properties.Settings.Default.defaultListingCopyingAsPrivateSubject;
+                    textBody.Focus();
+                    break;
+                case Template.ListingPromotion:
+                    body = Properties.Settings.Default.listingPromoTemplate;
+                    subject = Properties.Settings.Default.defaultPromoSubject;
+                    textBoxAddressTo.Focus();
+                    break;
             }
 
             textBody.Text = PreprocessTemplate(body);
@@ -307,7 +314,7 @@ namespace SuperAdminConsole
             if (body.Contains(wordsDictionary[Word.PRICE_NO_TAX]))
                 body = body.Replace(wordsDictionary[Word.PRICE_NO_TAX], string.Format("{0:00.00}", Properties.Settings.Default.PriceOf3DListing));
             if (body.Contains(wordsDictionary[Word.DAYS_VALID]))
-                body = body.Replace(wordsDictionary[Word.DAYS_VALID], ((theOrder.ExpiresOn - DateTime.Now).Days + 1).ToString());
+                body = body.Replace(wordsDictionary[Word.DAYS_VALID], ((theOrder.ExpiresOn - DateTime.Now).Days).ToString());
             if (body.Contains(wordsDictionary[Word.VALID_UNTIL_TIME_DAY]))
                 body = body.Replace(wordsDictionary[Word.VALID_UNTIL_TIME_DAY], theOrder.ExpiresOn.ToShortTimeString() + 
                                                        " of " + theOrder.ExpiresOn.ToLongDateString());
@@ -340,15 +347,20 @@ namespace SuperAdminConsole
 
             if (emailSettings.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
-                if (theTemplate == Template.OrderConfirmation)
+                switch (theTemplate)
                 {
-                    Properties.Settings.Default.orderConfirmationTemplate = emailSettings.Body;
-                    Properties.Settings.Default.defaultConfirmationSubject = emailSettings.Subject;
-                }
-                else if (theTemplate == Template.ListingPromotion)
-                {
-                    Properties.Settings.Default.listingPromoTemplate = emailSettings.Body;
-                    Properties.Settings.Default.defaultPromoSubject = emailSettings.Subject;
+                    case Template.OrderConfirmation:
+                        Properties.Settings.Default.orderConfirmationTemplate = emailSettings.Body;
+                        Properties.Settings.Default.defaultConfirmationSubject = emailSettings.Subject;
+                        break;
+                    case Template.ListingCopyingAsPrivate:
+                        Properties.Settings.Default.listingCopyingAsPrivate = emailSettings.Body;
+                        Properties.Settings.Default.defaultListingCopyingAsPrivateSubject = emailSettings.Subject;
+                        break;
+                    case Template.ListingPromotion:
+                        Properties.Settings.Default.listingPromoTemplate = emailSettings.Body;
+                        Properties.Settings.Default.defaultPromoSubject = emailSettings.Subject;
+                        break;
                 }
                 Properties.Settings.Default.Save();
 

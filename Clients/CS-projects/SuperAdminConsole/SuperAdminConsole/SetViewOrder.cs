@@ -537,7 +537,7 @@ namespace SuperAdminConsole
                 if (radioButton3DLayout.Checked)
                 {
                     string noteParam = string.IsNullOrEmpty(textBoxNote.Text) ? "" :
-                                "note=\"" + HttpUtility.UrlEncodeUnicode(textBoxNote.Text) + "\"&";
+                                "note=" + HttpUtility.UrlEncodeUnicode(textBoxNote.Text) + "&";
                     string infoUrlParam = string.IsNullOrEmpty(textMoreInfoUrl.Text) ? "" :
                                 "mls_url=\"" + HttpUtility.UrlEncodeUnicode(textMoreInfoUrl.Text) + "\"&";
                     parameters = string.Format("q=register&entity=viewOrder&product=b3dl&" +
@@ -569,7 +569,7 @@ namespace SuperAdminConsole
                                                "options={3}&" +
                                                "mls_id={6}&" +
                                                "mls_url={7}&" +
-                                               "note=\"{8}\"&" +
+                                               "note={8}&" +
                                                "propertyType={4}&" +
                                                "propertyId={5}",
                                                theUser.AutoID + (theUser.UserRole != User.Role.SuperAdmin ?

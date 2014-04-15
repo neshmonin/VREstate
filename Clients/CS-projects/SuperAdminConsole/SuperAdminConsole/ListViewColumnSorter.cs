@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Windows.Forms;
+using Vre.Server.BusinessLogic;
 
 
 namespace SuperAdminConsole
@@ -51,6 +53,27 @@ namespace SuperAdminConsole
             // Cast the objects to be compared to ListViewItem objects
             listviewX = (ListViewItem)x;
             listviewY = (ListViewItem)y;
+
+            // special case for comparing Date/Times
+            if (ColumnToSort == 3 &&
+                listviewX.Tag as ClientData != null)
+            {
+                ClientData clientDataX = listviewX.Tag as ClientData;
+                DateTime expiredOn_X = clientDataX.GetProperty("expiresOn", DateTime.Now);
+                if (expiredOn_X != null)
+                {
+                    ClientData clientDataY = listviewY.Tag as ClientData;
+                    DateTime expiredOn_Y = clientDataY.GetProperty("expiresOn", DateTime.Now);
+
+                    if (OrderOfSort == SortOrder.Ascending)
+                        return -DateTime.Compare(expiredOn_X, expiredOn_Y);
+                    else
+                    if (OrderOfSort == SortOrder.Descending)
+                        return DateTime.Compare(expiredOn_X, expiredOn_Y);
+                    else
+                        return 0;
+                }
+            }
 
             // Compare the two items
             compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
