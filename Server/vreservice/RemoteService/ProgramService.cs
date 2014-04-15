@@ -649,6 +649,9 @@ namespace Vre.Server.RemoteService
 					dao.Update(newVo);
 
 				tran.Commit();
+				ServiceInstances.Logger.Info("User {0} created a BuyingAgent-type ViewOrder: {1},{2}, MLS#{3}, VOID:{4}, PR:{5}",
+					request.UserInfo.Session.User,
+					targetType, targetId, mlsId, newVo.AutoID, paymentRefId);
 			}
 		}
 
@@ -684,7 +687,31 @@ namespace Vre.Server.RemoteService
 				using (var dao = new ViewOrderDao(request.UserInfo.Session.DbSession))
 					dao.Update(newVo);
 
+				Money? price = null;
+				if (request.Request.HasPrice())
+				{
+					price = request.Request.GetPrice();
+					var target = newVo.GetTarget(request.UserInfo.Session.DbSession);
+
+					Suite suite = target as Suite;
+					if ((suite != null) && price.HasValue)
+					{
+						suite.CurrentPrice = price;
+						using (var dao = new SuiteDao(request.UserInfo.Session.DbSession))
+							dao.SafeUpdate(suite);
+						using (var man = new SiteManager(request.UserInfo.Session))
+							man.LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice));
+					}
+				}
+
 				tran.Commit();
+
+				ServiceInstances.Logger.Info("User {0} created an Agent-type ViewOrder: {1},{2}, MLS#{3}, price:{4}, VOID:{5}, PR:{6}",
+					request.UserInfo.Session.User,
+					targetType, targetId, 
+					string.IsNullOrEmpty(mlsId) ? "N/A" : mlsId,
+					price.HasValue ? price.Value.ToFullString() : "<unchanged>",
+					newVo.AutoID, paymentRefId);
 			}
 		}
 
