@@ -23,6 +23,7 @@ namespace Vre.Server
 
         private static HttpServiceBase _httpService;
 		private static Vre.Server.Spikes.WmiController _wmiController;
+		private static Vre.Server.Util.HealthMonitor _healthMonitor;
 
         public static void PerformStartup(bool startAsService)
         {
@@ -95,6 +96,9 @@ namespace Vre.Server
                     startCommunications();
                 }
 
+				_healthMonitor = new Util.HealthMonitor(Configuration.Service.ServiceRamLimitMb.Value * 1024 * 1024);
+				_healthMonitor.Start();
+
 				if (Configuration.Service.WmiControl.Value)
 				{
 					_wmiController = new Spikes.WmiController(100 * 1024 * 1024);
@@ -103,7 +107,7 @@ namespace Vre.Server
 
                 Status = "Running.";
 
-                // TODO: DEBUG
+				// TODO: DEBUG
                 Testing.RandomUpdater.Start(Configuration.Debug.RandomObjectUpdateTimeSec.Value);
             }
             catch (Exception ex)
@@ -119,6 +123,8 @@ namespace Vre.Server
             Status = "Stopping...";
 
 			if (_wmiController != null) _wmiController.Stop();
+
+			_healthMonitor.Stop();
             
             stopCommunications();
 

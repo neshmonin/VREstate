@@ -240,6 +240,8 @@
     <Compile Include="UnitTest\UserManagement.cs" />
     <Compile Include="UserMessaging\IUserMessaging.cs" />
     <Compile Include="UserMessaging\MessageGenerator.cs" />
+    <Compile Include="Utilities\HealthInfo.cs" />
+    <Compile Include="Utilities\HealthMonitor.cs" />
     <Compile Include="Utilities\ImageProcessing.cs" />
     <Compile Include="Utilities\ProcessControl.cs" />
   </ItemGroup>

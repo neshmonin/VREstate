@@ -459,7 +459,8 @@ namespace Vre.Server.HttpService
             else if (file.Equals("humans.txt")) rq_text(1, response);
             else if (file.Equals("robots.txt")) rq_text(0, response);
             else if (file.Equals("base")) rq_redirect(0, response);
-            else
+			else if (file.Equals("health")) rq_health(response);
+			else
             {
 				if (file.Equals("view")) file = Configuration.HttpService.ViewClientPath.Value;
 
@@ -563,7 +564,15 @@ namespace Vre.Server.HttpService
             response.ResponseCode = HttpStatusCode.OK;
         }
 
-        private void rq_text(int type, IResponseData response)
+		private void rq_health(IResponseData response)
+		{
+			byte[] buffer = Encoding.UTF8.GetBytes(Util.HealthInfo.BuildHealthReport());
+			response.DataStream.Write(buffer, 0, buffer.Length);
+			response.DataStreamContentType = "txt";
+			response.ResponseCode = HttpStatusCode.OK;
+		}
+
+		private void rq_text(int type, IResponseData response)
         {
             response.ResponseCode = HttpStatusCode.OK;
             response.DataStreamContentType = "txt";

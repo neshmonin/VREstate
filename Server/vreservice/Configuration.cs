@@ -240,6 +240,9 @@ namespace Vre.Server
 
 			public static readonly BooleanConfigurationParam WmiControl =
 				new BooleanConfigurationParam(_config, "WmiControl", false);
+
+			public static readonly IntegerConfigurationParam ServiceRamLimitMb =
+				new IntegerConfigurationParam(_config, "ServiceRamLimitMb", 200);
 		}
 
 		public static class Urls
