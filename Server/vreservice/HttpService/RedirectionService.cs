@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Runtime.InteropServices;
+using System.Security;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
@@ -12,7 +15,7 @@ namespace Vre.Server.HttpService
 {
     internal class RedirectionService : HttpServiceBase
     {
-        enum ServiceType { Unknown, /*Const,*/ Redirection, Button, Reverse, ServerSessionStatus }
+        enum ServiceType { Unknown, /*Const,*/ Redirection, Button, Reverse, ServerSessionStatus, Reboot }
         private const string _defaultImage = "default.png";
 
         private string _buttonStorePath;
@@ -79,12 +82,17 @@ namespace Vre.Server.HttpService
                                 processServerSessionStatus(ctx, path, result);
                                 break;
 
+							case ServiceType.Reboot:
+								processSystemReboot(ctx, path, result);
+								break;
                             //case ServiceType.Const:
                             //    processConst(ctx, path, result);
                             //    break;
 
                             default:
-                                ProcessFileRequest(path, result);
+								var redirectUrl = altRedirect(ctx, path, browserKey);
+								if (null != redirectUrl) result.RedirectionUrl = redirectUrl;
+								else ProcessFileRequest(path, result);
                                 break;
                         }
                     }
@@ -115,7 +123,8 @@ namespace Vre.Server.HttpService
             //else if (pathElement.Equals("humans.txt")) return ServiceType.Const;
             //else if (pathElement.Equals("version")) return ServiceType.Const;
             else if (pathElement.Equals("sss")) return ServiceType.ServerSessionStatus;
-            return ServiceType.Unknown;
+			else if (pathElement.Equals("reboot")) return ServiceType.Reboot;
+			return ServiceType.Unknown;
         }
 
         private string redirect(HttpListenerContext ctx, string browserKey)
@@ -151,7 +160,38 @@ namespace Vre.Server.HttpService
             return finalUri;
         }
 
-        private string reverse(HttpListenerContext ctx, string browserKey)
+		private string altRedirect(HttpListenerContext ctx, string pathElementExtracted, string browserKey)
+		{
+			string finalUri;
+			bool testMode = false;
+
+			foreach (string k in ctx.Request.QueryString.AllKeys)
+			{
+				if (k.Equals("test"))
+				{
+					testMode = ctx.Request.QueryString[k].Equals("true");
+				}
+			}
+
+			finalUri = testMode ? _testMap.UriByAlias(pathElementExtracted) : _map.UriByAlias(pathElementExtracted);
+
+			if (finalUri != null)
+			{
+				string queryString = ctx.Request.Url.Query;
+				if (queryString.Length > 0)
+				{
+					if (finalUri.Contains("?")) finalUri += "&" + queryString.Substring(1);
+					else finalUri += queryString;
+				}
+			}
+
+			//ctx.Request.UrlReferrer;
+			// TODO: save statistics
+			//ctx.Response.Redirect(finalUri);
+			return finalUri;
+		}
+
+		private string reverse(HttpListenerContext ctx, string browserKey)
         {
             bool testMode = false;
             string id = null;
@@ -359,7 +399,52 @@ namespace Vre.Server.HttpService
             response.DataStream.Write(buffer, 0, buffer.Length);
         }
 
-        private static void streamImage(string path, IResponseData response)
+		private static void processSystemReboot(HttpListenerContext ctx, string path, IResponseData response)
+		{
+			response.ResponseCode = HttpStatusCode.OK;
+			response.DataStreamContentType = "txt";
+
+			StringBuilder text = new StringBuilder();
+
+			try
+			{
+				ServiceInstances.Logger.Info("Remote reboot request from {0}", ctx.Request.RemoteEndPoint);
+
+				bool force0 = !string.IsNullOrWhiteSpace(ctx.Request.QueryString["force0"]);
+				bool force1 = !string.IsNullOrWhiteSpace(ctx.Request.QueryString["force1"]);
+
+				long key;
+				if (long.TryParse(ctx.Request.QueryString["key"], out key))
+				{
+					var now = DateTime.Now;
+
+					long realKey = now.Year % 100 + now.Month + now.Day + now.Hour + now.Minute;
+
+					if (realKey == key)
+					{
+						var command = RebootManager.ExitWindows.Reboot;
+
+						if (force0) command |= RebootManager.ExitWindows.Force;
+						else if (force1) command |= RebootManager.ExitWindows.ForceIfHung;
+
+						if (RebootManager.PowerUtilities.ExitWindows(command, RebootManager.ShutdownReason.FlagPlanned, true))
+							text.Append("Rebooting now.\r\n");
+						else
+							text.Append("Rebooting failed.\r\n");
+					}
+				}
+
+			}
+			catch (Exception ex)
+			{
+				ServiceInstances.Logger.Error("Reboot processing failed: {0}\r\n{1}", ex.Message, ex.StackTrace);
+			}
+
+			byte[] buffer = Encoding.UTF8.GetBytes(text.ToString());
+			response.DataStream.Write(buffer, 0, buffer.Length);
+		}
+
+		private static void streamImage(string path, IResponseData response)
         {
             response.ResponseCode = HttpStatusCode.OK;
             response.DataStreamContentType = Path.GetExtension(path).ToLower().Substring(1);
@@ -534,6 +619,204 @@ namespace Vre.Server.HttpService
             }
         }
     }
+
+	/// <summary>
+	/// http://stackoverflow.com/questions/24726116/when-using-exitwindowsex-logoff-works-but-shutdown-and-restart-do-not
+	/// </summary>
+	internal class RebootManager
+	{
+		public static class PowerUtilities
+		{
+			[DllImport("user32.dll", SetLastError = true)]
+			private static extern int ExitWindowsEx(ExitWindows uFlags, ShutdownReason dwReason);
+
+			public static bool ExitWindows(ExitWindows exitWindows, ShutdownReason reason, bool ajustToken)
+			{
+				if (ajustToken && !TokenAdjuster.EnablePrivilege("SeShutdownPrivilege", true))
+				{
+					return false;
+				}
+
+				return ExitWindowsEx(exitWindows, reason) != 0;
+			}
+		}
+
+		[Flags]
+		public enum ExitWindows : uint
+		{
+			// ONE of the following:
+			LogOff = 0x00,
+			ShutDown = 0x01,
+			Reboot = 0x02,
+			PowerOff = 0x08,
+			RestartApps = 0x40,
+			// plus AT MOST ONE of the following two:
+			Force = 0x04,
+			ForceIfHung = 0x10,
+		}
+
+		[Flags]
+		public enum ShutdownReason : uint
+		{
+			None = 0,
+
+			MajorApplication = 0x00040000,
+			MajorHardware = 0x00010000,
+			MajorLegacyApi = 0x00070000,
+			MajorOperatingSystem = 0x00020000,
+			MajorOther = 0x00000000,
+			MajorPower = 0x00060000,
+			MajorSoftware = 0x00030000,
+			MajorSystem = 0x00050000,
+
+			MinorBlueScreen = 0x0000000F,
+			MinorCordUnplugged = 0x0000000b,
+			MinorDisk = 0x00000007,
+			MinorEnvironment = 0x0000000c,
+			MinorHardwareDriver = 0x0000000d,
+			MinorHotfix = 0x00000011,
+			MinorHung = 0x00000005,
+			MinorInstallation = 0x00000002,
+			MinorMaintenance = 0x00000001,
+			MinorMMC = 0x00000019,
+			MinorNetworkConnectivity = 0x00000014,
+			MinorNetworkCard = 0x00000009,
+			MinorOther = 0x00000000,
+			MinorOtherDriver = 0x0000000e,
+			MinorPowerSupply = 0x0000000a,
+			MinorProcessor = 0x00000008,
+			MinorReconfig = 0x00000004,
+			MinorSecurity = 0x00000013,
+			MinorSecurityFix = 0x00000012,
+			MinorSecurityFixUninstall = 0x00000018,
+			MinorServicePack = 0x00000010,
+			MinorServicePackUninstall = 0x00000016,
+			MinorTermSrv = 0x00000020,
+			MinorUnstable = 0x00000006,
+			MinorUpgrade = 0x00000003,
+			MinorWMI = 0x00000015,
+
+			FlagUserDefined = 0x40000000,
+			FlagPlanned = 0x80000000
+		}
+
+		public sealed class TokenAdjuster
+		{
+			// PInvoke stuff required to set/enable security privileges
+			private const int SE_PRIVILEGE_ENABLED = 0x00000002;
+			private const int TOKEN_ADJUST_PRIVILEGES = 0X00000020;
+			private const int TOKEN_QUERY = 0X00000008;
+			private const int TOKEN_ALL_ACCESS = 0X001f01ff;
+			private const int PROCESS_QUERY_INFORMATION = 0X00000400;
+
+			[DllImport("advapi32", SetLastError = true), SuppressUnmanagedCodeSecurity]
+			private static extern int OpenProcessToken(
+				IntPtr ProcessHandle, // handle to process
+				int DesiredAccess, // desired access to process
+				ref IntPtr TokenHandle // handle to open access token
+				);
+
+			[DllImport("kernel32", SetLastError = true), SuppressUnmanagedCodeSecurity]
+			private static extern bool CloseHandle(IntPtr handle);
+
+			[DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+			private static extern int AdjustTokenPrivileges(
+				IntPtr TokenHandle,
+				int DisableAllPrivileges,
+				IntPtr NewState,
+				int BufferLength,
+				IntPtr PreviousState,
+				ref int ReturnLength);
+
+			[DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+			private static extern bool LookupPrivilegeValue(
+				string lpSystemName,
+				string lpName,
+				ref LUID lpLuid);
+
+			public static bool EnablePrivilege(string lpszPrivilege, bool bEnablePrivilege)
+			{
+				bool retval = false;
+				int ltkpOld = 0;
+				IntPtr hToken = IntPtr.Zero;
+				TOKEN_PRIVILEGES tkp = new TOKEN_PRIVILEGES();
+				tkp.Privileges = new int[3];
+				TOKEN_PRIVILEGES tkpOld = new TOKEN_PRIVILEGES();
+				tkpOld.Privileges = new int[3];
+				LUID tLUID = new LUID();
+				tkp.PrivilegeCount = 1;
+				if (bEnablePrivilege)
+					tkp.Privileges[2] = SE_PRIVILEGE_ENABLED;
+				else
+					tkp.Privileges[2] = 0;
+				if (LookupPrivilegeValue(null, lpszPrivilege, ref tLUID))
+				{
+					Process proc = Process.GetCurrentProcess();
+					if (proc.Handle != IntPtr.Zero)
+					{
+						if (OpenProcessToken(proc.Handle, TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
+							ref hToken) != 0)
+						{
+							tkp.PrivilegeCount = 1;
+							tkp.Privileges[2] = SE_PRIVILEGE_ENABLED;
+							tkp.Privileges[1] = tLUID.HighPart;
+							tkp.Privileges[0] = tLUID.LowPart;
+							const int bufLength = 256;
+							IntPtr tu = Marshal.AllocHGlobal(bufLength);
+							Marshal.StructureToPtr(tkp, tu, true);
+							if (AdjustTokenPrivileges(hToken, 0, tu, bufLength, IntPtr.Zero, ref ltkpOld) != 0)
+							{
+								// successful AdjustTokenPrivileges doesn't mean privilege could be changed
+								if (Marshal.GetLastWin32Error() == 0)
+								{
+									retval = true; // Token changed
+								}
+							}
+							TOKEN_PRIVILEGES tokp = (TOKEN_PRIVILEGES)Marshal.PtrToStructure(tu, typeof(TOKEN_PRIVILEGES));
+							Marshal.FreeHGlobal(tu);
+						}
+					}
+				}
+				if (hToken != IntPtr.Zero)
+				{
+					CloseHandle(hToken);
+				}
+				return retval;
+			}
+
+			[StructLayout(LayoutKind.Sequential)]
+			internal struct LUID
+			{
+				internal int LowPart;
+				internal int HighPart;
+			}
+
+			[StructLayout(LayoutKind.Sequential)]
+			private struct LUID_AND_ATTRIBUTES
+			{
+				private LUID Luid;
+				private int Attributes;
+			}
+
+			[StructLayout(LayoutKind.Sequential)]
+			internal struct TOKEN_PRIVILEGES
+			{
+				internal int PrivilegeCount;
+				[MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+				internal int[] Privileges;
+			}
+
+			[StructLayout(LayoutKind.Sequential)]
+			private struct _PRIVILEGE_SET
+			{
+				private int PrivilegeCount;
+				private int Control;
+
+				[MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)] // ANYSIZE_ARRAY = 1
+				private LUID_AND_ATTRIBUTES[] Privileges;
+			}
+		}
+	}
 
     internal class AliasMap
     {
