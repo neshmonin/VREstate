@@ -141,12 +141,13 @@ namespace ModelPackageTester
 						}
 						suiteNames.Add(s.Name);
 
-						if (!s.Name.StartsWith(s.Floor))
-						{
-							readWarnings.AppendFormat("\r\nMDMD02: Building '{0}' suite '{1}' is set on wrong floor ({2}).",
-								b.Name, s.Name, s.Floor);
-							canImport = false;
-						}
+                        // This test is inappropriate for non-Canadian/USA numeration
+                        //if (!s.Name.StartsWith(s.Floor))
+                        //{
+                        //    readWarnings.AppendFormat("\r\nMDMD02: Building '{0}' suite '{1}' is set on wrong floor ({2}).",
+                        //        b.Name, s.Name, s.Floor);
+                        //    canImport = false;
+                        //}
 
 						string testingType = /*b.Type + "/" + */s.ClassName;
 						if (!info.HasType(testingType))
