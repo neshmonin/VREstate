@@ -188,6 +188,9 @@
   <ItemGroup>
     <Content Include="Assignment.txt" />
     <Content Include="Icon1.ico" />
+    <None Include="Resources\Layout3D.png" />
+    <None Include="Resources\PrivateListing.png" />
+    <None Include="Resources\PublicListing.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Server\Common\Common.csproj">

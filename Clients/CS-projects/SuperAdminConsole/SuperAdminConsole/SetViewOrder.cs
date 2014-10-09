@@ -83,6 +83,14 @@ namespace SuperAdminConsole
             get { return textBoxMLS.Text; }
         }
 
+        ViewOrder.ViewOrderProduct product = ViewOrder.ViewOrderProduct.PrivateListing;
+
+        public ViewOrder.ViewOrderProduct Product
+        {
+            get { return product; }
+            set { product = value; }
+        }
+
         public User theUser { private set; get; }
 
         ClientData theOrder = null;
@@ -147,9 +155,27 @@ namespace SuperAdminConsole
                 textBoxMLS.Text = theOrder.GetProperty("mlsId", string.Empty);
                 textMoreInfoUrl.Text = theOrder.GetProperty("infoUrl", string.Empty);
                 textBoxNote.Text = theOrder.GetProperty("note", string.Empty);
+                targetObjectType = theOrder.GetProperty("targetObjectType", "");
+                if (theReason == ChangeReason.Copy)
+                    Product = ViewOrder.ViewOrderProduct.PrivateListing;
+                else
+                    Product = theOrder.GetProperty<ViewOrder.ViewOrderProduct>("product",
+                                                            ViewOrder.ViewOrderProduct.PrivateListing);
+                switch (Product)
+                {
+                    case ViewOrder.ViewOrderProduct.PrivateListing:
+                        radioButtonPrivateListing.Checked = true;
+                        break;
+                    case ViewOrder.ViewOrderProduct.PublicListing:
+                        radioButtonSharedListing.Checked = true;
+                        break;
+                    case ViewOrder.ViewOrderProduct.Building3DLayout:
+                        radioButton3DLayout.Checked = true;
+                        break;
+                }
+
             }
 
-            targetObjectType = theOrder.GetProperty("targetObjectType", "");
             paymentRefId = string.Empty;
             decimal price = 0M;
 
@@ -268,11 +294,11 @@ namespace SuperAdminConsole
         private string generateTitle()
         {
             string tittle = string.Empty;
-            if (radioButtonPrivateListing.Checked)
+            if (Product == ViewOrder.ViewOrderProduct.PrivateListing)
                 tittle = "Ordered: Private Listing";
-            else if (radioButtonSharedListing.Checked)
+            else if (Product == ViewOrder.ViewOrderProduct.PublicListing)
                 tittle = "Ordered: Public Listing";
-            else if (radioButton3DLayout.Checked)
+            else if (Product == ViewOrder.ViewOrderProduct.Building3DLayout)
                 tittle = "Ordered: 3D Layout";
 
             switch (tabControlSteps.SelectedTab.Text)
@@ -313,8 +339,8 @@ namespace SuperAdminConsole
                     buttonCancel.Visible = true;
                     break;
                 case "Options":
-                    groupBoxListingOptions.Visible = radioButtonPrivateListing.Checked || 
-                                                     radioButtonSharedListing.Checked;
+                    groupBoxListingOptions.Visible = Product == ViewOrder.ViewOrderProduct.PrivateListing || 
+                                                     Product == ViewOrder.ViewOrderProduct.PublicListing;
                     labelValidFor.Visible = theReason != ChangeReason.Update;
                     numericUpDownDaysValid.Visible = theReason != ChangeReason.Update;
                     labelDays.Visible = theReason != ChangeReason.Update;
@@ -366,6 +392,16 @@ namespace SuperAdminConsole
                     textBoxMLS.ReadOnly = theReason != ChangeReason.Creation;
                     richTextBoxListingPrice.ReadOnly = theReason != ChangeReason.Creation || initialMLS != "";
 
+                    if (tabControlSteps.SelectedTab.Name == "tabPageViewOrderOptions")
+                    {
+                        if (Product == ViewOrder.ViewOrderProduct.PrivateListing)
+                            pictureBoxListingType.BackgroundImage = SuperAdminConsole.Properties.Resources.PrivateListing;
+                        else if (Product == ViewOrder.ViewOrderProduct.PublicListing)
+                            pictureBoxListingType.BackgroundImage = SuperAdminConsole.Properties.Resources.PublicListing;
+                        else if (Product == ViewOrder.ViewOrderProduct.Building3DLayout)
+                            pictureBoxListingType.BackgroundImage = SuperAdminConsole.Properties.Resources.Layout3D;
+                                ;
+                    }
                     break;
                 case "Generate":
                     buttonCancel.Visible = paymentSkip && !viewOrderUrlGenerated;
@@ -534,7 +570,7 @@ namespace SuperAdminConsole
                 string product = string.Empty;
 
                 string parameters;
-                if (radioButton3DLayout.Checked)
+                if (Product == ViewOrder.ViewOrderProduct.Building3DLayout)
                 {
                     string noteParam = string.IsNullOrEmpty(textBoxNote.Text) ? "" :
                                 "note=" + HttpUtility.UrlEncodeUnicode(textBoxNote.Text) + "&";
@@ -556,9 +592,9 @@ namespace SuperAdminConsole
                 }
                 else
                 {
-                    if (radioButtonPrivateListing.Checked)
+                    if (Product == ViewOrder.ViewOrderProduct.PrivateListing)
                         product = "prl";
-                    else if (radioButtonSharedListing.Checked)
+                    else if (Product == ViewOrder.ViewOrderProduct.PublicListing)
                         product = "pul";
                     parameters = string.Format("q=register&" +
                                                "entity=viewOrder&" +
@@ -601,7 +637,8 @@ namespace SuperAdminConsole
                     //      ”ref”:<ref number>
                     //  }
 
-                    if (radioButton3DLayout.Checked)
+                    if (Product == ViewOrder.ViewOrderProduct.Building3DLayout || 
+                        Product == ViewOrder.ViewOrderProduct.PrivateListing)
                     {
                         viewOrderUrlGenerated = true;
                         textBoxViewOrderURL.Text = viewOrderUrl;
@@ -1077,6 +1114,24 @@ namespace SuperAdminConsole
 
         private void radioButtonListingTypeRent_CheckedChanged(object sender, EventArgs e)
         {
+            UpdateState();
+        }
+
+        private void radioButtonPrivateListing_CheckedChanged(object sender, EventArgs e)
+        {
+            Product = ViewOrder.ViewOrderProduct.PrivateListing;
+            UpdateState();
+        }
+
+        private void radioButtonSharedListing_CheckedChanged(object sender, EventArgs e)
+        {
+            Product = ViewOrder.ViewOrderProduct.PublicListing;
+            UpdateState();
+        }
+
+        private void radioButton3DLayout_CheckedChanged(object sender, EventArgs e)
+        {
+            Product = ViewOrder.ViewOrderProduct.Building3DLayout;
             UpdateState();
         }
 
