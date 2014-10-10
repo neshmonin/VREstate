@@ -24,6 +24,7 @@ namespace ModelPackageTester
         private string _stiFileName = null;
         private string _floorPlanPath = null;
         private bool _isProduction = false;
+        private bool _importEnabled = false;
 
         private string doTest()
         {
@@ -269,7 +270,7 @@ namespace ModelPackageTester
 				}
 			}
 
-			btnImport.Enabled = canImport;
+            _importEnabled = canImport;
 
             return readWarnings.ToString();
         }
@@ -310,7 +311,6 @@ namespace ModelPackageTester
 
             string exeFile = getImportExecutablePath();
             bool canImport = File.Exists(exeFile);
-            btnImport.Visible = canImport;
             if (canImport)
             {
                 Text = Text.Replace("Tester", "Tester/Importer");
@@ -362,7 +362,7 @@ namespace ModelPackageTester
             else btnGuessFloorPlanFolder.Enabled = true;
 
             checkEnableTestButton();
-			btnImport.Enabled = false;
+            _importEnabled = false;
 		}
 
         private void guessFloorPlanPath()
@@ -401,7 +401,7 @@ namespace ModelPackageTester
             }
 
             btnGuessFloorPlanFolder.Enabled = false;
-			btnImport.Enabled = false;
+            _importEnabled = false;
 		}
 
         private void guessSuiteTypeInfoFileName()
@@ -440,7 +440,7 @@ namespace ModelPackageTester
             }
 
             btnGuessSuiteTypeInfo.Enabled = false;
-			btnImport.Enabled = false;
+            _importEnabled = false;
 		}
 
         private void onNewSuiteTypeInfoFileName(string filename)
@@ -451,7 +451,7 @@ namespace ModelPackageTester
             lblSuiteTypeInfoPath.Text = _stiFileName;
 
             checkEnableTestButton();
-			btnImport.Enabled = false;
+            _importEnabled = false;
 		}
 
         private void onNewFloorPlanPath(string pathname)
@@ -462,7 +462,7 @@ namespace ModelPackageTester
             lblFloorPlansPath.Text = _floorPlanPath;
 
             checkEnableTestButton();
-			btnImport.Enabled = false;
+            _importEnabled = false;
         }
 
         private void onImportSettings(string filename)
@@ -492,7 +492,7 @@ namespace ModelPackageTester
 					lblFloorPlansPath.Text = _floorPlanPath;
 
 					checkEnableTestButton();
-					btnImport.Enabled = false;
+                    _importEnabled = false;
 				}
 				else if (_settings.ImportMode == ModelImportSettings.Mode.Structure)
 				{
@@ -507,12 +507,12 @@ namespace ModelPackageTester
 					lblFloorPlansPath.Text = string.Empty;
 
 					btnTest.Enabled = (lblModelPath.Text.Length > 0);
-					btnImport.Enabled = false;
+                    _importEnabled = false;
 				}
 				else
 				{
 					btnTest.Enabled = false;
-					btnImport.Enabled = false;
+                    _importEnabled = false;
 				}
 				_importMode = _settings.ImportMode;
             }
@@ -601,6 +601,9 @@ namespace ModelPackageTester
                 tbResults.Enabled = true;
                 Cursor.Current = saved;
             }
+
+            if (_importEnabled)
+                doImport();
         }
 
         private void MainForm_DragEnter(object sender, DragEventArgs e)
@@ -650,7 +653,7 @@ namespace ModelPackageTester
             checkEnableTestButton();
         }
 
-        private void btnImport_Click(object sender, EventArgs e)
+        private void doImport()
         {
 			Form f = null;
 

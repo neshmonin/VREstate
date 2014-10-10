@@ -407,23 +407,14 @@ namespace ModelPackageTester
 		{
 			if (null == _settings)
 			{
-				if (DialogResult.Yes == MessageBox.Show(
-					"Do you want to create a new import settings file?",
-					Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question))
+				var path = Path.GetDirectoryName(_modelFileName);
+				var name = Path.GetFileName(path);  // gets name of last level folder 
+				if (string.IsNullOrEmpty(name))
 				{
-					var path = Path.GetDirectoryName(_modelFileName);
-					var name = Path.GetFileName(path);  // gets name of last level folder 
-					if (string.IsNullOrEmpty(name))
-					{
-						if (cbSingleBuilding.Checked) name = cbxBuildings.SelectedItem as string;
-						else name = tbSite.Text.Trim();
-					}
-					_settings = new ModelImportSettings(Path.Combine(path, name + ".import.txt"));
+					if (cbSingleBuilding.Checked) name = cbxBuildings.SelectedItem as string;
+					else name = tbSite.Text.Trim();
 				}
-				else
-				{
-					return;
-				}
+				_settings = new ModelImportSettings(Path.Combine(path, name + ".import.txt"));
 			}
 
 			string basePath = _settings.BasePath;
