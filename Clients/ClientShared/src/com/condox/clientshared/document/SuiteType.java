@@ -91,12 +91,12 @@ public class SuiteType implements I_JSON {
 		balconies = params.getInteger("balconies");
 		terraces = params.getInteger("terraces");
 		area = params.getDouble("area");
-		area = (area > 100) ? area : 100;
+		//area = (area > 100) ? area : 100;
 		String rawAreaUm = params.getString("areaUm");
-		if (rawAreaUm.equals("sqFt"))
-			areaUm = "sq.ft";
-		else
-			areaUm = "sq.m";
+		//if (rawAreaUm.equals("sqFt"))
+		//	areaUm = "sq.ft";
+		//else
+		//	areaUm = "sq.m";
 
 		floorPlanUrl = params.getString("floorPlanUrl");
 	}
