@@ -75,17 +75,25 @@ public class SuiteGeoItem implements IGeoItem {
 		String widthKml = "";
 		KmlStyle style = GE.getPlugin().createStyle("");		
 
+		String suiteName = suite.getName();
+		if (suiteName.length() == 1)
+			suiteName = "%20%20" + suiteName + "%20";
+		else if (suiteName.length() == 2)
+			suiteName = "%20" + suiteName + "%20";
+		else if (suiteName.length() == 3)
+			suiteName = "%20" + suiteName;
+		
 		switch (getGeoStatus()) {
 		case Available:
 			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
-					+ suite.getName()
+					+ suiteName
 					+ "&txtClr=65280&shdClr=65280&frame=0";
 			colorKml = "FF00FF00"; // GREEN
 			widthKml = "2";
 			break;
 		case OnHold:
 			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
-					+ suite.getName()
+					+ suiteName
 					+ "&txtClr=16776960&shdClr=16776960&frame=0";
 			colorKml = "FF00FFFF"; // YELLOW
 			widthKml = "2";
@@ -93,7 +101,7 @@ public class SuiteGeoItem implements IGeoItem {
 		case Sold:
 			if (Options.getShowSold()) {
 				href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
-					+ suite.getName()
+					+ suiteName
 					+ "&txtClr=16711680&shdClr=0&frame=0";
 				colorKml = "FF0000FF"; // RED
 				widthKml = "2";
@@ -107,28 +115,28 @@ public class SuiteGeoItem implements IGeoItem {
 			break;
 		case ResaleAvailable:
 			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
-					+ suite.getName()
+					+ suiteName
 					+ "&txtClr=1048575&shdClr=0&frame=0";
 			colorKml = "FFFFFF00"; // LIGHT BLUE
 			widthKml = "2";
 			break;
 		case AvailableRent:
 			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
-					+ suite.getName()
+					+ suiteName
 					+ "&txtClr=14854399&shdClr=0&frame=0";
 			colorKml = "FFE2A8FF"; // PINK
 			widthKml = "2";
 			break;
 		case Selected:
 			href = Options.URL_VRT + "gen/txt?height=30&shadow=2&text="
-					+ suite.getName()
+					+ suiteName
 					+ "&txtClr=16764108&shdClr=0&frame=0";
 			colorKml = "FFCCCCFF"; // LIGHT RED
 			widthKml = "4";
 			break;
 		case Layout:
 			href = Options.URL_VRT + "gen/txt?height=25&shadow=2&text="
-					+ suite.getName()
+					+ suiteName
 					+ "&txtClr=16777215&shdClr=0&frame=0";
 			colorKml = "FFFFFFFF"; // WHITE
 			widthKml = "3";
