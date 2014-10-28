@@ -180,7 +180,7 @@ public class SuiteView extends _GEView {
 			String formattedPrice = fmt.format(suite.getPrice());
 			if (suite.getStatus() == Status.AvailableRent)
 				formattedPrice += "/m";
-			json.put("VRT_price", new JSONString("$" + formattedPrice));
+			json.put("VRT_price", new JSONString(formattedPrice));
 		}
 		if (type.getBalconies() > 0)
 			json.put("VRT_balconies", new JSONNumber(type.getBalconies()));

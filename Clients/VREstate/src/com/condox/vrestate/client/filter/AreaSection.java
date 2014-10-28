@@ -123,12 +123,14 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 	public void Init() {
 		double min_area = Integer.MAX_VALUE;
 		double max_area = Integer.MIN_VALUE;
+		String areaUm = "Sq.Ft"; 
 		for (SuiteType suite_type : getParentSectionContainer().getActiveSuiteTypes().values()) {
 			double area = suite_type.getArea(); 
 			if (area <= 0)
 				continue;
 			min_area = Math.min(min_area, area);
 			max_area = Math.max(max_area, area);
+			areaUm = suite_type.getAreaUm();
 		}
 
 		int diff = (int) (max_area - min_area);
@@ -166,8 +168,8 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 				lbMaxArea.addItem("Max", item.toString());
 			else {
 				String area = NumberFormat.getDecimalFormat().format(item);
-				lbMinArea.addItem(area + " Sq.Ft", item.toString());
-				lbMaxArea.addItem(area + " Sq.Ft", item.toString());
+				lbMinArea.addItem(area + " " + areaUm, item.toString());
+				lbMaxArea.addItem(area + " " + areaUm, item.toString());
 			}
 		}
 
