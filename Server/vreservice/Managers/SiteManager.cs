@@ -148,9 +148,14 @@ namespace Vre.Server.BusinessLogic
 			}
 
 			bool result = false;
+			unauthorizedChange = false;
 			if (RolePermissionCheck.CheckLimitedUpdateSuite(_session, suite))
 			{
-				result = suite.UpdateFromClient(data, new[] { "currentPrice" }, out unauthorizedChange);
+				switch (suite.UpdateFromClient(data, new[] { "currentPrice" }))
+				{
+					case Suite.ClientUpdateResult.Changed: result = true; break;
+					case Suite.ClientUpdateResult.ChangesSkipped: result = true; unauthorizedChange = true; break;
+				}
 			}
 			else
 			{

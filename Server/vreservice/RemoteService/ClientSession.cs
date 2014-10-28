@@ -498,8 +498,9 @@ namespace Vre.Server.RemoteService
                 buildings = bresult;
                 suites = sresult;
             }
-            catch
+            catch (Exception ex)
             {
+				ServiceInstances.Logger.Error("Session.buildModifiedResponse failed: {0}", ex);
                 buildings = new Building[0];
                 suites = new Suite[0];
             }

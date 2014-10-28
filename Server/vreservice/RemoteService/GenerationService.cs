@@ -170,7 +170,10 @@ namespace Vre.Server.RemoteService
             return h * w;
         }
 
-        private static void generateTextImage(string text, ref int height, 
+		private static readonly Point _dummyPoint = new Point(0, 0);
+		private static readonly StringFormat _stringFormatWithSpaces = new StringFormat(StringFormatFlags.MeasureTrailingSpaces);
+		
+		private static void generateTextImage(string text, ref int height, 
             ref Color textColor, ref Color shadowColor, bool frame, Stream output)
         {
             using (Font oFont = new Font("Arial", height, FontStyle.Bold, GraphicsUnit.Pixel))
@@ -181,7 +184,7 @@ namespace Vre.Server.RemoteService
                     using (Graphics gr = Graphics.FromImage((Image)bm))
                     {
                         //gr.SmoothingMode = Graphics.SmoothingMode.AntiAlias;
-                        SizeF textSizeF = gr.MeasureString(text, oFont);
+                        SizeF textSizeF = gr.MeasureString(text, oFont, _dummyPoint, _stringFormatWithSpaces);
                         width = (int)textSizeF.Width;
                         height = (int)textSizeF.Height;
                     }

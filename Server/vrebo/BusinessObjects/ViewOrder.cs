@@ -193,9 +193,11 @@ namespace Vre.Server.BusinessLogic
             return result;
         }
 
-		public bool UpdateFromClient(ClientData data, ICollection<string> availableFields, out bool changesSkipped)
+		public enum ClientUpdateResult { NotChanged, ChangesSkipped, Changed }
+
+		public ClientUpdateResult UpdateFromClient(ClientData data, ICollection<string> availableFields)//, ref bool changesSkipped)
 		{
-			changesSkipped = false;
+			bool changesSkipped = false;
 			bool result = base.UpdateFromClient(data);
 
 			if (availableFields.Contains("enabled")) Enabled = data.UpdateProperty("enabled", Enabled, ref result);
@@ -228,7 +230,7 @@ namespace Vre.Server.BusinessLogic
 			if (availableFields.Contains("vTourUrl")) VTourUrl = data.UpdateProperty("vTourUrl", VTourUrl, ref result);
 			else if (data.GetProperty("vTourUrl", String.Empty) != VTourUrl) changesSkipped = true;
 
-			return result;
+			return result ? (changesSkipped ? ClientUpdateResult.ChangesSkipped : ClientUpdateResult.Changed) : ClientUpdateResult.NotChanged;
 		}
 	}
 }

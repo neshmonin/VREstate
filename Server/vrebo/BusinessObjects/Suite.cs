@@ -199,9 +199,11 @@ namespace Vre.Server.BusinessLogic
 			return changed;
         }
 
-		public virtual bool UpdateFromClient(ClientData data, ICollection<string> availableFields, out bool changesSkipped)
+		public enum ClientUpdateResult { NotChanged, ChangesSkipped, Changed }
+
+		public virtual ClientUpdateResult UpdateFromClient(ClientData data, ICollection<string> availableFields)//, ref bool changesSkipped)
 		{
-			changesSkipped = false;
+			bool changesSkipped = false;
 			bool result = base.UpdateFromClient(data);
 
 			if (availableFields.Contains("levelNumber")) PhysicalLevelNumber = data.UpdateProperty("levelNumber", PhysicalLevelNumber, ref result);
@@ -235,7 +237,7 @@ namespace Vre.Server.BusinessLogic
 				}
 			}
 
-			return result;
+			return result ? (changesSkipped ? ClientUpdateResult.ChangesSkipped : ClientUpdateResult.Changed) : ClientUpdateResult.NotChanged;
 		}
 
 		private void updatePrice(ClientData data, ref bool result)

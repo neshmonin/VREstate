@@ -16,7 +16,7 @@ namespace Vre.Server.Dao
 				int key;
 				if (int.TryParse(id, out key)) return GetById(key);
 
-				return _session.CreateCriteria<Building>()
+				return _session.CreateCriteria<Structure>()
 					.Add(Restrictions.Eq("Name", id))
 					.Add(Restrictions.Eq("Deleted", false))
 					.UniqueResult<Structure>();

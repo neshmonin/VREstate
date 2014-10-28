@@ -2065,8 +2065,8 @@ namespace Vre.Server.RemoteService
         private static void updateViewOrder(ClientSession session, ServiceQuery query, string strObjectId, ClientData data, IResponseData resp)
         {
             string paymentSystemRefId = query["pr"];
-			bool unauthorizedChange;
-			bool updated;
+			bool unauthorizedChange = false;
+			bool updated = false;
 
             using (INonNestedTransaction tran = NHibernateHelper.OpenNonNestedTransaction(session.DbSession))
             {
@@ -2078,7 +2078,11 @@ namespace Vre.Server.RemoteService
 
 				if (RolePermissionCheck.CheckLimitedUpdateViewOrder(session, owner))
 				{
-					updated = viewOrder.UpdateFromClient(data, new[] { "enabled" }, out unauthorizedChange);
+					switch (viewOrder.UpdateFromClient(data, new[] { "enabled" }))
+					{
+						case ViewOrder.ClientUpdateResult.Changed: updated = true; break;
+						case ViewOrder.ClientUpdateResult.ChangesSkipped: updated = true; unauthorizedChange = true; break;
+					}
 				}
 				else
 				{

@@ -89,7 +89,7 @@ namespace Vre.Server.BusinessLogic
             Updated = DateTime.MinValue;
         }
 
-        #region IClientDataProvide members and related methods
+        #region IClientDataProvider members and related methods
         public virtual ClientData GetClientData()
         {
             ClientData result = new ClientData();
