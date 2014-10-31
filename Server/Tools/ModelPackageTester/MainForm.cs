@@ -25,6 +25,7 @@ namespace ModelPackageTester
         private string _floorPlanPath = null;
         private bool _isProduction = false;
         private bool _importEnabled = false;
+        private bool _onVPS = false;
 
         private string doTest()
         {
@@ -310,8 +311,8 @@ namespace ModelPackageTester
             toolTip1.SetToolTip(btnGuessFloorPlanFolder, "Try guessing Floor Plan folder");
 
             string exeFile = getImportExecutablePath();
-            bool canImport = File.Exists(exeFile);
-            if (canImport)
+            _onVPS = File.Exists(exeFile);
+            if (_onVPS)
             {
                 Text = Text.Replace("Tester", "Tester/Importer");
 
@@ -521,6 +522,9 @@ namespace ModelPackageTester
                 _settings = null;
                 MessageBox.Show(ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
+            if (btnTest.Enabled)
+                btnTest_Click(null, null);
         }
 
         private void checkEnableTestButton()
@@ -602,7 +606,7 @@ namespace ModelPackageTester
                 Cursor.Current = saved;
             }
 
-            if (_importEnabled)
+            if (_importEnabled && _onVPS)
                 doImport();
         }
 
@@ -630,9 +634,14 @@ namespace ModelPackageTester
                             string ext = Path.GetExtension(file).ToLowerInvariant();
                             string name = Path.GetFileName(file).ToLowerInvariant();
 
-                            if (ext.Equals(".kmz")) onNewModelFileName(file);
-                            else if (ext.Equals(".csv")) onNewSuiteTypeInfoFileName(file);
-                            else if (name.EndsWith(".import.txt")) onImportSettings(file);
+                            if (ext.Equals(".kmz"))
+                                onNewModelFileName(file);
+                            else
+                            if (ext.Equals(".csv"))
+                                onNewSuiteTypeInfoFileName(file);
+                            else
+                            if (name.EndsWith(".import.txt"))
+                                onImportSettings(file);
                             else MessageBox.Show("Unknown file type dropped.",
                                 Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
