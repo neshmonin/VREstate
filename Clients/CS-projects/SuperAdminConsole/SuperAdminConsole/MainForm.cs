@@ -328,8 +328,8 @@ namespace SuperAdminConsole
             ClientData adminsJASON = resp.Data;
             ClientData[] admins = adminsJASON.GetNextLevelDataArray("users");
 
-            TreeNode[] adminNodes = new TreeNode[admins.Length-1];
-            int i = 0;
+            List<TreeNode> adminNodeList = new List<TreeNode>();
+
             foreach (ClientData cd in admins)
             {
                 User userDevAdmin = new User(cd);
@@ -353,12 +353,13 @@ namespace SuperAdminConsole
                 //                                        new TreeNode("Banners"),
                 //                                        new TreeNode("Logs") };
                 TreeNode[] children = new TreeNode[2] { new TreeNode("ViewOrders"),
-                                                    new TreeNode("Logs") };
-                adminNodes[i] = new TreeNode(nodeName, children);
-                adminNodes[i].Tag = userDevAdmin;
-                i++;
+                                                new TreeNode("Logs") };
+                TreeNode theNode = new TreeNode(nodeName, children);
+                adminNodeList.Add(theNode);
+                theNode.Tag = userDevAdmin;
             }
-            topNode = new TreeNode(string.Format("Dev Admins ({0})", admins.Length), adminNodes);
+
+            topNode = new TreeNode(string.Format("Dev Admins ({0})", admins.Length), adminNodeList.ToArray());
             treeViewAccounts.Nodes.Add(topNode);
 
             ///data/user?sid=<SID>[&genval=<generation>][&withdeleted={true|false}][&<hints>]
@@ -376,7 +377,7 @@ namespace SuperAdminConsole
             ClientData[] users = usersJSON.GetNextLevelDataArray("users");
 
             TreeNode[] userNodes = new TreeNode[users.Length];
-            i = 0;
+            int i = 0;
             foreach (ClientData cd in users)
             {
                 User userSellingAgent = new User(cd);
