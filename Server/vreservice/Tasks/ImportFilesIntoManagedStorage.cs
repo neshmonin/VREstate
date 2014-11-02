@@ -18,7 +18,7 @@ namespace Vre.Server.Task
 		protected override void processStorage(ISession dbSession,
 			FileStorageItem.LocationType locationType,
 			IFileStorageManager manager,
-			string storageRoot,
+			string storageRoot, IEnumerable<string> namespaceHints,
 			IEnumerable<string> dbFileList,
 			ref StringBuilder report, ref List<string> unusedFileList)
 		{

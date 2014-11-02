@@ -26,7 +26,7 @@ namespace Vre.Server.Task
 
 				processStorage(session.DbSession,
 					FileStorageItem.LocationType.Public, ServiceInstances.FileStorageManager,
-					Configuration.PublicFileStore.RootPath.Value,
+					Configuration.PublicFileStore.RootPath.Value, new [] { "models", "user" },
 					getAllPublicFilesUsedByDb(session.DbSession),
 					ref report, ref unusedFileList);
 
@@ -34,13 +34,13 @@ namespace Vre.Server.Task
 				{
 					var fn = Path.Combine(Configuration.PublicFileStore.RootPath.Value, string.Format("@unused-files-{0:yyyyMMddHHmm}.txt", DateTime.Now));
 					report.AppendFormat("Found {0} unused files; saved in {1}\r\n", unusedFileList.Count, fn);
-					dumpFileList(fn, "DEL ", true, unusedFileList);
+					dumpFileList(fn, "MOVE ", DateTime.Now.ToString("yyyyMMdd"), true, unusedFileList);
 					unusedFileList.Clear();
 				}
 
 				processStorage(session.DbSession,
 					FileStorageItem.LocationType.Internal, ServiceInstances.InternalFileStorageManager,
-					Configuration.InternalFileStore.RootPath.Value,
+					Configuration.InternalFileStore.RootPath.Value, new[] { "wireframes" },
 					getAllInternalFilesUsedByDb(session.DbSession),
 					ref report, ref unusedFileList);
 
@@ -48,7 +48,7 @@ namespace Vre.Server.Task
 				{
 					var fn = Path.Combine(Configuration.InternalFileStore.RootPath.Value, string.Format("@unused-files-{0:yyyyMMddHHmm}.txt", DateTime.Now));
 					report.AppendFormat("Found {0} unused files; saved in {1}\r\n", unusedFileList.Count, fn);
-					dumpFileList(fn, "DEL ", true, unusedFileList);
+					dumpFileList(fn, "MOVE ", DateTime.Now.ToString("yyyyMMdd"), true, unusedFileList);
 					unusedFileList.Clear();
 				}
 			}
@@ -59,7 +59,7 @@ namespace Vre.Server.Task
 		protected abstract void processStorage(ISession dbSession,
 			FileStorageItem.LocationType locationType,
 			IFileStorageManager manager,
-			string storageRoot,
+			string storageRoot, IEnumerable<string> namespaceHints,
 			IEnumerable<string> dbFileList,
 			ref StringBuilder report, ref List<string> unusedFileList);
 
@@ -146,7 +146,7 @@ namespace Vre.Server.Task
 			}
 		}
 
-		private static void dumpFileList(string outputPath, string prefix, bool quote, IEnumerable<string> list)
+		private static void dumpFileList(string outputPath, string prefix, string postfix, bool quote, IEnumerable<string> list)
 		{
 			using (var fs = File.CreateText(outputPath))
 			{
@@ -156,10 +156,15 @@ namespace Vre.Server.Task
 					{
 						fs.WriteLine(i);
 					}
-					else
+					else if (string.IsNullOrEmpty(postfix))
 					{
 						if (quote) fs.WriteLine("{0} \"{1}\"", prefix, i);
 						else fs.WriteLine("{0} {1}", prefix, i);
+					}
+					else
+					{
+						if (quote) fs.WriteLine("{0} \"{1}\" {2}", prefix, i, postfix);
+						else fs.WriteLine("{0} {1} {2}", prefix, i, postfix);
 					}
 				}
 			}
