@@ -696,7 +696,7 @@ namespace ModelPackageTester
 			ofd.Filter = "Import settings files (*.import.txt)|*.import.txt|All Files (*.*)|*.*";
 			ofd.Multiselect = false;
 			//ofd.InitialDirectory = null;
-			ofd.Title = "Select import settins file";
+			ofd.Title = "Select import settings file";
 
 			if (DialogResult.OK == ofd.ShowDialog()) onImportSettings(ofd.FileName);
 		}

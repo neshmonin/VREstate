@@ -123,7 +123,7 @@ namespace Vre.Server
 
 		public string Currency
 		{
-			get { return getSetting("Currenct", "CAD"); }
+			get { return getSetting("Currency", "CAD"); }
 			set { putSetting("Currency", value); }
 		}
 
