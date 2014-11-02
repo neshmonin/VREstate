@@ -85,7 +85,7 @@ namespace Vre.Server.BusinessLogic
             try
             {
                 _rawValue = double.Parse(parts[0]);
-                _unit = (Unit)byte.Parse(parts[1]);
+                _unit = ParseUnit(parts[1]);
             }
             catch (Exception ex)
             {
@@ -124,5 +124,23 @@ namespace Vre.Server.BusinessLogic
             }
             return false;
         }
-    }
+
+		public static bool TryParseUnit(string raw, out Unit unit)
+		{
+			byte encoded;
+			if (byte.TryParse(raw, out encoded))
+			{
+				unit = (Unit)encoded;
+				return true;
+			}
+			return Enum.TryParse<Unit>(raw, out unit);
+		}
+
+		public static Unit ParseUnit(string raw)
+		{
+			byte encoded;
+			if (byte.TryParse(raw, out encoded)) return (Unit)encoded;
+			return (Unit)Enum.Parse(typeof(Unit), raw);
+		}
+	}
 }

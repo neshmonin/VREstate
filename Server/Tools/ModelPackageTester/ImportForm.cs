@@ -199,6 +199,28 @@ namespace ModelPackageTester
 
             commandLine.AppendFormat(" suiteStatus={0}", cbxNewSuiteStatus.SelectedItem as string);
 
+			commandLine.AppendFormat(" currency={0}", cbxCurrency.SelectedItem as string);
+
+			switch (cbxMeasurementSystem.SelectedIndex)
+			{
+				default:
+				case 0:
+					commandLine.AppendFormat(" heightunit={0}", _settings.HeightUnit.ToString());
+					commandLine.AppendFormat(" floorareaunit={0}", _settings.FloorAreaUnit.ToString());
+					break;
+
+				case 1:
+					commandLine.AppendFormat(" heightunit={0}", ModelImportSettings.LengthUnit.Feet.ToString());
+					commandLine.AppendFormat(" floorareaunit={0}", ModelImportSettings.AreaUnit.SqFeet.ToString());
+					break;
+
+				case 2:
+					commandLine.AppendFormat(" heightunit={0}", ModelImportSettings.LengthUnit.Meters.ToString());
+					commandLine.AppendFormat(" floorareaunit={0}", ModelImportSettings.AreaUnit.SqMeters.ToString());
+					break;
+			}
+
+	
 			if (!cbDryRun.Checked)
 				commandLine.AppendFormat(" mlsimport={0}", cbDoMlsImport.Checked ? "true" : "false");
 
@@ -233,7 +255,18 @@ namespace ModelPackageTester
             cbxNewBuildingStatus.Items.Add("Sold");
             cbxNewBuildingStatus.Items.Add("ResaleAvailable");
             cbxNewBuildingStatus.SelectedIndex = 2;
-        }
+
+			cbxMeasurementSystem.Items.Clear();
+			cbxMeasurementSystem.Items.Add("Mixed (config)");
+			cbxMeasurementSystem.Items.Add("Imperial");
+			cbxMeasurementSystem.Items.Add("Metric");
+			cbxMeasurementSystem.SelectedIndex = 1;
+
+			cbxCurrency.Items.Clear();
+			cbxCurrency.Items.Add("CAD");
+			cbxCurrency.Items.Add("RUB");
+			cbxCurrency.SelectedIndex = 0;
+		}
 
         public void Init(ModelImportSettings settings,
             string modelFileName, string stiFileName, string floorPlanPath, Kmz model,
@@ -316,6 +349,18 @@ namespace ModelPackageTester
 
             prop = _settings.NewSuiteStatusName;
             if (prop != null) selectComboItem(cbxNewSuiteStatus, prop);
+
+			prop = _settings.Currency;
+			if (prop != null) selectComboItem(cbxCurrency, prop);
+
+			if ((_settings.FloorAreaUnit == ModelImportSettings.AreaUnit.SqFeet)
+				&& (_settings.HeightUnit == ModelImportSettings.LengthUnit.Feet))
+				cbxMeasurementSystem.SelectedIndex = 1;
+			else if ((_settings.FloorAreaUnit == ModelImportSettings.AreaUnit.SqMeters)
+				&& (_settings.HeightUnit == ModelImportSettings.LengthUnit.Meters))
+				cbxMeasurementSystem.SelectedIndex = 2;
+			else
+				cbxMeasurementSystem.SelectedIndex = 0;
 
             if (_settings.ImportMode == ModelImportSettings.Mode.Building)
             {
@@ -434,6 +479,25 @@ namespace ModelPackageTester
 	
 			_settings.NewBuildingStatusName = cbxNewBuildingStatus.SelectedItem as string;
 			_settings.NewSuiteStatusName = cbxNewSuiteStatus.SelectedItem as string;
+
+			_settings.Currency = cbxCurrency.SelectedItem as string;
+
+			switch (cbxMeasurementSystem.SelectedIndex)
+			{
+				default:
+				case 0:
+					break;
+
+				case 1:
+					_settings.FloorAreaUnit = ModelImportSettings.AreaUnit.SqFeet;
+					_settings.HeightUnit = ModelImportSettings.LengthUnit.Feet;
+					break;
+
+				case 2:
+					_settings.FloorAreaUnit = ModelImportSettings.AreaUnit.SqMeters;
+					_settings.HeightUnit = ModelImportSettings.LengthUnit.Meters;
+					break;
+			}
 
 			if (cbSingleBuilding.Checked)
 			{

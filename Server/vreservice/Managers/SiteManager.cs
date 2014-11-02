@@ -171,7 +171,7 @@ namespace Vre.Server.BusinessLogic
 
 				if (suite.CurrentPrice.HasValue &&
 					(!price.HasValue || (suite.CurrentPrice.Value.CompareTo(price.Value) != 0)))
-					LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice));
+					LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice), suite.CurrentPrice.Value.Currency);
 
 				ServiceInstances.Logger.Info("User ID={0} updated suite ID={1} ({2}, {3}).",
 					_session.User.AutoID, suite.AutoID,
@@ -278,7 +278,7 @@ namespace Vre.Server.BusinessLogic
 		//    return result;
 		//}
 
-		public bool LogNewSuitePrice(Suite suite, float price)
+		public bool LogNewSuitePrice(Suite suite, float price, Currency currency)
 		{
 			RolePermissionCheck.CheckUpdateSuite(_session, suite);
 
@@ -293,7 +293,7 @@ namespace Vre.Server.BusinessLogic
 					{
 						if (dao.IsSuiteOption(opt.OpType))
 						{
-							emitNewPrice(opt, price);
+							emitNewPrice(opt, price, currency);
 
 							result = true;
 							break;
@@ -305,7 +305,7 @@ namespace Vre.Server.BusinessLogic
 						Option opt = new Option(suite.Building, _session.User, "Suite", dao.GetSuiteOption());
 						using (OptionDao odao = new OptionDao(_session.DbSession)) odao.Create(opt);
 
-						emitNewPrice(opt, price);
+						emitNewPrice(opt, price, currency);
 
 						suite.OptionsPossible.Add(opt);
 
@@ -320,13 +320,13 @@ namespace Vre.Server.BusinessLogic
 			return result;
 		}
 
-		private void emitNewPrice(Option opt, float price)
+		private void emitNewPrice(Option opt, float price, Currency currency)
         {
             Price p = new Price(opt);
             p.NumberOfUnits = 1;
             p.PricePerUnitForBuyer = price;
             p.StartingDate = DateTime.UtcNow;
-            p.UnitName = "CAD";
+            p.UnitName = currency.Iso3LetterCode;
 
             _session.DbSession.Save(p);  // no need for special DAO; this is single-use saveable object!!!
         }
@@ -703,12 +703,12 @@ namespace Vre.Server.BusinessLogic
 				}
 
 				var currentPrice = s.CurrentPrice;
-				var newPrice = new Money(Convert.ToDecimal(item.CurrentPrice), Currency.Cad); // TODO: Currently locked to CAD
+				var newPrice = new Money(Convert.ToDecimal(item.CurrentPrice), item.PriceCurrency);
 				if (!currentPrice.HasValue || (currentPrice.Value.CompareTo(newPrice) != 0))
 				//if (Math.Abs(current - item.CurrentPrice) >= 0.01)
 				{
 					s.CurrentPrice = newPrice;
-					LogNewSuitePrice(s, (float)item.CurrentPrice);
+					LogNewSuitePrice(s, (float)item.CurrentPrice, item.PriceCurrency);
 
 					ServiceInstances.Logger.Info("Changing suite ID {0} ({1}, {2}) price {3} -> {4}",
 												s.AutoID, item.SuiteName, item.CompiledAddress, currentPrice, newPrice);
@@ -806,8 +806,8 @@ namespace Vre.Server.BusinessLogic
 				{
 					using (var dao = new ViewOrderDao(_session.DbSession)) dao.Create(vo);
 
-					suite.CurrentPrice = new Money(Convert.ToDecimal(item.CurrentPrice), Currency.Cad); // TODO: Currently locked to CAD
-					LogNewSuitePrice(suite, (float)item.CurrentPrice);
+					suite.CurrentPrice = new Money(Convert.ToDecimal(item.CurrentPrice), item.PriceCurrency);
+					LogNewSuitePrice(suite, (float)item.CurrentPrice, item.PriceCurrency);
 
 					switch (item.SaleLeaseState)
 					{

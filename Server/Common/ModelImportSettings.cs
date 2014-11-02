@@ -7,6 +7,8 @@ namespace Vre.Server
     public class ModelImportSettings
     {
 		public enum Mode { Site, Building, Structure }
+		public enum LengthUnit { Feet, Meters }
+		public enum AreaUnit { SqFeet, SqMeters }
 
         private Dictionary<string, string> _settings = new Dictionary<string, string>();
 		private string _settingsFileName;
@@ -95,6 +97,34 @@ namespace Vre.Server
 				else return Mode.Site;
 			}
 			set { putSetting("ImportMode", value.ToString()); }
+		}
+
+		public LengthUnit HeightUnit
+		{
+			get
+			{
+				var test = getSetting("HeightUnit", string.Empty).ToUpperInvariant();
+				if (test.Equals("METERS")) return ModelImportSettings.LengthUnit.Meters;
+				else return ModelImportSettings.LengthUnit.Feet;
+			}
+			set { putSetting("HeightUnit", value.ToString()); }
+		}
+
+		public AreaUnit FloorAreaUnit
+		{
+			get
+			{
+				var test = getSetting("FloorAreaUnit", string.Empty).ToUpperInvariant();
+				if (test.Equals("SQMETERS")) return ModelImportSettings.AreaUnit.SqMeters;
+				else return ModelImportSettings.AreaUnit.SqFeet;
+			}
+			set { putSetting("FloorAreaUnit", value.ToString()); }
+		}
+
+		public string Currency
+		{
+			get { return getSetting("Currenct", "CAD"); }
+			set { putSetting("Currency", value); }
 		}
 
 		public string StructureName
@@ -198,5 +228,7 @@ namespace Vre.Server
 			get { return getSetting("BuildingCountry", null); }
 			set { putSetting("BuildingCountry", value); }
 		}
+
+
     }
 }

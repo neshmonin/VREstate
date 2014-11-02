@@ -1903,7 +1903,7 @@ namespace Vre.Server.RemoteService
 			                    updatedCnt++;
 
 			                    if (suite.CurrentPrice.HasValue && (suite.CurrentPrice.Value.CompareTo(price.Value) != 0))
-				                    manager.LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice));
+				                    manager.LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice), suite.CurrentPrice.Value.Currency);
 		                    }
 		                    else
 		                    {

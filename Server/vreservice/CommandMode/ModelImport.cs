@@ -49,6 +49,9 @@ namespace Vre.Server.Command
         private ClientSession _clientSession;
         private string _importPath;
         private List<string> _filesSaved = new List<string>();
+		private Currency _currency;
+		private ValueWithUM.Unit _floorAreaUnit;
+		private ValueWithUM.Unit _heightUnit;
         //private ISession _session;
 
         public string Name { get { return "importmodel"; } }
@@ -64,6 +67,15 @@ namespace Vre.Server.Command
             string extraSuiteInfoFileName = param.GetOption("sti");
             string siteName = param.GetOption("site");
             bool dryRun = CommandHandler.str2bool(param.GetOption("dryrun"), true);
+
+			if (!ValueWithUM.TryParseUnit(param.GetOption("heightunit") ?? ValueWithUM.Unit.Feet.ToString(), out _heightUnit))
+				throw new ArgumentException("Invalid heightunit provided");
+
+			if (!ValueWithUM.TryParseUnit(param.GetOption("floorareaunit") ?? ValueWithUM.Unit.Feet.ToString(), out _floorAreaUnit))
+				throw new ArgumentException("Invalid floorareaunit provided");
+
+			if (!Currency.TryParse(param.GetOption("currency") ?? Vre.Server.BusinessLogic.Utilities.DefaultCurrency.Iso3LetterCode, out _currency))
+				throw new ArgumentException("Unknown currency provided");
 
             _log = new StringBuilder();
             string logFileName = Path.Combine(
@@ -718,10 +730,10 @@ namespace Vre.Server.Command
 			{
 				// this must be the first call on new suite as it re-reads suite from DB;
 				// all subsequent changes shall be lost!
-				dbSuite.CurrentPrice = new Money(Convert.ToDecimal(modelSuite.InitialPrice), Currency.Cad); // TODO: Currently locked to CAD
+				dbSuite.CurrentPrice = new Money(Convert.ToDecimal(modelSuite.InitialPrice), _currency);
 
 				using (SiteManager mgr = new SiteManager(_clientSession))
-					mgr.LogNewSuitePrice(dbSuite, (float)modelSuite.InitialPrice);
+					mgr.LogNewSuitePrice(dbSuite, (float)modelSuite.InitialPrice, _currency);
 			}
 
             dbSuite.ShowPanoramicView = modelSuite.ShowPanoramicView;
@@ -730,7 +742,7 @@ namespace Vre.Server.Command
 			//
 			dbSuite.Location = modelSuite.LocationGeo.AsViewPoint();
 			dbSuite.FloorName = Utilities.NormalizeFloorNumber(modelSuite.Floor);
-			dbSuite.CeilingHeight = new ValueWithUM(modelSuite.CeilingHeightFt, ValueWithUM.Unit.Feet);
+			dbSuite.CeilingHeight = new ValueWithUM(modelSuite.CeilingHeightFt, _heightUnit);
 
             setSuiteType(dbSuite, modelSite, modelSuite.ClassName);
         }
@@ -763,7 +775,7 @@ namespace Vre.Server.Command
                 stype.NoShowerBathroomCount = _extraSuiteInfo.GetNoShowerBathroomCount(cn);
                 stype.BedroomCount = _extraSuiteInfo.GetBedroomCount(cn);
                 stype.DenCount = _extraSuiteInfo.GetDenCount(cn);
-                stype.FloorArea = new ValueWithUM(_extraSuiteInfo.GetIndoorFloorAreaSqFt(cn), ValueWithUM.Unit.SqFeet);
+                stype.FloorArea = new ValueWithUM(_extraSuiteInfo.GetIndoorFloorAreaSqFt(cn), _floorAreaUnit);
 
 				// Add geoinformation
 				//

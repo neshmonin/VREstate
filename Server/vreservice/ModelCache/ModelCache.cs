@@ -575,7 +575,7 @@ namespace Vre.Server.ModelCache
 				// TRANSITION [MODEL CACHE] START
 				dbSuite.Location = _location;
 				dbSuite.FloorName = _floor;
-				dbSuite.CeilingHeight = new ValueWithUM(_ceilingHeightFt, ValueWithUM.Unit.Feet);
+				dbSuite.CeilingHeight = new ValueWithUM(_ceilingHeightFt, ValueWithUM.Unit.Feet);  // TODO: Hard-coded height unit
 				dbSuite.MarkUpdated();
 				dbSession.Update(dbSuite);
 				// TRANSITION [MODEL CACHE] END
@@ -583,7 +583,7 @@ namespace Vre.Server.ModelCache
 
             public void UpdateBo(Suite target, bool withSubObjects)
             {
-                target.CeilingHeight = new ValueWithUM(_ceilingHeightFt, ValueWithUM.Unit.Feet);
+				target.CeilingHeight = new ValueWithUM(_ceilingHeightFt, ValueWithUM.Unit.Feet);  // TODO: Hard-coded height unit
                 ////target.SuiteType
                 target.FloorName = _floor;
                 target.Location = _location;

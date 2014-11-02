@@ -700,7 +700,7 @@ namespace Vre.Server.RemoteService
 						using (var dao = new SuiteDao(request.UserInfo.Session.DbSession))
 							dao.SafeUpdate(suite);
 						using (var man = new SiteManager(request.UserInfo.Session))
-							man.LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice));
+							man.LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice), suite.CurrentPrice.Value.Currency);
 					}
 				}
 

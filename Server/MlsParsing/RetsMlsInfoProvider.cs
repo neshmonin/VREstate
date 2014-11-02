@@ -137,6 +137,7 @@ namespace Vre.Server.Mls
             item.MlsId = row[_mlsNumIdx];  // this item must exist
 
             item.CurrentPrice = double.Parse(row[_priceIdx]);
+			item.PriceCurrency = Currency.Cad;  // TODO: RETS Provider locked to CAD now.
 
 	        string listringType = row[_listingTypeIdx];
 			if (listringType.Equals("Sale")) item.SaleLeaseState = MlsItem.SaleLease.Sale;

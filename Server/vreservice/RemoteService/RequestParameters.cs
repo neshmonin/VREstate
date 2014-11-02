@@ -136,7 +136,7 @@ namespace Vre.Server.RemoteService
 				else cur = Currency.None;
 			}
 
-			if (Currency.None == cur) cur = Currency.Cad;  // TODO: DEFAULT
+			if (Currency.None == cur) cur = Vre.Server.BusinessLogic.Utilities.DefaultCurrency;
 
 			decimal val;
 			if (decimal.TryParse(arg, out val)) return new Money(val, cur);

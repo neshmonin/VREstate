@@ -101,8 +101,8 @@ namespace Vre.Server.BusinessLogic
                 if (value >= 0.0m)
                 {
                     Currency c;
-                    if (!Currency.TryParse(data.GetProperty("currentPriceCurrency", "CAD"), out c))
-                        c = Currency.Cad;
+					if (!Currency.TryParse(data.GetProperty("currentPriceCurrency", Utilities.DefaultCurrency.Iso3LetterCode), out c))
+						throw new ArgumentException("currentPriceCurrency value is invalid");
 
                     CurrentPrice = new Money(value, c);
                     changed = true;
