@@ -117,6 +117,8 @@ namespace Vre.Server.BusinessLogic
 	        Currency cpc;
 			if ((cp >= 0.0m) && Currency.TryParse(fromServer.GetProperty("currentPriceCurrency", string.Empty), out cpc))
 				CurrentPrice = new Money(cp, cpc);
+
+			Location.UpdateFromClient(fromServer.GetNextLevelDataItem("position"));
         }
 
         public Suite(ClientData fromServer) : this(fromServer, null) {}
