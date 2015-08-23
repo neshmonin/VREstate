@@ -11,14 +11,14 @@ namespace Vre.Server.BusinessLogic
         {
             return string.Format("{0}{1}",
                 FinancialTransactionRefNumPrefix,
-                Utilities.GenerateReferenceNumber(ft.AutoID ^ FinancialTransactionRefNumKey));
+                Vre.Utilities.GenerateReferenceNumber(ft.AutoID ^ FinancialTransactionRefNumKey));
         }
 
         public static void SetAutoSystemReferenceId(this FinancialTransaction ft)
         {
             ft.SetSystemReferenceId(string.Format("{0}{1}",
                 FinancialTransactionRefNumPrefix,
-                Utilities.GenerateReferenceNumber(ft.AutoID ^ FinancialTransactionRefNumKey)));
+                Vre.Utilities.GenerateReferenceNumber(ft.AutoID ^ FinancialTransactionRefNumKey)));
         }
 
 		public static void SetPaymentSystemReference(this FinancialTransaction ft,

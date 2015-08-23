@@ -1885,6 +1885,8 @@ namespace Vre.Server.RemoteService
                                              where s.SuiteName.Equals(name)
                                              select s;
                                 if (1 == suites.Count()) suite = suites.First();
+								ServiceInstances.Logger.Debug("UB: Suite not found by ID ({0}); searching by name ({1}) got ID={2}",
+									suiteId, name, (suite != null) ? suite.AutoID : -1);
                             }
 
                         if (null == suite) continue;
@@ -1895,14 +1897,19 @@ namespace Vre.Server.RemoteService
                         }
 
 	                    var price = suite.CurrentPrice;
+//ServiceInstances.Logger.Debug("UB#1: Suite ID={0} price={1}", suite.AutoID, price.HasValue ? price.Value.ToFullString() : "?");
 	                    if (!suite.UpdateFromClient(suiteData)) continue;
-	                    try
+//ServiceInstances.Logger.Debug("UB#2: Suite ID={0} price={1}", suite.AutoID, suite.CurrentPrice.HasValue ? suite.CurrentPrice.Value.ToFullString() : "?");
+						try
 	                    {
 		                    if (true)//manager.UpdateSuite(suite))
 		                    {
 			                    updatedCnt++;
 
-			                    if (suite.CurrentPrice.HasValue && (suite.CurrentPrice.Value.CompareTo(price.Value) != 0))
+			                    if (suite.CurrentPrice.HasValue && (
+									(price.HasValue && (suite.CurrentPrice.Value.CompareTo(price.Value) != 0))
+									|| (!price.HasValue)
+									))
 				                    manager.LogNewSuitePrice(suite, (float)Convert.ToDouble(suite.CurrentPrice), suite.CurrentPrice.Value.Currency);
 		                    }
 		                    else

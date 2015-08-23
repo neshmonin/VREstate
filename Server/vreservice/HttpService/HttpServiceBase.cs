@@ -508,10 +508,10 @@ namespace Vre.Server.HttpService
                 ContentTypeByExtension.Clear();
                 // http://www.iana.org/assignments/media-types/
 
-                ContentTypeByExtension.Add("html", "text/html");
-                ContentTypeByExtension.Add("htm", "text/html");
-                ContentTypeByExtension.Add("txt", "text/plain");
-                ContentTypeByExtension.Add("xml", "text/xml");
+				ContentTypeByExtension.Add("html", "text/html; charset=utf-8");
+				ContentTypeByExtension.Add("htm", "text/html; charset=utf-8");
+				ContentTypeByExtension.Add("txt", "text/plain; charset=utf-8");
+				ContentTypeByExtension.Add("xml", "text/xml; charset=utf-8");
                 ContentTypeByExtension.Add("css", "text/css");
 
                 ContentTypeByExtension.Add("gif", "image/gif");
@@ -521,7 +521,7 @@ namespace Vre.Server.HttpService
                 ContentTypeByExtension.Add("ico", "image/vnd.microsoft.icon");
 
                 ContentTypeByExtension.Add("js", "application/javascript");
-                ContentTypeByExtension.Add("json", "application/json");
+                ContentTypeByExtension.Add("json", "application/json; charset=utf-8");
                 ContentTypeByExtension.Add("kml", "application/vnd.google-earth.kml+xml");
                 ContentTypeByExtension.Add("kmz", "application/vnd.google-earth.kmz");
 
