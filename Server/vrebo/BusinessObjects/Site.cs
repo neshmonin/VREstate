@@ -12,6 +12,7 @@ namespace Vre.Server.BusinessLogic
         public virtual IList<SuiteType> SuiteTypes { get; protected set; }
 
         public virtual string Name { get; set; }
+		public virtual string LocalizedName { get; set; }
 
         public virtual string DisplayModelUrl { get; set; }
         public virtual string OverlayModelUrl { get; set; }
@@ -29,6 +30,7 @@ namespace Vre.Server.BusinessLogic
         {
             InitializeNew();
             Name = name;
+			LocalizedName = name;
             Developer = developer;
             Location = GeoPoint.Empty;
             Buildings = new List<Building>();
@@ -50,7 +52,7 @@ namespace Vre.Server.BusinessLogic
         {
             bool result = false;
 
-            Name = data.UpdateProperty("name", Name, ref result);
+            LocalizedName = data.UpdateProperty("name", LocalizedName, ref result);
             ExcursionModel = data.UpdateProperty("excursionModel", ExcursionModel, ref result);
             InitialView = data.UpdateProperty("initialView", InitialView, ref result);
 
@@ -62,7 +64,7 @@ namespace Vre.Server.BusinessLogic
             ClientData result = base.GetClientData();
 
             result.Add("estateDeveloperId", Developer.AutoID);
-            result.Add("name", Name);
+            result.Add("name", LocalizedName);
 
             //ClientData position = new ClientData();
             //position.Add("lon", Longitude);

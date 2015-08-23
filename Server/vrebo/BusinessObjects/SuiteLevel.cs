@@ -9,7 +9,8 @@ namespace Vre.Server.BusinessLogic
         public virtual SuiteType SuiteType { get; protected set; }
         public virtual int Order { get; set; }
         public virtual string Name { get; set; }
-        public virtual string Model { get; set; }
+		public virtual string LocalizedName { get; set; }
+		public virtual string Model { get; set; }
         public virtual IList<Room> Rooms { get; protected set; }
 
         #region consolidated searchable information
@@ -27,6 +28,7 @@ namespace Vre.Server.BusinessLogic
             InitializeNew();
             SuiteType = suiteType;
             Name = name;
+			LocalizedName = name;
             Order = 0;
             Model = null;
             Rooms = new List<Room>();
@@ -39,7 +41,7 @@ namespace Vre.Server.BusinessLogic
             result.Add("id", AutoID);  // informational only
 
             result.Add("order", Order);
-            result.Add("name", Name);
+            result.Add("name", LocalizedName);
             result.Add("modelName", Model);  // informatinal only
 
             // TODO: Rooms!

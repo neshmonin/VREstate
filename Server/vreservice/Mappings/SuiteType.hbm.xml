@@ -13,6 +13,7 @@
     <property name="Deleted" column="Deleted" />
 
     <property name="Name" column="Name" />
+    <property name="LocalizedName" column="LocalizedName" />
     <property name="WireframeModel" column="WireframeModel" />
 
     <bag name="Levels" lazy="false">

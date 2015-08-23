@@ -101,6 +101,9 @@ namespace ModelPackageTester
             commandLine.Append(" structure=");
 			insertPath((cbxStructures.SelectedItem as string).Trim(), ref commandLine);
 
+			commandLine.Append(" strucLocName=");
+			insertPath(tbLocalizedName.Text, ref commandLine);
+
             commandLine.AppendFormat(" dryrun={0}", cbDryRun.Checked ? "true" : "false");
 
 			return commandLine.ToString();
@@ -165,6 +168,15 @@ namespace ModelPackageTester
 			cbxStructures.Items.Clear();
 			foreach (Structure s in _model.Model.Site.Structures)
 				cbxStructures.Items.Add(s.Name);
+
+			string prop;
+
+			prop = _settings.StructureName;
+			selectComboItem(cbxStructures, prop);
+
+			prop = _settings.StructureLocalizedName;
+			if (prop != null) tbLocalizedName.Text = prop;
+			else tbLocalizedName.Text = _settings.StructureName;
 		}
 
 		private void saveImportSettings()
@@ -181,6 +193,8 @@ namespace ModelPackageTester
 			_settings.ImportMode = ModelImportSettings.Mode.Structure;
 
 			_settings.StructureName = (cbxStructures.SelectedItem as string).Trim();
+
+			_settings.StructureLocalizedName = tbLocalizedName.Text.Trim();
 
 			_settings.DisplayModelFileName = makeRelativePath(_displayModelFileName, basePath);
 

@@ -8,7 +8,8 @@ namespace Vre.Server.BusinessLogic
     {
         public virtual Site ConstructionSite { get; protected set; }
         public virtual string Name { get; set; }
-        public virtual string WireframeModel { get; set; }
+		public virtual string LocalizedName { get; set; }
+		public virtual string WireframeModel { get; set; }
         public virtual IList<SuiteLevel> Levels { get; protected set; }
 
         public virtual ValueWithUM FloorArea { get; set; }  // TODO: Should be computable field!
@@ -36,6 +37,7 @@ namespace Vre.Server.BusinessLogic
             InitializeNew();
             ConstructionSite = constructionSite;
             Name = name;
+			LocalizedName = name;
             Levels = new List<SuiteLevel>();
             WireframeModel = null;
             SuitesInvolved = new List<Suite>();
@@ -68,7 +70,7 @@ namespace Vre.Server.BusinessLogic
         {
             bool result = false;
 
-            Name = data.UpdateProperty("name", Name, ref result);
+			LocalizedName = data.UpdateProperty("name", LocalizedName, ref result);
             //Model = data.UpdateProperty("modelName", Model, ref changed);
             BedroomCount = data.UpdateProperty("bedrooms", BedroomCount, ref result);
             DenCount = data.UpdateProperty("dens", DenCount, ref result);
@@ -116,7 +118,7 @@ namespace Vre.Server.BusinessLogic
 
             result.Add("siteId", ConstructionSite.AutoID);  // informational only
 
-            result.Add("name", Name);
+			result.Add("name", LocalizedName);
             //result.Add("modelName", Model);  // informatinal only
 
             if (!string.IsNullOrEmpty(FloorPlanUrl))
@@ -171,7 +173,7 @@ namespace Vre.Server.BusinessLogic
             if (!supplement)
             {
                 result.Add("id", AutoID);
-                result.Add("name", Name);
+				result.Add("name", LocalizedName);
             }
 
             if (!string.IsNullOrEmpty(FloorPlanUrl))

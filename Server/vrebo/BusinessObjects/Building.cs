@@ -18,7 +18,8 @@ namespace Vre.Server.BusinessLogic
         public virtual Site ConstructionSite { get; protected set; }
 
         public virtual string Name { get; set; }
-        public virtual string AddressLine1 { get; set; }
+		public virtual string LocalizedName { get; set; }
+		public virtual string AddressLine1 { get; set; }
         public virtual string AddressLine2 { get; set; }
         public virtual string City { get; set; }
         public virtual string StateProvince { get; set; }
@@ -54,6 +55,7 @@ namespace Vre.Server.BusinessLogic
             InitializeNew();
             ConstructionSite = constructionSite;
             Name = name;
+			LocalizedName = name;
             Status = BuildingStatus.InProject;
             Location = GeoPoint.Empty;
             Center = GeoPoint.Empty;
@@ -95,7 +97,7 @@ namespace Vre.Server.BusinessLogic
 
             result.Add("siteId", ConstructionSite.AutoID);
 
-            result.Add("name", Name);
+            result.Add("name", LocalizedName);
             result.Add("status", ClientData.ConvertProperty<Building.BuildingStatus>(Status));
             result.Add("openingDate", OpeningDate);
             result.Add("altitudeAdjustment", AltitudeAdjustment);
@@ -140,7 +142,7 @@ namespace Vre.Server.BusinessLogic
         {
             bool changed = base.UpdateFromClient(data);
 
-            Name = data.UpdateProperty("name", Name, ref changed);
+            LocalizedName = data.UpdateProperty("name", LocalizedName, ref changed);
             Status = data.UpdateProperty<BuildingStatus>("status", Status, ref changed);
             OpeningDate = data.UpdateProperty("openingDate", OpeningDate, ref changed);
 
@@ -156,7 +158,7 @@ namespace Vre.Server.BusinessLogic
 
         public override string ToString()
         {
-            string result = Name;
+            string result = LocalizedName;
 
             if (!string.IsNullOrWhiteSpace(AddressLine1) ||
                 !string.IsNullOrWhiteSpace(AddressLine2))

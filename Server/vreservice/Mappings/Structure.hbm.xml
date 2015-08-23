@@ -15,6 +15,7 @@
     <property name="Deleted" column="Deleted" />
 
     <property name="Name" column="Name" />
+    <property name="LocalizedName" column="LocalizedName" />
     <property name="DisplayModelUrl" column="DisplayModelUrl" />
     <property name="AltitudeAdjustment" column="AltitudeAdjustment" />
 

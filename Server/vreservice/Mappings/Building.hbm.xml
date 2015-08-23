@@ -15,6 +15,7 @@
     <property name="Deleted" column="Deleted" />
 
     <property name="Name" column="Name" />
+    <property name="LocalizedName" column="LocalizedName" />
     <property name="AddressLine1" column="AddressLine1" />
     <property name="AddressLine2" column="AddressLine2" />
     <property name="City" column="City" />

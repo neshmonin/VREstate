@@ -6,6 +6,7 @@ namespace Vre.Server.BusinessLogic
 	public partial class Structure : UpdateableBase
 	{
 		public virtual string Name { get; set; }
+		public virtual string LocalizedName { get; set; }
 		public virtual string DisplayModelUrl { get; set; }
         public virtual GeoPoint Location { get; set; }
         public virtual double AltitudeAdjustment { get; set; }
@@ -16,6 +17,7 @@ namespace Vre.Server.BusinessLogic
 		{
             InitializeNew();
 			Name = name;
+			LocalizedName = name;
 			DisplayModelUrl = null;
 			Location = GeoPoint.Empty;
             AltitudeAdjustment = 0.0;
@@ -24,7 +26,7 @@ namespace Vre.Server.BusinessLogic
         public Structure(ClientData fromServer)
             : base(fromServer)
         {
-			Name = fromServer.GetProperty("name", string.Empty);
+			LocalizedName = fromServer.GetProperty("name", string.Empty);
             DisplayModelUrl = fromServer.GetProperty("displayModelUrl", string.Empty);
 			Location.UpdateFromClient(fromServer.GetNextLevelDataItem("position"));
 
@@ -35,7 +37,7 @@ namespace Vre.Server.BusinessLogic
         {
             ClientData result = base.GetClientData();
 
-			result.Add("name", Name);
+			result.Add("name", LocalizedName);
             result.Add("altitudeAdjustment", AltitudeAdjustment);
             if (Location != null) result.Add("position", Location.GetClientData());
             if (!string.IsNullOrEmpty(DisplayModelUrl))

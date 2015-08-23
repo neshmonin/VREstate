@@ -107,6 +107,12 @@ namespace Vre.Server.Command
 					structure.DisplayModelUrl = storeModelFile(structure, structure.DisplayModelUrl, 
 						displayModelFileName, "str");
 
+					// set localized name: if provided - use it; else if exists (update) - leave it; else use model name
+					var locName = ModelImport.conditionString(extras.GetOption("strucLocName"), 256);
+					structure.LocalizedName = string.IsNullOrEmpty(locName)
+						? (string.IsNullOrEmpty(structure.LocalizedName) ? structure.Name : structure.LocalizedName)
+						: locName;
+
 					_clientSession.DbSession.Update(structure);
 
                     if (dryRun)

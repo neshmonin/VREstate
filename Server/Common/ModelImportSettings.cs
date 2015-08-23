@@ -49,6 +49,7 @@ namespace Vre.Server
 			using (var wrt = File.CreateText(_settingsFileName))
 			{
 				wrt.WriteLine("; 3D Condo Explorer model import settings");
+				wrt.WriteLine("; MODIFY WITH CARE: This file is overwritten with ModelPackageTester import tool; comments etc. may be lost.");
 				switch (ImportMode)
 				{
 					case Mode.Site:
@@ -229,6 +230,20 @@ namespace Vre.Server
 			set { putSetting("BuildingCountry", value); }
 		}
 
-
-    }
+		//public string BuildingLocalizedName
+		//{
+		//    get { return getSetting("BuildingLocalizedName", null); }
+		//    set { putSetting("BuildingLocalizedName", value); }
+		//}
+		public string StructureLocalizedName
+		{
+			get { return getSetting("StructureLocalizedName", null); }
+			set { putSetting("StructureLocalizedName", value); }
+		}
+		//public string SiteLocalizedName
+		//{
+		//    get { return getSetting("SiteLocalizedName", null); }
+		//    set { putSetting("SiteLocalizedName", value); }
+		//}
+	}
 }

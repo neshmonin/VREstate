@@ -12,6 +12,7 @@ using Vre.Server.FileStorage;
 using Vre.Server.Mls;
 using Vre.Server.Model;
 using Vre.Server.RemoteService;
+using Vre.Server.Util;
 
 namespace Vre.Server.Command
 {
@@ -52,6 +53,7 @@ namespace Vre.Server.Command
 		private Currency _currency;
 		private ValueWithUM.Unit _floorAreaUnit;
 		private ValueWithUM.Unit _heightUnit;
+		private LocalizationXrefFile _localizationXref;
         //private ISession _session;
 
         public string Name { get { return "importmodel"; } }
@@ -77,37 +79,47 @@ namespace Vre.Server.Command
 			if (!Currency.TryParse(param.GetOption("currency") ?? Vre.Server.BusinessLogic.Utilities.DefaultCurrency.Iso3LetterCode, out _currency))
 				throw new ArgumentException("Unknown currency provided");
 
-            _log = new StringBuilder();
-            string logFileName = Path.Combine(
-                    Path.GetDirectoryName(infoModelFileName),
-                    Path.GetFileNameWithoutExtension(infoModelFileName))
-                + ".import.log.txt";
-            FileStream logFile = File.Open(logFileName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+			var derivedFileName = Path.Combine(
+					Path.GetDirectoryName(infoModelFileName),
+					Path.GetFileNameWithoutExtension(infoModelFileName));
+
+			_log = new StringBuilder();
+            var logFileName = derivedFileName + ".import.log.txt";
+			var localizationDictionaryFileName = derivedFileName + "-localized-xref.txt";
 
             _log.AppendLine("=========================================================");
             _log.AppendLine(Environment.CommandLine);
-            _log.AppendLine("---------------------------------------------------------");
+			_log.AppendFormat("Using the following localization cross-reference: {0}{1}", localizationDictionaryFileName, Environment.NewLine);
+			_log.AppendLine("---------------------------------------------------------");
 
             Exception importError = null;
+			try
+			{
+				DatabaseSettingsDao.VerifyDatabase();
 
-            try
-            {
-                DatabaseSettingsDao.VerifyDatabase();
+				debugBreak();
 
-                debugBreak();
+				_localizationXref = new LocalizationXrefFile(localizationDictionaryFileName);
+				_localizationXref.Read();
 
-                doImport(estateDeveloper, siteName,
-                    infoModelFileName, extraSuiteInfoFileName, dryRun, param);
-                //instance.generateSqlScript(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName);
-            }
-            catch (Exception e)
-            {
-                importError = e;
-                _log.AppendFormat("Error importing model: {0}", Utilities.ExplodeException(e));
-            }
+				doImport(estateDeveloper, siteName,
+					infoModelFileName, extraSuiteInfoFileName, dryRun, param);
+				//instance.generateSqlScript(estateDeveloperName, siteName, modelFileName, extraSuiteInfoFileName);
 
-            logFile.Seek(0, SeekOrigin.End);
-            using (StreamWriter sw = new StreamWriter(logFile)) sw.Write(_log);
+				_localizationXref.Save();
+			}
+			catch (Exception e)
+			{
+				importError = e;
+				_log.AppendFormat("Error importing model: {0}", Utilities.ExplodeException(e));
+			}
+			finally
+			{
+				using (var logFile = File.Open(logFileName, FileMode.Append, FileAccess.Write, FileShare.Read))
+				{
+					using (var sw = new StreamWriter(logFile)) sw.Write(_log);
+				}
+			}
 
             if (importError != null) throw importError;
         }
@@ -449,7 +461,12 @@ namespace Vre.Server.Command
 					mLat / (double)buildingCnt,
 					mAlt / (double)buildingCnt);
 			}
-				
+
+			// set localized name: if provided - use it; else write it to XREF
+			var locName = conditionString(_localizationXref.GetSiteName(dbSite.Name), 256);
+			if (string.IsNullOrEmpty(locName)) _localizationXref.WriteSiteName(dbSite.Name, dbSite.LocalizedName);
+			else dbSite.LocalizedName = locName;
+
 			dbSite.MarkUpdated();
 			_clientSession.DbSession.Update(dbSite);
         }
@@ -587,6 +604,11 @@ namespace Vre.Server.Command
 
             //if (isCreated && (infoModelFileName != null))  // new single building imported; attempt to write address
             {
+				// set localized name: if provided - use it; else write it to XREF
+				var locName = conditionString(_localizationXref.GetBuildingName(dbBuilding.Name), 256);
+				if (string.IsNullOrEmpty(locName)) _localizationXref.WriteBuildingName(dbBuilding.Name, dbBuilding.LocalizedName);
+				else dbBuilding.LocalizedName = locName;
+
                 dbBuilding.Country = conditionString(extras.GetOption("ad_co"), 128);
                 dbBuilding.PostalCode = conditionString(extras.GetOption("ad_po"), 10);
                 dbBuilding.StateProvince = conditionString(extras.GetOption("ad_stpr"), 8);
@@ -713,7 +735,7 @@ namespace Vre.Server.Command
 			}
 		}
 
-        private static string conditionString(string input, int maxlen)
+        internal static string conditionString(string input, int maxlen)
         {
             if (null == input) return string.Empty;
             input = input.Trim();
@@ -743,6 +765,15 @@ namespace Vre.Server.Command
 			dbSuite.Location = modelSuite.LocationGeo.AsViewPoint();
 			dbSuite.FloorName = Utilities.NormalizeFloorNumber(modelSuite.Floor);
 			dbSuite.CeilingHeight = new ValueWithUM(modelSuite.CeilingHeightFt, _heightUnit);
+
+			// set localized name: if provided - use it; else write it to XREF
+			var locName = conditionString(_localizationXref.GetSuiteName(dbSuite.SuiteName), 256);
+			if (string.IsNullOrEmpty(locName)) _localizationXref.WriteSuiteName(dbSuite.SuiteName, dbSuite.LocalizedSuiteName);
+			else dbSuite.LocalizedSuiteName = locName;
+
+			locName = conditionString(_localizationXref.GetFloorName(dbSuite.FloorName), 256);
+			if (string.IsNullOrEmpty(locName)) _localizationXref.WriteFloorName(dbSuite.FloorName, dbSuite.LocalizedFloorName);
+			else dbSuite.LocalizedFloorName = locName;
 
             setSuiteType(dbSuite, modelSite, modelSuite.ClassName);
         }
@@ -787,7 +818,19 @@ namespace Vre.Server.Command
 				cd.Add("geometries", cdmodel);
 				stype.WireframeModel = JavaScriptHelper.ClientDataToJson(cd);
 
-                if (newType)
+				// set localized name: if provided - use it; else write it to XREF
+				var locName = conditionString(_localizationXref.GetSuiteTypeName(stype.Name), 256);
+				if (string.IsNullOrEmpty(locName))
+				{
+					_localizationXref.WriteSuiteTypeName(stype.Name, stype.LocalizedName);
+				}
+				else if (!stype.LocalizedName.Equals(locName))
+				{
+					stype.LocalizedName = locName;
+					if (!newType) updated = true;
+				}
+				
+				if (newType)
                 {
                     _clientSession.DbSession.Save(stype);
                     _log.AppendFormat("Created new suite type ID={0}, Name={1}\r\n", stype.AutoID, stype.Name);
