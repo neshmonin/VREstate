@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace Vre.Server.Util
 {
@@ -35,7 +37,7 @@ namespace Vre.Server.Util
 
 			using (var file = File.Open(_fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
 			{
-				using (var rdr = new StreamReader(file))
+				using (var rdr = new StreamReader(file, Encoding.UTF8))
 				{
 					int lineNum = 0;
 					Dictionary<string, string> currentDictionary = null;
@@ -84,17 +86,20 @@ namespace Vre.Server.Util
 		public void Save()
 		{
 			if (!_modified) return;
-			using (var wrt = File.CreateText(_fileName))
+			using (var file = File.Create(_fileName))
 			{
-				wrt.WriteLine("; 3D Condo Explorer model localization cross-reference");
-				wrt.WriteLine("; MODIFY WITH CARE: This file may be overwritten with import tool; comments etc. may be lost.");
+				using (var wrt = new StreamWriter(file, Encoding.UTF8))
+				{
+					wrt.WriteLine("; 3D Condo Explorer model localization cross-reference");
+					wrt.WriteLine("; MODIFY WITH CARE: This file may be overwritten with import tool; comments etc. may be lost.");
 
-				writeSection(wrt, "Sites", _site);
-				writeSection(wrt, "Buildings", _building);
-				writeSection(wrt, "SuiteTypes", _suiteType);
-				writeSection(wrt, "Floors", _floor);
-				writeSection(wrt, "Suites", _suite);
-				writeSection(wrt, "SuiteLevels", _suiteLevel);
+					writeSection(wrt, "Sites", _site);
+					writeSection(wrt, "Buildings", _building);
+					writeSection(wrt, "SuiteTypes", _suiteType);
+					writeSection(wrt, "Floors", _floor);
+					writeSection(wrt, "Suites", _suite);
+					writeSection(wrt, "SuiteLevels", _suiteLevel);
+				}
 			}
 		}
 
@@ -102,7 +107,7 @@ namespace Vre.Server.Util
 		{
 			if (0 == data.Count) return;
 			dest.WriteLine("[{0}]", sectionName);
-			foreach (var key in data.Keys) dest.WriteLine("{0}={1}", key, data[key]);
+			foreach (var key in data.Keys.OrderBy(k => k)) dest.WriteLine("{0}={1}", key, data[key]);
 		}
 
 		private static string get(string key, 
@@ -111,7 +116,7 @@ namespace Vre.Server.Util
 			if (string.IsNullOrWhiteSpace(key)) throw new ArgumentException("name is empty");
 			string result;
 			if (dict.TryGetValue(key, out result)) return result;
-			return key;
+			return null;
 		}
 
 		private static void write(string name, string localized,
