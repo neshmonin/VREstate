@@ -171,12 +171,15 @@ namespace ModelPackageTester
 
 			string prop;
 
-			prop = _settings.StructureName;
-			selectComboItem(cbxStructures, prop);
+			if (_settings != null)
+			{
+				prop = _settings.StructureName;
+				selectComboItem(cbxStructures, prop);
 
-			prop = _settings.StructureLocalizedName;
-			if (prop != null) tbLocalizedName.Text = prop;
-			else tbLocalizedName.Text = _settings.StructureName;
+				prop = _settings.StructureLocalizedName;
+				if (prop != null) tbLocalizedName.Text = prop;
+				else tbLocalizedName.Text = _settings.StructureName;
+			}
 		}
 
 		private void saveImportSettings()
