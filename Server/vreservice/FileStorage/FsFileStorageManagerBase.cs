@@ -86,7 +86,7 @@ namespace Vre.Server.FileStorage
 
             if (!string.IsNullOrWhiteSpace(typeHint))
             {
-                relativePath.Append('_');
+                //relativePath.Append('_');
                 relativePath.Append(typeHint);
             }
 
@@ -108,7 +108,7 @@ namespace Vre.Server.FileStorage
                 int idx = rp.LastIndexOf('.');
                 // append with date/time first
                 rp = rp.Substring(0, idx)
-                    + "_"
+                    //+ "_"
                     + DateTime.UtcNow.ToString("yyyyMMddHHmmss")
                     + rp.Substring(idx);
 
