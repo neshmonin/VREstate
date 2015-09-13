@@ -63,15 +63,37 @@ namespace ConsoleSales
                 return count;
             }
         }
-        
-        static public Vre.Server.BusinessLogic.ClientData GenerateClientData()
-        {
-            List<Vre.Server.BusinessLogic.ClientData> units = new List<Vre.Server.BusinessLogic.ClientData>();
 
+        const int MaxNumberOfRecordsInMessage = 200;
+
+        static public Vre.Server.BusinessLogic.ClientData
+            GenerateClientData(out List<ChangingSuite> unitsToUpdate, out int buildingID)
+        {
+            buildingID = -1;
+            Vre.Server.BusinessLogic.Building building = null;
+            unitsToUpdate = new List<ChangingSuite>();
+            List<Vre.Server.BusinessLogic.ClientData> units = new List<Vre.Server.BusinessLogic.ClientData>();
             foreach (var suite in m_changedSuites.Values)
             {
                 if (suite.changed)
-                    units.Add(suite.suite.ClientData);
+                {
+                    if (building == null)
+                    {
+                        building = suite.getBuilding();
+                        buildingID = building.AutoID;
+                    }
+
+                    if (suite.getBuilding().AutoID == buildingID)
+                    {
+                        Vre.Server.BusinessLogic.Suite strippedSuite = new
+                            Vre.Server.BusinessLogic.Suite(null, 0, suite.FloorNumber, suite.Name);
+                        strippedSuite.UpdateFromClient(suite.suite.ClientData);
+                        units.Add(strippedSuite.GetClientData());
+                        unitsToUpdate.Add(suite);
+                        if (units.Count >= MaxNumberOfRecordsInMessage)
+                            break;
+                    }
+                }
             }
 
             Vre.Server.BusinessLogic.ClientData changes = new Vre.Server.BusinessLogic.ClientData();
@@ -107,20 +129,32 @@ namespace ConsoleSales
             m_changedSuites.Add(candidate.suite.UniqueKey, candidate);
         }
 
-        static public string GenerateChangesReport(bool addDateTimeInfo)
+        static public string GenerateChangesReport(List<ChangingSuite> unitsToUpdate,
+                                                   bool addDateTimeInfo)
         {
             string ret = string.Empty;
             string dateTimePrefix = addDateTimeInfo ? DateTime.Now.ToString() + " > " : string.Empty;
-            foreach (var c in m_changedSuites.Values)
+            int count = 0;
+            foreach (var c in unitsToUpdate)
             {
                 if (c.changed)
+                {
                     ret += string.Format("{0}Suite {1} changed: {2}{3}",
                         dateTimePrefix, c.suite.UniqueKey, c.WhatChanged, System.Environment.NewLine);
+                    count++;
+                }
                 //if (c.promoted)
                 //    ret += string.Format("{0}Suite {1} has been promoted\n",
                 //        dateTimePrefix, c.suite.UniqueKey);
             }
+            ret += string.Format("    {0} changes in this package{1}", 
+                                count, System.Environment.NewLine);
             return ret;
+        }
+
+        static public string GenerateChangesReport(bool addDateTimeInfo)
+        {
+            return GenerateChangesReport(m_changedSuites.Values.ToList(), addDateTimeInfo);
         }
 
         public bool PriceChanged { get { return base.Price != _changed.Price; } }
@@ -174,9 +208,10 @@ namespace ConsoleSales
 
         public delegate void OnPromotionDelegate(ChangingSuite suite);
 
-        static public void PromoteChanges(OnPromotionDelegate updateDelegate)
+        static public void PromoteChanges(OnPromotionDelegate updateDelegate,
+                                          List<ChangingSuite> unitsToUpdate)
         {
-            foreach (var c in m_changedSuites.Values)
+            foreach (var c in unitsToUpdate)
                 c.PromoteChange(updateDelegate);
         }
 

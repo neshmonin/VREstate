@@ -12,28 +12,40 @@
       <Value Profile="(Default)">15</Value>
     </Setting>
     <Setting Name="serverEndPoint" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">https://vrt.3dcondox.com/</Value>
+      <Value Profile="(Default)">https://vrt.3dcondox.com/vre/</Value>
     </Setting>
     <Setting Name="role" Type="System.String" Scope="User">
       <Value Profile="(Default)">superadmin</Value>
-    </Setting>
-    <Setting Name="ImportFromPath" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">C:\Internet Downloads\Business\Musee</Value>
-    </Setting>
-    <Setting Name="ExportToPath" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">C:\Internet Downloads\Business\Musee</Value>
-    </Setting>
-    <Setting Name="DeveloperName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">Plaza Corp</Value>
-    </Setting>
-    <Setting Name="DeveloperId" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">8</Value>
     </Setting>
     <Setting Name="clientLogin" Type="System.String" Scope="User">
       <Value Profile="(Default)">adminan</Value>
     </Setting>
     <Setting Name="clientPassword" Type="System.String" Scope="User">
       <Value Profile="(Default)">smelatoronto</Value>
+    </Setting>
+    <Setting Name="ImportFromPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\Internet Downloads\Business\YIT\Sites\Екатеринбург\Рифей</Value>
+    </Setting>
+    <Setting Name="ExportToPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\Internet Downloads\Business\YIT\Sites\Екатеринбург\Рифей</Value>
+    </Setting>
+    <Setting Name="DeveloperName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">YIT-Rifey</Value>
+    </Setting>
+    <Setting Name="DeveloperId" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">11</Value>
+    </Setting>
+    <Setting Name="FtpServer" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">ftp://213.33.245.89</Value>
+    </Setting>
+    <Setting Name="FtpLogin" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">ftp-3dkiosk</Value>
+    </Setting>
+    <Setting Name="FtpPassword" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Lopata38</Value>
+    </Setting>
+    <Setting Name="FtpFile" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/Russia/Yekaterinburg/YIT-Rifey/import.csv</Value>
     </Setting>
   </Settings>
 </SettingsFile>

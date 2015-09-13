@@ -52,7 +52,7 @@ namespace ConsoleSales.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://vrt.3dcondox.com/")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://vrt.3dcondox.com/vre/")]
         public string serverEndPoint {
             get {
                 return ((string)(this["serverEndPoint"]));
@@ -68,42 +68,6 @@ namespace ConsoleSales.Properties {
             }
             set {
                 this["role"] = value;
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Internet Downloads\\Business\\Musee")]
-        public string ImportFromPath {
-            get {
-                return ((string)(this["ImportFromPath"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Internet Downloads\\Business\\Musee")]
-        public string ExportToPath {
-            get {
-                return ((string)(this["ExportToPath"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Plaza Corp")]
-        public string DeveloperName {
-            get {
-                return ((string)(this["DeveloperName"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("8")]
-        public string DeveloperId {
-            get {
-                return ((string)(this["DeveloperId"]));
             }
         }
         
@@ -128,6 +92,78 @@ namespace ConsoleSales.Properties {
             }
             set {
                 this["clientPassword"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Internet Downloads\\Business\\YIT\\Sites\\Екатеринбург\\Рифей")]
+        public string ImportFromPath {
+            get {
+                return ((string)(this["ImportFromPath"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Internet Downloads\\Business\\YIT\\Sites\\Екатеринбург\\Рифей")]
+        public string ExportToPath {
+            get {
+                return ((string)(this["ExportToPath"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("YIT-Rifey")]
+        public string DeveloperName {
+            get {
+                return ((string)(this["DeveloperName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("11")]
+        public string DeveloperId {
+            get {
+                return ((string)(this["DeveloperId"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("ftp://213.33.245.89")]
+        public string FtpServer {
+            get {
+                return ((string)(this["FtpServer"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("ftp-3dkiosk")]
+        public string FtpLogin {
+            get {
+                return ((string)(this["FtpLogin"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Lopata38")]
+        public string FtpPassword {
+            get {
+                return ((string)(this["FtpPassword"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/Russia/Yekaterinburg/YIT-Rifey/import.csv")]
+        public string FtpFile {
+            get {
+                return ((string)(this["FtpFile"]));
             }
         }
     }
