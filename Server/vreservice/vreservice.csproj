@@ -243,6 +243,7 @@
     <Compile Include="Utilities\HealthInfo.cs" />
     <Compile Include="Utilities\HealthMonitor.cs" />
     <Compile Include="Utilities\ImageProcessing.cs" />
+    <Compile Include="Utilities\LocalizationXrefFile.cs" />
     <Compile Include="Utilities\ProcessControl.cs" />
   </ItemGroup>
   <ItemGroup>

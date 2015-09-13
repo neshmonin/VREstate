@@ -2,6 +2,7 @@
 using System.Collections.Specialized;
 using System.IO;
 using System.Net;
+using System.Web;
 using Vre.Server.BusinessLogic;
 using Vre.Server.RemoteService;
 
@@ -172,7 +173,8 @@ namespace Vre.Server.HttpService
             // TODO: verify this is acceptable:
             // ctx.Request.ContentType
 
-            ServiceQuery query = new ServiceQuery(ctx.Request.Headers, ctx.Request.QueryString);
+            ServiceQuery query = new ServiceQuery(ctx.Request.Headers,
+				HttpUtility.ParseQueryString(HttpUtility.UrlDecode(ctx.Request.Url.Query)));
 
             string file = ctx.Request.Url.LocalPath;//.Replace("/", "");
             if (file.StartsWith(servicePath)) file = file.Remove(0, servicePath.Length);

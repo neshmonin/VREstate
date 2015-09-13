@@ -24,7 +24,9 @@
 
     <property name="PhysicalLevelNumber" column="PhysicalLevelNumber" />
     <property name="FloorName" column="FloorName" />
+    <property name="LocalizedFloorName" column="LocalizedFloorName" />
     <property name="SuiteName" column="SuiteName" />
+    <property name="LocalizedSuiteName" column="LocalizedSuiteName" />
     <property name="Status" column="Status" />
     <property name="ShowPanoramicView" column="ShowPanoramicView" />
     <property name="BubbleTemplateUrl" column="BubbleTemplateUrl" />

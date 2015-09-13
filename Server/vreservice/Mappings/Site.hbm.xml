@@ -30,6 +30,7 @@
     />
 
     <property name="Name" column="Name" />
+    <property name="LocalizedName" column="LocalizedName" />
     <property name="DisplayModelUrl" column="DisplayModelUrl" />
     <property name="OverlayModelUrl" column="OverlayModelUrl" />
     <property name="PoiModelUrl" column="PoiModelUrl" />

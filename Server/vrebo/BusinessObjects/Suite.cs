@@ -17,8 +17,10 @@ namespace Vre.Server.BusinessLogic
 
         public virtual int PhysicalLevelNumber { get; set; }
         public virtual string FloorName { get; set; }
+		public virtual string LocalizedFloorName { get; set; }
         public virtual string SuiteName { get; set; }
-        public virtual SalesStatus Status { get; set; }
+		public virtual string LocalizedSuiteName { get; set; }
+		public virtual SalesStatus Status { get; set; }
 
         public virtual ICollection<Option> OptionsPossible { get; protected set; }
         //public IList<VRTour> VRTours { get; protected set; }
@@ -57,7 +59,9 @@ namespace Vre.Server.BusinessLogic
         {
             PhysicalLevelNumber = copy.PhysicalLevelNumber;
             FloorName = copy.FloorName;
+			LocalizedFloorName = copy.LocalizedFloorName;
             SuiteName = copy.SuiteName;
+			LocalizedSuiteName = copy.LocalizedSuiteName;
             Status = copy.Status;
             OptionsPossible = copy.OptionsPossible;
             Building = copy.Building;
@@ -75,7 +79,9 @@ namespace Vre.Server.BusinessLogic
             Building = building;
             PhysicalLevelNumber = physicalLevelNumber;
             FloorName = floorName;
+			LocalizedFloorName = floorName;
             SuiteName = suiteName;
+			LocalizedSuiteName = suiteName;
             Status = SalesStatus.Available;
             Location = ViewPoint.Empty;
             CeilingHeight = ValueWithUM.EmptyLinear;
@@ -107,7 +113,7 @@ namespace Vre.Server.BusinessLogic
 
             bool changed = UpdateFromClient(fromServer);
 
-            FloorName = fromServer.UpdateProperty("floorName", FloorName, ref changed);
+			LocalizedFloorName = fromServer.UpdateProperty("floorName", LocalizedFloorName, ref changed);
             if (CeilingHeight != null)
                 CeilingHeight.SetValue(fromServer.UpdateProperty("ceilingHeightFt", CeilingHeight.ValueAs(ValueWithUM.Unit.Feet), ref changed), ValueWithUM.Unit.Feet);
 
@@ -129,8 +135,8 @@ namespace Vre.Server.BusinessLogic
                 result.Add("buildingId", Building.AutoID);  // informational only
 
             result.Add("levelNumber", PhysicalLevelNumber);
-            result.Add("floorName", FloorName);
-            result.Add("name", SuiteName);
+			result.Add("floorName", LocalizedFloorName);
+			result.Add("name", LocalizedSuiteName);
             if (CeilingHeight != null)
                 result.Add("ceilingHeightFt", CeilingHeight.ValueAs(ValueWithUM.Unit.Feet));
             result.Add("showPanoramicView", ShowPanoramicView);
@@ -164,11 +170,11 @@ namespace Vre.Server.BusinessLogic
             if (!supplement)
             {
                 result.Add("id", AutoID);
-                result.Add("name", SuiteName);
+				result.Add("name", LocalizedSuiteName);
             }
 
             result.Add("levelNumber", PhysicalLevelNumber);
-            result.Add("floorName", FloorName);
+			result.Add("floorName", LocalizedFloorName);
 
             result.Add("status", ClientData.ConvertProperty<SalesStatus>(Status));
 
@@ -192,7 +198,7 @@ namespace Vre.Server.BusinessLogic
             bool changed = base.UpdateFromClient(data);
 
             PhysicalLevelNumber = data.UpdateProperty("levelNumber", PhysicalLevelNumber, ref changed);
-            SuiteName = data.UpdateProperty("name", SuiteName, ref changed);
+			LocalizedSuiteName = data.UpdateProperty("name", LocalizedSuiteName, ref changed);
             ShowPanoramicView = data.UpdateProperty("showPanoramicView", ShowPanoramicView, ref changed);
             Status = data.UpdateProperty("status", Status, ref changed);
 			updatePrice(data, ref changed);
@@ -210,8 +216,8 @@ namespace Vre.Server.BusinessLogic
 			if (availableFields.Contains("levelNumber")) PhysicalLevelNumber = data.UpdateProperty("levelNumber", PhysicalLevelNumber, ref result);
 			else if (data.GetProperty("levelNumber", 0) != PhysicalLevelNumber) changesSkipped = true;
 
-			if (availableFields.Contains("name")) SuiteName = data.UpdateProperty("name", SuiteName, ref result);
-			else if (data.GetProperty("name", string.Empty) != SuiteName) changesSkipped = true;
+			if (availableFields.Contains("name")) LocalizedSuiteName = data.UpdateProperty("name", LocalizedSuiteName, ref result);
+			else if (data.GetProperty("name", string.Empty) != LocalizedSuiteName) changesSkipped = true;
 
 			if (availableFields.Contains("showPanoramicView")) ShowPanoramicView = data.UpdateProperty("showPanoramicView", ShowPanoramicView, ref result);
 			else if (data.GetProperty("showPanoramicView", false) != ShowPanoramicView) changesSkipped = true;

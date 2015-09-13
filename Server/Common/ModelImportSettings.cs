@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace Vre.Server
 {
@@ -46,27 +47,31 @@ namespace Vre.Server
 
 		public void Save()
 		{
-			using (var wrt = File.CreateText(_settingsFileName))
+			using (var file = File.Create(_settingsFileName))
 			{
-				wrt.WriteLine("; 3D Condo Explorer model import settings");
-				switch (ImportMode)
+				using (var wrt = new StreamWriter(file, Encoding.UTF8))
 				{
-					case Mode.Site:
-						wrt.WriteLine("; {0} - complete site", SiteName);
-						break;
+					wrt.WriteLine("; 3D Condo Explorer model import settings");
+					wrt.WriteLine("; MODIFY WITH CARE: This file is overwritten with ModelPackageTester import tool; comments etc. may be lost.");
+					switch (ImportMode)
+					{
+						case Mode.Site:
+							wrt.WriteLine("; {0} - complete site", SiteName);
+							break;
 
-					case Mode.Building:
-						wrt.WriteLine("; {0} - single building", BuildingToImportName);
-						break;
+						case Mode.Building:
+							wrt.WriteLine("; {0} - single building", BuildingToImportName);
+							break;
 
-					case Mode.Structure:
-						wrt.WriteLine("; {0} - single structure", StructureName);
-						break;
+						case Mode.Structure:
+							wrt.WriteLine("; {0} - single structure", StructureName);
+							break;
+					}
+					wrt.WriteLine();
+
+					foreach (var kvp in _settings)
+						wrt.WriteLine("{0} = {1}", kvp.Key, kvp.Value);
 				}
-				wrt.WriteLine();
-
-				foreach (var kvp in _settings)
-					wrt.WriteLine("{0} = {1}", kvp.Key, kvp.Value);
 			}
 		}
 
@@ -229,6 +234,20 @@ namespace Vre.Server
 			set { putSetting("BuildingCountry", value); }
 		}
 
-
-    }
+		//public string BuildingLocalizedName
+		//{
+		//    get { return getSetting("BuildingLocalizedName", null); }
+		//    set { putSetting("BuildingLocalizedName", value); }
+		//}
+		public string StructureLocalizedName
+		{
+			get { return getSetting("StructureLocalizedName", null); }
+			set { putSetting("StructureLocalizedName", value); }
+		}
+		//public string SiteLocalizedName
+		//{
+		//    get { return getSetting("SiteLocalizedName", null); }
+		//    set { putSetting("SiteLocalizedName", value); }
+		//}
+	}
 }
