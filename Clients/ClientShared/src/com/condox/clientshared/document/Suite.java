@@ -24,6 +24,7 @@ public class Suite implements I_VRObject {
 	private Position position = new Position();
 	private SuiteType suite_type = null;
 	private int price = 0;
+	private String currency;
 	private ArrayList<Double> points = new ArrayList<Double>();
 	private String vTourUrl = null;
 	private String infoUrl = null;
@@ -80,6 +81,10 @@ public class Suite implements I_VRObject {
 		JSONString str = obj.get("floorName").isString();
 		if (str != null)
 			floor_name = str.stringValue();
+
+		str = obj.get("currentPriceCurrency").isString();
+		if (str != null)
+			currency = str.stringValue();
 
 		level_number = (int) obj.get("levelNumber").isNumber().doubleValue();
 
@@ -197,6 +202,10 @@ public class Suite implements I_VRObject {
 
 	public int getPrice() {
 		return price;
+	}
+
+	public String getCurrency() {
+		return currency;
 	}
 
 	// public static void test(String json) {

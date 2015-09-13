@@ -1,6 +1,5 @@
 package com.condox.clientshared.document;
 
-import com.condox.clientshared.abstractview.Log;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;

@@ -7,7 +7,6 @@ import java.util.Map;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.condox.clientshared.document.*;
 
 public class BuildingInfo implements I_JSON {
 	private static Map<Integer, BuildingInfo> ids = new HashMap<Integer, BuildingInfo>();

@@ -30,19 +30,12 @@ public class Options implements RequestCallback {
 	public enum ROLES {
 		KIOSK, VISITOR
 	};
-
 	public static ROLES ROLE = ROLES.VISITOR;
 
 	public static String URL_BUTTONS;
 	public static int BUILDING_ID = -1;
 	public static int SUITE_ID;
 //	public static String HOME_URL;
-	public static String ZOOM_UNZOOM_URL;
-	public static String ZOOM_IN_URL;
-	public static String ZOOM_OUT_URL;
-	public static String URL_BUTTON_PANORAMIC_VIEW;
-	public static String URL_BUTTON_EXIT_PANORAMIC_VIEW;
-	public static String URL_BUTTON_CENTER_PANORAMIC_VIEW;
 	public static String SUITE_INFO_TEMPLATE;
 	public static FrameElement SUITE_INFO;
 	public static Integer SUITE_DISTANCE;
@@ -133,19 +126,12 @@ public class Options implements RequestCallback {
 		} else
 			URL_BUTTONS = URL_VRT + "buttons/";
 
-		ZOOM_UNZOOM_URL = URL_BUTTONS + "ZoomUnzoomBar.png";
-		ZOOM_IN_URL = URL_VRT + "buttons/Unzoom.png";
-		ZOOM_OUT_URL = URL_VRT + "buttons/Zoom.png";
-		URL_BUTTON_PANORAMIC_VIEW = URL_BUTTONS + "PanoramicView.png";
-		URL_BUTTON_EXIT_PANORAMIC_VIEW = URL_BUTTONS + "Back.png";
-		URL_BUTTON_CENTER_PANORAMIC_VIEW = URL_BUTTONS + "Center.png";
-
 		if (params.containsKey("role")) {
 			if (params.get("role").get(0).equals("kiosk"))
 				ROLE = ROLES.KIOSK;
 			contextMap.remove("role");
 		}
-//		Log.write("ROLE:" + ROLE);
+		//Log.write("ROLE:" + ROLE);
 
 		Iterator<String> keyIterator = contextMap.keySet().iterator();
 		while (keyIterator.hasNext()) {
