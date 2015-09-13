@@ -30,7 +30,10 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 	private ArrayList<Double> areas = new ArrayList<Double>();
 	private I_FilterSectionContainer parentSection;
 
-	private AreaSection(){super();}
+	private AreaSection()
+	{
+		super();
+	}
 	
 	public static I_FilterSection CreateSectionPanel(I_FilterSectionContainer parentSection, 
 			String sectionLabel,
@@ -56,7 +59,7 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 		instance = new AreaSection();
 		instance.parentSection = parentSection;
 		instance.stackPanel = stackPanel;  
-		stackPanel.add(instance, "Area (any)", false);
+		stackPanel.add(instance, Filter.i18n.area_any(), false);
 		instance.setSize("100%", "150px");
 		
 		VerticalPanel vpArea = new VerticalPanel();
@@ -64,7 +67,7 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 		instance.add(vpArea);
 		vpArea.setWidth("100%");
 		
-		cbAnyArea = new MyCustomCheckBox("Any area");
+		cbAnyArea = new MyCustomCheckBox(Filter.i18n.anyOr());
 		cbAnyArea.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
 			@Override
@@ -130,7 +133,11 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 				continue;
 			min_area = Math.min(min_area, area);
 			max_area = Math.max(max_area, area);
-			areaUm = suite_type.getAreaUm();
+			if (suite_type.getAreaUm() == "sqFt")	
+				areaUm = Filter.i18n.sqFt();
+			else
+			if (suite_type.getAreaUm() == "sqM")	
+				areaUm = Filter.i18n.sqM();
 		}
 
 		int diff = (int) (max_area - min_area);
@@ -220,9 +227,9 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 	@Override
 	public void Apply() {
 		if (isAny)
-			stackPanel.setStackText(stackPanel.getWidgetIndex(this), "Area (any)");
+			stackPanel.setStackText(stackPanel.getWidgetIndex(this), Filter.i18n.area_any());
 		else
-			stackPanel.setStackText(stackPanel.getWidgetIndex(this), "Area");
+			stackPanel.setStackText(stackPanel.getWidgetIndex(this), Filter.i18n.area());
 		Filter.onChange();
 	}
 

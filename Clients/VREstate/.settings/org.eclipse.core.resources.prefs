@@ -1,4 +1,10 @@
-#Tue Apr 09 13:52:19 EEST 2013
+#Tue Sep 08 23:55:27 EDT 2015
 eclipse.preferences.version=1
+encoding//src/com/condox/vrestate/client/filter/FilterMessages.properties=UTF-8
+encoding//src/com/condox/vrestate/client/filter/FilterMessages_ru.properties=UTF-8
+encoding//src/com/condox/vrestate/client/interactor/InteractorMessages.properties=UTF-8
+encoding//src/com/condox/vrestate/client/interactor/InteractorMessages_ru.properties=UTF-8
 encoding//src/com/condox/vrestate/client/view/SuiteView.java=UTF-8
+encoding//src/com/condox/vrestate/client/view/ViewMessages.properties=UTF-8
+encoding//src/com/condox/vrestate/client/view/ViewMessages_ru.properties=UTF-8
 encoding//war/VREstate.html=ISO-8859-1

@@ -6,6 +6,7 @@ import com.condox.clientshared.abstractview.I_UpdatableView;
 import com.condox.clientshared.communication.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.OverlayHelpers;
+import com.google.gwt.core.client.GWT;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
 import com.nitrous.gwt.earth.client.api.KmlScreenOverlay;
 
@@ -17,11 +18,13 @@ public class ProgressBar extends OverlayHelpers implements I_UpdatableView, I_Pr
 	private KmlScreenOverlay progressOvl = null;
 	private String displayedProgress = null;
 	private String displayedLabel = "<none>";
+	private ViewMessages i18n;
 
 	public ProgressBar() {
 		progressRect = new OvlRectangle(new OvlPoint(new OvlDimension(0.5f),
 				new OvlDimension(0.5f)), new OvlDimension(299),
 				new OvlDimension(16));
+		i18n = (ViewMessages)GWT.create(ViewMessages.class);
 	}
 
 	private String getUpdatedDisplayUrl(double percent) {
@@ -62,19 +65,19 @@ public class ProgressBar extends OverlayHelpers implements I_UpdatableView, I_Pr
 		String hrefLabel = null;
 		switch (label) {
 		case Error:
-			hrefLabel = "Error.png";
+			hrefLabel = i18n.Error();
 			break;
 		case Loading:
-			hrefLabel = "Loading.png";
+			hrefLabel = i18n.Loading();
 			break;
 		case Processing:
-			hrefLabel = "Processing.png";
+			hrefLabel = i18n.Processing();
 			break;
 		case Executing:
-			hrefLabel = "Executing.png";
+			hrefLabel = i18n.Executing();
 			break;
 		case Wait:
-			hrefLabel = "WaitMessage.png";
+			hrefLabel = i18n.WaitMessage();
 			break;
 		default:
 			return null;

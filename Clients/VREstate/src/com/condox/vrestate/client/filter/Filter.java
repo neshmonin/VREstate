@@ -13,11 +13,13 @@ import com.condox.clientshared.abstractview.I_AbstractView;
 import com.condox.clientshared.abstractview.I_Progress;
 import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.Options;
+import com.condox.clientshared.communication.Options.ROLES;
 import com.condox.clientshared.document.SuiteType;
 import com.condox.vrestate.client.view.ProgressBar;
 import com.condox.vrestate.client.view._AbstractView;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem.GeoStatus;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.IFrameElement;
@@ -49,6 +51,7 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 	private static Filter instance = new Filter();
 	private static SortedMap<Integer, SuiteGeoItem> filteredIn_suiteGeos = null;
 	private static SortedMap<Integer, SuiteGeoItem> active_suiteGeos = null;
+	public static FilterMessages i18n = (FilterMessages)GWT.create(FilterMessages.class);
 
 	ArrayList<I_FilterSection> sections = new ArrayList<I_FilterSection>();
 
@@ -71,6 +74,7 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 	 * @wbp.parser.entryPoint
 	 */
 	private void Create() {
+		i18n = (FilterMessages)GWT.create(FilterMessages.class);
 		Log.write("Filter->Create()");
 		RootPanel panel = RootPanel.get();
 		panel.setWidth("");
@@ -97,10 +101,12 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 				btnReset.setEnabled(false);
 				ApplyAndSelect();
 				btnApply.setEnabled(false);
+				if (Options.ROLE != ROLES.KIOSK)
+					saveToCookie();
 			}
 		});
 		btnReset.setEnabled(false);
-		btnReset.setText("Reset");
+		btnReset.setText(i18n.reset());
 		horizontalPanel.add(btnReset);
 		btnReset.setWidth("100px");
 
@@ -109,11 +115,12 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 			public void onClick(ClickEvent event) {
 				ApplyAndSelect();
 				btnApply.setEnabled(false);
-				saveToCookie();
+				if (Options.ROLE != ROLES.KIOSK)
+					saveToCookie();
 			}
 		});
 		btnApply.setEnabled(false);
-		btnApply.setText("Apply");
+		btnApply.setText(i18n.apply());
 		horizontalPanel.add(btnApply);
 		btnApply.setWidth("100px");
 
@@ -250,13 +257,12 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 		lastState = StateHash();
 
 		if (getFilteredInSuiteGeoItems().size() == _AbstractView.getSuiteGeoItems().size())
-			dpFilter.getHeaderTextAccessor().setText(
-					"Selection Filter (" + _AbstractView.getSuiteGeoItems().size()
-							+ " units available)");
+			dpFilter.getHeaderTextAccessor()
+				.setText(i18n.selectionFilter_UnitsAvailable(_AbstractView.getSuiteGeoItems().size()));
 		else
-			dpFilter.getHeaderTextAccessor().setText(
-					"Selection Filter (" + getFilteredInSuiteGeoItems().size() + " out of "
-							+ _AbstractView.getSuiteGeoItems().size() + ")");
+			dpFilter.getHeaderTextAccessor()
+				.setText(i18n.selectionFilter_Units_OutOf_Available(getFilteredInSuiteGeoItems().size(),
+																_AbstractView.getSuiteGeoItems().size()));
 	}
 
 	@Override
@@ -440,6 +446,9 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 	}
 	
 	public void loadFromCookies() {
+		if (Options.ROLE == ROLES.KIOSK)
+			return;
+		
 		String json = Cookies.getCookie("vreFilter");
 		if ((json != null) && (!json.isEmpty())) {
 			Log.write("loadFromCookies, JSON: " + json);

@@ -1,8 +1,6 @@
 package com.condox.vrestate.client.filter;
 
-
 import java.util.ArrayList;
-
 import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.document.Suite;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
@@ -33,7 +31,6 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 	private ListBox cbMinPrice = null;
 	private ListBox cbMaxPrice = null;
 	private ArrayList<Integer> prices = null;
-	private String sectionLabel = "";
 	private PriceType priceType;
 	private I_FilterSectionContainer parentSection;
 
@@ -42,14 +39,15 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 	}
 
 	public static PriceSection CreateSectionPanel(I_FilterSectionContainer parentSection, 
-			String sectionLabel,
 			StackPanel stackPanel, PriceType priceType) {
-		Log.write("PriceSection(" + sectionLabel + ")");
+		Log.write("PriceSection(" + priceType.toString() + ")");
 		// ==============
+
 		int min_price = Integer.MAX_VALUE;
 		int max_price = Integer.MIN_VALUE;
 		for (SuiteGeoItem suiteGE : parentSection.getActiveSuiteGeoItems().values()) {
-			Suite.Status status = suiteGE.suite.getStatus(); 
+			Suite.Status status = suiteGE.suite.getStatus();
+			
 			if (status == Suite.Status.Sold)
 				continue;
 
@@ -82,7 +80,6 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 		instance = new PriceSection();
 		instance.parentSection = parentSection;
 		instance.prices = new ArrayList<Integer>();
-		instance.sectionLabel = sectionLabel;
 		instance.priceType = priceType;
 
 		instance.stackPanel = stackPanel;
@@ -95,7 +92,7 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 		instance.add(vpPrice);
 		vpPrice.setWidth("100%");
 
-		instance.cbAnyPrice = new CheckBox("Any price");
+		instance.cbAnyPrice = new CheckBox(Filter.i18n.anyOr());
 		instance.cbAnyPrice.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
 			@Override
@@ -153,7 +150,17 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 	}
 
 	private String generateLabel() {
-		return sectionLabel + (isAny ? " (any)" : "");
+		String retValue = "";
+		switch (priceType)
+		{
+		case Ownership:
+			retValue = isAny ? Filter.i18n.price_any() : Filter.i18n.price();
+			break;
+		case Rent:
+			retValue = isAny ? Filter.i18n.price_any() : Filter.i18n.price();
+			break;
+		}
+		return retValue;
 	}
 	
 	@Override
@@ -249,16 +256,19 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 		cbMinPrice.clear();
 		cbMaxPrice.clear();
 
+		NumberFormat currencyFrmt = NumberFormat.getDecimalFormat();
 		for (Integer item : prices) {
 			int index = prices.indexOf(item);
 			if (index == 0)
-				cbMinPrice.addItem("Min", item.toString());
+				cbMinPrice.addItem(Filter.i18n.min(), item.toString());
 			else if (index == prices.size() - 1)
-				cbMaxPrice.addItem("Max", item.toString());
+				cbMaxPrice.addItem(Filter.i18n.max(), item.toString());
 			else {
-				String price = NumberFormat.getDecimalFormat().format(item);
-				cbMinPrice.addItem("$" + price, item.toString());
-				cbMaxPrice.addItem("$" + price, item.toString());
+				String price = currencyFrmt.format(item);
+				// drop the separator + two decimals
+				//price = price.substring(0, price.length()-3);
+				cbMinPrice.addItem(price, item.toString());
+				cbMaxPrice.addItem(price, item.toString());
 			}
 		}
 		isAny = true;

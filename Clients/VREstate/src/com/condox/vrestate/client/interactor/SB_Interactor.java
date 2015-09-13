@@ -5,6 +5,7 @@ import com.condox.clientshared.abstractview.Log;
 import com.condox.clientshared.communication.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.I_SB_View;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -24,12 +25,14 @@ public class SB_Interactor extends OverlayHelpers
 	KmlScreenOverlay unzoom_overlay = null;
 	private OvlRectangle zoomRect = null;
 	private OvlRectangle unzoomRect = null;
+	private InteractorMessages i18n;
 
 	private I_SB_View view = null;
 
 	// Constructor
 	public SB_Interactor(I_SB_View view) {
 		this.view = view;
+		i18n = (InteractorMessages)GWT.create(InteractorMessages.class);
 
 		int WinW = GE.getEarth().getOffsetWidth();
 	    int WinH = GE.getEarth().getOffsetHeight();
@@ -84,7 +87,7 @@ public class SB_Interactor extends OverlayHelpers
 		if (enabling) {
 			if (zoom_overlay == null) {
 				KmlIcon icon = GE.getPlugin().createIcon("");
-				String href = Options.ZOOM_IN_URL;
+				String href = i18n.ZOOM_IN_URL(Options.URL_BUTTONS);
 				icon.setHref(href);
 				zoom_overlay = GE.getPlugin().createScreenOverlay("");
 				zoom_overlay.setIcon(icon);
@@ -98,7 +101,7 @@ public class SB_Interactor extends OverlayHelpers
 
 			if (unzoom_overlay == null) {
 				KmlIcon icon = GE.getPlugin().createIcon("");
-				String href = Options.ZOOM_OUT_URL;
+				String href = i18n.ZOOM_OUT_URL(Options.URL_BUTTONS);
 				icon.setHref(href);
 				unzoom_overlay = GE.getPlugin().createScreenOverlay("");
 				unzoom_overlay.setIcon(icon);

@@ -18,6 +18,7 @@ import com.condox.clientshared.document.Site;
 import com.condox.clientshared.document.Suite;
 import com.condox.clientshared.document.ViewOrder;
 import com.condox.clientshared.utils.StringFormatter;
+import com.condox.vrestate.client.filter.Filter;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.interactor.I_AbstractInteractor;
 import com.condox.vrestate.client.view.Camera.Camera;
@@ -25,6 +26,7 @@ import com.condox.vrestate.client.view.GeoItems.BuildingGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SiteGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem.GeoStatus;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
 import com.nitrous.gwt.earth.client.api.KmlIcon;
@@ -37,6 +39,7 @@ import com.nitrous.gwt.earth.client.api.event.ViewChangeListener;
 public abstract class _AbstractView implements I_AbstractView {
 
 	private static Stack<I_AbstractView> views = new Stack<I_AbstractView>();
+	public static ViewMessages i18n = (ViewMessages)GWT.create(ViewMessages.class);;
 
 	protected I_AbstractInteractor _interactor = null;
 	protected IGeoItem theGeoItem = null;
@@ -205,6 +208,8 @@ public abstract class _AbstractView implements I_AbstractView {
 	}
 
 	public static void PopToTheBottom() {
+		Filter.get().Reset();
+		Filter.get().ApplyAndSelect();
 		while (views.size() > 1) {
 			I_AbstractView currView = views.peek();
 			currView.setEnabled(false);
