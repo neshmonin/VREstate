@@ -11,6 +11,11 @@ namespace Vre.Server.BusinessLogic
             AutoID = data.GetProperty("id", 0);
         }
         public UpdateableBase(UpdateableBase copy) : base(copy) { }
+        public virtual bool UpdateFromClient(ClientData data)
+        {
+            if (AutoID == 0) AutoID = data.GetProperty("id", 0);
+            return base.UpdateFromClient(data);
+        }
     }
 
     public abstract class UpdateableGuidBase : UpdateableBaseGen<Guid> 
@@ -23,6 +28,12 @@ namespace Vre.Server.BusinessLogic
             AutoID = Guid.Parse(data.GetProperty("id", _defaultId));
         }
         public UpdateableGuidBase(UpdateableGuidBase copy) : base(copy) { }
+        public virtual bool UpdateFromClient(ClientData data)
+        {
+            if (AutoID == Guid.Empty)
+                AutoID = Guid.Parse(data.GetProperty("id", _defaultId));
+            return base.UpdateFromClient(data);
+        }
     }
 
     public abstract class UpdateableBaseGen<T> : IClientDataProvider where T : struct
