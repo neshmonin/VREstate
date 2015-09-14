@@ -1,6 +1,5 @@
 package com.condox.vrestate.client.view;
 
-
 import com.condox.clientshared.abstractview.IGeoItem;
 import com.condox.clientshared.abstractview.I_AbstractView;
 import com.condox.clientshared.abstractview.Log;
@@ -174,14 +173,15 @@ public class SuiteView extends _GEView {
 			json.put("VRT_area", new JSONNumber(type.getArea()));
 		if (!type.getAreaUm().isEmpty())
 			json.put("VRT_areaUm", new JSONString(type.getAreaUm()));
-		NumberFormat fmt = NumberFormat.getDecimalFormat();
 		if (suite.getPrice() > 0)
 		{
-			String formattedPrice = fmt.format(suite.getPrice());
-			if (suite.getStatus() == Status.AvailableRent)
-				formattedPrice += "/m";
+			NumberFormat currencyFrmt = NumberFormat.getDecimalFormat(); 
+			String price = currencyFrmt.format(suite.getPrice());
+			String formattedPrice = price.replace((char)0xA0,(char)0x20);
 			json.put("VRT_price", new JSONString(formattedPrice));
 		}
+		if (suite.getStatus() == Status.AvailableRent)
+			json.put("VRT_perMonth", new JSONString(i18n.perMonth()));
 		if (type.getBalconies() > 0)
 			json.put("VRT_balconies", new JSONNumber(type.getBalconies()));
 		else

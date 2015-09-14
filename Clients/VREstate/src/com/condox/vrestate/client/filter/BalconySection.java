@@ -49,10 +49,10 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 		instance.parentSection = parentSection;
 		instance.stackPanel = stackPanel;  
 		//instance.setSpacing(10);
-		stackPanel.add(instance, generateTitle(), false);
+		stackPanel.add(instance, instance.generateTitle(true), false);
 		instance.setSize("100%", "150px");
 
-		rbDoNotCare = new RadioButton("new name", "Don't Care");
+		rbDoNotCare = new RadioButton("new name", Filter.i18n.dontCare());
 		rbDoNotCare.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -62,7 +62,7 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 		instance.add(rbDoNotCare);
  
 		if (nonePresent) {
-			rbNone = new RadioButton("new name", "None");
+			rbNone = new RadioButton("new name", Filter.i18n.none());
 			rbNone.addStyleDependentName("margined");
 			rbNone.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
 				@Override
@@ -73,7 +73,7 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 		}
  
 		if (balconiesPresent) {
-			rbBalconyYes = new RadioButton("new name", "With Balcony");
+			rbBalconyYes = new RadioButton("new name", Filter.i18n.withBalcony());
 			rbBalconyYes.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
 				@Override
 				public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -84,7 +84,7 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 		}
 
 		if (terracesPresent) {
-			rbTerraceYes = new RadioButton("new name", "With Terrace");
+			rbTerraceYes = new RadioButton("new name", Filter.i18n.withTerrace());
 			rbTerraceYes.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
 				@Override
 				public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -95,7 +95,7 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 		}
 
 		if (balconiesPresent && terracesPresent) {
-			rbBalconyOrTerrace = new RadioButton("new name", "With Balcony or Terrace");
+			rbBalconyOrTerrace = new RadioButton("new name", Filter.i18n.withBalconyOrTerrace());
 			rbBalconyOrTerrace.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
 				@Override
 				public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -161,23 +161,23 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 
 	@Override
 	public void Apply() {
-		if (rbDoNotCare.getValue())
-			instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), 
-					generateTitle() + "(any)");
- 		else
-			instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), 
-					generateTitle());
+		instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance), 
+					generateTitle(rbDoNotCare.getValue()));
 		Filter.onChange();
 	}
 
-	private static String generateTitle() {
+	private String generateTitle(boolean dontCare) {
+		String retValue = "";
 		if (terracesPresent && balconiesPresent)
-			return "Balconies/Terraces";
+			retValue = dontCare? Filter.i18n.balconies_terraces_any():Filter.i18n.balconies_terraces();
+		else
 		if (balconiesPresent)
-			return "Balconies";
+			retValue = dontCare? Filter.i18n.balconies_any():Filter.i18n.balconies();
+		else
 		if (terracesPresent)
-			return "Terraces";
-		return "";		
+			retValue = dontCare? Filter.i18n.terraces_any():Filter.i18n.terraces();
+		
+		return retValue;
 	}
 
 	@Override

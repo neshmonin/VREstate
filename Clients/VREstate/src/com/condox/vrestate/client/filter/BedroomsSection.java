@@ -49,10 +49,10 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 		instance = new BedroomsSection();
 		instance.parentSection = parentSection;
 		instance.stackPanel = stackPanel;
-		stackPanel.add(instance, "Bedrooms", false);
+		stackPanel.add(instance, Filter.i18n.bedrooms(), false);
 		instance.setSize("100%", "150px");
 
-		cbAny = new MyCustomCheckBox("Any, or");
+		cbAny = new MyCustomCheckBox(Filter.i18n.anyOr());
 		cbAny.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				instance.isAny = cbAny.getValue().booleanValue();
@@ -73,7 +73,7 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 		});
 		instance.add(cbAny);
 
-		cbStudio = new CheckBox("Studio");
+		cbStudio = new CheckBox(Filter.i18n.studio());
 		cbStudio.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				if (isAllBedroomsUnchecked())
@@ -87,7 +87,7 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 		cbStudio.addStyleDependentName("margined");
 		instance.add(cbStudio);
 
-		cbOneBedrooms = new CheckBox("One Bedroom");
+		cbOneBedrooms = new CheckBox(Filter.i18n.oneBedroom());
 		cbOneBedrooms.addStyleDependentName("margined");
 		cbOneBedrooms.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -116,7 +116,7 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 				});
 		instance.add(cbOneBedroomsDens);
 
-		cbTwoBedrooms = new CheckBox("Two Bedroom");
+		cbTwoBedrooms = new CheckBox(Filter.i18n.twoBedroom());
 		cbTwoBedrooms.addStyleDependentName("margined");
 		cbTwoBedrooms.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -145,7 +145,7 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 				});
 		instance.add(cbTwoBedroomsDens);
 
-		cbThreeBedrooms = new CheckBox("Three Bedroom");
+		cbThreeBedrooms = new CheckBox(Filter.i18n.threeBedroom());
 		cbThreeBedrooms.addStyleDependentName("margined");
 		cbThreeBedrooms
 				.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -175,7 +175,7 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 				});
 		instance.add(cbThreeBedroomsDens);
 
-		cbFourBedrooms = new CheckBox("Four Bedroom");
+		cbFourBedrooms = new CheckBox(Filter.i18n.fourBedroom());
 		cbFourBedrooms.addStyleDependentName("margined");
 		cbFourBedrooms.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -204,7 +204,7 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 				});
 		instance.add(cbFourBedroomsDens);
 
-		cbFiveBedrooms = new CheckBox("More");
+		cbFiveBedrooms = new CheckBox(Filter.i18n.fiveBedroom());
 		cbFiveBedrooms.addStyleDependentName("margined");
 		cbFiveBedrooms.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -398,9 +398,11 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 	@Override
 	public void Apply() {
 		if (isAny)
-			instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance),"Bedrooms (any)");
+			instance.stackPanel.setStackText(instance.stackPanel
+					.getWidgetIndex(instance),Filter.i18n.bedrooms_any());
 		else
-			instance.stackPanel.setStackText(instance.stackPanel.getWidgetIndex(instance),"Bedrooms");
+			instance.stackPanel.setStackText(instance.stackPanel
+					.getWidgetIndex(instance),Filter.i18n.bedrooms());
 		Filter.onChange();
 	}
 

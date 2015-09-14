@@ -99,11 +99,14 @@ namespace CoreClasses
 
         public bool FromCSV(string csvStream)
         {
-            String label = "# ----------------- " + Name + " -----------------,,,,,";
-            int begin = csvStream.IndexOf(label);
+            int begin = csvStream.IndexOf("# ----------------- " + Name + " -----------------");
             if (begin == -1) return false;
 
-            begin = begin + label.Length;
+            csvStream = csvStream.Substring(begin);
+            begin = 0;
+
+            int tittleLength = csvStream.IndexOf('\n');
+            begin = begin + tittleLength + 1;
 
             int end = csvStream.IndexOf("# ----------------- ", begin);
             string myCSV;
@@ -129,6 +132,9 @@ namespace CoreClasses
                 {
                     if (Suites.ContainsKey(uniqyeKey))
                         Suites[uniqyeKey].FromCSV(csvLines[i]);
+                    else
+                        Trace.WriteLine("CSV line: " + csvLines[i] + ": Cannot recognize a Suite.");
+
                 }
             }
 

@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class LoginPresenter extends VREstateTreeNode {
 	
 	public static String simpleName = "Login";
-	private I_Display display = null;
+	//private I_Display display = null;
 	
 	public interface I_Display extends I_Contained {
 		void setPresenter(LoginPresenter presenter);
@@ -18,7 +18,7 @@ public class LoginPresenter extends VREstateTreeNode {
 	
 	public LoginPresenter(I_Display display) {
 		display.setPresenter(this);
-		this.display = display;
+		//this.display = display;
 	}
 
 	@Override

@@ -18,6 +18,8 @@ namespace CoreClasses
             get { return _suite.GetClientData(); }
         }
 
+        public Vre.Server.BusinessLogic.Building getBuilding() { return _suite.Building; }
+
         public enum SaleStatus
         {
             Available,
@@ -102,26 +104,53 @@ namespace CoreClasses
         public virtual bool FromCSV(string csv)
         {
             string[] split = csv.Split(new char[] { ',', ';', '\t' });
-            if (split.Length != 6) return false;
+            if (split.Length != 6)
+            {
+                Trace.WriteLine("CSV line: " + csv + ": Invalid number of tokens. " +
+                    "Expected: 6;  Obtained: " + split.Length);
+                return false;
+            }
 
             string floor = split[0].Trim();
-            int floorNum = -1;
-            try { floorNum = int.Parse(floor); } catch (System.FormatException) { }
-            if (floorNum != -1)
-                floor = string.Format("{0:D2}", floorNum);
+            if (floor != FloorNumber)
+            {
+                int floorNum = -1;
+                try { floorNum = int.Parse(floor); }
+                catch (System.FormatException) { }
+                if (floorNum != -1)
+                    floor = string.Format("{0:D2}", floorNum);
 
-            if (floor != FloorNumber) return false;
+                if (floor != FloorNumber)
+                {
+                    Trace.WriteLine("CSV line: " + csv + ": Invalid FloorNumber. " +
+                        "Expected: " + FloorNumber +
+                        ";  Obtained: " + floor);
+                    //return false;
+                }
+            }
 
             string name = split[1].Trim();
-            int suiteNum = -1;
-            try { suiteNum = int.Parse(name); } catch (System.FormatException) { }
+            //int suiteNum = -1;
+            //try { suiteNum = int.Parse(name); } catch (System.FormatException) { }
             //if (suiteNum != -1)
             //    name = string.Format("{0:D4}", suiteNum);
 
-            if (name != Name) return false;
+            if (name != Name)
+            {
+                Trace.WriteLine("CSV line: " + csv + ": Invalid Name. " +
+                    "Expected: " + Name +
+                    ";  Obtained: " + name);
+                return false;
+            }
 
             string classID = split[2].Trim();
-            if (classID != ClassId) return false;
+            if (classID != ClassId)
+            {
+                Trace.WriteLine("CSV line: " + csv + ": Invalid ClassId. " +
+                    "Expected: " + ClassId +
+                    ";  Obtained: " + classID);
+                //return false;
+            }
 
             double price = 0.0;
             try { price = double.Parse(split[3].Trim()); }
@@ -146,9 +175,9 @@ namespace CoreClasses
                     return false;
             }
 
-            FloorNumber = floor;
+            //FloorNumber = floor;
             Name = name;
-            _suite.SuiteType.Name = classID;
+            //_suite.SuiteType.Name = classID;
             Price = price;
             Status = status;
 

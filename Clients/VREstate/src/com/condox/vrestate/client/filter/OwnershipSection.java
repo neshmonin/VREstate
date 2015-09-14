@@ -158,13 +158,13 @@ public class OwnershipSection extends SectionContainer {
 
 		if (anyNotBuild || anyResale) {
 			I_FilterSection purchasePriceSection = 
-				PriceSection.CreateSectionPanel(this, "Purchase Price", stackPanel, PriceType.Ownership);
+				PriceSection.CreateSectionPanel(this, stackPanel, PriceType.Ownership);
 			if (purchasePriceSection != null) sections.add(purchasePriceSection);
 		}
 		
 		if (anyRent) {
 			I_FilterSection rentPriceSection = 
-				PriceSection.CreateSectionPanel(this, "Rent Price", stackPanel, PriceType.Rent);
+				PriceSection.CreateSectionPanel(this, stackPanel, PriceType.Rent);
 			if (rentPriceSection != null) sections.add(rentPriceSection);
 		}
 		

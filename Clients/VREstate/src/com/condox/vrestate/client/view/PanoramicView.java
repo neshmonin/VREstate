@@ -53,7 +53,7 @@ public class PanoramicView extends _GEView {
 
 	@Override
 	public String getTitleText() {
-		return "Suite " + theGeoItem.getName() + " - Out-of-Window View";
+		return i18n.panoramicView_TitleText(theGeoItem.getName());
 	}
 
 	@Override

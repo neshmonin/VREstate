@@ -94,8 +94,6 @@ namespace Vre.Server.BusinessLogic
         public Suite(ClientData fromServer, Building building)
             : this(building, 0, string.Empty, string.Empty)
         {
-            AutoID = fromServer.GetProperty("id", -1);
-
             int suiteTypeId = fromServer.GetProperty("suiteTypeId", 0);
             Boolean found = false;
             if (building != null && building.ConstructionSite != null)
@@ -109,9 +107,9 @@ namespace Vre.Server.BusinessLogic
                         break;
                     }
                 }
+                if (!found)
+                    SuiteType = new BusinessLogic.SuiteType(building.ConstructionSite, "<unknown>");
             }
-            if (!found)
-                SuiteType = new BusinessLogic.SuiteType(building.ConstructionSite, "<unknown>");
 
             bool changed = UpdateFromClient(fromServer);
 
@@ -133,7 +131,8 @@ namespace Vre.Server.BusinessLogic
         {
             ClientData result = base.GetClientData();
 
-            result.Add("buildingId", Building.AutoID);  // informational only
+            if (Building != null)
+                result.Add("buildingId", Building.AutoID);  // informational only
 
             result.Add("levelNumber", PhysicalLevelNumber);
 			result.Add("floorName", LocalizedFloorName);

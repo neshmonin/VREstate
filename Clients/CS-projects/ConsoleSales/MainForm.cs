@@ -157,6 +157,16 @@ namespace ConsoleSales
         private bool m_ignoreSelStatuseChange = false;
         private bool m_ignoreShowViewChange = false;
         private static bool m_vrEstateAppIsRunning = false;
+        private int howManyUpdated = 0;
+
+        enum CSVimport
+        {
+            none,
+            localFile,
+            ftpFile
+        }
+
+        private CSVimport importSource = CSVimport.none;
 
         public MainForm()
         {
@@ -529,7 +539,7 @@ namespace ConsoleSales
                         saveChanges();
                         break;
                     case System.Windows.Forms.DialogResult.No:
-                        ChangingSuite.DiscardChanges();
+                        //ChangingSuite.DiscardChanges();
                         break; // go ahead - change it!
                     default: // i.e. "Cancel"
                         return; 
@@ -541,7 +551,7 @@ namespace ConsoleSales
             listViewSuites.Enabled = true;
             groupBox4.Enabled = true;
             groupSuiteInfo.Enabled = true;
-            ChangingSuite.Clear();
+            //ChangingSuite.Clear();
             populateBuilding();
         }
 
@@ -872,19 +882,48 @@ namespace ConsoleSales
                 return;
 
             Cursor.Current = Cursors.WaitCursor;
-            Vre.Server.BusinessLogic.ClientData changes = ChangingSuite.GenerateClientData();
+            report = "";
+            howManyUpdated = 0;
+            ServerResponse resp = null;
+            do
+            {
+                List<ChangingSuite> unitsToUpdate = null;
+                int buildingID = -1;
+                Vre.Server.BusinessLogic.ClientData changes =
+                                ChangingSuite.GenerateClientData(out unitsToUpdate, out buildingID);
 
-            ServerResponse resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
-                                                              "building/" + m_currBldng.ID,
-                                                              null,
-                                                              changes);
-            int svCount = 0;
+                report += ChangingSuite.GenerateChangesReport(unitsToUpdate, false);
+
+                resp = ServerProxy.MakeDataRequest(ServerProxy.RequestType.Update,
+                                                    "building/" + buildingID,
+                                                    null,
+                                                    changes);
+
+                if (resp.ResponseCode != HttpStatusCode.OK)
+                    break;
+
+                howManyUpdated += resp.Data.GetProperty("updated", 0);
+                ChangingSuite.PromoteChanges(delegate(ChangingSuite s)
+                {
+                    foreach (var bldng in m_currSite.Buildings.Values)
+                    {
+                        if (bldng.ID == buildingID)
+                        {
+                            reflectInGUI(s);
+                            bldng.Suites[s.suite.UniqueKey] = s;
+                        }
+                    }
+                }, unitsToUpdate);
+
+                updateApplyButton();
+
+            } while (ChangingSuite.HowManyChanges > 0);
 
             switch (resp.ResponseCode)
             {
                 case HttpStatusCode.OK:
-                    svCount = resp.Data.GetProperty("updated", 0);
-                    if (MessageBox.Show(svCount + " records have been updated in the Data Base." +
+                    #region Saving report to local drive
+                    if (MessageBox.Show(howManyUpdated + " records have been updated in the Data Base." +
                                         "\nDo you want to save the Changes Report?",
                                     "Data has been changed successfully",
                                     MessageBoxButtons.YesNo,
@@ -921,36 +960,72 @@ namespace ConsoleSales
                             using (StreamWriter writeFile = new StreamWriter(stream))
                             {
                                 string outStr = string.Format("Changes Report for site \'{0}\', building \'{1}\'{2}",
-                                                               m_currSite.Name,
-                                                               m_currBldng.Name,
-                                                               System.Environment.NewLine);
+                                                                m_currSite.Name,
+                                                                m_currBldng.Name,
+                                                                System.Environment.NewLine);
                                 outStr += report;
 
                                 writeFile.Write(outStr);
                             }
                         }
                     }
+                    #endregion // Saving report to local drive
+
+                    if (importSource == CSVimport.ftpFile)
+                    {
+                        #region Renaming FTP-remote CSV file
+                        String ftpserver = FtpImportForm.FtpServer + FtpImportForm.FileLocation;
+                        FtpWebRequest renameFTP = (FtpWebRequest)FtpWebRequest.Create(new Uri(ftpserver));
+                        renameFTP.UsePassive = false;
+                        renameFTP.UseBinary = true;
+                        renameFTP.Credentials = new NetworkCredential(FtpImportForm.Login, FtpImportForm.Password);
+                        renameFTP.Proxy = GlobalProxySelection.GetEmptyWebProxy();
+                        renameFTP.Method = WebRequestMethods.Ftp.Rename;
+                        string newFileName = string.Format("imported {0} {1}.csv",
+                                                            DateTime.Now.ToShortDateString().Replace('/', '-'),
+                                                            DateTime.Now.ToShortTimeString().Replace(':', '-'));
+                        renameFTP.RenameTo = newFileName;
+                        FtpWebResponse response = null;
+                        string ftpRenamedTo = "";
+                        try
+                        {
+                            response = (FtpWebResponse)renameFTP.GetResponse();
+                            ftpRenamedTo = "\n\nRenamed import.csv => \"" + newFileName + "\"";
+                        }
+                        catch (WebException we)
+                        {
+                            Trace.WriteLine("Warning: cannot rename the import.csv file - " + we.Message);
+                        }
+
+                        MessageBox.Show(howManyUpdated + " records have been updated in the Data Base." +
+                                        ftpRenamedTo,
+                                    "FTP " + ftpserver,
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Information);
+                        #endregion //  Renaming FTP-remote CSV file
+                    }
+
+                    Trace.WriteLine(DateTime.Now.ToString() + "> Changes sent to server:\n" +
+                        report, "Info");
+                    Trace.Flush();
                     break;
 
                 default:
-                    MessageBox.Show("Technical problem detected on server.\nPlease try again",
+                    string partialSent = "";
+                    if (howManyUpdated != 0)
+                        partialSent = "\n\nNOTE: When the problen occured, " + howManyUpdated + " records were already updated\n";
+                    MessageBox.Show("Technical problem detected on the server."+
+                                    partialSent +
+                                    "\nPlease try again",
                                     "Serverside Problem",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Error);
-                     return;
+                    updateApplyButton();
+                    return;
             }
 
-            ChangingSuite.PromoteChanges(delegate(ChangingSuite s)
-            {
-                reflectInGUI(s);
-                m_currBldng.Suites[s.suite.UniqueKey] = s;
-            });
-            Trace.WriteLine(DateTime.Now.ToString() + "> Changes sent to server:\n" +
-                report, "Info");
-            Trace.Flush();
-
-            listViewSuites.SelectedItems.Clear();
             updateApplyButton();
+            listViewSuites.SelectedItems.Clear();
             Cursor.Current = Cursors.Default;
         }
 
@@ -1103,11 +1178,12 @@ namespace ConsoleSales
                 return;
             }
 
-            //foreach (var building in m_currSite.Buildings.Values)
-            //{
-            //    building.FromCSV(import);
-            //}
-            m_currBldng.FromCSV(import);
+            foreach (var building in m_currSite.Buildings.Values)
+            {
+                building.FromCSV(import);
+            }
+            importSource = CSVimport.localFile;
+            //m_currBldng.FromCSV(import);
 
             if (ChangingSuite.AtLeastOneChanged)
                 populateBuilding();
@@ -1184,6 +1260,24 @@ namespace ConsoleSales
 
             // Perform the sort with these new sort options.
             listViewSuites.Sort();
+        }
+
+        private void buttonFtpImport_Click(object sender, EventArgs e)
+        {
+            FtpImportForm ftpImportForm = new FtpImportForm();
+            if (ftpImportForm.ShowDialog(this) != DialogResult.OK)
+                return;
+
+            foreach (var building in m_currSite.Buildings.Values)
+            {
+                building.FromCSV(ftpImportForm.CSV);
+            }
+            importSource = CSVimport.ftpFile;
+
+            if (ChangingSuite.AtLeastOneChanged)
+                populateBuilding();
+
+            updateApplyButton();
         }
     }
 }

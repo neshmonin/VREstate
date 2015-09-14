@@ -4,6 +4,7 @@ import com.condox.clientshared.communication.Options;
 import com.condox.vrestate.client.ge.GE;
 import com.condox.vrestate.client.view.I_SB_View;
 import com.condox.vrestate.client.view._AbstractView;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -20,6 +21,7 @@ public class SB_Kiosk_Interactor extends OverlayHelpers implements
 	KmlScreenOverlay overlayZoomUnzoom = null;
 	private OvlRectangle rectCentralBar = null;
 	private OvlRectangle rectZoomUnzoom = null;
+	private InteractorMessages i18n;
 
 	private I_SB_View view = null;
 
@@ -27,6 +29,7 @@ public class SB_Kiosk_Interactor extends OverlayHelpers implements
 	public SB_Kiosk_Interactor(I_SB_View view) {
 		this.view = view;
 		int WinH = GE.getEarthHeight();
+		i18n = (InteractorMessages)GWT.create(InteractorMessages.class);
 
 		// ZoomUnzoomBar.png - dimentions 148x964
 		int buttonHeightPixels = WinH * 80 / 100;
@@ -69,7 +72,7 @@ public class SB_Kiosk_Interactor extends OverlayHelpers implements
 		if (enabling) {
 			if (overlayZoomUnzoom == null) {
 				KmlIcon icon = GE.getPlugin().createIcon("");
-				String href = Options.ZOOM_UNZOOM_URL;
+				String href = i18n.ZOOM_UNZOOM_URL(Options.URL_BUTTONS);
 				icon.setHref(href);
 				overlayZoomUnzoom = GE.getPlugin().createScreenOverlay("");
 				overlayZoomUnzoom.setIcon(icon);

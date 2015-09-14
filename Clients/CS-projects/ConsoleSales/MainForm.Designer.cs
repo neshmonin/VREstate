@@ -51,6 +51,7 @@
             this.buttonUpdateFromCSV = new System.Windows.Forms.Button();
             this.buttonExportToCSV = new System.Windows.Forms.Button();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.buttonFtpImport = new System.Windows.Forms.Button();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.comboDevelopers = new System.Windows.Forms.ComboBox();
@@ -122,7 +123,7 @@
             this.groupSuiteInfo.Controls.Add(this.textPrice);
             this.groupSuiteInfo.Controls.Add(this.label8);
             this.groupSuiteInfo.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.groupSuiteInfo.Location = new System.Drawing.Point(672, 313);
+            this.groupSuiteInfo.Location = new System.Drawing.Point(672, 360);
             this.groupSuiteInfo.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupSuiteInfo.Name = "groupSuiteInfo";
             this.groupSuiteInfo.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -240,17 +241,17 @@
             // columnSuiteName
             // 
             this.columnSuiteName.Text = "Suite";
-            this.columnSuiteName.Width = 75;
+            this.columnSuiteName.Width = 58;
             // 
             // columnSuiteType
             // 
             this.columnSuiteType.Text = "Type";
-            this.columnSuiteType.Width = 178;
+            this.columnSuiteType.Width = 157;
             // 
             // columnPrice
             // 
             this.columnPrice.Text = "Price";
-            this.columnPrice.Width = 122;
+            this.columnPrice.Width = 159;
             // 
             // columnStatus
             // 
@@ -303,15 +304,26 @@
             // 
             this.groupBox4.Controls.Add(this.buttonExportToCSV);
             this.groupBox4.Controls.Add(this.buttonUpdateFromCSV);
+            this.groupBox4.Controls.Add(this.buttonFtpImport);
             this.groupBox4.Enabled = false;
             this.groupBox4.Location = new System.Drawing.Point(672, 17);
             this.groupBox4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox4.Size = new System.Drawing.Size(289, 64);
+            this.groupBox4.Size = new System.Drawing.Size(289, 113);
             this.groupBox4.TabIndex = 15;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "CSV Export/Import";
+            // 
+            // buttonFtpImport
+            // 
+            this.buttonFtpImport.Location = new System.Drawing.Point(87, 70);
+            this.buttonFtpImport.Name = "buttonFtpImport";
+            this.buttonFtpImport.Size = new System.Drawing.Size(130, 30);
+            this.buttonFtpImport.TabIndex = 26;
+            this.buttonFtpImport.Text = "FTP Import...";
+            this.buttonFtpImport.UseVisualStyleBackColor = true;
+            this.buttonFtpImport.Click += new System.EventHandler(this.buttonFtpImport_Click);
             // 
             // openFileDialog
             // 
@@ -423,7 +435,7 @@
             this.groupBoxSuiteTypeInfo.Controls.Add(this.textBoxBedrooms);
             this.groupBoxSuiteTypeInfo.Controls.Add(this.label1);
             this.groupBoxSuiteTypeInfo.Controls.Add(this.labelSuiteType);
-            this.groupBoxSuiteTypeInfo.Location = new System.Drawing.Point(673, 88);
+            this.groupBoxSuiteTypeInfo.Location = new System.Drawing.Point(673, 148);
             this.groupBoxSuiteTypeInfo.Name = "groupBoxSuiteTypeInfo";
             this.groupBoxSuiteTypeInfo.Size = new System.Drawing.Size(283, 184);
             this.groupBoxSuiteTypeInfo.TabIndex = 25;
@@ -546,6 +558,7 @@
             // 
             // MainForm
             // 
+            this.AcceptButton = this.buttonApplyChanges;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonCancel;
@@ -632,6 +645,7 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox textCellingHeight;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Button buttonFtpImport;
     }
 }
 

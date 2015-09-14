@@ -1,6 +1,5 @@
 package com.condox.clientshared.document;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import com.condox.clientshared.abstractview.Log;
