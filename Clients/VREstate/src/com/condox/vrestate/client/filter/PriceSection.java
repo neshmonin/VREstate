@@ -164,13 +164,25 @@ public class PriceSection extends VerticalPanel implements I_FilterSection {
 	}
 	
 	@Override
-	public void Reset() {
-		cbAnyPrice.setValue(true, true);
+	public boolean Reset() {
+		boolean changed = false;
+		if (cbAnyPrice.getValue() != true) {
+			cbAnyPrice.setValue(true, true);
+			changed = true;
+		}
 		cbMinPrice.setEnabled(true);
-		cbMinPrice.setSelectedIndex(0); // !!
+		if (cbMinPrice.getSelectedIndex() != 0) {
+			cbMinPrice.setSelectedIndex(0);
+			changed = true;
+		}
 		cbMaxPrice.setEnabled(true);
-		cbMaxPrice.setSelectedIndex(cbMaxPrice.getItemCount() - 1); //!!
+		int lastIndx = cbMaxPrice.getItemCount() - 1;
+		if (cbMaxPrice.getSelectedIndex() != lastIndx) {
+			cbMaxPrice.setSelectedIndex(lastIndx);
+			changed = true;
+		}
 		isAny = true;
+		return changed;
 	}
 
 	@Override

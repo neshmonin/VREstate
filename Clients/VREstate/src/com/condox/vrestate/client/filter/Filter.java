@@ -94,13 +94,10 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 		horizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		horizontalPanel.setSize("104px", "20px");
 
-		btnReset = new Button("New button");
+		btnReset = new Button("Reset");
 		btnReset.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				Reset();
-				btnReset.setEnabled(false);
-				ApplyAndSelect();
-				btnApply.setEnabled(false);
 				if (Options.ROLE != ROLES.KIOSK)
 					saveToCookie();
 			}
@@ -110,11 +107,10 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 		horizontalPanel.add(btnReset);
 		btnReset.setWidth("100px");
 
-		btnApply = new Button("New button");
+		btnApply = new Button("Apply");
 		btnApply.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				ApplyAndSelect();
-				btnApply.setEnabled(false);
 				if (Options.ROLE != ROLES.KIOSK)
 					saveToCookie();
 			}
@@ -251,7 +247,7 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 		progressBar.CleanupProgress();
 
 		if (btnApply != null)
-			btnApply.setEnabled(true);
+			btnApply.setEnabled(false);
 		if (btnReset != null)
 			btnReset.setEnabled(true);
 		lastState = StateHash();
@@ -277,11 +273,21 @@ public class Filter extends StackPanel implements I_FilterSectionContainer {
 	}
 
 	@Override
-	public void Reset() {
+	public boolean Reset() {
+		boolean changed = false;
 		getFilteredInSuiteGeoItems().putAll(getActiveSuiteGeoItems());
-		for (I_FilterSection section : sections)
-			section.Reset();
-		Apply();
+		for (I_FilterSection section : sections) {
+			if (section.Reset())
+				changed = true;
+		}
+		if (changed)
+			Apply();
+		if (btnApply != null)
+			btnApply.setEnabled(false);
+		if (btnReset != null)
+			btnReset.setEnabled(false);
+
+		return changed;
 	}
 
 	@Override

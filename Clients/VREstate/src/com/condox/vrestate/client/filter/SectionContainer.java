@@ -28,13 +28,18 @@ public abstract class SectionContainer extends VerticalPanel implements I_Filter
 	}
 
 	@Override
-	public void Reset() {
+	public boolean Reset() {
+		boolean changed = false;
+
 		I_FilterSectionContainer parent = getParentSectionContainer(); 
 		if (parent != null)
 			setActiveSuiteGeoItems(parent.getActiveSuiteGeoItems());
 		
-		for (I_FilterSection section : sections)
-			section.Reset();
+		for (I_FilterSection section : sections) {
+			if (section.Reset())
+				changed = true;
+		}
+		return changed;
 	}
 	
 	@Override

@@ -115,8 +115,13 @@ public class BalconySection extends VerticalPanel implements I_FilterSection {
 	}
 
 	@Override
-	public void Reset() {
-		rbDoNotCare.setValue(true,true);
+	public boolean Reset() {
+		boolean changed = false;
+		if (rbDoNotCare.getValue() != true) {
+			rbDoNotCare.setValue(true,true);
+			changed = true;
+		}
+		return changed;
 	}
 
 	@Override

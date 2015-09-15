@@ -82,9 +82,11 @@ public class Suite implements I_VRObject {
 		if (str != null)
 			floor_name = str.stringValue();
 
-		str = obj.get("currentPriceCurrency").isString();
-		if (str != null)
-			currency = str.stringValue();
+		if (obj.containsKey("currentPriceCurrency")) {
+			str = obj.get("currentPriceCurrency").isString();
+			if (str != null)
+				currency = str.stringValue();
+		}
 
 		level_number = (int) obj.get("levelNumber").isNumber().doubleValue();
 

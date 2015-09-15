@@ -225,19 +225,25 @@ public class OwnershipSection extends SectionContainer {
 		super.Init();
 	}
 	
-	private void ResetAllSections()	{ super.Reset(); }
+	private boolean ResetAllSections()	{ return super.Reset(); }
 	
 	@Override
-	public void Reset() {
-		if (simpleCase){
-			super.Reset();
-			return;
+	public boolean Reset() {
+		if (simpleCase)
+			return ResetAllSections();
+			
+		boolean changed = false;
+
+		if (!isAny) {
+			if (cbAny.getValue() != true) {			
+				cbAny.setValue(true,true);
+				changed = true;
+			}
 		}
-		
-		if (!isAny)
-			cbAny.setValue(true, true);
 		else
-			ResetAllSections();
+			return ResetAllSections();
+		
+		return changed;
 	}
 	
 	public void Parent2ActiveSuiteGeoItems() {

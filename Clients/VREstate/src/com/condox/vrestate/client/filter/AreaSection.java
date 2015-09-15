@@ -184,13 +184,26 @@ public class AreaSection extends VerticalPanel implements I_FilterSection {
 	}
 
 	@Override
-	public void Reset() {
-		cbAnyArea.setValue(true, true);
+	public boolean Reset() {
+		boolean changed = false;
+		if (cbAnyArea.getValue() != true) {
+			cbAnyArea.setValue(true, true);
+			changed = true;
+		}
 		lbMinArea.setEnabled(true);
-		lbMinArea.setSelectedIndex(0);
+		if (lbMinArea.getSelectedIndex() != 0) {
+			lbMinArea.setSelectedIndex(0);
+			changed = true;
+		}
 		lbMaxArea.setEnabled(true);
-		lbMaxArea.setSelectedIndex(lbMaxArea.getItemCount() - 1);
+		int lastIndx = lbMaxArea.getItemCount() - 1;
+		if (lbMaxArea.getSelectedIndex() != lastIndx) {
+			lbMaxArea.setSelectedIndex(lastIndx);
+			changed = true;
+		}
 		isAny = true;
+		
+		return changed;
 	}
 	
 	@Override

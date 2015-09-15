@@ -65,7 +65,7 @@ public abstract class _AbstractView implements I_AbstractView {
 		m_timeoutTimer.cancel();
 		if (!m_timeoutTimerDisabled) {
 			if (Options.SERVER_MODE.equals(Options.MODE.TEST))
-				m_timeoutTimer.schedule(2 * 60 * 1000);
+				m_timeoutTimer.schedule(30 * 1000);
 			else
 				m_timeoutTimer.schedule(TIMEOUTINTERVAL);
 		}
@@ -209,7 +209,6 @@ public abstract class _AbstractView implements I_AbstractView {
 
 	public static void PopToTheBottom() {
 		Filter.get().Reset();
-		Filter.get().ApplyAndSelect();
 		while (views.size() > 1) {
 			I_AbstractView currView = views.peek();
 			currView.setEnabled(false);

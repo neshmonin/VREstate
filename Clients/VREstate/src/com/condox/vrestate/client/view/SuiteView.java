@@ -180,6 +180,8 @@ public class SuiteView extends _GEView {
 			String formattedPrice = price.replace((char)0xA0,(char)0x20);
 			json.put("VRT_price", new JSONString(formattedPrice));
 		}
+		if (!suite.getCurrency().isEmpty())
+			json.put("VRT_currency", new JSONString(suite.getCurrency()));
 		if (suite.getStatus() == Status.AvailableRent)
 			json.put("VRT_perMonth", new JSONString(i18n.perMonth()));
 		if (type.getBalconies() > 0)

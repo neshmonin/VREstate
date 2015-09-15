@@ -5,7 +5,7 @@ import com.condox.vrestate.client.view.GeoItems.SuiteGeoItem;
 
 public interface I_FilterSection extends I_State, I_JSON {
 	public void Init();
-	public void Reset();
+	public boolean Reset();
 	public boolean isFilteredIn(SuiteGeoItem suiteGI);
 	public boolean isAny();
 	public void Apply();

@@ -351,8 +351,13 @@ public class BedroomsSection extends VerticalPanel implements I_FilterSection {
 	}
 
 	@Override
-	public void Reset() {
-		cbAny.setValue(true, true);
+	public boolean Reset() {
+		boolean changed = false;
+		if (cbAny.getValue() != true) {			
+			cbAny.setValue(true,true);
+			changed = true;
+		}
+		return changed;
 	}
 
 	@Override
