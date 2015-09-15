@@ -156,7 +156,7 @@ namespace Vre.Server.BusinessLogic
 
 	        if (CurrentPrice.HasValue)
 	        {
-		        result.Add("currentPrice", CurrentPrice.Value.ToString("F"));
+		        result.Add("currentPrice", CurrentPrice.Value.ToString("raw"));
 				result.Add("currentPriceDisplay", CurrentPrice.Value.ToString("C"));
 				result.Add("currentPriceCurrency", CurrentPrice.Value.Currency.Iso3LetterCode);
 	        }

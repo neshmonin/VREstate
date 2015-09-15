@@ -621,6 +621,7 @@ namespace System
 
         public String ToString(String format)
         {
+			if (format.Equals("raw")) return computeValue().ToString();
             return computeValue().ToString(format, (IFormatProvider)_currency ?? NumberFormatInfo.CurrentInfo);
         }
 
