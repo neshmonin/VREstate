@@ -456,7 +456,7 @@ namespace System
             Currency currencyValue;
 
             // Check for currency symbol (e.g. $, £)
-            if (!Currency.TryParse(s.Substring(0, 1), out currencyValue))
+            //if (!Currency.TryParse(s.Substring(0, 1), out currencyValue))
             {
                 // Check for currency ISO code (e.g. USD, GBP)
                 if (s.Length > 2 && Currency.TryParse(s.Substring(0, 3), out currencyValue))
@@ -465,11 +465,11 @@ namespace System
                     currency = currencyValue;
                 }
             }
-            else
-            {
-                s = s.Substring(1);
-                currency = currencyValue;
-            }
+			//else
+			//{
+			//    s = s.Substring(1);
+			//    currency = currencyValue;
+			//}
 
             Decimal value;
 
@@ -621,6 +621,7 @@ namespace System
 
         public String ToString(String format)
         {
+			if (format.Equals("raw")) return computeValue().ToString();
             return computeValue().ToString(format, (IFormatProvider)_currency ?? NumberFormatInfo.CurrentInfo);
         }
 
