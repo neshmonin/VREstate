@@ -52,7 +52,7 @@ namespace ConsoleSales.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://vrt.3dcondox.com/vre/")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://vrt.3dcondox.com/")]
         public string serverEndPoint {
             get {
                 return ((string)(this["serverEndPoint"]));
@@ -160,7 +160,7 @@ namespace ConsoleSales.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("/Russia/Yekaterinburg/YIT-Rifey/import.csv")]
+        [global::System.Configuration.DefaultSettingValueAttribute("/Russia/Krasnogorsk/YITPark/import.csv")]
         public string FtpFile {
             get {
                 return ((string)(this["FtpFile"]));

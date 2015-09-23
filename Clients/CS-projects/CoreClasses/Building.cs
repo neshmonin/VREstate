@@ -85,8 +85,8 @@ namespace CoreClasses
 
         public string ToCSV()
         {
-            String outStr = "# ----------------- " + Name + " -----------------,,,,,\n";
-            outStr += "#Floor,#Suite,#Type,#Price,#Status,#Panoramic View\n";
+            String outStr = @"# ----------------- " + Name + " -----------------,,,,,\n";
+            outStr += @"#Floor,#Suite,#Type,#Price,#Status,#Panoramic View\n";
 
             var list = Suites.Values.ToList();
             list.Sort();
@@ -99,7 +99,7 @@ namespace CoreClasses
 
         public bool FromCSV(string csvStream)
         {
-            int begin = csvStream.IndexOf("# ----------------- " + Name + " -----------------");
+            int begin = csvStream.IndexOf(@"# ----------------- " + Name + @" -----------------");
             if (begin == -1) return false;
 
             csvStream = csvStream.Substring(begin);
@@ -108,7 +108,7 @@ namespace CoreClasses
             int tittleLength = csvStream.IndexOf('\n');
             begin = begin + tittleLength + 1;
 
-            int end = csvStream.IndexOf("# ----------------- ", begin);
+            int end = csvStream.IndexOf(@"# ----------------- ", begin);
             string myCSV;
             if (end != -1)
                 myCSV = csvStream.Substring(begin, end - begin);

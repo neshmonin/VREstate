@@ -12,7 +12,7 @@
       <Value Profile="(Default)">15</Value>
     </Setting>
     <Setting Name="serverEndPoint" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">https://vrt.3dcondox.com/vre/</Value>
+      <Value Profile="(Default)">https://vrt.3dcondox.com/</Value>
     </Setting>
     <Setting Name="role" Type="System.String" Scope="User">
       <Value Profile="(Default)">superadmin</Value>
@@ -45,7 +45,7 @@
       <Value Profile="(Default)">Lopata38</Value>
     </Setting>
     <Setting Name="FtpFile" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">/Russia/Yekaterinburg/YIT-Rifey/import.csv</Value>
+      <Value Profile="(Default)">/Russia/Krasnogorsk/YITPark/import.csv</Value>
     </Setting>
   </Settings>
 </SettingsFile>
