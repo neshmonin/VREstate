@@ -70,7 +70,7 @@ namespace Vre.Server.BusinessLogic
         {
             bool result = false;
 
-			LocalizedName = data.UpdateProperty("name", LocalizedName, ref result);
+            LocalizedName = Name = data.UpdateProperty("name", LocalizedName, ref result);
             //Model = data.UpdateProperty("modelName", Model, ref changed);
             BedroomCount = data.UpdateProperty("bedrooms", BedroomCount, ref result);
             DenCount = data.UpdateProperty("dens", DenCount, ref result);

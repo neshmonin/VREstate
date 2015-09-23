@@ -52,7 +52,7 @@ namespace Vre.Server.BusinessLogic
         {
             bool result = false;
 
-            LocalizedName = data.UpdateProperty("name", LocalizedName, ref result);
+            LocalizedName = Name = data.UpdateProperty("name", LocalizedName, ref result);
             ExcursionModel = data.UpdateProperty("excursionModel", ExcursionModel, ref result);
             InitialView = data.UpdateProperty("initialView", InitialView, ref result);
 

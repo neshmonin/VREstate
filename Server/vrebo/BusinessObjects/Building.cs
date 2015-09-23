@@ -142,7 +142,7 @@ namespace Vre.Server.BusinessLogic
         {
             bool changed = base.UpdateFromClient(data);
 
-            LocalizedName = data.UpdateProperty("name", LocalizedName, ref changed);
+            LocalizedName = Name = data.UpdateProperty("name", LocalizedName, ref changed);
             Status = data.UpdateProperty<BuildingStatus>("status", Status, ref changed);
             OpeningDate = data.UpdateProperty("openingDate", OpeningDate, ref changed);
 

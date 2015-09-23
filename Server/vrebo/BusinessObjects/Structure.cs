@@ -26,7 +26,7 @@ namespace Vre.Server.BusinessLogic
         public Structure(ClientData fromServer)
             : base(fromServer)
         {
-			LocalizedName = fromServer.GetProperty("name", string.Empty);
+            LocalizedName = Name = fromServer.GetProperty("name", string.Empty);
             DisplayModelUrl = fromServer.GetProperty("displayModelUrl", string.Empty);
 			Location.UpdateFromClient(fromServer.GetNextLevelDataItem("position"));
 
