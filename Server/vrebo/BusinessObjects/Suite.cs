@@ -156,7 +156,8 @@ namespace Vre.Server.BusinessLogic
 
 	        if (CurrentPrice.HasValue)
 	        {
-		        result.Add("currentPrice", CurrentPrice.Value.ToString("raw"));
+                decimal currentPrice = Convert.ToDecimal(CurrentPrice.Value);
+		        result.Add("currentPrice", currentPrice);
 				result.Add("currentPriceDisplay", CurrentPrice.Value.ToString("C"));
 				result.Add("currentPriceCurrency", CurrentPrice.Value.Currency.Iso3LetterCode);
 	        }
@@ -201,7 +202,15 @@ namespace Vre.Server.BusinessLogic
             LocalizedSuiteName = SuiteName = data.UpdateProperty("name", LocalizedSuiteName, ref changed);
             ShowPanoramicView = data.UpdateProperty("showPanoramicView", ShowPanoramicView, ref changed);
             Status = data.UpdateProperty("status", Status, ref changed);
-			updatePrice(data, ref changed);
+            var value = data.GetProperty("currentPrice", -1.0m);
+            if (value >= 0.0m)
+            {
+                Currency c;
+                if (!Currency.TryParse(data.GetProperty("currentPriceCurrency", Utilities.DefaultCurrency.Iso3LetterCode), out c))
+                    throw new ArgumentException("currentPriceCurrency value is invalid");
+
+                CurrentPrice = new Money(value, c);
+            }
 
 			return changed;
         }

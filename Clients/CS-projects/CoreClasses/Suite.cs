@@ -262,7 +262,17 @@ namespace CoreClasses
         public double Price
         {
             get { return _suite.CurrentPrice.Value.ToDouble(null); }
-            set { _suite.CurrentPrice = (Money)(value); }
+            set 
+            {
+                if (!_suite.CurrentPrice.HasValue)
+                    _suite.CurrentPrice = (Money)(value); 
+                else
+                {
+                    System.Currency sysCurrency = new Currency(_suite.CurrentPrice.Value.Currency.Iso3LetterCode);
+                    Money newPrice = new Money((decimal)value, sysCurrency);
+                    _suite.CurrentPrice = newPrice;
+                }
+            }
         }
 
         public int CellingHeight
